@@ -1,0 +1,15 @@
+#!/bin/bash -ex
+
+java \
+  -XX:+UseG1GC \
+  -XX:MaxGCPauseMillis=100 \
+  -Xms4G \
+  -Xmx4G \
+  -Djava.net.preferIPv4Stack=true \
+  -Djdk.tls.allowUnsafeServerCertChange=true \
+  -Duser.timezone=UTC \
+  -XX:+PrintClassHistogram \
+  -XX:+PrintConcurrentLocks \
+  -Djava.io.tmpdir=tmp \
+  -classpath "./local/java:cloud-backfila.jar" \
+  com.squareup.backfila.service.BackfilaServiceKt

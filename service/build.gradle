@@ -1,0 +1,88 @@
+import org.junit.platform.console.options.Details
+
+apply plugin: 'kotlin'
+apply plugin: 'org.junit.platform.gradle.plugin'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+compileKotlin {
+  kotlinOptions {
+    jvmTarget = "1.8"
+  }
+}
+
+compileTestKotlin {
+  kotlinOptions {
+    jvmTarget = "1.8"
+  }
+}
+
+sourceSets {
+  main.java.srcDirs += 'src/main/kotlin/'
+  test.java.srcDirs += 'src/test/kotlin/'
+}
+
+junitPlatform {
+  details Details.VERBOSE
+}
+
+dependencies {
+  compile dep.guava
+  compile dep.guice
+  compile dep.guiceMultibindings
+  compile dep.jacksonDatabind
+  compile dep.jacksonDataformatYaml
+  compile dep.jacksonJsr310
+  compile dep.jacksonKotlin
+  compile dep.jCommander
+  compile dep.jettyServer
+  compile dep.jettyServlet
+  compile dep.jettyWebsocketServlet
+  compile dep.jettyWebsocketServer
+  compile dep.kotlinStdLib
+  compile dep.kotlinReflection
+  compile dep.loggingApi
+  compile dep.metricsCore
+  compile dep.metricsParent
+  compile dep.moshi
+  compile dep.okHttp
+  compile dep.okio
+  compile dep.openTracing
+  compile dep.openTracingOkHttp
+  compile dep.tracingJaeger
+  compile dep.wireRuntime
+  compile dep.wireCompiler
+  compile dep.wireSchema
+  compile dep.miskWeb
+
+  compile(dep.misk) {
+    exclude group: 'com.google.guava'
+  }
+  testCompile(dep.miskTesting) {
+    exclude group: 'com.google.guava'
+  }
+  compile(dep.skim) {
+    exclude group: 'com.google.guava'
+  }
+
+  testCompile dep.junitApi
+  testCompile dep.junitParams
+  testCompile dep.junitEngine
+  testCompile dep.assertj
+  testCompile dep.mockito
+  testCompile dep.mockitoKotlin
+  testCompile dep.openTracingMock
+}
+
+jar {
+  manifest {
+    attributes 'Main-Class': 'com.squareup.backfila.service.BackfilaServiceKt'
+  }
+  classifier = 'unshaded'
+}
+
+shadowJar {
+  exclude('module-info.class') // https://github.com/johnrengelman/shadow/issues/352
+  mergeServiceFiles()
+  zip64 true
+  classifier = null
+}
