@@ -1,7 +1,6 @@
 package com.squareup.backfila.service
 
 import com.squareup.skim.config.SkimConfig
-import misk.MiskServiceModule
 import misk.config.ConfigModule
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
