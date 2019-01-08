@@ -1,7 +1,12 @@
 package com.squareup.backfila.service
 
-import misk.MiskApplication
+import com.squareup.skim.ServiceBuilder
+import misk.inject.KAbstractModule
 
 fun main(args: Array<String>) {
-  MiskApplication(BackfilaServiceModule()).run(args)
+  ServiceBuilder.getMiskApplication(::applicationModules).run(args)
+}
+
+fun applicationModules(serviceBuilder: ServiceBuilder<BackfilaConfig>): List<KAbstractModule> {
+  return listOf(BackfilaServiceModule())
 }
