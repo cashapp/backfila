@@ -12,8 +12,8 @@ import misk.web.metadata.AdminDashboardAccess
 
 class BackfilaServiceModule : KAbstractModule() {
   override fun configure() {
-    SkimLogging.configure()
     val environment = Environment.fromEnvironmentVariable()
+    SkimLogging.configure(environment)
     install(BackfilaModule(environment))
 
     install(SkimModule(environment))
