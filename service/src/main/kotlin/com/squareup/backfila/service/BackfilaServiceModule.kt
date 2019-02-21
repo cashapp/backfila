@@ -19,8 +19,8 @@ class BackfilaServiceModule : KAbstractModule() {
     install(SkimModule(environment))
     install(DashboardModule())
     multibind<AccessAnnotationEntry>().toInstance(
-        AccessAnnotationEntry<AdminDashboardAccess>(roles = listOf("cash-eng")))
+        AccessAnnotationEntry<AdminDashboardAccess>(roles = listOf("eng")))
     bind<MiskCaller>().annotatedWith<DevelopmentOnly>()
-        .toInstance(MiskCaller(user = "development", roles = setOf("cash-eng")))
+        .toInstance(MiskCaller(user = "development", roles = setOf("eng")))
   }
 }
