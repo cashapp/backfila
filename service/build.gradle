@@ -58,7 +58,7 @@ dependencies {
     exclude group: 'com.google.guava'
   }
   testCompile(dep.miskTesting) {
-    exclude group: 'com.google.guava'
+    exclude group: 'com.google.guava', module: 'guava'
   }
   compile(dep.skim) {
     exclude group: 'com.google.guava'
