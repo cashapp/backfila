@@ -64,7 +64,7 @@ ext.dep = [
   "metricsParent": "io.dropwizard.metrics:metrics-parent:4.0.1",
   "misk": "com.squareup.misk:misk:2019.03.02-4aec7979",
   "miskAws": "com.squareup.misk:misk-aws:2019.03.02-4aec7979",
-  "miskEvents": "com.squareup.misk:misk-eveiternts:2019.03.02-4aec7979",
+  "miskEvents": "com.squareup.misk:misk-events:2019.03.02-4aec7979",
   "miskGcp": "com.squareup.misk:misk-gcp:2019.03.02-4aec7979",
   "miskGcpTesting": "com.squareup.misk:misk-gcp-testing:2019.03.02-4aec7979",
   "miskHibernate": "com.squareup.misk:misk-hibernate:2019.03.02-4aec7979",
