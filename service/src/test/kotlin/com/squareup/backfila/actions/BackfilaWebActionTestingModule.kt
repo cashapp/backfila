@@ -1,7 +1,7 @@
 package com.squareup.backfila.actions
 
 import com.squareup.backfila.dashboard.DashboardModule
-import com.squareup.backfila.service.BackfilaModule
+import com.squareup.skim.SkimTestingModule
 import misk.MiskTestingServiceModule
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
@@ -13,7 +13,6 @@ internal class BackfilaWebActionTestingModule : KAbstractModule() {
     install(EnvironmentModule(Environment.TESTING))
     install(LogCollectorModule())
     install(MiskTestingServiceModule())
-    install(BackfilaModule(Environment.TESTING))
     install(DashboardModule())
   }
 }

@@ -1,10 +1,10 @@
 package com.squareup.backfila.dashboard
 
 import misk.inject.KAbstractModule
-import misk.web.actions.WebActionEntry
+import misk.web.WebActionModule
 
 class DashboardModule : KAbstractModule() {
   override fun configure() {
-    multibind<WebActionEntry>().toInstance(WebActionEntry<GetDashboardAction>())
+    install(WebActionModule.create<GetDashboardAction>())
   }
 }

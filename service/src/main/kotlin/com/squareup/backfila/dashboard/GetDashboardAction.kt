@@ -5,8 +5,9 @@ import misk.web.Get
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
+import javax.inject.Inject
 
-class GetDashboardAction : WebAction {
+class GetDashboardAction @Inject constructor() : WebAction {
 
   @Get("/dashboard")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
