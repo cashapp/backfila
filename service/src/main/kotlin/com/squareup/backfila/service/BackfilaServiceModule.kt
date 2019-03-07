@@ -2,21 +2,23 @@ package com.squareup.backfila.service
 
 import com.squareup.backfila.dashboard.DashboardModule
 import com.squareup.skim.SkimModule
-import com.squareup.skim.logging.SkimLogging
 import misk.MiskCaller
+import misk.config.ConfigModule
 import misk.environment.Environment
+import misk.environment.EnvironmentModule
 import misk.inject.KAbstractModule
 import misk.security.authz.AccessAnnotationEntry
 import misk.security.authz.DevelopmentOnly
 import misk.web.metadata.AdminDashboardAccess
 
-class BackfilaServiceModule : KAbstractModule() {
+class BackfilaServiceModule(
+  private val environment: Environment,
+  private val config: BackfilaConfig
+) : KAbstractModule() {
   override fun configure() {
-    val environment = Environment.fromEnvironmentVariable()
-    SkimLogging.configure(environment)
-    install(BackfilaModule(environment))
-
-    install(SkimModule(environment))
+    install(ConfigModule.create("backfila", config))
+    install(EnvironmentModule(environment))
+    install(SkimModule(environment, config.skim))
     install(DashboardModule())
     multibind<AccessAnnotationEntry>().toInstance(
         AccessAnnotationEntry<AdminDashboardAccess>(roles = listOf("eng")))
