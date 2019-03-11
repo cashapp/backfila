@@ -12,6 +12,7 @@ subprojects {
 
     dependencies {
       classpath dep.kotlinGradlePlugin
+      classpath dep.wireCompiler
       classpath 'org.junit.platform:junit-platform-gradle-plugin:1.0.2'
       classpath dep.shadowJarPlugin
       classpath 'com.vanniktech:gradle-maven-publish-plugin:0.2.0'
