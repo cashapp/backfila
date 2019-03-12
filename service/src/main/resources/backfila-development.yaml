@@ -1,0 +1,8 @@
+data_source_clusters:
+  backfila-001:
+    writer:
+      type: MYSQL
+      database: backfila_development
+      username: root
+      password: ""
+      vitess_schema_dir: src/main/resources/schema

@@ -1,10 +1,10 @@
 package com.squareup.backfila.service
 
 import com.squareup.skim.config.SkimServiceConfig
-import misk.client.HttpClientsConfig
 import misk.config.Config
-import misk.web.WebConfig
+import misk.jdbc.DataSourceClustersConfig
 
 data class BackfilaConfig(
-  val skim: SkimServiceConfig
+  val skim: SkimServiceConfig,
+  val data_source_clusters: DataSourceClustersConfig
 ) : Config

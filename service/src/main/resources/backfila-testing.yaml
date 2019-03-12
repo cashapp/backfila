@@ -1,0 +1,8 @@
+data_source_clusters:
+  backfila-001:
+    writer:
+      type: MYSQL
+      database: backfila_test
+      username: root
+      password: ""
+      migrations_resource: classpath:/migrations
