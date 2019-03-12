@@ -12,3 +12,9 @@ skim:
       trust_store:
         resource: filesystem:/etc/config/certificate_authority.pem
         format: PEM
+
+data_source_clusters:
+  backfila-001:
+    writer:
+      type: MYSQL
+      migrations_resource: classpath:/migrations
