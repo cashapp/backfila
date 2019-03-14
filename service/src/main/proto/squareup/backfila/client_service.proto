@@ -89,6 +89,7 @@ message PipelinedRecord {
   optional bytes data = 1;
 }
 
+// TODO(mgersh): rm this if we don't need it for service container apps
 service BackfilaClientService {
   rpc PrepareBackfill (PrepareBackfillRequest) returns (PrepareBackfillResponse);
   rpc GetNextBatchRange (GetNextBatchRangeRequest) returns (GetNextBatchRangeResponse);

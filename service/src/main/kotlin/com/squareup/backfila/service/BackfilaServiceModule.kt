@@ -1,5 +1,6 @@
 package com.squareup.backfila.service
 
+import com.squareup.backfila.api.ServiceWebActionsModule
 import com.squareup.backfila.dashboard.DashboardModule
 import com.squareup.skim.SkimModule
 import misk.MiskCaller
@@ -19,7 +20,9 @@ class BackfilaServiceModule(
     install(ConfigModule.create("backfila", config))
     install(EnvironmentModule(environment))
     install(SkimModule(environment, config.skim))
+    install(BackfilaPersistenceModule(config))
     install(DashboardModule())
+    install(ServiceWebActionsModule())
     multibind<AccessAnnotationEntry>().toInstance(
         AccessAnnotationEntry<AdminDashboardAccess>(roles = listOf("eng")))
     bind<MiskCaller>().annotatedWith<DevelopmentOnly>()
