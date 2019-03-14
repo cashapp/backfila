@@ -6,6 +6,7 @@ option java_generic_services = true;
 
 // In this file: APIs that the service provides to the client.
 
+// TODO(mgersh): figure out cleanest way to determine how to reach the calling service
 enum ServiceType {
   CLOUD = 1;
   SQUARE_DC = 2;
@@ -16,9 +17,9 @@ message ConfigureServiceRequest {
     optional string name = 1;
     repeated string parameter_names = 2;
 
-    // The class name of pipelined data.
-    optional string provides_type = 3;
-    optional string consumes_type = 4;
+    // The class name of pipelined data, only set if backfill supports pipelining.
+    optional string type_provided = 3;
+    optional string type_consumed = 4;
   }
 
   // List of all available backfills in this service
