@@ -9,6 +9,9 @@ interface RegisteredBackfillQuery : Query<DbRegisteredBackfill> {
   @Constraint("service_id")
   fun serviceId(serviceId: Id<DbService>): RegisteredBackfillQuery
 
+  @Constraint("name")
+  fun name(name: String): RegisteredBackfillQuery
+
   @Constraint("deleted_in_service", Operator.IS_NULL)
   fun notDeletedInService(): RegisteredBackfillQuery
 

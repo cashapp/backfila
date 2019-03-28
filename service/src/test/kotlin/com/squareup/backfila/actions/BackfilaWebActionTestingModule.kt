@@ -1,7 +1,7 @@
 package com.squareup.backfila.actions
 
 import com.squareup.backfila.api.ServiceWebActionsModule
-import com.squareup.backfila.dashboard.DashboardModule
+import com.squareup.backfila.dashboard.DashboardWebActionsModule
 import com.squareup.backfila.service.BackfilaConfig
 import com.squareup.backfila.service.BackfilaDb
 import com.squareup.backfila.service.BackfilaPersistenceModule
@@ -25,7 +25,7 @@ internal class BackfilaWebActionTestingModule : KAbstractModule() {
     install(HibernateTestingModule(BackfilaDb::class, disableCrossShardQueryDetector = false))
     install(BackfilaPersistenceModule(config))
 
-    install(DashboardModule())
+    install(DashboardWebActionsModule())
     install(ServiceWebActionsModule())
 
     install(object : ActionScopedProviderModule() {
