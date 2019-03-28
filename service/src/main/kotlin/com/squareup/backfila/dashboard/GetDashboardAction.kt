@@ -1,5 +1,6 @@
 package com.squareup.backfila.dashboard
 
+import com.squareup.protos.cash.backfila.service.ConfigureServiceRequest
 import misk.security.authz.Unauthenticated
 import misk.web.Get
 import misk.web.ResponseContentType
@@ -10,23 +11,24 @@ import javax.inject.Inject
 class GetDashboardAction @Inject constructor() : WebAction {
 
   @Get("/dashboard")
-  @ResponseContentType(MediaTypes.APPLICATION_JSON)
+  @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)
   @Unauthenticated
-  fun loadDashboard(): UiDashboard {
-    return UiDashboard(
-        listOf(
-            UiBackfill(
-                "BackfillRavenTemplates",
-                0.1f,
-                UiBackfill.State.RUNNING
-            ),
-            UiBackfill(
-                "BackfillClientSyncCardTransactions",
-                0.0f,
-                UiBackfill.State.FAILED
-            )
-        )
-    )
+  fun loadDashboard(): ConfigureServiceRequest.BackfillData {
+    return ConfigureServiceRequest.BackfillData("test", listOf(), "com.squareup.inclass", "com.squareup.outclass")
+//    return UiDashboard(
+//        listOf(
+//            UiBackfill(
+//                "BackfillRavenTemplates",
+//                0.1f,
+//                UiBackfill.State.RUNNING
+//            ),
+//            UiBackfill(
+//                "BackfillClientSyncCardTransactions",
+//                0.0f,
+//                UiBackfill.State.FAILED
+//            )
+//        )
+//    )
   }
 }
 

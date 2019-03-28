@@ -5,4 +5,4 @@ data_source_clusters:
       database: backfila_development
       username: root
       password: ""
-      vitess_schema_dir: src/main/resources/schema
+      migrations_resource: classpath:/migrations

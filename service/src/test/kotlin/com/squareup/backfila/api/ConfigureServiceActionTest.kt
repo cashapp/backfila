@@ -56,6 +56,39 @@ class ConfigureServiceActionTest {
     }
   }
 
+  @Test
+  fun reintroduceBackfill() {
+    val seedData: Map<Key<*>, Any> = mapOf(
+        keyOf<MiskCaller>() to MiskCaller("franklin"))
+
+    scope.enter(seedData).use {
+      configureServiceAction.configureService(
+          ConfigureServiceRequest(listOf(), ServiceType.SQUARE_DC))
+      assertThat(backfillNames("franklin")).containsOnly()
+
+      configureServiceAction.configureService(ConfigureServiceRequest(listOf(
+          ConfigureServiceRequest.BackfillData("xyz", listOf(), null, null)),
+          ServiceType.SQUARE_DC))
+      assertThat(backfillNames("franklin")).containsOnly("xyz")
+      assertThat(deletedBackfillNames("franklin")).containsOnly()
+
+      configureServiceAction.configureService(
+          ConfigureServiceRequest(
+              listOf(),
+              ServiceType.SQUARE_DC))
+      assertThat(backfillNames("franklin")).containsOnly()
+      assertThat(deletedBackfillNames("franklin")).containsOnly("xyz")
+
+      configureServiceAction.configureService(
+          ConfigureServiceRequest(
+              listOf(ConfigureServiceRequest.BackfillData("xyz", listOf(), null, null)),
+              ServiceType.SQUARE_DC))
+      // The reintroduced backfill is created, and the old one kept around.
+      assertThat(backfillNames("franklin")).containsOnly("xyz")
+      assertThat(deletedBackfillNames("franklin")).containsOnly("xyz")
+    }
+  }
+
   private fun backfillNames(serviceName: String): List<String> {
     return transacter.transaction { session ->
       var dbService = queryFactory.newQuery<ServiceQuery>()
