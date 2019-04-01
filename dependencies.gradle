@@ -1,5 +1,5 @@
 ext.dep = [
-  "allProtos": "com.squareup.protos:all-protos:20190323.065001",
+  "allProtos": "com.squareup.protos:all-protos:20190329.194341",
   "assertj": "org.assertj:assertj-core:3.9.0",
   "aws": "com.amazonaws:aws-java-sdk:1.11.144",
   "awsApi": "com.amazonaws:aws-java-sdk:1.11.144",
