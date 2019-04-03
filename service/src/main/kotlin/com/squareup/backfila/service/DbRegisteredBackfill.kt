@@ -30,7 +30,7 @@ class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimestampedE
    * historic references.
    */
   @Column
-  var deleted_in_service: Boolean? = null
+  var deleted_in_service_at: Instant? = null
 
   @Column
   override lateinit var created_at: Instant

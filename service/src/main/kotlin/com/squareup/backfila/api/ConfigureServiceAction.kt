@@ -20,12 +20,14 @@ import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
+import java.time.Clock
 import javax.inject.Inject
 
 class ConfigureServiceAction @Inject constructor(
   private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
   @BackfilaDb private val transacter: Transacter,
-  private val queryFactory: Query.Factory
+  private val queryFactory: Query.Factory,
+  private val clock: Clock
 ) : WebAction {
   @Post("/configure_service")
   @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
@@ -64,7 +66,7 @@ class ConfigureServiceAction @Inject constructor(
       // Any existing backfills not in the current set should be marked deleted.
       val deleted = existingBackfills.filter { e -> request.backfills.none { it.name == e.name } }
       deleted.forEach {
-        it.deleted_in_service = true
+        it.deleted_in_service_at = clock.instant()
         logger.info { "Deleted backfill for `$service`: `${it.name}`" }
       }
     }
