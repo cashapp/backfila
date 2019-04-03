@@ -51,7 +51,7 @@ class ConfigureServiceAction @Inject constructor(
       // Add any missing backfills, update existing ones, and mark missing ones as deleted.
       val existingBackfills = queryFactory.newQuery<RegisteredBackfillQuery>()
           .serviceId(dbService.id)
-          .notDeletedInService()
+          .active()
           .list(session)
       logger.info { "Found ${existingBackfills.size} existing backfills for `$service`" }
 
@@ -67,6 +67,7 @@ class ConfigureServiceAction @Inject constructor(
       val deleted = existingBackfills.filter { e -> request.backfills.none { it.name == e.name } }
       deleted.forEach {
         it.deleted_in_service_at = clock.instant()
+        it.active = null
         logger.info { "Deleted backfill for `$service`: `${it.name}`" }
       }
     }

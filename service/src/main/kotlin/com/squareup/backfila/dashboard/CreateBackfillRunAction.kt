@@ -53,7 +53,7 @@ class CreateBackfillRunAction @Inject constructor(
       val registeredBackfill = queryFactory.newQuery<RegisteredBackfillQuery>()
           .serviceId(dbService.id)
           .name(request.backfill_name)
-          .notDeletedInService()
+          .active()
           .uniqueResult(session) ?: throw BadRequestException("${request.backfill_name} doesn't exist")
       logger.info { "Found registered backfill existing backfills for `$service`::`${request.backfill_name}` ${registeredBackfill.id}" }
     }
