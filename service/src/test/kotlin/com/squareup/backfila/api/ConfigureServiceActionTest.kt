@@ -96,7 +96,7 @@ class ConfigureServiceActionTest {
           .uniqueResult(session)!!
       queryFactory.newQuery<RegisteredBackfillQuery>()
           .serviceId(dbService.id)
-          .notDeletedInService()
+          .active()
           .list(session)
           .map { it.name }
     }
@@ -109,7 +109,7 @@ class ConfigureServiceActionTest {
           .uniqueResult(session)!!
       queryFactory.newQuery<RegisteredBackfillQuery>()
           .serviceId(dbService.id)
-          .deletedInService()
+          .notActive()
           .list(session)
           .map { it.name }
     }

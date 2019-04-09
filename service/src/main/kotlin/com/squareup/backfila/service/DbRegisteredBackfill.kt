@@ -26,11 +26,17 @@ class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimestampedE
   lateinit var name: String
 
   /**
-   * When the backfill is deleted on the client service, we stop showing it, but we keep it for
-   * historic references.
+   * When the backfill is updated or deleted on the client service,
+   * we stop showing it, but we keep it for historic references.
+   *
+   * Only one backfill for this service and name can be active, and it has the current config.
+   * Others with the same service and name are obsolete.
    */
   @Column
-  var deleted_in_service: Boolean? = null
+  var active: Boolean? = null
+
+  @Column
+  var deleted_in_service_at: Instant? = null
 
   @Column
   override lateinit var created_at: Instant
@@ -60,5 +66,6 @@ class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimestampedE
     this.parameter_names = parameter_names.joinToString(",")
     this.type_provided = type_provided
     this.type_consumed = type_consumed
+    this.active = true
   }
 }
