@@ -12,6 +12,8 @@ class BackfilaPersistenceModule(private val config: BackfilaConfig) : KAbstractM
       override fun configureHibernate() {
         addEntities(DbService::class)
         addEntities(DbRegisteredBackfill::class)
+        addEntities(DbBackfillRun::class)
+        addEntities(DbRunInstance::class)
       }
     })
   }

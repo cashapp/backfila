@@ -3,8 +3,8 @@ package com.squareup.backfila.actions
 import com.google.inject.Module
 import com.squareup.backfila.api.ConfigureServiceAction
 import com.squareup.backfila.dashboard.GetServicesAction
-import com.squareup.protos.cash.backfila.service.ConfigureServiceRequest
-import com.squareup.protos.cash.backfila.service.ServiceType
+import com.squareup.protos.backfila.service.ConfigureServiceRequest
+import com.squareup.protos.backfila.service.ServiceType
 import misk.MiskCaller
 import misk.inject.keyOf
 import misk.scope.ActionScope

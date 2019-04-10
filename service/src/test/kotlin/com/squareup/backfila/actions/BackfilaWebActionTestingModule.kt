@@ -1,6 +1,8 @@
 package com.squareup.backfila.actions
 
 import com.squareup.backfila.api.ServiceWebActionsModule
+import com.squareup.backfila.client.BackfilaClientServiceClientProvider
+import com.squareup.backfila.client.FakeBackfilaClientServiceClientProvider
 import com.squareup.backfila.dashboard.DashboardWebActionsModule
 import com.squareup.backfila.service.BackfilaConfig
 import com.squareup.backfila.service.BackfilaDb
@@ -27,6 +29,9 @@ internal class BackfilaWebActionTestingModule : KAbstractModule() {
 
     install(DashboardWebActionsModule())
     install(ServiceWebActionsModule())
+
+    bind(BackfilaClientServiceClientProvider::class.java)
+        .to(FakeBackfilaClientServiceClientProvider::class.java)
 
     install(object : ActionScopedProviderModule() {
       override fun configureProviders() {

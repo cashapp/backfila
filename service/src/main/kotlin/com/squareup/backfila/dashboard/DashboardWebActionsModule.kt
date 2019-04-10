@@ -6,6 +6,6 @@ import misk.web.WebActionModule
 class DashboardWebActionsModule : KAbstractModule() {
   override fun configure() {
     install(WebActionModule.create<GetServicesAction>())
-    install(WebActionModule.create<CreateBackfillRunAction>())
+    install(WebActionModule.create<CreateBackfillAction>())
   }
 }
