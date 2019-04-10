@@ -6,8 +6,8 @@ import com.squareup.backfila.actions.BackfilaWebActionTestingModule
 import com.squareup.backfila.service.BackfilaDb
 import com.squareup.backfila.service.RegisteredBackfillQuery
 import com.squareup.backfila.service.ServiceQuery
-import com.squareup.protos.cash.backfila.service.ConfigureServiceRequest
-import com.squareup.protos.cash.backfila.service.ServiceType
+import com.squareup.protos.backfila.service.ConfigureServiceRequest
+import com.squareup.protos.backfila.service.ServiceType
 import misk.MiskCaller
 import misk.hibernate.Query
 import misk.hibernate.Transacter
@@ -42,14 +42,14 @@ class ConfigureServiceActionTest {
       assertThat(backfillNames("franklin")).containsOnly()
 
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
-          ConfigureServiceRequest.BackfillData("xyz", listOf(), null, null)),
+          ConfigureServiceRequest.BackfillData("xyz", listOf(), null, null, false)),
           ServiceType.SQUARE_DC))
       assertThat(backfillNames("franklin")).containsOnly("xyz")
       assertThat(deletedBackfillNames("franklin")).containsOnly()
 
       configureServiceAction.configureService(
           ConfigureServiceRequest(
-              listOf(ConfigureServiceRequest.BackfillData("zzz", listOf(), null, null)),
+              listOf(ConfigureServiceRequest.BackfillData("zzz", listOf(), null, null, false)),
               ServiceType.SQUARE_DC))
       assertThat(backfillNames("franklin")).containsOnly("zzz")
       assertThat(deletedBackfillNames("franklin")).containsOnly("xyz")
@@ -67,7 +67,7 @@ class ConfigureServiceActionTest {
       assertThat(backfillNames("franklin")).containsOnly()
 
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
-          ConfigureServiceRequest.BackfillData("xyz", listOf(), null, null)),
+          ConfigureServiceRequest.BackfillData("xyz", listOf(), null, null, false)),
           ServiceType.SQUARE_DC))
       assertThat(backfillNames("franklin")).containsOnly("xyz")
       assertThat(deletedBackfillNames("franklin")).containsOnly()
@@ -81,7 +81,7 @@ class ConfigureServiceActionTest {
 
       configureServiceAction.configureService(
           ConfigureServiceRequest(
-              listOf(ConfigureServiceRequest.BackfillData("xyz", listOf(), null, null)),
+              listOf(ConfigureServiceRequest.BackfillData("xyz", listOf(), null, null, false)),
               ServiceType.SQUARE_DC))
       // The reintroduced backfill is created, and the old one kept around.
       assertThat(backfillNames("franklin")).containsOnly("xyz")
@@ -91,7 +91,7 @@ class ConfigureServiceActionTest {
 
   private fun backfillNames(serviceName: String): List<String> {
     return transacter.transaction { session ->
-      var dbService = queryFactory.newQuery<ServiceQuery>()
+      val dbService = queryFactory.newQuery<ServiceQuery>()
           .registryName(serviceName)
           .uniqueResult(session)!!
       queryFactory.newQuery<RegisteredBackfillQuery>()
@@ -104,7 +104,7 @@ class ConfigureServiceActionTest {
 
   private fun deletedBackfillNames(serviceName: String): List<String> {
     return transacter.transaction { session ->
-      var dbService = queryFactory.newQuery<ServiceQuery>()
+      val dbService = queryFactory.newQuery<ServiceQuery>()
           .registryName(serviceName)
           .uniqueResult(session)!!
       queryFactory.newQuery<RegisteredBackfillQuery>()

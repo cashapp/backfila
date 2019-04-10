@@ -1,6 +1,6 @@
 package com.squareup.backfila.dashboard
 
-import com.squareup.protos.cash.backfila.service.ConfigureServiceRequest
+import com.squareup.protos.backfila.service.ConfigureServiceRequest
 import misk.security.authz.Unauthenticated
 import misk.web.Get
 import misk.web.ResponseContentType
@@ -14,7 +14,7 @@ class GetDashboardAction @Inject constructor() : WebAction {
   @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)
   @Unauthenticated
   fun loadDashboard(): ConfigureServiceRequest.BackfillData {
-    return ConfigureServiceRequest.BackfillData("test", listOf(), "com.squareup.inclass", "com.squareup.outclass")
+    return ConfigureServiceRequest.BackfillData("test", listOf(), "com.squareup.inclass", "com.squareup.outclass", false)
 //    return UiDashboard(
 //        listOf(
 //            UiBackfill(

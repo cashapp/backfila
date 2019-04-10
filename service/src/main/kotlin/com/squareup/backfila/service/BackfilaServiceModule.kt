@@ -1,6 +1,8 @@
 package com.squareup.backfila.service
 
 import com.squareup.backfila.api.ServiceWebActionsModule
+import com.squareup.backfila.client.BackfilaClientServiceClientProvider
+import com.squareup.backfila.client.RealBackfilaClientServiceClientProvider
 import com.squareup.backfila.dashboard.DashboardWebActionsModule
 import com.squareup.skim.SkimModule
 import misk.MiskCaller
@@ -27,5 +29,8 @@ class BackfilaServiceModule(
         AccessAnnotationEntry<AdminDashboardAccess>(roles = listOf("eng")))
     bind<MiskCaller>().annotatedWith<DevelopmentOnly>()
         .toInstance(MiskCaller(user = "development", roles = setOf("eng")))
+
+    bind(BackfilaClientServiceClientProvider::class.java)
+        .to(RealBackfilaClientServiceClientProvider::class.java)
   }
 }

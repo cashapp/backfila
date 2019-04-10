@@ -5,8 +5,8 @@ import com.squareup.backfila.service.DbRegisteredBackfill
 import com.squareup.backfila.service.DbService
 import com.squareup.backfila.service.RegisteredBackfillQuery
 import com.squareup.backfila.service.ServiceQuery
-import com.squareup.protos.cash.backfila.service.ConfigureServiceRequest
-import com.squareup.protos.cash.backfila.service.ConfigureServiceResponse
+import com.squareup.protos.backfila.service.ConfigureServiceRequest
+import com.squareup.protos.backfila.service.ConfigureServiceResponse
 import misk.MiskCaller
 import misk.hibernate.Query
 import misk.hibernate.Transacter

@@ -1,7 +1,7 @@
 syntax = "proto2";
-package squareup.cash.backfila.service;
+package squareup.backfila.service;
 
-option java_package = "com.squareup.protos.cash.backfila.service";
+option java_package = "com.squareup.protos.backfila.service";
 option java_generic_services = true;
 
 // In this file: APIs that the service provides to the client.
@@ -20,6 +20,8 @@ message ConfigureServiceRequest {
     // The class name of pipelined data, only set if backfill supports pipelining.
     optional string type_provided = 3;
     optional string type_consumed = 4;
+
+    optional bool requires_approval = 5;
   }
 
   // List of all available backfills in this service

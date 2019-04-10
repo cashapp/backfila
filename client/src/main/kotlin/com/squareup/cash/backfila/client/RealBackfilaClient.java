@@ -1,9 +1,9 @@
 package com.squareup.cash.backfila.client;
 
 import com.squareup.moshi.Moshi;
-import com.squareup.protos.cash.backfila.service.ConfigureServiceRequest;
-import com.squareup.protos.cash.backfila.service.ConfigureServiceResponse;
-import com.squareup.protos.cash.backfila.service.ServiceType;
+import com.squareup.protos.backfila.service.ConfigureServiceRequest;
+import com.squareup.protos.backfila.service.ConfigureServiceResponse;
+import com.squareup.protos.backfila.service.ServiceType;
 import com.squareup.wire.WireJsonAdapterFactory;
 import java.io.IOException;
 import java.io.UncheckedIOException;

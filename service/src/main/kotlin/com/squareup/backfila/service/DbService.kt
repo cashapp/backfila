@@ -1,6 +1,6 @@
 package com.squareup.backfila.service
 
-import com.squareup.protos.cash.backfila.service.ServiceType
+import com.squareup.protos.backfila.service.ServiceType
 import misk.hibernate.DbTimestampedEntity
 import misk.hibernate.DbUnsharded
 import misk.hibernate.Id
