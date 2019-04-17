@@ -1,3 +1,4 @@
+//Generated from polyrepo's master-dependencies.json
 ext.dep = [
   "allProtos": "com.squareup.protos:all-protos:20190402.203500",
   "assertj": "org.assertj:assertj-core:3.9.0",
@@ -62,18 +63,18 @@ ext.dep = [
   "loggingImpl": "org.apache.logging.log4j:log4j-slf4j-impl:2.10.0",
   "metricsCore": "io.dropwizard.metrics:metrics-core:4.0.1",
   "metricsParent": "io.dropwizard.metrics:metrics-parent:4.0.1",
-  "misk": "com.squareup.misk:misk:2019.04.12-4a15dff3",
-  "miskAws": "com.squareup.misk:misk-aws:2019.04.12-4a15dff3",
-  "miskEvents": "com.squareup.misk:misk-events:2019.04.12-4a15dff3",
-  "miskGcp": "com.squareup.misk:misk-gcp:2019.04.12-4a15dff3",
-  "miskGcpTesting": "com.squareup.misk:misk-gcp-testing:2019.04.12-4a15dff3",
-  "miskHibernate": "com.squareup.misk:misk-hibernate:2019.04.12-4a15dff3",
-  "miskHibernateTesting": "com.squareup.misk:misk-hibernate-testing:2019.04.12-4a15dff3",
-  "miskJaeger": "com.squareup.misk:misk-jaeger:2019.04.12-4a15dff3",
-  "miskPrometheus": "com.squareup.misk:misk-prometheus:2019.04.12-4a15dff3",
-  "miskTesting": "com.squareup.misk:misk-testing:2019.04.12-4a15dff3",
+  "misk": "com.squareup.misk:misk:2019.04.16-ef36fb25",
+  "miskAws": "com.squareup.misk:misk-aws:2019.04.16-ef36fb25",
+  "miskEvents": "com.squareup.misk:misk-events:2019.04.16-ef36fb25",
+  "miskGcp": "com.squareup.misk:misk-gcp:2019.04.16-ef36fb25",
+  "miskGcpTesting": "com.squareup.misk:misk-gcp-testing:2019.04.16-ef36fb25",
+  "miskHibernate": "com.squareup.misk:misk-hibernate:2019.04.16-ef36fb25",
+  "miskHibernateTesting": "com.squareup.misk:misk-hibernate-testing:2019.04.16-ef36fb25",
+  "miskJaeger": "com.squareup.misk:misk-jaeger:2019.04.16-ef36fb25",
+  "miskPrometheus": "com.squareup.misk:misk-prometheus:2019.04.16-ef36fb25",
+  "miskTesting": "com.squareup.misk:misk-testing:2019.04.16-ef36fb25",
   "miskWeb": "com.squareup.misk-web:misk-web:2018.12.08-fee59f3",
-  "miskZipkin": "com.squareup.misk:misk-zipkin:2019.04.12-4a15dff3",
+  "miskZipkin": "com.squareup.misk:misk-zipkin:2019.04.16-ef36fb25",
   "mockito": "org.mockito:mockito-core:2.23.4",
   "mockitoCore": "org.mockito:mockito-core:2.23.4",
   "mockitoKotlin": "com.nhaarman:mockito-kotlin:1.5.0",
@@ -114,5 +115,6 @@ ext.dep = [
   "wireSchema": "com.squareup.wire:wire-schema:2.3.0-RC1",
   "zipkinBrave": "io.zipkin.brave:brave:4.17.2",
   "zipkinReporter": "io.zipkin.reporter2:zipkin-sender-okhttp3:2.4.1",
-  "zookeeper": "org.apache.zookeeper:zookeeper:3.5.4-beta"
-]//Generated from polyrepo's master-dependencies.json
+  "zookeeper": "org.apache.zookeeper:zookeeper:3.5.4-beta",
+]
+//Generated from polyrepo's master-dependencies.json
