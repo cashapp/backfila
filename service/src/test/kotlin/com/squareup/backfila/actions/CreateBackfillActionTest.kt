@@ -83,8 +83,13 @@ class CreateBackfillActionTest {
 
         val instances = queryFactory.newQuery<RunInstanceQuery>()
             .backfillRunId(run.id)
+            .orderByName()
             .list(session)
         assertThat(instances).hasSize(2)
+        assertThat(instances[0].instance_name).isEqualTo("-80")
+        assertThat(instances[0].lease_token).isNull()
+        assertThat(instances[1].instance_name).isEqualTo("80-")
+        assertThat(instances[1].lease_token).isNull()
       }
     }
   }

@@ -8,6 +8,7 @@ CREATE TABLE registered_backfills (
   updated_at timestamp(3) NOT NULL DEFAULT NOW(3) ON UPDATE NOW(3),
   type_provided varbinary(300) NULL DEFAULT NULL,
   type_consumed varbinary(300) NULL DEFAULT NULL,
-  parameter_names blob NULL DEFAULT NULL,
+  parameter_names mediumtext NULL DEFAULT NULL,
+  requires_approval tinyint(1) NOT NULL DEFAULT 0,
   UNIQUE KEY `unq_service_id_name_active` (service_id, name, active)
 );

@@ -13,7 +13,7 @@ import javax.persistence.Table
 import javax.persistence.Version
 
 /**
- * Backfill runs can have many instances, e.g. one per shard.
+ * Backfill runs can have many instances, e.g. one per database shard.
  * Each instance tracks cursors individually. They are also leased individually.
  * All instances of a run have the same running or paused state.
  */
@@ -50,6 +50,23 @@ class DbRunInstance() : DbUnsharded<DbRunInstance>, DbTimestampedEntity {
 
   @Column
   var pkey_range_end: ByteString? = null
+
+  @Column
+  var estimated_record_count: Long? = null
+
+  /**
+   * Cursor used to precompute the size of the data.
+   * Precomputing is done when this equals pkey_range_end.
+   **/
+  @Column
+  var precomputing_pkey_cursor: ByteString? = null
+
+  /** How many records in the data set. Not correct until precomputing is done. */
+  @Column
+  var computed_record_count: Long? = null
+
+  @Column
+  var backfilled_record_count: Long? = null
 
   constructor(
     backfill_run_id: Id<DbBackfillRun>,
