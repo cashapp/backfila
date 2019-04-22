@@ -26,8 +26,12 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
   @Column(nullable = false)
   lateinit var service_id: Id<DbService>
 
+  /** Immutably stores the data configured by the client service for this backfill. */
   @Column(nullable = false)
   lateinit var registered_backfill_id: Id<DbRegisteredBackfill>
+
+  @Column
+  var pipeline_target_backfill_id: Id<DbRegisteredBackfill>? = null
 
   @Column
   override lateinit var created_at: Instant
@@ -58,11 +62,8 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
   @Column(nullable = false)
   var num_threads: Long = 0
 
-  // We capture all the config at creation time since backfills can change after being created.
-  // TODO consider instead making registered_backfills immutable to avoid duplication
-
   // TODO(mgersh): denormalize into a 1,n table
-  @JsonColumn @Column(columnDefinition = "blob")
+  @JsonColumn @Column(columnDefinition = "mediumtext")
   var parameter_map: Map<String, String>? = null
 
   constructor(

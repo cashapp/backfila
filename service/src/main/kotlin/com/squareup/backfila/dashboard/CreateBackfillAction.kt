@@ -37,6 +37,7 @@ data class CreateBackfillRequest(
   val num_threads: Long = 5,
   val pkey_range_start: String? = null,
   val pkey_range_end: String? = null,
+  // Parameters that go to the client service.
   val parameter_map: Map<String, String> = mapOf()
 )
 

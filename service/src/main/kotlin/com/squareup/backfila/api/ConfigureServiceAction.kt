@@ -48,27 +48,50 @@ class ConfigureServiceAction @Inject constructor(
         session.save(dbService)
       }
 
-      // Add any missing backfills, update existing ones, and mark missing ones as deleted.
+      // Add any missing backfills, update modified ones, and mark missing ones as deleted.
       val existingBackfills = queryFactory.newQuery<RegisteredBackfillQuery>()
           .serviceId(dbService.id)
           .active()
           .list(session)
+          .associateBy { it.name }
       logger.info { "Found ${existingBackfills.size} existing backfills for `$service`" }
 
-      request.backfills
-          .filter { e -> existingBackfills.none { it.name == e.name } }
-          .forEach {
-            logger.info { "New backfill for `$service`: `${it.name}`" }
-            session.save(DbRegisteredBackfill(
-                dbService.id, it.name, it.parameter_names, it.type_provided, it.type_consumed))
+      for (backfill in request.backfills) {
+        val existingBackfill = existingBackfills[backfill.name]
+        val newBackfill = DbRegisteredBackfill(
+            dbService.id,
+            backfill.name,
+            backfill.parameter_names,
+            backfill.type_provided,
+            backfill.type_consumed,
+            backfill.requires_approval
+        )
+        var save = false
+        if (existingBackfill != null) {
+          // Replace it only if the config has changed.
+          if (!existingBackfill.equalConfig(newBackfill)) {
+            existingBackfill.deactivate(clock)
+            session.hibernateSession.flush()
+            save = true
+            logger.info { "Updated backfill config for `$service`: `${backfill.name}`" }
+          } else {
+            logger.info { "Backfill config unchanged for `$service`: `${backfill.name}`" }
           }
+        } else {
+          // Add the new backfill.
+          logger.info { "New backfill for `$service`: `${backfill.name}`" }
+          save = true
+        }
+        if (save) {
+          session.save(newBackfill)
+        }
+      }
 
       // Any existing backfills not in the current set should be marked deleted.
-      val deleted = existingBackfills.filter { e -> request.backfills.none { it.name == e.name } }
-      deleted.forEach {
-        it.deleted_in_service_at = clock.instant()
-        it.active = null
-        logger.info { "Deleted backfill for `$service`: `${it.name}`" }
+      val deleted = existingBackfills.keys - request.backfills.map { it.name }
+      deleted.forEach { name ->
+        existingBackfills.getValue(name).deactivate(clock)
+        logger.info { "Deleted backfill for `$service`: `$name`" }
       }
     }
 

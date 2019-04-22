@@ -19,14 +19,16 @@ internal class FakeBackfilaClientServiceClient : BackfilaClientServiceClient {
                 KeyRange(
                     ByteString.of(*"1".toByteArray()),
                     ByteString.of(*"10000".toByteArray())
-                )
+                ),
+                1_000_000L
             ),
             PrepareBackfillResponse.Instance(
                 "80-",
                 KeyRange(
                     ByteString.of(*"1".toByteArray()),
                     ByteString.of(*"10000".toByteArray())
-                )
+                ),
+                null
             )
         )
     )

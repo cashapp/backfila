@@ -21,6 +21,7 @@ message ConfigureServiceRequest {
     optional string type_provided = 3;
     optional string type_consumed = 4;
 
+    // If true the backfill will need approval from another user before it can be started.
     optional bool requires_approval = 5;
   }
 
