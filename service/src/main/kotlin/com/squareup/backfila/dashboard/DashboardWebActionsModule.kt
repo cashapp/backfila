@@ -7,5 +7,7 @@ class DashboardWebActionsModule : KAbstractModule() {
   override fun configure() {
     install(WebActionModule.create<GetServicesAction>())
     install(WebActionModule.create<CreateBackfillAction>())
+    install(WebActionModule.create<StartBackfillAction>())
+    install(WebActionModule.create<StopBackfillAction>())
   }
 }

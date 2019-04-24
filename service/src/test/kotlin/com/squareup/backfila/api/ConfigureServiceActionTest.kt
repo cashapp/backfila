@@ -37,106 +37,106 @@ class ConfigureServiceActionTest {
   @Test
   fun configureServiceSyncsBackfills() {
     val seedData: Map<Key<*>, Any> = mapOf(
-        keyOf<MiskCaller>() to MiskCaller("franklin"))
+        keyOf<MiskCaller>() to MiskCaller("deep-fryer"))
 
     scope.enter(seedData).use {
       configureServiceAction.configureService(
           ConfigureServiceRequest(listOf(), ServiceType.SQUARE_DC))
-      assertThat(backfillNames("franklin")).isEmpty()
+      assertThat(backfillNames("deep-fryer")).isEmpty()
 
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
           ConfigureServiceRequest.BackfillData("xyz", listOf(), null, null, false)),
           ServiceType.SQUARE_DC))
-      assertThat(backfillNames("franklin")).containsOnly("xyz")
-      assertThat(deletedBackfillNames("franklin")).isEmpty()
+      assertThat(backfillNames("deep-fryer")).containsOnly("xyz")
+      assertThat(deletedBackfillNames("deep-fryer")).isEmpty()
 
       configureServiceAction.configureService(
           ConfigureServiceRequest(
               listOf(ConfigureServiceRequest.BackfillData("zzz", listOf(), null, null, false)),
               ServiceType.SQUARE_DC))
-      assertThat(backfillNames("franklin")).containsOnly("zzz")
-      assertThat(deletedBackfillNames("franklin")).containsOnly("xyz")
+      assertThat(backfillNames("deep-fryer")).containsOnly("zzz")
+      assertThat(deletedBackfillNames("deep-fryer")).containsOnly("xyz")
     }
   }
 
   @Test
   fun deleteOneOfTwo() {
     val seedData: Map<Key<*>, Any> = mapOf(
-        keyOf<MiskCaller>() to MiskCaller("franklin"))
+        keyOf<MiskCaller>() to MiskCaller("deep-fryer"))
 
     scope.enter(seedData).use {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
           ConfigureServiceRequest.BackfillData("xyz", listOf(), null, null, false),
           ConfigureServiceRequest.BackfillData("zzz", listOf(), null, null, false)),
           ServiceType.SQUARE_DC))
-      assertThat(backfillNames("franklin")).containsOnly("xyz", "zzz")
-      assertThat(deletedBackfillNames("franklin")).isEmpty()
+      assertThat(backfillNames("deep-fryer")).containsOnly("xyz", "zzz")
+      assertThat(deletedBackfillNames("deep-fryer")).isEmpty()
 
       configureServiceAction.configureService(
           ConfigureServiceRequest(
               listOf(ConfigureServiceRequest.BackfillData("zzz", listOf(), null, null, false)),
               ServiceType.SQUARE_DC))
-      assertThat(backfillNames("franklin")).containsOnly("zzz")
-      assertThat(deletedBackfillNames("franklin")).containsOnly("xyz")
+      assertThat(backfillNames("deep-fryer")).containsOnly("zzz")
+      assertThat(deletedBackfillNames("deep-fryer")).containsOnly("xyz")
     }
   }
 
   @Test
   fun reintroduceBackfill() {
     val seedData: Map<Key<*>, Any> = mapOf(
-        keyOf<MiskCaller>() to MiskCaller("franklin"))
+        keyOf<MiskCaller>() to MiskCaller("deep-fryer"))
 
     scope.enter(seedData).use {
       configureServiceAction.configureService(
           ConfigureServiceRequest(listOf(), ServiceType.SQUARE_DC))
-      assertThat(backfillNames("franklin")).isEmpty()
+      assertThat(backfillNames("deep-fryer")).isEmpty()
 
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
           ConfigureServiceRequest.BackfillData("xyz", listOf(), null, null, false)),
           ServiceType.SQUARE_DC))
-      assertThat(backfillNames("franklin")).containsOnly("xyz")
-      assertThat(deletedBackfillNames("franklin")).isEmpty()
+      assertThat(backfillNames("deep-fryer")).containsOnly("xyz")
+      assertThat(deletedBackfillNames("deep-fryer")).isEmpty()
 
       configureServiceAction.configureService(
           ConfigureServiceRequest(
               listOf(),
               ServiceType.SQUARE_DC))
-      assertThat(backfillNames("franklin")).isEmpty()
-      assertThat(deletedBackfillNames("franklin")).containsOnly("xyz")
+      assertThat(backfillNames("deep-fryer")).isEmpty()
+      assertThat(deletedBackfillNames("deep-fryer")).containsOnly("xyz")
 
       configureServiceAction.configureService(
           ConfigureServiceRequest(
               listOf(ConfigureServiceRequest.BackfillData("xyz", listOf(), null, null, false)),
               ServiceType.SQUARE_DC))
       // The reintroduced backfill is created, and the old one kept around.
-      assertThat(backfillNames("franklin")).containsOnly("xyz")
-      assertThat(deletedBackfillNames("franklin")).containsOnly("xyz")
+      assertThat(backfillNames("deep-fryer")).containsOnly("xyz")
+      assertThat(deletedBackfillNames("deep-fryer")).containsOnly("xyz")
     }
   }
 
   @Test
   fun modifyBackfillRequiresApprovalBackAndForth() {
     val seedData: Map<Key<*>, Any> = mapOf(
-        keyOf<MiskCaller>() to MiskCaller("franklin"))
+        keyOf<MiskCaller>() to MiskCaller("deep-fryer"))
 
     scope.enter(seedData).use {
       // Going back and forth between approval required creates new registered backfills.
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
           ConfigureServiceRequest.BackfillData("xyz", listOf(), null, null, false)),
           ServiceType.SQUARE_DC))
-      assertThat(backfillNames("franklin")).containsOnly("xyz")
-      assertThat(deletedBackfillNames("franklin")).isEmpty()
+      assertThat(backfillNames("deep-fryer")).containsOnly("xyz")
+      assertThat(deletedBackfillNames("deep-fryer")).isEmpty()
 
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
           ConfigureServiceRequest.BackfillData("xyz", listOf(), null, null, true)),
           ServiceType.SQUARE_DC))
-      assertThat(backfillNames("franklin")).containsOnly("xyz")
-      assertThat(deletedBackfillNames("franklin")).containsOnly("xyz")
+      assertThat(backfillNames("deep-fryer")).containsOnly("xyz")
+      assertThat(deletedBackfillNames("deep-fryer")).containsOnly("xyz")
 
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
           ConfigureServiceRequest.BackfillData("xyz", listOf(), null, null, false)),
           ServiceType.SQUARE_DC))
-      val backfills = backfills("franklin")
+      val backfills = backfills("deep-fryer")
       assertThat(backfills).containsOnly(
           Backfill("xyz", clock.instant(), type_provided = null, type_consumed = null,
               parameter_names = "", requires_approval = false),
@@ -151,7 +151,7 @@ class ConfigureServiceActionTest {
   @Test
   fun modifyParams() {
     val seedData: Map<Key<*>, Any> = mapOf(
-        keyOf<MiskCaller>() to MiskCaller("franklin"))
+        keyOf<MiskCaller>() to MiskCaller("deep-fryer"))
 
     scope.enter(seedData).use {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
@@ -160,7 +160,7 @@ class ConfigureServiceActionTest {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
           ConfigureServiceRequest.BackfillData("xyz", listOf("abc"), null, null, false)),
           ServiceType.SQUARE_DC))
-      val backfills = backfills("franklin")
+      val backfills = backfills("deep-fryer")
       assertThat(backfills).containsOnly(
           Backfill("xyz", clock.instant(), type_provided = null, type_consumed = null,
               parameter_names = "", requires_approval = false),
@@ -173,7 +173,7 @@ class ConfigureServiceActionTest {
   @Test
   fun modifyTypeProvided() {
     val seedData: Map<Key<*>, Any> = mapOf(
-        keyOf<MiskCaller>() to MiskCaller("franklin"))
+        keyOf<MiskCaller>() to MiskCaller("deep-fryer"))
 
     scope.enter(seedData).use {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
@@ -182,7 +182,7 @@ class ConfigureServiceActionTest {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
           ConfigureServiceRequest.BackfillData("xyz", listOf(), "Int", null, false)),
           ServiceType.SQUARE_DC))
-      val backfills = backfills("franklin")
+      val backfills = backfills("deep-fryer")
       assertThat(backfills).containsOnly(
           Backfill("xyz", clock.instant(), type_provided = "String", type_consumed = null,
               parameter_names = "", requires_approval = false),
@@ -195,7 +195,7 @@ class ConfigureServiceActionTest {
   @Test
   fun modifyTypeConsumed() {
     val seedData: Map<Key<*>, Any> = mapOf(
-        keyOf<MiskCaller>() to MiskCaller("franklin"))
+        keyOf<MiskCaller>() to MiskCaller("deep-fryer"))
 
     scope.enter(seedData).use {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
@@ -204,7 +204,7 @@ class ConfigureServiceActionTest {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
           ConfigureServiceRequest.BackfillData("xyz", listOf(), null, "Int", false)),
           ServiceType.SQUARE_DC))
-      val backfills = backfills("franklin")
+      val backfills = backfills("deep-fryer")
       assertThat(backfills).containsOnly(
           Backfill("xyz", clock.instant(), type_provided = null, type_consumed = "String",
               parameter_names = "", requires_approval = false),
@@ -217,7 +217,7 @@ class ConfigureServiceActionTest {
   @Test
   fun unchangedBackfillNotDuplicated() {
     val seedData: Map<Key<*>, Any> = mapOf(
-        keyOf<MiskCaller>() to MiskCaller("franklin"))
+        keyOf<MiskCaller>() to MiskCaller("deep-fryer"))
 
     scope.enter(seedData).use {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
@@ -226,7 +226,7 @@ class ConfigureServiceActionTest {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
           ConfigureServiceRequest.BackfillData("xyz", listOf(), null, "String", false)),
           ServiceType.SQUARE_DC))
-      val backfills = backfills("franklin")
+      val backfills = backfills("deep-fryer")
       assertThat(backfills).containsOnly(
           Backfill("xyz", deleted_in_service_at = null, type_provided = null,
               type_consumed = "String", parameter_names = "", requires_approval = false)

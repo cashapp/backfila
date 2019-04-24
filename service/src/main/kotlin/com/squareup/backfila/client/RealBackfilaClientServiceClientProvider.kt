@@ -16,7 +16,8 @@ class RealBackfilaClientServiceClientProvider @Inject constructor(
 ) : BackfilaClientServiceClientProvider{
   override fun clientFor(serviceName: String, type: ServiceType): BackfilaClientServiceClient {
     // TODO http client caching
-    // TODO use type
+    // TODO use servicetype
+    // TODO use typedhttpclient?
     val httpClientEndpointConfig = HttpClientEndpointConfig(
         envoy = HttpClientEnvoyConfig(app = serviceName))
     val okHttpClient = httpClientFactory.create(httpClientEndpointConfig)

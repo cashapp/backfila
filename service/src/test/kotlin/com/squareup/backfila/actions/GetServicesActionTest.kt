@@ -33,19 +33,19 @@ class GetServicesActionTest {
 
   @Test
   fun oneService() {
-    scope(MiskCaller(service="franklin")).use {
+    scope(MiskCaller(service="deep-fryer")).use {
       configureServiceAction.configureService(
           ConfigureServiceRequest(listOf(), ServiceType.SQUARE_DC))
     }
 
     scope(MiskCaller(user="bob")).use {
-      assertThat(getServicesAction.services().services).containsOnly("franklin")
+      assertThat(getServicesAction.services().services).containsOnly("deep-fryer")
     }
   }
 
   @Test
   fun twoServices() {
-    scope(MiskCaller(service="franklin")).use {
+    scope(MiskCaller(service="deep-fryer")).use {
       configureServiceAction.configureService(
           ConfigureServiceRequest(listOf(), ServiceType.SQUARE_DC))
     }
@@ -54,7 +54,7 @@ class GetServicesActionTest {
           ConfigureServiceRequest(listOf(), ServiceType.SQUARE_DC))
     }
     scope(MiskCaller(user="bob")).use {
-      assertThat(getServicesAction.services().services).containsOnly("franklin", "permit")
+      assertThat(getServicesAction.services().services).containsOnly("deep-fryer", "permit")
     }
   }
 

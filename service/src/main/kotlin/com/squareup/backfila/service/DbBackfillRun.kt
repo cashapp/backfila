@@ -9,7 +9,10 @@ import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.EnumType
 import javax.persistence.Enumerated
+import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
+import javax.persistence.JoinColumn
+import javax.persistence.ManyToOne
 import javax.persistence.Table
 import javax.persistence.Version
 
@@ -29,6 +32,10 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
   /** Immutably stores the data configured by the client service for this backfill. */
   @Column(nullable = false)
   lateinit var registered_backfill_id: Id<DbRegisteredBackfill>
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "registered_backfill_id", updatable = false, insertable = false)
+  lateinit var registered_backfill: DbRegisteredBackfill
 
   @Column
   var pipeline_target_backfill_id: Id<DbRegisteredBackfill>? = null

@@ -7,7 +7,10 @@ import java.time.Clock
 import java.time.Instant
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
+import javax.persistence.JoinColumn
+import javax.persistence.ManyToOne
 import javax.persistence.Table
 
 /**
@@ -22,6 +25,10 @@ class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimestampedE
 
   @Column(nullable = false)
   lateinit var service_id: Id<DbService>
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "service_id", updatable = false, insertable = false)
+  lateinit var service: DbService
 
   @Column(nullable = false)
   lateinit var name: String
