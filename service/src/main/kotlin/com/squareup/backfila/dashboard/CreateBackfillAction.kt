@@ -77,7 +77,7 @@ class CreateBackfillAction @Inject constructor(
           ?: throw BadRequestException("`${request.backfill_name}` doesn't exist")
       logger.info {
         "Found registered backfill for `$service`::`${request.backfill_name}`" +
-            " ${registeredBackfill.id}"
+            " [id=${registeredBackfill.id}]"
       }
       registeredBackfill.id
     }

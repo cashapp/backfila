@@ -42,34 +42,34 @@ class CreateBackfillActionTest {
   fun serviceDoesntExist() {
     scope(MiskCaller(user = "bob")).use {
       assertThatThrownBy {
-        createBackfillAction.create("franklin", CreateBackfillRequest("abc"))
+        createBackfillAction.create("deep-fryer", CreateBackfillRequest("abc"))
       }.isInstanceOf(BadRequestException::class.java)
     }
   }
 
   @Test
   fun backfillDoesntExist() {
-    scope(MiskCaller(service = "franklin")).use {
+    scope(MiskCaller(service = "deep-fryer")).use {
       configureServiceAction.configureService(
           ConfigureServiceRequest(listOf(), ServiceType.SQUARE_DC))
     }
 
     scope(MiskCaller(user = "bob")).use {
       assertThatThrownBy {
-        createBackfillAction.create("franklin", CreateBackfillRequest("abc"))
+        createBackfillAction.create("deep-fryer", CreateBackfillRequest("abc"))
       }.isInstanceOf(BadRequestException::class.java)
     }
   }
 
   @Test
   fun created() {
-    scope(MiskCaller(service = "franklin")).use {
+    scope(MiskCaller(service = "deep-fryer")).use {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
           ConfigureServiceRequest.BackfillData("ChickenSandwich", listOf(), null, null, false)),
           ServiceType.SQUARE_DC))
     }
     scope(MiskCaller(user = "bob")).use {
-      val response = createBackfillAction.create("franklin",
+      val response = createBackfillAction.create("deep-fryer",
           CreateBackfillRequest("ChickenSandwich"))
       assertThat(response.statusCode).isEqualTo(HttpURLConnection.HTTP_MOVED_TEMP)
 
@@ -80,6 +80,8 @@ class CreateBackfillActionTest {
         assertThat(run.created_by_user).isEqualTo("bob")
         assertThat(run.approved_by_user).isNull()
         assertThat(run.approved_at).isNull()
+
+        assertThat(response.headers["Location"]).endsWith("/backfills/${run.id}")
 
         val instances = queryFactory.newQuery<RunInstanceQuery>()
             .backfillRunId(run.id)
