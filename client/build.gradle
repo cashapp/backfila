@@ -22,19 +22,19 @@ sourceSets {
 }
 
 dependencies {
-  compile dep.guava
-  compile dep.moshi
-  compile dep.wireRuntime
-  compile dep.guice
-  compile dep.okHttp
-  compile dep.retrofit
-  compile dep.retrofitMoshi
-  compile dep.retrofitWire
-  compile dep.okio
-  compile dep.kotlinStdLib
-  compile dep.wireMoshiAdapter
+  implementation dep.guava
+  implementation dep.moshi
+  implementation dep.wireRuntime
+  implementation dep.guice
+  implementation dep.okHttp
+  implementation dep.retrofit
+  implementation dep.retrofitMoshi
+  implementation dep.retrofitWire
+  implementation dep.okio
+  implementation dep.kotlinStdLib
+  implementation dep.wireMoshiAdapter
 
-  testCompile dep.junitEngine
+  testImplementation dep.junitEngine
 }
 
 jar {

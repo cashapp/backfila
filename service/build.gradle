@@ -27,57 +27,57 @@ junitPlatform {
 }
 
 dependencies {
-  compile dep.guava
-  compile dep.guice
-  compile dep.guiceMultibindings
-  compile dep.jacksonDatabind
-  compile dep.jacksonDataformatYaml
-  compile dep.jacksonJsr310
-  compile dep.jacksonKotlin
-  compile dep.jCommander
-  compile dep.jettyServer
-  compile dep.jettyServlet
-  compile dep.jettyWebsocketServlet
-  compile dep.jettyWebsocketServer
-  compile dep.kotlinStdLib
-  compile dep.kotlinReflection
-  compile dep.loggingApi
-  compile dep.metricsCore
-  compile dep.metricsParent
-  compile dep.moshi
-  compile dep.okHttp
-  compile dep.okio
-  compile dep.openTracing
-  compile dep.openTracingOkHttp
-  compile dep.tracingJaeger
-  compile dep.wireRuntime
-  compile dep.wireCompiler
-  compile dep.wireSchema
-  compile dep.misk
-  compile dep.miskHibernate
-  compile dep.miskZipkin
-  compile dep.skim
+  implementation dep.guava
+  implementation dep.guice
+  implementation dep.guiceMultibindings
+  implementation dep.jacksonDatabind
+  implementation dep.jacksonDataformatYaml
+  implementation dep.jacksonJsr310
+  implementation dep.jacksonKotlin
+  implementation dep.jCommander
+  implementation dep.jettyServer
+  implementation dep.jettyServlet
+  implementation dep.jettyWebsocketServlet
+  implementation dep.jettyWebsocketServer
+  implementation dep.kotlinStdLib
+  implementation dep.kotlinReflection
+  implementation dep.loggingApi
+  implementation dep.metricsCore
+  implementation dep.metricsParent
+  implementation dep.moshi
+  implementation dep.okHttp
+  implementation dep.okio
+  implementation dep.openTracing
+  implementation dep.openTracingOkHttp
+  implementation dep.tracingJaeger
+  implementation dep.wireRuntime
+  implementation dep.wireCompiler
+  implementation dep.wireSchema
+  implementation dep.misk
+  implementation dep.miskHibernate
+  implementation dep.miskZipkin
+  implementation dep.skim
   compile project(':client')
 
-  compile(dep.misk) {
-    exclude group: 'com.google.guava'
+  implementation(dep.misk) {
+
   }
-  testCompile(dep.miskTesting) {
-    exclude group: 'com.google.guava', module: 'guava'
+  testImplementation(dep.miskTesting) {
+
   }
-  compile(dep.skim) {
-    exclude group: 'com.google.guava'
+  implementation(dep.skim) {
+
   }
 
-  testCompile dep.miskTesting
-  testCompile dep.miskHibernateTesting
-  testCompile dep.junitApi
-  testCompile dep.junitParams
-  testCompile dep.junitEngine
-  testCompile dep.assertj
-  testCompile dep.mockito
-  testCompile dep.mockitoKotlin
-  testCompile dep.openTracingMock
+  testImplementation dep.miskTesting
+  testImplementation dep.miskHibernateTesting
+  testImplementation dep.junitApi
+  testImplementation dep.junitParams
+  testImplementation dep.junitEngine
+  testImplementation dep.assertj
+  testImplementation dep.mockito
+  testImplementation dep.mockitoKotlin
+  testImplementation dep.openTracingMock
 }
 
 jar {
