@@ -1,18 +1,16 @@
 package com.squareup.backfila.api
 
-import com.google.inject.Key
 import com.google.inject.Module
-import com.squareup.backfila.actions.BackfilaWebActionTestingModule
+import com.squareup.backfila.actions.BackfilaTestingModule
+import com.squareup.backfila.fakeCaller
 import com.squareup.backfila.service.BackfilaDb
 import com.squareup.backfila.service.RegisteredBackfillQuery
 import com.squareup.backfila.service.ServiceQuery
 import com.squareup.protos.backfila.service.ConfigureServiceRequest
 import com.squareup.protos.backfila.service.ServiceType
-import misk.MiskCaller
 import misk.hibernate.Query
 import misk.hibernate.Transacter
 import misk.hibernate.newQuery
-import misk.inject.keyOf
 import misk.scope.ActionScope
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -26,7 +24,7 @@ import javax.inject.Inject
 class ConfigureServiceActionTest {
   @Suppress("unused")
   @MiskTestModule
-  val module: Module = BackfilaWebActionTestingModule()
+  val module: Module = BackfilaTestingModule()
 
   @Inject lateinit var clock: Clock
   @Inject lateinit var configureServiceAction: ConfigureServiceAction
@@ -36,10 +34,7 @@ class ConfigureServiceActionTest {
 
   @Test
   fun configureServiceSyncsBackfills() {
-    val seedData: Map<Key<*>, Any> = mapOf(
-        keyOf<MiskCaller>() to MiskCaller("deep-fryer"))
-
-    scope.enter(seedData).use {
+    scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(
           ConfigureServiceRequest(listOf(), ServiceType.SQUARE_DC))
       assertThat(backfillNames("deep-fryer")).isEmpty()
@@ -61,10 +56,7 @@ class ConfigureServiceActionTest {
 
   @Test
   fun deleteOneOfTwo() {
-    val seedData: Map<Key<*>, Any> = mapOf(
-        keyOf<MiskCaller>() to MiskCaller("deep-fryer"))
-
-    scope.enter(seedData).use {
+    scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
           ConfigureServiceRequest.BackfillData("xyz", listOf(), null, null, false),
           ConfigureServiceRequest.BackfillData("zzz", listOf(), null, null, false)),
@@ -83,10 +75,7 @@ class ConfigureServiceActionTest {
 
   @Test
   fun reintroduceBackfill() {
-    val seedData: Map<Key<*>, Any> = mapOf(
-        keyOf<MiskCaller>() to MiskCaller("deep-fryer"))
-
-    scope.enter(seedData).use {
+    scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(
           ConfigureServiceRequest(listOf(), ServiceType.SQUARE_DC))
       assertThat(backfillNames("deep-fryer")).isEmpty()
@@ -116,10 +105,7 @@ class ConfigureServiceActionTest {
 
   @Test
   fun modifyBackfillRequiresApprovalBackAndForth() {
-    val seedData: Map<Key<*>, Any> = mapOf(
-        keyOf<MiskCaller>() to MiskCaller("deep-fryer"))
-
-    scope.enter(seedData).use {
+    scope.fakeCaller(service = "deep-fryer") {
       // Going back and forth between approval required creates new registered backfills.
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
           ConfigureServiceRequest.BackfillData("xyz", listOf(), null, null, false)),
@@ -150,10 +136,7 @@ class ConfigureServiceActionTest {
 
   @Test
   fun modifyParams() {
-    val seedData: Map<Key<*>, Any> = mapOf(
-        keyOf<MiskCaller>() to MiskCaller("deep-fryer"))
-
-    scope.enter(seedData).use {
+    scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
           ConfigureServiceRequest.BackfillData("xyz", listOf(), null, null, false)),
           ServiceType.SQUARE_DC))
@@ -172,10 +155,7 @@ class ConfigureServiceActionTest {
 
   @Test
   fun modifyTypeProvided() {
-    val seedData: Map<Key<*>, Any> = mapOf(
-        keyOf<MiskCaller>() to MiskCaller("deep-fryer"))
-
-    scope.enter(seedData).use {
+    scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
           ConfigureServiceRequest.BackfillData("xyz", listOf(), "String", null, false)),
           ServiceType.SQUARE_DC))
@@ -194,10 +174,7 @@ class ConfigureServiceActionTest {
 
   @Test
   fun modifyTypeConsumed() {
-    val seedData: Map<Key<*>, Any> = mapOf(
-        keyOf<MiskCaller>() to MiskCaller("deep-fryer"))
-
-    scope.enter(seedData).use {
+    scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
           ConfigureServiceRequest.BackfillData("xyz", listOf(), null, "String", false)),
           ServiceType.SQUARE_DC))
@@ -216,10 +193,7 @@ class ConfigureServiceActionTest {
 
   @Test
   fun unchangedBackfillNotDuplicated() {
-    val seedData: Map<Key<*>, Any> = mapOf(
-        keyOf<MiskCaller>() to MiskCaller("deep-fryer"))
-
-    scope.enter(seedData).use {
+    scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
           ConfigureServiceRequest.BackfillData("xyz", listOf(), null, "String", false)),
           ServiceType.SQUARE_DC))

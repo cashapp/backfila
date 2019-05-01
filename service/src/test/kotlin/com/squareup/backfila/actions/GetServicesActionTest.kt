@@ -3,10 +3,9 @@ package com.squareup.backfila.actions
 import com.google.inject.Module
 import com.squareup.backfila.api.ConfigureServiceAction
 import com.squareup.backfila.dashboard.GetServicesAction
+import com.squareup.backfila.fakeCaller
 import com.squareup.protos.backfila.service.ConfigureServiceRequest
 import com.squareup.protos.backfila.service.ServiceType
-import misk.MiskCaller
-import misk.inject.keyOf
 import misk.scope.ActionScope
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -18,7 +17,7 @@ import javax.inject.Inject
 class GetServicesActionTest {
   @Suppress("unused")
   @MiskTestModule
-  val module: Module = BackfilaWebActionTestingModule()
+  val module: Module = BackfilaTestingModule()
 
   @Inject lateinit var configureServiceAction: ConfigureServiceAction
   @Inject lateinit var getServicesAction: GetServicesAction
@@ -26,38 +25,35 @@ class GetServicesActionTest {
 
   @Test
   fun noServices() {
-    scope(MiskCaller(user = "bob")).use {
+    scope.fakeCaller(user = "bob") {
       assertThat(getServicesAction.services().services).isEmpty()
     }
   }
 
   @Test
   fun oneService() {
-    scope(MiskCaller(service="deep-fryer")).use {
+    scope.fakeCaller(service="deep-fryer") {
       configureServiceAction.configureService(
           ConfigureServiceRequest(listOf(), ServiceType.SQUARE_DC))
     }
 
-    scope(MiskCaller(user="bob")).use {
+    scope.fakeCaller(user="bob") {
       assertThat(getServicesAction.services().services).containsOnly("deep-fryer")
     }
   }
 
   @Test
   fun twoServices() {
-    scope(MiskCaller(service="deep-fryer")).use {
+    scope.fakeCaller(service="deep-fryer") {
       configureServiceAction.configureService(
           ConfigureServiceRequest(listOf(), ServiceType.SQUARE_DC))
     }
-    scope(MiskCaller(service="permit")).use {
+    scope.fakeCaller(service="permit") {
       configureServiceAction.configureService(
           ConfigureServiceRequest(listOf(), ServiceType.SQUARE_DC))
     }
-    scope(MiskCaller(user="bob")).use {
+    scope.fakeCaller(user="bob") {
       assertThat(getServicesAction.services().services).containsOnly("deep-fryer", "permit")
     }
   }
-
-  fun scope(caller: MiskCaller) =
-      scope.enter(mapOf(keyOf<MiskCaller>() to caller))
 }

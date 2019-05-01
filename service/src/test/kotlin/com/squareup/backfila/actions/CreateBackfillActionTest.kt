@@ -4,18 +4,17 @@ import com.google.inject.Module
 import com.squareup.backfila.api.ConfigureServiceAction
 import com.squareup.backfila.dashboard.CreateBackfillAction
 import com.squareup.backfila.dashboard.CreateBackfillRequest
+import com.squareup.backfila.fakeCaller
 import com.squareup.backfila.service.BackfilaDb
 import com.squareup.backfila.service.BackfillRunQuery
 import com.squareup.backfila.service.BackfillState
 import com.squareup.backfila.service.RunInstanceQuery
 import com.squareup.protos.backfila.service.ConfigureServiceRequest
 import com.squareup.protos.backfila.service.ServiceType
-import misk.MiskCaller
 import misk.exceptions.BadRequestException
 import misk.hibernate.Query
 import misk.hibernate.Transacter
 import misk.hibernate.newQuery
-import misk.inject.keyOf
 import misk.scope.ActionScope
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -30,7 +29,7 @@ import kotlin.test.assertNotNull
 class CreateBackfillActionTest {
   @Suppress("unused")
   @MiskTestModule
-  val module: Module = BackfilaWebActionTestingModule()
+  val module: Module = BackfilaTestingModule()
 
   @Inject lateinit var configureServiceAction: ConfigureServiceAction
   @Inject lateinit var createBackfillAction: CreateBackfillAction
@@ -40,7 +39,7 @@ class CreateBackfillActionTest {
 
   @Test
   fun serviceDoesntExist() {
-    scope(MiskCaller(user = "bob")).use {
+    scope.fakeCaller(user = "bob") {
       assertThatThrownBy {
         createBackfillAction.create("deep-fryer", CreateBackfillRequest("abc"))
       }.isInstanceOf(BadRequestException::class.java)
@@ -49,12 +48,12 @@ class CreateBackfillActionTest {
 
   @Test
   fun backfillDoesntExist() {
-    scope(MiskCaller(service = "deep-fryer")).use {
+    scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(
           ConfigureServiceRequest(listOf(), ServiceType.SQUARE_DC))
     }
 
-    scope(MiskCaller(user = "bob")).use {
+    scope.fakeCaller(user = "bob") {
       assertThatThrownBy {
         createBackfillAction.create("deep-fryer", CreateBackfillRequest("abc"))
       }.isInstanceOf(BadRequestException::class.java)
@@ -63,12 +62,12 @@ class CreateBackfillActionTest {
 
   @Test
   fun created() {
-    scope(MiskCaller(service = "deep-fryer")).use {
+    scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
           ConfigureServiceRequest.BackfillData("ChickenSandwich", listOf(), null, null, false)),
           ServiceType.SQUARE_DC))
     }
-    scope(MiskCaller(user = "bob")).use {
+    scope.fakeCaller(user = "bob") {
       val response = createBackfillAction.create("deep-fryer",
           CreateBackfillRequest("ChickenSandwich"))
       assertThat(response.statusCode).isEqualTo(HttpURLConnection.HTTP_MOVED_TEMP)
@@ -95,7 +94,4 @@ class CreateBackfillActionTest {
       }
     }
   }
-
-  fun scope(caller: MiskCaller) =
-      scope.enter(mapOf(keyOf<MiskCaller>() to caller))
 }
