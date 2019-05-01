@@ -8,17 +8,16 @@ import com.squareup.backfila.dashboard.StartBackfillAction
 import com.squareup.backfila.dashboard.StartBackfillRequest
 import com.squareup.backfila.dashboard.StopBackfillAction
 import com.squareup.backfila.dashboard.StopBackfillRequest
+import com.squareup.backfila.fakeCaller
 import com.squareup.backfila.service.BackfilaDb
 import com.squareup.backfila.service.BackfillState
 import com.squareup.backfila.service.DbBackfillRun
 import com.squareup.protos.backfila.service.ConfigureServiceRequest
 import com.squareup.protos.backfila.service.ServiceType
-import misk.MiskCaller
 import misk.exceptions.BadRequestException
 import misk.hibernate.Id
 import misk.hibernate.Transacter
 import misk.hibernate.load
-import misk.inject.keyOf
 import misk.scope.ActionScope
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -32,7 +31,7 @@ import kotlin.test.assertNotNull
 class StartStopBackfillActionTest {
   @Suppress("unused")
   @MiskTestModule
-  val module: Module = BackfilaWebActionTestingModule()
+  val module: Module = BackfilaTestingModule()
 
   @Inject lateinit var configureServiceAction: ConfigureServiceAction
   @Inject lateinit var createBackfillAction: CreateBackfillAction
@@ -43,12 +42,12 @@ class StartStopBackfillActionTest {
 
   @Test
   fun startAndStop() {
-    scope(MiskCaller(service = "deep-fryer")).use {
+    scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
           ConfigureServiceRequest.BackfillData("ChickenSandwich", listOf(), null, null, false)),
           ServiceType.SQUARE_DC))
     }
-    scope(MiskCaller(user = "bob")).use {
+    scope.fakeCaller(user = "bob") {
       val response = createBackfillAction.create("deep-fryer",
           CreateBackfillRequest("ChickenSandwich"))
       val id = response.headers["Location"]!!.substringAfterLast("/").toLong()
@@ -72,12 +71,12 @@ class StartStopBackfillActionTest {
 
   @Test
   fun backfillDoesntExist() {
-    scope(MiskCaller(service = "deep-fryer")).use {
+    scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
           ConfigureServiceRequest.BackfillData("ChickenSandwich", listOf(), null, null, false)),
           ServiceType.SQUARE_DC))
     }
-    scope(MiskCaller(user = "bob")).use {
+    scope.fakeCaller(user = "bob") {
       val response = createBackfillAction.create("deep-fryer",
           CreateBackfillRequest("ChickenSandwich"))
       val id = response.headers["Location"]!!.substringAfterLast("/").toLong()
@@ -90,12 +89,12 @@ class StartStopBackfillActionTest {
 
   @Test
   fun cantStartRunningBackfill() {
-    scope(MiskCaller(service = "deep-fryer")).use {
+    scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
           ConfigureServiceRequest.BackfillData("ChickenSandwich", listOf(), null, null, false)),
           ServiceType.SQUARE_DC))
     }
-    scope(MiskCaller(user = "bob")).use {
+    scope.fakeCaller(user = "bob") {
       val response = createBackfillAction.create("deep-fryer",
           CreateBackfillRequest("ChickenSandwich"))
       val id = response.headers["Location"]!!.substringAfterLast("/").toLong()
@@ -115,12 +114,12 @@ class StartStopBackfillActionTest {
 
   @Test
   fun cantStopPausedBackfill() {
-    scope(MiskCaller(service = "deep-fryer")).use {
+    scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
           ConfigureServiceRequest.BackfillData("ChickenSandwich", listOf(), null, null, false)),
           ServiceType.SQUARE_DC))
     }
-    scope(MiskCaller(user = "bob")).use {
+    scope.fakeCaller(user = "bob") {
       val response = createBackfillAction.create("deep-fryer",
           CreateBackfillRequest("ChickenSandwich"))
       val id = response.headers["Location"]!!.substringAfterLast("/").toLong()
@@ -132,12 +131,12 @@ class StartStopBackfillActionTest {
 
   @Test
   fun cantToggleCompletedBackfill() {
-    scope(MiskCaller(service = "deep-fryer")).use {
+    scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
           ConfigureServiceRequest.BackfillData("ChickenSandwich", listOf(), null, null, false)),
           ServiceType.SQUARE_DC))
     }
-    scope(MiskCaller(user = "bob")).use {
+    scope.fakeCaller(user = "bob") {
       val response = createBackfillAction.create("deep-fryer",
           CreateBackfillRequest("ChickenSandwich"))
       val id = response.headers["Location"]!!.substringAfterLast("/").toLong()
@@ -156,7 +155,4 @@ class StartStopBackfillActionTest {
       }.isInstanceOf(BadRequestException::class.java)
     }
   }
-
-  fun scope(caller: MiskCaller) =
-      scope.enter(mapOf(keyOf<MiskCaller>() to caller))
 }
