@@ -4,6 +4,9 @@ import misk.hibernate.DbTimestampedEntity
 import misk.hibernate.DbUnsharded
 import misk.hibernate.Id
 import misk.hibernate.JsonColumn
+import misk.hibernate.Query
+import misk.hibernate.Session
+import misk.hibernate.newQuery
 import java.time.Instant
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -50,7 +53,7 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
   var version: Long = 0
 
   @Column(nullable = false) @Enumerated(EnumType.STRING)
-  lateinit var state: BackfillState
+  private lateinit var state: BackfillState
 
   @Column
   var created_by_user: String? = null
@@ -77,6 +80,7 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
     service_id: Id<DbService>,
     registered_backfill_id: Id<DbRegisteredBackfill>,
     parameter_map: Map<String, String>,
+    state: BackfillState,
     created_by_user: String?,
     scan_size: Long,
     batch_size: Long,
@@ -85,17 +89,20 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
     this.service_id = service_id
     this.registered_backfill_id = registered_backfill_id
     this.parameter_map = parameter_map
-    this.state = BackfillState.PAUSED
+    this.state = state
     this.created_by_user = created_by_user
     this.scan_size = scan_size
     this.batch_size = batch_size
     this.num_threads = num_threads
   }
-}
 
-// TODO move me out
-enum class BackfillState {
-  PAUSED,
-  RUNNING,
-  COMPLETE
+  fun state(): BackfillState = state
+
+  fun setState(session: Session, queryFactory: Query.Factory, state: BackfillState) {
+    this.state = state
+    queryFactory.newQuery<RunInstanceQuery>()
+        .backfillRunId(id)
+        .list(session)
+        .forEach { instance -> instance.run_state = state }
+  }
 }
