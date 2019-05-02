@@ -75,11 +75,10 @@ class CreateBackfillActionTest {
       transacter.transaction { session ->
         val run = queryFactory.newQuery<BackfillRunQuery>().uniqueResult(session)
         assertNotNull(run)
-        assertThat(run.state).isEqualTo(BackfillState.PAUSED)
+        assertThat(run.state()).isEqualTo(BackfillState.PAUSED)
         assertThat(run.created_by_user).isEqualTo("bob")
         assertThat(run.approved_by_user).isNull()
         assertThat(run.approved_at).isNull()
-
         assertThat(response.headers["Location"]).endsWith("/backfills/${run.id}")
 
         val instances = queryFactory.newQuery<RunInstanceQuery>()
@@ -89,8 +88,10 @@ class CreateBackfillActionTest {
         assertThat(instances).hasSize(2)
         assertThat(instances[0].instance_name).isEqualTo("-80")
         assertThat(instances[0].lease_token).isNull()
+        assertThat(instances[0].run_state).isEqualTo(BackfillState.PAUSED)
         assertThat(instances[1].instance_name).isEqualTo("80-")
         assertThat(instances[1].lease_token).isNull()
+        assertThat(instances[1].run_state).isEqualTo(BackfillState.PAUSED)
       }
     }
   }

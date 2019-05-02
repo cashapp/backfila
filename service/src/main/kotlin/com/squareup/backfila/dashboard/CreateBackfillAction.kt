@@ -2,6 +2,7 @@ package com.squareup.backfila.dashboard
 
 import com.squareup.backfila.client.BackfilaClientServiceClientProvider
 import com.squareup.backfila.service.BackfilaDb
+import com.squareup.backfila.service.BackfillState
 import com.squareup.backfila.service.DbBackfillRun
 import com.squareup.backfila.service.DbRunInstance
 import com.squareup.backfila.service.RegisteredBackfillQuery
@@ -100,6 +101,7 @@ class CreateBackfillAction @Inject constructor(
           serviceId,
           registeredBackfillId,
           request.parameter_map,
+          BackfillState.PAUSED,
           caller.get()?.user,
           request.scan_size,
           request.batch_size,
@@ -109,7 +111,7 @@ class CreateBackfillAction @Inject constructor(
 
       for (instance in instances) {
         val dbRunInstance = DbRunInstance(
-            backfillRun.id, instance.instance_name, instance.backfill_range)
+            backfillRun.id, instance.instance_name, instance.backfill_range, backfillRun.state())
         session.save(dbRunInstance)
       }
 

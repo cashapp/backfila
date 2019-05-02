@@ -47,6 +47,7 @@ class RunnerSchedulerService @Inject constructor(
 
       newRunners.forEach(::addRunner)
 
+      // Repeat at random intervals to reduce chance of multiple nodes racing.
       Thread.sleep(1000L + random.nextInt(5000))
     }
   }

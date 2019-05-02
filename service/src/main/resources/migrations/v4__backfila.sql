@@ -5,7 +5,7 @@ CREATE TABLE run_instances (
   created_at timestamp(3) NOT NULL DEFAULT NOW(3),
   updated_at timestamp(3) NOT NULL DEFAULT NOW(3) ON UPDATE NOW(3),
   version bigint NOT NULL DEFAULT 0,
-
+  run_state ENUM('PAUSED', 'RUNNING', 'COMPLETE') NOT NULL,
   lease_token varbinary(300) NULL DEFAULT NULL,
   lease_expires_at timestamp(3) NULL DEFAULT NULL,
 
@@ -18,5 +18,6 @@ CREATE TABLE run_instances (
 
   backfilled_record_count bigint NULL DEFAULT NULL,
 
-  UNIQUE KEY `unq_backfill_run_id_instance_name` (backfill_run_id, instance_name)
+  UNIQUE KEY `unq_backfill_run_id_instance_name` (backfill_run_id, instance_name),
+  KEY `idx_run_state_lease_expires_at` (run_state, lease_expires_at)
 );
