@@ -36,10 +36,10 @@ class BackfillStateToggler @Inject constructor(
         "Found backfill $id for `${run.registered_backfill.service.registry_name}`" +
             "::`${run.registered_backfill.name}`"
       }
-      if (run.state() != requiredCurrentState) {
+      if (run.state != requiredCurrentState) {
         logger.info {
           "Backfill $id can't move to state $desiredState, " +
-              "in state ${run.state()}, requires $requiredCurrentState"
+              "in state ${run.state}, requires $requiredCurrentState"
         }
         throw BadRequestException(
             "backfill $id isn't $requiredCurrentState, can't move to state $desiredState")

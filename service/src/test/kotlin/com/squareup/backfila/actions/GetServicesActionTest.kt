@@ -1,6 +1,7 @@
 package com.squareup.backfila.actions
 
 import com.google.inject.Module
+import com.squareup.backfila.BackfilaTestingModule
 import com.squareup.backfila.api.ConfigureServiceAction
 import com.squareup.backfila.dashboard.GetServicesAction
 import com.squareup.backfila.fakeCaller

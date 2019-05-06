@@ -53,7 +53,8 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
   var version: Long = 0
 
   @Column(nullable = false) @Enumerated(EnumType.STRING)
-  private lateinit var state: BackfillState
+  lateinit var state: BackfillState
+    private set
 
   @Column
   var created_by_user: String? = null
@@ -95,8 +96,6 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
     this.batch_size = batch_size
     this.num_threads = num_threads
   }
-
-  fun state(): BackfillState = state
 
   fun setState(session: Session, queryFactory: Query.Factory, state: BackfillState) {
     this.state = state
