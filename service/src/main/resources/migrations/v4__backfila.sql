@@ -7,7 +7,7 @@ CREATE TABLE run_instances (
   version bigint NOT NULL DEFAULT 0,
   run_state ENUM('PAUSED', 'RUNNING', 'COMPLETE') NOT NULL,
   lease_token varbinary(300) NULL DEFAULT NULL,
-  lease_expires_at timestamp(3) NULL DEFAULT NULL,
+  lease_expires_at timestamp(3) NOT NULL,
 
   pkey_cursor varbinary(300) NULL DEFAULT NULL,
   pkey_range_end varbinary(300) NULL DEFAULT NULL,

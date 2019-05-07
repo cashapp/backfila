@@ -1,6 +1,7 @@
 package com.squareup.backfila.actions
 
 import com.google.inject.Module
+import com.squareup.backfila.BackfilaTestingModule
 import com.squareup.backfila.api.ConfigureServiceAction
 import com.squareup.backfila.dashboard.CreateBackfillAction
 import com.squareup.backfila.dashboard.CreateBackfillRequest
@@ -75,7 +76,7 @@ class CreateBackfillActionTest {
       transacter.transaction { session ->
         val run = queryFactory.newQuery<BackfillRunQuery>().uniqueResult(session)
         assertNotNull(run)
-        assertThat(run.state()).isEqualTo(BackfillState.PAUSED)
+        assertThat(run.state).isEqualTo(BackfillState.PAUSED)
         assertThat(run.created_by_user).isEqualTo("bob")
         assertThat(run.approved_by_user).isNull()
         assertThat(run.approved_at).isNull()

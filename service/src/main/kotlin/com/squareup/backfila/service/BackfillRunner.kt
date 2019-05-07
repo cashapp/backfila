@@ -1,8 +1,13 @@
 package com.squareup.backfila.service
 
+import misk.hibernate.Id
 import misk.logging.getLogger
 
-class BackfillRunner(val name: String) {
+class BackfillRunner(
+  val name: String,
+  val instanceId: Id<DbRunInstance>,
+  val leaseToken: String
+) {
   @Volatile private var running = true
 
   fun stop() {

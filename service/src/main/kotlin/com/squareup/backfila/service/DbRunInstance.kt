@@ -10,7 +10,10 @@ import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.EnumType
 import javax.persistence.Enumerated
+import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
+import javax.persistence.JoinColumn
+import javax.persistence.ManyToOne
 import javax.persistence.Table
 import javax.persistence.Version
 
@@ -28,6 +31,10 @@ class DbRunInstance() : DbUnsharded<DbRunInstance>, DbTimestampedEntity {
 
   @Column(nullable = false)
   lateinit var backfill_run_id: Id<DbBackfillRun>
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "backfill_run_id", updatable = false, insertable = false)
+  lateinit var backfill_run: DbBackfillRun
 
   @Column(nullable = false)
   lateinit var instance_name: String
@@ -52,7 +59,7 @@ class DbRunInstance() : DbUnsharded<DbRunInstance>, DbTimestampedEntity {
   var lease_token: String? = null
 
   @Column
-  var lease_expires_at: Instant? = null
+  lateinit var lease_expires_at: Instant
 
   @Column
   var pkey_cursor: ByteString? = null
@@ -88,5 +95,6 @@ class DbRunInstance() : DbUnsharded<DbRunInstance>, DbTimestampedEntity {
     this.pkey_cursor = backfill_range.start
     this.pkey_range_end = backfill_range.end
     this.run_state = run_state
+    this.lease_expires_at = Instant.ofEpochSecond(1L)
   }
 }

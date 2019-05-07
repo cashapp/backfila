@@ -111,7 +111,7 @@ class CreateBackfillAction @Inject constructor(
 
       for (instance in instances) {
         val dbRunInstance = DbRunInstance(
-            backfillRun.id, instance.instance_name, instance.backfill_range, backfillRun.state())
+            backfillRun.id, instance.instance_name, instance.backfill_range, backfillRun.state)
         session.save(dbRunInstance)
       }
 

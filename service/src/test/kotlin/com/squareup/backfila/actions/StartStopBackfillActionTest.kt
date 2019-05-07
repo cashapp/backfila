@@ -1,6 +1,7 @@
 package com.squareup.backfila.actions
 
 import com.google.inject.Module
+import com.squareup.backfila.BackfilaTestingModule
 import com.squareup.backfila.api.ConfigureServiceAction
 import com.squareup.backfila.dashboard.CreateBackfillAction
 import com.squareup.backfila.dashboard.CreateBackfillRequest
@@ -60,7 +61,7 @@ class StartStopBackfillActionTest {
       transacter.transaction { session ->
         val run = session.load(Id<DbBackfillRun>(id))
         assertNotNull(run)
-        assertThat(run.state()).isEqualTo(BackfillState.RUNNING)
+        assertThat(run.state).isEqualTo(BackfillState.RUNNING)
         assertThat(queryFactory.newQuery<RunInstanceQuery>()
             .backfillRunId(run.id)
             .list(session).map { it.run_state })
@@ -72,7 +73,7 @@ class StartStopBackfillActionTest {
       transacter.transaction { session ->
         val run = session.load(Id<DbBackfillRun>(id))
         assertNotNull(run)
-        assertThat(run.state()).isEqualTo(BackfillState.PAUSED)
+        assertThat(run.state).isEqualTo(BackfillState.PAUSED)
         assertThat(queryFactory.newQuery<RunInstanceQuery>()
             .backfillRunId(run.id)
             .list(session).map { it.run_state })
@@ -115,7 +116,7 @@ class StartStopBackfillActionTest {
       transacter.transaction { session ->
         val run = session.load(Id<DbBackfillRun>(id))
         assertNotNull(run)
-        assertThat(run.state()).isEqualTo(BackfillState.RUNNING)
+        assertThat(run.state).isEqualTo(BackfillState.RUNNING)
       }
 
       assertThatThrownBy {
