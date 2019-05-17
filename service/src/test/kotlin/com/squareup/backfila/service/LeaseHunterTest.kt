@@ -49,7 +49,7 @@ class LeaseHunterTest {
           ConfigureServiceRequest.BackfillData("ChickenSandwich", listOf(), null, null, false)),
           ServiceType.SQUARE_DC))
     }
-    scope.fakeCaller(user = "bob") {
+    scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create("deep-fryer",
           CreateBackfillRequest("ChickenSandwich"))
     }
@@ -63,7 +63,7 @@ class LeaseHunterTest {
           ConfigureServiceRequest.BackfillData("ChickenSandwich", listOf(), null, null, false)),
           ServiceType.SQUARE_DC))
     }
-    scope.fakeCaller(user = "bob") {
+    scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create("deep-fryer",
           CreateBackfillRequest("ChickenSandwich"))
 
@@ -74,7 +74,7 @@ class LeaseHunterTest {
     val runners = leaseHunter.hunt()
     assertThat(runners).hasSize(1)
     val runner = runners.single()
-    assertThat(runner.name).isEqualTo("ChickenSandwich")
+    assertThat(runner.backfillName).isEqualTo("ChickenSandwich")
   }
 
   @Test
@@ -84,7 +84,7 @@ class LeaseHunterTest {
           ConfigureServiceRequest.BackfillData("ChickenSandwich", listOf(), null, null, false)),
           ServiceType.SQUARE_DC))
     }
-    scope.fakeCaller(user = "bob") {
+    scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create("deep-fryer",
           CreateBackfillRequest("ChickenSandwich"))
 
