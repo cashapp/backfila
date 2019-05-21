@@ -54,7 +54,7 @@ class GetServicesActionTest {
           ConfigureServiceRequest(listOf(), ServiceType.SQUARE_DC))
     }
     scope.fakeCaller(user="molly") {
-      assertThat(getServicesAction.services().services).containsOnly("deep-fryer", "permit")
+      assertThat(getServicesAction.services().services).containsOnly("deep-fryer", "freezer")
     }
   }
 }

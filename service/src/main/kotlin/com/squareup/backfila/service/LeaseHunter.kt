@@ -14,7 +14,8 @@ class LeaseHunter @Inject constructor(
   @BackfilaDb private val transacter: Transacter,
   private val queryFactory: Query.Factory,
   private val clock: Clock,
-  private val tokenGenerator: TokenGenerator
+  private val tokenGenerator: TokenGenerator,
+  private val backfillRunnerFactory: BackfillRunner.Factory
 ) {
   fun hunt(): Set<BackfillRunner> {
     // Hibernate prevents write races using the version column, ensuring only one transaction
@@ -33,13 +34,13 @@ class LeaseHunter @Inject constructor(
       val instance = unleasedInstances.random()
       val leaseToken = tokenGenerator.generate()
       instance.lease_token = leaseToken
-      instance.lease_expires_at = clock.instant().plus(LEASE_DURATION)
+      instance.lease_expires_at = clock.instant() + LEASE_DURATION
 
       // Only get one lease at a time to promote distribution of work and to ramp up
       // the backfill slowly.
-      setOf(BackfillRunner(
-          instance.backfill_run.registered_backfill.name,
-          instance.id,
+      setOf(backfillRunnerFactory.create(
+          session,
+          instance,
           leaseToken
       ))
     }

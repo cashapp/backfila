@@ -10,11 +10,13 @@ CREATE TABLE run_instances (
   lease_expires_at timestamp(3) NOT NULL,
 
   pkey_cursor varbinary(300) NULL DEFAULT NULL,
+  pkey_range_start varbinary(300) NULL DEFAULT NULL,
   pkey_range_end varbinary(300) NULL DEFAULT NULL,
 
   estimated_record_count bigint NULL DEFAULT NULL,
   precomputing_pkey_cursor varbinary(300) NULL DEFAULT NULL,
   computed_record_count bigint NULL DEFAULT NULL,
+  precomputing_done tinyint(1) NOT NULL,
 
   backfilled_record_count bigint NULL DEFAULT NULL,
 
