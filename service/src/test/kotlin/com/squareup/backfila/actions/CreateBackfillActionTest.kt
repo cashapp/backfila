@@ -40,7 +40,7 @@ class CreateBackfillActionTest {
 
   @Test
   fun serviceDoesntExist() {
-    scope.fakeCaller(user = "bob") {
+    scope.fakeCaller(user = "molly") {
       assertThatThrownBy {
         createBackfillAction.create("deep-fryer", CreateBackfillRequest("abc"))
       }.isInstanceOf(BadRequestException::class.java)
@@ -54,7 +54,7 @@ class CreateBackfillActionTest {
           ConfigureServiceRequest(listOf(), ServiceType.SQUARE_DC))
     }
 
-    scope.fakeCaller(user = "bob") {
+    scope.fakeCaller(user = "molly") {
       assertThatThrownBy {
         createBackfillAction.create("deep-fryer", CreateBackfillRequest("abc"))
       }.isInstanceOf(BadRequestException::class.java)
@@ -68,7 +68,7 @@ class CreateBackfillActionTest {
           ConfigureServiceRequest.BackfillData("ChickenSandwich", listOf(), null, null, false)),
           ServiceType.SQUARE_DC))
     }
-    scope.fakeCaller(user = "bob") {
+    scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create("deep-fryer",
           CreateBackfillRequest("ChickenSandwich"))
       assertThat(response.statusCode).isEqualTo(HttpURLConnection.HTTP_MOVED_TEMP)
@@ -77,7 +77,7 @@ class CreateBackfillActionTest {
         val run = queryFactory.newQuery<BackfillRunQuery>().uniqueResult(session)
         assertNotNull(run)
         assertThat(run.state).isEqualTo(BackfillState.PAUSED)
-        assertThat(run.created_by_user).isEqualTo("bob")
+        assertThat(run.created_by_user).isEqualTo("molly")
         assertThat(run.approved_by_user).isNull()
         assertThat(run.approved_at).isNull()
         assertThat(response.headers["Location"]).endsWith("/backfills/${run.id}")

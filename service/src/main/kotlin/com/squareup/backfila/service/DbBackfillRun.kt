@@ -1,5 +1,6 @@
 package com.squareup.backfila.service
 
+import com.google.api.client.repackaged.com.google.common.base.Preconditions.checkState
 import misk.hibernate.DbTimestampedEntity
 import misk.hibernate.DbUnsharded
 import misk.hibernate.Id
@@ -7,6 +8,7 @@ import misk.hibernate.JsonColumn
 import misk.hibernate.Query
 import misk.hibernate.Session
 import misk.hibernate.newQuery
+import okio.ByteString
 import java.time.Instant
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -80,7 +82,7 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
   constructor(
     service_id: Id<DbService>,
     registered_backfill_id: Id<DbRegisteredBackfill>,
-    parameter_map: Map<String, String>,
+    parameter_map: Map<String, ByteString>,
     state: BackfillState,
     created_by_user: String?,
     scan_size: Long,
@@ -89,7 +91,7 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
   ) : this() {
     this.service_id = service_id
     this.registered_backfill_id = registered_backfill_id
-    this.parameter_map = parameter_map
+    this.parameter_map = parameter_map.mapValues { (k, v) -> v.base64() }
     this.state = state
     this.created_by_user = created_by_user
     this.scan_size = scan_size
@@ -97,11 +99,24 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
     this.num_threads = num_threads
   }
 
+  fun instances(session: Session, queryFactory: Query.Factory) =
+      queryFactory.newQuery<RunInstanceQuery>()
+          .backfillRunId(id)
+          .list(session)
+
   fun setState(session: Session, queryFactory: Query.Factory, state: BackfillState) {
+    // State can't be changed after being completed.
+    checkState(this.state != BackfillState.COMPLETE)
     this.state = state
-    queryFactory.newQuery<RunInstanceQuery>()
-        .backfillRunId(id)
-        .list(session)
-        .forEach { instance -> instance.run_state = state }
+    instances(session, queryFactory)
+        .forEach { instance ->
+          if (instance.run_state != BackfillState.COMPLETE) {
+            instance.run_state = state
+          }
+        }
+  }
+
+  fun complete() {
+    this.state = BackfillState.COMPLETE
   }
 }

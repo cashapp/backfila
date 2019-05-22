@@ -7,6 +7,7 @@ import com.squareup.backfila.service.DbBackfillRun
 import com.squareup.backfila.service.DbRunInstance
 import com.squareup.backfila.service.RegisteredBackfillQuery
 import com.squareup.backfila.service.ServiceQuery
+import com.squareup.protos.backfila.clientservice.KeyRange
 import com.squareup.protos.backfila.clientservice.PrepareBackfillRequest
 import misk.MiskCaller
 import misk.exceptions.BadRequestException
@@ -27,6 +28,8 @@ import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import okhttp3.Headers
+import okio.ByteString
+import okio.ByteString.Companion.encodeUtf8
 import java.net.HttpURLConnection
 import javax.inject.Inject
 
@@ -34,12 +37,12 @@ data class CreateBackfillRequest(
   val backfill_name: String,
   // TODO move defaults to UI
   val scan_size: Long = 1000,
-  val batch_size: Long = 10000,
+  val batch_size: Long = 100,
   val num_threads: Long = 5,
   val pkey_range_start: String? = null,
   val pkey_range_end: String? = null,
   // Parameters that go to the client service.
-  val parameter_map: Map<String, String> = mapOf()
+  val parameter_map: Map<String, ByteString> = mapOf()
 )
 
 class CreateBackfillAction @Inject constructor(
@@ -85,7 +88,13 @@ class CreateBackfillAction @Inject constructor(
 
     val client = clientProvider.clientFor(service, serviceType)
     val prepareBackfillResponse =
-        client.prepareBackfill(PrepareBackfillRequest(request.backfill_name, null, listOf()))
+        client.prepareBackfill(PrepareBackfillRequest(
+            request.backfill_name,
+            KeyRange(
+                request.pkey_range_start?.encodeUtf8(),
+                request.pkey_range_end?.encodeUtf8()),
+            request.parameter_map
+        ))
     // TODO check for error and fail
     val instances = prepareBackfillResponse.instances
     if (instances.distinctBy { it.instance_name }.size != instances.size) {
@@ -111,7 +120,12 @@ class CreateBackfillAction @Inject constructor(
 
       for (instance in instances) {
         val dbRunInstance = DbRunInstance(
-            backfillRun.id, instance.instance_name, instance.backfill_range, backfillRun.state)
+            backfillRun.id,
+            instance.instance_name,
+            instance.backfill_range,
+            backfillRun.state,
+            instance.estimated_record_count
+        )
         session.save(dbRunInstance)
       }
 

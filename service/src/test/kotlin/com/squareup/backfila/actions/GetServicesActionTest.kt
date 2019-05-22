@@ -26,7 +26,7 @@ class GetServicesActionTest {
 
   @Test
   fun noServices() {
-    scope.fakeCaller(user = "bob") {
+    scope.fakeCaller(user = "molly") {
       assertThat(getServicesAction.services().services).isEmpty()
     }
   }
@@ -38,7 +38,7 @@ class GetServicesActionTest {
           ConfigureServiceRequest(listOf(), ServiceType.SQUARE_DC))
     }
 
-    scope.fakeCaller(user="bob") {
+    scope.fakeCaller(user="molly") {
       assertThat(getServicesAction.services().services).containsOnly("deep-fryer")
     }
   }
@@ -49,12 +49,12 @@ class GetServicesActionTest {
       configureServiceAction.configureService(
           ConfigureServiceRequest(listOf(), ServiceType.SQUARE_DC))
     }
-    scope.fakeCaller(service="permit") {
+    scope.fakeCaller(service="freezer") {
       configureServiceAction.configureService(
           ConfigureServiceRequest(listOf(), ServiceType.SQUARE_DC))
     }
-    scope.fakeCaller(user="bob") {
-      assertThat(getServicesAction.services().services).containsOnly("deep-fryer", "permit")
+    scope.fakeCaller(user="molly") {
+      assertThat(getServicesAction.services().services).containsOnly("deep-fryer", "freezer")
     }
   }
 }

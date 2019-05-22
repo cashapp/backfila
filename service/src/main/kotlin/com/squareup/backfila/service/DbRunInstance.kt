@@ -61,8 +61,16 @@ class DbRunInstance() : DbUnsharded<DbRunInstance>, DbTimestampedEntity {
   @Column
   lateinit var lease_expires_at: Instant
 
+  /**
+   * The primary key values only make sense in the context of the client service.
+   * We provide them to the client service when needed. We store them transparently
+   * as byte strings because they can be any type.
+   */
   @Column
   var pkey_cursor: ByteString? = null
+
+  @Column
+  var pkey_range_start: ByteString? = null
 
   @Column
   var pkey_range_end: ByteString? = null
@@ -77,6 +85,9 @@ class DbRunInstance() : DbUnsharded<DbRunInstance>, DbTimestampedEntity {
   @Column
   var precomputing_pkey_cursor: ByteString? = null
 
+  @Column(nullable = false)
+  var precomputing_done: Boolean = false
+
   /** How many records in the data set. Not correct until precomputing is done. */
   @Column
   var computed_record_count: Long? = null
@@ -88,13 +99,20 @@ class DbRunInstance() : DbUnsharded<DbRunInstance>, DbTimestampedEntity {
     backfill_run_id: Id<DbBackfillRun>,
     instance_name: String,
     backfill_range: KeyRange,
-    run_state: BackfillState
+    run_state: BackfillState,
+    estimated_record_count: Long?
   ) : this() {
     this.backfill_run_id = backfill_run_id
     this.instance_name = instance_name
-    this.pkey_cursor = backfill_range.start
+    this.pkey_range_start = backfill_range.start
     this.pkey_range_end = backfill_range.end
     this.run_state = run_state
+    this.lease_expires_at = Instant.ofEpochSecond(1L)
+    this.estimated_record_count = estimated_record_count
+  }
+
+  fun clearLease() {
+    this.lease_token = null
     this.lease_expires_at = Instant.ofEpochSecond(1L)
   }
 }

@@ -48,7 +48,7 @@ class RunnerSchedulerService @Inject constructor(
       newRunners.forEach(::addRunner)
 
       // Repeat at random intervals to reduce chance of multiple nodes racing.
-      Thread.sleep(1000L + random.nextInt(5000))
+      Thread.sleep(1000L + random.nextInt(4000))
     }
   }
 
@@ -61,11 +61,11 @@ class RunnerSchedulerService @Inject constructor(
 
     // Tell runners to clean up
     for (runner in runners) {
-      logger.info { "Stopping runner: ${runner.name}" }
+      logger.info { "Stopping runner: ${runner.backfillName}" }
       try {
         runner.stop()
       } catch (e: Exception) {
-        logger.info(e) { "Exception stopping runner: ${runner.name}" }
+        logger.info(e) { "Exception stopping runner: ${runner.backfillName}" }
       }
     }
 
@@ -79,27 +79,28 @@ class RunnerSchedulerService @Inject constructor(
       // so it should be empty after waiting for completion.
       if (runners.isNotEmpty()) {
         logger.warn {
-          "Runners not empty at shutdown, is there a bug? names: ${runners.map { it.name }}"
+          "Runners not empty at shutdown, is there a bug? names: ${runners.map { it.backfillName }}"
         }
       }
     } else {
       logger.info {
-        "Timed out waiting for runners to complete. names: ${runners.map { it.name }}"
+        "Timed out waiting for runners to complete. names: ${runners.map { it.backfillName }}"
       }
     }
   }
 
   private fun addRunner(runner: BackfillRunner) {
-    logger.info { "Leased backfill: ${runner.name}" }
+    logger.info { "Leased backfill: ${runner.backfillName}" }
     runners.add(runner)
     runnerExecutorService.submit {
       try {
-        runner.work()
-      } catch (e: Exception) {
-        logger.info(e) { "Runner had uncaught exception: ${runner.name}" }
+        runner.run()
+      } catch (e: Throwable) {
+        logger.info(e) { "Runner had uncaught exception: ${runner.backfillName}" }
+      } finally {
+        runners.remove(runner)
+        logger.info { "Runner removed: ${runner.backfillName}" }
       }
-      runners.remove(runner)
-      logger.info { "Runner removed: ${runner.name}" }
     }
   }
 
