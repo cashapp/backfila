@@ -1,4 +1,4 @@
-package com.squareup.cash.backfila.client;
+package com.squareup.backfila.client;
 
 public interface BackfilaClient {
   void configureService(/*TODO*/);

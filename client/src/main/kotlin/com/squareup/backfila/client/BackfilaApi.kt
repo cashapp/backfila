@@ -1,4 +1,4 @@
-package com.squareup.cash.backfila.client
+package com.squareup.backfila.client
 
 import com.squareup.protos.backfila.service.ConfigureServiceRequest
 import com.squareup.protos.backfila.service.ConfigureServiceResponse
