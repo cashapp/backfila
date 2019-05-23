@@ -13,7 +13,7 @@ import retrofit2.http.POST
 
 // Methods implemented by the client service library that backfila calls out to.
 interface BackfilaClientServiceSquareDcApi {
-  @POST("/prepare_backfill")
+  @POST("$BASE_PATH/prepare_backfill")
   @Headers(value = [
     "Accept: application/x-protobuf",
     "Content-Type: application/x-protobuf"
@@ -22,7 +22,7 @@ interface BackfilaClientServiceSquareDcApi {
     @Body request: PrepareBackfillRequest
   ): Call<PrepareBackfillResponse>
 
-  @POST("/get_next_batch_range")
+  @POST("$BASE_PATH/get_next_batch_range")
   @Headers(value = [
     "Accept: application/x-protobuf",
     "Content-Type: application/x-protobuf"
@@ -31,7 +31,7 @@ interface BackfilaClientServiceSquareDcApi {
     @Body request: GetNextBatchRangeRequest
   ): Call<GetNextBatchRangeResponse>
 
-  @POST("/run_batch")
+  @POST("$BASE_PATH/run_batch")
   @Headers(value = [
     "Accept: application/x-protobuf",
     "Content-Type: application/x-protobuf"
