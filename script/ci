@@ -3,5 +3,4 @@
 set -euxo pipefail
 
 git clone ssh://git@git.sqcorp.co/cash/cash-ci.git
-# TODO(rhall): backfila should have a client jar
-./cash-ci/cash-service-ci -s backfila -c
+./cash-ci/cash-service-ci -s backfila
