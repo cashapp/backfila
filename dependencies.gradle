@@ -62,7 +62,7 @@ ext.dep = [
   "logbackJsonCore": "ch.qos.logback.contrib:logback-json-core:0.1.5",
   "loggingApi": "io.github.microutils:kotlin-logging:1.4.9",
   "loggingImpl": "org.apache.logging.log4j:log4j-slf4j-impl:2.10.0",
-  "mavenPublishGradlePlugin": "com.vanniktech:gradle-maven-publish-plugin:0.2.0",
+  "mavenPublishGradlePlugin": "com.vanniktech:gradle-maven-publish-plugin:0.8.0",
   "metricsCore": "io.dropwizard.metrics:metrics-core:4.0.1",
   "metricsParent": "io.dropwizard.metrics:metrics-parent:4.0.1",
   "misk": "com.squareup.misk:misk:2019.05.24-5435bb6b",
