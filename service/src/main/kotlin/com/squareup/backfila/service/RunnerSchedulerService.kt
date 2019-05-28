@@ -3,10 +3,6 @@ package com.squareup.backfila.service
 import com.google.common.collect.Sets
 import com.google.common.util.concurrent.AbstractExecutionThreadService
 import com.google.common.util.concurrent.ListeningExecutorService
-import com.google.inject.Key
-import misk.DependentService
-import misk.hibernate.SchemaMigratorService
-import misk.inject.toKey
 import misk.logging.getLogger
 import java.util.Random
 import java.util.concurrent.TimeUnit
@@ -23,11 +19,7 @@ import javax.inject.Singleton
 class RunnerSchedulerService @Inject constructor(
   @ForBackfilaScheduler private val runnerExecutorService: ListeningExecutorService,
   private val leaseHunter: LeaseHunter
-) : AbstractExecutionThreadService(), DependentService {
-  override val consumedKeys: Set<Key<*>> = setOf(
-      SchemaMigratorService::class.toKey(BackfilaDb::class))
-  override val producedKeys: Set<Key<*>> = setOf(Key.get(RunnerSchedulerService::class.java))
-
+) : AbstractExecutionThreadService() {
   /**
    * List of runners maintained so we can tell them to shut down.
    * Added to by the service thread, removed from by the executor threads.
