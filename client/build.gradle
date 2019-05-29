@@ -3,6 +3,11 @@ apply plugin: 'org.junit.platform.gradle.plugin'
 
 apply from: "https://git.sqcorp.co/projects/CASH/repos/cash-upload/raw/common-upload.gradle?at=refs%2Fheads%2Fmaster"
 
+compileJava {
+  targetCompatibility = "8"
+  sourceCompatibility = "8"
+}
+
 compileKotlin {
   kotlinOptions {
     jvmTarget = "1.8"
