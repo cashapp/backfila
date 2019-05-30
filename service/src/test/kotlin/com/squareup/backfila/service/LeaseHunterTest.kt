@@ -65,13 +65,12 @@ class LeaseHunterTest {
           ConfigureServiceRequest.BackfillData("ChickenSandwich", listOf(), null, null, false)),
           ServiceType.SQUARE_DC))
     }
-    val id = scope.fakeCaller(user = "molly") {
+    scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create("deep-fryer",
           CreateBackfillRequest("ChickenSandwich"))
 
       val id = response.headers["Location"]!!.substringAfterLast("/").toLong()
       startBackfillAction.start(id, StartBackfillRequest())
-      id
     }
 
     var runners = leaseHunter.hunt()

@@ -129,6 +129,8 @@ class BackfillRunner private constructor(
     factory.transacter.transaction { session ->
       val dbRunInstance = session.load(instanceId)
       dbRunInstance.pkey_cursor = batch.batch_range.end
+      dbRunInstance.backfilled_scanned_record_count += batch.scanned_record_count
+      dbRunInstance.backfilled_matching_record_count += batch.matching_record_count
     }
   }
 

@@ -15,10 +15,12 @@ CREATE TABLE run_instances (
 
   estimated_record_count bigint NULL DEFAULT NULL,
   precomputing_pkey_cursor varbinary(300) NULL DEFAULT NULL,
-  computed_record_count bigint NULL DEFAULT NULL,
-  precomputing_done tinyint(1) NOT NULL,
+  computed_scanned_record_count bigint NOT NULL DEFAULT 0,
+  computed_matching_record_count bigint NOT NULL DEFAULT 0,
+  precomputing_done tinyint(1) NOT NULL DEFAULT 0,
 
-  backfilled_record_count bigint NULL DEFAULT NULL,
+  backfilled_scanned_record_count bigint NOT NULL DEFAULT 0,
+  backfilled_matching_record_count bigint NOT NULL DEFAULT 0,
 
   UNIQUE KEY `unq_backfill_run_id_instance_name` (backfill_run_id, instance_name),
   KEY `idx_run_state_lease_expires_at` (run_state, lease_expires_at)
