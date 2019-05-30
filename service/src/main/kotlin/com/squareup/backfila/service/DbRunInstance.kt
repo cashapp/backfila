@@ -58,7 +58,7 @@ class DbRunInstance() : DbUnsharded<DbRunInstance>, DbTimestampedEntity {
   @Column
   var lease_token: String? = null
 
-  @Column
+  @Column(nullable = false)
   lateinit var lease_expires_at: Instant
 
   /**
