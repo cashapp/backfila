@@ -88,12 +88,25 @@ class DbRunInstance() : DbUnsharded<DbRunInstance>, DbTimestampedEntity {
   @Column(nullable = false)
   var precomputing_done: Boolean = false
 
-  /** How many records in the data set. Not correct until precomputing is done. */
+  /**
+   * How many records in the data set.
+   * Not correct until precomputing is done.
+   */
   @Column
-  var computed_record_count: Long? = null
+  var computed_scanned_record_count: Long = 0
+
+  /**
+   * How many records in the data set that match the criteria and will be backfilled.
+   * Not correct until precomputing is done.
+   */
+  @Column
+  var computed_matching_record_count: Long = 0
 
   @Column
-  var backfilled_record_count: Long? = null
+  var backfilled_scanned_record_count: Long = 0
+
+  @Column
+  var backfilled_matching_record_count: Long = 0
 
   constructor(
     backfill_run_id: Id<DbBackfillRun>,

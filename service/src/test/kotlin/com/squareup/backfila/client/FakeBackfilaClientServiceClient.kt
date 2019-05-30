@@ -53,8 +53,8 @@ internal class FakeBackfilaClientServiceClient : BackfilaClientServiceClient {
     return Futures.immediateFuture(GetNextBatchRangeResponse(
         listOf(GetNextBatchRangeResponse.Batch(
             KeyRange(nextStart.toString().encodeUtf8(), nextEnd.toString().encodeUtf8()),
-            request.batch_size,
-            request.batch_size
+            nextEnd - nextStart + 1,
+            nextEnd - nextStart + 1
         ))
     ))
   }
