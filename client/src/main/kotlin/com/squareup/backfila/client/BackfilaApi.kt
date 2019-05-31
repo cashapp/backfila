@@ -10,8 +10,8 @@ import retrofit2.http.POST
 interface BackfilaApi {
   @POST("/configure_service")
   @Headers(value = [
-    "Accept: application/json",
-    "Content-Type: application/json"
+    "Accept: application/x-protobuf",
+    "Content-Type: application/x-protobuf"
   ])
   fun configureService(
     @Body request: ConfigureServiceRequest
