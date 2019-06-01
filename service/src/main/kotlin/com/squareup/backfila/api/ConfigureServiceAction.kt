@@ -64,7 +64,7 @@ class ConfigureServiceAction @Inject constructor(
             backfill.parameter_names,
             backfill.type_provided,
             backfill.type_consumed,
-            backfill.requires_approval
+            backfill.requires_approval == true
         )
         var save = false
         if (existingBackfill != null) {
