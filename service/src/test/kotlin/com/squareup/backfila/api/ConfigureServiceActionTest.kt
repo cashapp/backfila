@@ -40,7 +40,7 @@ class ConfigureServiceActionTest {
       assertThat(backfillNames("deep-fryer")).isEmpty()
 
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
-          ConfigureServiceRequest.BackfillData("xyz", listOf(), null, null, false)),
+          ConfigureServiceRequest.BackfillData("xyz", listOf(), null, null, null)),
           ServiceType.SQUARE_DC))
       assertThat(backfillNames("deep-fryer")).containsOnly("xyz")
       assertThat(deletedBackfillNames("deep-fryer")).isEmpty()
