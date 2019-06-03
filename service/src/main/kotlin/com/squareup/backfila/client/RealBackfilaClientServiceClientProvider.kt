@@ -6,6 +6,7 @@ import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientEnvoyConfig
 import misk.client.HttpClientFactory
 import retrofit2.Retrofit
+import retrofit2.converter.wire.WireConverterFactory
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -25,6 +26,7 @@ class RealBackfilaClientServiceClientProvider @Inject constructor(
     val retrofit = Retrofit.Builder()
         .baseUrl(baseUrl)
         .client(okHttpClient)
+        .addConverterFactory(WireConverterFactory.create())
 //        .addCallAdapterFactory(GuavaCallAdapterFactory())
         .build()
     val api = retrofit.create(BackfilaClientServiceSquareDcApi::class.java)
