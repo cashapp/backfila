@@ -31,7 +31,7 @@ internal class BackfilaTestingModule : KAbstractModule() {
     install(LogCollectorModule())
     install(MiskTestingServiceModule())
 
-    install(HibernateTestingModule(BackfilaDb::class, disableCrossShardQueryDetector = false))
+    install(HibernateTestingModule(BackfilaDb::class))
     install(BackfilaPersistenceModule(config))
 
     install(DashboardWebActionsModule())
