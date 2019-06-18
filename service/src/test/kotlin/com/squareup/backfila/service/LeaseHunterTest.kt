@@ -10,7 +10,7 @@ import com.squareup.backfila.dashboard.StartBackfillRequest
 import com.squareup.backfila.dashboard.StopBackfillAction
 import com.squareup.backfila.fakeCaller
 import com.squareup.protos.backfila.service.ConfigureServiceRequest
-import com.squareup.protos.backfila.service.ServiceType
+import com.squareup.protos.backfila.service.Connector
 import misk.hibernate.Query
 import misk.hibernate.Transacter
 import misk.hibernate.load
@@ -48,8 +48,8 @@ class LeaseHunterTest {
   fun pausedBackfillNotLeased() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
-          ConfigureServiceRequest.BackfillData("ChickenSandwich", listOf(), null, null, false)),
-          ServiceType.SQUARE_DC))
+          ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null, null, false)),
+          Connector.ENVOY, null))
     }
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create("deep-fryer",
@@ -62,8 +62,8 @@ class LeaseHunterTest {
   fun runningBackfillLeased() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
-          ConfigureServiceRequest.BackfillData("ChickenSandwich", listOf(), null, null, false)),
-          ServiceType.SQUARE_DC))
+          ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null, null, false)),
+          Connector.ENVOY, null))
     }
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create("deep-fryer",
@@ -147,8 +147,8 @@ class LeaseHunterTest {
   fun activeLeaseNotStolen() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
-          ConfigureServiceRequest.BackfillData("ChickenSandwich", listOf(), null, null, false)),
-          ServiceType.SQUARE_DC))
+          ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null, null, false)),
+          Connector.ENVOY, null))
     }
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create("deep-fryer",

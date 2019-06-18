@@ -6,7 +6,7 @@ import com.squareup.backfila.api.ConfigureServiceAction
 import com.squareup.backfila.dashboard.GetServicesAction
 import com.squareup.backfila.fakeCaller
 import com.squareup.protos.backfila.service.ConfigureServiceRequest
-import com.squareup.protos.backfila.service.ServiceType
+import com.squareup.protos.backfila.service.Connector
 import misk.scope.ActionScope
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -35,7 +35,7 @@ class GetServicesActionTest {
   fun oneService() {
     scope.fakeCaller(service="deep-fryer") {
       configureServiceAction.configureService(
-          ConfigureServiceRequest(listOf(), ServiceType.SQUARE_DC))
+          ConfigureServiceRequest(listOf(), Connector.ENVOY, null))
     }
 
     scope.fakeCaller(user="molly") {
@@ -47,11 +47,11 @@ class GetServicesActionTest {
   fun twoServices() {
     scope.fakeCaller(service="deep-fryer") {
       configureServiceAction.configureService(
-          ConfigureServiceRequest(listOf(), ServiceType.SQUARE_DC))
+          ConfigureServiceRequest(listOf(), Connector.ENVOY, null))
     }
     scope.fakeCaller(service="freezer") {
       configureServiceAction.configureService(
-          ConfigureServiceRequest(listOf(), ServiceType.SQUARE_DC))
+          ConfigureServiceRequest(listOf(), Connector.ENVOY, null))
     }
     scope.fakeCaller(user="molly") {
       assertThat(getServicesAction.services().services).containsOnly("deep-fryer", "freezer")

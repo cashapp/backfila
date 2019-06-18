@@ -7,7 +7,8 @@ import com.squareup.backfila.service.BackfilaDb
 import com.squareup.backfila.service.RegisteredBackfillQuery
 import com.squareup.backfila.service.ServiceQuery
 import com.squareup.protos.backfila.service.ConfigureServiceRequest
-import com.squareup.protos.backfila.service.ServiceType
+import com.squareup.protos.backfila.service.Connector
+import com.squareup.protos.backfila.service.Parameter
 import misk.hibernate.Query
 import misk.hibernate.Transacter
 import misk.hibernate.newQuery
@@ -36,19 +37,19 @@ class ConfigureServiceActionTest {
   fun configureServiceSyncsBackfills() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(
-          ConfigureServiceRequest(listOf(), ServiceType.SQUARE_DC))
+          ConfigureServiceRequest(listOf(), Connector.ENVOY, null))
       assertThat(backfillNames("deep-fryer")).isEmpty()
 
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
-          ConfigureServiceRequest.BackfillData("xyz", listOf(), null, null, null)),
-          ServiceType.SQUARE_DC))
+          ConfigureServiceRequest.BackfillData("xyz", "Description", listOf(), null, null, null)),
+          Connector.ENVOY, null))
       assertThat(backfillNames("deep-fryer")).containsOnly("xyz")
       assertThat(deletedBackfillNames("deep-fryer")).isEmpty()
 
       configureServiceAction.configureService(
           ConfigureServiceRequest(
-              listOf(ConfigureServiceRequest.BackfillData("zzz", listOf(), null, null, false)),
-              ServiceType.SQUARE_DC))
+              listOf(ConfigureServiceRequest.BackfillData("zzz", "Description", listOf(), null, null, false)),
+              Connector.ENVOY, null))
       assertThat(backfillNames("deep-fryer")).containsOnly("zzz")
       assertThat(deletedBackfillNames("deep-fryer")).containsOnly("xyz")
     }
@@ -58,16 +59,16 @@ class ConfigureServiceActionTest {
   fun deleteOneOfTwo() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
-          ConfigureServiceRequest.BackfillData("xyz", listOf(), null, null, false),
-          ConfigureServiceRequest.BackfillData("zzz", listOf(), null, null, false)),
-          ServiceType.SQUARE_DC))
+          ConfigureServiceRequest.BackfillData("xyz", "Description", listOf(), null, null, false),
+          ConfigureServiceRequest.BackfillData("zzz", "Description", listOf(), null, null, false)),
+          Connector.ENVOY, null))
       assertThat(backfillNames("deep-fryer")).containsOnly("xyz", "zzz")
       assertThat(deletedBackfillNames("deep-fryer")).isEmpty()
 
       configureServiceAction.configureService(
           ConfigureServiceRequest(
-              listOf(ConfigureServiceRequest.BackfillData("zzz", listOf(), null, null, false)),
-              ServiceType.SQUARE_DC))
+              listOf(ConfigureServiceRequest.BackfillData("zzz", "Description", listOf(), null, null, false)),
+              Connector.ENVOY, null))
       assertThat(backfillNames("deep-fryer")).containsOnly("zzz")
       assertThat(deletedBackfillNames("deep-fryer")).containsOnly("xyz")
     }
@@ -77,26 +78,26 @@ class ConfigureServiceActionTest {
   fun reintroduceBackfill() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(
-          ConfigureServiceRequest(listOf(), ServiceType.SQUARE_DC))
+          ConfigureServiceRequest(listOf(), Connector.ENVOY, null))
       assertThat(backfillNames("deep-fryer")).isEmpty()
 
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
-          ConfigureServiceRequest.BackfillData("xyz", listOf(), null, null, false)),
-          ServiceType.SQUARE_DC))
+          ConfigureServiceRequest.BackfillData("xyz", "Description", listOf(), null, null, false)),
+          Connector.ENVOY, null))
       assertThat(backfillNames("deep-fryer")).containsOnly("xyz")
       assertThat(deletedBackfillNames("deep-fryer")).isEmpty()
 
       configureServiceAction.configureService(
           ConfigureServiceRequest(
               listOf(),
-              ServiceType.SQUARE_DC))
+              Connector.ENVOY, null))
       assertThat(backfillNames("deep-fryer")).isEmpty()
       assertThat(deletedBackfillNames("deep-fryer")).containsOnly("xyz")
 
       configureServiceAction.configureService(
           ConfigureServiceRequest(
-              listOf(ConfigureServiceRequest.BackfillData("xyz", listOf(), null, null, false)),
-              ServiceType.SQUARE_DC))
+              listOf(ConfigureServiceRequest.BackfillData("xyz", "Description", listOf(), null, null, false)),
+              Connector.ENVOY, null))
       // The reintroduced backfill is created, and the old one kept around.
       assertThat(backfillNames("deep-fryer")).containsOnly("xyz")
       assertThat(deletedBackfillNames("deep-fryer")).containsOnly("xyz")
@@ -108,20 +109,20 @@ class ConfigureServiceActionTest {
     scope.fakeCaller(service = "deep-fryer") {
       // Going back and forth between approval required creates new registered backfills.
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
-          ConfigureServiceRequest.BackfillData("xyz", listOf(), null, null, false)),
-          ServiceType.SQUARE_DC))
+          ConfigureServiceRequest.BackfillData("xyz", "Description", listOf(), null, null, false)),
+          Connector.ENVOY, null))
       assertThat(backfillNames("deep-fryer")).containsOnly("xyz")
       assertThat(deletedBackfillNames("deep-fryer")).isEmpty()
 
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
-          ConfigureServiceRequest.BackfillData("xyz", listOf(), null, null, true)),
-          ServiceType.SQUARE_DC))
+          ConfigureServiceRequest.BackfillData("xyz", "Description", listOf(), null, null, true)),
+          Connector.ENVOY, null))
       assertThat(backfillNames("deep-fryer")).containsOnly("xyz")
       assertThat(deletedBackfillNames("deep-fryer")).containsOnly("xyz")
 
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
-          ConfigureServiceRequest.BackfillData("xyz", listOf(), null, null, false)),
-          ServiceType.SQUARE_DC))
+          ConfigureServiceRequest.BackfillData("xyz", "Description", listOf(), null, null, false)),
+          Connector.ENVOY, null))
       val backfills = backfills("deep-fryer")
       assertThat(backfills).containsOnly(
           Backfill("xyz", clock.instant(), type_provided = null, type_consumed = null,
@@ -138,11 +139,13 @@ class ConfigureServiceActionTest {
   fun modifyParams() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
-          ConfigureServiceRequest.BackfillData("xyz", listOf(), null, null, false)),
-          ServiceType.SQUARE_DC))
+          ConfigureServiceRequest.BackfillData("xyz", "Description", listOf(), null, null, false)),
+          Connector.ENVOY, null))
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
-          ConfigureServiceRequest.BackfillData("xyz", listOf("abc"), null, null, false)),
-          ServiceType.SQUARE_DC))
+          ConfigureServiceRequest.BackfillData("xyz", "Description",
+              listOf(Parameter.Builder().name("abc").build()),
+              null, null, false)),
+          Connector.ENVOY, null))
       val backfills = backfills("deep-fryer")
       assertThat(backfills).containsOnly(
           Backfill("xyz", clock.instant(), type_provided = null, type_consumed = null,
@@ -157,11 +160,11 @@ class ConfigureServiceActionTest {
   fun modifyTypeProvided() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
-          ConfigureServiceRequest.BackfillData("xyz", listOf(), "String", null, false)),
-          ServiceType.SQUARE_DC))
+          ConfigureServiceRequest.BackfillData("xyz", "Description", listOf(), "String", null, false)),
+          Connector.ENVOY, null))
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
-          ConfigureServiceRequest.BackfillData("xyz", listOf(), "Int", null, false)),
-          ServiceType.SQUARE_DC))
+          ConfigureServiceRequest.BackfillData("xyz", "Description", listOf(), "Int", null, false)),
+          Connector.ENVOY, null))
       val backfills = backfills("deep-fryer")
       assertThat(backfills).containsOnly(
           Backfill("xyz", clock.instant(), type_provided = "String", type_consumed = null,
@@ -176,11 +179,11 @@ class ConfigureServiceActionTest {
   fun modifyTypeConsumed() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
-          ConfigureServiceRequest.BackfillData("xyz", listOf(), null, "String", false)),
-          ServiceType.SQUARE_DC))
+          ConfigureServiceRequest.BackfillData("xyz", "Description", listOf(), null, "String", false)),
+          Connector.ENVOY, null))
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
-          ConfigureServiceRequest.BackfillData("xyz", listOf(), null, "Int", false)),
-          ServiceType.SQUARE_DC))
+          ConfigureServiceRequest.BackfillData("xyz", "Description", listOf(), null, "Int", false)),
+          Connector.ENVOY, null))
       val backfills = backfills("deep-fryer")
       assertThat(backfills).containsOnly(
           Backfill("xyz", clock.instant(), type_provided = null, type_consumed = "String",
@@ -195,11 +198,11 @@ class ConfigureServiceActionTest {
   fun unchangedBackfillNotDuplicated() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
-          ConfigureServiceRequest.BackfillData("xyz", listOf(), null, "String", false)),
-          ServiceType.SQUARE_DC))
+          ConfigureServiceRequest.BackfillData("xyz", "Description", listOf(), null, "String", false)),
+          Connector.ENVOY, null))
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
-          ConfigureServiceRequest.BackfillData("xyz", listOf(), null, "String", false)),
-          ServiceType.SQUARE_DC))
+          ConfigureServiceRequest.BackfillData("xyz", "Description", listOf(), null, "String", false)),
+          Connector.ENVOY, null))
       val backfills = backfills("deep-fryer")
       assertThat(backfills).containsOnly(
           Backfill("xyz", deleted_in_service_at = null, type_provided = null,

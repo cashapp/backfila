@@ -15,7 +15,7 @@ import com.squareup.backfila.service.BackfillState
 import com.squareup.backfila.service.DbBackfillRun
 import com.squareup.backfila.service.RunInstanceQuery
 import com.squareup.protos.backfila.service.ConfigureServiceRequest
-import com.squareup.protos.backfila.service.ServiceType
+import com.squareup.protos.backfila.service.Connector
 import misk.exceptions.BadRequestException
 import misk.hibernate.Id
 import misk.hibernate.Query
@@ -49,8 +49,8 @@ class StartStopBackfillActionTest {
   fun startAndStop() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
-          ConfigureServiceRequest.BackfillData("ChickenSandwich", listOf(), null, null, false)),
-          ServiceType.SQUARE_DC))
+          ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null, null, false)),
+          Connector.ENVOY, null))
     }
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create("deep-fryer",
@@ -86,8 +86,8 @@ class StartStopBackfillActionTest {
   fun backfillDoesntExist() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
-          ConfigureServiceRequest.BackfillData("ChickenSandwich", listOf(), null, null, false)),
-          ServiceType.SQUARE_DC))
+          ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null, null, false)),
+          Connector.ENVOY, null))
     }
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create("deep-fryer",
@@ -104,8 +104,8 @@ class StartStopBackfillActionTest {
   fun cantStartRunningBackfill() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
-          ConfigureServiceRequest.BackfillData("ChickenSandwich", listOf(), null, null, false)),
-          ServiceType.SQUARE_DC))
+          ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null, null, false)),
+          Connector.ENVOY, null))
     }
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create("deep-fryer",
@@ -129,8 +129,8 @@ class StartStopBackfillActionTest {
   fun cantStopPausedBackfill() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
-          ConfigureServiceRequest.BackfillData("ChickenSandwich", listOf(), null, null, false)),
-          ServiceType.SQUARE_DC))
+          ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null, null, false)),
+          Connector.ENVOY, null))
     }
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create("deep-fryer",
@@ -146,8 +146,8 @@ class StartStopBackfillActionTest {
   fun cantToggleCompletedBackfill() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
-          ConfigureServiceRequest.BackfillData("ChickenSandwich", listOf(), null, null, false)),
-          ServiceType.SQUARE_DC))
+          ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null, null, false)),
+          Connector.ENVOY, null))
     }
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create("deep-fryer",

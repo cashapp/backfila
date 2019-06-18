@@ -44,7 +44,7 @@ class BackfillRunner private constructor(
 
   @VisibleForTesting
   fun work() {
-    val (serviceName, serviceType) = factory.transacter.transaction { session ->
+    val (serviceName, connector) = factory.transacter.transaction { session ->
       val dbRunInstance = session.load(instanceId)
       val service = dbRunInstance.backfill_run.registered_backfill.service
 
@@ -53,7 +53,7 @@ class BackfillRunner private constructor(
         logger.info {
           "Backfill is no longer running, stopping runner for $backfillName::$instanceName"
         }
-        return@transaction Pair(service.registry_name, service.service_type)
+        return@transaction Pair(service.registry_name, service.connector)
       }
       if (dbRunInstance.lease_token != leaseToken) {
         throw IllegalStateException("Backfill instance $instanceId has been stolen! " +
@@ -62,34 +62,38 @@ class BackfillRunner private constructor(
       // Extend our lease before doing long work
       dbRunInstance.lease_expires_at = factory.clock.instant() + LeaseHunter.LEASE_DURATION
 
-      Pair(service.registry_name, service.service_type)
+      Pair(service.registry_name, service.connector)
     }
 
     if (!running) {
       return
     }
 
-    val client = factory.clientProvider.clientFor(serviceName, serviceType)
+    val client = factory.clientProvider.clientFor(serviceName, connector)
 
     data class BackfillData(
+      val backfillRunId: Id<DbBackfillRun>,
       val pkeyCursor: ByteString?,
       val pkeyStart: ByteString?,
       val pkeyEnd: ByteString?,
       val parameters: Map<String, ByteString>?,
       val batchSize: Long,
-      val scanSize: Long
+      val scanSize: Long,
+      val dryRun: Boolean
     )
 
     val data = factory.transacter.transaction { session ->
       val dbRunInstance = session.load(instanceId)
 
       BackfillData(
+          dbRunInstance.backfill_run_id,
           dbRunInstance.pkey_cursor,
           dbRunInstance.pkey_range_start,
           dbRunInstance.pkey_range_end,
           dbRunInstance.backfill_run.parameter_map?.mapValues { (k, v) -> v.decodeBase64()!! },
           dbRunInstance.backfill_run.batch_size,
-          dbRunInstance.backfill_run.scan_size
+          dbRunInstance.backfill_run.scan_size,
+          dbRunInstance.backfill_run.dry_run
       )
     }
 
@@ -97,6 +101,7 @@ class BackfillRunner private constructor(
     val computeCountLimit = 1L
     // TODO handle rpc error
     val nextBatchRange = client.getNextBatchRange(GetNextBatchRangeRequest(
+        data.backfillRunId.toString(),
         backfillName,
         instanceName,
         data.batchSize,
@@ -118,14 +123,18 @@ class BackfillRunner private constructor(
       return
     }
     val batch = nextBatchRange.get().batches.first()
-    // TODO check for response error
-    val runBatchResponse = client.runBatch(RunBatchRequest(
-        backfillName,
-        instanceName,
-        batch.batch_range,
-        data.parameters,
-        null
-    )).get()
+    if (batch.matching_record_count != 0L) {
+      // TODO check for response error
+      val runBatchResponse = client.runBatch(RunBatchRequest(
+          data.backfillRunId.toString(),
+          backfillName,
+          instanceName,
+          batch.batch_range,
+          data.parameters,
+          data.dryRun,
+          null // TODO
+      )).get()
+    }
     factory.transacter.transaction { session ->
       val dbRunInstance = session.load(instanceId)
       dbRunInstance.pkey_cursor = batch.batch_range.end

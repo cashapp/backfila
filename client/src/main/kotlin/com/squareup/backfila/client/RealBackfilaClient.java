@@ -3,7 +3,7 @@ package com.squareup.backfila.client;
 import com.squareup.moshi.Moshi;
 import com.squareup.protos.backfila.service.ConfigureServiceRequest;
 import com.squareup.protos.backfila.service.ConfigureServiceResponse;
-import com.squareup.protos.backfila.service.ServiceType;
+import com.squareup.protos.backfila.service.Connector;
 import com.squareup.wire.WireJsonAdapterFactory;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -32,16 +32,16 @@ public class RealBackfilaClient implements BackfilaClient {
 
   @Override public void configureService() {
     ConfigureServiceRequest request = new ConfigureServiceRequest.Builder()
-        .service_type(ServiceType.CLOUD)
+        .connector(Connector.ENVOY)
         .backfills(Collections.emptyList())
         .build();
 
-      try {
-        Response<ConfigureServiceResponse> response =
-            backfilaApi.configureService(request).execute();
-        checkState(response.isSuccessful());
-      } catch (IOException e) {
-        throw new UncheckedIOException(e);
-      }
+    try {
+      Response<ConfigureServiceResponse> response =
+          backfilaApi.configureService(request).execute();
+      checkState(response.isSuccessful());
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 }

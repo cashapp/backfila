@@ -42,7 +42,8 @@ data class CreateBackfillRequest(
   val pkey_range_start: String? = null,
   val pkey_range_end: String? = null,
   // Parameters that go to the client service.
-  val parameter_map: Map<String, ByteString> = mapOf()
+  val parameter_map: Map<String, ByteString> = mapOf(),
+  val dry_run: Boolean = false
 )
 
 class CreateBackfillAction @Inject constructor(
@@ -52,7 +53,7 @@ class CreateBackfillAction @Inject constructor(
   private val clientProvider: BackfilaClientServiceClientProvider
 ) : WebAction {
 
-  @Post("/{service}/create")
+  @Post("/services/{service}/create")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   // TODO allow any user
@@ -63,13 +64,15 @@ class CreateBackfillAction @Inject constructor(
   ): Response<ResponseBody> {
     // TODO check user has permissions for this service with `X-Forwarded-All-Capabilities` header
 
+    // TODO validate scan_size > batch_size
+
     logger.info { "Create backfill for $service by ${caller.get()?.user}" }
 
-    val (serviceId, serviceType) = transacter.transaction { session ->
+    val (serviceId, connector) = transacter.transaction { session ->
       val dbService = queryFactory.newQuery<ServiceQuery>()
           .registryName(service)
           .uniqueResult(session) ?: throw BadRequestException("`$service` doesn't exist")
-      Pair(dbService.id, dbService.service_type)
+      Pair(dbService.id, dbService.connector)
     }
 
     val registeredBackfillId = transacter.transaction { session ->
@@ -86,9 +89,10 @@ class CreateBackfillAction @Inject constructor(
       registeredBackfill.id
     }
 
-    val client = clientProvider.clientFor(service, serviceType)
+    val client = clientProvider.clientFor(service, connector)
     val prepareBackfillResponse =
         client.prepareBackfill(PrepareBackfillRequest(
+            registeredBackfillId.toString(),
             request.backfill_name,
             KeyRange(
                 request.pkey_range_start?.encodeUtf8(),
@@ -97,6 +101,9 @@ class CreateBackfillAction @Inject constructor(
         ))
     // TODO check for error and fail
     val instances = prepareBackfillResponse.instances
+    if (instances.isEmpty()) {
+      throw BadRequestException("PrepareBackfill returned no instances")
+    }
     if (instances.distinctBy { it.instance_name }.size != instances.size) {
       throw BadRequestException("PrepareBackfill did not return distinct instance names:" +
           " ${instances.map { it.instance_name }}")
