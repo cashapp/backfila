@@ -14,7 +14,7 @@ import javax.inject.Singleton
 class RealBackfilaClientServiceClientProvider @Inject constructor(
   private val httpClientFactory: HttpClientFactory,
   private val httpClientConfigUrlProvider: HttpClientConfigUrlProvider
-) : BackfilaClientServiceClientProvider{
+) : BackfilaClientServiceClientProvider {
   override fun clientFor(serviceName: String, connector: Connector): BackfilaClientServiceClient {
     // TODO http client caching
     // TODO use connector type

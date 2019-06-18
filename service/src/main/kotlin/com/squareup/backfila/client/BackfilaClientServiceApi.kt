@@ -40,7 +40,6 @@ interface BackfilaClientServiceSquareDcApi {
     @Body request: RunBatchRequest
   ): Call<RunBatchResponse>
 
-
   // TODO figure out if we're using service container routing or plain http or grpc
   companion object {
     private const val BASE_PATH = "/services/squareup.backfila.clientservice.BackfilaClientService"
