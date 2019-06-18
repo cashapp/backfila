@@ -19,7 +19,7 @@ internal class InjectorTest {
     test(Environment.PRODUCTION)
   }
 
-  private fun test(env : Environment) {
+  private fun test(env: Environment) {
     ServiceBuilder.getTestVerifier("backfila", env, ::applicationModules).verify()
   }
 }

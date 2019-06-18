@@ -33,27 +33,27 @@ class GetServicesActionTest {
 
   @Test
   fun oneService() {
-    scope.fakeCaller(service="deep-fryer") {
+    scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(
           ConfigureServiceRequest(listOf(), Connector.ENVOY, null))
     }
 
-    scope.fakeCaller(user="molly") {
+    scope.fakeCaller(user = "molly") {
       assertThat(getServicesAction.services().services).containsOnly("deep-fryer")
     }
   }
 
   @Test
   fun twoServices() {
-    scope.fakeCaller(service="deep-fryer") {
+    scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(
           ConfigureServiceRequest(listOf(), Connector.ENVOY, null))
     }
-    scope.fakeCaller(service="freezer") {
+    scope.fakeCaller(service = "freezer") {
       configureServiceAction.configureService(
           ConfigureServiceRequest(listOf(), Connector.ENVOY, null))
     }
-    scope.fakeCaller(user="molly") {
+    scope.fakeCaller(user = "molly") {
       assertThat(getServicesAction.services().services).containsOnly("deep-fryer", "freezer")
     }
   }

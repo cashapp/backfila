@@ -1,5 +1,15 @@
 apply from: new File("./dependencies.gradle")
 
+buildscript {
+  repositories {
+    maven {
+      url "https://maven.global.square/artifactory/square-public"
+    }
+    mavenCentral()
+    jcenter()
+  }
+}
+
 subprojects {
   buildscript {
     repositories {
@@ -16,6 +26,7 @@ subprojects {
       classpath dep.junitGradlePlugin
       classpath dep.shadowJarPlugin
       classpath dep.mavenPublishGradlePlugin
+      classpath dep.spotlessPlugin
     }
   }
 
