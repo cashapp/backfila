@@ -34,6 +34,35 @@ class ConfigureServiceActionTest {
   @Inject lateinit var scope: ActionScope
 
   @Test
+  fun changeServiceConnector() {
+    scope.fakeCaller(service = "deep-fryer") {
+      configureServiceAction.configureService(
+          ConfigureServiceRequest(listOf(), Connector.ENVOY, "abc"))
+      assertThat(backfillNames("deep-fryer")).isEmpty()
+
+      transacter.transaction { session ->
+        val dbService = queryFactory.newQuery<ServiceQuery>()
+            .registryName("deep-fryer")
+            .uniqueResult(session)!!
+        assertThat(dbService.connector).isEqualTo(Connector.ENVOY)
+        assertThat(dbService.connector_extra_data).isEqualTo("abc")
+      }
+
+      configureServiceAction.configureService(
+          ConfigureServiceRequest(listOf(), Connector.HTTP, "def"))
+      assertThat(backfillNames("deep-fryer")).isEmpty()
+
+      transacter.transaction { session ->
+        val dbService = queryFactory.newQuery<ServiceQuery>()
+            .registryName("deep-fryer")
+            .uniqueResult(session)!!
+        assertThat(dbService.connector).isEqualTo(Connector.HTTP)
+        assertThat(dbService.connector_extra_data).isEqualTo("def")
+      }
+    }
+  }
+
+  @Test
   fun configureServiceSyncsBackfills() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(
