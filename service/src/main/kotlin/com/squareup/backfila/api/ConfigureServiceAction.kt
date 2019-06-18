@@ -47,6 +47,9 @@ class ConfigureServiceAction @Inject constructor(
         // TODO validate data for connector
         dbService = DbService(service, request.connector, request.connector_extra_data)
         session.save(dbService)
+      } else {
+        dbService.connector = request.connector
+        dbService.connector_extra_data = request.connector_extra_data
       }
 
       // Add any missing backfills, update modified ones, and mark missing ones as deleted.
