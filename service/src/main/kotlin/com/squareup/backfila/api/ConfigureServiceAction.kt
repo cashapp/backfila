@@ -44,7 +44,8 @@ class ConfigureServiceAction @Inject constructor(
           .registryName(service)
           .uniqueResult(session)
       if (dbService == null) {
-        dbService = DbService(service, request.service_type)
+        // TODO validate data for connector
+        dbService = DbService(service, request.connector, request.connector_extra_data)
         session.save(dbService)
       }
 
@@ -61,7 +62,7 @@ class ConfigureServiceAction @Inject constructor(
         val newBackfill = DbRegisteredBackfill(
             dbService.id,
             backfill.name,
-            backfill.parameter_names,
+            backfill.parameters.map { it.name },
             backfill.type_provided,
             backfill.type_consumed,
             backfill.requires_approval == true

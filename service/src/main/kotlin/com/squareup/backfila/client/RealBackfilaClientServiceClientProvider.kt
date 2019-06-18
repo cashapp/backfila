@@ -1,6 +1,6 @@
 package com.squareup.backfila.client
 
-import com.squareup.protos.backfila.service.ServiceType
+import com.squareup.protos.backfila.service.Connector
 import misk.client.HttpClientConfigUrlProvider
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientEnvoyConfig
@@ -15,10 +15,11 @@ class RealBackfilaClientServiceClientProvider @Inject constructor(
   private val httpClientFactory: HttpClientFactory,
   private val httpClientConfigUrlProvider: HttpClientConfigUrlProvider
 ) : BackfilaClientServiceClientProvider{
-  override fun clientFor(serviceName: String, type: ServiceType): BackfilaClientServiceClient {
+  override fun clientFor(serviceName: String, connector: Connector): BackfilaClientServiceClient {
     // TODO http client caching
-    // TODO use servicetype
+    // TODO use connector type
     // TODO use typedhttpclient?
+    // TODO timeout
     val httpClientEndpointConfig = HttpClientEndpointConfig(
         envoy = HttpClientEnvoyConfig(app = serviceName))
     val okHttpClient = httpClientFactory.create(httpClientEndpointConfig)

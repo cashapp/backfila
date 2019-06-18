@@ -11,7 +11,7 @@ import com.squareup.backfila.service.BackfillRunQuery
 import com.squareup.backfila.service.BackfillState
 import com.squareup.backfila.service.RunInstanceQuery
 import com.squareup.protos.backfila.service.ConfigureServiceRequest
-import com.squareup.protos.backfila.service.ServiceType
+import com.squareup.protos.backfila.service.Connector
 import misk.exceptions.BadRequestException
 import misk.hibernate.Query
 import misk.hibernate.Transacter
@@ -51,7 +51,7 @@ class CreateBackfillActionTest {
   fun backfillDoesntExist() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(
-          ConfigureServiceRequest(listOf(), ServiceType.SQUARE_DC))
+          ConfigureServiceRequest(listOf(), Connector.ENVOY, null))
     }
 
     scope.fakeCaller(user = "molly") {
@@ -65,8 +65,8 @@ class CreateBackfillActionTest {
   fun created() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
-          ConfigureServiceRequest.BackfillData("ChickenSandwich", listOf(), null, null, false)),
-          ServiceType.SQUARE_DC))
+          ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null, null, false)),
+          Connector.ENVOY, null))
     }
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create("deep-fryer",

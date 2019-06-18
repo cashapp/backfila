@@ -1,6 +1,6 @@
 package com.squareup.backfila.service
 
-import com.squareup.protos.backfila.service.ServiceType
+import com.squareup.protos.backfila.service.Connector
 import misk.hibernate.DbTimestampedEntity
 import misk.hibernate.DbUnsharded
 import misk.hibernate.Id
@@ -23,7 +23,10 @@ class DbService() : DbUnsharded<DbService>, DbTimestampedEntity {
   lateinit var registry_name: String
 
   @Column(nullable = false) @Enumerated(EnumType.STRING)
-  lateinit var service_type: ServiceType
+  lateinit var connector: Connector
+
+  @Column(columnDefinition = "mediumtext")
+  var connector_extra_data: String? = null
 
   @Column
   override lateinit var created_at: Instant
@@ -31,8 +34,13 @@ class DbService() : DbUnsharded<DbService>, DbTimestampedEntity {
   @Column
   override lateinit var updated_at: Instant
 
-  constructor(registry_name: String, service_type: ServiceType) : this() {
+  constructor(
+    registry_name: String,
+    connector: Connector,
+    connector_extra_data: String?
+  ) : this() {
     this.registry_name = registry_name
-    this.service_type = service_type
+    this.connector = connector
+    this.connector_extra_data = connector_extra_data
   }
 }

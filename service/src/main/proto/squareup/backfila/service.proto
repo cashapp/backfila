@@ -6,29 +6,44 @@ option java_generic_services = true;
 
 // In this file: APIs that the service provides to the client.
 
-// TODO(mgersh): figure out cleanest way to determine how to reach the calling service
-enum ServiceType {
-  CLOUD = 1;
-  SQUARE_DC = 2;
+enum Connector {
+  HTTP = 1;
+  ENVOY = 2;
+}
+
+message Parameter {
+  optional string name = 1;
+  // Description to show in the UI.
+  optional string description = 2;
 }
 
 message ConfigureServiceRequest {
   message BackfillData {
+    // Identifies the backfill. Must be unique per service.
     optional string name = 1;
-    repeated string parameter_names = 2;
+    // Description to show in the UI.
+    optional string description = 2;
+
+    // Parameters the backfill will accept. An input is displayed in the UI for each parameter.
+    repeated Parameter parameters = 3;
 
     // The class name of pipelined data, only set if backfill supports pipelining.
-    optional string type_provided = 3;
-    optional string type_consumed = 4;
+    optional string type_provided = 4;
+    optional string type_consumed = 5;
 
     // If true the backfill will need approval from another user before it can be started.
-    optional bool requires_approval = 5;
+    optional bool requires_approval = 6;
   }
 
   // List of all available backfills in this service
   repeated BackfillData backfills = 1;
 
-  optional ServiceType service_type = 2;
+  optional Connector connector = 2;
+
+  // Extra data specific to the connector type. Suggested encoding is JSON.
+  // For example ENVOY type would have the cluster type as extra data.
+  // {"cluster_type": "production-jobs"}
+  optional string connector_extra_data = 3;
 }
 
 message ConfigureServiceResponse {

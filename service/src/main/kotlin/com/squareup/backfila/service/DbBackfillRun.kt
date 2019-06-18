@@ -79,6 +79,9 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
   @JsonColumn @Column(columnDefinition = "mediumtext")
   var parameter_map: Map<String, String>? = null
 
+  @Column(nullable = false)
+  var dry_run: Boolean = false
+
   constructor(
     service_id: Id<DbService>,
     registered_backfill_id: Id<DbRegisteredBackfill>,
