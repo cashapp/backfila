@@ -2,6 +2,7 @@ package com.squareup.backfila.api
 
 import com.google.inject.Module
 import com.squareup.backfila.BackfilaTestingModule
+import com.squareup.backfila.dashboard.GetRegisteredBackfillsAction
 import com.squareup.backfila.fakeCaller
 import com.squareup.backfila.service.BackfilaDb
 import com.squareup.backfila.service.RegisteredBackfillQuery
@@ -29,6 +30,7 @@ class ConfigureServiceActionTest {
 
   @Inject lateinit var clock: Clock
   @Inject lateinit var configureServiceAction: ConfigureServiceAction
+  @Inject lateinit var getRegisteredBackfillsAction: GetRegisteredBackfillsAction
   @Inject @BackfilaDb lateinit var transacter: Transacter
   @Inject lateinit var queryFactory: Query.Factory
   @Inject lateinit var scope: ActionScope
@@ -241,16 +243,8 @@ class ConfigureServiceActionTest {
   }
 
   private fun backfillNames(serviceName: String): List<String> {
-    return transacter.transaction { session ->
-      val dbService = queryFactory.newQuery<ServiceQuery>()
-          .registryName(serviceName)
-          .uniqueResult(session)!!
-      queryFactory.newQuery<RegisteredBackfillQuery>()
-          .serviceId(dbService.id)
-          .active()
-          .list(session)
-          .map { it.name }
-    }
+    return getRegisteredBackfillsAction.backfills(serviceName)
+        .backfills.map { it.name }
   }
 
   private fun deletedBackfillNames(serviceName: String): List<String> {
