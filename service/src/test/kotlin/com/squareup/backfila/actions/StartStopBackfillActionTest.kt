@@ -5,6 +5,8 @@ import com.squareup.backfila.BackfilaTestingModule
 import com.squareup.backfila.api.ConfigureServiceAction
 import com.squareup.backfila.dashboard.CreateBackfillAction
 import com.squareup.backfila.dashboard.CreateBackfillRequest
+import com.squareup.backfila.dashboard.GetBackfillRunsAction
+import com.squareup.backfila.dashboard.GetBackfillRunsRequest
 import com.squareup.backfila.dashboard.StartBackfillAction
 import com.squareup.backfila.dashboard.StartBackfillRequest
 import com.squareup.backfila.dashboard.StopBackfillAction
@@ -41,6 +43,7 @@ class StartStopBackfillActionTest {
   @Inject lateinit var createBackfillAction: CreateBackfillAction
   @Inject lateinit var startBackfillAction: StartBackfillAction
   @Inject lateinit var stopBackfillAction: StopBackfillAction
+  @Inject lateinit var getBackfillRunsAction: GetBackfillRunsAction
   @Inject lateinit var queryFactory: Query.Factory
   @Inject lateinit var scope: ActionScope
   @Inject @BackfilaDb lateinit var transacter: Transacter
@@ -53,9 +56,21 @@ class StartStopBackfillActionTest {
           Connector.ENVOY, null))
     }
     scope.fakeCaller(user = "molly") {
+      var backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer",
+          GetBackfillRunsRequest())
+      assertThat(backfillRuns.paused_backfills).hasSize(0)
+      assertThat(backfillRuns.running_backfills).hasSize(0)
+
       val response = createBackfillAction.create("deep-fryer",
           CreateBackfillRequest("ChickenSandwich"))
+
+      backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer",
+          GetBackfillRunsRequest())
+      assertThat(backfillRuns.paused_backfills).hasSize(1)
+      assertThat(backfillRuns.running_backfills).hasSize(0)
+
       val id = response.headers["Location"]!!.substringAfterLast("/").toLong()
+      assertThat(backfillRuns.paused_backfills[0].id).isEqualTo(id.toString())
       startBackfillAction.start(id, StartBackfillRequest())
 
       transacter.transaction { session ->
@@ -68,6 +83,11 @@ class StartStopBackfillActionTest {
             .containsOnly(BackfillState.RUNNING)
       }
 
+      backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer",
+          GetBackfillRunsRequest())
+      assertThat(backfillRuns.paused_backfills).hasSize(0)
+      assertThat(backfillRuns.running_backfills).hasSize(1)
+
       stopBackfillAction.stop(id, StopBackfillRequest())
 
       transacter.transaction { session ->
@@ -79,6 +99,11 @@ class StartStopBackfillActionTest {
             .list(session).map { it.run_state })
             .containsOnly(BackfillState.PAUSED)
       }
+
+      backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer",
+          GetBackfillRunsRequest())
+      assertThat(backfillRuns.paused_backfills).hasSize(1)
+      assertThat(backfillRuns.running_backfills).hasSize(0)
     }
   }
 
