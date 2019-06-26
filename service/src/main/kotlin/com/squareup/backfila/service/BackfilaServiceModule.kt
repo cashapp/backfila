@@ -40,9 +40,9 @@ class BackfilaServiceModule(
     install(SchedulerLifecycleServiceModule())
 
     multibind<AccessAnnotationEntry>().toInstance(
-        AccessAnnotationEntry<AdminDashboardAccess>(roles = listOf("eng")))
+        AccessAnnotationEntry<AdminDashboardAccess>(capabilities = listOf("eng")))
     bind<MiskCaller>().annotatedWith<DevelopmentOnly>()
-        .toInstance(MiskCaller(user = "development", roles = setOf("eng")))
+        .toInstance(MiskCaller(user = "development", capabilities = setOf("eng")))
 
     bind(BackfilaClientServiceClientProvider::class.java)
         .to(RealBackfilaClientServiceClientProvider::class.java)

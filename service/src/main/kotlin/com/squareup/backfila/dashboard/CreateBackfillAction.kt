@@ -57,7 +57,7 @@ class CreateBackfillAction @Inject constructor(
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   // TODO allow any user
-  @Authenticated(roles = ["eng"])
+  @Authenticated(capabilities = ["eng"])
   fun create(
     @PathParam service: String,
     @RequestBody request: CreateBackfillRequest
