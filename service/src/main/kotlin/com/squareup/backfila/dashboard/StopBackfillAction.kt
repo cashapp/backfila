@@ -26,7 +26,7 @@ class StopBackfillAction @Inject constructor(
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   // TODO allow any user
-  @Authenticated(roles = ["eng"])
+  @Authenticated(capabilities = ["eng"])
   fun stop(
     @PathParam id: Long,
     @RequestBody request: StopBackfillRequest
