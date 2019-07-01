@@ -9,6 +9,7 @@ import com.squareup.backfila.client.BackfilaClientServiceClientProvider
 import com.squareup.backfila.client.RealBackfilaClientServiceClientProvider
 import com.squareup.backfila.dashboard.DashboardWebActionsModule
 import com.squareup.skim.SkimModule
+import com.squareup.skim.aws.Region
 import misk.MiskCaller
 import misk.config.ConfigModule
 import misk.environment.Environment
@@ -23,12 +24,13 @@ import javax.inject.Singleton
 
 class BackfilaServiceModule(
   private val environment: Environment,
-  private val config: BackfilaConfig
+  private val config: BackfilaConfig,
+  private val region: Region
 ) : KAbstractModule() {
   override fun configure() {
     install(ConfigModule.create("backfila", config))
     install(EnvironmentModule(environment))
-    install(SkimModule(environment, config.skim))
+    install(SkimModule(environment, config.skim, region))
     install(BackfilaPersistenceModule(config))
     install(DashboardWebActionsModule())
     install(ServiceWebActionsModule())

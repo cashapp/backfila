@@ -8,5 +8,5 @@ fun main(args: Array<String>) {
 }
 
 fun applicationModules(serviceBuilder: ServiceBuilder<BackfilaConfig>): List<KAbstractModule> {
-  return listOf(BackfilaServiceModule(serviceBuilder.env, serviceBuilder.config))
+  return listOf(BackfilaServiceModule(serviceBuilder.env, serviceBuilder.config, serviceBuilder.region))
 }
