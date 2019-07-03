@@ -2,6 +2,7 @@ package com.squareup.backfila.service
 
 import com.google.common.annotations.VisibleForTesting
 import com.google.common.base.Preconditions.checkState
+import com.squareup.backfila.client.BackfilaClientServiceClient
 import com.squareup.backfila.client.BackfilaClientServiceClientProvider
 import com.squareup.protos.backfila.clientservice.GetNextBatchRangeRequest
 import com.squareup.protos.backfila.clientservice.GetNextBatchRangeResponse
@@ -29,6 +30,8 @@ class BackfillRunner private constructor(
 
   private var failuresSinceSuccess = 0
 
+  private val client by lazy { createClient() }
+
   fun stop() {
     // TODO cancel futures (after 5s timeout? that needs another thread)
     // or we could just have bounded sleeps on futures and ignore pending ones on shutdown
@@ -46,9 +49,18 @@ class BackfillRunner private constructor(
     logger.info { "Runner finished: $backfillName::$instanceName" }
   }
 
+  fun createClient(): BackfilaClientServiceClient {
+    val (serviceName, connector) = factory.transacter.transaction { session ->
+      val dbRunInstance = session.load(instanceId)
+      val service = dbRunInstance.backfill_run.registered_backfill.service
+      Pair(service.registry_name, service.connector)
+    }
+    return factory.clientProvider.clientFor(serviceName, connector)
+  }
+
   @VisibleForTesting
   fun work() {
-    val (serviceName, connector) = factory.transacter.transaction { session ->
+    factory.transacter.transaction { session ->
       val dbRunInstance = session.load(instanceId)
       val service = dbRunInstance.backfill_run.registered_backfill.service
 
@@ -65,15 +77,11 @@ class BackfillRunner private constructor(
       }
       // Extend our lease before doing long work
       dbRunInstance.lease_expires_at = factory.clock.instant() + LeaseHunter.LEASE_DURATION
-
-      Pair(service.registry_name, service.connector)
     }
 
     if (!running) {
       return
     }
-
-    val client = factory.clientProvider.clientFor(serviceName, connector)
 
     data class BackfillData(
       val backfillRunId: Id<DbBackfillRun>,
