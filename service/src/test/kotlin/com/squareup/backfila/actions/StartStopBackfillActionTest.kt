@@ -6,7 +6,6 @@ import com.squareup.backfila.api.ConfigureServiceAction
 import com.squareup.backfila.dashboard.CreateBackfillAction
 import com.squareup.backfila.dashboard.CreateBackfillRequest
 import com.squareup.backfila.dashboard.GetBackfillRunsAction
-import com.squareup.backfila.dashboard.GetBackfillRunsRequest
 import com.squareup.backfila.dashboard.StartBackfillAction
 import com.squareup.backfila.dashboard.StartBackfillRequest
 import com.squareup.backfila.dashboard.StopBackfillAction
@@ -56,16 +55,14 @@ class StartStopBackfillActionTest {
           Connector.ENVOY, null))
     }
     scope.fakeCaller(user = "molly") {
-      var backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer",
-          GetBackfillRunsRequest())
+      var backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
       assertThat(backfillRuns.paused_backfills).hasSize(0)
       assertThat(backfillRuns.running_backfills).hasSize(0)
 
       val response = createBackfillAction.create("deep-fryer",
           CreateBackfillRequest("ChickenSandwich"))
 
-      backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer",
-          GetBackfillRunsRequest())
+      backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
       assertThat(backfillRuns.paused_backfills).hasSize(1)
       assertThat(backfillRuns.running_backfills).hasSize(0)
 
@@ -83,8 +80,7 @@ class StartStopBackfillActionTest {
             .containsOnly(BackfillState.RUNNING)
       }
 
-      backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer",
-          GetBackfillRunsRequest())
+      backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
       assertThat(backfillRuns.paused_backfills).hasSize(0)
       assertThat(backfillRuns.running_backfills).hasSize(1)
 
@@ -100,8 +96,7 @@ class StartStopBackfillActionTest {
             .containsOnly(BackfillState.PAUSED)
       }
 
-      backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer",
-          GetBackfillRunsRequest())
+      backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
       assertThat(backfillRuns.paused_backfills).hasSize(1)
       assertThat(backfillRuns.running_backfills).hasSize(0)
     }
