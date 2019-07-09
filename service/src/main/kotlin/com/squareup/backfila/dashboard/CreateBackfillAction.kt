@@ -28,6 +28,7 @@ import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import okhttp3.Headers
+import okhttp3.Headers.Companion.headersOf
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
 import java.net.HttpURLConnection
@@ -142,7 +143,7 @@ class CreateBackfillAction @Inject constructor(
     return Response(
         body = "go to /backfills/$backfillRunId".toResponseBody(),
         statusCode = HttpURLConnection.HTTP_MOVED_TEMP,
-        headers = Headers.of("Location", "/backfills/$backfillRunId"))
+        headers = headersOf("Location", "/backfills/$backfillRunId"))
   }
 
   companion object {
