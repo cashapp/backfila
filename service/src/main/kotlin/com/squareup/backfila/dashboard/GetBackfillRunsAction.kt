@@ -11,9 +11,9 @@ import misk.hibernate.Transacter
 import misk.hibernate.newQuery
 import misk.logging.getLogger
 import misk.security.authz.Authenticated
+import misk.web.Get
 import misk.web.PathParam
-import misk.web.Post
-import misk.web.RequestBody
+import misk.web.QueryParam
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
@@ -28,19 +28,20 @@ data class GetBackfillRunsRequest(val pagination_token: String? = null)
 
 data class GetBackfillRunsResponse(
   val running_backfills: List<UiBackfillRun>,
-  val paused_backfills: List<UiBackfillRun>
+  val paused_backfills: List<UiBackfillRun>,
+  val next_pagination_token: String?
 )
 
 class GetBackfillRunsAction @Inject constructor(
   @BackfilaDb private val transacter: Transacter,
   private val queryFactory: Query.Factory
 ) : WebAction {
-  @Post("/services/{service}/backfill-runs")
+  @Get("/services/{service}/backfill-runs")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Authenticated
   fun backfillRuns(
     @PathParam service: String,
-    @RequestBody request: GetBackfillRunsRequest
+    @QueryParam pagination_token: String? = null
   ): GetBackfillRunsResponse {
     return transacter.transaction { session ->
       val dbService = queryFactory.newQuery<ServiceQuery>()
@@ -50,15 +51,17 @@ class GetBackfillRunsAction @Inject constructor(
       val runningBackfills = queryFactory.newQuery<BackfillRunQuery>()
           .serviceId(dbService.id)
           .state(BackfillState.RUNNING)
+          .orderByIdDesc()
           .list(session)
           .map(this::dbToUi)
       val pausedBackfills = queryFactory.newQuery<BackfillRunQuery>()
           .serviceId(dbService.id)
           .stateNot(BackfillState.RUNNING)
+          .orderByIdDesc()
           .list(session)
           .map(this::dbToUi)
 
-      GetBackfillRunsResponse(runningBackfills, pausedBackfills)
+      GetBackfillRunsResponse(runningBackfills, pausedBackfills, next_pagination_token = null)
     }
   }
 

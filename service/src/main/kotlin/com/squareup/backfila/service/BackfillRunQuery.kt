@@ -3,6 +3,7 @@ package com.squareup.backfila.service
 import misk.hibernate.Constraint
 import misk.hibernate.Id
 import misk.hibernate.Operator
+import misk.hibernate.Order
 import misk.hibernate.Query
 
 interface BackfillRunQuery : Query<DbBackfillRun> {
@@ -17,4 +18,7 @@ interface BackfillRunQuery : Query<DbBackfillRun> {
 
   @Constraint("state", Operator.NE)
   fun stateNot(state: BackfillState): BackfillRunQuery
+
+  @Order("id", asc = false)
+  fun orderByIdDesc(): BackfillRunQuery
 }
