@@ -49,7 +49,7 @@ class BackfillRunner private constructor(
     logger.info { "Runner finished: $backfillName::$instanceName" }
   }
 
-  fun createClient(): BackfilaClientServiceClient {
+  private fun createClient(): BackfilaClientServiceClient {
     val (serviceName, connector) = factory.transacter.transaction { session ->
       val dbRunInstance = session.load(instanceId)
       val service = dbRunInstance.backfill_run.registered_backfill.service
@@ -110,7 +110,7 @@ class BackfillRunner private constructor(
     }
 
     val computeTimeLimitMs = 10_000L
-    val computeCountLimit = 1L
+    val computeCountLimit = 10L
     val nextBatchRange: GetNextBatchRangeResponse
     try {
       nextBatchRange = client.getNextBatchRange(GetNextBatchRangeRequest(
@@ -149,38 +149,48 @@ class BackfillRunner private constructor(
       }
       return
     }
-    val batch = nextBatchRange.batches.first()
-    if (batch.matching_record_count != 0L) {
-      try {
-        val runBatchResponse = client.runBatch(RunBatchRequest(
-            data.backfillRunId.toString(),
-            backfillName,
-            instanceName,
-            batch.batch_range,
-            data.parameters,
-            data.dryRun,
-            null // TODO
-        )).get()
-        failuresSinceSuccess = 0
-      } catch (e: Exception) {
-        failuresSinceSuccess++
 
-        logger.warn(e) { "Error calling runbatch, failures: $failuresSinceSuccess" }
+    var scanned = 0L
+    var matched = 0L
+    for (batch in nextBatchRange.batches) {
+      if (batch.matching_record_count != 0L) {
+        try {
+          val runBatchResponse = client.runBatch(RunBatchRequest(
+              data.backfillRunId.toString(),
+              backfillName,
+              instanceName,
+              batch.batch_range,
+              data.parameters,
+              data.dryRun,
+              null // TODO
+          )).get()
+          failuresSinceSuccess = 0
+          scanned += batch.scanned_record_count
+          matched += batch.matching_record_count
+        } catch (e: Exception) {
+          failuresSinceSuccess++
 
-        if (failuresSinceSuccess > 3) {
-          logger.warn { "Pausing backfill due to too many consecutive failures:" +
-              " $failuresSinceSuccess"}
-          pauseBackfill()
+          logger.warn(e) { "Error calling runbatch, failures: $failuresSinceSuccess" }
+
+          if (failuresSinceSuccess > 3) {
+            logger.warn {
+              "Pausing backfill due to too many consecutive failures:" +
+                  " $failuresSinceSuccess"
+            }
+            pauseBackfill()
+          }
+
+          return
         }
-
-        return
       }
     }
+
     factory.transacter.transaction { session ->
       val dbRunInstance = session.load(instanceId)
-      dbRunInstance.pkey_cursor = batch.batch_range.end
-      dbRunInstance.backfilled_scanned_record_count += batch.scanned_record_count
-      dbRunInstance.backfilled_matching_record_count += batch.matching_record_count
+      val lastBatch = nextBatchRange.batches.last()
+      dbRunInstance.pkey_cursor = lastBatch.batch_range.end
+      dbRunInstance.backfilled_scanned_record_count += scanned
+      dbRunInstance.backfilled_matching_record_count += matched
     }
   }
 
