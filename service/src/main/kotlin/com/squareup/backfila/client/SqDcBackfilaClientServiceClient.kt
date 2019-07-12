@@ -1,6 +1,5 @@
 package com.squareup.backfila.client
 
-import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import com.squareup.protos.backfila.clientservice.GetNextBatchRangeRequest
 import com.squareup.protos.backfila.clientservice.GetNextBatchRangeResponse
@@ -21,14 +20,12 @@ internal class SqDcBackfilaClientServiceClient internal constructor(
 
   override fun getNextBatchRange(request: GetNextBatchRangeRequest):
       ListenableFuture<GetNextBatchRangeResponse> {
-    // TODO use a real future - for now we only use this synchronously
-    return Futures.immediateFuture(api.getNextBatchRange(request).execute().getOrThrow())
+    return api.getNextBatchRange(request)
   }
 
   override fun runBatch(request: RunBatchRequest):
       ListenableFuture<RunBatchResponse> {
-    // TODO use a real future - for now we only use this synchronously
-    return Futures.immediateFuture(api.runBatch(request).execute().getOrThrow())
+    return api.runBatch(request)
   }
 
   private fun <T> Response<T>.getOrThrow(): T {

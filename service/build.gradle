@@ -52,19 +52,22 @@ dependencies {
   implementation dep.loggingApi
   implementation dep.metricsCore
   implementation dep.metricsParent
+  implementation dep.misk
+  implementation dep.miskHibernate
+  implementation dep.miskZipkin
   implementation dep.moshi
   implementation dep.okHttp
   implementation dep.okio
   implementation dep.openTracing
   implementation dep.openTracingOkHttp
+  implementation dep.retrofit
+  implementation dep.retrofitGuavaAdapter
+  implementation dep.skim
   implementation dep.tracingJaeger
   implementation dep.wireRuntime
   implementation dep.wireCompiler
   implementation dep.wireSchema
-  implementation dep.misk
-  implementation dep.miskHibernate
-  implementation dep.miskZipkin
-  implementation dep.skim
+  
   compile project(':client')
 
   implementation(dep.misk) {
