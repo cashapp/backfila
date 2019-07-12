@@ -24,6 +24,7 @@ class RealBackfilaClientServiceClientProvider @Inject constructor(
     val httpClientEndpointConfig = HttpClientEndpointConfig(
         envoy = HttpClientEnvoyConfig(app = serviceName))
     val okHttpClient = httpClientFactory.create(httpClientEndpointConfig)
+    okHttpClient.dispatcher.maxRequestsPerHost = 64
     val baseUrl = httpClientConfigUrlProvider.getUrl(httpClientEndpointConfig)
     val retrofit = Retrofit.Builder()
         .baseUrl(baseUrl)
