@@ -2,12 +2,14 @@ package com.squareup.backfila.service
 
 import com.google.common.annotations.VisibleForTesting
 import com.google.common.base.Preconditions.checkState
+import com.google.common.util.concurrent.ListenableFuture
 import com.squareup.backfila.client.BackfilaClientServiceClient
 import com.squareup.backfila.client.BackfilaClientServiceClientProvider
 import com.squareup.protos.backfila.clientservice.GetNextBatchRangeRequest
 import com.squareup.protos.backfila.clientservice.GetNextBatchRangeResponse
 import com.squareup.protos.backfila.clientservice.KeyRange
 import com.squareup.protos.backfila.clientservice.RunBatchRequest
+import com.squareup.protos.backfila.clientservice.RunBatchResponse
 import misk.hibernate.Id
 import misk.hibernate.Query
 import misk.hibernate.Session
@@ -91,7 +93,8 @@ class BackfillRunner private constructor(
       val parameters: Map<String, ByteString>?,
       val batchSize: Long,
       val scanSize: Long,
-      val dryRun: Boolean
+      val dryRun: Boolean,
+      val numThreads: Long
     )
 
     val data = factory.transacter.transaction { session ->
@@ -105,12 +108,13 @@ class BackfillRunner private constructor(
           dbRunInstance.backfill_run.parameter_map?.mapValues { (k, v) -> v.decodeBase64()!! },
           dbRunInstance.backfill_run.batch_size,
           dbRunInstance.backfill_run.scan_size,
-          dbRunInstance.backfill_run.dry_run
+          dbRunInstance.backfill_run.dry_run,
+          dbRunInstance.backfill_run.num_threads
       )
     }
 
     val computeTimeLimitMs = 10_000L
-    val computeCountLimit = 10L
+    val computeCountLimit = data.numThreads
     val nextBatchRange: GetNextBatchRangeResponse
     try {
       nextBatchRange = client.getNextBatchRange(GetNextBatchRangeRequest(
@@ -139,7 +143,9 @@ class BackfillRunner private constructor(
 
       return
     }
-    if (nextBatchRange.batches.isEmpty()) {
+
+    val batches = nextBatchRange.batches
+    if (batches.isEmpty()) {
       logger.info { "No more batches, done: $backfillName::$instanceName" }
       factory.transacter.transaction { session ->
         val dbRunInstance = session.load(instanceId)
@@ -150,23 +156,28 @@ class BackfillRunner private constructor(
       return
     }
 
-    var scanned = 0L
-    var matched = 0L
-    for (batch in nextBatchRange.batches) {
-      if (batch.matching_record_count != 0L) {
+    val futures = ArrayList<ListenableFuture<RunBatchResponse>?>()
+    for (batch in batches) {
+      if (batch.matching_record_count == 0L) {
+        futures.add(null)
+        continue
+      }
+      futures.add(client.runBatch(RunBatchRequest(
+          data.backfillRunId.toString(),
+          backfillName,
+          instanceName,
+          batch.batch_range,
+          data.parameters,
+          data.dryRun,
+          null // TODO
+      )))
+    }
+    for ((batch, future) in batches.zip(futures)) {
+      if (future != null) {
         try {
-          val runBatchResponse = client.runBatch(RunBatchRequest(
-              data.backfillRunId.toString(),
-              backfillName,
-              instanceName,
-              batch.batch_range,
-              data.parameters,
-              data.dryRun,
-              null // TODO
-          )).get()
+          future.get()
+          logger.info { "Runbatch succeeded for batch ${batch.batch_range}" }
           failuresSinceSuccess = 0
-          scanned += batch.scanned_record_count
-          matched += batch.matching_record_count
         } catch (e: Exception) {
           failuresSinceSuccess++
 
@@ -183,14 +194,14 @@ class BackfillRunner private constructor(
           return
         }
       }
-    }
-
-    factory.transacter.transaction { session ->
-      val dbRunInstance = session.load(instanceId)
-      val lastBatch = nextBatchRange.batches.last()
-      dbRunInstance.pkey_cursor = lastBatch.batch_range.end
-      dbRunInstance.backfilled_scanned_record_count += scanned
-      dbRunInstance.backfilled_matching_record_count += matched
+      // Even if batch was empty we have to update db for scanned count.
+      factory.transacter.transaction { session ->
+        val dbRunInstance = session.load(instanceId)
+        val lastBatch = batches.last()
+        dbRunInstance.pkey_cursor = lastBatch.batch_range.end
+        dbRunInstance.backfilled_scanned_record_count += batch.scanned_record_count
+        dbRunInstance.backfilled_matching_record_count += batch.matching_record_count
+      }
     }
   }
 
