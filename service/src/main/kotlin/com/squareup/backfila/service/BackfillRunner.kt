@@ -113,7 +113,7 @@ class BackfillRunner private constructor(
       )
     }
 
-    val computeTimeLimitMs = 10_000L
+    val computeTimeLimitMs = 5000L // half of the http timeout
     val computeCountLimit = data.numThreads
     val nextBatchRange: GetNextBatchRangeResponse
     try {
@@ -208,8 +208,8 @@ class BackfillRunner private constructor(
   private fun pauseBackfill() {
     factory.transacter.transaction { session ->
       val dbRunInstance = session.load(instanceId)
-      checkState(dbRunInstance.run_state == BackfillState.RUNNING)
-      dbRunInstance.run_state = BackfillState.PAUSED
+      checkState(dbRunInstance.backfill_run.state == BackfillState.RUNNING)
+      dbRunInstance.backfill_run.setState(session, factory.queryFactory, BackfillState.PAUSED)
     }
   }
 
