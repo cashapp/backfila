@@ -45,7 +45,7 @@ ext.dep = [
   "retrofitMoshi": "com.squareup.retrofit2:converter-moshi:2.4.0",
   "retrofitWire": "com.squareup.retrofit2:converter-wire:2.4.0",
   "shadowJarPlugin": "com.github.jengelman.gradle.plugins:shadow:4.0.4",
-  "skim": "com.squareup.skim:skim:2019.07.09-1562701236-8ad256a",
+  "skim": "com.squareup.skim:skim:2019.07.15-1563218675-5aa021f",
   "spotlessPlugin": "com.diffplug.spotless:spotless-plugin-gradle:3.23.0",
   "tracingJaeger": "com.uber.jaeger:jaeger-core:0.24.0",
   "wireCompiler": "com.squareup.wire:wire-compiler:3.0.0-square09",
