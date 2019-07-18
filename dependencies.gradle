@@ -21,6 +21,7 @@ ext.dep = [
   "kotlinGradlePlugin": "org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.21",
   "kotlinReflection": "org.jetbrains.kotlin:kotlin-reflect:1.3.21",
   "kotlinStdLib": "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.21",
+  "kotlinxCoroutines": "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.2.1",
   "ktlintVersion": "0.33.0",
   "loggingApi": "io.github.microutils:kotlin-logging:1.4.9",
   "loggingImpl": "org.apache.logging.log4j:log4j-slf4j-impl:2.10.0",

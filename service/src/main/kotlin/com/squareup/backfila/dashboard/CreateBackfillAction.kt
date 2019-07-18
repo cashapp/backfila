@@ -27,7 +27,6 @@ import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
-import okhttp3.Headers
 import okhttp3.Headers.Companion.headersOf
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
@@ -39,12 +38,13 @@ data class CreateBackfillRequest(
   // TODO move defaults to UI
   val scan_size: Long = 1000,
   val batch_size: Long = 100,
-  val num_threads: Long = 5,
+  val num_threads: Int = 5,
   val pkey_range_start: String? = null,
   val pkey_range_end: String? = null,
   // Parameters that go to the client service.
   val parameter_map: Map<String, ByteString> = mapOf(),
-  val dry_run: Boolean = false
+  val dry_run: Boolean = false,
+  val backoff_schedule: String? = null
 )
 
 class CreateBackfillAction @Inject constructor(
@@ -65,9 +65,25 @@ class CreateBackfillAction @Inject constructor(
   ): Response<ResponseBody> {
     // TODO check user has permissions for this service with `X-Forwarded-All-Capabilities` header
 
-    // TODO validate scan_size > batch_size
-
     logger.info { "Create backfill for $service by ${caller.get()?.user}" }
+
+    if (request.num_threads < 1) {
+      throw BadRequestException("num_threads must be >= 1")
+    }
+    if (request.scan_size < 1) {
+      throw BadRequestException("scan_size must be >= 1")
+    }
+    if (request.batch_size < 1) {
+      throw BadRequestException("batch_size must be >= 1")
+    }
+    if (request.scan_size < request.batch_size) {
+      throw BadRequestException("scan_size must be >= batch_size")
+    }
+    request.backoff_schedule?.let { schedule ->
+      if (schedule.split(',').any { it.toLongOrNull() == null }) {
+        throw BadRequestException("backoff_schedule must be a comma separated list of integers")
+      }
+    }
 
     val (serviceId, connector) = transacter.transaction { session ->
       val dbService = queryFactory.newQuery<ServiceQuery>()
@@ -100,7 +116,6 @@ class CreateBackfillAction @Inject constructor(
                 request.pkey_range_end?.encodeUtf8()),
             request.parameter_map
         ))
-    // TODO check for error and fail
     val instances = prepareBackfillResponse.instances
     if (instances.isEmpty()) {
       throw BadRequestException("PrepareBackfill returned no instances")
@@ -109,9 +124,8 @@ class CreateBackfillAction @Inject constructor(
       throw BadRequestException("PrepareBackfill did not return distinct instance names:" +
           " ${instances.map { it.instance_name }}")
     }
-    // TODO validate params fit names
 
-    // TODO validate backfill_ranges
+    // TODO validate params fit names
 
     val backfillRunId = transacter.transaction { session ->
       val backfillRun = DbBackfillRun(
@@ -122,7 +136,8 @@ class CreateBackfillAction @Inject constructor(
           caller.get()?.user,
           request.scan_size,
           request.batch_size,
-          request.num_threads
+          request.num_threads,
+          request.backoff_schedule
       )
       session.save(backfillRun)
 

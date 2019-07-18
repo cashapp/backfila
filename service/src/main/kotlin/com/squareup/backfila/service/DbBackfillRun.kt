@@ -73,7 +73,7 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
   var batch_size: Long = 0
 
   @Column(nullable = false)
-  var num_threads: Long = 0
+  var num_threads: Int = 0
 
   // TODO(mgersh): denormalize into a 1,n table
   @JsonColumn @Column(columnDefinition = "mediumtext")
@@ -81,6 +81,10 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
 
   @Column(nullable = false)
   var dry_run: Boolean = false
+
+  /** Comma separated list of delays for consecutive retries in milliseconds, e.g. 1000,2000 */
+  @Column
+  var backoff_schedule: String? = null
 
   constructor(
     service_id: Id<DbService>,
@@ -90,7 +94,8 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
     created_by_user: String?,
     scan_size: Long,
     batch_size: Long,
-    num_threads: Long
+    num_threads: Int,
+    backoff_schedule: String?
   ) : this() {
     this.service_id = service_id
     this.registered_backfill_id = registered_backfill_id
@@ -100,6 +105,7 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
     this.scan_size = scan_size
     this.batch_size = batch_size
     this.num_threads = num_threads
+    this.backoff_schedule = backoff_schedule
   }
 
   fun instances(session: Session, queryFactory: Query.Factory) =
@@ -122,4 +128,6 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
   fun complete() {
     this.state = BackfillState.COMPLETE
   }
+
+  fun backoffSchedule() = backoff_schedule?.split(',')?.map { it.toLong() }
 }

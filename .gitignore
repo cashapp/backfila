@@ -4,3 +4,4 @@
 build/
 *.iml
 *.swp
+service/web/**/lib/
