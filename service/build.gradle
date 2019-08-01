@@ -49,6 +49,7 @@ dependencies {
   implementation dep.jettyWebsocketServer
   implementation dep.kotlinStdLib
   implementation dep.kotlinReflection
+  implementation dep.kotlinxCoroutines
   implementation dep.loggingApi
   implementation dep.metricsCore
   implementation dep.metricsParent

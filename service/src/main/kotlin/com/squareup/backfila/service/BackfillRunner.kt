@@ -1,15 +1,13 @@
 package com.squareup.backfila.service
 
-import com.google.common.annotations.VisibleForTesting
 import com.google.common.base.Preconditions.checkState
-import com.google.common.util.concurrent.ListenableFuture
 import com.squareup.backfila.client.BackfilaClientServiceClient
 import com.squareup.backfila.client.BackfilaClientServiceClientProvider
-import com.squareup.protos.backfila.clientservice.GetNextBatchRangeRequest
 import com.squareup.protos.backfila.clientservice.GetNextBatchRangeResponse
-import com.squareup.protos.backfila.clientservice.KeyRange
 import com.squareup.protos.backfila.clientservice.RunBatchRequest
-import com.squareup.protos.backfila.clientservice.RunBatchResponse
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import misk.hibernate.Id
 import misk.hibernate.Query
 import misk.hibernate.Session
@@ -19,36 +17,115 @@ import misk.logging.getLogger
 import okio.ByteString
 import okio.ByteString.Companion.decodeBase64
 import java.time.Clock
+import java.time.Duration
+import java.time.Instant
 import javax.inject.Inject
+import kotlin.math.max
 
+val DEFAULT_BACKOFF_SCHEDULE = listOf(5_000L, 15_000L, 30_000L)
+
+/**
+ * Coordinator of the backfill run. Starts a few actors as coroutines and updates the lease.
+ */
 class BackfillRunner private constructor(
-  private val factory: Factory,
+  val factory: Factory,
   val backfillName: String,
   val instanceName: String,
+  val backfillRunId: Id<DbBackfillRun>,
   val instanceId: Id<DbRunInstance>,
-  val leaseToken: String
+  val leaseToken: String,
+  val backoffSchedule: List<Long>
 ) {
-  @Volatile private var running = true
+  /** Metadata about the backfill from the database. Refreshed regularly. */
+  lateinit var metadata: BackfillMetaData
+    private set
+
+  /**
+   * Set to false when subtasks should begin to gracefully stop.
+   * We cancel the coroutines to forcefully stop them.
+   */
+  private var running = true
 
   private var failuresSinceSuccess = 0
+  private var backoffUntil: Instant? = null
 
-  private val client by lazy { createClient() }
+  val client by lazy { createClient() }
 
   fun stop() {
-    // TODO cancel futures (after 5s timeout? that needs another thread)
-    // or we could just have bounded sleeps on futures and ignore pending ones on shutdown
+    // Once false, the leasing task will exit and the child coroutines will be cancelled.
     running = false
   }
 
   fun run() {
-    logger.info { "Runner starting: $backfillName::$instanceName " }
-    while (running) {
-      logger.info { "Runner looping: $backfillName::$instanceName $leaseToken" }
-      work()
+    logger.info { "Runner starting: ${logLabel()} " }
+
+    metadata = factory.transacter.transaction { session -> loadMetaData(session) }
+
+    val batchQueuer = BatchQueuer(this, metadata.numThreads)
+    val batchRunner = BatchRunner(this, batchQueuer.nextBatchChannel(),
+        metadata.numThreads)
+    val batchAwaiter = BatchAwaiter(this, batchRunner.runChannel(),
+        batchRunner.rpcBackpressureChannel())
+
+    // All our tasks run on this thread.
+    runBlocking {
+      batchQueuer.run(this)
+      batchRunner.run(this)
+      batchAwaiter.run(this)
+
+      checkAndUpdateLeaseUntilPausedOrComplete()
+      coroutineContext.cancelChildren()
     }
-    logger.info { "Runner cleaning up: $backfillName::$instanceName" }
-    cleanup()
-    logger.info { "Runner finished: $backfillName::$instanceName" }
+
+    logger.info { "Runner cleaning up: ${logLabel()}" }
+    clearLease()
+    logger.info { "Runner finished: ${logLabel()}" }
+  }
+
+  private suspend fun checkAndUpdateLeaseUntilPausedOrComplete() {
+    while (running) {
+      val dbRunning = factory.transacter.transaction { session ->
+        val dbRunInstance = session.load(instanceId)
+
+        if (dbRunInstance.run_state != BackfillState.RUNNING) {
+          logger.info { "Backfill is no longer in RUNNING state, stopping runner ${logLabel()}" }
+          running = false
+          return@transaction false
+        }
+        if (dbRunInstance.lease_token != leaseToken) {
+          throw IllegalStateException("Backfill instance $instanceId has been stolen! " +
+              "our token: $leaseToken, new token: ${dbRunInstance.lease_token}")
+        }
+        // Extend our lease regularly.
+        dbRunInstance.lease_expires_at = factory.clock.instant() + LeaseHunter.LEASE_DURATION
+
+        // While we're here, refresh metadata about the backfill in case a user made some changes,
+        // such as changing batch_size or num_threads. This way we keep metadata updated but don't
+        // have to load it repeatedly in every task.
+        metadata = loadMetaData(session)
+
+        return@transaction true
+      }
+      if (!dbRunning) break
+      delay(1000)
+    }
+  }
+
+  private fun loadMetaData(session: Session): BackfillMetaData {
+    val dbRunInstance = session.load(instanceId)
+    return BackfillMetaData(
+        dbRunInstance.backfill_run_id,
+        dbRunInstance.pkey_cursor,
+        dbRunInstance.pkey_range_start,
+        dbRunInstance.pkey_range_end,
+        dbRunInstance.backfill_run.parameter_map?.mapValues { (k, v) -> v.decodeBase64()!! },
+        dbRunInstance.backfill_run.batch_size,
+        dbRunInstance.backfill_run.scan_size,
+        dbRunInstance.backfill_run.dry_run,
+        dbRunInstance.backfill_run.num_threads,
+        dbRunInstance.precomputing_done,
+        dbRunInstance.precomputing_pkey_cursor
+    )
   }
 
   private fun createClient(): BackfilaClientServiceClient {
@@ -60,176 +137,56 @@ class BackfillRunner private constructor(
     return factory.clientProvider.clientFor(serviceName, connector)
   }
 
-  @VisibleForTesting
-  fun work() {
-    factory.transacter.transaction { session ->
-      val dbRunInstance = session.load(instanceId)
-      val service = dbRunInstance.backfill_run.registered_backfill.service
+  fun runBatchRequest(
+    batch: GetNextBatchRangeResponse.Batch
+  ) = RunBatchRequest(
+      metadata.backfillRunId.toString(),
+      backfillName,
+      instanceName,
+      batch.batch_range,
+      metadata.parameters,
+      metadata.dryRun,
+      null
+  )
 
-      if (dbRunInstance.run_state != BackfillState.RUNNING) {
-        running = false
-        logger.info {
-          "Backfill is no longer running, stopping runner for $backfillName::$instanceName"
-        }
-        return@transaction Pair(service.registry_name, service.connector)
-      }
-      if (dbRunInstance.lease_token != leaseToken) {
-        throw IllegalStateException("Backfill instance $instanceId has been stolen! " +
-            "our token: $leaseToken, new token: ${dbRunInstance.lease_token}")
-      }
-      // Extend our lease before doing long work
-      dbRunInstance.lease_expires_at = factory.clock.instant() + LeaseHunter.LEASE_DURATION
-    }
+  fun onRpcSuccess() {
+    failuresSinceSuccess = 0
+  }
 
-    if (!running) {
+  fun onRpcFailure() {
+    // If there is an intermittent server issue, all the current batches will likely fail.
+    // So to consider those as only one failure, only increment failure count if the backoff
+    // finished.
+    if (backingOff()) {
+      logger.info { "Ignoring rpc error because runner is already backing off" }
       return
     }
-
-    data class BackfillData(
-      val backfillRunId: Id<DbBackfillRun>,
-      val pkeyCursor: ByteString?,
-      val pkeyStart: ByteString?,
-      val pkeyEnd: ByteString?,
-      val parameters: Map<String, ByteString>?,
-      val batchSize: Long,
-      val scanSize: Long,
-      val dryRun: Boolean,
-      val numThreads: Long
-    )
-
-    val data = factory.transacter.transaction { session ->
-      val dbRunInstance = session.load(instanceId)
-
-      BackfillData(
-          dbRunInstance.backfill_run_id,
-          dbRunInstance.pkey_cursor,
-          dbRunInstance.pkey_range_start,
-          dbRunInstance.pkey_range_end,
-          dbRunInstance.backfill_run.parameter_map?.mapValues { (k, v) -> v.decodeBase64()!! },
-          dbRunInstance.backfill_run.batch_size,
-          dbRunInstance.backfill_run.scan_size,
-          dbRunInstance.backfill_run.dry_run,
-          dbRunInstance.backfill_run.num_threads
-      )
-    }
-
-    val computeTimeLimitMs = 5000L // half of the http timeout
-    val computeCountLimit = data.numThreads
-    val nextBatchRange: GetNextBatchRangeResponse
-    try {
-      nextBatchRange = client.getNextBatchRange(GetNextBatchRangeRequest(
-          data.backfillRunId.toString(),
-          backfillName,
-          instanceName,
-          data.batchSize,
-          data.scanSize,
-          data.pkeyCursor,
-          KeyRange(data.pkeyStart, data.pkeyEnd),
-          data.parameters,
-          computeTimeLimitMs,
-          computeCountLimit
-      )).get()
-      failuresSinceSuccess = 0
-    } catch (e: Exception) {
-      failuresSinceSuccess++
-
-      logger.warn(e) { "Error calling getnextbatchrange, failures: $failuresSinceSuccess" }
-
-      if (failuresSinceSuccess > 3) {
-        logger.warn { "Pausing backfill due to too many consecutive failures:" +
-            " $failuresSinceSuccess"}
-        pauseBackfill()
+    failuresSinceSuccess++
+    if (failuresSinceSuccess > backoffSchedule.size) {
+      logger.info {
+        "Pausing backfill due to too many consecutive failures:" +
+            " $failuresSinceSuccess"
       }
-
-      return
-    }
-
-    val batches = nextBatchRange.batches
-    if (batches.isEmpty()) {
-      logger.info { "No more batches, done: $backfillName::$instanceName" }
-      factory.transacter.transaction { session ->
-        val dbRunInstance = session.load(instanceId)
-        dbRunInstance.run_state = BackfillState.COMPLETE
-
-        maybeCompleteBackfill(session, dbRunInstance)
-      }
-      return
-    }
-
-    val futures = ArrayList<ListenableFuture<RunBatchResponse>?>()
-    for (batch in batches) {
-      if (batch.matching_record_count == 0L) {
-        futures.add(null)
-        continue
-      }
-      futures.add(client.runBatch(RunBatchRequest(
-          data.backfillRunId.toString(),
-          backfillName,
-          instanceName,
-          batch.batch_range,
-          data.parameters,
-          data.dryRun,
-          null // TODO
-      )))
-    }
-    for ((batch, future) in batches.zip(futures)) {
-      if (future != null) {
-        try {
-          future.get()
-          logger.info { "Runbatch succeeded for batch ${batch.batch_range}" }
-          failuresSinceSuccess = 0
-        } catch (e: Exception) {
-          failuresSinceSuccess++
-
-          logger.warn(e) { "Error calling runbatch, failures: $failuresSinceSuccess" }
-
-          if (failuresSinceSuccess > 3) {
-            logger.warn {
-              "Pausing backfill due to too many consecutive failures:" +
-                  " $failuresSinceSuccess"
-            }
-            pauseBackfill()
-          }
-
-          return
-        }
-      }
-      // Even if batch was empty we have to update db for scanned count.
-      factory.transacter.transaction { session ->
-        val dbRunInstance = session.load(instanceId)
-        val lastBatch = batches.last()
-        dbRunInstance.pkey_cursor = lastBatch.batch_range.end
-        dbRunInstance.backfilled_scanned_record_count += batch.scanned_record_count
-        dbRunInstance.backfilled_matching_record_count += batch.matching_record_count
-      }
+      pauseBackfill()
+    } else {
+      backoffUntil = factory.clock.instant().plusMillis(
+          backoffSchedule[failuresSinceSuccess - 1])
     }
   }
+
+  fun backingOff() = backoffUntil?.isAfter(factory.clock.instant()) ?: false
+  fun backoffMs() = max(0, Duration.between(factory.clock.instant(), backoffUntil!!).toMillis())
 
   private fun pauseBackfill() {
     factory.transacter.transaction { session ->
       val dbRunInstance = session.load(instanceId)
       checkState(dbRunInstance.backfill_run.state == BackfillState.RUNNING)
-      dbRunInstance.backfill_run.setState(session, factory.queryFactory, BackfillState.PAUSED)
+      dbRunInstance.backfill_run.setState(session, factory.queryFactory,
+          BackfillState.PAUSED)
     }
   }
 
-  private fun maybeCompleteBackfill(
-    session: Session,
-    dbRunInstance: DbRunInstance
-  ) {
-    logger.info { "Instance $backfillName::$instanceName completed" }
-    // If multiple instances finish they need to be synchronized to see eachother's states
-    // If all states are COMPLETE the whole backfill will be completed.
-    dbRunInstance.backfill_run.version++
-    val instances = dbRunInstance.backfill_run.instances(session, factory.queryFactory)
-    if (instances.all { it.run_state == BackfillState.COMPLETE }) {
-      dbRunInstance.backfill_run.complete()
-      logger.info { "Backfill $backfillName completed" }
-      // TODO post-completion tasks...
-    }
-  }
-
-  private fun cleanup() {
+  fun clearLease() {
     factory.transacter.transaction { session ->
       val dbRunInstance = session.load(instanceId)
       if (dbRunInstance.lease_token != leaseToken) {
@@ -237,9 +194,25 @@ class BackfillRunner private constructor(
         return@transaction
       }
       dbRunInstance.clearLease()
-      logger.info { "Released lease on $backfillName::$instanceName" }
+      logger.info { "Released lease on ${logLabel()}" }
     }
   }
+
+  fun logLabel() = "$backfillName::$instanceName::$instanceId"
+
+  data class BackfillMetaData(
+    val backfillRunId: Id<DbBackfillRun>,
+    val pkeyCursor: ByteString?,
+    val pkeyStart: ByteString?,
+    val pkeyEnd: ByteString?,
+    val parameters: Map<String, ByteString>?,
+    val batchSize: Long,
+    val scanSize: Long,
+    val dryRun: Boolean,
+    val numThreads: Int,
+    val precomputingDone: Boolean,
+    val precomputingPkeyCursor: ByteString?
+  )
 
   companion object {
     private val logger = getLogger<BackfillRunner>()
@@ -260,8 +233,10 @@ class BackfillRunner private constructor(
           this,
           dbRunInstance.backfill_run.registered_backfill.name,
           dbRunInstance.instance_name,
+          dbRunInstance.backfill_run_id,
           dbRunInstance.id,
-          leaseToken
+          leaseToken,
+          dbRunInstance.backfill_run.backoffSchedule() ?: DEFAULT_BACKOFF_SCHEDULE
       )
     }
   }

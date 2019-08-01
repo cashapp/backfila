@@ -7,7 +7,9 @@ import javax.inject.Singleton
 @Singleton
 class FakeBackfilaClientServiceClientProvider @Inject constructor() :
     BackfilaClientServiceClientProvider {
+  @Inject lateinit var fakeBackfilaClientServiceClient: FakeBackfilaClientServiceClient
+
   override fun clientFor(serviceName: String, connector: Connector): BackfilaClientServiceClient {
-    return FakeBackfilaClientServiceClient()
+    return fakeBackfilaClientServiceClient
   }
 }

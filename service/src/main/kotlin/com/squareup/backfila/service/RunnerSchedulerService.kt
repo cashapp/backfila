@@ -5,6 +5,7 @@ import com.google.common.util.concurrent.AbstractExecutionThreadService
 import com.google.common.util.concurrent.ListeningExecutorService
 import misk.logging.getLogger
 import java.util.Random
+import java.util.concurrent.RejectedExecutionException
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -84,15 +85,21 @@ class RunnerSchedulerService @Inject constructor(
   private fun addRunner(runner: BackfillRunner) {
     logger.info { "Leased backfill: ${runner.backfillName}" }
     runners.add(runner)
-    runnerExecutorService.submit {
-      try {
-        runner.run()
-      } catch (e: Throwable) {
-        logger.info(e) { "Runner had uncaught exception: ${runner.backfillName}" }
-      } finally {
-        runners.remove(runner)
-        logger.info { "Runner removed: ${runner.backfillName}" }
+    try {
+      runnerExecutorService.submit {
+        try {
+          runner.run()
+        } catch (e: Throwable) {
+          logger.info(e) { "Runner had uncaught exception: ${runner.backfillName}" }
+        } finally {
+          runners.remove(runner)
+          logger.info { "Runner removed: ${runner.backfillName}" }
+        }
       }
+    } catch (e: RejectedExecutionException) {
+      logger.info { "Rejected execution of runner for instance ${runner.instanceId}" }
+      runner.clearLease()
+      runners.remove(runner)
     }
   }
 

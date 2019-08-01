@@ -1,6 +1,5 @@
 package com.squareup.backfila.client
 
-import com.google.common.util.concurrent.ListenableFuture
 import com.squareup.protos.backfila.clientservice.GetNextBatchRangeRequest
 import com.squareup.protos.backfila.clientservice.GetNextBatchRangeResponse
 import com.squareup.protos.backfila.clientservice.PrepareBackfillRequest
@@ -28,18 +27,18 @@ interface BackfilaClientServiceSquareDcApi {
     "Accept: application/x-protobuf",
     "Content-Type: application/x-protobuf"
   ])
-  fun getNextBatchRange(
+  suspend fun getNextBatchRange(
     @Body request: GetNextBatchRangeRequest
-  ): ListenableFuture<GetNextBatchRangeResponse>
+  ): GetNextBatchRangeResponse
 
   @POST("$BASE_PATH/run_batch")
   @Headers(value = [
     "Accept: application/x-protobuf",
     "Content-Type: application/x-protobuf"
   ])
-  fun runBatch(
+  suspend fun runBatch(
     @Body request: RunBatchRequest
-  ): ListenableFuture<RunBatchResponse>
+  ): RunBatchResponse
 
   // TODO figure out if we're using service container routing or plain http or grpc
   companion object {
