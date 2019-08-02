@@ -57,6 +57,7 @@ class BatchPrecomputer(
             val dbRunInstance = session.load(backfillRunner.instanceId)
             dbRunInstance.precomputing_done = true
           }
+          logger.info { "Precomputing completed for ${backfillRunner.logLabel()}" }
           break
         }
 

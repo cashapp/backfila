@@ -60,11 +60,16 @@ class BatchRunner(
       }
 
       logger.info { "Enqueuing run of batch $batch" }
-      // TODO skip rpcs for batches with no matching records, but they still have to be processed
-      //  to advance the cursor
-      // Supervisor here allows us to handle the exception, rather than failing the job.
-      val run = async(SupervisorJob()) {
-        backfillRunner.client.runBatch(backfillRunner.runBatchRequest(batch))
+      val run = if (batch.matching_record_count == 0L) {
+        // Skip RPCs for batches with no matching records, but still report it to the awaiter to
+        // update cursors.
+        async { RunBatchResponse.Builder().build() }
+      } else {
+        // Supervisor here allows us to handle the exception, rather than failing the job.
+        async(SupervisorJob()) {
+          backfillRunner.client.runBatch(backfillRunner.runBatchRequest(batch))
+          // TODO for pipelined backfills, await result and start a second RPC to the target
+        }
       }
       runChannel.send(AwaitingRun(batch, run))
       rpcBackpressureChannel.send(Unit)

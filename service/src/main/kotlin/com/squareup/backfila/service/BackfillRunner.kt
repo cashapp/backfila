@@ -160,14 +160,13 @@ class BackfillRunner private constructor(
     // So to consider those as only one failure, only increment failure count if the backoff
     // finished.
     if (backingOff()) {
-      logger.info { "Ignoring rpc error because runner is already backing off" }
+      logger.info { "Ignoring rpc error because runner is already backing off ${logLabel()}" }
       return
     }
     failuresSinceSuccess++
     if (failuresSinceSuccess > backoffSchedule.size) {
       logger.info {
-        "Pausing backfill due to too many consecutive failures:" +
-            " $failuresSinceSuccess"
+        "Pausing backfill ${logLabel()} due to too many consecutive failures: $failuresSinceSuccess"
       }
       pauseBackfill()
     } else {
