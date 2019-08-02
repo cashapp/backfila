@@ -1,16 +1,16 @@
 package com.squareup.backfila.dashboard
 
 import com.squareup.backfila.service.BackfilaDb
-import com.squareup.backfila.service.BackfillRunQuery
 import com.squareup.backfila.service.BackfillState
 import com.squareup.backfila.service.BackfillState.PAUSED
 import com.squareup.backfila.service.BackfillState.RUNNING
+import com.squareup.backfila.service.DbBackfillRun
 import misk.MiskCaller
 import misk.exceptions.BadRequestException
 import misk.hibernate.Id
 import misk.hibernate.Query
 import misk.hibernate.Transacter
-import misk.hibernate.newQuery
+import misk.hibernate.loadOrNull
 import misk.logging.getLogger
 import javax.inject.Inject
 
@@ -18,7 +18,6 @@ class BackfillStateToggler @Inject constructor(
   @BackfilaDb private val transacter: Transacter,
   private val queryFactory: Query.Factory
 ) {
-
   fun toggleRunningState(id: Long, caller: MiskCaller, desiredState: BackfillState) {
     val requiredCurrentState = when (desiredState) {
       PAUSED -> RUNNING
@@ -27,10 +26,7 @@ class BackfillStateToggler @Inject constructor(
     }
 
     transacter.transaction { session ->
-      // TODO Replace with loadOrNull when it's merged
-      val run = queryFactory.newQuery<BackfillRunQuery>()
-          .id(Id(id))
-          .uniqueResult(session)
+      val run = session.loadOrNull<DbBackfillRun>(Id(id))
           ?: throw BadRequestException("backfill $id doesn't exist")
       logger.info {
         "Found backfill $id for `${run.registered_backfill.service.registry_name}`" +
