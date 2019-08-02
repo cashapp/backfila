@@ -83,6 +83,12 @@ class BackfillRunnerTest {
     transacter.transaction { session ->
       val instance = session.load(runner.instanceId)
       assertThat(instance.pkey_cursor).isEqualTo("1000".encodeUtf8())
+      assertThat(instance.precomputing_pkey_cursor).isEqualTo("1000".encodeUtf8())
+      assertThat(instance.precomputing_done).isEqualTo(true)
+      assertThat(instance.computed_scanned_record_count).isEqualTo(1001)
+      assertThat(instance.computed_matching_record_count).isEqualTo(1001)
+      assertThat(instance.backfilled_scanned_record_count).isEqualTo(1001)
+      assertThat(instance.backfilled_matching_record_count).isEqualTo(1001)
       assertThat(instance.run_state).isEqualTo(BackfillState.COMPLETE)
       // All instances complete.
       assertThat(instance.backfill_run.state).isEqualTo(BackfillState.COMPLETE)
@@ -152,6 +158,12 @@ class BackfillRunnerTest {
   @Test fun processRunBatchWhileGetNextBatchWaiting() {
     val runner = startBackfill(numThreads = 1)
 
+    // Disable precomputing to avoid making interfering calls to GetNextBatch
+    transacter.transaction { session ->
+      val instance = session.load(runner.instanceId)
+      instance.precomputing_done = true
+    }
+
     runBlocking {
       launch { runner.run() }
       try {
@@ -181,6 +193,12 @@ class BackfillRunnerTest {
   // The cursor for GetNextBatch should be ahead of the DB.
   @Test fun getNextBatchCursorSeparateFromDb() {
     val runner = startBackfill(numThreads = 1)
+
+    // Disable precomputing to avoid making interfering calls to GetNextBatch
+    transacter.transaction { session ->
+      val instance = session.load(runner.instanceId)
+      instance.precomputing_done = true
+    }
 
     runBlocking {
       launch { runner.run() }

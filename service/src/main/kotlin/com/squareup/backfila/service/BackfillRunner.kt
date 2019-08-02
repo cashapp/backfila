@@ -61,6 +61,7 @@ class BackfillRunner private constructor(
 
     metadata = factory.transacter.transaction { session -> loadMetaData(session) }
 
+    val batchPrecomputer = BatchPrecomputer(this)
     val batchQueuer = BatchQueuer(this, metadata.numThreads)
     val batchRunner = BatchRunner(this, batchQueuer.nextBatchChannel(),
         metadata.numThreads)
@@ -69,6 +70,7 @@ class BackfillRunner private constructor(
 
     // All our tasks run on this thread.
     runBlocking {
+      batchPrecomputer.run(this)
       batchQueuer.run(this)
       batchRunner.run(this)
       batchAwaiter.run(this)
