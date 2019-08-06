@@ -11,6 +11,8 @@ import com.squareup.backfila.dashboard.StartBackfillRequest
 import com.squareup.backfila.dashboard.StopBackfillAction
 import com.squareup.backfila.dashboard.StopBackfillRequest
 import com.squareup.backfila.fakeCaller
+import com.squareup.protos.backfila.clientservice.GetNextBatchRangeResponse
+import com.squareup.protos.backfila.clientservice.KeyRange
 import com.squareup.protos.backfila.clientservice.RunBatchResponse
 import com.squareup.protos.backfila.service.ConfigureServiceRequest
 import com.squareup.protos.backfila.service.Connector
@@ -168,7 +170,8 @@ class BackfillRunnerTest {
       launch { runner.run() }
       try {
         assertThat(fakeBackfilaClientServiceClient.getNextBatchRangeRequests.receive()).isNotNull()
-        fakeBackfilaClientServiceClient.getNextBatchRangeResponses.send(Result.success(Unit))
+        fakeBackfilaClientServiceClient.getNextBatchRangeResponses.send(Result.success(
+            nextBatchResponse(start = "0", end = "99", scannedCount = 100, matchingCount = 100)))
         assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
 
         // Make this request wait
@@ -206,14 +209,17 @@ class BackfillRunnerTest {
         // 1 thread, so it should send 1 rpc and buffer 2 batches
         assertThat(
             fakeBackfilaClientServiceClient.getNextBatchRangeRequests.receive().previous_end_key).isNull()
-        fakeBackfilaClientServiceClient.getNextBatchRangeResponses.send(Result.success(Unit))
+        fakeBackfilaClientServiceClient.getNextBatchRangeResponses.send(Result.success(
+            nextBatchResponse(start = "0", end = "99", scannedCount = 100, matchingCount = 100)))
 
         assertThat(fakeBackfilaClientServiceClient.getNextBatchRangeRequests.receive()
             .previous_end_key).isEqualTo("99".encodeUtf8())
-        fakeBackfilaClientServiceClient.getNextBatchRangeResponses.send(Result.success(Unit))
+        fakeBackfilaClientServiceClient.getNextBatchRangeResponses.send(Result.success(
+            nextBatchResponse(start = "100", end = "199", scannedCount = 100, matchingCount = 100)))
         assertThat(fakeBackfilaClientServiceClient.getNextBatchRangeRequests.receive()
             .previous_end_key).isEqualTo("199".encodeUtf8())
-        fakeBackfilaClientServiceClient.getNextBatchRangeResponses.send(Result.success(Unit))
+        fakeBackfilaClientServiceClient.getNextBatchRangeResponses.send(Result.success(
+            nextBatchResponse(start = "200", end = "299", scannedCount = 100, matchingCount = 100)))
         // Not buffering any more batches
         yield()
         assertThat(fakeBackfilaClientServiceClient.getNextBatchRangeResponses.poll()).isNull()
@@ -356,6 +362,38 @@ class BackfillRunnerTest {
     }
   }
 
+  @Test fun skipEmptyBatches() {
+    val runner = startBackfill(numThreads = 1)
+
+    // Disable precomputing to avoid making interfering calls to GetNextBatch
+    transacter.transaction { session ->
+      val instance = session.load(runner.instanceId)
+      instance.precomputing_done = true
+    }
+
+    runBlocking {
+      launch { runner.run() }
+      try {
+        assertThat(fakeBackfilaClientServiceClient.getNextBatchRangeRequests.receive()).isNotNull()
+        fakeBackfilaClientServiceClient.getNextBatchRangeResponses.send(Result.success(
+            nextBatchResponse(start = "0", end = "99", scannedCount = 100, matchingCount = 0)))
+
+        assertThat(withTimeoutOrNull(1000L) {
+          fakeBackfilaClientServiceClient.runBatchRequests.receive()
+        }).isNull()
+      } finally {
+        runner.stop()
+      }
+    }
+
+    // No RunBatch RPC was made but cursor should be updated by RunBatch
+    transacter.transaction { session ->
+      val instance = session.load(runner.instanceId)
+      assertThat(instance.pkey_cursor).isEqualTo("99".encodeUtf8())
+      assertThat(instance.run_state).isEqualTo(BackfillState.RUNNING)
+    }
+  }
+
   fun startBackfill(numThreads: Int = 3): BackfillRunner {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(ConfigureServiceRequest(listOf(
@@ -373,4 +411,11 @@ class BackfillRunnerTest {
 
     return leaseHunter.hunt().single()
   }
+
+  fun nextBatchResponse(start: String, end: String, scannedCount: Long, matchingCount: Long) =
+      GetNextBatchRangeResponse(listOf(GetNextBatchRangeResponse.Batch(
+          KeyRange(start.encodeUtf8(), end.encodeUtf8()),
+          scannedCount,
+          matchingCount
+      )))
 }

@@ -16,7 +16,7 @@ import javax.inject.Singleton
 class FakeBackfilaClientServiceClient @Inject constructor() : BackfilaClientServiceClient {
   val getNextBatchRangeRequests = Channel<GetNextBatchRangeRequest>()
   /** Send empty data here to signal GetNextBatchRange should return the next batch. */
-  val getNextBatchRangeResponses = Channel<Result<Unit>>()
+  val getNextBatchRangeResponses = Channel<Result<GetNextBatchRangeResponse>>()
 
   val runBatchRequests = Channel<RunBatchRequest>()
   /** Send responses or exceptions here to return them to the runner. */
@@ -51,7 +51,7 @@ class FakeBackfilaClientServiceClient @Inject constructor() : BackfilaClientServ
       GetNextBatchRangeResponse {
     if (!getNextBatchRangeRequests.isClosedForSend) {
       getNextBatchRangeRequests.send(request)
-      getNextBatchRangeResponses.receive().getOrThrow()
+      return getNextBatchRangeResponses.receive().getOrThrow()
     }
     val nextStart = if (request.previous_end_key != null) {
       request.previous_end_key.utf8().toLong() + 1
