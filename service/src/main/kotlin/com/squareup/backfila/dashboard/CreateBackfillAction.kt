@@ -114,7 +114,8 @@ class CreateBackfillAction @Inject constructor(
             KeyRange(
                 request.pkey_range_start?.encodeUtf8(),
                 request.pkey_range_end?.encodeUtf8()),
-            request.parameter_map
+            request.parameter_map,
+            request.dry_run
         ))
     val instances = prepareBackfillResponse.instances
     if (instances.isEmpty()) {

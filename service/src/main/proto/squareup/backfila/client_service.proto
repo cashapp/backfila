@@ -26,6 +26,8 @@ message PrepareBackfillRequest {
 
   // User provided parameters at creation.
   map<string, bytes> parameters = 4;
+
+  optional bool dry_run = 5;
 }
 message PrepareBackfillResponse {
   message Instance {
@@ -61,6 +63,8 @@ message GetNextBatchRangeRequest {
   optional uint64 compute_time_limit_ms = 9;
   // Compute as many batches as possible until this many results.
   optional uint64 compute_count_limit = 10;
+
+  optional bool dry_run = 11;
 }
 message GetNextBatchRangeResponse {
   message Batch {

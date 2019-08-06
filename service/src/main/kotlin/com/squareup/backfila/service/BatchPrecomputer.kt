@@ -47,7 +47,8 @@ class BatchPrecomputer(
             KeyRange(metadata.pkeyStart, metadata.pkeyEnd),
             metadata.parameters,
             computeTimeLimitMs,
-            computeCountLimit
+            computeCountLimit,
+            metadata.dryRun
         ))
 
         backfillRunner.onRpcSuccess()
