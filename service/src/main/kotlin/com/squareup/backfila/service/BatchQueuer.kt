@@ -52,7 +52,8 @@ class BatchQueuer(
             KeyRange(metadata.pkeyStart, metadata.pkeyEnd),
             metadata.parameters,
             computeTimeLimitMs,
-            computeCountLimit.toLong()
+            computeCountLimit.toLong(),
+            metadata.dryRun
         ))
 
         backfillRunner.onRpcSuccess()
