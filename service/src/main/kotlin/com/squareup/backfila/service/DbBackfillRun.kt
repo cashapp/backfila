@@ -9,6 +9,7 @@ import misk.hibernate.Query
 import misk.hibernate.Session
 import misk.hibernate.newQuery
 import okio.ByteString
+import okio.ByteString.Companion.decodeBase64
 import java.time.Instant
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -33,6 +34,10 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
 
   @Column(nullable = false)
   lateinit var service_id: Id<DbService>
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "service_id", updatable = false, insertable = false)
+  lateinit var service: DbService
 
   /** Immutably stores the data configured by the client service for this backfill. */
   @Column(nullable = false)
@@ -128,6 +133,8 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
   fun complete() {
     this.state = BackfillState.COMPLETE
   }
+
+  fun parameters() = parameter_map?.mapValues { (k, v) -> v.decodeBase64()!! }
 
   fun backoffSchedule() = backoff_schedule?.split(',')?.map { it.toLong() }
 }

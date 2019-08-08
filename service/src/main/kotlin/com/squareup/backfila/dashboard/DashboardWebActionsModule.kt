@@ -10,7 +10,7 @@ class DashboardWebActionsModule : KAbstractModule() {
     install(WebActionModule.create<StartBackfillAction>())
     install(WebActionModule.create<StopBackfillAction>())
     install(WebActionModule.create<GetRegisteredBackfillsAction>())
-    install(WebActionModule.create<GetJvmThreadsAction>())
     install(WebActionModule.create<GetBackfillRunsAction>())
+    install(WebActionModule.create<GetBackfillStatusAction>())
   }
 }
