@@ -6,6 +6,7 @@ import com.squareup.backfila.api.ConfigureServiceAction
 import com.squareup.backfila.dashboard.CreateBackfillAction
 import com.squareup.backfila.dashboard.CreateBackfillRequest
 import com.squareup.backfila.dashboard.GetBackfillRunsAction
+import com.squareup.backfila.dashboard.GetBackfillStatusAction
 import com.squareup.backfila.dashboard.StartBackfillAction
 import com.squareup.backfila.dashboard.StartBackfillRequest
 import com.squareup.backfila.dashboard.StopBackfillAction
@@ -14,7 +15,6 @@ import com.squareup.backfila.fakeCaller
 import com.squareup.backfila.service.BackfilaDb
 import com.squareup.backfila.service.BackfillState
 import com.squareup.backfila.service.DbBackfillRun
-import com.squareup.backfila.service.RunInstanceQuery
 import com.squareup.protos.backfila.service.ConfigureServiceRequest
 import com.squareup.protos.backfila.service.Connector
 import misk.exceptions.BadRequestException
@@ -22,7 +22,6 @@ import misk.hibernate.Id
 import misk.hibernate.Query
 import misk.hibernate.Transacter
 import misk.hibernate.load
-import misk.hibernate.newQuery
 import misk.scope.ActionScope
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -43,6 +42,7 @@ class StartStopBackfillActionTest {
   @Inject lateinit var startBackfillAction: StartBackfillAction
   @Inject lateinit var stopBackfillAction: StopBackfillAction
   @Inject lateinit var getBackfillRunsAction: GetBackfillRunsAction
+  @Inject lateinit var getBackfillStatusAction: GetBackfillStatusAction
   @Inject lateinit var queryFactory: Query.Factory
   @Inject lateinit var scope: ActionScope
   @Inject @BackfilaDb lateinit var transacter: Transacter
@@ -70,15 +70,10 @@ class StartStopBackfillActionTest {
       assertThat(backfillRuns.paused_backfills[0].id).isEqualTo(id.toString())
       startBackfillAction.start(id, StartBackfillRequest())
 
-      transacter.transaction { session ->
-        val run = session.load(Id<DbBackfillRun>(id))
-        assertNotNull(run)
-        assertThat(run.state).isEqualTo(BackfillState.RUNNING)
-        assertThat(queryFactory.newQuery<RunInstanceQuery>()
-            .backfillRunId(run.id)
-            .list(session).map { it.run_state })
-            .containsOnly(BackfillState.RUNNING)
-      }
+      var status = getBackfillStatusAction.status(id)
+      assertThat(status.state).isEqualTo(BackfillState.RUNNING)
+      assertThat(status.instances.map { it.state })
+          .containsOnly(BackfillState.RUNNING)
 
       backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
       assertThat(backfillRuns.paused_backfills).hasSize(0)
@@ -86,15 +81,10 @@ class StartStopBackfillActionTest {
 
       stopBackfillAction.stop(id, StopBackfillRequest())
 
-      transacter.transaction { session ->
-        val run = session.load(Id<DbBackfillRun>(id))
-        assertNotNull(run)
-        assertThat(run.state).isEqualTo(BackfillState.PAUSED)
-        assertThat(queryFactory.newQuery<RunInstanceQuery>()
-            .backfillRunId(run.id)
-            .list(session).map { it.run_state })
-            .containsOnly(BackfillState.PAUSED)
-      }
+      status = getBackfillStatusAction.status(id)
+      assertThat(status.state).isEqualTo(BackfillState.PAUSED)
+      assertThat(status.instances.map { it.state })
+          .containsOnly(BackfillState.PAUSED)
 
       backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
       assertThat(backfillRuns.paused_backfills).hasSize(1)

@@ -15,7 +15,6 @@ import misk.hibernate.Transacter
 import misk.hibernate.load
 import misk.logging.getLogger
 import okio.ByteString
-import okio.ByteString.Companion.decodeBase64
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant
@@ -120,7 +119,7 @@ class BackfillRunner private constructor(
         dbRunInstance.pkey_cursor,
         dbRunInstance.pkey_range_start,
         dbRunInstance.pkey_range_end,
-        dbRunInstance.backfill_run.parameter_map?.mapValues { (k, v) -> v.decodeBase64()!! },
+        dbRunInstance.backfill_run.parameters(),
         dbRunInstance.backfill_run.batch_size,
         dbRunInstance.backfill_run.scan_size,
         dbRunInstance.backfill_run.dry_run,

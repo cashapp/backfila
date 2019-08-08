@@ -24,8 +24,6 @@ data class UiBackfillRun(
   val name: String
 )
 
-data class GetBackfillRunsRequest(val pagination_token: String? = null)
-
 data class GetBackfillRunsResponse(
   val running_backfills: List<UiBackfillRun>,
   val paused_backfills: List<UiBackfillRun>,

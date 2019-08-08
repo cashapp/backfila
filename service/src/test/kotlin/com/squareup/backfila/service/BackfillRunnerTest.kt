@@ -6,6 +6,7 @@ import com.squareup.backfila.api.ConfigureServiceAction
 import com.squareup.backfila.client.FakeBackfilaClientServiceClient
 import com.squareup.backfila.dashboard.CreateBackfillAction
 import com.squareup.backfila.dashboard.CreateBackfillRequest
+import com.squareup.backfila.dashboard.GetBackfillStatusAction
 import com.squareup.backfila.dashboard.StartBackfillAction
 import com.squareup.backfila.dashboard.StartBackfillRequest
 import com.squareup.backfila.dashboard.StopBackfillAction
@@ -42,6 +43,7 @@ class BackfillRunnerTest {
 
   @Inject lateinit var configureServiceAction: ConfigureServiceAction
   @Inject lateinit var createBackfillAction: CreateBackfillAction
+  @Inject lateinit var getBackfillStatusAction: GetBackfillStatusAction
   @Inject lateinit var startBackfillAction: StartBackfillAction
   @Inject lateinit var stopBackfillAction: StopBackfillAction
   @Inject lateinit var scope: ActionScope
@@ -64,37 +66,33 @@ class BackfillRunnerTest {
 
     runner.run()
 
-    transacter.transaction { session ->
-      val instance = session.load(runner.instanceId)
-      assertThat(instance.pkey_cursor).isEqualTo("1000".encodeUtf8())
-      assertThat(instance.run_state).isEqualTo(BackfillState.COMPLETE)
-      // Not all instances complete.
-      assertThat(instance.backfill_run.state).isEqualTo(BackfillState.RUNNING)
-    }
+    var status = getBackfillStatusAction.status(runner.backfillRunId.id)
+    var instance = status.instances.find { it.id == runner.instanceId.id }!!
+    assertThat(instance.pkey_cursor).isEqualTo("1000".encodeUtf8())
+    assertThat(instance.state).isEqualTo(BackfillState.COMPLETE)
+    // Not all instances complete.
+    assertThat(status.state).isEqualTo(BackfillState.RUNNING)
 
     runner = leaseHunter.hunt().single()
 
-    transacter.transaction { session ->
-      val instance = session.load(runner.instanceId)
-      assertThat(instance.pkey_cursor).isNull()
-      assertThat(instance.run_state).isEqualTo(BackfillState.RUNNING)
-    }
+    instance = status.instances.find { it.id == runner.instanceId.id }!!
+    assertThat(instance.pkey_cursor).isNull()
+    assertThat(instance.state).isEqualTo(BackfillState.RUNNING)
 
     runner.run()
 
-    transacter.transaction { session ->
-      val instance = session.load(runner.instanceId)
-      assertThat(instance.pkey_cursor).isEqualTo("1000".encodeUtf8())
-      assertThat(instance.precomputing_pkey_cursor).isEqualTo("1000".encodeUtf8())
-      assertThat(instance.precomputing_done).isEqualTo(true)
-      assertThat(instance.computed_scanned_record_count).isEqualTo(1001)
-      assertThat(instance.computed_matching_record_count).isEqualTo(1001)
-      assertThat(instance.backfilled_scanned_record_count).isEqualTo(1001)
-      assertThat(instance.backfilled_matching_record_count).isEqualTo(1001)
-      assertThat(instance.run_state).isEqualTo(BackfillState.COMPLETE)
-      // All instances complete.
-      assertThat(instance.backfill_run.state).isEqualTo(BackfillState.COMPLETE)
-    }
+    status = getBackfillStatusAction.status(runner.backfillRunId.id)
+    // All instances complete.
+    assertThat(status.state).isEqualTo(BackfillState.COMPLETE)
+    instance = status.instances.find { it.id == runner.instanceId.id }!!
+    assertThat(instance.state).isEqualTo(BackfillState.COMPLETE)
+    assertThat(instance.pkey_cursor).isEqualTo("1000".encodeUtf8())
+    assertThat(instance.precomputing_pkey_cursor).isEqualTo("1000".encodeUtf8())
+    assertThat(instance.precomputing_done).isEqualTo(true)
+    assertThat(instance.computed_scanned_record_count).isEqualTo(1001)
+    assertThat(instance.computed_matching_record_count).isEqualTo(1001)
+    assertThat(instance.backfilled_scanned_record_count).isEqualTo(1001)
+    assertThat(instance.backfilled_matching_record_count).isEqualTo(1001)
   }
 
   // An important use case is serial / single thread backfills.
