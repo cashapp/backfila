@@ -18,7 +18,6 @@ import misk.inject.KAbstractModule
 import misk.security.authz.AccessAnnotationEntry
 import misk.security.authz.DevelopmentOnly
 import misk.web.metadata.AdminDashboardAccess
-import misk.web.metadata.AdminDashboardTestingModule
 import java.util.concurrent.Executors
 import javax.inject.Singleton
 
@@ -34,10 +33,6 @@ class BackfilaServiceModule(
     install(BackfilaPersistenceModule(config))
     install(DashboardWebActionsModule())
     install(ServiceWebActionsModule())
-
-    if (environment == Environment.DEVELOPMENT) {
-      install(AdminDashboardTestingModule(environment))
-    }
 
     install(SchedulerLifecycleServiceModule())
 
