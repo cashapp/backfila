@@ -6,11 +6,6 @@ option java_generic_services = true;
 
 // In this file: APIs that the service provides to the client.
 
-enum Connector {
-  HTTP = 1;
-  ENVOY = 2;
-}
-
 message Parameter {
   optional string name = 1;
   // Description to show in the UI.
@@ -38,12 +33,16 @@ message ConfigureServiceRequest {
   // List of all available backfills in this service
   repeated BackfillData backfills = 1;
 
-  optional Connector connector = 2;
+  // This isn't encoded as protobuf so connector implementations can be added without modifying
+  // protos (thus avoiding modifying the core backfila codebase).
+  optional string connector_type = 2;
 
-  // Extra data specific to the connector type. Suggested encoding is JSON.
-  // For example ENVOY type would have the cluster type as extra data.
-  // {"cluster_type": "production-jobs"}
+  // Extra data that is passed through to the connector corresponding to connector_type.
+  // Suggested encoding is JSON. For example ENVOY type could have the cluster type as extra data:
+  //  e.g.: `{"cluster_type": "production-jobs"}`
   optional string connector_extra_data = 3;
+
+  optional string slack_channel = 4;
 }
 
 message ConfigureServiceResponse {

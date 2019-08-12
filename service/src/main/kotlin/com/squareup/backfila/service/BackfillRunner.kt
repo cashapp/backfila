@@ -2,7 +2,7 @@ package com.squareup.backfila.service
 
 import com.google.common.base.Preconditions.checkState
 import com.squareup.backfila.client.BackfilaClientServiceClient
-import com.squareup.backfila.client.BackfilaClientServiceClientProvider
+import com.squareup.backfila.client.ConnectorProvider
 import com.squareup.protos.backfila.clientservice.GetNextBatchRangeResponse
 import com.squareup.protos.backfila.clientservice.RunBatchRequest
 import kotlinx.coroutines.cancelChildren
@@ -130,12 +130,18 @@ class BackfillRunner private constructor(
   }
 
   private fun createClient(): BackfilaClientServiceClient {
-    val (serviceName, connector) = factory.transacter.transaction { session ->
+    data class DbData(
+      val serviceName: String,
+      val connector: String,
+      val connectorExtraData: String?
+    )
+    val dbData = factory.transacter.transaction { session ->
       val dbRunInstance = session.load(instanceId)
       val service = dbRunInstance.backfill_run.registered_backfill.service
-      Pair(service.registry_name, service.connector)
+      DbData(service.registry_name, service.connector, service.connector_extra_data)
     }
-    return factory.clientProvider.clientFor(serviceName, connector)
+    return factory.connectorProvider.clientProvider(dbData.connector)
+        .clientFor(dbData.serviceName, dbData.connectorExtraData)
   }
 
   fun runBatchRequest(
@@ -221,8 +227,8 @@ class BackfillRunner private constructor(
   class Factory @Inject internal constructor(
     @BackfilaDb val transacter: Transacter,
     val clock: Clock,
-    val clientProvider: BackfilaClientServiceClientProvider,
-    val queryFactory: Query.Factory
+    val queryFactory: Query.Factory,
+    val connectorProvider: ConnectorProvider
   ) {
     fun create(
       @Suppress("UNUSED_PARAMETER") session: Session,

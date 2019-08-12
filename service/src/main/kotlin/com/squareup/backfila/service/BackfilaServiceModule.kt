@@ -6,7 +6,9 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder
 import com.google.inject.Provides
 import com.squareup.backfila.api.ServiceWebActionsModule
 import com.squareup.backfila.client.BackfilaClientServiceClientProvider
-import com.squareup.backfila.client.RealBackfilaClientServiceClientProvider
+import com.squareup.backfila.client.Connectors
+import com.squareup.backfila.client.EnvoyClientServiceClientProvider
+import com.squareup.backfila.client.ForConnectors
 import com.squareup.backfila.dashboard.DashboardWebActionsModule
 import com.squareup.skim.SkimModule
 import com.squareup.skim.aws.Region
@@ -46,8 +48,10 @@ class BackfilaServiceModule(
     bind<MiskCaller>().annotatedWith<DevelopmentOnly>()
         .toInstance(MiskCaller(user = "development", capabilities = setOf("eng")))
 
-    bind(BackfilaClientServiceClientProvider::class.java)
-        .to(RealBackfilaClientServiceClientProvider::class.java)
+    newMapBinder<String, BackfilaClientServiceClientProvider>(ForConnectors::class)
+        .addBinding(Connectors.ENVOY)
+        .to(EnvoyClientServiceClientProvider::class.java)
+    // TODO http connector
   }
 
   @Provides @ForBackfilaScheduler @Singleton

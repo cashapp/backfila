@@ -1,16 +1,19 @@
 package com.squareup.backfila.dashboard
 
-import com.squareup.backfila.client.BackfilaClientServiceClientProvider
+import com.squareup.backfila.client.ConnectorProvider
 import com.squareup.backfila.service.BackfilaDb
 import com.squareup.backfila.service.BackfillState
 import com.squareup.backfila.service.DbBackfillRun
+import com.squareup.backfila.service.DbRegisteredBackfill
 import com.squareup.backfila.service.DbRunInstance
+import com.squareup.backfila.service.DbService
 import com.squareup.backfila.service.RegisteredBackfillQuery
 import com.squareup.backfila.service.ServiceQuery
 import com.squareup.protos.backfila.clientservice.KeyRange
 import com.squareup.protos.backfila.clientservice.PrepareBackfillRequest
 import misk.MiskCaller
 import misk.exceptions.BadRequestException
+import misk.hibernate.Id
 import misk.hibernate.Query
 import misk.hibernate.Transacter
 import misk.hibernate.newQuery
@@ -51,7 +54,7 @@ class CreateBackfillAction @Inject constructor(
   private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
   @BackfilaDb private val transacter: Transacter,
   private val queryFactory: Query.Factory,
-  private val clientProvider: BackfilaClientServiceClientProvider
+  private val connectorProvider: ConnectorProvider
 ) : WebAction {
 
   @Post("/services/{service}/create")
@@ -85,16 +88,12 @@ class CreateBackfillAction @Inject constructor(
       }
     }
 
-    val (serviceId, connector) = transacter.transaction { session ->
+    val dbData = transacter.transaction { session ->
       val dbService = queryFactory.newQuery<ServiceQuery>()
           .registryName(service)
           .uniqueResult(session) ?: throw BadRequestException("`$service` doesn't exist")
-      Pair(dbService.id, dbService.connector)
-    }
-
-    val registeredBackfillId = transacter.transaction { session ->
       val registeredBackfill = queryFactory.newQuery<RegisteredBackfillQuery>()
-          .serviceId(serviceId)
+          .serviceId(dbService.id)
           .name(request.backfill_name)
           .active()
           .uniqueResult(session)
@@ -103,17 +102,21 @@ class CreateBackfillAction @Inject constructor(
         "Found registered backfill for `$service`::`${request.backfill_name}`" +
             " [id=${registeredBackfill.id}]"
       }
-      registeredBackfill.id
+      DbData(
+          dbService.id,
+          dbService.connector,
+          dbService.connector_extra_data,
+          registeredBackfill.id
+      )
     }
 
-    val client = clientProvider.clientFor(service, connector)
+    val client = connectorProvider.clientProvider(dbData.connectorType)
+        .clientFor(service, dbData.connectorExtraData)
     val prepareBackfillResponse =
         client.prepareBackfill(PrepareBackfillRequest(
-            registeredBackfillId.toString(),
+            dbData.registeredBackfillId.toString(),
             request.backfill_name,
-            KeyRange(
-                request.pkey_range_start?.encodeUtf8(),
-                request.pkey_range_end?.encodeUtf8()),
+            KeyRange(request.pkey_range_start?.encodeUtf8(), request.pkey_range_end?.encodeUtf8()),
             request.parameter_map,
             request.dry_run
         ))
@@ -130,8 +133,8 @@ class CreateBackfillAction @Inject constructor(
 
     val backfillRunId = transacter.transaction { session ->
       val backfillRun = DbBackfillRun(
-          serviceId,
-          registeredBackfillId,
+          dbData.serviceId,
+          dbData.registeredBackfillId,
           request.parameter_map,
           BackfillState.PAUSED,
           caller.get()?.user,
@@ -159,8 +162,16 @@ class CreateBackfillAction @Inject constructor(
     return Response(
         body = "go to /backfills/$backfillRunId".toResponseBody(),
         statusCode = HttpURLConnection.HTTP_MOVED_TEMP,
-        headers = headersOf("Location", "/backfills/$backfillRunId"))
+        headers = headersOf("Location", "/backfills/$backfillRunId")
+    )
   }
+
+  data class DbData(
+    val serviceId: Id<DbService>,
+    val connectorType: String,
+    val connectorExtraData: String?,
+    val registeredBackfillId: Id<DbRegisteredBackfill>
+  )
 
   companion object {
     private val logger = getLogger<CreateBackfillAction>()

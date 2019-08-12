@@ -1,7 +1,17 @@
 package com.squareup.backfila.client
 
-import com.squareup.protos.backfila.service.Connector
+import misk.client.HttpClientEndpointConfig
+import java.time.Duration
+
+val DEFAULT_HTTP_CLIENT_ENDPOINT_CONFIG = HttpClientEndpointConfig(
+    // Allow RunBatch requests to take a long time.
+    readTimeout = Duration.ofSeconds(30L),
+    // Use a large number, we limit parallel calls ourselves.
+    maxRequests = 1000,
+    maxRequestsPerHost = 1000
+)
 
 interface BackfilaClientServiceClientProvider {
-  fun clientFor(serviceName: String, connector: Connector): BackfilaClientServiceClient
+  fun validateExtraData(connectorExtraData: String?)
+  fun clientFor(serviceName: String, connectorExtraData: String?): BackfilaClientServiceClient
 }

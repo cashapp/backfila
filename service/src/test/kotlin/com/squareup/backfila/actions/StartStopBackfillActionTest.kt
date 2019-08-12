@@ -3,6 +3,7 @@ package com.squareup.backfila.actions
 import com.google.inject.Module
 import com.squareup.backfila.BackfilaTestingModule
 import com.squareup.backfila.api.ConfigureServiceAction
+import com.squareup.backfila.client.Connectors
 import com.squareup.backfila.dashboard.CreateBackfillAction
 import com.squareup.backfila.dashboard.CreateBackfillRequest
 import com.squareup.backfila.dashboard.GetBackfillRunsAction
@@ -16,7 +17,6 @@ import com.squareup.backfila.service.BackfilaDb
 import com.squareup.backfila.service.BackfillState
 import com.squareup.backfila.service.DbBackfillRun
 import com.squareup.protos.backfila.service.ConfigureServiceRequest
-import com.squareup.protos.backfila.service.Connector
 import misk.exceptions.BadRequestException
 import misk.hibernate.Id
 import misk.hibernate.Query
@@ -50,9 +50,12 @@ class StartStopBackfillActionTest {
   @Test
   fun startAndStop() {
     scope.fakeCaller(service = "deep-fryer") {
-      configureServiceAction.configureService(ConfigureServiceRequest(listOf(
-          ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null, null, false)),
-          Connector.ENVOY, null))
+      configureServiceAction.configureService(ConfigureServiceRequest.Builder()
+          .backfills(listOf(
+              ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null,
+                  null, false)))
+          .connector_type(Connectors.ENVOY)
+          .build())
     }
     scope.fakeCaller(user = "molly") {
       var backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
@@ -95,9 +98,12 @@ class StartStopBackfillActionTest {
   @Test
   fun backfillDoesntExist() {
     scope.fakeCaller(service = "deep-fryer") {
-      configureServiceAction.configureService(ConfigureServiceRequest(listOf(
-          ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null, null, false)),
-          Connector.ENVOY, null))
+      configureServiceAction.configureService(ConfigureServiceRequest.Builder()
+          .backfills(listOf(
+              ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null,
+                  null, false)))
+          .connector_type(Connectors.ENVOY)
+          .build())
     }
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create("deep-fryer",
@@ -113,9 +119,12 @@ class StartStopBackfillActionTest {
   @Test
   fun cantStartRunningBackfill() {
     scope.fakeCaller(service = "deep-fryer") {
-      configureServiceAction.configureService(ConfigureServiceRequest(listOf(
-          ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null, null, false)),
-          Connector.ENVOY, null))
+      configureServiceAction.configureService(ConfigureServiceRequest.Builder()
+          .backfills(listOf(
+              ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null,
+                  null, false)))
+          .connector_type(Connectors.ENVOY)
+          .build())
     }
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create("deep-fryer",
@@ -138,9 +147,12 @@ class StartStopBackfillActionTest {
   @Test
   fun cantStopPausedBackfill() {
     scope.fakeCaller(service = "deep-fryer") {
-      configureServiceAction.configureService(ConfigureServiceRequest(listOf(
-          ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null, null, false)),
-          Connector.ENVOY, null))
+      configureServiceAction.configureService(ConfigureServiceRequest.Builder()
+          .backfills(listOf(
+              ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null,
+                  null, false)))
+          .connector_type(Connectors.ENVOY)
+          .build())
     }
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create("deep-fryer",
@@ -155,9 +167,12 @@ class StartStopBackfillActionTest {
   @Test
   fun cantToggleCompletedBackfill() {
     scope.fakeCaller(service = "deep-fryer") {
-      configureServiceAction.configureService(ConfigureServiceRequest(listOf(
-          ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null, null, false)),
-          Connector.ENVOY, null))
+      configureServiceAction.configureService(ConfigureServiceRequest.Builder()
+          .backfills(listOf(
+              ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null,
+                  null, false)))
+          .connector_type(Connectors.ENVOY)
+          .build())
     }
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create("deep-fryer",
