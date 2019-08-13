@@ -12,7 +12,7 @@ import retrofit2.http.Headers
 import retrofit2.http.POST
 
 // Methods implemented by the client service library that backfila calls out to.
-interface BackfilaClientServiceSquareDcApi {
+interface EnvoyClientServiceApi {
   @POST("$BASE_PATH/prepare_backfill")
   @Headers(value = [
     "Accept: application/x-protobuf",
@@ -40,7 +40,6 @@ interface BackfilaClientServiceSquareDcApi {
     @Body request: RunBatchRequest
   ): RunBatchResponse
 
-  // TODO figure out if we're using service container routing or plain http or grpc
   companion object {
     private const val BASE_PATH = "/services/squareup.backfila.clientservice.BackfilaClientService"
   }

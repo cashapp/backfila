@@ -9,8 +9,8 @@ import com.squareup.protos.backfila.clientservice.RunBatchResponse
 import retrofit2.HttpException
 import retrofit2.Response
 
-internal class SqDcBackfilaClientServiceClient internal constructor(
-  private val api: BackfilaClientServiceSquareDcApi
+internal class EnvoyClientServiceClient internal constructor(
+  private val api: EnvoyClientServiceApi
 ) : BackfilaClientServiceClient {
 
   override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {

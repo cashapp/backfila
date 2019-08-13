@@ -1,5 +1,6 @@
 package com.squareup.backfila.api
 
+import com.squareup.backfila.client.ConnectorProvider
 import com.squareup.backfila.service.BackfilaDb
 import com.squareup.backfila.service.DbRegisteredBackfill
 import com.squareup.backfila.service.DbService
@@ -27,7 +28,8 @@ class ConfigureServiceAction @Inject constructor(
   private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
   @BackfilaDb private val transacter: Transacter,
   private val queryFactory: Query.Factory,
-  private val clock: Clock
+  private val clock: Clock,
+  private val connectorProvider: ConnectorProvider
 ) : WebAction {
   @Post("/configure_service")
   @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
@@ -39,16 +41,24 @@ class ConfigureServiceAction @Inject constructor(
 
     logger.info { "Configuring service `$service` with ${request.backfills.size} backfills" }
 
+    val clientProvider = connectorProvider.clientProvider(request.connector_type)
+    // This tests that the extra data is valid, throwing an exception if invalid.
+    clientProvider.validateExtraData(request.connector_extra_data)
+
     transacter.transaction { session ->
       var dbService = queryFactory.newQuery<ServiceQuery>()
           .registryName(service)
           .uniqueResult(session)
       if (dbService == null) {
-        // TODO validate data for connector
-        dbService = DbService(service, request.connector, request.connector_extra_data)
+        dbService = DbService(
+            service,
+            request.connector_type,
+            request.connector_extra_data,
+            request.slack_channel
+        )
         session.save(dbService)
       } else {
-        dbService.connector = request.connector
+        dbService.connector = request.connector_type
         dbService.connector_extra_data = request.connector_extra_data
       }
 

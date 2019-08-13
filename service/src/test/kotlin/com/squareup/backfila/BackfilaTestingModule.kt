@@ -6,7 +6,9 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder
 import com.google.inject.Provides
 import com.squareup.backfila.api.ServiceWebActionsModule
 import com.squareup.backfila.client.BackfilaClientServiceClientProvider
+import com.squareup.backfila.client.Connectors
 import com.squareup.backfila.client.FakeBackfilaClientServiceClientProvider
+import com.squareup.backfila.client.ForConnectors
 import com.squareup.backfila.dashboard.DashboardWebActionsModule
 import com.squareup.backfila.service.BackfilaConfig
 import com.squareup.backfila.service.BackfilaDb
@@ -45,6 +47,13 @@ internal class BackfilaTestingModule : KAbstractModule() {
         bindSeedData(MiskCaller::class)
       }
     })
+
+    newMapBinder<String, BackfilaClientServiceClientProvider>(ForConnectors::class)
+        .addBinding(Connectors.HTTP)
+        .to(FakeBackfilaClientServiceClientProvider::class.java)
+    newMapBinder<String, BackfilaClientServiceClientProvider>(ForConnectors::class)
+        .addBinding(Connectors.ENVOY)
+        .to(FakeBackfilaClientServiceClientProvider::class.java)
   }
 
   @Provides @ForBackfilaScheduler @Singleton

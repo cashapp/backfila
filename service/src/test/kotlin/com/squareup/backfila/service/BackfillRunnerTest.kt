@@ -3,6 +3,7 @@ package com.squareup.backfila.service
 import com.google.inject.Module
 import com.squareup.backfila.BackfilaTestingModule
 import com.squareup.backfila.api.ConfigureServiceAction
+import com.squareup.backfila.client.Connectors.ENVOY
 import com.squareup.backfila.client.FakeBackfilaClientServiceClient
 import com.squareup.backfila.dashboard.CreateBackfillAction
 import com.squareup.backfila.dashboard.CreateBackfillRequest
@@ -16,7 +17,6 @@ import com.squareup.protos.backfila.clientservice.GetNextBatchRangeResponse
 import com.squareup.protos.backfila.clientservice.KeyRange
 import com.squareup.protos.backfila.clientservice.RunBatchResponse
 import com.squareup.protos.backfila.service.ConfigureServiceRequest
-import com.squareup.protos.backfila.service.Connector
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -394,10 +394,12 @@ class BackfillRunnerTest {
 
   fun startBackfill(numThreads: Int = 3): BackfillRunner {
     scope.fakeCaller(service = "deep-fryer") {
-      configureServiceAction.configureService(ConfigureServiceRequest(listOf(
-          ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null,
-              null, false)),
-          Connector.ENVOY, null))
+      configureServiceAction.configureService(ConfigureServiceRequest.Builder()
+          .backfills(listOf(
+              ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null,
+                  null, false)))
+          .connector_type(ENVOY)
+          .build())
     }
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create("deep-fryer",
