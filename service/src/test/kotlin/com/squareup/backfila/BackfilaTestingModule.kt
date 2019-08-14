@@ -36,7 +36,6 @@ internal class BackfilaTestingModule : KAbstractModule() {
     install(HibernateTestingModule(BackfilaDb::class))
     install(BackfilaPersistenceModule(config))
 
-    install(DashboardWebActionsModule())
     install(ServiceWebActionsModule())
 
     bind(BackfilaClientServiceClientProvider::class.java)

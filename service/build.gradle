@@ -28,6 +28,15 @@ compileTestKotlin {
 sourceSets {
   main.java.srcDirs += 'src/main/kotlin/'
   test.java.srcDirs += 'src/test/kotlin/'
+  main.resources {
+    srcDirs += [
+            'web/tabs/home/lib'
+    ]
+    srcDirs += [
+            'web/static/'
+    ]
+    exclude '**/node_modules'
+  }
 }
 
 junitPlatform {

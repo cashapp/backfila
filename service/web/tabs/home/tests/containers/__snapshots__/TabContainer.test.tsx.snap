@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TabContainer TabContainer can render with redux 1`] = `
+<DocumentFragment>
+  <div>
+    <div>
+      <h1
+        class="bp3-heading"
+      >
+        Services
+      </h1>
+      <ul>
+        <li
+          class="bp3-skeleton"
+        >
+          lorem ipsum 1234 5678
+        </li>
+        <li
+          class="bp3-skeleton"
+        >
+          lorem ipsum 1234 5678
+        </li>
+        <li
+          class="bp3-skeleton"
+        >
+          lorem ipsum 1234 5678
+        </li>
+        <li
+          class="bp3-skeleton"
+        >
+          lorem ipsum 1234 5678
+        </li>
+        <li
+          class="bp3-skeleton"
+        >
+          lorem ipsum 1234 5678
+        </li>
+      </ul>
+      <span />
+    </div>
+  </div>
+</DocumentFragment>
+`;

@@ -33,7 +33,7 @@ class BackfilaServiceModule(
     install(EnvironmentModule(environment))
     install(SkimModule(environment, config.skim, region))
     install(BackfilaPersistenceModule(config))
-    install(DashboardWebActionsModule())
+    install(DashboardWebActionsModule(environment))
     install(ServiceWebActionsModule())
 
     install(SchedulerLifecycleServiceModule())
