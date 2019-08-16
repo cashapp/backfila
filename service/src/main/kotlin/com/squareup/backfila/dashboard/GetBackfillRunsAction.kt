@@ -7,6 +7,7 @@ import com.squareup.backfila.service.DbBackfillRun
 import com.squareup.backfila.service.ServiceQuery
 import misk.exceptions.BadRequestException
 import misk.hibernate.Query
+import misk.hibernate.Session
 import misk.hibernate.Transacter
 import misk.hibernate.newQuery
 import misk.logging.getLogger
@@ -17,11 +18,18 @@ import misk.web.QueryParam
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
+import java.time.Instant
 import javax.inject.Inject
 
 data class UiBackfillRun(
   val id: String,
-  val name: String
+  val name: String,
+  val state: BackfillState,
+  val created_at: Instant,
+  val created_by_user: String?
+//  val precomputing_done: Boolean,
+//  val computed_matching_record_count: Long,
+//  val backfilled_matching_record_count: Long
 )
 
 data class GetBackfillRunsResponse(
@@ -51,22 +59,25 @@ class GetBackfillRunsAction @Inject constructor(
           .state(BackfillState.RUNNING)
           .orderByIdDesc()
           .list(session)
-          .map(this::dbToUi)
+          .map { dbToUi(session, it) }
       val pausedBackfills = queryFactory.newQuery<BackfillRunQuery>()
           .serviceId(dbService.id)
           .stateNot(BackfillState.RUNNING)
           .orderByIdDesc()
           .list(session)
-          .map(this::dbToUi)
+          .map { dbToUi(session, it) }
 
       GetBackfillRunsResponse(runningBackfills, pausedBackfills, next_pagination_token = null)
     }
   }
 
-  private fun dbToUi(run: DbBackfillRun): UiBackfillRun {
+  private fun dbToUi(session: Session, run: DbBackfillRun): UiBackfillRun {
     return UiBackfillRun(
         run.id.toString(),
-        run.registered_backfill.name
+        run.registered_backfill.name,
+        run.state,
+        run.created_at,
+        run.created_by_user
     )
   }
 

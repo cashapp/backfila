@@ -1,6 +1,5 @@
 package com.squareup.backfila.service
 
-import com.google.common.base.Preconditions.checkState
 import com.squareup.backfila.client.BackfilaClientServiceClient
 import com.squareup.backfila.client.ConnectorProvider
 import com.squareup.protos.backfila.clientservice.GetNextBatchRangeResponse
@@ -186,7 +185,6 @@ class BackfillRunner private constructor(
   private fun pauseBackfill() {
     factory.transacter.transaction { session ->
       val dbRunInstance = session.load(instanceId)
-      checkState(dbRunInstance.backfill_run.state == BackfillState.RUNNING)
       dbRunInstance.backfill_run.setState(session, factory.queryFactory,
           BackfillState.PAUSED)
     }
