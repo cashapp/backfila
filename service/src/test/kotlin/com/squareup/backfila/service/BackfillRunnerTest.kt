@@ -68,7 +68,7 @@ class BackfillRunnerTest {
 
     var status = getBackfillStatusAction.status(runner.backfillRunId.id)
     var instance = status.instances.find { it.id == runner.instanceId.id }!!
-    assertThat(instance.pkey_cursor).isEqualTo("1000".encodeUtf8())
+    assertThat(instance.pkey_cursor).isEqualTo("1000")
     assertThat(instance.state).isEqualTo(BackfillState.COMPLETE)
     // Not all instances complete.
     assertThat(status.state).isEqualTo(BackfillState.RUNNING)
@@ -86,8 +86,8 @@ class BackfillRunnerTest {
     assertThat(status.state).isEqualTo(BackfillState.COMPLETE)
     instance = status.instances.find { it.id == runner.instanceId.id }!!
     assertThat(instance.state).isEqualTo(BackfillState.COMPLETE)
-    assertThat(instance.pkey_cursor).isEqualTo("1000".encodeUtf8())
-    assertThat(instance.precomputing_pkey_cursor).isEqualTo("1000".encodeUtf8())
+    assertThat(instance.pkey_cursor).isEqualTo("1000")
+    assertThat(instance.precomputing_pkey_cursor).isEqualTo("1000")
     assertThat(instance.precomputing_done).isEqualTo(true)
     assertThat(instance.computed_scanned_record_count).isEqualTo(1001)
     assertThat(instance.computed_matching_record_count).isEqualTo(1001)

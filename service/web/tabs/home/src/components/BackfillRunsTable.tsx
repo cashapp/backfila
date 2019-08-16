@@ -50,7 +50,7 @@ export const BackfillRunsTable = (props: ITableProps) => {
           {backfillRuns.map((run: any) => (
             <li>
               <Link to={`/app/home/backfills/${run.id}`}>
-                #{run.id} {run.name}
+                #{run.id} {run.name} {run.state}
               </Link>
             </li>
           ))}

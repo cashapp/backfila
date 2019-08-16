@@ -32,6 +32,7 @@ class GetServicesAction @Inject constructor(
 
     val services = transacter.transaction { session ->
       val services = queryFactory.newQuery<ServiceQuery>()
+          .orderByName()
           .list(session)
       services.map { it.registry_name }
     }

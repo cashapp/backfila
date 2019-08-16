@@ -17,18 +17,18 @@ import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
-import okio.ByteString
+import java.time.Instant
 import javax.inject.Inject
 
 data class UiInstance(
   val id: Long,
   val name: String,
   val state: BackfillState,
-  val pkey_cursor: ByteString?,
-  val pkey_start: ByteString?,
-  val pkey_end: ByteString?,
+  val pkey_cursor: String?,
+  val pkey_start: String?,
+  val pkey_end: String?,
   val precomputing_done: Boolean,
-  val precomputing_pkey_cursor: ByteString?,
+  val precomputing_pkey_cursor: String?,
   val computed_scanned_record_count: Long,
   val computed_matching_record_count: Long,
   val backfilled_scanned_record_count: Long,
@@ -39,11 +39,13 @@ data class GetBackfillStatusResponse(
   val service_name: String,
   val name: String,
   val state: BackfillState,
-  val parameters: Map<String, ByteString>?,
+  val parameters: Map<String, String>?,
   val batch_size: Long,
   val scan_size: Long,
   val dry_run: Boolean,
   val num_threads: Int,
+  val created_at: Instant,
+  val created_by_user: String?,
   val instances: List<UiInstance>
 )
 
@@ -66,11 +68,13 @@ class GetBackfillStatusAction @Inject constructor(
           run.service.registry_name,
           run.registered_backfill.name,
           run.state,
-          run.parameters(),
+          run.parameters()?.mapValues { (k, v) -> v.utf8() },
           run.batch_size,
           run.scan_size,
           run.dry_run,
           run.num_threads,
+          run.created_at,
+          run.created_by_user,
           run.instances(session, queryFactory).map { dbToUi(it) }
       )
     }
@@ -81,11 +85,11 @@ class GetBackfillStatusAction @Inject constructor(
         instance.id.id,
         instance.instance_name,
         instance.run_state,
-        instance.pkey_cursor,
-        instance.pkey_range_start,
-        instance.pkey_range_end,
+        instance.pkey_cursor?.utf8(),
+        instance.pkey_range_start?.utf8(),
+        instance.pkey_range_end?.utf8(),
         instance.precomputing_done,
-        instance.precomputing_pkey_cursor,
+        instance.precomputing_pkey_cursor?.utf8(),
         instance.computed_scanned_record_count,
         instance.computed_matching_record_count,
         instance.backfilled_scanned_record_count,
