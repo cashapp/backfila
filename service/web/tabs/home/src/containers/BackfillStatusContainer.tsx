@@ -1,23 +1,12 @@
 import * as React from "react"
 import {connect} from "react-redux"
 import {IDispatchProps, IState, mapDispatchToProps, mapStateToProps} from "../ducks"
-import {Button, Classes, H2, H3, HTMLTable, Tooltip} from "@blueprintjs/core"
+import {Classes, H2, H3, HTMLTable, Tooltip} from "@blueprintjs/core"
 import {simpleSelect} from "@misk/simpleredux"
 import {Link} from "react-router-dom"
-import {BackfillProgressBar} from "../components"
+import {BackfillProgressBar, StartStopButton} from "../components"
 
 // import TimeAgo from "react-timeago"
-
-function StartStopButton(props: any) {
-  // props.simpleNetworkPost
-  const state = props.state
-  if (state == "RUNNING") {
-    return <Button>stop</Button>
-  } else if (state == "PAUSED") {
-    return <Button>start</Button>
-  }
-  return <Button disabled={true}>start</Button>
-}
 
 export interface IComputedCountProps {
   precomputing_done: boolean
@@ -48,16 +37,17 @@ class BackfillStatusContainer extends React.Component<
   private interval: any
 
   componentDidMount() {
-    this.props.simpleNetworkGet(
-      this.backfillStatusTag,
-      `/backfills/${this.id}/status`
-    )
+    this.requestStatus()
     this.interval = setInterval(() => {
-      this.props.simpleNetworkGet(
+      this.requestStatus()
+    }, 5000)
+  }
+
+  requestStatus() {
+    this.props.simpleNetworkGet(
         this.backfillStatusTag,
         `/backfills/${this.id}/status`
-      )
-    }, 5000)
+    )
   }
 
   render() {
@@ -103,7 +93,12 @@ class BackfillStatusContainer extends React.Component<
               <tbody>
                 <tr>
                   <td>State</td>
-                  <td>{status.state}</td>
+                  <td>
+                    {status.state}{" "}
+                    <div style={{float: "right"}}>
+                      <StartStopButton id={this.id} state={status.state}/>
+                    </div>
+                  </td>
                 </tr>
                 <tr>
                   <td>Dry run</td>
@@ -148,9 +143,6 @@ class BackfillStatusContainer extends React.Component<
                 )}
               </tbody>
             </HTMLTable>
-          </div>
-          <div>
-            <StartStopButton state={status.state} />
           </div>
           <div>
             Total backfilled records: {total_backfilled_matching_record_count}

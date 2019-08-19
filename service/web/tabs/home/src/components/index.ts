@@ -1,5 +1,11 @@
 import BackfillRunsTable from "./BackfillRunsTable"
-import ServicesListComponent from "./ServicesListComponent"
 import BackfillProgressBar from "./BackfillProgressBar"
+import ServicesListComponent from "./ServicesListComponent"
+import StartStopButton from "./StartStopButton"
 
-export { BackfillProgressBar, BackfillRunsTable, ServicesListComponent }
+export {
+  BackfillProgressBar,
+  BackfillRunsTable,
+  ServicesListComponent,
+  StartStopButton
+}
