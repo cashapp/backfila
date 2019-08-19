@@ -100,7 +100,8 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
     scan_size: Long,
     batch_size: Long,
     num_threads: Int,
-    backoff_schedule: String?
+    backoff_schedule: String?,
+    dry_run: Boolean
   ) : this() {
     this.service_id = service_id
     this.registered_backfill_id = registered_backfill_id
@@ -111,6 +112,7 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
     this.batch_size = batch_size
     this.num_threads = num_threads
     this.backoff_schedule = backoff_schedule
+    this.dry_run = dry_run
   }
 
   fun instances(session: Session, queryFactory: Query.Factory) =
