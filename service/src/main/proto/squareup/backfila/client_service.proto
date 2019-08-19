@@ -65,6 +65,10 @@ message GetNextBatchRangeRequest {
   optional uint64 compute_count_limit = 10;
 
   optional bool dry_run = 11;
+
+  // Indicates if this request is used to precompute data size.
+  // Client can choose to use a more optimized query in this case.
+  optional bool precomputing = 12;
 }
 message GetNextBatchRangeResponse {
   message Batch {

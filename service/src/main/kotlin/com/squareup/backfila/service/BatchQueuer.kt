@@ -53,7 +53,8 @@ class BatchQueuer(
             metadata.parameters,
             computeTimeLimitMs,
             computeCountLimit.toLong(),
-            metadata.dryRun
+            metadata.dryRun,
+            false
         ))
 
         backfillRunner.onRpcSuccess()

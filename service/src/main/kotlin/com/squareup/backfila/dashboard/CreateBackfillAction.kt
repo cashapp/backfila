@@ -46,7 +46,7 @@ data class CreateBackfillRequest(
   val pkey_range_end: String? = null,
   // Parameters that go to the client service.
   val parameter_map: Map<String, ByteString> = mapOf(),
-  val dry_run: Boolean = false,
+  val dry_run: Boolean = true,
   val backoff_schedule: String? = null
 )
 
@@ -141,7 +141,8 @@ class CreateBackfillAction @Inject constructor(
           request.scan_size,
           request.batch_size,
           request.num_threads,
-          request.backoff_schedule
+          request.backoff_schedule,
+          request.dry_run
       )
       session.save(backfillRun)
 

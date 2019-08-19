@@ -48,7 +48,8 @@ class BatchPrecomputer(
             metadata.parameters,
             computeTimeLimitMs,
             computeCountLimit,
-            metadata.dryRun
+            metadata.dryRun,
+            true
         ))
 
         backfillRunner.onRpcSuccess()
