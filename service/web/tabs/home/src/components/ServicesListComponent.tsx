@@ -1,7 +1,7 @@
-import {Classes, H1} from "@blueprintjs/core"
-import {ErrorCalloutComponent} from "@misk/core"
+import { Classes, H1 } from "@blueprintjs/core"
+import { ErrorCalloutComponent } from "@misk/core"
 import * as React from "react"
-import {Link} from "react-router-dom"
+import { Link } from "react-router-dom"
 
 export interface ITableProps {
   data: any

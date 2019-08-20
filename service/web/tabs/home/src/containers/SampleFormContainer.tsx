@@ -14,8 +14,8 @@ import {
   TagInput,
   TextArea
 } from "@blueprintjs/core"
-import {IconNames} from "@blueprintjs/icons"
-import {FlexContainer} from "@misk/core"
+import { IconNames } from "@blueprintjs/icons"
+import { FlexContainer } from "@misk/core"
 import {
   onChangeFnCall,
   onChangeNumberFnCall,
@@ -26,8 +26,13 @@ import {
   simpleType
 } from "@misk/simpleredux"
 import * as React from "react"
-import {connect} from "react-redux"
-import {IDispatchProps, IState, mapDispatchToProps, mapStateToProps} from "../ducks"
+import { connect } from "react-redux"
+import {
+  IDispatchProps,
+  IState,
+  mapDispatchToProps,
+  mapStateToProps
+} from "../ducks"
 
 export const SampleFormContainer = (props: IState & IDispatchProps) => {
   const FormTag = "Expense Report"

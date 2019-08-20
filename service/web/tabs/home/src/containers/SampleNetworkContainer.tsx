@@ -1,8 +1,21 @@
-import {Button, ButtonGroup, H1, InputGroup, Intent, Pre, TextArea} from "@blueprintjs/core"
-import {onChangeFnCall, onClickFnCall, simpleSelect} from "@misk/simpleredux"
+import {
+  Button,
+  ButtonGroup,
+  H1,
+  InputGroup,
+  Intent,
+  Pre,
+  TextArea
+} from "@blueprintjs/core"
+import { onChangeFnCall, onClickFnCall, simpleSelect } from "@misk/simpleredux"
 import * as React from "react"
-import {connect} from "react-redux"
-import {IDispatchProps, IState, mapDispatchToProps, mapStateToProps} from "../ducks"
+import { connect } from "react-redux"
+import {
+  IDispatchProps,
+  IState,
+  mapDispatchToProps,
+  mapStateToProps
+} from "../ducks"
 
 export const SampleNetworkContainer = (props: IDispatchProps & IState) => {
   return (

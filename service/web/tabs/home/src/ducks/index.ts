@@ -14,10 +14,14 @@ import {
   watchSimpleFormSagas,
   watchSimpleNetworkSagas
 } from "@misk/simpleredux"
-import {connectRouter, LocationChangeAction, RouterState} from "connected-react-router"
-import {History} from "history"
-import {AnyAction, combineReducers, Reducer} from "redux"
-import {all, fork} from "redux-saga/effects"
+import {
+  connectRouter,
+  LocationChangeAction,
+  RouterState
+} from "connected-react-router"
+import { History } from "history"
+import { AnyAction, combineReducers, Reducer } from "redux"
+import { all, fork } from "redux-saga/effects"
 import {
   dispatchHome,
   HomeReducer,

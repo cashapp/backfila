@@ -1,12 +1,17 @@
 import * as React from "react"
-import {connect} from "react-redux"
-import {IDispatchProps, IState, mapDispatchToProps, mapStateToProps} from "../ducks"
-import {Classes, H2, H3, HTMLTable, Tooltip} from "@blueprintjs/core"
-import {simpleSelect} from "@misk/simpleredux"
-import {Link} from "react-router-dom"
-import {BackfillProgressBar, StartStopButton} from "../components"
+import { connect } from "react-redux"
+import {
+  IDispatchProps,
+  IState,
+  mapDispatchToProps,
+  mapStateToProps
+} from "../ducks"
+import { Classes, H2, H3, HTMLTable, Tooltip } from "@blueprintjs/core"
+import { simpleSelect } from "@misk/simpleredux"
+import { Link } from "react-router-dom"
+import { BackfillProgressBar, StartStopButton } from "../components"
 
-// import TimeAgo from "react-timeago"
+import TimeAgo from "react-timeago"
 
 export interface IComputedCountProps {
   precomputing_done: boolean
@@ -25,6 +30,32 @@ function ComputedCount(props: IComputedCountProps) {
     )
   }
   return <span>{props.computed_matching_record_count}</span>
+}
+
+function prettyEta(durationSeconds: number) {
+  let result = '';
+  let temp = durationSeconds;
+  const years = Math.floor(temp / 31536000);
+  if (years) {
+    result += years + 'y';
+  }
+  const days = Math.floor((temp %= 31536000) / 86400);
+  if (days) {
+    result += days + 'd';
+  }
+  const hours = Math.floor((temp %= 86400) / 3600);
+  if (hours) {
+    result += hours + 'h';
+  }
+  const minutes = Math.floor((temp %= 3600) / 60);
+  if (minutes) {
+    result += minutes + 'm';
+  }
+  const seconds = Math.floor(temp % 60);
+  if (seconds) {
+    result += seconds + 's';
+  }
+  return result;
 }
 
 class BackfillStatusContainer extends React.Component<
@@ -122,13 +153,13 @@ class BackfillStatusContainer extends React.Component<
                 <tr>
                   <td>Sleep between batches</td>
                   {/*todo make editable*/}
-                  <td>{status.extra_sleep_ms}</td>
+                  <td>{status.extra_sleep_ms} ms</td>
                 </tr>
                 <tr>
                   <td>Created</td>
                   <td>
-                    {/*<TimeAgo date={status.created_at} />*/}
-                    {status.created_at} by {status.created_by_user}
+                    <TimeAgo date={status.created_at} /> by{" "}
+                    {status.created_by_user}
                   </td>
                 </tr>
                 <tr>
@@ -234,20 +265,22 @@ class BackfillStatusContainer extends React.Component<
                   <td>
                     {instance.matching_records_per_minute && (
                       <span>
-                        {instance.matching_records_per_minute} records/m
+                        {instance.matching_records_per_minute} #/m
                       </span>
                     )}
                   </td>
                   <td>
                     {instance.precomputing_done &&
                       instance.computed_matching_record_count > 0 &&
-                      instance.matching_records_per_minute && (
+                      instance.state != "COMPLETE" &&
+                      instance.matching_records_per_minute &&
+                      instance.matching_records_per_minute > 0 && (
                         <span>
-                          {/*todo use pretty time*/}
-                          {(instance.computed_matching_record_count -
-                            instance.backfilled_matching_record_count) /
-                            instance.matching_records_per_minute}{" "}
-                          m
+                          {prettyEta(
+                            (instance.computed_matching_record_count -
+                              instance.backfilled_matching_record_count) /
+                              (instance.matching_records_per_minute/60)
+                          )}{" "}
                         </span>
                       )}
                   </td>

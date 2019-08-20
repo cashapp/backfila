@@ -1,8 +1,13 @@
 import * as React from "react"
-import {Button, Intent} from "@blueprintjs/core"
-import {connect} from "react-redux"
-import {IDispatchProps, IState, mapDispatchToProps, mapStateToProps} from "../ducks"
-import {onClickFnCall, simpleSelect} from "@misk/simpleredux"
+import { Button, Intent } from "@blueprintjs/core"
+import { connect } from "react-redux"
+import {
+  IDispatchProps,
+  IState,
+  mapDispatchToProps,
+  mapStateToProps
+} from "../ducks"
+import { onClickFnCall, simpleSelect } from "@misk/simpleredux"
 
 export interface IStartStopButtonProps {
   id: string
