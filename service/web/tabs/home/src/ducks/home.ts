@@ -6,8 +6,8 @@ import {
   SimpleReduxSaga
 } from "@misk/simpleredux"
 import axios from "axios"
-import {Map} from "immutable"
-import {all, call, put, takeLatest} from "redux-saga/effects"
+import { Map } from "immutable"
+import { all, call, put, takeLatest } from "redux-saga/effects"
 
 /**
  * Actions

@@ -1,8 +1,13 @@
-import {simpleSelect} from "@misk/simpleredux"
+import { simpleSelect } from "@misk/simpleredux"
 import * as React from "react"
-import {connect} from "react-redux"
-import {ServicesListComponent} from "../components"
-import {IDispatchProps, IState, mapDispatchToProps, mapStateToProps} from "../ducks"
+import { connect } from "react-redux"
+import { ServicesListComponent } from "../components"
+import {
+  IDispatchProps,
+  IState,
+  mapDispatchToProps,
+  mapStateToProps
+} from "../ducks"
 
 class TabContainer extends React.Component<IState & IDispatchProps, IState> {
   private tableTag = "services"

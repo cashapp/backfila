@@ -1,6 +1,6 @@
-import {Classes, HTMLTable} from "@blueprintjs/core"
+import { Classes, HTMLTable } from "@blueprintjs/core"
 import * as React from "react"
-import {Link} from "react-router-dom"
+import { Link } from "react-router-dom"
 
 export interface ITableProps {
   backfillRuns: any

@@ -96,8 +96,6 @@ dependencies {
   testImplementation dep.junitParams
   testImplementation dep.junitEngine
   testImplementation dep.assertj
-  testImplementation dep.mockito
-  testImplementation dep.mockitoKotlin
   testImplementation dep.openTracingMock
 }
 

@@ -1,5 +1,5 @@
 import * as React from "react"
-import {Intent, ProgressBar} from "@blueprintjs/core"
+import { Intent, ProgressBar } from "@blueprintjs/core"
 
 export interface IBackfillProgressBarProps {
   precomputing_done: boolean
