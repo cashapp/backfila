@@ -15,10 +15,7 @@ import misk.hibernate.load
 import misk.logging.getLogger
 import okio.ByteString
 import java.time.Clock
-import java.time.Duration
-import java.time.Instant
 import javax.inject.Inject
-import kotlin.math.max
 
 val DEFAULT_BACKOFF_SCHEDULE = listOf(5_000L, 15_000L, 30_000L)
 
@@ -45,7 +42,11 @@ class BackfillRunner private constructor(
   private var running = true
 
   private var failuresSinceSuccess = 0
-  private var backoffUntil: Instant? = null
+
+  /** Backoff for all RPCs for this runner. */
+  val globalBackoff = Backoff(factory.clock)
+  /** Backoff just for RunBatch RPCs. */
+  val runBatchBackoff = Backoff(factory.clock)
 
   val client by lazy { createClient() }
 
@@ -124,7 +125,8 @@ class BackfillRunner private constructor(
         dbRunInstance.backfill_run.dry_run,
         dbRunInstance.backfill_run.num_threads,
         dbRunInstance.precomputing_done,
-        dbRunInstance.precomputing_pkey_cursor
+        dbRunInstance.precomputing_pkey_cursor,
+        dbRunInstance.backfill_run.extra_sleep_ms
     )
   }
 
@@ -163,7 +165,7 @@ class BackfillRunner private constructor(
     // If there is an intermittent server issue, all the current batches will likely fail.
     // So to consider those as only one failure, only increment failure count if the backoff
     // finished.
-    if (backingOff()) {
+    if (globalBackoff.backingOff()) {
       logger.info { "Ignoring rpc error because runner is already backing off ${logLabel()}" }
       return
     }
@@ -174,13 +176,9 @@ class BackfillRunner private constructor(
       }
       pauseBackfill()
     } else {
-      backoffUntil = factory.clock.instant().plusMillis(
-          backoffSchedule[failuresSinceSuccess - 1])
+      globalBackoff.addMillis(backoffSchedule[failuresSinceSuccess - 1])
     }
   }
-
-  fun backingOff() = backoffUntil?.isAfter(factory.clock.instant()) ?: false
-  fun backoffMs() = max(0, Duration.between(factory.clock.instant(), backoffUntil!!).toMillis())
 
   private fun pauseBackfill() {
     factory.transacter.transaction { session ->
@@ -215,7 +213,8 @@ class BackfillRunner private constructor(
     val dryRun: Boolean,
     val numThreads: Int,
     val precomputingDone: Boolean,
-    val precomputingPkeyCursor: ByteString?
+    val precomputingPkeyCursor: ByteString?,
+    val extraSleepMs: Long
   )
 
   companion object {
