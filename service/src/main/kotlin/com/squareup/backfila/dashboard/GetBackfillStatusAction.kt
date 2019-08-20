@@ -9,7 +9,6 @@ import misk.hibernate.Id
 import misk.hibernate.Query
 import misk.hibernate.Transacter
 import misk.hibernate.loadOrNull
-import misk.logging.getLogger
 import misk.security.authz.Authenticated
 import misk.web.Get
 import misk.web.PathParam
@@ -32,7 +31,9 @@ data class UiInstance(
   val computed_scanned_record_count: Long,
   val computed_matching_record_count: Long,
   val backfilled_scanned_record_count: Long,
-  val backfilled_matching_record_count: Long
+  val backfilled_matching_record_count: Long,
+  val scanned_records_per_minute: Long?,
+  val matching_records_per_minute: Long?
 )
 
 data class GetBackfillStatusResponse(
@@ -46,6 +47,7 @@ data class GetBackfillStatusResponse(
   val num_threads: Int,
   val created_at: Instant,
   val created_by_user: String?,
+  val extra_sleep_ms: Long,
   val instances: List<UiInstance>
 )
 
@@ -75,6 +77,7 @@ class GetBackfillStatusAction @Inject constructor(
           run.num_threads,
           run.created_at,
           run.created_by_user,
+          run.extra_sleep_ms,
           run.instances(session, queryFactory).map { dbToUi(it) }
       )
     }
@@ -93,10 +96,8 @@ class GetBackfillStatusAction @Inject constructor(
         instance.computed_scanned_record_count,
         instance.computed_matching_record_count,
         instance.backfilled_scanned_record_count,
-        instance.backfilled_matching_record_count
+        instance.backfilled_matching_record_count,
+        instance.scanned_records_per_minute,
+        instance.matching_records_per_minute
     )
-
-  companion object {
-    private val logger = getLogger<GetBackfillRunsAction>()
-  }
 }

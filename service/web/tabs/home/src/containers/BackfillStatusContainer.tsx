@@ -45,8 +45,8 @@ class BackfillStatusContainer extends React.Component<
 
   requestStatus() {
     this.props.simpleNetworkGet(
-        this.backfillStatusTag,
-        `/backfills/${this.id}/status`
+      this.backfillStatusTag,
+      `/backfills/${this.id}/status`
     )
   }
 
@@ -95,8 +95,8 @@ class BackfillStatusContainer extends React.Component<
                   <td>State</td>
                   <td>
                     {status.state}{" "}
-                    <div style={{float: "right"}}>
-                      <StartStopButton id={this.id} state={status.state}/>
+                    <div style={{ float: "right" }}>
+                      <StartStopButton id={this.id} state={status.state} />
                     </div>
                   </td>
                 </tr>
@@ -118,6 +118,11 @@ class BackfillStatusContainer extends React.Component<
                   <td>Batch size</td>
                   {/*todo make editable*/}
                   <td>{status.batch_size}</td>
+                </tr>
+                <tr>
+                  <td>Sleep between batches</td>
+                  {/*todo make editable*/}
+                  <td>{status.extra_sleep_ms}</td>
                 </tr>
                 <tr>
                   <td>Created</td>
@@ -226,8 +231,26 @@ class BackfillStatusContainer extends React.Component<
                       state={instance.state}
                     />
                   </td>
-                  <td>TODO</td>
-                  <td>TODO</td>
+                  <td>
+                    {instance.matching_records_per_minute && (
+                      <span>
+                        {instance.matching_records_per_minute} records/m
+                      </span>
+                    )}
+                  </td>
+                  <td>
+                    {instance.precomputing_done &&
+                      instance.computed_matching_record_count > 0 &&
+                      instance.matching_records_per_minute && (
+                        <span>
+                          {/*todo use pretty time*/}
+                          {(instance.computed_matching_record_count -
+                            instance.backfilled_matching_record_count) /
+                            instance.matching_records_per_minute}{" "}
+                          m
+                        </span>
+                      )}
+                  </td>
                 </tr>
               ))}
             </tbody>

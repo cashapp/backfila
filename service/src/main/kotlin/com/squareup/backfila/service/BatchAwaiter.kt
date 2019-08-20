@@ -17,6 +17,9 @@ class BatchAwaiter(
   private val receiveChannel: ReceiveChannel<AwaitingRun>,
   private val rpcBackpressureChannel: ReceiveChannel<Unit>
 ) {
+  private val scannedRateCounter = RateCounter(backfillRunner.factory.clock)
+  private val matchingRateCounter = RateCounter(backfillRunner.factory.clock)
+
   // TODO on shutdown can this wait for all rpcs to finish, with a ~5s time bound?
   fun run(
     scope: CoroutineScope
@@ -51,6 +54,8 @@ class BatchAwaiter(
 
           backfillRunner.onRpcSuccess()
 
+          matchingRateCounter.add(batch.matching_record_count)
+          scannedRateCounter.add(batch.scanned_record_count)
           // Track our progress in DB for when another runner takes over.
           // TODO update this less often, probably in the lease updater task
           backfillRunner.factory.transacter.transaction { session ->
@@ -58,6 +63,8 @@ class BatchAwaiter(
             dbRunInstance.pkey_cursor = batch.batch_range.end
             dbRunInstance.backfilled_scanned_record_count += batch.scanned_record_count
             dbRunInstance.backfilled_matching_record_count += batch.matching_record_count
+            dbRunInstance.scanned_records_per_minute = scannedRateCounter.projectedRate()
+            dbRunInstance.matching_records_per_minute = matchingRateCounter.projectedRate()
           }
           break@retry
         } catch (e: CancellationException) {

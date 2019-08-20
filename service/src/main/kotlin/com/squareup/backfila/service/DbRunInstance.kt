@@ -108,6 +108,12 @@ class DbRunInstance() : DbUnsharded<DbRunInstance>, DbTimestampedEntity {
   @Column
   var backfilled_matching_record_count: Long = 0
 
+  @Column
+  var scanned_records_per_minute: Long? = null
+
+  @Column
+  var matching_records_per_minute: Long? = null
+
   constructor(
     backfill_run_id: Id<DbBackfillRun>,
     instance_name: String,
