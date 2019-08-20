@@ -27,8 +27,8 @@ class BatchPrecomputer(
         break
       }
 
-      if (backfillRunner.backingOff()) {
-        val backoffMs = backfillRunner.backoffMs()
+      if (backfillRunner.globalBackoff.backingOff()) {
+        val backoffMs = backfillRunner.globalBackoff.backoffMs()
         logger.info { "BatchPrecomputer ${backfillRunner.logLabel()} backing off for $backoffMs" }
         delay(backoffMs)
       }

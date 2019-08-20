@@ -91,6 +91,13 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
   @Column
   var backoff_schedule: String? = null
 
+  /**
+   * Sleep that is added after every successful RunBatch.
+   * To be used when automatic backpressure is not available.
+   */
+  @Column(nullable = false)
+  var extra_sleep_ms: Long = 0
+
   constructor(
     service_id: Id<DbService>,
     registered_backfill_id: Id<DbRegisteredBackfill>,
@@ -101,7 +108,8 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
     batch_size: Long,
     num_threads: Int,
     backoff_schedule: String?,
-    dry_run: Boolean
+    dry_run: Boolean,
+    extra_sleep_ms: Long
   ) : this() {
     this.service_id = service_id
     this.registered_backfill_id = registered_backfill_id
@@ -113,6 +121,7 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
     this.num_threads = num_threads
     this.backoff_schedule = backoff_schedule
     this.dry_run = dry_run
+    this.extra_sleep_ms = extra_sleep_ms
   }
 
   fun instances(session: Session, queryFactory: Query.Factory) =

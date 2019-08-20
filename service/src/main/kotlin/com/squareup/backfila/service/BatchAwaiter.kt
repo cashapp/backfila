@@ -37,8 +37,15 @@ class BatchAwaiter(
       // Repeat this batch until it succeeds.
       retry@ while (true) {
         try {
-          // TODO read response for backoff
           val response: RunBatchResponse = runBatchRpc.await()
+
+          if (!backfillRunner.runBatchBackoff.backingOff()) {
+            if (response.backoff_ms ?: 0 > 0) {
+              backfillRunner.runBatchBackoff.addMillis(response.backoff_ms)
+            } else if (backfillRunner.metadata.extraSleepMs > 0) {
+              backfillRunner.runBatchBackoff.addMillis(backfillRunner.metadata.extraSleepMs)
+            }
+          }
 
           logger.info { "Runbatch finished for ${backfillRunner.logLabel()} $batch" }
 
@@ -60,8 +67,8 @@ class BatchAwaiter(
           logger.info(e) { "Rpc failure when running batch for ${backfillRunner.logLabel()}" }
           backfillRunner.onRpcFailure()
 
-          if (backfillRunner.backingOff()) {
-            val backoffMs = backfillRunner.backoffMs()
+          if (backfillRunner.globalBackoff.backingOff()) {
+            val backoffMs = backfillRunner.globalBackoff.backoffMs()
             logger.info {
               "BatchAwaiter ${backfillRunner.logLabel()} backing off for $backoffMs ms"
             }

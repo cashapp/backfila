@@ -33,8 +33,8 @@ class BatchQueuer(
       // Use the latest metadata snapshot.
       val metadata = backfillRunner.metadata
 
-      if (backfillRunner.backingOff()) {
-        val backoffMs = backfillRunner.backoffMs()
+      if (backfillRunner.globalBackoff.backingOff()) {
+        val backoffMs = backfillRunner.globalBackoff.backoffMs()
         logger.info { "BatchQueuer ${backfillRunner.logLabel()} backing off for $backoffMs" }
         delay(backoffMs)
       }

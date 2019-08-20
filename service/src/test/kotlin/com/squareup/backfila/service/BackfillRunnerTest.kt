@@ -392,7 +392,72 @@ class BackfillRunnerTest {
     }
   }
 
-  fun startBackfill(numThreads: Int = 3): BackfillRunner {
+  @Test fun backoffRequestedByClient() {
+    fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
+    val runner = startBackfill(numThreads = 1)
+
+    runBlocking {
+      launch { runner.run() }
+      try {
+        fakeBackfilaClientServiceClient.runBatchRequests.receive()
+        fakeBackfilaClientServiceClient.runBatchResponses.send(
+            Result.success(RunBatchResponse.Builder()
+                .backoff_ms(1_000L).build()))
+
+        delay(500)
+        // Nothing sent yet - the backoff is 1000ms
+        assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNull()
+        // Give a bit more buffer to send next request due to scheduling delays.
+        assertThat(withTimeoutOrNull(2000) {
+          fakeBackfilaClientServiceClient.runBatchRequests.receive()
+        }).isNotNull()
+        fakeBackfilaClientServiceClient.runBatchResponses.send(
+            Result.success(RunBatchResponse.Builder().build()))
+      } finally {
+        runner.stop()
+      }
+    }
+    // Cursor updated
+    transacter.transaction { session ->
+      val instance = session.load(runner.instanceId)
+      assertThat(instance.pkey_cursor).isEqualTo("199".encodeUtf8())
+      assertThat(instance.run_state).isEqualTo(BackfillState.RUNNING)
+    }
+  }
+
+  @Test fun backoffOnSuccessfulRequests() {
+    fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
+    val runner = startBackfill(numThreads = 1, extraSleepMs = 1000L)
+
+    runBlocking {
+      launch { runner.run() }
+      try {
+        fakeBackfilaClientServiceClient.runBatchRequests.receive()
+        fakeBackfilaClientServiceClient.runBatchResponses.send(
+            Result.success(RunBatchResponse.Builder().build()))
+
+        delay(500)
+        // Nothing sent yet - the backoff is 1000ms
+        assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNull()
+        // Give a bit more buffer to send next request due to scheduling delays.
+        assertThat(withTimeoutOrNull(2000) {
+          fakeBackfilaClientServiceClient.runBatchRequests.receive()
+        }).isNotNull()
+        fakeBackfilaClientServiceClient.runBatchResponses.send(
+            Result.success(RunBatchResponse.Builder().build()))
+      } finally {
+        runner.stop()
+      }
+    }
+    // Cursor updated
+    transacter.transaction { session ->
+      val instance = session.load(runner.instanceId)
+      assertThat(instance.pkey_cursor).isEqualTo("199".encodeUtf8())
+      assertThat(instance.run_state).isEqualTo(BackfillState.RUNNING)
+    }
+  }
+
+  fun startBackfill(numThreads: Int = 3, extraSleepMs: Long = 0): BackfillRunner {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(ConfigureServiceRequest.Builder()
           .backfills(listOf(
@@ -403,8 +468,12 @@ class BackfillRunnerTest {
     }
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create("deep-fryer",
-          CreateBackfillRequest("ChickenSandwich", num_threads = numThreads,
-              backoff_schedule = "1000"))
+          CreateBackfillRequest(
+              "ChickenSandwich",
+              num_threads = numThreads,
+              backoff_schedule = "1000",
+              extra_sleep_ms = extraSleepMs
+          ))
       val id = response.headers["Location"]!!.substringAfterLast("/").toLong()
       startBackfillAction.start(id, StartBackfillRequest())
     }

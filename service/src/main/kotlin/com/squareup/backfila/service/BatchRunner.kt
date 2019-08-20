@@ -53,9 +53,13 @@ class BatchRunner(
         break
       }
 
-      if (backfillRunner.backingOff()) {
-        val backoffMs = backfillRunner.backoffMs()
+      if (backfillRunner.globalBackoff.backingOff()) {
+        val backoffMs = backfillRunner.globalBackoff.backoffMs()
         logger.info { "BatchRunner ${backfillRunner.logLabel()} backing off for $backoffMs" }
+        delay(backoffMs)
+      }
+      if (backfillRunner.runBatchBackoff.backingOff()) {
+        val backoffMs = backfillRunner.runBatchBackoff.backoffMs()
         delay(backoffMs)
       }
 

@@ -47,7 +47,9 @@ data class CreateBackfillRequest(
   // Parameters that go to the client service.
   val parameter_map: Map<String, ByteString> = mapOf(),
   val dry_run: Boolean = true,
-  val backoff_schedule: String? = null
+  val backoff_schedule: String? = null,
+  // Sleep that is added after every successful RunBatch.
+  val extra_sleep_ms: Long = 0
 )
 
 class CreateBackfillAction @Inject constructor(
@@ -81,6 +83,9 @@ class CreateBackfillAction @Inject constructor(
     }
     if (request.scan_size < request.batch_size) {
       throw BadRequestException("scan_size must be >= batch_size")
+    }
+    if (request.extra_sleep_ms < 0) {
+      throw BadRequestException("extra_sleep_ms must be >= 1")
     }
     request.backoff_schedule?.let { schedule ->
       if (schedule.split(',').any { it.toLongOrNull() == null }) {
@@ -142,7 +147,8 @@ class CreateBackfillAction @Inject constructor(
           request.batch_size,
           request.num_threads,
           request.backoff_schedule,
-          request.dry_run
+          request.dry_run,
+          request.extra_sleep_ms
       )
       session.save(backfillRun)
 
