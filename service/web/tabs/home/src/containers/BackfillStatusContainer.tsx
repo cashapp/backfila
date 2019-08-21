@@ -1,15 +1,10 @@
 import * as React from "react"
-import { connect } from "react-redux"
-import {
-  IDispatchProps,
-  IState,
-  mapDispatchToProps,
-  mapStateToProps
-} from "../ducks"
-import { Classes, H2, H3, HTMLTable, Tooltip } from "@blueprintjs/core"
-import { simpleSelect } from "@misk/simpleredux"
-import { Link } from "react-router-dom"
-import { BackfillProgressBar, StartStopButton } from "../components"
+import {connect} from "react-redux"
+import {IDispatchProps, IState, mapDispatchToProps, mapStateToProps} from "../ducks"
+import {Classes, H2, H3, HTMLTable, Tooltip} from "@blueprintjs/core"
+import {simpleSelect} from "@misk/simpleredux"
+import {Link} from "react-router-dom"
+import {BackfillProgressBar, StartStopButton} from "../components"
 
 import TimeAgo from "react-timeago"
 
@@ -33,29 +28,29 @@ function ComputedCount(props: IComputedCountProps) {
 }
 
 function prettyEta(durationSeconds: number) {
-  let result = '';
-  let temp = durationSeconds;
-  const years = Math.floor(temp / 31536000);
+  let result = ""
+  let temp = durationSeconds
+  const years = Math.floor(temp / 31536000)
   if (years) {
-    result += years + 'y';
+    result += years + "y"
   }
-  const days = Math.floor((temp %= 31536000) / 86400);
+  const days = Math.floor((temp %= 31536000) / 86400)
   if (days) {
-    result += days + 'd';
+    result += days + "d"
   }
-  const hours = Math.floor((temp %= 86400) / 3600);
+  const hours = Math.floor((temp %= 86400) / 3600)
   if (hours) {
-    result += hours + 'h';
+    result += hours + "h"
   }
-  const minutes = Math.floor((temp %= 3600) / 60);
+  const minutes = Math.floor((temp %= 3600) / 60)
   if (minutes) {
-    result += minutes + 'm';
+    result += minutes + "m"
   }
-  const seconds = Math.floor(temp % 60);
+  const seconds = Math.floor(temp % 60)
   if (seconds) {
-    result += seconds + 's';
+    result += seconds + "s"
   }
-  return result;
+  return result
 }
 
 class BackfillStatusContainer extends React.Component<
@@ -127,7 +122,11 @@ class BackfillStatusContainer extends React.Component<
                   <td>
                     {status.state}{" "}
                     <div style={{ float: "right" }}>
-                      <StartStopButton id={this.id} state={status.state} />
+                      <StartStopButton
+                        id={this.id}
+                        state={status.state}
+                        onUpdate={() => this.requestStatus()}
+                      />
                     </div>
                   </td>
                 </tr>
@@ -264,9 +263,7 @@ class BackfillStatusContainer extends React.Component<
                   </td>
                   <td>
                     {instance.matching_records_per_minute && (
-                      <span>
-                        {instance.matching_records_per_minute} #/m
-                      </span>
+                      <span>{instance.matching_records_per_minute} #/m</span>
                     )}
                   </td>
                   <td>
@@ -279,7 +276,7 @@ class BackfillStatusContainer extends React.Component<
                           {prettyEta(
                             (instance.computed_matching_record_count -
                               instance.backfilled_matching_record_count) /
-                              (instance.matching_records_per_minute/60)
+                              (instance.matching_records_per_minute / 60)
                           )}{" "}
                         </span>
                       )}
