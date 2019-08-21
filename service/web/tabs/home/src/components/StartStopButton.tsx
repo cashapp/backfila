@@ -1,42 +1,49 @@
 import * as React from "react"
-import { Button, Intent } from "@blueprintjs/core"
-import { connect } from "react-redux"
-import {
-  IDispatchProps,
-  IState,
-  mapDispatchToProps,
-  mapStateToProps
-} from "../ducks"
-import { onClickFnCall, simpleSelect } from "@misk/simpleredux"
+import Axios from "axios"
+import {Button, Intent} from "@blueprintjs/core"
+import {connect} from "react-redux"
+import {IDispatchProps, IState, mapDispatchToProps, mapStateToProps} from "../ducks"
 
 export interface IStartStopButtonProps {
   id: string
   state: string
+  onUpdate?: () => void
+}
+
+interface IStartStopButtonState {
+  loading: boolean
 }
 
 class StartStopButton extends React.Component<
   IState & IDispatchProps & IStartStopButtonProps,
-  IState
+    IStartStopButtonState
 > {
   private id: string = this.props.id
-  private postTag: string = `${this.id}::StartStopButton`
+
+  public state: IStartStopButtonState = {
+    loading: false
+  }
+
+  startstop(startorstop: String) {
+    const url = `/backfills/${this.id}/${startorstop}`
+    this.setState({loading: true})
+    Axios.post(url, {})
+      .then(response => this.props.onUpdate())
+      .catch(error => {
+        // TODO show a toast or something
+        console.log(error)
+      })
+      .finally(() => this.setState({loading: false}))
+  }
 
   render() {
     const state = this.props.state
     if (state == "RUNNING") {
       return (
         <Button
-          onClick={onClickFnCall(
-            this.props.simpleNetworkPost,
-            this.postTag,
-            `/backfills/${this.id}/stop`
-          )}
+          onClick={() => this.startstop("stop")}
           intent={Intent.DANGER}
-          loading={simpleSelect(
-            this.props.simpleNetwork,
-            this.postTag,
-            "loading"
-          )}
+          loading={this.state.loading}
           small={true}
           text={"Stop"}
         />
@@ -44,17 +51,9 @@ class StartStopButton extends React.Component<
     } else if (state == "PAUSED") {
       return (
         <Button
-          onClick={onClickFnCall(
-            this.props.simpleNetworkPost,
-            this.postTag,
-            `/backfills/${this.id}/start`
-          )}
+          onClick={() => this.startstop("start")}
           intent={Intent.SUCCESS}
-          loading={simpleSelect(
-            this.props.simpleNetwork,
-            this.postTag,
-            "loading"
-          )}
+          loading={this.state.loading}
           small={true}
           text={"Start"}
         />
