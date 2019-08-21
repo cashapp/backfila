@@ -17,7 +17,8 @@ import misk.web.mediatype.MediaTypes
 import javax.inject.Inject
 
 data class RegisteredBackfill(
-  val name: String
+  val name: String,
+  val parameterNames: List<String>?
 )
 data class GetRegisteredBackfillsResponse(val backfills: List<RegisteredBackfill>)
 
@@ -41,7 +42,8 @@ class GetRegisteredBackfillsAction @Inject constructor(
           .list(session)
       backfills.map {
         RegisteredBackfill(
-            it.name
+            it.name,
+            it.parameterNames()
         )
       }
     }
