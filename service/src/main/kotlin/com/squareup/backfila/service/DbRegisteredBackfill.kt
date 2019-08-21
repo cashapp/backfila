@@ -97,4 +97,6 @@ class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimestampedE
     this.active = null
     this.deleted_in_service_at = clock.instant()
   }
+
+  fun parameterNames() = parameter_names?.split(",")
 }
