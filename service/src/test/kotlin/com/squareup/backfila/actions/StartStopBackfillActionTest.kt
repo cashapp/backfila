@@ -69,7 +69,7 @@ class StartStopBackfillActionTest {
       assertThat(backfillRuns.paused_backfills).hasSize(1)
       assertThat(backfillRuns.running_backfills).hasSize(0)
 
-      val id = response.headers["Location"]!!.substringAfterLast("/").toLong()
+      val id = response.id
       assertThat(backfillRuns.paused_backfills[0].id).isEqualTo(id.toString())
       startBackfillAction.start(id, StartBackfillRequest())
 
@@ -108,7 +108,7 @@ class StartStopBackfillActionTest {
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create("deep-fryer",
           CreateBackfillRequest("ChickenSandwich"))
-      val id = response.headers["Location"]!!.substringAfterLast("/").toLong()
+      val id = response.id
 
       assertThatThrownBy {
         startBackfillAction.start(id + 1, StartBackfillRequest())
@@ -129,7 +129,7 @@ class StartStopBackfillActionTest {
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create("deep-fryer",
           CreateBackfillRequest("ChickenSandwich"))
-      val id = response.headers["Location"]!!.substringAfterLast("/").toLong()
+      val id = response.id
       startBackfillAction.start(id, StartBackfillRequest())
 
       transacter.transaction { session ->
@@ -157,7 +157,7 @@ class StartStopBackfillActionTest {
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create("deep-fryer",
           CreateBackfillRequest("ChickenSandwich"))
-      val id = response.headers["Location"]!!.substringAfterLast("/").toLong()
+      val id = response.id
       assertThatThrownBy {
         stopBackfillAction.stop(id, StopBackfillRequest())
       }.isInstanceOf(BadRequestException::class.java)
@@ -177,7 +177,7 @@ class StartStopBackfillActionTest {
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create("deep-fryer",
           CreateBackfillRequest("ChickenSandwich"))
-      val id = response.headers["Location"]!!.substringAfterLast("/").toLong()
+      val id = response.id
 
       transacter.transaction { session ->
         val run = session.load(Id<DbBackfillRun>(id))

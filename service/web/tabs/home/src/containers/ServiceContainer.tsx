@@ -6,9 +6,10 @@ import {
   mapDispatchToProps,
   mapStateToProps
 } from "../ducks"
-import { H1 } from "@blueprintjs/core"
+import { H1, Intent, AnchorButton } from "@blueprintjs/core"
 import { BackfillRunsTable } from "../components"
 import { simpleSelect } from "@misk/simpleredux"
+import { Link } from "react-router-dom"
 
 class ServiceContainer extends React.Component<
   IState & IDispatchProps,
@@ -41,6 +42,9 @@ class ServiceContainer extends React.Component<
     return (
       <div>
         <H1>Service: {this.service}</H1>
+        <Link to={`/app/home/services/${this.service}/create`}>
+          <AnchorButton text={"Create"} intent={Intent.PRIMARY} />
+        </Link>
         <h4>Running Backfills</h4>
         <BackfillRunsTable backfillRuns={result.running_backfills} />
         <h4>Paused Backfills</h4>

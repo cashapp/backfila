@@ -2,6 +2,7 @@ import * as React from "react"
 import { Route, Switch } from "react-router"
 import {
   BackfillStatusContainer,
+  CreateFormContainer,
   ServiceContainer,
   TabContainer
 } from "../containers"
@@ -9,6 +10,10 @@ import {
 const routes = (
   <div>
     <Switch>
+      <Route
+        path="/app/home/services/:service/create"
+        component={CreateFormContainer}
+      />
       <Route path="/app/home/services/:service" component={ServiceContainer} />
       <Route
         path="/app/home/backfills/:id"

@@ -474,7 +474,7 @@ class BackfillRunnerTest {
               backoff_schedule = "1000",
               extra_sleep_ms = extraSleepMs
           ))
-      val id = response.headers["Location"]!!.substringAfterLast("/").toLong()
+      val id = response.id
       startBackfillAction.start(id, StartBackfillRequest())
     }
 

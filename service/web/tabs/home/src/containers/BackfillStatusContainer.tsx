@@ -1,10 +1,15 @@
 import * as React from "react"
-import {connect} from "react-redux"
-import {IDispatchProps, IState, mapDispatchToProps, mapStateToProps} from "../ducks"
-import {Classes, H2, H3, HTMLTable, Tooltip} from "@blueprintjs/core"
-import {simpleSelect} from "@misk/simpleredux"
-import {Link} from "react-router-dom"
-import {BackfillProgressBar, StartStopButton} from "../components"
+import { connect } from "react-redux"
+import {
+  IDispatchProps,
+  IState,
+  mapDispatchToProps,
+  mapStateToProps
+} from "../ducks"
+import { Classes, H2, H3, HTMLTable, Tooltip } from "@blueprintjs/core"
+import { simpleSelect } from "@misk/simpleredux"
+import { Link } from "react-router-dom"
+import { BackfillProgressBar, StartStopButton } from "../components"
 
 import TimeAgo from "react-timeago"
 

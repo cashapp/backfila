@@ -76,7 +76,6 @@ class CreateBackfillActionTest {
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create("deep-fryer",
           CreateBackfillRequest("ChickenSandwich"))
-      assertThat(response.statusCode).isEqualTo(HttpURLConnection.HTTP_MOVED_TEMP)
 
       transacter.transaction { session ->
         val run = queryFactory.newQuery<BackfillRunQuery>().uniqueResult(session)
@@ -85,7 +84,7 @@ class CreateBackfillActionTest {
         assertThat(run.created_by_user).isEqualTo("molly")
         assertThat(run.approved_by_user).isNull()
         assertThat(run.approved_at).isNull()
-        assertThat(response.headers["Location"]).endsWith("/backfills/${run.id}")
+        assertThat(response.id).isEqualTo(run.id.id)
 
         val instances = queryFactory.newQuery<RunInstanceQuery>()
             .backfillRunId(run.id)
