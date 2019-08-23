@@ -46,9 +46,9 @@ ext.dep = [
   "skim": "com.squareup.skim:skim:2019.08.23-1566580184-151d09e",
   "spotlessPlugin": "com.diffplug.spotless:spotless-plugin-gradle:3.23.0",
   "tracingJaeger": "com.uber.jaeger:jaeger-core:0.24.0",
-  "wireCompiler": "com.squareup.wire:wire-compiler:3.0.0-square09",
-  "wireMoshiAdapter": "com.squareup.wire:wire-moshi-adapter:2.3.0-SQUARE23",
-  "wireRuntime": "com.squareup.wire:wire-runtime:2.3.0-RC1",
-  "wireSchema": "com.squareup.wire:wire-schema:2.3.0-RC1",
+  "wireCompiler": "com.squareup.wire:wire-compiler:3.0.0-rc01",
+  "wireMoshiAdapter": "com.squareup.wire:wire-moshi-adapter:3.0.0-rc01",
+  "wireRuntime": "com.squareup.wire:wire-runtime:3.0.0-rc01",
+  "wireSchema": "com.squareup.wire:wire-schema:3.0.0-rc01",
 ]
 // Auto-generated from polyrepo's master-dependencies.json. Update via polyrepo dep-add and polyrepo dep-upgrade.
