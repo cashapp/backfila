@@ -67,7 +67,7 @@ class LeaseHunterTest {
       val response = createBackfillAction.create("deep-fryer",
           CreateBackfillRequest("ChickenSandwich"))
 
-      val id = response.headers["Location"]!!.substringAfterLast("/").toLong()
+      val id = response.id
       startBackfillAction.start(id, StartBackfillRequest())
     }
 
@@ -97,7 +97,7 @@ class LeaseHunterTest {
       val response = createBackfillAction.create("deep-fryer",
           CreateBackfillRequest("ChickenSandwich"))
 
-      val id = response.headers["Location"]!!.substringAfterLast("/").toLong()
+      val id = response.id
       startBackfillAction.start(id, StartBackfillRequest())
     }
 

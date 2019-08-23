@@ -191,11 +191,11 @@ class ConfigureServiceActionTest {
       val backfills = backfills("deep-fryer")
       assertThat(backfills).containsOnly(
           Backfill("xyz", clock.instant(), type_provided = null, type_consumed = null,
-              parameter_names = "", requires_approval = false),
+              parameter_names = null, requires_approval = false),
           Backfill("xyz", clock.instant(), type_provided = null, type_consumed = null,
-              parameter_names = "", requires_approval = true),
+              parameter_names = null, requires_approval = true),
           Backfill("xyz", null, type_provided = null, type_consumed = null,
-              parameter_names = "", requires_approval = false)
+              parameter_names = null, requires_approval = false)
       )
     }
   }
@@ -219,7 +219,7 @@ class ConfigureServiceActionTest {
       val backfills = backfills("deep-fryer")
       assertThat(backfills).containsOnly(
           Backfill("xyz", clock.instant(), type_provided = null, type_consumed = null,
-              parameter_names = "", requires_approval = false),
+              parameter_names = null, requires_approval = false),
           Backfill("xyz", null, type_provided = null, type_consumed = null,
               parameter_names = "abc", requires_approval = false)
       )
@@ -244,9 +244,9 @@ class ConfigureServiceActionTest {
       val backfills = backfills("deep-fryer")
       assertThat(backfills).containsOnly(
           Backfill("xyz", clock.instant(), type_provided = "String", type_consumed = null,
-              parameter_names = "", requires_approval = false),
+              parameter_names = null, requires_approval = false),
           Backfill("xyz", null, type_provided = "Int", type_consumed = null,
-              parameter_names = "", requires_approval = false)
+              parameter_names = null, requires_approval = false)
       )
     }
   }
@@ -269,9 +269,9 @@ class ConfigureServiceActionTest {
       val backfills = backfills("deep-fryer")
       assertThat(backfills).containsOnly(
           Backfill("xyz", clock.instant(), type_provided = null, type_consumed = "String",
-              parameter_names = "", requires_approval = false),
+              parameter_names = null, requires_approval = false),
           Backfill("xyz", null, type_provided = null, type_consumed = "Int",
-              parameter_names = "", requires_approval = false)
+              parameter_names = null, requires_approval = false)
       )
     }
   }
@@ -294,7 +294,7 @@ class ConfigureServiceActionTest {
       val backfills = backfills("deep-fryer")
       assertThat(backfills).containsOnly(
           Backfill("xyz", deleted_in_service_at = null, type_provided = null,
-              type_consumed = "String", parameter_names = "", requires_approval = false)
+              type_consumed = "String", parameter_names = null, requires_approval = false)
       )
     }
   }

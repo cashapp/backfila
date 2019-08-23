@@ -11,6 +11,7 @@ import com.squareup.backfila.service.RegisteredBackfillQuery
 import com.squareup.backfila.service.ServiceQuery
 import com.squareup.protos.backfila.clientservice.KeyRange
 import com.squareup.protos.backfila.clientservice.PrepareBackfillRequest
+import com.squareup.protos.backfila.clientservice.PrepareBackfillResponse
 import misk.MiskCaller
 import misk.exceptions.BadRequestException
 import misk.hibernate.Id
@@ -52,6 +53,10 @@ data class CreateBackfillRequest(
   val extra_sleep_ms: Long = 0
 )
 
+data class CreateBackfillResponse(
+  val id: Long
+)
+
 class CreateBackfillAction @Inject constructor(
   private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
   @BackfilaDb private val transacter: Transacter,
@@ -67,7 +72,7 @@ class CreateBackfillAction @Inject constructor(
   fun create(
     @PathParam service: String,
     @RequestBody request: CreateBackfillRequest
-  ): Response<ResponseBody> {
+  ): CreateBackfillResponse {
     // TODO check user has permissions for this service with `X-Forwarded-All-Capabilities` header
 
     logger.info { "Create backfill for $service by ${caller.get()?.user}" }
@@ -129,6 +134,9 @@ class CreateBackfillAction @Inject constructor(
     if (instances.isEmpty()) {
       throw BadRequestException("PrepareBackfill returned no instances")
     }
+    if (instances.any { it.instance_name == null }) {
+      throw BadRequestException("PrepareBackfill returned unnamed instances")
+    }
     if (instances.distinctBy { it.instance_name }.size != instances.size) {
       throw BadRequestException("PrepareBackfill did not return distinct instance names:" +
           " ${instances.map { it.instance_name }}")
@@ -156,7 +164,7 @@ class CreateBackfillAction @Inject constructor(
         val dbRunInstance = DbRunInstance(
             backfillRun.id,
             instance.instance_name,
-            instance.backfill_range,
+            instance.backfill_range ?: KeyRange.Builder().build(),
             backfillRun.state,
             instance.estimated_record_count
         )
@@ -166,11 +174,7 @@ class CreateBackfillAction @Inject constructor(
       backfillRun.id
     }
 
-    return Response(
-        body = "go to /backfills/$backfillRunId".toResponseBody(),
-        statusCode = HttpURLConnection.HTTP_MOVED_TEMP,
-        headers = headersOf("Location", "/backfills/$backfillRunId")
-    )
+    return CreateBackfillResponse(backfillRunId.id)
   }
 
   data class DbData(

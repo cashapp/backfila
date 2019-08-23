@@ -1,8 +1,13 @@
 import * as React from "react"
 import Axios from "axios"
-import {Button, Intent} from "@blueprintjs/core"
-import {connect} from "react-redux"
-import {IDispatchProps, IState, mapDispatchToProps, mapStateToProps} from "../ducks"
+import { Button, Intent } from "@blueprintjs/core"
+import { connect } from "react-redux"
+import {
+  IDispatchProps,
+  IState,
+  mapDispatchToProps,
+  mapStateToProps
+} from "../ducks"
 
 export interface IStartStopButtonProps {
   id: string
@@ -16,7 +21,7 @@ interface IStartStopButtonState {
 
 class StartStopButton extends React.Component<
   IState & IDispatchProps & IStartStopButtonProps,
-    IStartStopButtonState
+  IStartStopButtonState
 > {
   private id: string = this.props.id
 
@@ -26,14 +31,14 @@ class StartStopButton extends React.Component<
 
   startstop(startorstop: String) {
     const url = `/backfills/${this.id}/${startorstop}`
-    this.setState({loading: true})
+    this.setState({ loading: true })
     Axios.post(url, {})
       .then(response => this.props.onUpdate())
       .catch(error => {
         // TODO show a toast or something
         console.log(error)
       })
-      .finally(() => this.setState({loading: false}))
+      .finally(() => this.setState({ loading: false }))
   }
 
   render() {
