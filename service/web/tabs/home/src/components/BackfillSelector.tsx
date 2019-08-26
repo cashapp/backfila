@@ -1,7 +1,7 @@
 import * as React from "react"
 
-import {MenuItem} from "@blueprintjs/core"
-import {ItemPredicate, ItemRenderer, Suggest} from "@blueprintjs/select"
+import { MenuItem } from "@blueprintjs/core"
+import { ItemPredicate, ItemRenderer, Suggest } from "@blueprintjs/select"
 
 export interface IBackfill {
   name: string

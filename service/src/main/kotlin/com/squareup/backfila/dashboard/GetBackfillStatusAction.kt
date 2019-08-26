@@ -48,6 +48,7 @@ data class GetBackfillStatusResponse(
   val created_at: Instant,
   val created_by_user: String?,
   val extra_sleep_ms: Long,
+  val backoff_schedule: String?,
   val instances: List<UiInstance>
 )
 
@@ -78,6 +79,7 @@ class GetBackfillStatusAction @Inject constructor(
           run.created_at,
           run.created_by_user,
           run.extra_sleep_ms,
+          run.backoff_schedule,
           run.instances(session, queryFactory).map { dbToUi(it) }
       )
     }

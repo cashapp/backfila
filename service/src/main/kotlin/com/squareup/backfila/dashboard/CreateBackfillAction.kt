@@ -11,7 +11,6 @@ import com.squareup.backfila.service.RegisteredBackfillQuery
 import com.squareup.backfila.service.ServiceQuery
 import com.squareup.protos.backfila.clientservice.KeyRange
 import com.squareup.protos.backfila.clientservice.PrepareBackfillRequest
-import com.squareup.protos.backfila.clientservice.PrepareBackfillResponse
 import misk.MiskCaller
 import misk.exceptions.BadRequestException
 import misk.hibernate.Id
@@ -25,16 +24,11 @@ import misk.web.PathParam
 import misk.web.Post
 import misk.web.RequestBody
 import misk.web.RequestContentType
-import misk.web.Response
-import misk.web.ResponseBody
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
-import misk.web.toResponseBody
-import okhttp3.Headers.Companion.headersOf
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
-import java.net.HttpURLConnection
 import javax.inject.Inject
 
 data class CreateBackfillRequest(
@@ -90,7 +84,7 @@ class CreateBackfillAction @Inject constructor(
       throw BadRequestException("scan_size must be >= batch_size")
     }
     if (request.extra_sleep_ms < 0) {
-      throw BadRequestException("extra_sleep_ms must be >= 1")
+      throw BadRequestException("extra_sleep_ms must be >= 0")
     }
     request.backoff_schedule?.let { schedule ->
       if (schedule.split(',').any { it.toLongOrNull() == null }) {

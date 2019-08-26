@@ -9,7 +9,11 @@ import {
 import { Classes, H2, H3, HTMLTable, Tooltip } from "@blueprintjs/core"
 import { simpleSelect } from "@misk/simpleredux"
 import { Link } from "react-router-dom"
-import { BackfillProgressBar, StartStopButton } from "../components"
+import {
+  BackfillProgressBar,
+  StartStopButton,
+  EditableField
+} from "../components"
 
 import TimeAgo from "react-timeago"
 
@@ -58,9 +62,13 @@ function prettyEta(durationSeconds: number) {
   return result
 }
 
+interface BackfillStatusState {
+  editing: any
+}
+
 class BackfillStatusContainer extends React.Component<
   IState & IDispatchProps,
-  IState
+  IState & BackfillStatusState
 > {
   private id: string = (this.props as any).match.params.id
   private backfillStatusTag: string = `${this.id}::BackfillRuns`
@@ -72,6 +80,7 @@ class BackfillStatusContainer extends React.Component<
     this.interval = setInterval(() => {
       this.requestStatus()
     }, 5000)
+    this.setState({ editing: {} })
   }
 
   requestStatus() {
@@ -141,23 +150,89 @@ class BackfillStatusContainer extends React.Component<
                 </tr>
                 <tr>
                   <td>Threads per instance</td>
-                  {/*todo make editable*/}
-                  <td>{status.num_threads}</td>
+                  <td>
+                    <EditableField
+                      id={this.id}
+                      numeric={true}
+                      fieldName={"num_threads"}
+                      value={status.num_threads}
+                      minValue={1}
+                      onUpdate={() => this.requestStatus()}
+                    />
+                  </td>
                 </tr>
                 <tr>
-                  <td>Scan size</td>
-                  {/*todo make editable*/}
-                  <td>{status.scan_size}</td>
+                  <td>
+                    <Tooltip
+                      className={Classes.TOOLTIP_INDICATOR}
+                      content="How many records to scan when computing batches."
+                    >
+                      Scan Size
+                    </Tooltip>
+                  </td>
+                  <td>
+                    <EditableField
+                      id={this.id}
+                      numeric={true}
+                      fieldName={"scan_size"}
+                      value={status.scan_size}
+                      minValue={1}
+                      onUpdate={() => this.requestStatus()}
+                    />
+                  </td>
                 </tr>
                 <tr>
-                  <td>Batch size</td>
-                  {/*todo make editable*/}
-                  <td>{status.batch_size}</td>
+                  <td>
+                    <Tooltip
+                      className={Classes.TOOLTIP_INDICATOR}
+                      content="How many *matching* records to send per call to RunBatch."
+                    >
+                      Batch Size
+                    </Tooltip>
+                  </td>
+                  <td>
+                    <EditableField
+                      id={this.id}
+                      numeric={true}
+                      fieldName={"batch_size"}
+                      value={status.batch_size}
+                      minValue={1}
+                      onUpdate={() => this.requestStatus()}
+                    />
+                  </td>
                 </tr>
                 <tr>
-                  <td>Sleep between batches</td>
-                  {/*todo make editable*/}
-                  <td>{status.extra_sleep_ms} ms</td>
+                  <td>Sleep between batches (ms)</td>
+                  <td>
+                    <EditableField
+                      id={this.id}
+                      numeric={true}
+                      fieldName={"extra_sleep_ms"}
+                      value={status.extra_sleep_ms}
+                      minValue={0}
+                      onUpdate={() => this.requestStatus()}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <Tooltip
+                      className={Classes.TOOLTIP_INDICATOR}
+                      content="Comma separated list of milliseconds to backoff on subsequent failures"
+                    >
+                      Backoff Schedule
+                    </Tooltip>
+                  </td>
+                  <td>
+                    <EditableField
+                      id={this.id}
+                      numeric={false}
+                      placeholder={"1000,5000,30000"}
+                      fieldName={"backoff_schedule"}
+                      value={status.backoff_schedule}
+                      onUpdate={() => this.requestStatus()}
+                    />
+                  </td>
                 </tr>
                 <tr>
                   <td>Created</td>

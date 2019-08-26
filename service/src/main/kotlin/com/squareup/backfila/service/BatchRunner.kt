@@ -1,5 +1,6 @@
 package com.squareup.backfila.service
 
+import com.google.common.base.Stopwatch
 import com.squareup.protos.backfila.clientservice.GetNextBatchRangeResponse.Batch
 import com.squareup.protos.backfila.clientservice.RunBatchResponse
 import kotlinx.coroutines.CancellationException
@@ -13,6 +14,7 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import misk.logging.getLogger
+import java.time.Duration
 
 data class AwaitingRun(
   val batch: Batch,
@@ -42,6 +44,7 @@ class BatchRunner(
     logger.info { "BatchRunner started ${backfillRunner.logLabel()} with numThreads=$numThreads" }
 
     while (true) {
+      val stopwatch = Stopwatch.createStarted()
       val batch = try {
         nextBatchChannel.receive()
       } catch (e: CancellationException) {
@@ -51,6 +54,10 @@ class BatchRunner(
         logger.info { "Queuer closed, no more batches to run ${backfillRunner.logLabel()}" }
         runChannel.close()
         break
+      }
+      if (stopwatch.elapsed() > Duration.ofMillis(500)) {
+        logger.info { "Runner stalled ${stopwatch.elapsed()} ms waiting for batch from " +
+            "queuer ${backfillRunner.logLabel()}"}
       }
 
       if (backfillRunner.globalBackoff.backingOff()) {

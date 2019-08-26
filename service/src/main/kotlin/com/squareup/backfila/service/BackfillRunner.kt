@@ -28,8 +28,7 @@ class BackfillRunner private constructor(
   val instanceName: String,
   val backfillRunId: Id<DbBackfillRun>,
   val instanceId: Id<DbRunInstance>,
-  val leaseToken: String,
-  val backoffSchedule: List<Long>
+  val leaseToken: String
 ) {
   /** Metadata about the backfill from the database. Refreshed regularly. */
   lateinit var metadata: BackfillMetaData
@@ -126,7 +125,8 @@ class BackfillRunner private constructor(
         dbRunInstance.backfill_run.num_threads,
         dbRunInstance.precomputing_done,
         dbRunInstance.precomputing_pkey_cursor,
-        dbRunInstance.backfill_run.extra_sleep_ms
+        dbRunInstance.backfill_run.extra_sleep_ms,
+        dbRunInstance.backfill_run.backoffSchedule() ?: DEFAULT_BACKOFF_SCHEDULE
     )
   }
 
@@ -170,13 +170,13 @@ class BackfillRunner private constructor(
       return
     }
     failuresSinceSuccess++
-    if (failuresSinceSuccess > backoffSchedule.size) {
+    if (failuresSinceSuccess > metadata.backoffSchedule.size) {
       logger.info {
         "Pausing backfill ${logLabel()} due to too many consecutive failures: $failuresSinceSuccess"
       }
       pauseBackfill()
     } else {
-      globalBackoff.addMillis(backoffSchedule[failuresSinceSuccess - 1])
+      globalBackoff.addMillis(metadata.backoffSchedule[failuresSinceSuccess - 1])
     }
   }
 
@@ -214,7 +214,8 @@ class BackfillRunner private constructor(
     val numThreads: Int,
     val precomputingDone: Boolean,
     val precomputingPkeyCursor: ByteString?,
-    val extraSleepMs: Long
+    val extraSleepMs: Long,
+    val backoffSchedule: List<Long>
   )
 
   companion object {
@@ -238,8 +239,7 @@ class BackfillRunner private constructor(
           dbRunInstance.instance_name,
           dbRunInstance.backfill_run_id,
           dbRunInstance.id,
-          leaseToken,
-          dbRunInstance.backfill_run.backoffSchedule() ?: DEFAULT_BACKOFF_SCHEDULE
+          leaseToken
       )
     }
   }
