@@ -1,6 +1,6 @@
 import * as React from "react"
 import Axios from "axios"
-import { Button, Intent } from "@blueprintjs/core"
+import { Button, Intent, Toaster } from "@blueprintjs/core"
 import { connect } from "react-redux"
 import {
   IDispatchProps,
@@ -33,10 +33,16 @@ class StartStopButton extends React.Component<
     const url = `/backfills/${this.id}/${startorstop}`
     this.setState({ loading: true })
     Axios.post(url, {})
-      .then(response => this.props.onUpdate())
+      .then(response => {
+        if (this.props.onUpdate) {
+          this.props.onUpdate()
+        }
+      })
       .catch(error => {
-        // TODO show a toast or something
-        console.log(error)
+        Toaster.create().show({
+          intent: Intent.DANGER,
+          message: `Error: ${error.response.data}`
+        })
       })
       .finally(() => this.setState({ loading: false }))
   }
