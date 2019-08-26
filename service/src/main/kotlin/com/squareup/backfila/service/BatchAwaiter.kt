@@ -101,7 +101,7 @@ class BatchAwaiter(
 
       // If all states are COMPLETE the whole backfill will be completed.
       // If multiple instances finish at the same time they will retry due to the hibernate
-      // version mismatch.
+      // version mismatch on the DbBackfillRun.
       val instances = dbRunInstance.backfill_run.instances(session,
           backfillRunner.factory.queryFactory)
       if (instances.all { it.run_state == BackfillState.COMPLETE }) {

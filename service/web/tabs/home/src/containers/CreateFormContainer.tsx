@@ -210,7 +210,7 @@ class CreateFormContainer extends React.Component<
                 </H5>
                 <InputGroup
                   id="text-input"
-                  placeholder="1000,5000,30000"
+                  placeholder="5000,15000,30000"
                   onChange={(event: FormEvent<HTMLElement>) => {
                     this.setState({
                       backoff_schedule: (event.target as any).value
