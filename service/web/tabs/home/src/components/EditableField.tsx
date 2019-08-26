@@ -84,7 +84,7 @@ export default class StartStopButton extends React.Component<
           {!this.props.numeric && (
             <InputGroup
               id="text-input"
-              placeholder="1000,5000,30000"
+              placeholder={this.props.placeholder}
               onChange={(event: FormEvent<HTMLElement>) => {
                 this.setState({
                   editingValue: (event.target as any).value

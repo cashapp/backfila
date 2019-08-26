@@ -227,7 +227,7 @@ class BackfillStatusContainer extends React.Component<
                     <EditableField
                       id={this.id}
                       numeric={false}
-                      placeholder={"1000,5000,30000"}
+                      placeholder={"5000,15000,30000"}
                       fieldName={"backoff_schedule"}
                       value={status.backoff_schedule}
                       onUpdate={() => this.requestStatus()}
