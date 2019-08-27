@@ -95,7 +95,7 @@ class BatchAwaiter(
   }
 
   fun completeInstance() {
-    backfillRunner.factory.transacter.transaction { session ->
+    val runComplete = backfillRunner.factory.transacter.transaction { session ->
       val dbRunInstance = session.load(backfillRunner.instanceId)
       dbRunInstance.run_state = BackfillState.COMPLETE
 
@@ -107,8 +107,14 @@ class BatchAwaiter(
       if (instances.all { it.run_state == BackfillState.COMPLETE }) {
         dbRunInstance.backfill_run.complete()
         logger.info { "Backfill ${backfillRunner.backfillName} completed" }
-        // TODO post-completion tasks...
+        // TODO audit log
+        return@transaction true
       }
+      false
+    }
+
+    if (runComplete) {
+      backfillRunner.factory.slackHelper.runCompleted(backfillRunner.backfillRunId)
     }
   }
 

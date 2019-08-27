@@ -20,6 +20,13 @@ internal class InjectorTest {
   }
 
   private fun test(env: Environment) {
-    ServiceBuilder.getTestVerifier("backfila", env, ::applicationModules).verify()
+    ServiceBuilder.getTestVerifier(
+        "backfila",
+        env,
+        ::applicationModules,
+        mapOf(
+            "/etc/secrets/service/slack-webhook-url" to ""
+        )
+    ).verify()
   }
 }

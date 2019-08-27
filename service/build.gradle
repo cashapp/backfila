@@ -64,6 +64,7 @@ dependencies {
   implementation dep.metricsParent
   implementation dep.misk
   implementation dep.miskHibernate
+  implementation dep.miskSlack
   implementation dep.miskZipkin
   implementation dep.moshi
   implementation dep.okHttp

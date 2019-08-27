@@ -19,6 +19,7 @@ import misk.environment.EnvironmentModule
 import misk.inject.KAbstractModule
 import misk.security.authz.AccessAnnotationEntry
 import misk.security.authz.DevelopmentOnly
+import misk.slack.SlackModule
 import misk.web.metadata.AdminDashboardAccess
 import java.util.concurrent.Executors
 import javax.inject.Singleton
@@ -47,6 +48,10 @@ class BackfilaServiceModule(
         .addBinding(Connectors.ENVOY)
         .to(EnvoyClientServiceClientProvider::class.java)
     // TODO http connector
+
+    if (config.slack != null) {
+      install(SlackModule(config.slack))
+    }
   }
 
   @Provides @ForBackfilaScheduler @Singleton
