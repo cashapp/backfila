@@ -60,6 +60,7 @@ class ConfigureServiceAction @Inject constructor(
       } else {
         dbService.connector = request.connector_type
         dbService.connector_extra_data = request.connector_extra_data
+        dbService.slack_channel = request.slack_channel
       }
 
       // Add any missing backfills, update modified ones, and mark missing ones as deleted.
