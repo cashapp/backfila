@@ -174,17 +174,24 @@ class BackfillRunner private constructor(
       logger.info {
         "Pausing backfill ${logLabel()} due to too many consecutive failures: $failuresSinceSuccess"
       }
-      pauseBackfill()
+      if (pauseBackfill()) {
+        factory.slackHelper.runErrored(backfillRunId)
+      }
     } else {
       globalBackoff.addMillis(metadata.backoffSchedule[failuresSinceSuccess - 1])
     }
   }
 
-  private fun pauseBackfill() {
-    factory.transacter.transaction { session ->
+  /** Returns true if the backfill was changed to paused, false if it was already paused. */
+  private fun pauseBackfill(): Boolean {
+    return factory.transacter.transaction { session ->
       val dbRunInstance = session.load(instanceId)
-      dbRunInstance.backfill_run.setState(session, factory.queryFactory,
-          BackfillState.PAUSED)
+      if (dbRunInstance.backfill_run.state == BackfillState.RUNNING) {
+        dbRunInstance.backfill_run.setState(session, factory.queryFactory,
+            BackfillState.PAUSED)
+        return@transaction true
+      }
+      return@transaction false
     }
   }
 
@@ -226,7 +233,8 @@ class BackfillRunner private constructor(
     @BackfilaDb val transacter: Transacter,
     val clock: Clock,
     val queryFactory: Query.Factory,
-    val connectorProvider: ConnectorProvider
+    val connectorProvider: ConnectorProvider,
+    val slackHelper: SlackHelper
   ) {
     fun create(
       @Suppress("UNUSED_PARAMETER") session: Session,

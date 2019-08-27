@@ -5,6 +5,7 @@ import com.squareup.backfila.service.BackfillState
 import com.squareup.backfila.service.BackfillState.PAUSED
 import com.squareup.backfila.service.BackfillState.RUNNING
 import com.squareup.backfila.service.DbBackfillRun
+import com.squareup.backfila.service.SlackHelper
 import misk.MiskCaller
 import misk.exceptions.BadRequestException
 import misk.hibernate.Id
@@ -16,7 +17,8 @@ import javax.inject.Inject
 
 class BackfillStateToggler @Inject constructor(
   @BackfilaDb private val transacter: Transacter,
-  private val queryFactory: Query.Factory
+  private val queryFactory: Query.Factory,
+  private val slackHelper: SlackHelper
 ) {
   fun toggleRunningState(id: Long, caller: MiskCaller, desiredState: BackfillState) {
     val requiredCurrentState = when (desiredState) {
@@ -42,6 +44,13 @@ class BackfillStateToggler @Inject constructor(
       }
       run.setState(session, queryFactory, desiredState)
     }
+
+    if (desiredState == RUNNING) {
+      slackHelper.runStarted(Id(id), caller.user!!)
+    } else {
+      slackHelper.runPaused(Id(id), caller.user!!)
+    }
+
     // TODO audit log event
   }
 

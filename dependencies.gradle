@@ -31,6 +31,7 @@ ext.dep = [
   "miskHibernate": "com.squareup.misk:misk-hibernate:2019.08.27-1566931748-f47b537e",
   "miskHibernateTesting": "com.squareup.misk:misk-hibernate-testing:2019.08.27-1566931748-f47b537e",
   "miskTesting": "com.squareup.misk:misk-testing:2019.08.27-1566931748-f47b537e",
+  "miskSlack": "com.squareup.misk:misk-slack:2019.08.27-1566931748-f47b537e",
   "miskZipkin": "com.squareup.misk:misk-zipkin:2019.08.27-1566931748-f47b537e",
   "moshi": "com.squareup.moshi:moshi-kotlin:1.8.0",
   "okHttp": "com.squareup.okhttp3:okhttp:4.0.1",

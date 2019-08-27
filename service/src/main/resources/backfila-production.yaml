@@ -19,3 +19,6 @@ data_source_clusters:
       type: MYSQL
       migrations_resource: classpath:/migrations
       fixed_pool_size: 15
+
+slack:
+  webhook_path: "filesystem:/etc/secrets/service/slack-webhook-url"
