@@ -21,3 +21,5 @@ data_source_clusters:
 
 slack:
   webhook_path: "filesystem:/etc/secrets/service/slack-webhook-url"
+
+web_url_root: "http://backfila.stage.sqprod.co/app/home/"

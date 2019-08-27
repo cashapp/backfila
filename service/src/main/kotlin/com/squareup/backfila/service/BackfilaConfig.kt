@@ -8,5 +8,6 @@ import misk.slack.SlackConfig
 data class BackfilaConfig(
   val skim: SkimServiceConfig,
   val data_source_clusters: DataSourceClustersConfig,
-  val slack: SlackConfig?
+  val slack: SlackConfig?,
+  val web_url_root: String
 ) : Config

@@ -8,13 +8,14 @@ import javax.inject.Inject
 
 class SlackHelper @Inject constructor(
   @BackfilaDb private val transacter: Transacter,
-  private val slackClient: SlackClient
+  private val slackClient: SlackClient,
+  private val backfilaConfig: BackfilaConfig
 ) {
-  // TODO clickable links to the status page, need base url in BackfilaConfig
   fun runStarted(id: Id<DbBackfillRun>, user: String) {
     val (message, channel) = transacter.transaction { session ->
       val run = session.load(id)
-      "`${run.registered_backfill.name}` started by @$user" to run.service.slack_channel
+      val message = "`${run.registered_backfill.name}` (${idLink(id)}) started by @$user"
+      message to run.service.slack_channel
     }
     slackClient.postMessage("Backfila", ":backfila:", message, channel)
   }
@@ -22,7 +23,8 @@ class SlackHelper @Inject constructor(
   fun runPaused(id: Id<DbBackfillRun>, user: String) {
     val (message, channel) = transacter.transaction { session ->
       val run = session.load(id)
-      "`${run.registered_backfill.name}` paused by @$user" to run.service.slack_channel
+      val message = "`${run.registered_backfill.name}` (${idLink(id)}) paused by @$user"
+      message to run.service.slack_channel
     }
     slackClient.postMessage("Backfila", ":backfila:", message, channel)
   }
@@ -30,7 +32,8 @@ class SlackHelper @Inject constructor(
   fun runErrored(id: Id<DbBackfillRun>) {
     val (message, channel) = transacter.transaction { session ->
       val run = session.load(id)
-      "`${run.registered_backfill.name}` paused due to error" to run.service.slack_channel
+      val message = "`${run.registered_backfill.name}` (${idLink(id)}) paused due to error"
+      message to run.service.slack_channel
     }
     slackClient.postMessage("Backfila", ":backfila:", message, channel)
   }
@@ -38,8 +41,14 @@ class SlackHelper @Inject constructor(
   fun runCompleted(id: Id<DbBackfillRun>) {
     val (message, channel) = transacter.transaction { session ->
       val run = session.load(id)
-      "`${run.registered_backfill.name}` completed" to run.service.slack_channel
+      val message = "`${run.registered_backfill.name}` (${idLink(id)}) completed"
+      message to run.service.slack_channel
     }
     slackClient.postMessage("Backfila", ":backfila:", message, channel)
+  }
+
+  private fun idLink(id: Id<DbBackfillRun>): String {
+    val url = "${backfilaConfig.web_url_root}backfills/$id"
+    return "<$url|$id>"
   }
 }

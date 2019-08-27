@@ -6,3 +6,5 @@ data_source_clusters:
       username: root
       password: ""
       migrations_resource: classpath:/migrations
+
+web_url_root: ""
