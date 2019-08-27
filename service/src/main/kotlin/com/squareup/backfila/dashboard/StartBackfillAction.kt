@@ -31,7 +31,7 @@ class StartBackfillAction @Inject constructor(
     @PathParam id: Long,
     @RequestBody request: StartBackfillRequest
   ): StartBackfillResponse {
-    // TODO check user has permissions for this service with `X-Forwarded-All-Capabilities` header
+    // TODO check user has permissions for this service with access api
     logger.info { "Start backfill $id by ${caller.get()?.user}" }
     backfillStateToggler.toggleRunningState(id, caller.get()!!, BackfillState.RUNNING)
     return StartBackfillResponse()

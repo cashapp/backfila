@@ -29,6 +29,7 @@ import javax.inject.Singleton
 internal class BackfilaTestingModule : KAbstractModule() {
   override fun configure() {
     val config = SkimConfig.load<BackfilaConfig>("backfila", Environment.TESTING)
+    bind<BackfilaConfig>().toInstance(config)
     install(EnvironmentModule(Environment.TESTING))
     install(LogCollectorModule())
     install(MiskTestingServiceModule())

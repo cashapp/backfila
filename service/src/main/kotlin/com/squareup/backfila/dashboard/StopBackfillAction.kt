@@ -31,7 +31,7 @@ class StopBackfillAction @Inject constructor(
     @PathParam id: Long,
     @RequestBody request: StopBackfillRequest
   ): StopBackfillResponse {
-    // TODO check user has permissions for this service with `X-Forwarded-All-Capabilities` header
+    // TODO check user has permissions for this service with access api
     logger.info { "Stop backfill $id by ${caller.get()?.user}" }
     backfillStateToggler.toggleRunningState(id, caller.get()!!, BackfillState.PAUSED)
     return StopBackfillResponse()

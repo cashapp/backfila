@@ -67,7 +67,7 @@ class CreateBackfillAction @Inject constructor(
     @PathParam service: String,
     @RequestBody request: CreateBackfillRequest
   ): CreateBackfillResponse {
-    // TODO check user has permissions for this service with `X-Forwarded-All-Capabilities` header
+    // TODO check user has permissions for this service with access api
 
     logger.info { "Create backfill for $service by ${caller.get()?.user}" }
 

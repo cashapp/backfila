@@ -44,7 +44,7 @@ class UpdateBackfillAction @Inject constructor(
     @PathParam id: Long,
     @RequestBody request: UpdateBackfillRequest
   ): UpdateBackfillResponse {
-    // TODO check user has permissions for this service with `X-Forwarded-All-Capabilities` header
+    // TODO check user has permissions for this service with access api
 
     logger.info { "Update backfill $id by ${caller.get()?.user} $request" }
 
