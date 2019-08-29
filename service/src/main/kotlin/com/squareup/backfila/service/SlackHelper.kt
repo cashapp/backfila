@@ -14,7 +14,7 @@ class SlackHelper @Inject constructor(
   fun runStarted(id: Id<DbBackfillRun>, user: String) {
     val (message, channel) = transacter.transaction { session ->
       val run = session.load(id)
-      val message = "`${run.registered_backfill.name}` (${idLink(id)}) started by @$user"
+      val message = ":backfila_start: `${run.registered_backfill.name}` (${idLink(id)}) started by @$user"
       message to run.service.slack_channel
     }
     slackClient.postMessage("Backfila", ":backfila:", message, channel)
@@ -23,7 +23,7 @@ class SlackHelper @Inject constructor(
   fun runPaused(id: Id<DbBackfillRun>, user: String) {
     val (message, channel) = transacter.transaction { session ->
       val run = session.load(id)
-      val message = "`${run.registered_backfill.name}` (${idLink(id)}) paused by @$user"
+      val message = ":backfila_pause: `${run.registered_backfill.name}` (${idLink(id)}) paused by @$user"
       message to run.service.slack_channel
     }
     slackClient.postMessage("Backfila", ":backfila:", message, channel)
@@ -32,7 +32,7 @@ class SlackHelper @Inject constructor(
   fun runErrored(id: Id<DbBackfillRun>) {
     val (message, channel) = transacter.transaction { session ->
       val run = session.load(id)
-      val message = "`${run.registered_backfill.name}` (${idLink(id)}) paused due to error"
+      val message = ":backfila_error: `${run.registered_backfill.name}` (${idLink(id)}) paused due to error"
       message to run.service.slack_channel
     }
     slackClient.postMessage("Backfila", ":backfila:", message, channel)
@@ -41,7 +41,7 @@ class SlackHelper @Inject constructor(
   fun runCompleted(id: Id<DbBackfillRun>) {
     val (message, channel) = transacter.transaction { session ->
       val run = session.load(id)
-      val message = "`${run.registered_backfill.name}` (${idLink(id)}) completed"
+      val message = ":backfila_complete: `${run.registered_backfill.name}` (${idLink(id)}) completed"
       message to run.service.slack_channel
     }
     slackClient.postMessage("Backfila", ":backfila:", message, channel)
