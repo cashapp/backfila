@@ -17,6 +17,7 @@ class DashboardWebActionsModule(val environment: Environment) : KAbstractModule(
     install(WebActionModule.create<GetBackfillRunsAction>())
     install(WebActionModule.create<GetBackfillStatusAction>())
     install(WebActionModule.create<UpdateBackfillAction>())
+    install(WebActionModule.create<RootRedirectAction>())
 
     // Tabs
     multibind<DashboardTab, AdminDashboardTab>().toInstance(DashboardTab(
