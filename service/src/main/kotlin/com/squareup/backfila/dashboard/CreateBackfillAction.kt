@@ -116,14 +116,19 @@ class CreateBackfillAction @Inject constructor(
 
     val client = connectorProvider.clientProvider(dbData.connectorType)
         .clientFor(service, dbData.connectorExtraData)
-    val prepareBackfillResponse =
-        client.prepareBackfill(PrepareBackfillRequest(
-            dbData.registeredBackfillId.toString(),
-            request.backfill_name,
-            KeyRange(request.pkey_range_start?.encodeUtf8(), request.pkey_range_end?.encodeUtf8()),
-            request.parameter_map,
-            request.dry_run
-        ))
+    val prepareBackfillResponse = try {
+      client.prepareBackfill(PrepareBackfillRequest(
+          dbData.registeredBackfillId.toString(),
+          request.backfill_name,
+          KeyRange(request.pkey_range_start?.encodeUtf8(),
+              request.pkey_range_end?.encodeUtf8()),
+          request.parameter_map,
+          request.dry_run
+      ))
+    } catch (e: Exception) {
+      logger.info(e) { "PrepareBackfill on `$service` failed"}
+      throw BadRequestException("PrepareBackfill on `$service` failed: " + e.message, e)
+    }
     val instances = prepareBackfillResponse.instances
     if (instances.isEmpty()) {
       throw BadRequestException("PrepareBackfill returned no instances")

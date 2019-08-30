@@ -1,6 +1,9 @@
+/** @jsx jsx */
+
 import * as React from "react"
 
 import { MenuItem } from "@blueprintjs/core"
+import { Global, css, jsx } from "@emotion/core"
 import { ItemPredicate, ItemRenderer, Suggest } from "@blueprintjs/select"
 
 export interface IBackfill {
@@ -10,6 +13,7 @@ export interface IBackfill {
 
 export interface IBackfillSelectorProps {
   backfills: IBackfill[]
+
   onValueChange?(value: IBackfill): void
 }
 
@@ -18,16 +22,25 @@ export default class BackfillSelector extends React.PureComponent<
 > {
   public render() {
     return (
-      <Suggest<IBackfill>
-        fill={true}
-        popoverProps={{ minimal: true }}
-        inputValueRenderer={this.renderInputValue}
-        items={this.props.backfills}
-        noResults={<MenuItem disabled={true} text="No backfills." />}
-        onItemSelect={this.props.onValueChange}
-        itemPredicate={this.filterBackfill}
-        itemRenderer={this.renderBackfill}
-      />
+      <div style={{ width: "100%" }}>
+        <Global
+          styles={css`
+            .bp3-select-popover .bp3-menu {
+              max-width: 100% !important;
+            }
+          `}
+        />
+        <Suggest<IBackfill>
+          fill={true}
+          popoverProps={{ minimal: true }}
+          inputValueRenderer={this.renderInputValue}
+          items={this.props.backfills}
+          noResults={<MenuItem disabled={true} text="No backfills." />}
+          onItemSelect={this.props.onValueChange}
+          itemPredicate={this.filterBackfill}
+          itemRenderer={this.renderBackfill}
+        />
+      </div>
     )
   }
 
