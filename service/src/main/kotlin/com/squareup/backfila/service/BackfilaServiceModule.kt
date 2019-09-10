@@ -30,6 +30,11 @@ class BackfilaServiceModule(
   private val region: Region
 ) : KAbstractModule() {
   override fun configure() {
+    multibind<AccessAnnotationEntry>().toInstance(
+      AccessAnnotationEntry<AdminDashboardAccess>(capabilities = listOf("backfila--owners")))
+    bind<MiskCaller>().annotatedWith<DevelopmentOnly>()
+      .toInstance(MiskCaller(user = "development", capabilities = setOf("backfila--owners")))
+
     install(ConfigModule.create("backfila", config))
     install(EnvironmentModule(environment))
     install(SkimModule(environment, config.skim, region))
@@ -38,11 +43,6 @@ class BackfilaServiceModule(
     install(ServiceWebActionsModule())
 
     install(SchedulerLifecycleServiceModule())
-
-    multibind<AccessAnnotationEntry>().toInstance(
-        AccessAnnotationEntry<AdminDashboardAccess>(capabilities = listOf("eng")))
-    bind<MiskCaller>().annotatedWith<DevelopmentOnly>()
-        .toInstance(MiskCaller(user = "development", capabilities = setOf("eng")))
 
     newMapBinder<String, BackfilaClientServiceClientProvider>(ForConnectors::class)
         .addBinding(Connectors.ENVOY)

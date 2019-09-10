@@ -1,13 +1,14 @@
-import { simpleSelect } from "@misk/simpleredux"
+import { simpleSelectorGet } from "@misk/simpleredux"
 import * as React from "react"
 import { connect } from "react-redux"
-import { ServicesListComponent } from "../components"
+import { ServicesListComponent } from "src/components"
 import {
   IDispatchProps,
   IState,
   mapDispatchToProps,
   mapStateToProps
-} from "../ducks"
+} from "src/ducks"
+import { NavbarContainer } from "."
 
 class TabContainer extends React.Component<IState & IDispatchProps, IState> {
   private tableTag = "services"
@@ -19,13 +20,17 @@ class TabContainer extends React.Component<IState & IDispatchProps, IState> {
 
   render() {
     return (
-      <div>
+      <NavbarContainer>
         <ServicesListComponent
-          data={simpleSelect(this.props.simpleNetwork, this.tableTag)}
+          data={simpleSelectorGet(
+            this.props.simpleNetwork,
+            [this.tableTag, "data", "services"],
+            []
+          )}
           url={this.tableUrl}
           tag={this.tableTag}
         />
-      </div>
+      </NavbarContainer>
     )
   }
 }

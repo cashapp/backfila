@@ -5,4 +5,4 @@ import routes from "./routes"
 export * from "./components"
 export * from "./containers"
 
-createIndex("home", createApp(routes), Ducks)
+createIndex("app", createApp(routes), Ducks)

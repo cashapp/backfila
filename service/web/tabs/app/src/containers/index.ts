@@ -1,11 +1,13 @@
 import BackfillStatusContainer from "./BackfillStatusContainer"
 import CreateFormContainer from "./CreateFormContainer"
+import HomeContainer from "./HomeContainer"
+import NavbarContainer from "./NavbarContainer"
 import ServiceContainer from "./ServiceContainer"
-import TabContainer from "./TabContainer"
 
 export {
   BackfillStatusContainer,
   CreateFormContainer,
-  ServiceContainer,
-  TabContainer
+  HomeContainer,
+  NavbarContainer,
+  ServiceContainer
 }

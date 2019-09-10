@@ -6,14 +6,15 @@ import {
   mapDispatchToProps,
   mapStateToProps
 } from "../ducks"
-import { Classes, H2, H3, HTMLTable, Tooltip } from "@blueprintjs/core"
-import { simpleSelect } from "@misk/simpleredux"
+import { Classes, H2, H3, HTMLTable, Tooltip, Spinner } from "@blueprintjs/core"
+import { simpleSelectorGet } from "@misk/simpleredux"
 import { Link } from "react-router-dom"
 import {
   BackfillProgressBar,
   StartStopButton,
   EditableField
 } from "../components"
+import { NavbarContainer } from "../containers"
 
 import TimeAgo from "react-timeago"
 
@@ -91,11 +92,10 @@ class BackfillStatusContainer extends React.Component<
   }
 
   render() {
-    let result = simpleSelect(
-      this.props.simpleNetwork,
+    let result = simpleSelectorGet(this.props.simpleNetwork, [
       this.backfillStatusTag,
       "data"
-    )
+    ])
     if (result) {
       this.status = result
       if (result.state == "COMPLETE") {
@@ -103,7 +103,11 @@ class BackfillStatusContainer extends React.Component<
       }
     }
     if (!this.status) {
-      return <div>loading</div>
+      return (
+        <NavbarContainer>
+          <Spinner />
+        </NavbarContainer>
+      )
     } else {
       let status = this.status
       let all_precomputing_done = status.instances.every(
@@ -120,10 +124,10 @@ class BackfillStatusContainer extends React.Component<
         0
       )
       return (
-        <div>
+        <NavbarContainer>
           <H2>
             Backfill #{this.id}: {status.name} in{" "}
-            <Link to={`/app/home/services/${status.service_name}`}>
+            <Link to={`/app/services/${status.service_name}`}>
               {status.service_name}
             </Link>
           </H2>
@@ -365,7 +369,7 @@ class BackfillStatusContainer extends React.Component<
               ))}
             </tbody>
           </HTMLTable>
-        </div>
+        </NavbarContainer>
       )
     }
   }

@@ -14,9 +14,9 @@ class RootRedirectAction : WebAction {
   @Authenticated
   fun root(): Response<ResponseBody> {
     return Response(
-        body = "go to /app/home/".toResponseBody(),
+        body = "go to /app/".toResponseBody(),
         statusCode = HttpURLConnection.HTTP_MOVED_TEMP,
-        headers = Headers.headersOf("Location", "/app/home/")
+        headers = Headers.headersOf("Location", "/app/")
     )
   }
 }
