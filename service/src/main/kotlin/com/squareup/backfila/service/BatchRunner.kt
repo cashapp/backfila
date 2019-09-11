@@ -8,7 +8,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.delay
@@ -26,25 +25,42 @@ class BatchRunner(
   private val nextBatchChannel: ReceiveChannel<Batch>,
   private val numThreads: Int
 ) {
-  // TODO resize on config change
-  // 0 capacity is 1 at a time, etc, so subtract 1.
-  private val runChannel = Channel<AwaitingRun>(capacity = numThreads - 1)
+  private val runChannel = VariableCapacityChannel<AwaitingRun>(capacity(numThreads))
 
   /**
    * This channel just signals when more RPCs can be sent, since the above channel is opened up when
    * a Deferred RPC is read, not when the RPC completes, which would cause an extra RPC to be open.
    */
-  private val rpcBackpressureChannel = Channel<Unit>(capacity = numThreads - 1)
+  private val rpcBackpressureChannel = VariableCapacityChannel<Unit>(capacity(numThreads) )
 
-  fun runChannel(): ReceiveChannel<AwaitingRun> = runChannel
+  fun runChannel(): ReceiveChannel<AwaitingRun> = runChannel.downstream()
 
-  fun rpcBackpressureChannel(): ReceiveChannel<Unit> = rpcBackpressureChannel
+  fun rpcBackpressureChannel(): ReceiveChannel<Unit> = rpcBackpressureChannel.downstream()
+
+  private fun capacity(numThreads: Int) = numThreads
 
   fun run(coroutineScope: CoroutineScope) = coroutineScope.launch {
     logger.info { "BatchRunner started ${backfillRunner.logLabel()} with numThreads=$numThreads" }
 
+    runChannel.proxy(coroutineScope)
+    rpcBackpressureChannel.proxy(coroutineScope)
+    // Prefill the backpressure channel with one entry since it will be consumed and buffered
+    // immediately.
+    rpcBackpressureChannel.upstream().send(Unit)
+
     while (true) {
+      // Use the latest metadata snapshot.
+      val metadata = backfillRunner.metadata
+      // Update channel size if the user changed numThreads.
+      val newCapacity = capacity(metadata.numThreads)
+      if (newCapacity != runChannel.capacity) {
+        logger.info { "Updated channel capacity to $newCapacity" }
+        runChannel.capacity = newCapacity
+        rpcBackpressureChannel.capacity = newCapacity
+      }
+
       val stopwatch = Stopwatch.createStarted()
+
       val batch = try {
         nextBatchChannel.receive()
       } catch (e: CancellationException) {
@@ -52,7 +68,7 @@ class BatchRunner(
         break
       } catch (e: ClosedReceiveChannelException) {
         logger.info { "Queuer closed, no more batches to run ${backfillRunner.logLabel()}" }
-        runChannel.close()
+        runChannel.upstream().close()
         break
       }
       if (stopwatch.elapsed() > Duration.ofMillis(500)) {
@@ -82,8 +98,8 @@ class BatchRunner(
           // TODO for pipelined backfills, await result and start a second RPC to the target
         }
       }
-      runChannel.send(AwaitingRun(batch, run))
-      rpcBackpressureChannel.send(Unit)
+      runChannel.upstream().send(AwaitingRun(batch, run))
+      rpcBackpressureChannel.upstream().send(Unit)
     }
     logger.info { "BatchRunner stopped ${backfillRunner.logLabel()}" }
   }

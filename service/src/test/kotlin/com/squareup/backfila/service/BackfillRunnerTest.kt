@@ -12,6 +12,8 @@ import com.squareup.backfila.dashboard.StartBackfillAction
 import com.squareup.backfila.dashboard.StartBackfillRequest
 import com.squareup.backfila.dashboard.StopBackfillAction
 import com.squareup.backfila.dashboard.StopBackfillRequest
+import com.squareup.backfila.dashboard.UpdateBackfillAction
+import com.squareup.backfila.dashboard.UpdateBackfillRequest
 import com.squareup.backfila.fakeCaller
 import com.squareup.protos.backfila.clientservice.GetNextBatchRangeResponse
 import com.squareup.protos.backfila.clientservice.KeyRange
@@ -51,6 +53,7 @@ class BackfillRunnerTest {
   @Inject lateinit var leaseHunter: LeaseHunter
   @Inject @BackfilaDb lateinit var transacter: Transacter
   @Inject lateinit var fakeBackfilaClientServiceClient: FakeBackfilaClientServiceClient
+  @Inject lateinit var updateBackfillAction: UpdateBackfillAction
 
   @Test fun happyCompleteRun() {
     fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
@@ -450,6 +453,52 @@ class BackfillRunnerTest {
       }
     }
     // Cursor updated
+    transacter.transaction { session ->
+      val instance = session.load(runner.instanceId)
+      assertThat(instance.pkey_cursor).isEqualTo("199".encodeUtf8())
+      assertThat(instance.run_state).isEqualTo(BackfillState.RUNNING)
+    }
+  }
+
+  @Test fun numThreadsIncreased() {
+    fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
+    val runner = startBackfill(numThreads = 3)
+
+    runBlocking {
+      launch { runner.run() }
+      try {
+        // We should only get numthreads=3 calls in parallel, then it must wait for more room.
+        assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
+        assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
+        assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
+        yield()
+        assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNull()
+
+        updateBackfillAction.update(runner.backfillRunId.id,
+            UpdateBackfillRequest(num_threads = 4))
+        // Wait for runner to reload metadata.
+        delay(2000)
+
+        // It takes 2 rpcs for the channels to resize, then another 3 are enqueued.
+        fakeBackfilaClientServiceClient.runBatchResponses.send(
+            Result.success(RunBatchResponse.Builder().build()))
+        fakeBackfilaClientServiceClient.runBatchResponses.send(
+            Result.success(RunBatchResponse.Builder().build()))
+
+        assertThat(withTimeoutOrNull(1000L) {
+          fakeBackfilaClientServiceClient.runBatchRequests.receive()
+        }).isNotNull()
+        assertThat(withTimeoutOrNull(1000L) {
+          fakeBackfilaClientServiceClient.runBatchRequests.receive()
+        }).isNotNull()
+        assertThat(withTimeoutOrNull(1000L) {
+          fakeBackfilaClientServiceClient.runBatchRequests.receive()
+        }).isNotNull()
+      } finally {
+        runner.stop()
+      }
+    }
+
     transacter.transaction { session ->
       val instance = session.load(runner.instanceId)
       assertThat(instance.pkey_cursor).isEqualTo("199".encodeUtf8())

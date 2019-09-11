@@ -21,11 +21,11 @@ import javax.inject.Inject
 
 // These values correspond to those in CreateBackfillAction. Only non null values are updated.
 data class UpdateBackfillRequest(
-  val scan_size: Long?,
-  val batch_size: Long?,
-  val num_threads: Int?,
-  val backoff_schedule: String?,
-  val extra_sleep_ms: Long?
+  val scan_size: Long? = null,
+  val batch_size: Long? = null,
+  val num_threads: Int? = null,
+  val backoff_schedule: String? = null,
+  val extra_sleep_ms: Long? = null
 )
 
 class UpdateBackfillResponse
