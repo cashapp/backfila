@@ -5,7 +5,6 @@ import com.squareup.protos.backfila.clientservice.GetNextBatchRangeResponse.Batc
 import com.squareup.protos.backfila.clientservice.KeyRange
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -15,15 +14,17 @@ class BatchQueuer(
   private val backfillRunner: BackfillRunner,
   numThreads: Int
 ) {
-  // 0 capacity is 1 at a time, etc, so subtract 1.
-  private val capacity = numThreads * 2 - 1
-  // TODO resize on config change
-  private val nextBatchChannel = Channel<Batch>(capacity)
+  private val nextBatchChannel = VariableCapacityChannel<Batch>(capacity(numThreads))
 
-  fun nextBatchChannel(): ReceiveChannel<Batch> = nextBatchChannel
+  fun nextBatchChannel(): ReceiveChannel<Batch> = nextBatchChannel.downstream()
+
+  private fun capacity(numThreads: Int) = numThreads * 2
 
   fun run(coroutineScope: CoroutineScope) = coroutineScope.launch {
-    logger.info { "BatchQueuer started ${backfillRunner.logLabel()} with buffer size=$capacity" }
+    nextBatchChannel.proxy(coroutineScope)
+
+    logger.info {"BatchQueuer started ${backfillRunner.logLabel()} with buffer size=" +
+        "${nextBatchChannel.capacity}" }
 
     // Start at the cursor we have in the DB, but after that we need to maintain our own,
     // since the DB stores how far we've completed batches, and we are likely ahead of that.
@@ -33,6 +34,12 @@ class BatchQueuer(
       // Use the latest metadata snapshot.
       val metadata = backfillRunner.metadata
 
+      // Update channel size if the user changed numThreads.
+      val newCapacity = capacity(metadata.numThreads)
+      if (newCapacity != nextBatchChannel.capacity) {
+        nextBatchChannel.capacity = newCapacity
+      }
+
       if (backfillRunner.globalBackoff.backingOff()) {
         val backoffMs = backfillRunner.globalBackoff.backoffMs()
         logger.info { "BatchQueuer ${backfillRunner.logLabel()} backing off for $backoffMs" }
@@ -41,7 +48,7 @@ class BatchQueuer(
 
       try {
         val computeTimeLimitMs = 5_000L // half of HTTP timeout
-        val computeCountLimit = capacity
+        val computeCountLimit = nextBatchChannel.capacity
         val response = backfillRunner.client.getNextBatchRange(GetNextBatchRangeRequest(
             metadata.backfillRunId.toString(),
             backfillRunner.backfillName,
@@ -61,11 +68,11 @@ class BatchQueuer(
 
         if (response.batches.isEmpty()) {
           logger.info { "No more batches, finished computing for ${backfillRunner.logLabel()}" }
-          nextBatchChannel.close()
+          nextBatchChannel.upstream().close()
           break
         } else {
           for (batch in response.batches) {
-            nextBatchChannel.send(batch)
+            nextBatchChannel.upstream().send(batch)
             pkeyCursor = batch.batch_range.end
           }
         }
