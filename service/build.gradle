@@ -30,7 +30,7 @@ sourceSets {
   test.java.srcDirs += 'src/test/kotlin/'
   main.resources {
     srcDirs += [
-            'web/tabs/home/lib'
+            'web/tabs/app/lib'
     ]
     srcDirs += [
             'web/static/'

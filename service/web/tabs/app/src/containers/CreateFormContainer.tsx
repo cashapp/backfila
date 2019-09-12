@@ -18,14 +18,16 @@ import {
   H2,
   H5,
   Tooltip,
-  Classes
+  Classes,
+  Spinner
 } from "@blueprintjs/core"
-import { simpleSelect } from "@misk/simpleredux"
+import { simpleSelectorGet } from "@misk/simpleredux"
 import { BackfillSelector } from "../components"
 import { FlexContainer } from "@misk/core"
 import { Link } from "react-router-dom"
 import { FormEvent } from "react"
-import { IBackfill } from "../components/BackfillSelector"
+import { IBackfill } from "../components"
+import { NavbarContainer } from "../containers"
 
 interface CreateFormState {
   loading: boolean
@@ -72,25 +74,24 @@ class CreateFormContainer extends React.Component<
   }
 
   render() {
-    let registeredBackfills = simpleSelect(
-      this.props.simpleNetwork,
+    let registeredBackfills = simpleSelectorGet(this.props.simpleNetwork, [
       this.registeredBackfills,
       "data"
-    )
+    ])
 
     if (!registeredBackfills || !this.state) {
       return (
-        <div>
+        <NavbarContainer>
           <H1>Service: {this.service}</H1>
-          loading
-        </div>
+          <Spinner />
+        </NavbarContainer>
       )
     }
     return (
-      <div>
+      <NavbarContainer>
         <H1>
           Service:{" "}
-          <Link to={`/app/home/services/${this.service}`}>{this.service}</Link>
+          <Link to={`/app/services/${this.service}`}>{this.service}</Link>
         </H1>
         <div style={{ width: "1000px", margin: "auto" }}>
           <H2>Create backfill</H2>
@@ -262,7 +263,7 @@ class CreateFormContainer extends React.Component<
                     .then(response => {
                       let id = response.data.id
                       let history = (this.props as any).history
-                      history.push(`/app/home/backfills/${id}`)
+                      history.push(`/app/backfills/${id}`)
                     })
                     .catch(error => {
                       console.log(error)
@@ -283,7 +284,7 @@ class CreateFormContainer extends React.Component<
             )}
           </FormGroup>
         </div>
-      </div>
+      </NavbarContainer>
     )
   }
 

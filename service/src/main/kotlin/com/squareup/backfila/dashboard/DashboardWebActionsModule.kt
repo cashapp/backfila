@@ -21,17 +21,17 @@ class DashboardWebActionsModule(val environment: Environment) : KAbstractModule(
 
     // Tabs
     multibind<DashboardTab, AdminDashboardTab>().toInstance(DashboardTab(
-        name = "Home",
-        slug = "home",
-        url_path_prefix = "/app/home/",
+        name = "App",
+        slug = "app",
+        url_path_prefix = "/app/",
         category = "Backfila"
     ))
     install(WebTabResourceModule(
         environment = environment,
-        slug = "home",
+        slug = "app",
         web_proxy_url = "http://localhost:4200/",
-        url_path_prefix = "/app/home/",
-        resourcePath = "classpath:/web/app/home/"
+        url_path_prefix = "/app/",
+        resourcePath = "classpath:/web/app/"
     ))
   }
 }

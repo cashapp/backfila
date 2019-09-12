@@ -1,6 +1,6 @@
 {
-  "name": "Home",
-  "output_path": "lib/web/app/home",
+  "name": "App",
+  "output_path": "lib/web/app",
   "port": "4200",
   "rawGitginore": "",
   "rawIndex": false,
@@ -8,11 +8,11 @@
   "rawTsconfig": {},
   "rawTslint": {},
   "rawWebpackConfig": {},
-  "relative_path_prefix": "app/home/",
-  "slug": "home",
+  "relative_path_prefix": "app/",
+  "slug": "app",
   "useWebpackBundleAnalyzer": false,
   "useWebpackExternals": true,
-  "version": "0.1.17",
+  "version": "0.1.18-5",
   "zipOnBuild": false,
   "___DeprecatedKeys": "Any keys below this point in your miskTab.json are deprecated and can be safely removed."
 }

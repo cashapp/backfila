@@ -9,7 +9,6 @@ import com.squareup.backfila.client.BackfilaClientServiceClientProvider
 import com.squareup.backfila.client.Connectors
 import com.squareup.backfila.client.FakeBackfilaClientServiceClientProvider
 import com.squareup.backfila.client.ForConnectors
-import com.squareup.backfila.dashboard.DashboardWebActionsModule
 import com.squareup.backfila.service.BackfilaConfig
 import com.squareup.backfila.service.BackfilaDb
 import com.squareup.backfila.service.BackfilaPersistenceModule
