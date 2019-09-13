@@ -39,6 +39,7 @@ class GetRegisteredBackfillsAction @Inject constructor(
       val backfills = queryFactory.newQuery<RegisteredBackfillQuery>()
           .serviceId(dbService.id)
           .active()
+          .orderByName()
           .list(session)
       backfills.map {
         RegisteredBackfill(
