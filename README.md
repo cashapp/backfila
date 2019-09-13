@@ -1,7 +1,6 @@
 # backfila
 
-This is a sample app that makes use of Misk. All commands below assume you're in the root directory
-of this repository.
+Backfila is a service that manages backfill state, calling into other services to do batched work.
 
 ## Building
 Build backfila:
@@ -40,16 +39,37 @@ Run backfila in Docker locally:
   $ docker run -p 8080:8080 backfila-0.0.1
 ```
 
-Confirm backfila works with curl:
+Visit the UI at http://localhost:8080/
 
+## Client
+The backfila client must be installed in your services to expose their backfill code.
+It also provides the batching mechanism and templates for common types of backfills.
+
+## Connectors
+Connectors can be installed to provide a way to connect to your services.
+The included default connectors are HTTPS and Envoy. Add custom connectors using Guice map binding.
+
+Gradle
+--------
+
+```kotlin
+implementation("app.cash.backfila:backfila-client:0.1.0")
+implementation("app.cash.backfila:backfila-service-lib:0.1.0")
 ```
-  $ curl --data '{"message": "hello"}' -H 'Content-Type: application/json' http://localhost:8080/ping
-```
 
-## Polyrepo
+License
+--------
 
-Visit [Polyrepo Readme](https://git.sqcorp.co/projects/CASH/repos/cash/browse/README.md) for the polyrepo docs
+    Copyright 2019 Square, Inc.
 
-## Other examplars
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-See [cash-urlshortener](https://git.sqcorp.co/projects/CASH/repos/cash-urlshortener/browse) for an example of how to set up a MySql database
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
