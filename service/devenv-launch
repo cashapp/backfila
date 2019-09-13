@@ -12,4 +12,4 @@ java \
   -XX:+PrintConcurrentLocks \
   -Djava.io.tmpdir=tmp \
   -classpath "./local/java:cloud-backfila.jar" \
-  com.squareup.backfila.service.BackfilaServiceKt
+  app.cash.backfila.service.BackfilaServiceKt
