@@ -1,0 +1,50 @@
+syntax = "proto2";
+package app.cash.backfila.protos.service;
+
+option java_package = "app.cash.backfila.protos.service";
+option java_generic_services = true;
+
+// In this file: APIs that the service provides to the client.
+
+message Parameter {
+  optional string name = 1;
+  // Description to show in the UI.
+  optional string description = 2;
+}
+
+message ConfigureServiceRequest {
+  message BackfillData {
+    // Identifies the backfill. Must be unique per service.
+    optional string name = 1;
+    // Description to show in the UI.
+    optional string description = 2;
+
+    // Parameters the backfill will accept. An input is displayed in the UI for each parameter.
+    repeated Parameter parameters = 3;
+
+    // The class name of pipelined data, only set if backfill supports pipelining.
+    optional string type_provided = 4;
+    optional string type_consumed = 5;
+
+    // If true the backfill will need approval from another user before it can be started.
+    optional bool requires_approval = 6;
+  }
+
+  // List of all available backfills in this service
+  repeated BackfillData backfills = 1;
+
+  // This isn't encoded as protobuf so connector implementations can be added without modifying
+  // protos (thus avoiding modifying the core backfila codebase).
+  optional string connector_type = 2;
+
+  // Extra data that is passed through to the connector corresponding to connector_type.
+  // Suggested encoding is JSON. For example ENVOY type could have the cluster type as extra data:
+  //  e.g.: `{"cluster_type": "production-jobs"}`
+  optional string connector_extra_data = 3;
+
+  optional string slack_channel = 4;
+}
+
+message ConfigureServiceResponse {
+
+}

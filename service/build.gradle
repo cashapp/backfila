@@ -103,7 +103,7 @@ dependencies {
 
 jar {
   manifest {
-    attributes 'Main-Class': 'com.squareup.backfila.service.BackfilaServiceKt'
+    attributes 'Main-Class': 'app.cash.backfila.service.BackfilaServiceKt'
   }
   zip64 = true
   classifier = 'unshaded'
@@ -120,14 +120,14 @@ task compileWire {
   doLast {
     //TODO(drashkov): upgrade wire compiler with a flag to create output directory
     def base = rootProject.findProject(":client").file("build/generated/source/proto/main/java")
-    println "Creating $base/com/squareup/protos/cash/backfila"
-    "mkdir -p $base/com/squareup/protos/cash/backfila".execute()
+    println "Creating $base/app/cash/backfila/protos"
+    "mkdir -p $base/app/cash/backfila/protos".execute()
 
     def args = [
             "--proto_path=" + project.file("src/main/proto"),
             "--java_out=" + base,
-            "squareup/backfila/service.proto",
-            "squareup/backfila/client_service.proto",
+            "app/cash/backfila/service.proto",
+            "app/cash/backfila/client_service.proto",
     ]
     WireCompiler.main(args.toArray(new String[args.size()]))
   }

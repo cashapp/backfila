@@ -1,0 +1,114 @@
+syntax = "proto2";
+package app.cash.backfila.protos.clientservice;
+
+option java_package = "app.cash.backfila.protos.clientservice";
+option java_generic_services = true;
+
+// In this file: APIs that backfila calls on the client service.
+
+// Inclusive range of primary keys.
+// Backfila will never make assumptions about the type of the primary key,
+// these are passed around as tokens.
+message KeyRange {
+  optional bytes start = 1;
+  optional bytes end = 2;
+}
+
+message PrepareBackfillRequest {
+  // A unique identifier for this backfill run.
+  // Can be used as a caching key since backfill metadata is immutable after creation.
+  optional string backfill_id = 1;
+
+  optional string backfill_name = 2;
+
+  // Range populated if specified by user in UI
+  optional KeyRange range = 3;
+
+  // User provided parameters at creation.
+  map<string, bytes> parameters = 4;
+
+  optional bool dry_run = 5;
+}
+message PrepareBackfillResponse {
+  message Instance {
+    optional string instance_name = 1;
+    optional KeyRange backfill_range = 2;
+
+    // If available, an estimate can be provided here to display while the
+    // actual count is being computed.
+    optional uint64 estimated_record_count = 3;
+  }
+
+  repeated Instance instances = 1;
+}
+
+message GetNextBatchRangeRequest {
+  // A unique identifier for this backfill run.
+  // Can be used as a caching key since backfill metadata is immutable after creation.
+  optional string backfill_id = 1;
+  optional string backfill_name = 2;
+  optional string instance_name = 3;
+  // Max number of matching records to return in a batch range.
+  optional uint64 batch_size = 4;
+  // Max number of records to scan when computing a batch range.
+  optional uint64 scan_size = 5;
+  // End key of the previous computed batch. Can be null for the first call.
+  optional bytes previous_end_key = 6;
+  // The range of the whole backfill.
+  // This determines where the first batch starts and the last batch ends.
+  optional KeyRange backfill_range = 7;
+  // User provided parameters at creation. The values are immutable for the life of the backfill.
+  map<string, bytes> parameters = 8;
+  // Compute as many batches as possible until this duration elapses.
+  optional uint64 compute_time_limit_ms = 9;
+  // Compute as many batches as possible until this many results.
+  optional uint64 compute_count_limit = 10;
+
+  optional bool dry_run = 11;
+
+  // Indicates if this request is used to precompute data size.
+  // Client can choose to use a more optimized query in this case.
+  optional bool precomputing = 12;
+}
+message GetNextBatchRangeResponse {
+  message Batch {
+    optional KeyRange batch_range = 1;
+    optional uint64 scanned_record_count = 2;
+    optional uint64 matching_record_count = 3;
+  }
+
+  repeated Batch batches = 1;
+}
+
+message RunBatchRequest {
+  // A unique identifier for this backfill run.
+  // Can be used as a caching key since backfill metadata is immutable after creation.
+  optional string backfill_id = 1;
+  optional string backfill_name = 2;
+  optional string instance_name = 3;
+  optional KeyRange batch_range = 4;
+
+  // User provided parameters at creation.
+  map<string, bytes> parameters = 5;
+  optional bool dry_run = 6;
+
+  // Provided data from the source backfill if this is the target backfill in a pipelined backfill.
+  optional PipelinedData pipelined_data = 7;
+}
+message RunBatchResponse {
+  // How much to sleep before starting new batches. For example can be set to replication lag.
+  optional uint64 backoff_ms = 1;
+
+  optional PipelinedData pipelined_data = 2;
+}
+
+// Pipelined data can be any format as long as both the consumer and provider agree on it.
+// This structure is passed around from the source to the target unchanged.
+message PipelinedData {
+  repeated PipelinedRecord records = 1;
+
+  repeated bytes metadata = 2;
+}
+message PipelinedRecord {
+  optional bytes data = 1;
+}
