@@ -10,8 +10,6 @@ import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import com.google.inject.Provides
-import com.squareup.skim.SkimModule
-import com.squareup.skim.aws.Region
 import misk.MiskCaller
 import misk.config.ConfigModule
 import misk.environment.Environment
@@ -26,18 +24,16 @@ import javax.inject.Singleton
 
 class BackfilaServiceModule(
   private val environment: Environment,
-  private val config: BackfilaConfig,
-  private val region: Region
+  private val config: BackfilaConfig
 ) : KAbstractModule() {
   override fun configure() {
     multibind<AccessAnnotationEntry>().toInstance(
-      AccessAnnotationEntry<AdminDashboardAccess>(capabilities = listOf("backfila--owners")))
-    bind<MiskCaller>().annotatedWith<DevelopmentOnly>()
-      .toInstance(MiskCaller(user = "development", capabilities = setOf("backfila--owners")))
+        AccessAnnotationEntry<AdminDashboardAccess>(capabilities = listOf("backfila--owners")))
+    bind<MiskCaller>().annotatedWith<DevelopmentOnly>().toInstance(
+        MiskCaller(user = "development", capabilities = setOf("eng", "backfila--owners")))
 
     install(ConfigModule.create("backfila", config))
     install(EnvironmentModule(environment))
-    install(SkimModule(environment, config.skim, region))
     install(BackfilaPersistenceModule(config))
     install(DashboardWebActionsModule(environment))
     install(ServiceWebActionsModule())

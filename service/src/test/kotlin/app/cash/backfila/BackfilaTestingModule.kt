@@ -13,13 +13,16 @@ import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import com.google.inject.Provides
-import com.squareup.skim.config.SkimConfig
 import misk.MiskCaller
 import misk.MiskTestingServiceModule
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
 import misk.hibernate.HibernateTestingModule
 import misk.inject.KAbstractModule
+import misk.jdbc.DataSourceClusterConfig
+import misk.jdbc.DataSourceClustersConfig
+import misk.jdbc.DataSourceConfig
+import misk.jdbc.DataSourceType
 import misk.logging.LogCollectorModule
 import misk.scope.ActionScopedProviderModule
 import java.util.concurrent.Executors
@@ -27,7 +30,21 @@ import javax.inject.Singleton
 
 internal class BackfilaTestingModule : KAbstractModule() {
   override fun configure() {
-    val config = SkimConfig.load<BackfilaConfig>("backfila", Environment.TESTING)
+    val config = BackfilaConfig(
+        data_source_clusters = DataSourceClustersConfig(
+            mapOf("backfila-001" to DataSourceClusterConfig(
+                writer = DataSourceConfig(
+                    type = DataSourceType.MYSQL,
+                    database = "backfila_test",
+                    username = "root",
+                    migrations_resource = "classpath:/migrations"
+                ),
+                reader = null
+            ))
+        ),
+        web_url_root = "",
+        slack = null
+    )
     bind<BackfilaConfig>().toInstance(config)
     install(EnvironmentModule(Environment.TESTING))
     install(LogCollectorModule())
