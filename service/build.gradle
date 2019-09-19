@@ -75,7 +75,6 @@ dependencies {
   implementation dep.openTracingOkHttp
   implementation dep.retrofit
   implementation dep.retrofitGuavaAdapter
-  implementation dep.skim
   implementation dep.tracingJaeger
   implementation dep.wireRuntime
   implementation dep.wireCompiler
@@ -87,9 +86,6 @@ dependencies {
 
   }
   testImplementation(dep.miskTesting) {
-
-  }
-  implementation(dep.skim) {
 
   }
 
@@ -108,7 +104,7 @@ jar {
     attributes 'Main-Class': 'app.cash.backfila.service.BackfilaServiceKt'
   }
   zip64 = true
-  classifier = 'unshaded'
+//  classifier = 'unshaded'
 }
 
 shadowJar {
