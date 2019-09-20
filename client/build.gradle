@@ -54,4 +54,5 @@ jar {
   baseName = "backfila-client"
 }
 
+compileKotlin.dependsOn 'spotlessKotlinApply'
 compileKotlin.dependsOn ':service:compileWire'

@@ -131,4 +131,5 @@ task compileWire {
   }
 }
 
+compileKotlin.dependsOn 'spotlessKotlinApply'
 compileKotlin.dependsOn compileWire

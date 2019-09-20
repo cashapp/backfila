@@ -27,7 +27,7 @@ import { FlexContainer } from "@misk/core"
 import { Link } from "react-router-dom"
 import { FormEvent } from "react"
 import { IBackfill } from "../components"
-import { NavbarContainer } from "../containers"
+import { LayoutContainer } from "../containers"
 
 interface CreateFormState {
   loading: boolean
@@ -81,14 +81,14 @@ class CreateFormContainer extends React.Component<
 
     if (!registeredBackfills || !this.state) {
       return (
-        <NavbarContainer>
+        <LayoutContainer>
           <H1>Service: {this.service}</H1>
           <Spinner />
-        </NavbarContainer>
+        </LayoutContainer>
       )
     }
     return (
-      <NavbarContainer>
+      <LayoutContainer>
         <H1>
           Service:{" "}
           <Link to={`/app/services/${this.service}`}>{this.service}</Link>
@@ -284,7 +284,7 @@ class CreateFormContainer extends React.Component<
             )}
           </FormGroup>
         </div>
-      </NavbarContainer>
+      </LayoutContainer>
     )
   }
 

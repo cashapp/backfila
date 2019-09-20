@@ -14,7 +14,7 @@ import {
   StartStopButton,
   EditableField
 } from "../components"
-import { NavbarContainer } from "../containers"
+import { LayoutContainer } from "../containers"
 
 import TimeAgo from "react-timeago"
 
@@ -104,9 +104,9 @@ class BackfillStatusContainer extends React.Component<
     }
     if (!this.status) {
       return (
-        <NavbarContainer>
+        <LayoutContainer>
           <Spinner />
-        </NavbarContainer>
+        </LayoutContainer>
       )
     } else {
       let status = this.status
@@ -124,7 +124,7 @@ class BackfillStatusContainer extends React.Component<
         0
       )
       return (
-        <NavbarContainer>
+        <LayoutContainer>
           <H2>
             Backfill #{this.id}: {status.name} in{" "}
             <Link to={`/app/services/${status.service_name}`}>
@@ -369,7 +369,7 @@ class BackfillStatusContainer extends React.Component<
               ))}
             </tbody>
           </HTMLTable>
-        </NavbarContainer>
+        </LayoutContainer>
       )
     }
   }

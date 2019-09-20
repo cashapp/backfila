@@ -19,17 +19,17 @@
     "zip": "tar --exclude='.gitignore' --exclude='.old_build_files' --exclude='package.json' --exclude='package-lock.json' --exclude='prettier.config.js' --exclude='tsconfig.json' --exclude='tslint.json' --exclude='webpack.config.js' --exclude='yarn.lock' --exclude='demo' --exclude='lib' --exclude='.DS_Store' --exclude='*.log' --exclude='node_modules' --exclude='app.tgz' -czvf app.tgz ./"
   },
   "dependencies": {
-    "@misk/common": "0.1.18-5",
-    "@misk/core": "0.1.18-5",
-    "@misk/simpleredux": "0.1.18-5",
+    "@misk/common": "0.1.19",
+    "@misk/core": "0.1.19",
+    "@misk/simpleredux": "0.1.19",
     "react-timeago": "4.4.0",
     "@types/react-timeago": "4.1.1"
   },
   "devDependencies": {
-    "@misk/dev": "0.1.18-5",
-    "@misk/prettier": "0.1.18-5",
-    "@misk/test": "0.1.18-5",
-    "@misk/tslint": "0.1.18-5"
+    "@misk/dev": "0.1.19",
+    "@misk/prettier": "0.1.19",
+    "@misk/test": "0.1.19",
+    "@misk/tslint": "0.1.19"
   },
   "jest": {
     "testEnvironment": "jsdom",
