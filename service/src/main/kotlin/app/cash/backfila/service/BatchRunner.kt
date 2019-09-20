@@ -31,7 +31,7 @@ class BatchRunner(
    * This channel just signals when more RPCs can be sent, since the above channel is opened up when
    * a Deferred RPC is read, not when the RPC completes, which would cause an extra RPC to be open.
    */
-  private val rpcBackpressureChannel = VariableCapacityChannel<Unit>(capacity(numThreads) )
+  private val rpcBackpressureChannel = VariableCapacityChannel<Unit>(capacity(numThreads))
 
   fun runChannel(): ReceiveChannel<AwaitingRun> = runChannel.downstream()
 
@@ -73,7 +73,7 @@ class BatchRunner(
       }
       if (stopwatch.elapsed() > Duration.ofMillis(500)) {
         logger.info { "Runner stalled ${stopwatch.elapsed()} ms waiting for batch from " +
-            "queuer ${backfillRunner.logLabel()}"}
+            "queuer ${backfillRunner.logLabel()}" }
       }
 
       if (backfillRunner.globalBackoff.backingOff()) {

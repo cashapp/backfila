@@ -8,7 +8,7 @@ import {
   mapDispatchToProps,
   mapStateToProps
 } from "src/ducks"
-import { NavbarContainer } from "."
+import { LayoutContainer } from "."
 
 class TabContainer extends React.Component<IState & IDispatchProps, IState> {
   private tableTag = "services"
@@ -20,7 +20,7 @@ class TabContainer extends React.Component<IState & IDispatchProps, IState> {
 
   render() {
     return (
-      <NavbarContainer>
+      <LayoutContainer>
         <ServicesListComponent
           data={simpleSelectorGet(
             this.props.simpleNetwork,
@@ -30,7 +30,7 @@ class TabContainer extends React.Component<IState & IDispatchProps, IState> {
           url={this.tableUrl}
           tag={this.tableTag}
         />
-      </NavbarContainer>
+      </LayoutContainer>
     )
   }
 }

@@ -23,7 +23,7 @@ class BatchQueuer(
   fun run(coroutineScope: CoroutineScope) = coroutineScope.launch {
     nextBatchChannel.proxy(coroutineScope)
 
-    logger.info {"BatchQueuer started ${backfillRunner.logLabel()} with buffer size=" +
+    logger.info { "BatchQueuer started ${backfillRunner.logLabel()} with buffer size=" +
         "${nextBatchChannel.capacity}" }
 
     // Start at the cursor we have in the DB, but after that we need to maintain our own,

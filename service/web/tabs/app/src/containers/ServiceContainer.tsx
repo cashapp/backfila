@@ -10,7 +10,7 @@ import { H1, Intent, AnchorButton, Spinner } from "@blueprintjs/core"
 import { BackfillRunsTable } from "../components"
 import { simpleSelectorGet } from "@misk/simpleredux"
 import { Link } from "react-router-dom"
-import { NavbarContainer } from "."
+import { LayoutContainer } from "."
 
 class ServiceContainer extends React.Component<
   IState & IDispatchProps,
@@ -33,14 +33,14 @@ class ServiceContainer extends React.Component<
     ])
     if (!this.service || !result) {
       return (
-        <NavbarContainer>
+        <LayoutContainer>
           <H1>Service: {this.service}</H1>
           <Spinner />
-        </NavbarContainer>
+        </LayoutContainer>
       )
     }
     return (
-      <NavbarContainer>
+      <LayoutContainer>
         <H1>Service: {this.service}</H1>
         <Link to={`/app/services/${this.service}/create`}>
           <AnchorButton text={"Create"} intent={Intent.PRIMARY} />
@@ -49,7 +49,7 @@ class ServiceContainer extends React.Component<
         <BackfillRunsTable backfillRuns={result.running_backfills} />
         <h4>Paused Backfills</h4>
         <BackfillRunsTable backfillRuns={result.paused_backfills} />
-      </NavbarContainer>
+      </LayoutContainer>
     )
   }
 }

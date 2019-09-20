@@ -126,7 +126,7 @@ class CreateBackfillAction @Inject constructor(
           request.dry_run
       ))
     } catch (e: Exception) {
-      logger.info(e) { "PrepareBackfill on `$service` failed"}
+      logger.info(e) { "PrepareBackfill on `$service` failed" }
       throw BadRequestException("PrepareBackfill on `$service` failed: " + e.message, e)
     }
     val instances = prepareBackfillResponse.instances
