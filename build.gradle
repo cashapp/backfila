@@ -37,4 +37,8 @@ subprojects {
     mavenCentral()
     jcenter()
   }
+
+  if (rootProject.file("hooks.gradle").exists()) {
+    apply from: rootProject.file("hooks.gradle")
+  }
 }
