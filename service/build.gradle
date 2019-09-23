@@ -132,3 +132,7 @@ task compileWire {
 
 compileKotlin.dependsOn 'spotlessKotlinApply'
 compileKotlin.dependsOn compileWire
+
+if (rootProject.file("hooks.gradle").exists()) {
+  apply from: rootProject.file("hooks.gradle")
+}
