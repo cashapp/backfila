@@ -1,12 +1,12 @@
 import com.squareup.wire.WireCompiler
 import org.junit.platform.console.options.Details
 
+apply plugin: 'com.vanniktech.maven.publish'
+
 apply plugin: 'kotlin'
 apply plugin: 'org.junit.platform.gradle.plugin'
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'com.diffplug.gradle.spotless'
-
-apply from: "https://git.sqcorp.co/projects/CASH/repos/cash-upload/raw/common-upload.gradle?at=refs%2Fheads%2Fmaster"
 
 spotless {
   kotlin {
@@ -104,7 +104,6 @@ jar {
     attributes 'Main-Class': 'app.cash.backfila.service.BackfilaServiceKt'
   }
   zip64 = true
-//  classifier = 'unshaded'
 }
 
 shadowJar {
