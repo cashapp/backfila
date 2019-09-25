@@ -12,7 +12,9 @@ export const LayoutContainer = (props: { children: any }) => (
     adminDashboardTabsUrl={miskAdminDashboardTabsUrl}
     children={props.children}
     homeName={<HomeLinkLogo />}
+    homeUrl={"/app/"}
     menuShowButton={false}
+    propsOverrideRemoteData={true}
     serviceMetadataUrl={miskServiceMetadataUrl}
     theme={backfilaTheme}
   />
