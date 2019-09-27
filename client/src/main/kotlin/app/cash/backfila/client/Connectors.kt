@@ -5,4 +5,6 @@ object Connectors {
   const val ENVOY = "ENVOY"
 }
 
+data class HttpConnectorData(val url: String)
+
 data class EnvoyConnectorData(val clusterType: String)

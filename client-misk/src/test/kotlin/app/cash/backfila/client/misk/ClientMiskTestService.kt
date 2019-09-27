@@ -12,7 +12,7 @@ import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientsConfig
 import misk.client.HttpClientsConfigModule
 
-class Backfill1 : Backfill {
+class DummyBackfill : Backfill {
   override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
     TODO(
         "not implemented") // To change body of created functions use File | Settings | File Templates.
@@ -30,11 +30,10 @@ class Backfill1 : Backfill {
 }
 
 fun main(args: Array<String>) {
-
   MiskApplication(
       BackfilaClientModule(
-          BackfilaClientConfig("#test"),
-          listOf(Backfill1::class.java, Backfill::class.java)
+          BackfilaClientConfig(url = "#test", slack_channel = "#test"),
+          listOf(DummyBackfill::class.java)
       ),
       HttpClientsConfigModule(
           HttpClientsConfig(endpoints = mapOf(
