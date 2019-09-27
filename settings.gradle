@@ -1,2 +1,3 @@
 include 'client'
+include 'client-misk'
 include 'service'
