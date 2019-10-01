@@ -6,7 +6,7 @@ Backfila is a service that manages backfill state, calling into other services t
 Build backfila:
 
 ```
-  $ ./gradlew clean shadowJar
+$ ./gradlew clean shadowJar
 ```
 
 ## Run the Service
@@ -14,7 +14,7 @@ Build backfila:
 ### From the command line
 
 ```
-  $ java -jar service/build/libs/service.jar
+$ java -jar service/build/libs/service.jar
 ```
 
 ### From IntelliJ
@@ -27,7 +27,7 @@ Build backfila:
 Build a Docker image of backfila:
 
 ```
-  $ docker build -t backfila-0.0.1 service
+$ docker build -t backfila-0.0.1 service
 ```
 
 #### Running locally
@@ -36,7 +36,7 @@ Visit [Docker for Mac](https://docs.docker.com/docker-for-mac/install/) to insta
 
 Run backfila in Docker locally:
 ```
-  $ docker run -p 8080:8080 backfila-0.0.1
+$ docker run -p 8080:8080 backfila-0.0.1
 ```
 
 Visit the UI at http://localhost:8080/
