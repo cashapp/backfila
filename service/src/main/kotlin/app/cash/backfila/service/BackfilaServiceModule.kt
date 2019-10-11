@@ -29,8 +29,6 @@ class BackfilaServiceModule(
   override fun configure() {
     multibind<AccessAnnotationEntry>().toInstance(
         AccessAnnotationEntry<AdminDashboardAccess>(capabilities = listOf("backfila--owners")))
-    bind<MiskCaller>().annotatedWith<DevelopmentOnly>().toInstance(
-        MiskCaller(user = "development", capabilities = setOf("eng", "backfila--owners")))
 
     install(ConfigModule.create("backfila", config))
     install(EnvironmentModule(environment))
