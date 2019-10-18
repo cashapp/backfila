@@ -4,7 +4,8 @@ import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.web.DashboardTab
 import misk.web.WebActionModule
-import misk.web.actions.AdminDashboardTab
+import misk.web.dashboard.AdminDashboard
+import misk.web.dashboard.DashboardTabProvider
 import misk.web.metadata.WebTabResourceModule
 
 class DashboardWebActionsModule(val environment: Environment) : KAbstractModule() {
@@ -20,7 +21,7 @@ class DashboardWebActionsModule(val environment: Environment) : KAbstractModule(
     install(WebActionModule.create<RootRedirectAction>())
 
     // Tabs
-    multibind<DashboardTab, AdminDashboardTab>().toInstance(DashboardTab(
+    multibind<DashboardTab>().toProvider(DashboardTabProvider<AdminDashboard>(
         name = "App",
         slug = "app",
         url_path_prefix = "/app/",
