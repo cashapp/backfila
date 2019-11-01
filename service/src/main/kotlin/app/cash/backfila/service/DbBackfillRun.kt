@@ -133,12 +133,14 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
     // State can't be changed after being completed.
     checkState(this.state != BackfillState.COMPLETE)
     this.state = state
-    instances(session, queryFactory)
-        .forEach { instance ->
-          if (instance.run_state != BackfillState.COMPLETE) {
-            instance.run_state = state
-          }
-        }
+    // Set the state of all the instances that are not complete
+    val query = session.hibernateSession.createQuery("update DbRunInstance " +
+            "set run_state = :newState, version = version + 1 " +
+            "where backfill_run_id = :runId and run_state <> :completed")
+    query.setParameter("runId", id)
+    query.setParameter("newState", state)
+    query.setParameter("completed", BackfillState.COMPLETE)
+    query.executeUpdate();
   }
 
   fun complete() {
