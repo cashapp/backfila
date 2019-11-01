@@ -31,7 +31,7 @@ jobs:
   java:
     machine:
       image: circleci/classic:latest
-    parallelism: 2
+    parallelism: 1
     environment:
       ENVIRONMENT: TESTING
       JVM_OPTS: -Xmx1024M
@@ -57,25 +57,14 @@ jobs:
           name: "Dump environment variables"
           command: env
       - run:
-          name: "Start MySQL if needed"
+          name: "Start MySQL"
           # There's a race condition here, where it's possible that MySQL hasn't finished starting
           # up before we try to connect to it. But Kotlin builds are so damn slow it'll never
           # happen in practice.
-          command: |
-            # Only run MySQL for the hibernate tests.
-            if [ "$CIRCLE_NODE_INDEX" -eq 1 ]; then
-              docker run -d -p 3306:3306 --name mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=1 mysql:5.7
-            else
-              echo "Not starting MySQL"
-            fi
+          command: docker run -d -p 3306:3306 --name mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=1 mysql:5.7
       - run:
           name: "Build and test"
-          command: |
-            if [ "$CIRCLE_NODE_INDEX" -eq 1 ]; then
-              ./gradlew testShardHibernate -i --scan --parallel --build-cache
-            else
-              ./gradlew testShardNonHibernate -i --scan --parallel --build-cache
-            fi
+          command: ./gradlew build check -i --scan --parallel --build-cache
       - run:
           name: Collect test results
           command: |
@@ -91,15 +80,6 @@ jobs:
       - store_test_results:
           name: Store test results
           path: ~/test-results
-      - run:
-          name: Collect gradle reports
-          command: |
-            mkdir -p ~/reports/
-            tar cf - */build/reports | (cd ~/reports/; tar xf -)
-          when: always
-      - store_artifacts:
-          name: Store gradle reports
-          path: ~/reports
   node:
     docker:
       - image: circleci/node:10.15
