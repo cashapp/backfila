@@ -1,15 +1,6 @@
 package app.cash.backfila.service
 
 import com.google.api.client.repackaged.com.google.common.base.Preconditions.checkState
-import misk.hibernate.DbTimestampedEntity
-import misk.hibernate.DbUnsharded
-import misk.hibernate.Id
-import misk.hibernate.JsonColumn
-import misk.hibernate.Query
-import misk.hibernate.Session
-import misk.hibernate.newQuery
-import okio.ByteString
-import okio.ByteString.Companion.decodeBase64
 import java.time.Instant
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -21,6 +12,15 @@ import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
 import javax.persistence.Table
 import javax.persistence.Version
+import misk.hibernate.DbTimestampedEntity
+import misk.hibernate.DbUnsharded
+import misk.hibernate.Id
+import misk.hibernate.JsonColumn
+import misk.hibernate.Query
+import misk.hibernate.Session
+import misk.hibernate.newQuery
+import okio.ByteString
+import okio.ByteString.Companion.decodeBase64
 
 /**
  * Tracks the state of a created backfill.

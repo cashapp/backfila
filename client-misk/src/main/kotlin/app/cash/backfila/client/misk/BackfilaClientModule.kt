@@ -9,6 +9,9 @@ import com.google.inject.Key
 import com.google.inject.Provides
 import com.google.inject.TypeLiteral
 import com.google.inject.name.Names
+import javax.inject.Inject
+import javax.inject.Named
+import javax.inject.Singleton
 import misk.ServiceModule
 import misk.client.TypedHttpClientModule
 import misk.inject.KAbstractModule
@@ -16,9 +19,6 @@ import misk.logging.getLogger
 import misk.web.WebActionModule
 import retrofit2.Retrofit
 import retrofit2.converter.wire.WireConverterFactory
-import javax.inject.Inject
-import javax.inject.Named
-import javax.inject.Singleton
 
 data class BackfilaClientConfig(
   val slack_channel: String?

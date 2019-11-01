@@ -5,20 +5,21 @@ import app.cash.backfila.client.BackfilaClientServiceClientProvider
 import app.cash.backfila.client.Connectors
 import app.cash.backfila.client.EnvoyClientServiceClientProvider
 import app.cash.backfila.client.ForConnectors
-import app.cash.backfila.dashboard.DashboardWebActionsModule
+import app.cash.backfila.dashboard.BackfilaDashboardModule
+import app.cash.backfila.dashboard.BackfilaWebActionsModule
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import com.google.inject.Provides
+import java.util.concurrent.Executors
+import javax.inject.Singleton
 import misk.config.ConfigModule
 import misk.environment.Environment
 import misk.environment.EnvironmentModule
 import misk.inject.KAbstractModule
 import misk.security.authz.AccessAnnotationEntry
 import misk.slack.SlackModule
-import misk.web.metadata.AdminDashboardAccess
-import java.util.concurrent.Executors
-import javax.inject.Singleton
+import misk.web.dashboard.AdminDashboardAccess
 
 class BackfilaServiceModule(
   private val environment: Environment,
@@ -31,7 +32,8 @@ class BackfilaServiceModule(
     install(ConfigModule.create("backfila", config))
     install(EnvironmentModule(environment))
     install(BackfilaPersistenceModule(config))
-    install(DashboardWebActionsModule(environment))
+    install(BackfilaWebActionsModule())
+    install(BackfilaDashboardModule(environment))
     install(ServiceWebActionsModule())
 
     install(SchedulerLifecycleServiceModule())

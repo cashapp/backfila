@@ -15,19 +15,18 @@ import misk.client.HttpClientsConfigModule
 class Backfill1 : Backfill {
   override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
     TODO(
-        "not implemented") //To change body of created functions use File | Settings | File Templates.
+        "not implemented") // To change body of created functions use File | Settings | File Templates.
   }
 
   override fun getNextBatchRange(request: GetNextBatchRangeRequest): GetNextBatchRangeResponse {
     TODO(
-        "not implemented") //To change body of created functions use File | Settings | File Templates.
+        "not implemented") // To change body of created functions use File | Settings | File Templates.
   }
 
   override fun runBatch(request: RunBatchRequest): RunBatchResponse {
     TODO(
-        "not implemented") //To change body of created functions use File | Settings | File Templates.
+        "not implemented") // To change body of created functions use File | Settings | File Templates.
   }
-
 }
 
 fun main(args: Array<String>) {

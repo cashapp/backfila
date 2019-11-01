@@ -1,44 +1,72 @@
-apply from: new File("./dependencies.gradle")
-
 buildscript {
   repositories {
-    maven {
-      url "https://maven.global.square/artifactory/square-public"
-    }
     mavenCentral()
     jcenter()
+  }
+  
+  apply from: new File("./dependencies.gradle")
+
+  dependencies {
+    classpath dep.junitGradlePlugin
+    classpath dep.kotlinGradlePlugin
+    classpath dep.mavenPublishGradlePlugin
+    classpath dep.shadowJarPlugin
+    classpath dep.spotlessPlugin
+    classpath dep.wirePlugin
   }
 }
 
-subprojects {
-  buildscript {
-    repositories {
-      maven {
-        url "https://maven.global.square/artifactory/square-public"
-      }
-      mavenCentral()
-      jcenter()
-    }
+subprojects { subProject ->
+  apply plugin: 'java'
+  apply plugin: 'kotlin'
+  apply plugin: 'com.diffplug.gradle.spotless'
+  apply plugin: 'org.jetbrains.dokka'
 
-    dependencies {
-      classpath dep.kotlinGradlePlugin
-      classpath dep.wireCompiler
-      classpath dep.junitGradlePlugin
-      classpath dep.shadowJarPlugin
-      classpath dep.mavenPublishGradlePlugin
-      classpath dep.spotlessPlugin
+  compileKotlin {
+    kotlinOptions {
+      jvmTarget = JavaVersion.VERSION_1_8
     }
   }
 
-  apply plugin: 'java'
-  apply plugin: 'kotlin'
-  apply plugin: 'org.jetbrains.dokka'
+  compileTestKotlin {
+    kotlinOptions {
+      jvmTarget = JavaVersion.VERSION_1_8
+    }
+  }
+
+  compileJava {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+  }
+
+  spotless {
+    kotlin {
+      target "**/*.kt"
+      ktlint(dep.ktlintVersion).userData(['indent_size': '2', 'continuation_indent_size': '2'])
+    }
+  }
+  compileKotlin.dependsOn 'spotlessKotlinApply'
 
   repositories {
-    maven {
-      url "https://maven.global.square/artifactory/square-public"
-    }
     mavenCentral()
     jcenter()
+  }
+
+  test {
+    useJUnitPlatform()
+    testLogging {
+      events "started", "passed", "skipped", "failed"
+      exceptionFormat = 'full'
+      showExceptions = true
+      showStackTraces = true
+    }
+  }
+
+  // Workaround the Gradle bug resolving multiplatform dependencies.
+  // https://github.com/square/okio/issues/647
+  configurations.all { configuration ->
+    if (name.contains('kapt') || name.contains("wire")) {
+      attributes.attribute(Usage.USAGE_ATTRIBUTE, subProject.objects.named(Usage.class, Usage.JAVA_RUNTIME))
+    }
   }
 }

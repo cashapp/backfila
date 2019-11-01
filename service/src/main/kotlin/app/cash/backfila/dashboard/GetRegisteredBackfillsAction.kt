@@ -3,6 +3,7 @@ package app.cash.backfila.dashboard
 import app.cash.backfila.service.BackfilaDb
 import app.cash.backfila.service.RegisteredBackfillQuery
 import app.cash.backfila.service.ServiceQuery
+import javax.inject.Inject
 import misk.exceptions.BadRequestException
 import misk.hibernate.Query
 import misk.hibernate.Transacter
@@ -14,7 +15,6 @@ import misk.web.PathParam
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
-import javax.inject.Inject
 
 data class RegisteredBackfill(
   val name: String,

@@ -1,5 +1,6 @@
 package app.cash.backfila.service
 
+import java.util.LinkedList
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -8,7 +9,6 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.select
-import java.util.LinkedList
 
 class VariableCapacityChannel<T>(
   capacity: Int

@@ -1,20 +1,18 @@
 package app.cash.backfila.client.misk
 
 import com.google.inject.Injector
+import javax.inject.Inject
 import misk.security.authz.Authenticated
 import misk.web.Post
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
-import javax.inject.Inject
 
 internal class BackfilaClassResolver @Inject constructor(
   private val injector: Injector,
   private val backfills: Map<String, Class<out Backfill>>
-) {
-
-}
+)
 
 internal class PrepareBackfillAction @Inject constructor(
 //  private val backfilaClassResolver: BackfilaClassResolver

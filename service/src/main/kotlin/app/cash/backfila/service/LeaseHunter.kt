@@ -1,13 +1,13 @@
 package app.cash.backfila.service
 
-import misk.hibernate.Query
-import misk.hibernate.Transacter
-import misk.hibernate.newQuery
-import misk.tokens.TokenGenerator
 import java.time.Clock
 import java.time.Duration
 import javax.inject.Inject
 import javax.inject.Singleton
+import misk.hibernate.Query
+import misk.hibernate.Transacter
+import misk.hibernate.newQuery
+import misk.tokens.TokenGenerator
 
 @Singleton
 class LeaseHunter @Inject constructor(

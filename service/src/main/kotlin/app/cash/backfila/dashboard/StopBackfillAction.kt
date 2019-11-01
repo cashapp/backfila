@@ -1,6 +1,7 @@
 package app.cash.backfila.dashboard
 
 import app.cash.backfila.service.BackfillState
+import javax.inject.Inject
 import misk.MiskCaller
 import misk.logging.getLogger
 import misk.scope.ActionScoped
@@ -12,7 +13,6 @@ import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
-import javax.inject.Inject
 
 class StopBackfillRequest
 class StopBackfillResponse
