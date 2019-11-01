@@ -9,7 +9,7 @@ import { backfilaTheme } from "src/utilities"
 
 export const LayoutContainer = (props: { children: any }) => (
   <MiskNavbarContainer
-    adminDashboardTabsUrl={miskDashboardMetadataUrl("BackfilaApp")}
+    dashboardMetadataUrl={miskDashboardMetadataUrl("backfilaapp")}
     children={props.children}
     homeName={<HomeLinkLogo />}
     homeUrl={"/app/"}
