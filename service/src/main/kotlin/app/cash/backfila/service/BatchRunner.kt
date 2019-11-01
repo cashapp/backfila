@@ -3,6 +3,7 @@ package app.cash.backfila.service
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse.Batch
 import app.cash.backfila.protos.clientservice.RunBatchResponse
 import com.google.common.base.Stopwatch
+import java.time.Duration
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -13,7 +14,6 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import misk.logging.getLogger
-import java.time.Duration
 
 data class AwaitingRun(
   val batch: Batch,

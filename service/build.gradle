@@ -1,35 +1,10 @@
-import com.squareup.wire.WireCompiler
-import org.junit.platform.console.options.Details
-
 apply plugin: 'com.vanniktech.maven.publish'
-
 apply plugin: 'kotlin'
 apply plugin: 'org.junit.platform.gradle.plugin'
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'com.diffplug.gradle.spotless'
 
-spotless {
-  kotlin {
-    target "**/*.kt"
-    ktlint(dep.ktlintVersion).userData(['indent_size': '2', 'continuation_indent_size' : '2'])
-  }
-}
-
-compileKotlin {
-  kotlinOptions {
-    jvmTarget = "1.8"
-  }
-}
-
-compileTestKotlin {
-  kotlinOptions {
-    jvmTarget = "1.8"
-  }
-}
-
 sourceSets {
-  main.java.srcDirs += 'src/main/kotlin/'
-  test.java.srcDirs += 'src/test/kotlin/'
   main.resources {
     srcDirs += [
             'web/tabs/app/lib'
@@ -39,10 +14,6 @@ sourceSets {
     ]
     exclude '**/node_modules'
   }
-}
-
-junitPlatform {
-  details Details.VERBOSE
 }
 
 dependencies {
@@ -79,15 +50,9 @@ dependencies {
   implementation dep.wireRuntime
   implementation dep.wireCompiler
   implementation dep.wireSchema
-  
-  compile project(':client')
 
-  implementation(dep.misk) {
-
-  }
-  testImplementation(dep.miskTesting) {
-
-  }
+  implementation project(':client')
+  implementation project(':client-misk')
 
   testImplementation dep.miskTesting
   testImplementation dep.miskHibernateTesting
@@ -111,33 +76,6 @@ shadowJar {
   mergeServiceFiles()
   zip64 true
   classifier = null
-}
-
-task compileWire {
-  doLast {
-    //TODO(drashkov): upgrade wire compiler with a flag to create output directory
-    def base = rootProject.findProject(":client").file("build/generated/source/proto/main/java")
-    println "Creating $base/app/cash/backfila/protos"
-    "mkdir -p $base/app/cash/backfila/protos".execute()
-
-    def args = [
-            "--proto_path=" + project.file("src/main/proto"),
-            "--java_out=" + base,
-            "app/cash/backfila/service.proto",
-            "app/cash/backfila/client_service.proto",
-    ]
-    WireCompiler.main(args.toArray(new String[args.size()]))
-  }
-}
-
-compileKotlin.dependsOn 'spotlessKotlinApply'
-compileKotlin.dependsOn compileWire
-
-afterEvaluate { project ->
-  project.tasks.dokka {
-    outputDirectory = "$rootDir/docs/0.x"
-    outputFormat = 'gfm'
-  }
 }
 
 if (rootProject.file("hooks.gradle").exists()) {

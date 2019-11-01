@@ -1,8 +1,8 @@
 package app.cash.backfila.client
 
-import misk.exceptions.BadRequestException
 import javax.inject.Inject
 import javax.inject.Singleton
+import misk.exceptions.BadRequestException
 
 @Singleton
 class ConnectorProvider @Inject constructor(

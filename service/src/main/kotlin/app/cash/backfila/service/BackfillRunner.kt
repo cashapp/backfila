@@ -4,6 +4,8 @@ import app.cash.backfila.client.BackfilaClientServiceClient
 import app.cash.backfila.client.ConnectorProvider
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.RunBatchRequest
+import java.time.Clock
+import javax.inject.Inject
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -14,8 +16,6 @@ import misk.hibernate.Transacter
 import misk.hibernate.load
 import misk.logging.getLogger
 import okio.ByteString
-import java.time.Clock
-import javax.inject.Inject
 
 val DEFAULT_BACKOFF_SCHEDULE = listOf(5_000L, 15_000L, 30_000L)
 

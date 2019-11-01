@@ -12,6 +12,8 @@ import app.cash.backfila.service.BackfillRunQuery
 import app.cash.backfila.service.BackfillState
 import app.cash.backfila.service.RunInstanceQuery
 import com.google.inject.Module
+import javax.inject.Inject
+import kotlin.test.assertNotNull
 import misk.exceptions.BadRequestException
 import misk.hibernate.Query
 import misk.hibernate.Transacter
@@ -22,8 +24,6 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
-import kotlin.test.assertNotNull
 
 @MiskTest(startService = true)
 class CreateBackfillActionTest {

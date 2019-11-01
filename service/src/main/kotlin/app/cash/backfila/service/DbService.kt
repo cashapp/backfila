@@ -1,13 +1,13 @@
 package app.cash.backfila.service
 
-import misk.hibernate.DbTimestampedEntity
-import misk.hibernate.DbUnsharded
-import misk.hibernate.Id
 import java.time.Instant
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Table
+import misk.hibernate.DbTimestampedEntity
+import misk.hibernate.DbUnsharded
+import misk.hibernate.Id
 
 @Entity
 @Table(name = "services")

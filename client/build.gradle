@@ -1,36 +1,13 @@
-apply plugin: 'com.vanniktech.maven.publish'
+apply plugin: 'com.squareup.wire'
 apply plugin: 'kotlin'
 apply plugin: 'org.junit.platform.gradle.plugin'
-apply plugin: 'com.diffplug.gradle.spotless'
-
-spotless {
-  kotlin {
-    target "**/*.kt"
-    ktlint(dep.ktlintVersion).userData(['indent_size': '2', 'continuation_indent_size' : '2'])
-  }
-}
-
-compileJava {
-  targetCompatibility = "8"
-  sourceCompatibility = "8"
-}
-
-compileKotlin {
-  kotlinOptions {
-    jvmTarget = "1.8"
-  }
-}
-
-compileTestKotlin {
-  kotlinOptions {
-    jvmTarget = "1.8"
-  }
-}
 
 sourceSets {
-  main.java.srcDirs += 'src/main/kotlin/'
-  main.java.srcDirs += 'build/generated/source/proto/main/java/'
-  test.java.srcDirs += 'src/test/kotlin/'
+  main.resources.srcDirs += "src/main/proto/"
+
+  main.java {
+    srcDirs += "$buildDir/generated/source/wire/"
+  }
 }
 
 dependencies {
@@ -53,8 +30,13 @@ jar {
   baseName = "backfila-client"
 }
 
-compileKotlin.dependsOn 'spotlessKotlinApply'
-compileKotlin.dependsOn ':service:compileWire'
+wire {
+  sourcePath {
+    srcDir 'src/main/proto'
+  }
+  java {
+  }
+}
 
 afterEvaluate { project ->
   project.tasks.dokka {

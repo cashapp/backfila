@@ -1,5 +1,6 @@
 package app.cash.backfila.dashboard
 
+import java.net.HttpURLConnection
 import misk.security.authz.Authenticated
 import misk.web.Get
 import misk.web.Response
@@ -7,7 +8,6 @@ import misk.web.ResponseBody
 import misk.web.actions.WebAction
 import misk.web.toResponseBody
 import okhttp3.Headers
-import java.net.HttpURLConnection
 
 class RootRedirectAction : WebAction {
   @Get("/")

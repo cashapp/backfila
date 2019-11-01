@@ -7,10 +7,10 @@ import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
 import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
 import app.cash.backfila.protos.clientservice.RunBatchRequest
 import app.cash.backfila.protos.clientservice.RunBatchResponse
-import kotlinx.coroutines.channels.Channel
-import okio.ByteString.Companion.encodeUtf8
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.channels.Channel
+import okio.ByteString.Companion.encodeUtf8
 
 @Singleton
 class FakeBackfilaClientServiceClient @Inject constructor() : BackfilaClientServiceClient {

@@ -1,7 +1,7 @@
 package app.cash.backfila.client
 
-import misk.client.HttpClientEndpointConfig
 import java.time.Duration
+import misk.client.HttpClientEndpointConfig
 
 val DEFAULT_HTTP_CLIENT_ENDPOINT_CONFIG = HttpClientEndpointConfig(
     // Allow RunBatch requests to take a long time.
