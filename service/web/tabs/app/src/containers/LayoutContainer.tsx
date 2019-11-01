@@ -1,6 +1,6 @@
 import {
   MiskNavbarContainer,
-  miskAdminDashboardTabsUrl,
+  miskDashboardMetadataUrl,
   miskServiceMetadataUrl
 } from "@misk/core"
 import * as React from "react"
@@ -9,7 +9,7 @@ import { backfilaTheme } from "src/utilities"
 
 export const LayoutContainer = (props: { children: any }) => (
   <MiskNavbarContainer
-    adminDashboardTabsUrl={miskAdminDashboardTabsUrl}
+    adminDashboardTabsUrl={miskDashboardMetadataUrl("BackfilaApp")}
     children={props.children}
     homeName={<HomeLinkLogo />}
     homeUrl={"/app/"}
