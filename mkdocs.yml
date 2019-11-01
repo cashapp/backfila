@@ -41,8 +41,7 @@ nav:
   - 'Overview': index.md
   - '0.x API':
       - 'client': 0.x/client/index.md
-      - 'client-service': 0.x/client-service/index.md
-      - 'service': 0.x/service/index.md
+      - 'client-service': 0.x/client-misk/index.md
   - 'Change Log': changelog.md
   - 'Releasing': releasing.md
   - 'Stack Overflow ⏏': https://stackoverflow.com/questions/tagged/backfila?sort=active
