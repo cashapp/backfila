@@ -140,7 +140,7 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
     query.setParameter("runId", id)
     query.setParameter("newState", state)
     query.setParameter("completed", BackfillState.COMPLETE)
-    query.executeUpdate();
+    query.executeUpdate()
   }
 
   fun complete() {

@@ -3,8 +3,6 @@ package app.cash.backfila.dashboard
 import javax.inject.Qualifier
 import misk.environment.Environment
 import misk.inject.KAbstractModule
-import misk.web.dashboard.DashboardTab
-import misk.web.dashboard.DashboardTabProvider
 import misk.web.dashboard.WebTabResourceModule
 
 class BackfilaDashboardModule(val environment: Environment) : KAbstractModule() {
