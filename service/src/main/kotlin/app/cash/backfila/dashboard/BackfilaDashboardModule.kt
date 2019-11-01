@@ -9,12 +9,6 @@ import misk.web.dashboard.WebTabResourceModule
 
 class BackfilaDashboardModule(val environment: Environment) : KAbstractModule() {
   override fun configure() {
-    multibind<DashboardTab>().toProvider(DashboardTabProvider<BackfilaApp>(
-      name = "App",
-      slug = "app",
-      url_path_prefix = "/app/",
-      category = "Backfila"
-    ))
     install(WebTabResourceModule(
       environment = environment,
       slug = "app",
