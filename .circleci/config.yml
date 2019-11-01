@@ -61,7 +61,7 @@ jobs:
           # There's a race condition here, where it's possible that MySQL hasn't finished starting
           # up before we try to connect to it. But Kotlin builds are so damn slow it'll never
           # happen in practice.
-          command: docker run -d -p 3306:3306 --name mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=1 mysql:5.7
+          command: docker run -d -p 3306:3306 --name mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=1 mysql:5.7 --sql-mode=""
       - run:
           name: "Build and test"
           command: ./gradlew build check -i --scan --parallel --build-cache
