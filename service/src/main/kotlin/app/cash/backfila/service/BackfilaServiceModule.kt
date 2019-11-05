@@ -5,6 +5,7 @@ import app.cash.backfila.client.BackfilaClientServiceClientProvider
 import app.cash.backfila.client.Connectors
 import app.cash.backfila.client.EnvoyClientServiceClientProvider
 import app.cash.backfila.client.ForConnectors
+import app.cash.backfila.client.HttpClientServiceClientProvider
 import app.cash.backfila.dashboard.BackfilaDashboardModule
 import app.cash.backfila.dashboard.BackfilaWebActionsModule
 import com.google.common.util.concurrent.ListeningExecutorService
@@ -39,9 +40,11 @@ class BackfilaServiceModule(
     install(SchedulerLifecycleServiceModule())
 
     newMapBinder<String, BackfilaClientServiceClientProvider>(ForConnectors::class)
+        .addBinding(Connectors.HTTP)
+        .to(HttpClientServiceClientProvider::class.java)
+    newMapBinder<String, BackfilaClientServiceClientProvider>(ForConnectors::class)
         .addBinding(Connectors.ENVOY)
         .to(EnvoyClientServiceClientProvider::class.java)
-    // TODO http connector
 
     if (config.slack != null) {
       install(SlackModule(config.slack))
