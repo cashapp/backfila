@@ -31,6 +31,7 @@ import misk.scope.ActionScopedProviderModule
 internal class BackfilaTestingModule : KAbstractModule() {
   override fun configure() {
     val config = BackfilaConfig(
+        backfill_runner_threads = null,
         data_source_clusters = DataSourceClustersConfig(
             mapOf("backfila-001" to DataSourceClusterConfig(
                 writer = DataSourceConfig(
