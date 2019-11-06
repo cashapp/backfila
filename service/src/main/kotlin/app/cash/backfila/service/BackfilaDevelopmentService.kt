@@ -24,6 +24,7 @@ fun main(args: Array<String>) {
       BackfilaServiceModule(
           Environment.DEVELOPMENT,
           BackfilaConfig(
+              backfill_runner_threads = null,
               data_source_clusters = DataSourceClustersConfig(
                   mapOf("backfila-001" to DataSourceClusterConfig(
                       writer = DataSourceConfig(

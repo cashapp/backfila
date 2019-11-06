@@ -53,7 +53,7 @@ class BackfilaServiceModule(
 
   @Provides @ForBackfilaScheduler @Singleton
   fun backfillRunnerExecutor(): ListeningExecutorService {
-    return MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(40,
+    return MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(config.backfill_runner_threads?: 40,
         ThreadFactoryBuilder()
             .setNameFormat("backfila-runner-%d")
             .build()))
