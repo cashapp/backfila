@@ -10,7 +10,7 @@ copyright: 'Copyright &copy; 2019 Square, Inc.'
 theme:
   name: 'material'
   favicon: img/favicon.ico
-  logo: img/backfila.png
+  logo: img/cashapp.png
   feature:
     tabs: false
   palette:
