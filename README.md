@@ -1,7 +1,5 @@
 # Backfila
 
-![Back-fil-a](https://github.com/cashapp/backfila/raw/master/docs/img/backfila-large.png)
-
 Backfila is a service that manages backfill state, calling into other services to do batched work.
 
 ## Building
