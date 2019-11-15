@@ -8,6 +8,7 @@ dependencies {
   implementation dep.guice
   implementation dep.okHttp
   implementation dep.retrofit
+  implementation dep.retrofitMock
   implementation dep.retrofitMoshi
   implementation dep.retrofitWire
   implementation dep.okio
@@ -17,7 +18,9 @@ dependencies {
   compile project(':client')
 
   implementation(dep.misk)
+  implementation(dep.miskHibernate)
   testImplementation(dep.miskTesting)
+  testImplementation(dep.miskHibernateTesting)
   testImplementation dep.junitEngine
 }
 
