@@ -1,0 +1,34 @@
+{
+  "sharded": true,
+  "vindexes": {
+    "hash": {
+      "type": "hash"
+    }
+  },
+  "tables": {
+    "restaurants": {
+      "column_vindexes": [
+        {
+          "column": "id",
+          "name": "hash"
+        }
+      ],
+      "auto_increment": {
+        "column": "id",
+        "sequence": "restaurants"
+      }
+    },
+    "orders": {
+      "column_vindexes": [
+        {
+          "column": "restaurant_id",
+          "name": "hash"
+        }
+      ],
+      "auto_increment": {
+        "column": "id",
+        "sequence": "orders_seq"
+      }
+    }
+  }
+}

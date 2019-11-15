@@ -26,6 +26,7 @@ dependencies {
   compile project(':client')
 
   implementation(dep.misk)
+  implementation(dep.miskHibernate)
   testImplementation(dep.miskTesting)
   testImplementation dep.junitEngine
 }
