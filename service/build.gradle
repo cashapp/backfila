@@ -52,7 +52,6 @@ dependencies {
   implementation dep.wireSchema
 
   implementation project(':client')
-  implementation project(':client-misk')
 
   testImplementation dep.miskTesting
   testImplementation dep.miskHibernateTesting
