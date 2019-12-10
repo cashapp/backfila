@@ -1,4 +1,4 @@
-package app.cash.backfila.client.misk
+package app.cash.backfila.client.misk.internal
 
 import app.cash.backfila.client.BackfilaApi
 import app.cash.backfila.protos.service.ConfigureServiceRequest

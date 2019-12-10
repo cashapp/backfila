@@ -41,6 +41,7 @@ ext.dep = [
   "openTracingOkHttp": "io.opentracing.contrib:opentracing-okhttp3:0.1.0",
   "retrofit": "com.squareup.retrofit2:retrofit:2.6.2",
   "retrofitGuavaAdapter": "com.squareup.retrofit2:adapter-guava:2.6.2",
+  "retrofitMock": "com.squareup.retrofit2:retrofit-mock:2.6.2",
   "retrofitMoshi": "com.squareup.retrofit2:converter-moshi:2.6.2",
   "retrofitWire": "com.squareup.retrofit2:converter-wire:2.6.2",
   "shadowJarPlugin": "com.github.jengelman.gradle.plugins:shadow:5.1.0",
