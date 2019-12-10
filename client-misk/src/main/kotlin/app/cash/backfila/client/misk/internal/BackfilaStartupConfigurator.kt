@@ -2,18 +2,18 @@ package app.cash.backfila.client.misk.internal
 
 import app.cash.backfila.client.Connectors
 import app.cash.backfila.client.HttpConnectorData
-import app.cash.backfila.client.misk.client.BackfilaClientConfig
 import app.cash.backfila.client.misk.Backfill
 import app.cash.backfila.client.misk.ForBackfila
+import app.cash.backfila.client.misk.client.BackfilaClientConfig
 import app.cash.backfila.protos.service.ConfigureServiceRequest
 import com.google.common.util.concurrent.AbstractIdleService
 import com.squareup.moshi.Moshi
-import misk.logging.getLogger
-import misk.moshi.adapter
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
+import misk.logging.getLogger
+import misk.moshi.adapter
 
 /**
  * Sends backfill metadata to Backfila at application startup. If Backfila is unreachable then

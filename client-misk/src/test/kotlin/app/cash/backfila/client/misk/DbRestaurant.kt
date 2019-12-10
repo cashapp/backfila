@@ -1,12 +1,12 @@
 package app.cash.backfila.client.misk
 
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.GeneratedValue
+import javax.persistence.Table
 import misk.hibernate.DbRoot
 import misk.hibernate.Id
 import misk.hibernate.annotation.Keyspace
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.Table
-import javax.persistence.GeneratedValue
 
 @Entity
 @Keyspace("backfila_orders")

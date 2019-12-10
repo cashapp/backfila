@@ -18,9 +18,9 @@ interface InstanceProvider {
 }
 
 /**
- * Implements a simple unsharded Hibernate backfill that creates a single Backfila instance. If you
+ * A simple unsharded instance provider that uses a single Backfila instance. If you
  * are using a Vitess datasource you should almost certainly be using one of the Vitess base
- * backfills. [VitessSingleCursorBackfill] [VitessShardedBackfill]
+ * backfills. [VitessSingleCursorInstanceProvider] [VitessShardedInstanceProvider]
  */
 class UnshardedInstanceProvider(val transacter: Transacter) : InstanceProvider {
 

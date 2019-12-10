@@ -1,11 +1,11 @@
 package app.cash.backfila.client.misk
 
 import com.squareup.moshi.Types
+import java.lang.reflect.ParameterizedType
+import kotlin.reflect.KClass
 import misk.hibernate.DbEntity
 import misk.hibernate.Query
 import misk.inject.typeLiteral
-import java.lang.reflect.ParameterizedType
-import kotlin.reflect.KClass
 
 /**
  * Implement this for each or your backfills. Install with your [BackfilaModule].

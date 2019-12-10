@@ -20,6 +20,12 @@ import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
 import com.google.common.collect.ImmutableList
 import com.google.inject.Injector
+import java.util.ArrayList
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
+import javax.persistence.Table
+import kotlin.reflect.KClass
 import misk.exceptions.BadRequestException
 import misk.hibernate.DbEntity
 import misk.hibernate.Id
@@ -31,12 +37,6 @@ import misk.hibernate.Session
 import misk.logging.getLogger
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
-import java.util.ArrayList
-import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
-import javax.persistence.Table
-import kotlin.reflect.KClass
 
 /**
  * Operates on a backfill using Hibernate 5.x entities. Create instances with [Factory].
@@ -81,9 +81,7 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
   fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
     validateRange(request.range)
 
-    backfill.validate(
-        BackfillConfig(request.parameters,
-            request.dry_run))
+    backfill.validate(BackfillConfig(request.parameters, request.dry_run))
 
     return PrepareBackfillResponse.Builder()
         .instances(instanceProvider.names(request).map { instanceForShard(it, request.range) })
@@ -94,7 +92,7 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
     instanceName: String,
     requestedRange: KeyRange?
   ): Instance {
-    if (requestedRange != null && requestedRange.start != null && requestedRange.end != null) {
+    if (requestedRange?.start != null && requestedRange.end != null) {
       return Instance.Builder()
           .instance_name(instanceName)
           .backfill_range(requestedRange)
@@ -135,7 +133,9 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
    */
   protected fun computeBoundingRangeMax(
     instanceName: String,
-    previousEndKey: ByteString?, backfillRange: KeyRange, scanSize: Long?
+    previousEndKey: ByteString?,
+    backfillRange: KeyRange,
+    scanSize: Long?
   ): Pkey? {
     return instanceProvider.transaction(instanceName) { session ->
       selectMaxBound(session, schemaAndTable(), previousEndKey, backfillRange, scanSize)
@@ -176,8 +176,10 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
 
   protected fun selectMaxBound(
     session: Session,
-    schemaAndTable: String, previousEndKey: ByteString?,
-    backfillRange: KeyRange, scanSize: Long?
+    schemaAndTable: String,
+    previousEndKey: ByteString?,
+    backfillRange: KeyRange,
+    scanSize: Long?
   ): Pkey? {
     // Hibernate doesn't support subqueries in FROM, and we don't want to read in 100k+ records,
     // so we use raw SQL here.
@@ -188,41 +190,30 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
     }
     where += " AND $pkeyName <= ${backfillRange.end.utf8()}"
     val sql = """
-        |SELECT MAX(s.${pkeyName}) FROM
-        | (SELECT DISTINCT ${pkeyName} FROM ${schemaAndTable}
-        | ${where}
-        | ORDER BY ${pkeyName}
-        | LIMIT ${scanSize}) s
+        |SELECT MAX(s.$pkeyName) FROM
+        | (SELECT DISTINCT $pkeyName FROM $schemaAndTable
+        | $where
+        | ORDER BY $pkeyName
+        | LIMIT $scanSize) s
         """.trimMargin()
     val max = session.hibernateSession.createNativeQuery(sql).uniqueResult()
 
     @Suppress("UNCHECKED_CAST") // Return type from the query should always match.
-    return max as Pkey? // TODO(mikepaw,jwilson) running through the tests I think we are always getting a Pkey. I think this remains true all the time.
+    return max as Pkey? // I think we are always getting a Pkey here so the cast should be safe.
   }
 
   private inner class BatchGenerator internal constructor(request: GetNextBatchRangeRequest) {
-    private val instanceName: String
-    private val batchSize: Long
-    private val scanSize: Long
-    private val backfillRange: KeyRange
-    private val config: BackfillConfig
-    private val precomputing: Boolean
+    private val instanceName: String = request.instance_name
+    private val batchSize: Long = request.batch_size
+    private val scanSize: Long = request.scan_size
+    private val backfillRange: KeyRange = request.backfill_range
+    private val config: BackfillConfig = BackfillConfig(request.parameters, request.dry_run)
+    private val precomputing: Boolean = request.precomputing == true
 
     // Initialized from the request and gets updated as batches are returned.
-    private var previousEndKey: ByteString? = null
+    private var previousEndKey: ByteString? = request.previous_end_key
 
     private var boundingMax: Pkey? = null
-
-    init {
-      instanceName = request.instance_name
-      batchSize = request.batch_size
-      scanSize = request.scan_size
-      backfillRange = request.backfill_range
-      previousEndKey = request.previous_end_key
-      config = BackfillConfig(request.parameters,
-          request.dry_run)
-      precomputing = request.precomputing == true
-    }
 
     private fun addBoundingMin(query: Query<E>) {
       if (previousEndKey != null) {
@@ -251,7 +242,7 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
       class TxResult(val end: Pkey, val batch: Batch)
 
       val pkeyProperty = backfill.primaryKeyHibernateName()
-      val txResult = instanceProvider.transaction<TxResult>(instanceName) { session ->
+      val txResult = instanceProvider.transaction(instanceName) { session ->
         val batchEndPkey: Pkey?
         if (precomputing) {
           // No need to find correct-sized batches, just quickly compute a count.
@@ -272,7 +263,7 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
 
           @Suppress("UNCHECKED_CAST") // Return type from the query should always match.
           batchEndPkey =
-              stringBatchEndPkeyRow?.single() as Pkey? // TODO(mikepaw,jwilson) running through the tests I think we are always getting a Pkey?. I think this remains true all the time.
+              stringBatchEndPkeyRow?.single() as Pkey? // I think we are always getting a Pkey here so the cast should be safe.
         }
 
         val matchingCount: Long?
@@ -340,6 +331,7 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
       }.dynamicList(session, listOf(pkeyProperty))
 
       // Convert them back to a list of Pkey
+      @Suppress("UNCHECKED_CAST") // Return type from the query should always match.
       idList.map { it.single() } as List<Pkey>
     }
     backfill.runBatch(pkeys, config)

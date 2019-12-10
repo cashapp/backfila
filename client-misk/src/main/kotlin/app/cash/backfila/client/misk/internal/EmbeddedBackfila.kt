@@ -2,19 +2,19 @@ package app.cash.backfila.client.misk.internal
 
 import app.cash.backfila.client.BackfilaApi
 import app.cash.backfila.client.Connectors
-import app.cash.backfila.client.misk.embedded.Backfila
 import app.cash.backfila.client.misk.Backfill
+import app.cash.backfila.client.misk.embedded.Backfila
 import app.cash.backfila.client.misk.embedded.BackfillRun
 import app.cash.backfila.protos.service.ConfigureServiceRequest
 import app.cash.backfila.protos.service.ConfigureServiceResponse
-import okio.ByteString
-import retrofit2.Call
-import retrofit2.mock.Calls
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
+import okio.ByteString
+import retrofit2.Call
+import retrofit2.mock.Calls
 
 /**
  * A small implementation of Backfila suitable for use in test cases and development mode. Unlike
@@ -26,7 +26,7 @@ internal class EmbeddedBackfila @Inject internal constructor(
   private val operatorFactory: BackfillOperator.Factory
 ) : Backfila, BackfilaApi {
   private var serviceData: ConfigureServiceRequest? = null
-  private var backfillIdGenerator: AtomicInteger = AtomicInteger(10)
+  private var backfillIdGenerator = AtomicInteger(10)
 
   override fun configureService(request: ConfigureServiceRequest): Call<ConfigureServiceResponse> {
     check(serviceData == null) { "Should only be configuring a single backfila service." }

@@ -1,14 +1,14 @@
 package app.cash.backfila.client.misk
 
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.GeneratedValue
+import javax.persistence.Table
 import misk.hibernate.Constraint
 import misk.hibernate.DbUnsharded
 import misk.hibernate.Id
 import misk.hibernate.Operator
 import misk.hibernate.Query
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.GeneratedValue
-import javax.persistence.Table
 
 @Entity
 @Table(name = "menu")
