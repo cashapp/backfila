@@ -65,7 +65,7 @@ subprojects { subProject ->
   // Workaround the Gradle bug resolving multiplatform dependencies.
   // https://github.com/square/okio/issues/647
   configurations.all { configuration ->
-    if (name.contains('kapt') || name.contains("wire")) {
+    if (name.contains('kapt') || name.contains("wire") || name.contains("proto")) {
       attributes.attribute(Usage.USAGE_ATTRIBUTE, subProject.objects.named(Usage.class, Usage.JAVA_RUNTIME))
     }
   }
