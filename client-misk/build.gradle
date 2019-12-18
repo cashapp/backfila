@@ -15,7 +15,8 @@ dependencies {
   implementation dep.kotlinStdLib
   implementation dep.wireMoshiAdapter
 
-  compile project(':client')
+  api project(':client')
+  testApi project(':client-misk-testing')
 
   implementation(dep.misk)
   implementation(dep.miskHibernate)

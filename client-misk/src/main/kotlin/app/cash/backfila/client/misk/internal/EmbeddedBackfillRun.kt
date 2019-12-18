@@ -8,9 +8,9 @@ import app.cash.backfila.protos.clientservice.KeyRange
 import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
 import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
 import app.cash.backfila.protos.clientservice.RunBatchRequest
+import java.util.ArrayDeque
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
-import java.util.ArrayDeque
 
 /**
  * A simple backfill run for test and development. Unlike the backfila service, this doesn't use
@@ -30,6 +30,8 @@ internal class EmbeddedBackfillRun<B : Backfill<*, *>>(
   override var computeCountLimit: Long = 1L
 ) : BackfillRun<B> {
   override val backfill: B
+    // This api on the operator returns the same backfill it was initialized with.
+    @Suppress("UNCHECKED_CAST")
     get() = operator.backfill as B
   override val prepareBackfillResponse: PrepareBackfillResponse
 
@@ -54,12 +56,10 @@ internal class EmbeddedBackfillRun<B : Backfill<*, *>>(
         .dry_run(dryRun)
         .build())
     precomputeProgress = prepareBackfillResponse.instances.associate {
-      it.instance_name to MutableInstanceCursor(
-          it.instance_name, it.backfill_range)
+      it.instance_name to MutableInstanceCursor(it.instance_name, it.backfill_range)
     }
     scanProgress = prepareBackfillResponse.instances.associate {
-      it.instance_name to MutableInstanceCursor(
-          it.instance_name, it.backfill_range)
+      it.instance_name to MutableInstanceCursor(it.instance_name, it.backfill_range)
     }
   }
 
@@ -100,7 +100,8 @@ internal class EmbeddedBackfillRun<B : Backfill<*, *>>(
   override fun finishedPrecomputing() = precomputeProgress.all { it.value.done }
 
   override fun instanceScan(instanceName: String): GetNextBatchRangeResponse {
-    val cursor = scanProgress.get(instanceName)!!
+    val cursor = scanProgress[instanceName] ?: error(
+        "Instance $instanceName not found. Valid instances are ${scanProgress.keys}")
     val response =
         operator.getNextBatchRange(GetNextBatchRangeRequest.Builder()
             .instance_name(cursor.instanceName)
@@ -119,8 +120,10 @@ internal class EmbeddedBackfillRun<B : Backfill<*, *>>(
     batchesToRun.addAll(response.batches
         .filterNot { it.matching_record_count == 0L } // Remove batches that have no matching records.
         .map {
-          BatchSnapshot(instanceName,
-              it.batch_range, it.scanned_record_count,
+          BatchSnapshot(
+              instanceName,
+              it.batch_range,
+              it.scanned_record_count,
               it.matching_record_count)
         })
     return response
@@ -132,8 +135,9 @@ internal class EmbeddedBackfillRun<B : Backfill<*, *>>(
   }
 
   override fun scanRemaining() {
-    do singleScan()
-    while (!finishedScanning())
+    do {
+      singleScan()
+    } while (!finishedScanning())
   }
 
   override fun finishedScanning() = scanProgress.all { it.value.done }
@@ -177,11 +181,18 @@ data class InstanceCursor(
   val keyRange: KeyRange,
   val previousEndKey: ByteString?,
   val done: Boolean
-)
+) {
+  fun utf8RangeStart() = keyRange.start?.utf8()
+  fun utf8RangeEnd() = keyRange.end?.utf8()
+  fun utf8PreviousEndKey() = previousEndKey?.utf8()
+}
 
 data class BatchSnapshot(
   val instanceName: String,
   val batchRange: KeyRange,
   val scannedRecordCount: Long,
   val matchingRecordCount: Long
-)
+) {
+  fun utf8RangeStart() = batchRange.start.utf8()
+  fun utf8RangeEnd() = batchRange.end.utf8()
+}

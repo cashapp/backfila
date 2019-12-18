@@ -1,11 +1,5 @@
 package app.cash.backfila.client.misk
 
-import misk.hibernate.DbChild
-import misk.hibernate.Gid
-import misk.hibernate.Id
-import misk.hibernate.annotation.Keyspace
-import org.hibernate.annotations.GenericGenerator
-import org.hibernate.annotations.Parameter
 import javax.persistence.AttributeOverride
 import javax.persistence.Column
 import javax.persistence.EmbeddedId
@@ -15,11 +9,17 @@ import javax.persistence.GeneratedValue
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
 import javax.persistence.Table
+import misk.hibernate.DbChild
+import misk.hibernate.Gid
+import misk.hibernate.Id
+import misk.hibernate.annotation.Keyspace
+import org.hibernate.annotations.GenericGenerator
+import org.hibernate.annotations.Parameter
 
 @Entity
 @Keyspace("backfila_orders")
 @Table(name = "orders")
-class DbOrder private constructor(): DbChild<DbRestaurant, DbOrder> {
+class DbOrder private constructor() : DbChild<DbRestaurant, DbOrder> {
   @EmbeddedId
   @AttributeOverride(name = "rootId", column = Column(name = "restaurant_id"))
   @GeneratedValue(generator = "child")

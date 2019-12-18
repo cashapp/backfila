@@ -6,6 +6,7 @@ import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
 import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
 import app.cash.backfila.protos.clientservice.RunBatchRequest
 import app.cash.backfila.protos.clientservice.RunBatchResponse
+import javax.inject.Inject
 import misk.logging.getLogger
 import misk.security.authz.Authenticated
 import misk.web.Post
@@ -13,7 +14,6 @@ import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
-import javax.inject.Inject
 
 internal class PrepareBackfillAction @Inject constructor(
   private val operatorFactory: BackfillOperator.Factory
