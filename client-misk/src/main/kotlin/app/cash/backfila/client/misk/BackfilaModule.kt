@@ -8,11 +8,12 @@ import com.google.inject.BindingAnnotation
 import com.google.inject.Provides
 import com.google.inject.TypeLiteral
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import misk.ServiceModule
+import misk.inject.KAbstractModule
 import javax.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
-import misk.ServiceModule
-import misk.inject.KAbstractModule
 
 /**
  * Backfila-using applications install this and either [EmbeddedBackfilaModule] (testing and
@@ -38,7 +39,9 @@ class BackfilaModule(
     install(ServiceModule<BackfilaStartupConfigurator>())
   }
 
-  @Singleton @Provides @ForBackfila fun provideMoshi() = Moshi.Builder().build()
+  @Singleton @Provides @ForBackfila fun provideMoshi() = Moshi.Builder()
+      .add(KotlinJsonAdapterFactory())
+      .build()
 }
 
 @BindingAnnotation
