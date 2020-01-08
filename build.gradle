@@ -12,7 +12,7 @@ buildscript {
     classpath dep.mavenPublishGradlePlugin
     classpath dep.shadowJarPlugin
     classpath dep.spotlessPlugin
-    classpath dep.wirePlugin
+    classpath dep.wireGradlePlugin
   }
 }
 

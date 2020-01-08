@@ -49,7 +49,7 @@ ext.dep = [
   "tracingJaeger": "com.uber.jaeger:jaeger-core:0.24.0",
   "wireCompiler": "com.squareup.wire:wire-compiler:3.0.1",
   "wireMoshiAdapter": "com.squareup.wire:wire-moshi-adapter:3.0.1",
-  "wirePlugin": "com.squareup.wire:wire-gradle-plugin:3.0.1",
+  "wireGradlePlugin": "com.squareup.wire:wire-gradle-plugin:3.0.1",
   "wireRuntime": "com.squareup.wire:wire-runtime:3.0.1",
   "wireSchema": "com.squareup.wire:wire-schema:3.0.1",
 ]
