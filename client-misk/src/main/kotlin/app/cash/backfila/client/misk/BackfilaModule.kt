@@ -13,6 +13,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
 import misk.ServiceModule
 import misk.inject.KAbstractModule
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
 /**
  * Backfila-using applications install this and either [EmbeddedBackfilaModule] (testing and
@@ -38,7 +39,9 @@ class BackfilaModule(
     install(ServiceModule<BackfilaStartupConfigurator>())
   }
 
-  @Singleton @Provides @ForBackfila fun provideMoshi() = Moshi.Builder().build()
+  @Singleton @Provides @ForBackfila fun provideMoshi() = Moshi.Builder()
+      .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
+      .build()
 }
 
 @BindingAnnotation

@@ -3,7 +3,8 @@ apply plugin: 'org.junit.platform.gradle.plugin'
 
 dependencies {
   implementation dep.guava
-  implementation dep.moshi
+  implementation dep.moshiCore
+  implementation dep.moshiKotlin
   implementation dep.wireRuntime
   implementation dep.guice
   implementation dep.okHttp

@@ -39,7 +39,8 @@ dependencies {
   implementation dep.miskHibernate
   implementation dep.miskSlack
   implementation dep.miskZipkin
-  implementation dep.moshi
+  implementation dep.moshiCore
+  implementation dep.moshiKotlin
   implementation dep.okHttp
   implementation dep.okio
   implementation dep.openTracing
