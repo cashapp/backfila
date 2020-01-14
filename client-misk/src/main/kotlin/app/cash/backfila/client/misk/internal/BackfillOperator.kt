@@ -24,7 +24,6 @@ import java.util.ArrayList
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
-import javax.persistence.Table
 import kotlin.reflect.KClass
 import misk.exceptions.BadRequestException
 import misk.hibernate.DbEntity
@@ -33,7 +32,6 @@ import misk.hibernate.Operator.GE
 import misk.hibernate.Operator.GT
 import misk.hibernate.Operator.LE
 import misk.hibernate.Query
-import misk.hibernate.Session
 import misk.logging.getLogger
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
@@ -50,6 +48,7 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
   factory: Factory
 ) {
   private val instanceProvider = backfill.instanceProvider()
+  private val boundingRangeStrategy = instanceProvider.boundingRangeStrategy<E, Pkey>()
   private var pkeySqlAdapter: PkeySqlAdapter = factory.pkeySqlAdapter
   internal var queryFactory: Query.Factory = factory.queryFactory
 
@@ -126,22 +125,6 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
         .build()
   }
 
-  /**
-   * Computes a bound of size request.scan_size, to get a set of records that can be scanned for
-   * records that match the criteria.
-   * Returns null if there is are no more records left in the table.
-   */
-  protected fun computeBoundingRangeMax(
-    instanceName: String,
-    previousEndKey: ByteString?,
-    backfillRange: KeyRange,
-    scanSize: Long?
-  ): Pkey? {
-    return instanceProvider.transaction(instanceName) { session ->
-      selectMaxBound(session, schemaAndTable(), previousEndKey, backfillRange, scanSize)
-    }
-  }
-
   fun getNextBatchRange(
     request: GetNextBatchRangeRequest
   ): GetNextBatchRangeResponse {
@@ -174,34 +157,6 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
         .build()
   }
 
-  protected fun selectMaxBound(
-    session: Session,
-    schemaAndTable: String,
-    previousEndKey: ByteString?,
-    backfillRange: KeyRange,
-    scanSize: Long?
-  ): Pkey? {
-    // Hibernate doesn't support subqueries in FROM, and we don't want to read in 100k+ records,
-    // so we use raw SQL here.
-    val pkeyName = backfill.primaryKeyName()
-    var where = when {
-      previousEndKey != null -> "WHERE $pkeyName > ${previousEndKey.utf8()}"
-      else -> "WHERE $pkeyName >= ${backfillRange.start.utf8()}"
-    }
-    where += " AND $pkeyName <= ${backfillRange.end.utf8()}"
-    val sql = """
-        |SELECT MAX(s.$pkeyName) FROM
-        | (SELECT DISTINCT $pkeyName FROM $schemaAndTable
-        | $where
-        | ORDER BY $pkeyName
-        | LIMIT $scanSize) s
-        """.trimMargin()
-    val max = session.hibernateSession.createNativeQuery(sql).uniqueResult()
-
-    @Suppress("UNCHECKED_CAST") // Return type from the query should always match.
-    return max as Pkey? // I think we are always getting a Pkey here so the cast should be safe.
-  }
-
   private inner class BatchGenerator internal constructor(request: GetNextBatchRangeRequest) {
     private val instanceName: String = request.instance_name
     private val batchSize: Long = request.batch_size
@@ -230,7 +185,8 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
       // We find all matching batches in each scan bound to avoid repeating this work.
       if (boundingMax == null) {
         val stopwatch = Stopwatch.createStarted()
-        boundingMax = computeBoundingRangeMax(instanceName, previousEndKey, backfillRange, scanSize)
+        boundingMax = boundingRangeStrategy
+            .computeBoundingRangeMax(backfill, instanceName, previousEndKey, backfillRange, scanSize)
         if (boundingMax == null) {
           logger.info("Bounding range returned no records, done computing batches")
           return null
@@ -337,16 +293,6 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
     backfill.runBatch(pkeys, config)
 
     return RunBatchResponse.Builder().build()
-  }
-
-  protected fun schemaAndTable(): String {
-    val tableAnnotation = backfill.entityClass.java.getAnnotation(Table::class.java)
-    val schema = tableAnnotation.schema
-    val table = tableAnnotation.name
-    return when {
-      schema.isEmpty() -> "`$table`"
-      else -> "`$schema`.`$table`"
-    }
   }
 
   @Singleton
