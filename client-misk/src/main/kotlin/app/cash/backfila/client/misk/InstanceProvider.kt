@@ -13,6 +13,7 @@ import misk.hibernate.Transacter
 import misk.hibernate.shards
 import misk.hibernate.transaction
 import javax.persistence.Table
+import misk.hibernate.annotation.Keyspace as KeyspaceAnnotation
 
 /**
  * Provides connectivity to a singleton database or a set of database shards.
@@ -54,7 +55,7 @@ class UnshardedInstanceProvider(val transacter: Transacter) : InstanceProvider {
  * than one thread per shard, consider using [VitessSingleCursorInstanceProvider] instead.
  */
 class VitessShardedInstanceProvider<E : DbEntity<E>, Pkey : Any>(val transacter: Transacter, val backfill: Backfill<E,Pkey>) : InstanceProvider {
-  private val keyspace = Keyspace(backfill.entityClass.java.getAnnotation(Table::class.java).schema)
+  private val keyspace = Keyspace(backfill.entityClass.java.getAnnotation(KeyspaceAnnotation::class.java).value)
 
   override fun names(request: PrepareBackfillRequest) = shards().map { it.name }
 
@@ -81,7 +82,7 @@ class VitessShardedInstanceProvider<E : DbEntity<E>, Pkey : Any>(val transacter:
  * each time, rather than splitting the work by shard.
  */
 class VitessSingleCursorInstanceProvider<E : DbEntity<E>, Pkey : Any>(val transacter: Transacter, val backfill: Backfill<E,Pkey>) : InstanceProvider {
-  private val keyspace = Keyspace(backfill.entityClass.java.getAnnotation(Table::class.java).schema)
+  private val keyspace = Keyspace(backfill.entityClass.java.getAnnotation(KeyspaceAnnotation::class.java).value)
 
   override fun names(request: PrepareBackfillRequest) = listOf("only")
 

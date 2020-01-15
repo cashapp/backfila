@@ -1,5 +1,6 @@
 package app.cash.backfila.client.misk
 
+import misk.hibernate.Constraint
 import javax.persistence.AttributeOverride
 import javax.persistence.Column
 import javax.persistence.EmbeddedId
@@ -12,6 +13,8 @@ import javax.persistence.Table
 import misk.hibernate.DbChild
 import misk.hibernate.Gid
 import misk.hibernate.Id
+import misk.hibernate.Operator
+import misk.hibernate.Query
 import misk.hibernate.annotation.Keyspace
 import org.hibernate.annotations.GenericGenerator
 import org.hibernate.annotations.Parameter
@@ -40,7 +43,15 @@ class DbOrder private constructor() : DbChild<DbRestaurant, DbOrder> {
   @Column(updatable = false, insertable = false)
   lateinit var restaurant_id: Id<DbRestaurant>
 
-  constructor(restaurant: DbRestaurant) : this() {
-    this.restaurant_id = restaurant.id
+  constructor(id: Id<DbRestaurant>) : this() {
+    this.restaurant_id = id
   }
+}
+
+interface OrderQuery : Query<DbOrder> {
+  @Constraint(path = "restaurant.name", operator = Operator.EQ)
+  fun restaurantName(name: String): OrderQuery
+
+  @Constraint(path = "id", operator = Operator.EQ)
+  fun id(id: Id<DbMenu>): OrderQuery
 }

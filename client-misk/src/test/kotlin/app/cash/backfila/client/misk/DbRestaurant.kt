@@ -13,12 +13,12 @@ import misk.hibernate.annotation.Keyspace
 @Table(name = "restaurants")
 class DbRestaurant private constructor() : DbRoot<DbRestaurant> {
   @javax.persistence.Id
-  @GeneratedValue
   override lateinit var id: Id<DbRestaurant>
 
   @Column(nullable = false) lateinit var name: String
 
-  constructor(name: String) : this() {
+  constructor(id: Id<DbRestaurant>, name: String) : this() {
+    this.id = id
     this.name = name
   }
 

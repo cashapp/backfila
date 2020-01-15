@@ -15,7 +15,7 @@
       ],
       "auto_increment": {
         "column": "id",
-        "sequence": "restaurants"
+        "sequence": "restaurants_seq"
       }
     },
     "orders": {

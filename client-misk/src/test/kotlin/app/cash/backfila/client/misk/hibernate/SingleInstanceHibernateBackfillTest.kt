@@ -278,15 +278,15 @@ abstract class SingleInstanceHibernateBackfillTest {
   private fun createSome(): List<Id<DbMenu>> {
     return transacter.transaction { session: Session ->
       val expected = mutableListOf<Id<DbMenu>>()
-      repeat((0..9).count()) {
+      repeat((1..10).count()) {
         val id = session.save(DbMenu("chicken"))
         expected.add(id)
       }
 
       // Intersperse these to make sure we test skipping non matching records.
-      repeat((0..4).count()) { session.save(DbMenu("beef")) }
+      repeat((1..5).count()) { session.save(DbMenu("beef")) }
 
-      repeat((0..9).count()) {
+      repeat((1..10).count()) {
         val id = session.save(DbMenu("chicken"))
         expected.add(id)
       }
@@ -296,7 +296,7 @@ abstract class SingleInstanceHibernateBackfillTest {
 
   private fun createNoMatching() {
     transacter.transaction { session: Session ->
-      repeat((0..4).count()) { session.save(DbMenu("beef")) }
+      repeat((1..5).count()) { session.save(DbMenu("beef")) }
     }
   }
 }
