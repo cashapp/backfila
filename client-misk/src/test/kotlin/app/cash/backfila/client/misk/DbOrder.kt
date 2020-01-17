@@ -36,8 +36,7 @@ class DbOrder private constructor() : DbChild<DbRestaurant, DbOrder> {
   override val rootId: Id<DbRestaurant>
     get() = restaurant_id
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "restaurant_id", updatable = false, insertable = false)
+  @ManyToOne @JoinColumn(name = "restaurant_id", updatable = false, insertable = false)
   lateinit var restaurant: DbRestaurant
 
   @Column(updatable = false, insertable = false)
@@ -49,7 +48,10 @@ class DbOrder private constructor() : DbChild<DbRestaurant, DbOrder> {
 }
 
 interface OrderQuery : Query<DbOrder> {
-  @Constraint(path = "restaurant.name", operator = Operator.EQ)
+  @Join(path = "restaurant", alias = "r")
+  fun joinRestaurant(): OrderQuery
+
+  @Constraint(join = "restaurant", path = "r.name", operator = Operator.EQ)
   fun restaurantName(name: String): OrderQuery
 
   @Constraint(path = "id", operator = Operator.EQ)

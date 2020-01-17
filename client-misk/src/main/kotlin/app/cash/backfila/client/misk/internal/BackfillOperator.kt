@@ -195,7 +195,7 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
             "Took $stopwatch")
       }
 
-      class TxResult(val end: Pkey, val batch: Batch)
+      data class TxResult(val end: Pkey, val batch: Batch)
 
       val pkeyProperty = backfill.primaryKeyHibernateName()
       val txResult = instanceProvider.transaction(instanceName) { session ->

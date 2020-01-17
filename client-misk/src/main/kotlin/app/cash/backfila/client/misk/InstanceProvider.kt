@@ -5,6 +5,8 @@ import app.cash.backfila.client.misk.internal.UnshardedHibernateBoundingRangeStr
 import app.cash.backfila.client.misk.internal.VitessShardedBoundingRangeStrategy
 import app.cash.backfila.client.misk.internal.VitessSingleCursorBoundingRangeStrategy
 import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
+import misk.hibernate.Check
+import misk.hibernate.Check.FULL_SCATTER
 import misk.hibernate.DbEntity
 import misk.hibernate.Keyspace
 import misk.hibernate.Session
@@ -73,13 +75,13 @@ class VitessShardedInstanceProvider<E : DbEntity<E>, Pkey : Any>(val transacter:
  * A instance provider that iterates over sharded vitess using a single cursor. This can only be
  * used if pkeys are unique across all shards, e.g. using a vitess sequence.
  *
- * Prefer [VitessShardedInstanceProvider]
+ * THIS USES FULL SCATTER CROSS SHARD VITESS QUERIES! Prefer [VitessShardedInstanceProvider]
  *
  * The benefits of this vs [VitessShardedInstanceProvider] is that if entities move from one
  * customer to another, they will not be missed because one shard's cursor cannot get ahead of
  * another's. It is also indifferent to shard splits and can run slower than one thread per shard.
- * The disadvantage is less efficient concurrency, since batches are computed by scanning all shards
- * each time, rather than splitting the work by shard.
+ * The disadvantage is less efficient concurrency and cross shard queries, since batches are
+ * computed by scanning all shards each time, rather than splitting the work by shard.
  */
 class VitessSingleCursorInstanceProvider<E : DbEntity<E>, Pkey : Any>(val transacter: Transacter, val backfill: Backfill<E,Pkey>) : InstanceProvider {
   private val keyspace = Keyspace(backfill.entityClass.java.getAnnotation(KeyspaceAnnotation::class.java).value)
@@ -87,7 +89,7 @@ class VitessSingleCursorInstanceProvider<E : DbEntity<E>, Pkey : Any>(val transa
   override fun names(request: PrepareBackfillRequest) = listOf("only")
 
   override fun <T> transaction(instanceName: String, task: (Session) -> T) =
-      transacter.transaction(task)
+      transacter.transaction { session -> session.disableChecks(listOf(FULL_SCATTER)) { task(session) } }
 
   override fun <E : DbEntity<E>, Pkey : Any> boundingRangeStrategy(): BoundingRangeStrategy<E, Pkey> {
     return VitessSingleCursorBoundingRangeStrategy<E, Pkey>(transacter, keyspace)

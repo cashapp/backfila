@@ -6,7 +6,7 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 
 @MiskTest(startService = true)
-class UnshardedHibernateBackfillTest : SingleInstanceHibernateBackfillTest() {
+class MysqlOnlyHibernateBackfillTest : SingleInstanceHibernateBackfillTest() {
   @Suppress("unused")
   @MiskTestModule
   val module: Module = ClientMiskTestingModule(false, listOf(TestBackfill::class))
