@@ -1,18 +1,19 @@
 package app.cash.backfila.client.misk
 
-import misk.hibernate.Constraint
 import javax.persistence.AttributeOverride
 import javax.persistence.Column
 import javax.persistence.EmbeddedId
 import javax.persistence.Entity
-import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
 import javax.persistence.Table
+import javax.persistence.criteria.JoinType.INNER
+import misk.hibernate.Constraint
 import misk.hibernate.DbChild
 import misk.hibernate.Gid
 import misk.hibernate.Id
+import misk.hibernate.Join
 import misk.hibernate.Operator
 import misk.hibernate.Query
 import misk.hibernate.annotation.Keyspace
@@ -48,12 +49,18 @@ class DbOrder private constructor() : DbChild<DbRestaurant, DbOrder> {
 }
 
 interface OrderQuery : Query<DbOrder> {
-  @Join(path = "restaurant", alias = "r")
-  fun joinRestaurant(): OrderQuery
+  @Join(path = "restaurant", type = INNER)
+  fun innerJoinRestaurant(block: RestaurantQuery.() -> Unit): OrderQuery
 
-  @Constraint(join = "restaurant", path = "r.name", operator = Operator.EQ)
+  @Constraint(path = "restaurant.name", operator = Operator.EQ)
   fun restaurantName(name: String): OrderQuery
 
   @Constraint(path = "id", operator = Operator.EQ)
   fun id(id: Id<DbMenu>): OrderQuery
+
+  @Constraint(path = "id", operator = Operator.LE)
+  fun idLe(id: Id<DbMenu>): OrderQuery
+
+  @Constraint(path = "id", operator = Operator.GE)
+  fun idGe(id: Id<DbMenu>): OrderQuery
 }

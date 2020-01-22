@@ -16,6 +16,7 @@ import app.cash.backfila.client.misk.internal.InstanceCursor
 import app.cash.backfila.client.misk.testing.assertThat
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import com.google.inject.Module
+import javax.inject.Inject
 import misk.hibernate.Id
 import misk.hibernate.Query
 import misk.hibernate.Session
@@ -28,7 +29,6 @@ import okhttp3.internal.toImmutableList
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
 
 @MiskTest(startService = true)
 class VitessShardedBackfillTest {
@@ -229,7 +229,7 @@ class VitessShardedBackfillTest {
     // Right Shard will not match ot backfill anything since chickfila is on the left shard
     while (!run.instanceProgressSnapshot[RIGHT_SHARD].done) {
       val rightScan = run.shardScan(RIGHT_SHARD)
-      if ( rightScan.batches.isNotEmpty()) {
+      if (rightScan.batches.isNotEmpty()) {
         assertThat(rightScan.batches.single().matching_record_count).isEqualTo(0)
       }
       assertThat(run.backfill.idsRanDry).isEmpty()
@@ -275,7 +275,7 @@ class VitessShardedBackfillTest {
 
   private fun createRestaurants() {
     transacter.allowCowrites().transaction { session: Session ->
-      val chickfila = session.save(DbRestaurant(CHICKFILA,"chickfila"))
+      val chickfila = session.save(DbRestaurant(CHICKFILA, "chickfila"))
       assertThat(chickfila).isEqualTo(CHICKFILA)
       assertThat(chickfila.shard(session)).isEqualTo(LEFT_SHARD)
       // Makes sure some non-matching make it on each shard, hash results should be a stable assumption.
@@ -300,8 +300,8 @@ class VitessShardedBackfillTest {
     // Created restaurants should have stable Ids as long as they are always created in order
     val CHICKFILA = Id<DbRestaurant>(1) // LEFT_SHARD
     val MCDONALDS = Id<DbRestaurant>(2) // LEFT_SHARD
-    val ARBYS = Id<DbRestaurant>(3)     // LEFT_SHARD
-    val WENDYS = Id<DbRestaurant>(4)    // RIGHT_SHARD
+    val ARBYS = Id<DbRestaurant>(3) // LEFT_SHARD
+    val WENDYS = Id<DbRestaurant>(4) // RIGHT_SHARD
   }
 
   private fun Id<DbRestaurant>.shard(session: Session): Shard {
@@ -313,7 +313,7 @@ class VitessShardedBackfillTest {
     return instanceScan(shard.name)
   }
 
-  private operator fun Map<String, InstanceCursor>.get(shard: Shard) : InstanceCursor {
-    return this[shard.name] ?: error("Snapshot missing instance shard ${shard}")
+  private operator fun Map<String, InstanceCursor>.get(shard: Shard): InstanceCursor {
+    return this[shard.name] ?: error("Snapshot missing instance shard $shard")
   }
 }

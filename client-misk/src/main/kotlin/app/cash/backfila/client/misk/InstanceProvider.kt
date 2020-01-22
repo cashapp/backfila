@@ -5,17 +5,15 @@ import app.cash.backfila.client.misk.internal.UnshardedHibernateBoundingRangeStr
 import app.cash.backfila.client.misk.internal.VitessShardedBoundingRangeStrategy
 import app.cash.backfila.client.misk.internal.VitessSingleCursorBoundingRangeStrategy
 import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
-import misk.hibernate.Check
 import misk.hibernate.Check.FULL_SCATTER
 import misk.hibernate.DbEntity
 import misk.hibernate.Keyspace
 import misk.hibernate.Session
 import misk.hibernate.Shard
 import misk.hibernate.Transacter
+import misk.hibernate.annotation.Keyspace as KeyspaceAnnotation
 import misk.hibernate.shards
 import misk.hibernate.transaction
-import javax.persistence.Table
-import misk.hibernate.annotation.Keyspace as KeyspaceAnnotation
 
 /**
  * Provides connectivity to a singleton database or a set of database shards.
@@ -29,7 +27,7 @@ interface InstanceProvider {
 
   fun <T> transaction(instanceName: String, task: (Session) -> T): T
 
-  fun <E : DbEntity<E>, Pkey : Any> boundingRangeStrategy() : BoundingRangeStrategy<E, Pkey>
+  fun <E : DbEntity<E>, Pkey : Any> boundingRangeStrategy(): BoundingRangeStrategy<E, Pkey>
 }
 
 /**
@@ -56,7 +54,7 @@ class UnshardedInstanceProvider(val transacter: Transacter) : InstanceProvider {
  * is its own instance. If your entities can move, or if you need to run this backfill slower
  * than one thread per shard, consider using [VitessSingleCursorInstanceProvider] instead.
  */
-class VitessShardedInstanceProvider<E : DbEntity<E>, Pkey : Any>(val transacter: Transacter, val backfill: Backfill<E,Pkey>) : InstanceProvider {
+class VitessShardedInstanceProvider<E : DbEntity<E>, Pkey : Any>(val transacter: Transacter, val backfill: Backfill<E, Pkey>) : InstanceProvider {
   private val keyspace = Keyspace(backfill.entityClass.java.getAnnotation(KeyspaceAnnotation::class.java).value)
 
   override fun names(request: PrepareBackfillRequest) = shards().map { it.name }
@@ -83,7 +81,7 @@ class VitessShardedInstanceProvider<E : DbEntity<E>, Pkey : Any>(val transacter:
  * The disadvantage is less efficient concurrency and cross shard queries, since batches are
  * computed by scanning all shards each time, rather than splitting the work by shard.
  */
-class VitessSingleCursorInstanceProvider<E : DbEntity<E>, Pkey : Any>(val transacter: Transacter, val backfill: Backfill<E,Pkey>) : InstanceProvider {
+class VitessSingleCursorInstanceProvider<E : DbEntity<E>, Pkey : Any>(val transacter: Transacter, val backfill: Backfill<E, Pkey>) : InstanceProvider {
   private val keyspace = Keyspace(backfill.entityClass.java.getAnnotation(KeyspaceAnnotation::class.java).value)
 
   override fun names(request: PrepareBackfillRequest) = listOf("only")

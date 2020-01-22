@@ -2,10 +2,12 @@ package app.cash.backfila.client.misk
 
 import javax.persistence.Column
 import javax.persistence.Entity
-import javax.persistence.GeneratedValue
 import javax.persistence.Table
+import misk.hibernate.Constraint
 import misk.hibernate.DbRoot
 import misk.hibernate.Id
+import misk.hibernate.Operator
+import misk.hibernate.Query
 import misk.hibernate.annotation.Keyspace
 
 @Entity
@@ -21,6 +23,10 @@ class DbRestaurant private constructor() : DbRoot<DbRestaurant> {
     this.id = id
     this.name = name
   }
+}
 
-  interface Query : misk.hibernate.Query<DbRestaurant>
+interface RestaurantQuery : Query<DbRestaurant> {
+
+  @Constraint(path = "name", operator = Operator.EQ)
+  fun name(name: String): RestaurantQuery
 }

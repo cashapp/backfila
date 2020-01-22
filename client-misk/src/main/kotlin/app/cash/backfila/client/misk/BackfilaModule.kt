@@ -8,12 +8,12 @@ import com.google.inject.BindingAnnotation
 import com.google.inject.Provides
 import com.google.inject.TypeLiteral
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import javax.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
 import misk.ServiceModule
 import misk.inject.KAbstractModule
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
 /**
  * Backfila-using applications install this and either [EmbeddedBackfilaModule] (testing and
