@@ -83,6 +83,7 @@ Cutting a Release
     sed -i "" \
       "s/\"backfila:\([^\:]*\):[^\"]*\"/\"backfila:\1:$RELEASE_VERSION\"/g" \
       `find . -name "README.md"`
+    miskweb ci-build -e
     ./gradlew clean uploadArchives
     ```
 
