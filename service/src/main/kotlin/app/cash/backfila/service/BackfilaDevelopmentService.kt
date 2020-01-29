@@ -1,8 +1,6 @@
 package app.cash.backfila.service
 
-import com.google.inject.TypeLiteral
 import misk.MiskApplication
-import misk.MiskCaller
 import misk.MiskRealServiceModule
 import misk.environment.Environment
 import misk.inject.KAbstractModule
@@ -10,15 +8,19 @@ import misk.jdbc.DataSourceClusterConfig
 import misk.jdbc.DataSourceClustersConfig
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
-import misk.scope.ActionScoped
+import misk.web.MiskWebModule
+import misk.web.WebConfig
 
 fun main(args: Array<String>) {
   MiskApplication(
       object : KAbstractModule() {
         override fun configure() {
-          val typeLiteral = object : TypeLiteral<ActionScoped<MiskCaller>>() {}
-          bind(typeLiteral).toInstance(ActionScoped.of(
-              MiskCaller(user = "development", capabilities = setOf("backfila--owners"))))
+          val webConfig = WebConfig(
+              port = 8080,
+              idle_timeout = 500000,
+              host = "127.0.0.1"
+          )
+          install(MiskWebModule(webConfig))
         }
       },
       BackfilaServiceModule(

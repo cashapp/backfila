@@ -21,6 +21,7 @@ import misk.inject.KAbstractModule
 import misk.security.authz.AccessAnnotationEntry
 import misk.slack.SlackModule
 import misk.web.dashboard.AdminDashboardAccess
+import misk.web.dashboard.AdminDashboardModule
 
 class BackfilaServiceModule(
   private val environment: Environment,
@@ -36,6 +37,7 @@ class BackfilaServiceModule(
     install(BackfilaWebActionsModule())
     install(BackfilaDashboardModule(environment))
     install(ServiceWebActionsModule())
+    install(AdminDashboardModule(environment))
 
     install(SchedulerLifecycleServiceModule())
 
