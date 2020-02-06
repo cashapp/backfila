@@ -26,7 +26,7 @@ class StartBackfillAction @Inject constructor(
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   // TODO allow any user
-  @Authenticated(capabilities = ["eng"])
+  @Authenticated(capabilities = ["users"])
   fun start(
     @PathParam id: Long,
     @RequestBody request: StartBackfillRequest

@@ -60,7 +60,7 @@ class GetBackfillStatusAction @Inject constructor(
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   // TODO allow any user
-  @Authenticated(capabilities = ["eng"])
+  @Authenticated(capabilities = ["users"])
   fun status(
     @PathParam id: Long
   ): GetBackfillStatusResponse {
