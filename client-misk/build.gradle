@@ -19,8 +19,8 @@ dependencies {
   api project(':client')
   testApi project(':client-misk-testing')
 
-  implementation(dep.misk)
-  implementation(dep.miskHibernate)
+  implementation dep.misk
+  api dep.miskHibernate
   testImplementation(dep.miskTesting)
   testImplementation(dep.miskHibernateTesting)
   testImplementation dep.junitEngine
