@@ -24,6 +24,8 @@ import java.util.ArrayList
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
+import javax.persistence.criteria.Path
+import javax.persistence.criteria.Root
 import kotlin.reflect.KClass
 import misk.exceptions.BadRequestException
 import misk.hibernate.DbEntity
@@ -102,8 +104,8 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
       val minmax = queryFactory.dynamicQuery(backfill.entityClass)
           .dynamicUniqueResult(session) { criteriaBuilder, queryRoot ->
             criteriaBuilder.tuple(
-                criteriaBuilder.min(queryRoot.get(backfill.primaryKeyHibernateName())),
-                criteriaBuilder.max(queryRoot.get(backfill.primaryKeyHibernateName())))
+                criteriaBuilder.min(backfill.getPrimaryKeyPath(queryRoot)),
+                criteriaBuilder.max(backfill.getPrimaryKeyPath(queryRoot)))
           }!!
 
       val min = minmax[0]
@@ -230,7 +232,7 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
             addBoundingMin(this)
             dynamicAddConstraint(pkeyProperty, LE, boundingMax)
           }.dynamicUniqueResult(session) { criteriaBuilder, queryRoot ->
-            criteriaBuilder.countDistinct(queryRoot.get<E>(pkeyProperty))
+            criteriaBuilder.countDistinct(backfill.getPrimaryKeyPath(queryRoot))
           }!!
           matchingCount = result[0] as Long?
           end = boundingMax!!
@@ -246,7 +248,7 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
           dynamicAddConstraint(pkeyProperty, LE, end)
         }.dynamicUniqueResult(session) { criteriaBuilder, queryRoot ->
           criteriaBuilder.tuple(
-              criteriaBuilder.min(queryRoot.get(pkeyProperty)),
+              criteriaBuilder.min(backfill.getPrimaryKeyPath(queryRoot)),
               criteriaBuilder.count(queryRoot))
         }!!
         val start = result[0].toString()
@@ -293,6 +295,15 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
     backfill.runBatch(pkeys, config)
 
     return RunBatchResponse.Builder().build()
+  }
+
+  private fun Backfill<*, *>.getPrimaryKeyPath(queryRoot: Root<*>): Path<Number> {
+    val fields = primaryKeyHibernateName().split('.')
+    var path = queryRoot as Path<Number>
+    for (field in fields) {
+      path = path.get(field)
+    }
+    return path
   }
 
   @Singleton
