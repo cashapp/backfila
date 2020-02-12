@@ -1,7 +1,6 @@
 package app.cash.backfila.client.misk
 
 import app.cash.backfila.client.misk.client.BackfilaClientConfig
-import app.cash.backfila.client.misk.client.BackfilaClientModule
 import app.cash.backfila.client.misk.embedded.EmbeddedBackfilaModule
 import kotlin.reflect.KClass
 import misk.MiskTestingServiceModule
@@ -55,6 +54,5 @@ internal class ClientMiskTestingModule(
             url = "test.url", slack_channel = "#test"),
         backfillClasses
     ))
-    install(BackfilaClientModule())
   }
 }
