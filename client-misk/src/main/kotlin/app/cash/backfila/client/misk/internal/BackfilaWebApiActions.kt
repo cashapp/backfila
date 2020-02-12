@@ -10,6 +10,7 @@ import javax.inject.Inject
 import misk.logging.getLogger
 import misk.security.authz.Authenticated
 import misk.web.Post
+import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
@@ -22,7 +23,7 @@ internal class PrepareBackfillAction @Inject constructor(
   @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
   @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)
   @Authenticated(services = ["backfila"])
-  fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
+  fun prepareBackfill(@RequestBody request: PrepareBackfillRequest): PrepareBackfillResponse {
     logger.info { "Preparing backfill `${request.backfill_name}::${request.backfill_id}`" }
 
     val operator = operatorFactory.create(request.backfill_name, request.backfill_id)
@@ -41,7 +42,7 @@ internal class GetNextBatchRangeAction @Inject constructor(
   @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
   @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)
   @Authenticated(services = ["backfila"])
-  fun getNextBatchRange(request: GetNextBatchRangeRequest): GetNextBatchRangeResponse {
+  fun getNextBatchRange(@RequestBody request: GetNextBatchRangeRequest): GetNextBatchRangeResponse {
     logger.info {
       "Computing batch for backfill `${request.backfill_name}::${request.instance_name}" +
           "::${request.backfill_id}`. Previous end: `${request.previous_end_key}`"
@@ -71,7 +72,7 @@ internal class RunBatchAction @Inject constructor(
   @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
   @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)
   @Authenticated(services = ["backfila"])
-  fun runBatch(request: RunBatchRequest): RunBatchResponse {
+  fun runBatch(@RequestBody request: RunBatchRequest): RunBatchResponse {
     logger.info {
       "Running backfila batch " +
           "`${request.backfill_name}::${request.instance_name}::${request.backfill_id}`: " +
