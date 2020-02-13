@@ -1,7 +1,10 @@
 package app.cash.backfila.client
 
-import java.time.Duration
+import com.google.inject.Provides
 import misk.client.HttpClientEndpointConfig
+import misk.inject.KAbstractModule
+import java.time.Duration
+import javax.inject.Named
 
 val DEFAULT_HTTP_CLIENT_ENDPOINT_CONFIG = HttpClientEndpointConfig(
     // Allow RunBatch requests to take a long time.
@@ -10,6 +13,14 @@ val DEFAULT_HTTP_CLIENT_ENDPOINT_CONFIG = HttpClientEndpointConfig(
     maxRequests = 1000,
     maxRequestsPerHost = 1000
 )
+
+class BackfilaDefaultEndpointConfigModule() : KAbstractModule() {
+  @Provides @Named(Connectors.HTTP)
+  fun httpClientEndpointConfigDefault() = DEFAULT_HTTP_CLIENT_ENDPOINT_CONFIG
+
+  @Provides @Named(Connectors.ENVOY)
+  fun envoyClientEndpointConfigDefault() = DEFAULT_HTTP_CLIENT_ENDPOINT_CONFIG
+}
 
 interface BackfilaClientServiceClientProvider {
   fun validateExtraData(connectorExtraData: String?)

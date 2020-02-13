@@ -1,5 +1,6 @@
 package app.cash.backfila.service
 
+import app.cash.backfila.client.BackfilaDefaultEndpointConfigModule
 import misk.MiskApplication
 import misk.MiskRealServiceModule
 import misk.environment.Environment
@@ -44,6 +45,7 @@ fun main(args: Array<String>) {
           )
       ),
       AdminDashboardModule(Environment.DEVELOPMENT),
+      BackfilaDefaultEndpointConfigModule(),
       MiskRealServiceModule()
   ).run(args)
 }
