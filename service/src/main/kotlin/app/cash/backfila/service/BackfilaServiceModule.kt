@@ -21,7 +21,6 @@ import misk.inject.KAbstractModule
 import misk.security.authz.AccessAnnotationEntry
 import misk.slack.SlackModule
 import misk.web.dashboard.AdminDashboardAccess
-import misk.web.dashboard.AdminDashboardModule
 
 class BackfilaServiceModule(
   private val environment: Environment,
@@ -37,7 +36,6 @@ class BackfilaServiceModule(
     install(BackfilaWebActionsModule())
     install(BackfilaDashboardModule(environment))
     install(ServiceWebActionsModule())
-    install(AdminDashboardModule(environment))
 
     install(SchedulerLifecycleServiceModule())
 
@@ -51,6 +49,9 @@ class BackfilaServiceModule(
     if (config.slack != null) {
       install(SlackModule(config.slack))
     }
+
+    // TODO:mikepaw Require that the Admin Console is installed so it isn't forgotten.
+    // something along the lines of requireBinding but works for multibindings.
   }
 
   @Provides @ForBackfilaScheduler @Singleton
