@@ -10,6 +10,7 @@ import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.web.MiskWebModule
 import misk.web.WebConfig
+import misk.web.dashboard.AdminDashboardModule
 
 fun main(args: Array<String>) {
   MiskApplication(
@@ -42,6 +43,7 @@ fun main(args: Array<String>) {
               slack = null
           )
       ),
+      AdminDashboardModule(Environment.DEVELOPMENT),
       MiskRealServiceModule()
   ).run(args)
 }
