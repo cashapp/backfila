@@ -4,6 +4,8 @@ import app.cash.backfila.client.misk.Backfill
 import app.cash.backfila.client.misk.InstanceProvider
 import app.cash.backfila.protos.clientservice.KeyRange
 import com.google.common.collect.Ordering
+import javax.persistence.Table
+import kotlin.streams.toList
 import misk.hibernate.DbEntity
 import misk.hibernate.Keyspace
 import misk.hibernate.Session
@@ -11,8 +13,6 @@ import misk.hibernate.Transacter
 import misk.hibernate.shards
 import misk.hibernate.transaction
 import okio.ByteString
-import javax.persistence.Table
-import kotlin.streams.toList
 
 interface BoundingRangeStrategy<E : DbEntity<E>, Pkey : Any> {
   /**
@@ -141,5 +141,5 @@ private fun <E : DbEntity<E>, Pkey : Any> schemaAndTable(backfill: Backfill<E, P
 private fun <E : DbEntity<E>, Pkey : Any> onlyTable(backfill: Backfill<E, Pkey>): String {
   val tableAnnotation = backfill.entityClass.java.getAnnotation(Table::class.java)
   val table = tableAnnotation.name
-  return  "`$table`"
+  return "`$table`"
 }

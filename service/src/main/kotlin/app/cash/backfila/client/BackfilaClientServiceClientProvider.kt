@@ -1,10 +1,10 @@
 package app.cash.backfila.client
 
 import com.google.inject.Provides
-import misk.client.HttpClientEndpointConfig
-import misk.inject.KAbstractModule
 import java.time.Duration
 import javax.inject.Named
+import misk.client.HttpClientEndpointConfig
+import misk.inject.KAbstractModule
 
 val DEFAULT_HTTP_CLIENT_ENDPOINT_CONFIG = HttpClientEndpointConfig(
     // Allow RunBatch requests to take a long time.
