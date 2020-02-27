@@ -3,7 +3,7 @@ package app.cash.backfila.service
 import java.util.concurrent.TimeUnit
 import misk.time.FakeClock
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class RateCounterTest {
   @Test
