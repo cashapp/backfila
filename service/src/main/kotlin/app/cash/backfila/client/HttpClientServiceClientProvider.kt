@@ -3,6 +3,7 @@ package app.cash.backfila.client
 import app.cash.backfila.client.Connectors.HTTP
 import com.squareup.moshi.Moshi
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 import misk.client.HttpClientConfigUrlProvider
 import misk.client.HttpClientEndpointConfig
@@ -11,7 +12,6 @@ import misk.moshi.adapter
 import retrofit2.Retrofit
 import retrofit2.adapter.guava.GuavaCallAdapterFactory
 import retrofit2.converter.wire.WireConverterFactory
-import javax.inject.Named
 
 @Singleton
 class HttpClientServiceClientProvider @Inject constructor(
