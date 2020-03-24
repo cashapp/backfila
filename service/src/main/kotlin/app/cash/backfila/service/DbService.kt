@@ -1,32 +1,32 @@
 package app.cash.backfila.service
 
+import misk.hibernate.DbTimestampedEntity
+import misk.hibernate.DbUnsharded
+import misk.hibernate.Id
 import java.time.Instant
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Table
-import misk.hibernate.DbTimestampedEntity
-import misk.hibernate.DbUnsharded
-import misk.hibernate.Id
 
 @Entity
 @Table(name = "services")
-class DbService() : DbUnsharded<DbService>, DbTimestampedEntity {
+open class DbService() : DbUnsharded<DbService>, DbTimestampedEntity {
   @javax.persistence.Id
   @GeneratedValue
   override lateinit var id: Id<DbService>
 
   @Column(nullable = false)
-  lateinit var registry_name: String
+  open lateinit var registry_name: String
 
   @Column(nullable = false)
-  lateinit var connector: String
+  open lateinit var connector: String
 
   @Column(columnDefinition = "mediumtext")
-  var connector_extra_data: String? = null
+  open var connector_extra_data: String? = null
 
   @Column
-  var slack_channel: String? = null
+  open var slack_channel: String? = null
 
   @Column
   override lateinit var created_at: Instant
