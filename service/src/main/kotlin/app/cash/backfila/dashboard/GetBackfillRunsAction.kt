@@ -69,16 +69,8 @@ class GetBackfillRunsAction @Inject constructor(
           .orderByIdDesc()
           .list(session)
 
-      val runningInstances = queryFactory.newQuery<RunInstanceQuery>()
-          .backfillRunIdIn(runningBackfills.map { it.id })
-          .list(session)
-          .groupBy { it.backfill_run_id }
-
-      val runningRegisteredBackfills = queryFactory.newQuery<RegisteredBackfillQuery>()
-          .idIn(runningBackfills.map { it.registered_backfill_id })
-          .list(session)
-          .associateBy { it.id }
-
+      val runningInstances = instances(session, runningBackfills)
+      val runningRegisteredBackfills = registeredBackfills(session, runningBackfills)
       val runningUiBackfills = runningBackfills
           .map {
             dbToUi(
@@ -99,16 +91,8 @@ class GetBackfillRunsAction @Inject constructor(
           )
           .nextPage(session) ?: Page.empty()
 
-      val pausedRegisteredBackfills = queryFactory.newQuery<RegisteredBackfillQuery>()
-          .idIn(pausedBackfills.map { it.registered_backfill_id }.toSet())
-          .list(session)
-          .associateBy { it.id }
-
-      val pausedInstances = queryFactory.newQuery<RunInstanceQuery>()
-          .backfillRunIdIn(pausedBackfills.map { it.id })
-          .list(session)
-          .groupBy { it.backfill_run_id }
-
+      val pausedRegisteredBackfills = registeredBackfills(session, pausedBackfills)
+      val pausedInstances = instances(session, pausedBackfills)
       val pausedUiBackfills = pausedBackfills
           .map {
             dbToUi(
@@ -126,6 +110,22 @@ class GetBackfillRunsAction @Inject constructor(
       )
     }
   }
+
+  private fun registeredBackfills(
+      session: Session,
+      runs: List<DbBackfillRun>
+  ) = queryFactory.newQuery<RegisteredBackfillQuery>()
+      .idIn(runs.map { it.registered_backfill_id }.toSet())
+      .list(session)
+      .associateBy { it.id }
+
+  private fun instances(
+      session: Session,
+      pausedBackfills: List<DbBackfillRun>
+  ) = queryFactory.newQuery<RunInstanceQuery>()
+      .backfillRunIdIn(pausedBackfills.map { it.id })
+      .list(session)
+      .groupBy { it.backfill_run_id }
 
   private fun dbToUi(
       @Suppress("UNUSED_PARAMETER") session: Session,
