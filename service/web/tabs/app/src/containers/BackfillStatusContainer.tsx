@@ -245,11 +245,13 @@ class BackfillStatusContainer extends React.Component<
                     {status.created_by_user}
                   </td>
                 </tr>
-                <tr>
-                  <td colSpan={2} style={{ textAlign: "center" }}>
-                    Custom parameters
-                  </td>
-                </tr>
+                {status.parameters.length > 0 && (
+                  <tr>
+                    <td colSpan={2} style={{ textAlign: "center" }}>
+                      Custom parameters
+                    </td>
+                  </tr>
+                )}
                 {Object.entries(status.parameters).map(
                   ([name, value]: [string, string]) => (
                     <tr>

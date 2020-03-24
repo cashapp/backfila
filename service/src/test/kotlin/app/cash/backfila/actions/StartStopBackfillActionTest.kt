@@ -17,8 +17,6 @@ import app.cash.backfila.service.BackfilaDb
 import app.cash.backfila.service.BackfillState
 import app.cash.backfila.service.DbBackfillRun
 import com.google.inject.Module
-import javax.inject.Inject
-import kotlin.test.assertNotNull
 import misk.exceptions.BadRequestException
 import misk.hibernate.Id
 import misk.hibernate.Query
@@ -30,6 +28,8 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import javax.inject.Inject
+import kotlin.test.assertNotNull
 
 @MiskTest(startService = true)
 class StartStopBackfillActionTest {
@@ -96,14 +96,64 @@ class StartStopBackfillActionTest {
   }
 
   @Test
+  fun pagination() {
+    scope.fakeCaller(service = "deep-fryer") {
+      configureServiceAction.configureService(
+          ConfigureServiceRequest.Builder()
+              .backfills(
+                  listOf(
+                      ConfigureServiceRequest.BackfillData.Builder()
+                          .name("ChickenSandwich")
+                          .description("Description")
+                          .build(),
+                      ConfigureServiceRequest.BackfillData.Builder()
+                          .name("BeefSandwich")
+                          .description("Description")
+                          .build()
+                  )
+              )
+              .connector_type(Connectors.ENVOY)
+              .build()
+      )
+    }
+    scope.fakeCaller(user = "molly") {
+      repeat(15) {
+        createBackfillAction.create(
+            "deep-fryer",
+            CreateBackfillRequest("ChickenSandwich")
+        )
+        createBackfillAction.create(
+            "deep-fryer",
+            CreateBackfillRequest("BeefSandwich")
+        )
+      }
+      val backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
+      assertThat(backfillRuns.paused_backfills).hasSize(20)
+
+      val backfillRunsPage2 = getBackfillRunsAction.backfillRuns(
+          "deep-fryer",
+          pagination_token = backfillRuns.next_pagination_token
+      )
+      assertThat(backfillRunsPage2.paused_backfills).hasSize(10)
+    }
+  }
+
+  @Test
   fun backfillDoesntExist() {
     scope.fakeCaller(service = "deep-fryer") {
-      configureServiceAction.configureService(ConfigureServiceRequest.Builder()
-          .backfills(listOf(
-              ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null,
-                  null, false)))
-          .connector_type(Connectors.ENVOY)
-          .build())
+      configureServiceAction.configureService(
+          ConfigureServiceRequest.Builder()
+              .backfills(
+                  listOf(
+                      ConfigureServiceRequest.BackfillData(
+                          "ChickenSandwich", "Description", listOf(), null,
+                          null, false
+                      )
+                  )
+              )
+              .connector_type(Connectors.ENVOY)
+              .build()
+      )
     }
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create("deep-fryer",

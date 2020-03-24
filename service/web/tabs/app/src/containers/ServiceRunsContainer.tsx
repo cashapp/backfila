@@ -6,23 +6,37 @@ import {
   mapDispatchToProps,
   mapStateToProps
 } from "../ducks"
-import { H2, H3, Intent, AnchorButton, Spinner } from "@blueprintjs/core"
+import { H2, H3, Spinner } from "@blueprintjs/core"
 import { BackfillRunsTable } from "../components"
 import { simpleSelectorGet } from "@misk/simpleredux"
 import { Link } from "react-router-dom"
 import { LayoutContainer } from "."
 
-class ServiceContainer extends React.Component<
+class ServiceRunsContainer extends React.Component<
   IState & IDispatchProps,
   IState
 > {
   private service: string = (this.props as any).match.params.service
   private backfillRunsTag: string = `${this.service}::BackfillRuns`
 
+  componentDidUpdate(prevProps: any) {
+    if (
+      (this.props as any).match.params.offset !==
+      (prevProps as any).match.params.offset
+    ) {
+      this.sendRequest()
+    }
+  }
+
   componentDidMount() {
+    this.sendRequest()
+  }
+
+  sendRequest() {
+    let offset = (this.props as any).match.params.offset
     this.props.simpleNetworkGet(
       this.backfillRunsTag,
-      `/services/${this.service}/backfill-runs`
+      `/services/${this.service}/backfill-runs?pagination_token=${offset}`
     )
   }
 
@@ -41,12 +55,9 @@ class ServiceContainer extends React.Component<
     }
     return (
       <LayoutContainer>
-        <H2>{this.service}</H2>
-        <Link to={`/app/services/${this.service}/create`}>
-          <AnchorButton text={"Create"} intent={Intent.PRIMARY} />
-        </Link>
-        <H3>Running Backfills</H3>
-        <BackfillRunsTable backfillRuns={result.running_backfills} />
+        <H2>
+          <Link to={`/app/services/${this.service}`}>{this.service}</Link>
+        </H2>
         <H3>Paused Backfills</H3>
         <BackfillRunsTable backfillRuns={result.paused_backfills} />
         {result.next_pagination_token && (
@@ -63,4 +74,7 @@ class ServiceContainer extends React.Component<
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(ServiceContainer)
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ServiceRunsContainer)

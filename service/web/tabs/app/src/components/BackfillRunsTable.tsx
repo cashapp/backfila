@@ -1,6 +1,8 @@
 import { Classes, HTMLTable } from "@blueprintjs/core"
 import * as React from "react"
 import { Link } from "react-router-dom"
+import { BackfillProgressBar } from "../components"
+import TimeAgo from "react-timeago"
 
 export interface ITableProps {
   backfillRuns: any
@@ -44,17 +46,56 @@ export const BackfillRunsTable = (props: ITableProps) => {
     /**
      * Data is loaded and ready to be rendered
      */
+    if (backfillRuns.length == 0) {
+      return <div>No backfills.</div>
+    }
     return (
       <div>
-        <ul>
-          {backfillRuns.map((run: any) => (
-            <li>
-              <Link to={`/app/backfills/${run.id}`}>
-                #{run.id} {run.name} {run.state}
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <HTMLTable bordered={true} striped={true} style={{ width: "100%" }}>
+          <thead>
+            <tr>
+              <th style={{ width: "10px" }}>ID</th>
+              <th>Name</th>
+              <th>State</th>
+              <th>Progress</th>
+              <th>Created by</th>
+              <th>Created at</th>
+              <th>Last active at</th>
+            </tr>
+          </thead>
+          <tbody>
+            {backfillRuns.map((run: any) => (
+              <tr>
+                <td>
+                  <Link to={`/app/backfills/${run.id}`}>#{run.id}</Link>
+                </td>
+                <td>
+                  <Link to={`/app/backfills/${run.id}`}>{run.name}</Link>
+                </td>
+                <td>{run.state}</td>
+                <td style={{ verticalAlign: "middle", width: "200px" }}>
+                  <BackfillProgressBar
+                    precomputing_done={run.precomputing_done}
+                    backfilled_matching_record_count={
+                      run.backfilled_matching_record_count
+                    }
+                    computed_matching_record_count={
+                      run.computed_matching_record_count
+                    }
+                    state={run.state}
+                  />
+                </td>
+                <td>{run.created_by_user}</td>
+                <td>
+                  <TimeAgo date={run.created_at} />
+                </td>
+                <td>
+                  <TimeAgo date={run.last_active_at} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </HTMLTable>
       </div>
     )
   }

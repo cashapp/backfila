@@ -1,4 +1,4 @@
-import { Classes, H1 } from "@blueprintjs/core"
+import { Classes, H1, HTMLTable } from "@blueprintjs/core"
 import { ErrorCalloutComponent } from "@misk/core"
 import * as React from "react"
 import { Link } from "react-router-dom"
@@ -18,30 +18,40 @@ export const ServicesListComponent = (props: ITableProps) => {
     return (
       <div>
         <H1>Services</H1>
-        <ul>
-          {data.map((service: string) => (
-            <li>
-              <Link to={`/app/services/${service}`}>{service}</Link>
-            </li>
-          ))}
-        </ul>
+        <HTMLTable bordered={true} striped={true}>
+          <tbody>
+            {data.map((service: string) => (
+              <tr>
+                <td>
+                  <Link to={`/app/services/${service}`}>{service}</Link>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </HTMLTable>
       </div>
     )
   } else {
     /**
      * Have a nice failure mode while your data is loading or doesn't load
      */
-    const FakeLi = <li className={Classes.SKELETON}>lorem ipsum 1234 5678</li>
+    const FakeCell = <p className={Classes.SKELETON}>lorem ipsum 1234 5678</p>
     return (
       <div>
         <H1>Services</H1>
-        <ul>
-          {FakeLi}
-          {FakeLi}
-          {FakeLi}
-          {FakeLi}
-          {FakeLi}
-        </ul>
+        <HTMLTable bordered={true} striped={true}>
+          <tbody>
+            <tr>
+              <td>{FakeCell}</td>
+            </tr>
+            <tr>
+              <td>{FakeCell}</td>
+            </tr>
+            <tr>
+              <td>{FakeCell}</td>
+            </tr>
+          </tbody>
+        </HTMLTable>
         <ErrorCalloutComponent error={data.error} />
       </div>
     )

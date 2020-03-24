@@ -2,6 +2,7 @@ package app.cash.backfila.service
 
 import app.cash.backfila.client.BackfilaDefaultEndpointConfigModule
 import misk.MiskApplication
+import misk.MiskCaller
 import misk.MiskRealServiceModule
 import misk.environment.Environment
 import misk.inject.KAbstractModule
@@ -9,6 +10,9 @@ import misk.jdbc.DataSourceClusterConfig
 import misk.jdbc.DataSourceClustersConfig
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
+import misk.security.authz.DevelopmentOnly
+import misk.security.authz.FakeCallerAuthenticator
+import misk.security.authz.MiskCallerAuthenticator
 import misk.web.MiskWebModule
 import misk.web.WebConfig
 import misk.web.dashboard.AdminDashboardModule
@@ -23,6 +27,9 @@ fun main(args: Array<String>) {
               host = "127.0.0.1"
           )
           install(MiskWebModule(webConfig))
+          multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
+          bind<MiskCaller>().annotatedWith<DevelopmentOnly>()
+              .toInstance(MiskCaller(user = "testfila"))
         }
       },
       BackfilaServiceModule(

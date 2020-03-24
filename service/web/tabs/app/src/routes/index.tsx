@@ -5,6 +5,7 @@ import {
   CreateFormContainer,
   HomeContainer,
   ServiceContainer,
+  ServiceRunsContainer,
   LayoutContainer
 } from "../containers"
 
@@ -14,6 +15,10 @@ const routes = (
       <Route
         path="/app/services/:service/create"
         component={CreateFormContainer}
+      />
+      <Route
+        path="/app/services/:service/runs/:offset"
+        component={ServiceRunsContainer}
       />
       <Route path="/app/services/:service" component={ServiceContainer} />
       <Route path="/app/backfills/:id" component={BackfillStatusContainer} />
