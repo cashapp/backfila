@@ -27,28 +27,28 @@ import javax.persistence.Version
  */
 @Entity
 @Table(name = "backfill_runs")
-open class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
+class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
   @javax.persistence.Id
   @GeneratedValue
   override lateinit var id: Id<DbBackfillRun>
 
   @Column(nullable = false)
-  open lateinit var service_id: Id<DbService>
+  lateinit var service_id: Id<DbService>
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "service_id", updatable = false, insertable = false)
-  open lateinit var service: DbService
+  lateinit var service: DbService
 
   /** Immutably stores the data configured by the client service for this backfill. */
   @Column(nullable = false)
-  open lateinit var registered_backfill_id: Id<DbRegisteredBackfill>
+  lateinit var registered_backfill_id: Id<DbRegisteredBackfill>
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "registered_backfill_id", updatable = false, insertable = false)
-  open lateinit var registered_backfill: DbRegisteredBackfill
+  lateinit var registered_backfill: DbRegisteredBackfill
 
   @Column
-  open var pipeline_target_backfill_id: Id<DbRegisteredBackfill>? = null
+  var pipeline_target_backfill_id: Id<DbRegisteredBackfill>? = null
 
   @Column
   override lateinit var created_at: Instant
@@ -57,46 +57,46 @@ open class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
   override lateinit var updated_at: Instant
 
   @Column(nullable = false) @Version
-  open var version: Long = 0
+  var version: Long = 0
 
   @Column(nullable = false) @Enumerated(EnumType.STRING)
-  open lateinit var state: BackfillState
+  lateinit var state: BackfillState
     protected set
 
   @Column
-  open var created_by_user: String? = null
+  var created_by_user: String? = null
 
   @Column
-  open var approved_by_user: String? = null
+  var approved_by_user: String? = null
 
-  open var approved_at: Instant? = null
-
-  @Column(nullable = false)
-  open var scan_size: Long = 0
+  var approved_at: Instant? = null
 
   @Column(nullable = false)
-  open var batch_size: Long = 0
+  var scan_size: Long = 0
 
   @Column(nullable = false)
-  open var num_threads: Int = 0
+  var batch_size: Long = 0
+
+  @Column(nullable = false)
+  var num_threads: Int = 0
 
   // TODO(mgersh): denormalize into a 1,n table
   @JsonColumn @Column(columnDefinition = "mediumtext")
-  open var parameter_map: Map<String, String>? = null
+  var parameter_map: Map<String, String>? = null
 
   @Column(nullable = false)
-  open var dry_run: Boolean = false
+  var dry_run: Boolean = false
 
   /** Comma separated list of delays for consecutive retries in milliseconds, e.g. 1000,2000 */
   @Column
-  open var backoff_schedule: String? = null
+  var backoff_schedule: String? = null
 
   /**
    * Sleep that is added after every successful RunBatch.
    * To be used when automatic backpressure is not available.
    */
   @Column(nullable = false)
-  open var extra_sleep_ms: Long = 0
+  var extra_sleep_ms: Long = 0
 
   constructor(
     service_id: Id<DbService>,

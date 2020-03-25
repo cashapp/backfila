@@ -24,20 +24,20 @@ import javax.persistence.Version
  */
 @Entity
 @Table(name = "run_instances")
-open class DbRunInstance() : DbUnsharded<DbRunInstance>, DbTimestampedEntity {
+class DbRunInstance() : DbUnsharded<DbRunInstance>, DbTimestampedEntity {
   @javax.persistence.Id
   @GeneratedValue
   override lateinit var id: Id<DbRunInstance>
 
   @Column(nullable = false)
-  open lateinit var backfill_run_id: Id<DbBackfillRun>
+  lateinit var backfill_run_id: Id<DbBackfillRun>
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "backfill_run_id", updatable = false, insertable = false)
-  open lateinit var backfill_run: DbBackfillRun
+  lateinit var backfill_run: DbBackfillRun
 
   @Column(nullable = false)
-  open lateinit var instance_name: String
+  lateinit var instance_name: String
 
   @Column
   override lateinit var created_at: Instant
@@ -47,7 +47,7 @@ open class DbRunInstance() : DbUnsharded<DbRunInstance>, DbTimestampedEntity {
 
   @Column(nullable = false)
   @Version
-  open var version: Long = 0
+  var version: Long = 0
 
   /**
    * State of the backfill run, kept in sync with backfill_runs to allow indexing
@@ -55,13 +55,13 @@ open class DbRunInstance() : DbUnsharded<DbRunInstance>, DbTimestampedEntity {
    */
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
-  open lateinit var run_state: BackfillState
+  lateinit var run_state: BackfillState
 
   @Column
-  open var lease_token: String? = null
+  var lease_token: String? = null
 
   @Column(nullable = false)
-  open lateinit var lease_expires_at: Instant
+  lateinit var lease_expires_at: Instant
 
   /**
    * The primary key values only make sense in the context of the client service.
@@ -69,52 +69,52 @@ open class DbRunInstance() : DbUnsharded<DbRunInstance>, DbTimestampedEntity {
    * as byte strings because they can be any type.
    */
   @Column
-  open var pkey_cursor: ByteString? = null
+  var pkey_cursor: ByteString? = null
 
   @Column
-  open var pkey_range_start: ByteString? = null
+  var pkey_range_start: ByteString? = null
 
   @Column
-  open var pkey_range_end: ByteString? = null
+  var pkey_range_end: ByteString? = null
 
   @Column
-  open var estimated_record_count: Long? = null
+  var estimated_record_count: Long? = null
 
   /**
    * Cursor used to precompute the size of the data.
    * Precomputing is done when this equals pkey_range_end.
    **/
   @Column
-  open var precomputing_pkey_cursor: ByteString? = null
+  var precomputing_pkey_cursor: ByteString? = null
 
   @Column(nullable = false)
-  open var precomputing_done: Boolean = false
+  var precomputing_done: Boolean = false
 
   /**
    * How many records in the data set.
    * Not correct until precomputing is done.
    */
   @Column
-  open var computed_scanned_record_count: Long = 0
+  var computed_scanned_record_count: Long = 0
 
   /**
    * How many records in the data set that match the criteria and will be backfilled.
    * Not correct until precomputing is done.
    */
   @Column
-  open var computed_matching_record_count: Long = 0
+  var computed_matching_record_count: Long = 0
 
   @Column
-  open var backfilled_scanned_record_count: Long = 0
+  var backfilled_scanned_record_count: Long = 0
 
   @Column
-  open var backfilled_matching_record_count: Long = 0
+  var backfilled_matching_record_count: Long = 0
 
   @Column
-  open var scanned_records_per_minute: Long? = null
+  var scanned_records_per_minute: Long? = null
 
   @Column
-  open var matching_records_per_minute: Long? = null
+  var matching_records_per_minute: Long? = null
 
   constructor(
     backfill_run_id: Id<DbBackfillRun>,
