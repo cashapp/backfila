@@ -74,7 +74,4 @@ class StartStopButton extends React.Component<
   }
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(StartStopButton)
+export default connect(mapStateToProps, mapDispatchToProps)(StartStopButton)

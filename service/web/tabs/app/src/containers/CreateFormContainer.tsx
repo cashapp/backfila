@@ -293,7 +293,4 @@ class CreateFormContainer extends React.Component<
   }
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(CreateFormContainer)
+export default connect(mapStateToProps, mapDispatchToProps)(CreateFormContainer)

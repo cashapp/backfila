@@ -4,14 +4,20 @@ import app.cash.backfila.service.BackfilaDb
 import app.cash.backfila.service.BackfillRunQuery
 import app.cash.backfila.service.BackfillState
 import app.cash.backfila.service.DbBackfillRun
+import app.cash.backfila.service.DbRegisteredBackfill
+import app.cash.backfila.service.DbRunInstance
+import app.cash.backfila.service.RegisteredBackfillQuery
+import app.cash.backfila.service.RunInstanceQuery
 import app.cash.backfila.service.ServiceQuery
-import java.time.Instant
-import javax.inject.Inject
 import misk.exceptions.BadRequestException
 import misk.hibernate.Query
 import misk.hibernate.Session
 import misk.hibernate.Transacter
 import misk.hibernate.newQuery
+import misk.hibernate.pagination.Offset
+import misk.hibernate.pagination.Page
+import misk.hibernate.pagination.idDescPaginator
+import misk.hibernate.pagination.newPager
 import misk.logging.getLogger
 import misk.security.authz.Authenticated
 import misk.web.Get
@@ -20,22 +26,25 @@ import misk.web.QueryParam
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
+import java.time.Instant
+import javax.inject.Inject
 
 data class UiBackfillRun(
-  val id: String,
-  val name: String,
-  val state: BackfillState,
-  val created_at: Instant,
-  val created_by_user: String?
-//  val precomputing_done: Boolean,
-//  val computed_matching_record_count: Long,
-//  val backfilled_matching_record_count: Long
+    val id: String,
+    val name: String,
+    val state: BackfillState,
+    val created_at: Instant,
+    val created_by_user: String?,
+    val last_active_at: Instant,
+    val precomputing_done: Boolean,
+    val computed_matching_record_count: Long,
+    val backfilled_matching_record_count: Long
 )
 
 data class GetBackfillRunsResponse(
-  val running_backfills: List<UiBackfillRun>,
-  val paused_backfills: List<UiBackfillRun>,
-  val next_pagination_token: String?
+    val running_backfills: List<UiBackfillRun>,
+    val paused_backfills: List<UiBackfillRun>,
+    val next_pagination_token: String?
 )
 
 class GetBackfillRunsAction @Inject constructor(
@@ -53,31 +62,94 @@ class GetBackfillRunsAction @Inject constructor(
       val dbService = queryFactory.newQuery<ServiceQuery>()
           .registryName(service)
           .uniqueResult(session) ?: throw BadRequestException("`$service` doesn't exist")
-      // TODO pagination, filtering
+
       val runningBackfills = queryFactory.newQuery<BackfillRunQuery>()
           .serviceId(dbService.id)
           .state(BackfillState.RUNNING)
           .orderByIdDesc()
           .list(session)
-          .map { dbToUi(session, it) }
-      val pausedBackfills = queryFactory.newQuery<BackfillRunQuery>()
+
+      val runningInstances = instances(session, runningBackfills)
+      val runningRegisteredBackfills = registeredBackfills(session, runningBackfills)
+      val runningUiBackfills = runningBackfills
+          .map {
+            dbToUi(
+                session,
+                it,
+                runningInstances.getValue(it.id),
+                runningRegisteredBackfills.getValue(it.registered_backfill_id)
+            )
+          }
+
+      val (pausedBackfills, nextOffset) = queryFactory.newQuery<BackfillRunQuery>()
           .serviceId(dbService.id)
           .stateNot(BackfillState.RUNNING)
-          .orderByIdDesc()
-          .list(session)
-          .map { dbToUi(session, it) }
+          .newPager(
+              idDescPaginator(),
+              initialOffset = pagination_token?.let { Offset(it) },
+              pageSize = 20
+          )
+          .nextPage(session) ?: Page.empty()
 
-      GetBackfillRunsResponse(runningBackfills, pausedBackfills, next_pagination_token = null)
+      val pausedRegisteredBackfills = registeredBackfills(session, pausedBackfills)
+      val pausedInstances = instances(session, pausedBackfills)
+      val pausedUiBackfills = pausedBackfills
+          .map {
+            dbToUi(
+                session,
+                it,
+                pausedInstances.getValue(it.id),
+                pausedRegisteredBackfills.getValue(it.registered_backfill_id)
+            )
+          }
+
+      GetBackfillRunsResponse(
+          runningUiBackfills,
+          pausedUiBackfills,
+          next_pagination_token = nextOffset?.offset
+      )
     }
   }
 
-  private fun dbToUi(session: Session, run: DbBackfillRun): UiBackfillRun {
+  private fun registeredBackfills(
+      session: Session,
+      runs: List<DbBackfillRun>
+  ) = queryFactory.newQuery<RegisteredBackfillQuery>()
+      .idIn(runs.map { it.registered_backfill_id }.toSet())
+      .list(session)
+      .associateBy { it.id }
+
+  private fun instances(
+      session: Session,
+      pausedBackfills: List<DbBackfillRun>
+  ) = queryFactory.newQuery<RunInstanceQuery>()
+      .backfillRunIdIn(pausedBackfills.map { it.id })
+      .list(session)
+      .groupBy { it.backfill_run_id }
+
+  private fun dbToUi(
+      @Suppress("UNUSED_PARAMETER") session: Session,
+      run: DbBackfillRun,
+      instances: List<DbRunInstance>,
+      registeredBackfill: DbRegisteredBackfill
+  ): UiBackfillRun {
+    val precomputingDone = instances.all { it.precomputing_done }
+    val computedMatchingRecordCount = instances
+        .map { it.computed_matching_record_count }
+        .sum()
+    val backfilledMatchingRecordCount = instances
+        .map { it.backfilled_matching_record_count }
+        .sum()
     return UiBackfillRun(
         run.id.toString(),
-        run.registered_backfill.name,
+        registeredBackfill.name,
         run.state,
         run.created_at,
-        run.created_by_user
+        run.created_by_user,
+        run.updated_at,
+        precomputingDone,
+        computedMatchingRecordCount,
+        backfilledMatchingRecordCount
     )
   }
 

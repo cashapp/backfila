@@ -10,6 +10,9 @@ interface RegisteredBackfillQuery : Query<DbRegisteredBackfill> {
   @Constraint("service_id")
   fun serviceId(serviceId: Id<DbService>): RegisteredBackfillQuery
 
+  @Constraint("id", Operator.IN)
+  fun idIn(backfillRunIds: Collection<Id<DbRegisteredBackfill>>): RegisteredBackfillQuery
+
   @Constraint("name")
   fun name(name: String): RegisteredBackfillQuery
 

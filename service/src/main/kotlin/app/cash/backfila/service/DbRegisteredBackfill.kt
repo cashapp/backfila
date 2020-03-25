@@ -1,5 +1,8 @@
 package app.cash.backfila.service
 
+import misk.hibernate.DbTimestampedEntity
+import misk.hibernate.DbUnsharded
+import misk.hibernate.Id
 import java.time.Clock
 import java.time.Instant
 import javax.persistence.Column
@@ -9,29 +12,26 @@ import javax.persistence.GeneratedValue
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
 import javax.persistence.Table
-import misk.hibernate.DbTimestampedEntity
-import misk.hibernate.DbUnsharded
-import misk.hibernate.Id
 
 /**
  * Stores the set of backfills that a service has registered as runnable.
  */
 @Entity
 @Table(name = "registered_backfills")
-class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimestampedEntity {
+open class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimestampedEntity {
   @javax.persistence.Id
   @GeneratedValue
   override lateinit var id: Id<DbRegisteredBackfill>
 
   @Column(nullable = false)
-  lateinit var service_id: Id<DbService>
+  open lateinit var service_id: Id<DbService>
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "service_id", updatable = false, insertable = false)
-  lateinit var service: DbService
+  open lateinit var service: DbService
 
   @Column(nullable = false)
-  lateinit var name: String
+  open lateinit var name: String
 
   /**
    * When the backfill is updated or deleted on the client service,
@@ -42,10 +42,10 @@ class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimestampedE
    * A unique index ensures this and prevents races from different hosts from creating duplicates.
    */
   @Column
-  var active: Boolean? = null
+  open var active: Boolean? = null
 
   @Column
-  var deleted_in_service_at: Instant? = null
+  open var deleted_in_service_at: Instant? = null
 
   @Column
   override lateinit var created_at: Instant
@@ -55,16 +55,16 @@ class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimestampedE
 
   // TODO(mgersh): this might want to be its own table
   @Column(columnDefinition = "mediumtext")
-  var parameter_names: String? = null
+  open var parameter_names: String? = null
 
   @Column
-  var type_provided: String? = null
+  open var type_provided: String? = null
 
   @Column
-  var type_consumed: String? = null
+  open var type_consumed: String? = null
 
   @Column
-  var requires_approval: Boolean = false
+  open var requires_approval: Boolean = false
 
   constructor(
     service_id: Id<DbService>,
