@@ -18,20 +18,20 @@ import javax.persistence.Table
  */
 @Entity
 @Table(name = "registered_backfills")
-open class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimestampedEntity {
+class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimestampedEntity {
   @javax.persistence.Id
   @GeneratedValue
   override lateinit var id: Id<DbRegisteredBackfill>
 
   @Column(nullable = false)
-  open lateinit var service_id: Id<DbService>
+  lateinit var service_id: Id<DbService>
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "service_id", updatable = false, insertable = false)
-  open lateinit var service: DbService
+  lateinit var service: DbService
 
   @Column(nullable = false)
-  open lateinit var name: String
+  lateinit var name: String
 
   /**
    * When the backfill is updated or deleted on the client service,
@@ -42,10 +42,10 @@ open class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimesta
    * A unique index ensures this and prevents races from different hosts from creating duplicates.
    */
   @Column
-  open var active: Boolean? = null
+  var active: Boolean? = null
 
   @Column
-  open var deleted_in_service_at: Instant? = null
+  var deleted_in_service_at: Instant? = null
 
   @Column
   override lateinit var created_at: Instant
@@ -55,16 +55,16 @@ open class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimesta
 
   // TODO(mgersh): this might want to be its own table
   @Column(columnDefinition = "mediumtext")
-  open var parameter_names: String? = null
+  var parameter_names: String? = null
 
   @Column
-  open var type_provided: String? = null
+  var type_provided: String? = null
 
   @Column
-  open var type_consumed: String? = null
+  var type_consumed: String? = null
 
   @Column
-  open var requires_approval: Boolean = false
+  var requires_approval: Boolean = false
 
   constructor(
     service_id: Id<DbService>,

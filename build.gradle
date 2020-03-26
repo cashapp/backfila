@@ -9,6 +9,7 @@ buildscript {
   dependencies {
     classpath dep.junitGradlePlugin
     classpath dep.kotlinGradlePlugin
+    classpath dep.kotlinAllOpenPlugin
     classpath dep.mavenPublishGradlePlugin
     classpath dep.shadowJarPlugin
     classpath dep.spotlessPlugin
@@ -22,6 +23,7 @@ subprojects { subProject ->
   apply plugin: 'com.diffplug.gradle.spotless'
   apply plugin: 'org.jetbrains.dokka'
   apply plugin: 'com.vanniktech.maven.publish'
+  apply plugin: 'kotlin-allopen'
 
   compileKotlin {
     kotlinOptions {
@@ -38,6 +40,12 @@ subprojects { subProject ->
   compileJava {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
+  }
+
+  allOpen {
+    annotation("javax.persistence.Entity")
+    annotation("javax.persistence.Embeddable")
+    annotation("javax.persistence.MappedSuperclass")
   }
 
   spotless {

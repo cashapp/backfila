@@ -11,22 +11,22 @@ import javax.persistence.Table
 
 @Entity
 @Table(name = "services")
-open class DbService() : DbUnsharded<DbService>, DbTimestampedEntity {
+class DbService() : DbUnsharded<DbService>, DbTimestampedEntity {
   @javax.persistence.Id
   @GeneratedValue
   override lateinit var id: Id<DbService>
 
   @Column(nullable = false)
-  open lateinit var registry_name: String
+  lateinit var registry_name: String
 
   @Column(nullable = false)
-  open lateinit var connector: String
+  lateinit var connector: String
 
   @Column(columnDefinition = "mediumtext")
-  open var connector_extra_data: String? = null
+  var connector_extra_data: String? = null
 
   @Column
-  open var slack_channel: String? = null
+  var slack_channel: String? = null
 
   @Column
   override lateinit var created_at: Instant
