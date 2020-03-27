@@ -1,10 +1,12 @@
 package app.cash.backfila.service
 
 import app.cash.backfila.client.BackfilaDefaultEndpointConfigModule
+import app.cash.backfila.dashboard.ViewLogsUrlProvider
 import misk.MiskApplication
 import misk.MiskCaller
 import misk.MiskRealServiceModule
 import misk.environment.Environment
+import misk.hibernate.Session
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceClusterConfig
 import misk.jdbc.DataSourceClustersConfig
@@ -30,6 +32,7 @@ fun main(args: Array<String>) {
           multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
           bind<MiskCaller>().annotatedWith<DevelopmentOnly>()
               .toInstance(MiskCaller(user = "testfila"))
+          bind<ViewLogsUrlProvider>().to<DevelopmentViewLogsUrlProvider>()
         }
       },
       BackfilaServiceModule(
@@ -55,4 +58,10 @@ fun main(args: Array<String>) {
       BackfilaDefaultEndpointConfigModule(),
       MiskRealServiceModule()
   ).run(args)
+}
+
+class DevelopmentViewLogsUrlProvider : ViewLogsUrlProvider {
+  override fun getUrl(session: Session, backfillRun: DbBackfillRun): String {
+    return "/"
+  }
 }
