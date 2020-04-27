@@ -14,10 +14,7 @@ const environmentColorLookup: IEnvironmentToColorLookup = {
   PRODUCTION: color.red
 }
 
-export const backfilaRed = "#db2636"
-
 export const backfilaTheme: ITheme = {
   ...defaultTheme,
-  environmentToColor: environmentToColor(environmentColorLookup),
-  navbarBackground: backfilaRed
+  environmentToColor: environmentToColor(environmentColorLookup)
 }
