@@ -247,9 +247,7 @@ class BackfillStatusContainer extends React.Component<
                 </tr>
                 <tr>
                   <td colSpan={2}>
-                    <a href={`/backfills/${this.id}/view-logs`}>
-                      View Logs
-                    </a>
+                    <a href={`/backfills/${this.id}/view-logs`}>View Logs</a>
                   </td>
                 </tr>
                 {status.parameters.length > 0 && (
