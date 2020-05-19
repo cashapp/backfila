@@ -7,13 +7,16 @@ import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
 import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
 import app.cash.backfila.protos.clientservice.RunBatchRequest
 import app.cash.backfila.protos.clientservice.RunBatchResponse
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.channels.Channel
 import okio.ByteString.Companion.encodeUtf8
+import java.util.LinkedList
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class FakeBackfilaClientServiceClient @Inject constructor() : BackfilaClientServiceClient {
+  val prepareBackfillResponses = LinkedList<PrepareBackfillResponse>()
+
   val getNextBatchRangeRequests = Channel<GetNextBatchRangeRequest>()
   /** Send empty data here to signal GetNextBatchRange should return the next batch. */
   val getNextBatchRangeResponses = Channel<Result<GetNextBatchRangeResponse>>()
@@ -31,20 +34,25 @@ class FakeBackfilaClientServiceClient @Inject constructor() : BackfilaClientServ
   }
 
   override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
-    return PrepareBackfillResponse(
-        listOf(
-            PrepareBackfillResponse.Instance(
-                "-80",
-                KeyRange("0".encodeUtf8(), "1000".encodeUtf8()),
-                1_000_000L
-            ),
-            PrepareBackfillResponse.Instance(
-                "80-",
-                KeyRange("0".encodeUtf8(), "1000".encodeUtf8()),
-                null
+    if (prepareBackfillResponses.isNotEmpty()) {
+      return prepareBackfillResponses.removeFirst()
+    }
+    return PrepareBackfillResponse.Builder()
+        .instances(
+            listOf(
+                PrepareBackfillResponse.Instance(
+                    "-80",
+                    KeyRange("0".encodeUtf8(), "1000".encodeUtf8()),
+                    1_000_000L
+                ),
+                PrepareBackfillResponse.Instance(
+                    "80-",
+                    KeyRange("0".encodeUtf8(), "1000".encodeUtf8()),
+                    null
+                )
             )
         )
-    )
+        .build()
   }
 
   override suspend fun getNextBatchRange(request: GetNextBatchRangeRequest):
