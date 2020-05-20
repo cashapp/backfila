@@ -11,7 +11,6 @@ import app.cash.backfila.service.DbRunInstance
 import app.cash.backfila.service.DbService
 import app.cash.backfila.service.RegisteredBackfillQuery
 import app.cash.backfila.service.ServiceQuery
-import javax.inject.Inject
 import misk.MiskCaller
 import misk.exceptions.BadRequestException
 import misk.hibernate.Id
@@ -30,6 +29,7 @@ import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
+import javax.inject.Inject
 
 data class CreateBackfillRequest(
   val backfill_name: String,
@@ -117,14 +117,18 @@ class CreateBackfillAction @Inject constructor(
     val client = connectorProvider.clientProvider(dbData.connectorType)
         .clientFor(service, dbData.connectorExtraData)
     val prepareBackfillResponse = try {
-      client.prepareBackfill(PrepareBackfillRequest(
-          dbData.registeredBackfillId.toString(),
-          request.backfill_name,
-          KeyRange(request.pkey_range_start?.encodeUtf8(),
-              request.pkey_range_end?.encodeUtf8()),
-          request.parameter_map,
-          request.dry_run
-      ))
+      client.prepareBackfill(
+          PrepareBackfillRequest(
+              dbData.registeredBackfillId.toString(),
+              request.backfill_name,
+              KeyRange(
+                  request.pkey_range_start?.encodeUtf8(),
+                  request.pkey_range_end?.encodeUtf8()
+              ),
+              request.parameter_map,
+              request.dry_run
+          )
+      )
     } catch (e: Exception) {
       logger.info(e) { "PrepareBackfill on `$service` failed" }
       throw BadRequestException("PrepareBackfill on `$service` failed: " + e.message, e)
@@ -141,13 +145,13 @@ class CreateBackfillAction @Inject constructor(
           " ${instances.map { it.instance_name }}")
     }
 
-    // TODO validate params fit names
+    val combinedParams = request.parameter_map.plus(prepareBackfillResponse.parameters)
 
     val backfillRunId = transacter.transaction { session ->
       val backfillRun = DbBackfillRun(
           dbData.serviceId,
           dbData.registeredBackfillId,
-          request.parameter_map,
+          combinedParams,
           BackfillState.PAUSED,
           caller.get()?.user,
           request.scan_size,

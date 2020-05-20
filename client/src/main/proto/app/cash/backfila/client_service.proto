@@ -40,6 +40,10 @@ message PrepareBackfillResponse {
   }
 
   repeated Instance instances = 1;
+
+  // Parameters created by the client to keep for the life of the backfill.
+  // Every backfill call will pass these parameters back, in addition to user provided parameters.
+  map<string, bytes> parameters = 2;
 }
 
 message GetNextBatchRangeRequest {
