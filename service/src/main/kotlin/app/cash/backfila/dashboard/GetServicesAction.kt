@@ -1,8 +1,9 @@
 package app.cash.backfila.dashboard
 
 import app.cash.backfila.service.BackfilaDb
+import app.cash.backfila.service.BackfillRunQuery
+import app.cash.backfila.service.BackfillState
 import app.cash.backfila.service.ServiceQuery
-import javax.inject.Inject
 import misk.MiskCaller
 import misk.hibernate.Query
 import misk.hibernate.Transacter
@@ -14,6 +15,7 @@ import misk.web.Get
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
+import javax.inject.Inject
 
 class GetServicesAction @Inject constructor(
   private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
@@ -21,7 +23,14 @@ class GetServicesAction @Inject constructor(
   private val queryFactory: Query.Factory
 ) : WebAction {
 
-  data class GetServicesResponse(val services: List<String>)
+  data class UiService(
+      val name: String,
+      val running_backfills: Int
+  )
+
+  data class GetServicesResponse(
+      val services: List<UiService>
+  )
 
   @Get("/services")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
@@ -34,7 +43,16 @@ class GetServicesAction @Inject constructor(
       val services = queryFactory.newQuery<ServiceQuery>()
           .orderByName()
           .list(session)
-      services.map { it.registry_name }
+      val runningByService = queryFactory.newQuery<BackfillRunQuery>()
+          .state(BackfillState.RUNNING)
+          .list(session)
+          .groupBy { it.service_id }
+      services.map {
+        UiService(
+            name = it.registry_name,
+            running_backfills = runningByService[it.id]?.size ?: 0
+        )
+      }
     }
     return GetServicesResponse(services)
   }
