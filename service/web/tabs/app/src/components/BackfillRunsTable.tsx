@@ -57,6 +57,7 @@ export const BackfillRunsTable = (props: ITableProps) => {
               <th style={{ width: "10px" }}>ID</th>
               <th>Name</th>
               <th>State</th>
+              <th>Dry Run</th>
               <th>Progress</th>
               <th>Created by</th>
               <th>Created at</th>
@@ -73,6 +74,7 @@ export const BackfillRunsTable = (props: ITableProps) => {
                   <Link to={`/app/backfills/${run.id}`}>{run.name}</Link>
                 </td>
                 <td>{run.state}</td>
+                <td>{run.dry_run ? "Dry run" : "Wet run"}</td>
                 <td style={{ verticalAlign: "middle", width: "200px" }}>
                   <BackfillProgressBar
                     precomputing_done={run.precomputing_done}
