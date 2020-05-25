@@ -20,11 +20,14 @@ export const ServicesListComponent = (props: ITableProps) => {
         <H1>Services</H1>
         <HTMLTable bordered={true} striped={true}>
           <tbody>
-            {data.map((service: string) => (
+            {data.map((service: any) => (
               <tr>
                 <td>
-                  <Link to={`/app/services/${service}`}>{service}</Link>
+                  <Link to={`/app/services/${service.name}`}>
+                    {service.name}
+                  </Link>
                 </td>
+                <td>{service.running_backfills} running</td>
               </tr>
             ))}
           </tbody>
