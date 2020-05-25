@@ -19,8 +19,6 @@ import app.cash.backfila.protos.clientservice.KeyRange
 import app.cash.backfila.protos.clientservice.RunBatchResponse
 import app.cash.backfila.protos.service.ConfigureServiceRequest
 import com.google.inject.Module
-import java.util.concurrent.TimeUnit
-import javax.inject.Inject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -36,6 +34,8 @@ import misk.time.FakeClock
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
 @MiskTest(startService = true)
 class BackfillRunnerTest {
@@ -363,6 +363,55 @@ class BackfillRunnerTest {
     }
   }
 
+  @Test fun `fails batch when stack trace is returned`() {
+    fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
+    val runner = startBackfill(numThreads = 2)
+
+    runBlocking {
+      launch { runner.run() }
+      try {
+        val firstRequest = fakeBackfilaClientServiceClient.runBatchRequests.receive()
+        fakeBackfilaClientServiceClient.runBatchRequests.receive()
+
+        fakeBackfilaClientServiceClient.runBatchResponses.send(
+            Result.success(RunBatchResponse.Builder()
+                .exception_stack_trace("stacktrace")
+                .build())
+        )
+        fakeBackfilaClientServiceClient.runBatchResponses.send(
+            Result.success(RunBatchResponse.Builder().build())
+        )
+
+        delay(500)
+        // Nothing sent yet - the backoff is 1000ms
+        assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNull()
+        // Give a bit more buffer to send next request due to scheduling delays.
+        val retry = withTimeout(2000) {
+          fakeBackfilaClientServiceClient.runBatchRequests.receive()
+        }
+        assertThat(retry.batch_range).isEqualTo(firstRequest.batch_range)
+
+        // Cursor is not updated, because the first rpc didn't succeed
+        transacter.transaction { session ->
+          val instance = session.load(runner.instanceId)
+          assertThat(instance.pkey_cursor).isNull()
+          assertThat(instance.run_state).isEqualTo(BackfillState.RUNNING)
+        }
+
+        fakeBackfilaClientServiceClient.runBatchResponses.send(
+            Result.success(RunBatchResponse.Builder().build()))
+      } finally {
+        runner.stop()
+      }
+    }
+    // Cursor updated
+    transacter.transaction { session ->
+      val instance = session.load(runner.instanceId)
+      assertThat(instance.pkey_cursor).isEqualTo("199".encodeUtf8())
+      assertThat(instance.run_state).isEqualTo(BackfillState.RUNNING)
+    }
+  }
+
   @Test fun skipEmptyBatches() {
     val runner = startBackfill(numThreads = 1)
 
@@ -506,7 +555,7 @@ class BackfillRunnerTest {
     }
   }
 
-  fun startBackfill(numThreads: Int = 3, extraSleepMs: Long = 0): BackfillRunner {
+  private fun startBackfill(numThreads: Int = 3, extraSleepMs: Long = 0): BackfillRunner {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(ConfigureServiceRequest.Builder()
           .backfills(listOf(
@@ -516,13 +565,15 @@ class BackfillRunnerTest {
           .build())
     }
     scope.fakeCaller(user = "molly") {
-      val response = createBackfillAction.create("deep-fryer",
+      val response = createBackfillAction.create(
+          "deep-fryer",
           CreateBackfillRequest(
               "ChickenSandwich",
               num_threads = numThreads,
               backoff_schedule = "1000",
               extra_sleep_ms = extraSleepMs
-          ))
+          )
+      )
       val id = response.id
       startBackfillAction.start(id, StartBackfillRequest())
     }
@@ -530,10 +581,18 @@ class BackfillRunnerTest {
     return leaseHunter.hunt().single()
   }
 
-  fun nextBatchResponse(start: String, end: String, scannedCount: Long, matchingCount: Long) =
-      GetNextBatchRangeResponse(listOf(GetNextBatchRangeResponse.Batch(
-          KeyRange(start.encodeUtf8(), end.encodeUtf8()),
-          scannedCount,
-          matchingCount
-      )))
+  private fun nextBatchResponse(
+      start: String,
+      end: String,
+      scannedCount: Long,
+      matchingCount: Long
+  ) = GetNextBatchRangeResponse(
+      listOf(
+          GetNextBatchRangeResponse.Batch(
+              KeyRange(start.encodeUtf8(), end.encodeUtf8()),
+              scannedCount,
+              matchingCount
+          )
+      )
+  )
 }
