@@ -12,6 +12,8 @@ import kotlinx.coroutines.launch
 import misk.hibernate.load
 import misk.logging.getLogger
 
+class RunBatchException(stackTrace: String) : Exception()
+
 class BatchAwaiter(
   private val backfillRunner: BackfillRunner,
   private val receiveChannel: ReceiveChannel<AwaitingRun>,
@@ -41,6 +43,10 @@ class BatchAwaiter(
       retry@ while (true) {
         try {
           val response: RunBatchResponse = runBatchRpc.await()
+
+          if (response.exception_stack_trace != null) {
+            throw RunBatchException(response.exception_stack_trace)
+          }
 
           if (!backfillRunner.runBatchBackoff.backingOff()) {
             if (response.backoff_ms ?: 0 > 0) {
@@ -73,6 +79,10 @@ class BatchAwaiter(
         } catch (e: Exception) {
           logger.info(e) { "Rpc failure when running batch for ${backfillRunner.logLabel()}" }
           backfillRunner.onRpcFailure()
+
+          if (e is RunBatchException) {
+            // TODO: write exception to event log
+          }
 
           if (backfillRunner.globalBackoff.backingOff()) {
             val backoffMs = backfillRunner.globalBackoff.backoffMs()

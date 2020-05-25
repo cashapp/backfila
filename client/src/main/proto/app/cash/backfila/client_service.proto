@@ -104,6 +104,8 @@ message RunBatchResponse {
   optional uint64 backoff_ms = 1;
 
   optional PipelinedData pipelined_data = 2;
+
+  optional string exception_stack_trace = 3;
 }
 
 // Pipelined data can be any format as long as both the consumer and provider agree on it.
