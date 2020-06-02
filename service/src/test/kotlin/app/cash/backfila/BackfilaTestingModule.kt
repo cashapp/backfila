@@ -2,9 +2,9 @@ package app.cash.backfila
 
 import app.cash.backfila.api.ServiceWebActionsModule
 import app.cash.backfila.client.BackfilaClientServiceClientProvider
+import app.cash.backfila.client.ConnectorProvider
 import app.cash.backfila.client.Connectors
 import app.cash.backfila.client.FakeBackfilaClientServiceClientProvider
-import app.cash.backfila.client.ForConnectors
 import app.cash.backfila.service.BackfilaConfig
 import app.cash.backfila.service.BackfilaDb
 import app.cash.backfila.service.BackfilaPersistenceModule
@@ -64,14 +64,15 @@ internal class BackfilaTestingModule : KAbstractModule() {
         bindSeedData(MiskCaller::class)
       }
     })
-
-    newMapBinder<String, BackfilaClientServiceClientProvider>(ForConnectors::class)
-        .addBinding(Connectors.HTTP)
-        .to(FakeBackfilaClientServiceClientProvider::class.java)
-    newMapBinder<String, BackfilaClientServiceClientProvider>(ForConnectors::class)
-        .addBinding(Connectors.ENVOY)
-        .to(FakeBackfilaClientServiceClientProvider::class.java)
   }
+
+  @Provides @Singleton
+  fun connectorProvider(
+    testClientProvider: FakeBackfilaClientServiceClientProvider
+  ) = ConnectorProvider(
+      Connectors.HTTP to testClientProvider,
+      Connectors.ENVOY to testClientProvider
+  )
 
   @Provides @ForBackfilaScheduler @Singleton
   fun backfillRunnerExecutor(): ListeningExecutorService {
