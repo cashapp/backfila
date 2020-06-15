@@ -13,8 +13,7 @@ import com.google.common.util.concurrent.MoreExecutors
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import com.google.inject.Provides
 import misk.config.ConfigModule
-import misk.environment.Environment
-import misk.environment.EnvironmentModule
+import misk.environment.Deployment
 import misk.inject.KAbstractModule
 import misk.security.authz.AccessAnnotationEntry
 import misk.slack.SlackModule
@@ -28,7 +27,7 @@ import javax.inject.Singleton
 annotation class HttpClientNetworkInterceptor
 
 class BackfilaServiceModule(
-  private val environment: Environment,
+  private val deployment: Deployment,
   private val config: BackfilaConfig
 ) : KAbstractModule() {
   override fun configure() {
@@ -36,10 +35,9 @@ class BackfilaServiceModule(
         AccessAnnotationEntry<AdminDashboardAccess>(capabilities = listOf("backfila--owners")))
 
     install(ConfigModule.create("backfila", config))
-    install(EnvironmentModule(environment))
     install(BackfilaPersistenceModule(config))
     install(BackfilaWebActionsModule())
-    install(BackfilaDashboardModule(environment))
+    install(BackfilaDashboardModule(deployment))
     install(ServiceWebActionsModule())
 
     install(SchedulerLifecycleServiceModule())
