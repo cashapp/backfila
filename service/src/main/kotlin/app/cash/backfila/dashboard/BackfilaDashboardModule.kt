@@ -1,18 +1,18 @@
 package app.cash.backfila.dashboard
 
+import misk.environment.Deployment
 import javax.inject.Qualifier
-import misk.environment.Environment
 import misk.inject.KAbstractModule
 import misk.web.dashboard.WebTabResourceModule
 
-class BackfilaDashboardModule(val environment: Environment) : KAbstractModule() {
+class BackfilaDashboardModule(val deployment: Deployment) : KAbstractModule() {
   override fun configure() {
     install(WebTabResourceModule(
-      environment = environment,
-      slug = "app",
-      web_proxy_url = "http://localhost:4200/",
-      url_path_prefix = "/app/",
-      resourcePath = "classpath:/web/app/"
+        deployment = deployment,
+        slug = "app",
+        web_proxy_url = "http://localhost:4200/",
+        url_path_prefix = "/app/",
+        resourcePath = "classpath:/web/app/"
     ))
   }
 }

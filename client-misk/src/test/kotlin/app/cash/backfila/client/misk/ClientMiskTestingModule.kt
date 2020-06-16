@@ -4,8 +4,7 @@ import app.cash.backfila.client.misk.client.BackfilaClientConfig
 import app.cash.backfila.client.misk.embedded.EmbeddedBackfilaModule
 import kotlin.reflect.KClass
 import misk.MiskTestingServiceModule
-import misk.environment.Environment
-import misk.environment.EnvironmentModule
+import misk.environment.DeploymentModule
 import misk.hibernate.HibernateEntityModule
 import misk.hibernate.HibernateModule
 import misk.hibernate.HibernateTestingModule
@@ -45,7 +44,7 @@ internal class ClientMiskTestingModule(
     })
     install(HibernateTestingModule(ClientMiskService::class))
 
-    install(EnvironmentModule(Environment.TESTING))
+    install(DeploymentModule.forTesting())
     install(LogCollectorModule())
     install(MiskTestingServiceModule())
     install(EmbeddedBackfilaModule())

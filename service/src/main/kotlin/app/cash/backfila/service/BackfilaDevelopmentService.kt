@@ -5,6 +5,9 @@ import app.cash.backfila.dashboard.ViewLogsUrlProvider
 import misk.MiskApplication
 import misk.MiskCaller
 import misk.MiskRealServiceModule
+import misk.environment.Deployment
+import misk.environment.DeploymentModule
+import misk.environment.Env
 import misk.environment.Environment
 import misk.hibernate.Session
 import misk.inject.KAbstractModule
@@ -20,6 +23,9 @@ import misk.web.WebConfig
 import misk.web.dashboard.AdminDashboardModule
 
 fun main(args: Array<String>) {
+  val env = Env(Environment.rawEnvironment())
+  val deployment = Deployment(name = "backfila", isLocalDevelopment = true)
+
   MiskApplication(
       object : KAbstractModule() {
         override fun configure() {
@@ -35,8 +41,9 @@ fun main(args: Array<String>) {
           bind<ViewLogsUrlProvider>().to<DevelopmentViewLogsUrlProvider>()
         }
       },
+      DeploymentModule(deployment, env),
       BackfilaServiceModule(
-          Environment.DEVELOPMENT,
+          deployment,
           BackfilaConfig(
               backfill_runner_threads = null,
               data_source_clusters = DataSourceClustersConfig(
@@ -54,7 +61,7 @@ fun main(args: Array<String>) {
               slack = null
           )
       ),
-      AdminDashboardModule(Environment.DEVELOPMENT),
+      AdminDashboardModule(true),
       BackfilaDefaultEndpointConfigModule(),
       MiskRealServiceModule()
   ).run(args)
