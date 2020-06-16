@@ -61,7 +61,7 @@ fun main(args: Array<String>) {
               slack = null
           )
       ),
-      AdminDashboardModule(true),
+      AdminDashboardModule(isDevelopment = true),
       BackfilaDefaultEndpointConfigModule(),
       MiskRealServiceModule()
   ).run(args)
