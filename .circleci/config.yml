@@ -113,7 +113,8 @@ workflows:
               only: master
       - java
       - node
-      - docs
+# Disabling this for now since it is breaking due to the python 2 -> 3 migration
+#      - docs
   nightly:
     jobs:
       - java
