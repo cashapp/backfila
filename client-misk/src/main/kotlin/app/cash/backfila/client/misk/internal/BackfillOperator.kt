@@ -11,7 +11,7 @@ import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse.Batch
 import app.cash.backfila.protos.clientservice.KeyRange
 import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
 import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
-import app.cash.backfila.protos.clientservice.PrepareBackfillResponse.Instance
+import app.cash.backfila.protos.clientservice.PrepareBackfillResponse.Partition
 import app.cash.backfila.protos.clientservice.RunBatchRequest
 import app.cash.backfila.protos.clientservice.RunBatchResponse
 import com.google.common.base.Preconditions.checkArgument
@@ -49,8 +49,8 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
   val backfill: Backfill<E, Pkey>,
   factory: Factory
 ) {
-  private val instanceProvider = backfill.instanceProvider()
-  private val boundingRangeStrategy = instanceProvider.boundingRangeStrategy<E, Pkey>()
+  private val partitionProvider = backfill.partitionProvider()
+  private val boundingRangeStrategy = partitionProvider.boundingRangeStrategy<E, Pkey>()
   private var pkeySqlAdapter: PkeySqlAdapter = factory.pkeySqlAdapter
   internal var queryFactory: Query.Factory = factory.queryFactory
 
@@ -85,22 +85,22 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
     backfill.validate(BackfillConfig(request.parameters, request.dry_run))
 
     return PrepareBackfillResponse.Builder()
-        .instances(instanceProvider.names(request).map { instanceForShard(it, request.range) })
+        .partitions(partitionProvider.names(request).map { partitionForShard(it, request.range) })
         .build()
   }
 
-  private fun instanceForShard(
-    instanceName: String,
+  private fun partitionForShard(
+    partitionName: String,
     requestedRange: KeyRange?
-  ): Instance {
+  ): Partition {
     if (requestedRange?.start != null && requestedRange.end != null) {
-      return Instance.Builder()
-          .instance_name(instanceName)
+      return Partition.Builder()
+          .partition_name(partitionName)
           .backfill_range(requestedRange)
           .estimated_record_count(null)
           .build()
     }
-    val keyRange: KeyRange = instanceProvider.transaction(instanceName) { session ->
+    val keyRange: KeyRange = partitionProvider.transaction(partitionName) { session ->
       val minmax = queryFactory.dynamicQuery(backfill.entityClass)
           .dynamicUniqueResult(session) { criteriaBuilder, queryRoot ->
             criteriaBuilder.tuple(
@@ -111,7 +111,7 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
       val min = minmax[0]
       val max = minmax[1]
       if (min == null) {
-        // Empty table, no work to do for this instance.
+        // Empty table, no work to do for this partition.
         KeyRange.Builder().build()
       } else {
         KeyRange.Builder()
@@ -120,8 +120,8 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
             .build()
       }
     }
-    return Instance.Builder()
-        .instance_name(instanceName)
+    return Partition.Builder()
+        .partition_name(partitionName)
         .backfill_range(keyRange)
         .estimated_record_count(null)
         .build()
@@ -132,7 +132,7 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
   ): GetNextBatchRangeResponse {
     checkArgument(request.compute_count_limit > 0, "batch limit must be > 0")
     if (request.backfill_range.start == null) {
-      // This instance never had any data, stop it immediately.
+      // This partition never had any data, stop it immediately.
       return GetNextBatchRangeResponse.Builder()
           .batches(ImmutableList.of<Batch>())
           .build()
@@ -160,7 +160,7 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
   }
 
   private inner class BatchGenerator internal constructor(request: GetNextBatchRangeRequest) {
-    private val instanceName: String = request.instance_name
+    private val partitionName: String = request.partition_name
     private val batchSize: Long = request.batch_size
     private val scanSize: Long = request.scan_size
     private val backfillRange: KeyRange = request.backfill_range
@@ -188,7 +188,7 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
       if (boundingMax == null) {
         val stopwatch = Stopwatch.createStarted()
         boundingMax = boundingRangeStrategy
-            .computeBoundingRangeMax(backfill, instanceName, previousEndKey, backfillRange, scanSize)
+            .computeBoundingRangeMax(backfill, partitionName, previousEndKey, backfillRange, scanSize)
         if (boundingMax == null) {
           logger.info("Bounding range returned no records, done computing batches")
           return null
@@ -200,7 +200,7 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
       class TxResult(val end: Pkey, val batch: Batch)
 
       val pkeyProperty = backfill.primaryKeyHibernateName()
-      val txResult = instanceProvider.transaction(instanceName) { session ->
+      val txResult = partitionProvider.transaction(partitionName) { session ->
         val batchEndPkey: Pkey?
         if (precomputing) {
           // No need to find correct-sized batches, just quickly compute a count.
@@ -278,7 +278,7 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
     val config = BackfillConfig(request.parameters,
         request.dry_run)
 
-    val pkeys = instanceProvider.transaction(request.instance_name) { session ->
+    val pkeys = partitionProvider.transaction(request.partition_name) { session ->
       val minId = Id<E>(request.batch_range.start.utf8().toLong())
       val maxId = Id<E>(request.batch_range.end.utf8().toLong())
       val pkeyProperty = backfill.primaryKeyHibernateName()

@@ -21,26 +21,26 @@ class LeaseHunter @Inject constructor(
     // Hibernate prevents write races using the version column, ensuring only one transaction
     // will win the lease.
     return transacter.transaction { session ->
-      val unleasedInstances = queryFactory.newQuery<RunInstanceQuery>()
+      val unleasedPartitions = queryFactory.newQuery<RunPartitionQuery>()
           .runState(BackfillState.RUNNING)
           .leaseExpiresAtBefore(clock.instant())
           .list(session)
 
-      if (unleasedInstances.isEmpty()) {
+      if (unleasedPartitions.isEmpty()) {
         return@transaction setOf()
       }
 
       // Pick one randomly to run, another host will be less likely to pick the same one.
-      val instance = unleasedInstances.random()
+      val partition = unleasedPartitions.random()
       val leaseToken = tokenGenerator.generate()
-      instance.lease_token = leaseToken
-      instance.lease_expires_at = clock.instant() + LEASE_DURATION
+      partition.lease_token = leaseToken
+      partition.lease_expires_at = clock.instant() + LEASE_DURATION
 
       // Only get one lease at a time to promote distribution of work and to ramp up
       // the backfill slowly.
       setOf(backfillRunnerFactory.create(
           session,
-          instance,
+          partition,
           leaseToken
       ))
     }

@@ -1,10 +1,6 @@
 package app.cash.backfila.service
 
 import app.cash.backfila.protos.clientservice.KeyRange
-import misk.hibernate.DbTimestampedEntity
-import misk.hibernate.DbUnsharded
-import misk.hibernate.Id
-import okio.ByteString
 import java.time.Instant
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -16,18 +12,22 @@ import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
 import javax.persistence.Table
 import javax.persistence.Version
+import misk.hibernate.DbTimestampedEntity
+import misk.hibernate.DbUnsharded
+import misk.hibernate.Id
+import okio.ByteString
 
 /**
- * Backfill runs can have many instances, e.g. one per database shard.
- * Each instance tracks cursors individually. They are also leased individually.
- * All instances of a run have the same running or paused state.
+ * Backfill runs can have many partitions, e.g. one per database shard.
+ * Each partition tracks cursors individually. They are also leased individually.
+ * All partitions of a run have the same running or paused state.
  */
 @Entity
-@Table(name = "run_instances")
-class DbRunInstance() : DbUnsharded<DbRunInstance>, DbTimestampedEntity {
+@Table(name = "run_partitions")
+class DbRunPartition() : DbUnsharded<DbRunPartition>, DbTimestampedEntity {
   @javax.persistence.Id
   @GeneratedValue
-  override lateinit var id: Id<DbRunInstance>
+  override lateinit var id: Id<DbRunPartition>
 
   @Column(nullable = false)
   lateinit var backfill_run_id: Id<DbBackfillRun>
@@ -37,7 +37,7 @@ class DbRunInstance() : DbUnsharded<DbRunInstance>, DbTimestampedEntity {
   lateinit var backfill_run: DbBackfillRun
 
   @Column(nullable = false)
-  lateinit var instance_name: String
+  lateinit var partition_name: String
 
   @Column
   override lateinit var created_at: Instant
@@ -118,13 +118,13 @@ class DbRunInstance() : DbUnsharded<DbRunInstance>, DbTimestampedEntity {
 
   constructor(
     backfill_run_id: Id<DbBackfillRun>,
-    instance_name: String,
+    partition_name: String,
     backfill_range: KeyRange,
     run_state: BackfillState,
     estimated_record_count: Long?
   ) : this() {
     this.backfill_run_id = backfill_run_id
-    this.instance_name = instance_name
+    this.partition_name = partition_name
     this.pkey_range_start = backfill_range.start
     this.pkey_range_end = backfill_range.end
     this.run_state = run_state

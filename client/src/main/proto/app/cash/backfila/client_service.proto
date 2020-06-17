@@ -30,8 +30,8 @@ message PrepareBackfillRequest {
   optional bool dry_run = 5;
 }
 message PrepareBackfillResponse {
-  message Instance {
-    optional string instance_name = 1;
+  message Partition {
+    optional string partition_name = 1;
     optional KeyRange backfill_range = 2;
 
     // If available, an estimate can be provided here to display while the
@@ -39,7 +39,7 @@ message PrepareBackfillResponse {
     optional uint64 estimated_record_count = 3;
   }
 
-  repeated Instance instances = 1;
+  repeated Partition partitions = 1;
 
   // Parameters created by the client to keep for the life of the backfill.
   // Every backfill call will pass these parameters back, in addition to user provided parameters.
@@ -51,7 +51,7 @@ message GetNextBatchRangeRequest {
   // Can be used as a caching key since backfill metadata is immutable after creation.
   optional string backfill_id = 1;
   optional string backfill_name = 2;
-  optional string instance_name = 3;
+  optional string partition_name = 3;
   // Max number of matching records to return in a batch range.
   optional uint64 batch_size = 4;
   // Max number of records to scan when computing a batch range.
@@ -89,7 +89,7 @@ message RunBatchRequest {
   // Can be used as a caching key since backfill metadata is immutable after creation.
   optional string backfill_id = 1;
   optional string backfill_name = 2;
-  optional string instance_name = 3;
+  optional string partition_name = 3;
   optional KeyRange batch_range = 4;
 
   // User provided parameters at creation.

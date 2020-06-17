@@ -17,28 +17,28 @@ import misk.hibernate.transaction
 /**
  * Provides connectivity to a singleton database or a set of database shards.
  */
-interface InstanceProvider {
+interface PartitionProvider {
   /**
    * Names the databases that will be connected with [transaction]. In a Vitess environment these
    * are the shard names.
    */
   fun names(request: PrepareBackfillRequest): List<String>
 
-  fun <T> transaction(instanceName: String, task: (Session) -> T): T
+  fun <T> transaction(partitionName: String, task: (Session) -> T): T
 
   fun <E : DbEntity<E>, Pkey : Any> boundingRangeStrategy(): BoundingRangeStrategy<E, Pkey>
 }
 
 /**
- * A simple unsharded instance provider that uses a single Backfila instance. If you
- * are using a Vitess datasource you should almost certainly be using one of the Vitess instance
- * providers. [VitessShardedInstanceProvider] [VitessSingleCursorInstanceProvider]
+ * A simple unsharded partition provider that uses a single Backfila partition. If you
+ * are using a Vitess datasource you should almost certainly be using one of the Vitess partition
+ * providers. [VitessShardedPartitionProvider] [VitessSingleCursorPartitionProvider]
  */
-class UnshardedInstanceProvider(val transacter: Transacter) : InstanceProvider {
+class UnshardedPartitionProvider(val transacter: Transacter) : PartitionProvider {
 
   override fun names(request: PrepareBackfillRequest) = listOf("only")
 
-  override fun <T> transaction(instanceName: String, task: (Session) -> T) =
+  override fun <T> transaction(partitionName: String, task: (Session) -> T) =
       transacter.transaction(task)
 
   override fun <E : DbEntity<E>, Pkey : Any> boundingRangeStrategy(): BoundingRangeStrategy<E, Pkey> {
@@ -47,22 +47,22 @@ class UnshardedInstanceProvider(val transacter: Transacter) : InstanceProvider {
 }
 
 /**
- * A sharded instance provider that creates a backfila instance per Vitess shard. Since a cursor is
+ * A sharded partition provider that creates a backfila partition per Vitess shard. Since a cursor is
  * maintained for each shard separately, if entities are moved between shards it's possible they
  * will be missed by the backfill. Also at minimum one thread is used per shard since each shard
- * is its own instance. If your entities can move, or if you need to run this backfill slower
- * than one thread per shard, consider using [VitessSingleCursorInstanceProvider] instead.
+ * is its own partition. If your entities can move, or if you need to run this backfill slower
+ * than one thread per shard, consider using [VitessSingleCursorPartitionProvider] instead.
  */
-class VitessShardedInstanceProvider<E : DbEntity<E>, Pkey : Any>(
+class VitessShardedPartitionProvider<E : DbEntity<E>, Pkey : Any>(
   val transacter: Transacter,
   val backfill: Backfill<E, Pkey>
-) : InstanceProvider {
+) : PartitionProvider {
   private val keyspace = Keyspace(backfill.entityClass.java.getAnnotation(Table::class.java).schema)
 
   override fun names(request: PrepareBackfillRequest) = shards().map { it.name }
 
-  override fun <T> transaction(instanceName: String, task: (Session) -> T) =
-      transacter.transaction(Shard(keyspace, instanceName), task)
+  override fun <T> transaction(partitionName: String, task: (Session) -> T) =
+      transacter.transaction(Shard(keyspace, partitionName), task)
 
   override fun <E : DbEntity<E>, Pkey : Any> boundingRangeStrategy(): BoundingRangeStrategy<E, Pkey> {
     return VitessShardedBoundingRangeStrategy(this)
@@ -72,26 +72,26 @@ class VitessShardedInstanceProvider<E : DbEntity<E>, Pkey : Any>(
 }
 
 /**
- * A instance provider that iterates over sharded vitess using a single cursor. This can only be
+ * A partition provider that iterates over sharded vitess using a single cursor. This can only be
  * used if pkeys are unique across all shards, e.g. using a vitess sequence.
  *
- * Prefer [VitessShardedInstanceProvider]
+ * Prefer [VitessShardedPartitionProvider]
  *
- * The benefits of this vs [VitessShardedInstanceProvider] is that if entities move from one
+ * The benefits of this vs [VitessShardedPartitionProvider] is that if entities move from one
  * customer to another, they will not be missed because one shard's cursor cannot get ahead of
  * another's. It is also indifferent to shard splits and can run slower than one thread per shard.
  * The disadvantage is less efficient concurrency, since batches are computed by scanning all shards
  * each time, rather than splitting the work by shard.
  */
-class VitessSingleCursorInstanceProvider<E : DbEntity<E>, Pkey : Any>(
+class VitessSingleCursorPartitionProvider<E : DbEntity<E>, Pkey : Any>(
   val transacter: Transacter,
   val backfill: Backfill<E, Pkey>
-) : InstanceProvider {
+) : PartitionProvider {
   private val keyspace = Keyspace(backfill.entityClass.java.getAnnotation(Table::class.java).schema)
 
   override fun names(request: PrepareBackfillRequest) = listOf("only")
 
-  override fun <T> transaction(instanceName: String, task: (Session) -> T) =
+  override fun <T> transaction(partitionName: String, task: (Session) -> T) =
       transacter.transaction(task)
 
   override fun <E : DbEntity<E>, Pkey : Any> boundingRangeStrategy(): BoundingRangeStrategy<E, Pkey> {

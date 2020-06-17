@@ -35,7 +35,7 @@ class BatchAwaiter(
         break
       } catch (e: ClosedReceiveChannelException) {
         logger.info { "No more batches to await, completed ${backfillRunner.logLabel()}" }
-        completeInstance()
+        completePartition()
         break
       }
 
@@ -65,12 +65,12 @@ class BatchAwaiter(
           // Track our progress in DB for when another runner takes over.
           // TODO update this less often, probably in the lease updater task
           backfillRunner.factory.transacter.transaction { session ->
-            val dbRunInstance = session.load(backfillRunner.instanceId)
-            dbRunInstance.pkey_cursor = batch.batch_range.end
-            dbRunInstance.backfilled_scanned_record_count += batch.scanned_record_count
-            dbRunInstance.backfilled_matching_record_count += batch.matching_record_count
-            dbRunInstance.scanned_records_per_minute = scannedRateCounter.projectedRate()
-            dbRunInstance.matching_records_per_minute = matchingRateCounter.projectedRate()
+            val dbRunPartition = session.load(backfillRunner.partitionId)
+            dbRunPartition.pkey_cursor = batch.batch_range.end
+            dbRunPartition.backfilled_scanned_record_count += batch.scanned_record_count
+            dbRunPartition.backfilled_matching_record_count += batch.matching_record_count
+            dbRunPartition.scanned_records_per_minute = scannedRateCounter.projectedRate()
+            dbRunPartition.matching_records_per_minute = matchingRateCounter.projectedRate()
           }
           break@retry
         } catch (e: CancellationException) {
@@ -104,18 +104,18 @@ class BatchAwaiter(
     }
   }
 
-  fun completeInstance() {
+  fun completePartition() {
     val runComplete = backfillRunner.factory.transacter.transaction { session ->
-      val dbRunInstance = session.load(backfillRunner.instanceId)
-      dbRunInstance.run_state = BackfillState.COMPLETE
+      val dbRunPartition = session.load(backfillRunner.partitionId)
+      dbRunPartition.run_state = BackfillState.COMPLETE
 
       // If all states are COMPLETE the whole backfill will be completed.
-      // If multiple instances finish at the same time they will retry due to the hibernate
+      // If multiple partitions finish at the same time they will retry due to the hibernate
       // version mismatch on the DbBackfillRun.
-      val instances = dbRunInstance.backfill_run.instances(session,
+      val partitions = dbRunPartition.backfill_run.partitions(session,
           backfillRunner.factory.queryFactory)
-      if (instances.all { it.run_state == BackfillState.COMPLETE }) {
-        dbRunInstance.backfill_run.complete()
+      if (partitions.all { it.run_state == BackfillState.COMPLETE }) {
+        dbRunPartition.backfill_run.complete()
         logger.info { "Backfill ${backfillRunner.backfillName} completed" }
         // TODO audit log
         return@transaction true

@@ -11,7 +11,7 @@ import misk.hibernate.Id
 
 // TODO(mikepaw) Not sure we even want this anymore. Maybe I'll replace this with an injector test of some kind?
 class DummyBackfill : Backfill<DbMenu, Id<DbMenu>>() {
-  override fun instanceProvider() = TODO()
+  override fun partitionProvider() = TODO()
 
   override fun backfillCriteria(config: BackfillConfig) = TODO()
 }

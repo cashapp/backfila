@@ -52,7 +52,7 @@ class BatchQueuer(
         val response = backfillRunner.client.getNextBatchRange(GetNextBatchRangeRequest(
             metadata.backfillRunId.toString(),
             backfillRunner.backfillName,
-            backfillRunner.instanceName,
+            backfillRunner.partitionName,
             metadata.batchSize,
             metadata.scanSize,
             pkeyCursor,

@@ -7,11 +7,11 @@ import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
 import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
 import app.cash.backfila.protos.clientservice.RunBatchRequest
 import app.cash.backfila.protos.clientservice.RunBatchResponse
-import kotlinx.coroutines.channels.Channel
-import okio.ByteString.Companion.encodeUtf8
 import java.util.LinkedList
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.channels.Channel
+import okio.ByteString.Companion.encodeUtf8
 
 @Singleton
 class FakeBackfilaClientServiceClient @Inject constructor() : BackfilaClientServiceClient {
@@ -38,14 +38,14 @@ class FakeBackfilaClientServiceClient @Inject constructor() : BackfilaClientServ
       return prepareBackfillResponses.removeFirst()
     }
     return PrepareBackfillResponse.Builder()
-        .instances(
+        .partitions(
             listOf(
-                PrepareBackfillResponse.Instance(
+                PrepareBackfillResponse.Partition(
                     "-80",
                     KeyRange("0".encodeUtf8(), "1000".encodeUtf8()),
                     1_000_000L
                 ),
-                PrepareBackfillResponse.Instance(
+                PrepareBackfillResponse.Partition(
                     "80-",
                     KeyRange("0".encodeUtf8(), "1000".encodeUtf8()),
                     null

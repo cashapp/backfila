@@ -1,7 +1,7 @@
 package app.cash.backfila.client.misk.internal
 
 import app.cash.backfila.client.misk.Backfill
-import app.cash.backfila.client.misk.InstanceProvider
+import app.cash.backfila.client.misk.PartitionProvider
 import app.cash.backfila.protos.clientservice.KeyRange
 import com.google.common.collect.Ordering
 import javax.persistence.Table
@@ -22,7 +22,7 @@ interface BoundingRangeStrategy<E : DbEntity<E>, Pkey : Any> {
    */
   fun computeBoundingRangeMax(
     backfill: Backfill<E, Pkey>,
-    instanceName: String,
+    partitionName: String,
     previousEndKey: ByteString?,
     backfillRange: KeyRange,
     scanSize: Long?
@@ -30,32 +30,32 @@ interface BoundingRangeStrategy<E : DbEntity<E>, Pkey : Any> {
 }
 
 class UnshardedHibernateBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any> (
-  val instanceProvider: InstanceProvider
+  val partitionProvider: PartitionProvider
 ) : BoundingRangeStrategy<E, Pkey> {
   override fun computeBoundingRangeMax(
     backfill: Backfill<E, Pkey>,
-    instanceName: String,
+    partitionName: String,
     previousEndKey: ByteString?,
     backfillRange: KeyRange,
     scanSize: Long?
   ): Pkey? {
-    return instanceProvider.transaction(instanceName) { session ->
+    return partitionProvider.transaction(partitionName) { session ->
       selectMaxBound(backfill, session, schemaAndTable(backfill), previousEndKey, backfillRange, scanSize)
     }
   }
 }
 
 class VitessShardedBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any> (
-  val instanceProvider: InstanceProvider
+  val partitionProvider: PartitionProvider
 ) : BoundingRangeStrategy<E, Pkey> {
   override fun computeBoundingRangeMax(
     backfill: Backfill<E, Pkey>,
-    instanceName: String,
+    partitionName: String,
     previousEndKey: ByteString?,
     backfillRange: KeyRange,
     scanSize: Long?
   ): Pkey? {
-    return instanceProvider.transaction(instanceName) { session ->
+    return partitionProvider.transaction(partitionName) { session ->
       // We don't provide a schema when pinned to a shard.
       selectMaxBound(backfill, session, onlyTable(backfill), previousEndKey, backfillRange, scanSize)
     }
@@ -80,7 +80,7 @@ class VitessSingleCursorBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any> (
    */
   override fun computeBoundingRangeMax(
     backfill: Backfill<E, Pkey>,
-    instanceName: String,
+    partitionName: String,
     previousEndKey: ByteString?,
     backfillRange: KeyRange,
     scanSize: Long?

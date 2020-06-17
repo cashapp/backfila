@@ -2,13 +2,13 @@ package app.cash.backfila.client.misk.embedded
 
 import app.cash.backfila.client.misk.Backfill
 import app.cash.backfila.client.misk.internal.BatchSnapshot
-import app.cash.backfila.client.misk.internal.InstanceCursor
+import app.cash.backfila.client.misk.internal.PartitionCursor
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
 import okio.ByteString
 
 /**
- * Get an instance if this from [Backfila].
+ * Get an instance of this from [Backfila].
  */
 interface BackfillRun<B : Backfill<*, *>> {
   val backfill: B
@@ -26,7 +26,7 @@ interface BackfillRun<B : Backfill<*, *>> {
   val precomputeMatchingCount: Long
   val precomputeScannedCount: Long
 
-  val instanceProgressSnapshot: Map<String, InstanceCursor>
+  val partitionProgressSnapshot: Map<String, PartitionCursor>
 
   val batchesToRunSnapshot: List<BatchSnapshot>
 
@@ -44,10 +44,10 @@ interface BackfillRun<B : Backfill<*, *>> {
 
   fun finishedPrecomputing(): Boolean
 
-  /** Does a single scan for batches on the instance provided. */
-  fun instanceScan(instanceName: String): GetNextBatchRangeResponse
+  /** Does a single scan for batches on the partition provided. */
+  fun partitionScan(partitionName: String): GetNextBatchRangeResponse
 
-  /** Does a single scan for batches on any instance. */
+  /** Does a single scan for batches on any partition. */
   fun singleScan(): GetNextBatchRangeResponse
 
   /** Scans all the remaining batches and places them in the queue to run. */

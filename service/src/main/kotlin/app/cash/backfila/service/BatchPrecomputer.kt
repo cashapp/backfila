@@ -40,7 +40,7 @@ class BatchPrecomputer(
         val response = backfillRunner.client.getNextBatchRange(GetNextBatchRangeRequest(
             metadata.backfillRunId.toString(),
             backfillRunner.backfillName,
-            backfillRunner.instanceName,
+            backfillRunner.partitionName,
             metadata.batchSize,
             metadata.scanSize,
             pkeyCursor,
@@ -56,21 +56,21 @@ class BatchPrecomputer(
 
         if (response.batches.isEmpty()) {
           backfillRunner.factory.transacter.transaction { session ->
-            val dbRunInstance = session.load(backfillRunner.instanceId)
-            dbRunInstance.precomputing_done = true
+            val dbRunPartition = session.load(backfillRunner.partitionId)
+            dbRunPartition.precomputing_done = true
           }
           logger.info { "Precomputing completed for ${backfillRunner.logLabel()}" }
           break
         }
 
         backfillRunner.factory.transacter.transaction { session ->
-          val dbRunInstance = session.load(backfillRunner.instanceId)
+          val dbRunPartition = session.load(backfillRunner.partitionId)
           for (batch in response.batches) {
             pkeyCursor = batch.batch_range.end
-            dbRunInstance.computed_scanned_record_count += batch.scanned_record_count
-            dbRunInstance.computed_matching_record_count += batch.matching_record_count
+            dbRunPartition.computed_scanned_record_count += batch.scanned_record_count
+            dbRunPartition.computed_matching_record_count += batch.matching_record_count
           }
-          dbRunInstance.precomputing_pkey_cursor = pkeyCursor
+          dbRunPartition.precomputing_pkey_cursor = pkeyCursor
           logger.debug { "Precomputer advanced to $pkeyCursor after scanning ${response.batches}" }
         }
       } catch (e: CancellationException) {

@@ -110,17 +110,17 @@ class BackfillStatusContainer extends React.Component<
       )
     } else {
       let status = this.status
-      let all_precomputing_done = status.instances.every(
-        (instance: any) => instance.precomputing_done
+      let all_precomputing_done = status.partitions.every(
+        (partition: any) => partition.precomputing_done
       )
-      let total_backfilled_matching_record_count = status.instances.reduce(
-        (sum: number, instance: any) =>
-          sum + instance.backfilled_matching_record_count,
+      let total_backfilled_matching_record_count = status.partitions.reduce(
+        (sum: number, partition: any) =>
+          sum + partition.backfilled_matching_record_count,
         0
       )
-      let total_computed_matching_record_count = status.instances.reduce(
-        (sum: number, instance: any) =>
-          sum + instance.computed_matching_record_count,
+      let total_computed_matching_record_count = status.partitions.reduce(
+        (sum: number, partition: any) =>
+          sum + partition.computed_matching_record_count,
         0
       )
       return (
@@ -153,7 +153,7 @@ class BackfillStatusContainer extends React.Component<
                   <td>{status.dry_run ? "dry run" : "wet run"}</td>
                 </tr>
                 <tr>
-                  <td>Threads per instance</td>
+                  <td>Threads per partitions</td>
                   <td>
                     <EditableField
                       id={this.id}
@@ -295,7 +295,7 @@ class BackfillStatusContainer extends React.Component<
               state={status.state}
             />
           </div>
-          <H3>Instances</H3>
+          <H3>Partitions</H3>
           <HTMLTable bordered={true} striped={true}>
             <thead>
               <tr>
@@ -312,62 +312,62 @@ class BackfillStatusContainer extends React.Component<
               </tr>
             </thead>
             <tbody>
-              {status.instances.map((instance: any) => (
+              {status.partitions.map((partition: any) => (
                 <tr>
-                  <td>{instance.name}</td>
-                  <td>{instance.state}</td>
-                  <td>{instance.pkey_cursor}</td>
+                  <td>{partition.name}</td>
+                  <td>{partition.state}</td>
+                  <td>{partition.pkey_cursor}</td>
                   <td>
-                    {instance.pkey_start}&nbsp;to&nbsp;{instance.pkey_end}
+                    {partition.pkey_start}&nbsp;to&nbsp;{partition.pkey_end}
                   </td>
                   <td style={{ textAlign: "right" }}>
-                    {instance.backfilled_matching_record_count}
+                    {partition.backfilled_matching_record_count}
                   </td>
                   <td style={{ textAlign: "right" }}>
                     <ComputedCount
-                      precomputing_done={instance.precomputing_done}
+                      precomputing_done={partition.precomputing_done}
                       computed_matching_record_count={
-                        instance.computed_matching_record_count
+                        partition.computed_matching_record_count
                       }
                     />
                   </td>
                   <td style={{ textAlign: "right" }}>
-                    {instance.precomputing_done &&
-                    instance.computed_matching_record_count > 0
+                    {partition.precomputing_done &&
+                    partition.computed_matching_record_count > 0
                       ? (
-                          (100 * instance.backfilled_matching_record_count) /
-                          instance.computed_matching_record_count
+                          (100 * partition.backfilled_matching_record_count) /
+                          partition.computed_matching_record_count
                         ).toFixed(2) + " %"
                       : "? %"}
                   </td>
                   <td style={{ verticalAlign: "middle", width: "300px" }}>
                     <BackfillProgressBar
-                      precomputing_done={instance.precomputing_done}
+                      precomputing_done={partition.precomputing_done}
                       backfilled_matching_record_count={
-                        instance.backfilled_matching_record_count
+                        partition.backfilled_matching_record_count
                       }
                       computed_matching_record_count={
-                        instance.computed_matching_record_count
+                        partition.computed_matching_record_count
                       }
-                      state={instance.state}
+                      state={partition.state}
                     />
                   </td>
                   <td>
-                    {instance.matching_records_per_minute && (
-                      <span>{instance.matching_records_per_minute} #/m</span>
+                    {partition.matching_records_per_minute && (
+                      <span>{partition.matching_records_per_minute} #/m</span>
                     )}
                   </td>
                   <td>
-                    {instance.precomputing_done &&
-                      instance.computed_matching_record_count > 0 &&
-                      instance.state != "COMPLETE" &&
-                      instance.matching_records_per_minute &&
-                      instance.matching_records_per_minute > 0 && (
+                    {partition.precomputing_done &&
+                      partition.computed_matching_record_count > 0 &&
+                      partition.state != "COMPLETE" &&
+                      partition.matching_records_per_minute &&
+                      partition.matching_records_per_minute > 0 && (
                         <span>
                           {prettyEta(
-                            (instance.computed_matching_record_count -
-                              instance.backfilled_matching_record_count) /
-                              (instance.matching_records_per_minute / 60)
+                            (partition.computed_matching_record_count -
+                              partition.backfilled_matching_record_count) /
+                              (partition.matching_records_per_minute / 60)
                           )}{" "}
                         </span>
                       )}
