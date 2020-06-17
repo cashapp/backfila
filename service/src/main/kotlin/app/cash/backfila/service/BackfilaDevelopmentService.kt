@@ -9,6 +9,7 @@ import misk.environment.Deployment
 import misk.environment.DeploymentModule
 import misk.environment.Env
 import misk.environment.Environment
+import misk.environment.EnvironmentModule
 import misk.hibernate.Session
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceClusterConfig
@@ -23,7 +24,8 @@ import misk.web.WebConfig
 import misk.web.dashboard.AdminDashboardModule
 
 fun main(args: Array<String>) {
-  val env = Env(Environment.rawEnvironment())
+  val environment = Environment.DEVELOPMENT
+  val env = Env(environment.toString())
   val deployment = Deployment(name = "backfila", isLocalDevelopment = true)
 
   MiskApplication(
@@ -41,6 +43,7 @@ fun main(args: Array<String>) {
           bind<ViewLogsUrlProvider>().to<DevelopmentViewLogsUrlProvider>()
         }
       },
+      EnvironmentModule(environment = environment),
       DeploymentModule(deployment, env),
       BackfilaServiceModule(
           deployment,
