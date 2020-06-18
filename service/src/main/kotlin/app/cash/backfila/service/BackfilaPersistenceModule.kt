@@ -13,7 +13,7 @@ class BackfilaPersistenceModule(private val config: BackfilaConfig) : KAbstractM
         addEntities(DbService::class)
         addEntities(DbRegisteredBackfill::class)
         addEntities(DbBackfillRun::class)
-        addEntities(DbRunInstance::class)
+        addEntities(DbRunPartition::class)
       }
     })
   }

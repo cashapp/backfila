@@ -97,7 +97,7 @@ class RunnerSchedulerService @Inject constructor(
         }
       }
     } catch (e: RejectedExecutionException) {
-      logger.info { "Rejected execution of runner for instance ${runner.instanceId}" }
+      logger.info { "Rejected execution of runner for partition ${runner.partitionId}" }
       runner.clearLease()
       runners.remove(runner)
     }

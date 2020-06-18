@@ -7,10 +7,11 @@ import app.cash.backfila.service.BackfilaDb
 import app.cash.backfila.service.BackfillState
 import app.cash.backfila.service.DbBackfillRun
 import app.cash.backfila.service.DbRegisteredBackfill
-import app.cash.backfila.service.DbRunInstance
+import app.cash.backfila.service.DbRunPartition
 import app.cash.backfila.service.DbService
 import app.cash.backfila.service.RegisteredBackfillQuery
 import app.cash.backfila.service.ServiceQuery
+import javax.inject.Inject
 import misk.MiskCaller
 import misk.exceptions.BadRequestException
 import misk.hibernate.Id
@@ -29,7 +30,6 @@ import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
-import javax.inject.Inject
 
 data class CreateBackfillRequest(
   val backfill_name: String,
@@ -133,16 +133,16 @@ class CreateBackfillAction @Inject constructor(
       logger.info(e) { "PrepareBackfill on `$service` failed" }
       throw BadRequestException("PrepareBackfill on `$service` failed: " + e.message, e)
     }
-    val instances = prepareBackfillResponse.instances
-    if (instances.isEmpty()) {
-      throw BadRequestException("PrepareBackfill returned no instances")
+    val partitions = prepareBackfillResponse.partitions
+    if (partitions.isEmpty()) {
+      throw BadRequestException("PrepareBackfill returned no partitions")
     }
-    if (instances.any { it.instance_name == null }) {
-      throw BadRequestException("PrepareBackfill returned unnamed instances")
+    if (partitions.any { it.partition_name == null }) {
+      throw BadRequestException("PrepareBackfill returned unnamed partitions")
     }
-    if (instances.distinctBy { it.instance_name }.size != instances.size) {
-      throw BadRequestException("PrepareBackfill did not return distinct instance names:" +
-          " ${instances.map { it.instance_name }}")
+    if (partitions.distinctBy { it.partition_name }.size != partitions.size) {
+      throw BadRequestException("PrepareBackfill did not return distinct partition names:" +
+          " ${partitions.map { it.partition_name }}")
     }
 
     val combinedParams = request.parameter_map.plus(prepareBackfillResponse.parameters)
@@ -163,15 +163,15 @@ class CreateBackfillAction @Inject constructor(
       )
       session.save(backfillRun)
 
-      for (instance in instances) {
-        val dbRunInstance = DbRunInstance(
+      for (partition in partitions) {
+        val dbRunPartition = DbRunPartition(
             backfillRun.id,
-            instance.instance_name,
-            instance.backfill_range ?: KeyRange.Builder().build(),
+            partition.partition_name,
+            partition.backfill_range ?: KeyRange.Builder().build(),
             backfillRun.state,
-            instance.estimated_record_count
+            partition.estimated_record_count
         )
-        session.save(dbRunInstance)
+        session.save(dbRunPartition)
       }
 
       backfillRun.id

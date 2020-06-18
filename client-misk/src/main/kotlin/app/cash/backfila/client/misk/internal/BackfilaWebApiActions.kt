@@ -44,7 +44,7 @@ internal class GetNextBatchRangeAction @Inject constructor(
   @Authenticated(services = ["backfila"])
   fun getNextBatchRange(@RequestBody request: GetNextBatchRangeRequest): GetNextBatchRangeResponse {
     logger.info {
-      "Computing batch for backfill `${request.backfill_name}::${request.instance_name}" +
+      "Computing batch for backfill `${request.backfill_name}::${request.partition_name}" +
           "::${request.backfill_id}`. Previous end: `${request.previous_end_key}`"
     }
 
@@ -54,7 +54,7 @@ internal class GetNextBatchRangeAction @Inject constructor(
         .also {
           logger.info {
             "Next batches computed for backfill " +
-                "`${request.backfill_name}::${request.instance_name}::${request.backfill_id}`. " +
+                "`${request.backfill_name}::${request.partition_name}::${request.backfill_id}`. " +
                 "${it.batches}"
           }
         }
@@ -75,7 +75,7 @@ internal class RunBatchAction @Inject constructor(
   fun runBatch(@RequestBody request: RunBatchRequest): RunBatchResponse {
     logger.info {
       "Running backfila batch " +
-          "`${request.backfill_name}::${request.instance_name}::${request.backfill_id}`: " +
+          "`${request.backfill_name}::${request.partition_name}::${request.backfill_id}`: " +
           "[${request.batch_range.start.utf8()}, ${request.batch_range.end.utf8()}]"
     }
 

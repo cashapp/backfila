@@ -3,7 +3,7 @@ package app.cash.backfila.dashboard
 import app.cash.backfila.service.BackfilaDb
 import app.cash.backfila.service.BackfillState
 import app.cash.backfila.service.DbBackfillRun
-import app.cash.backfila.service.DbRunInstance
+import app.cash.backfila.service.DbRunPartition
 import java.time.Instant
 import javax.inject.Inject
 import misk.exceptions.BadRequestException
@@ -19,7 +19,7 @@ import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 
-data class UiInstance(
+data class UiPartition(
   val id: Long,
   val name: String,
   val state: BackfillState,
@@ -49,7 +49,7 @@ data class GetBackfillStatusResponse(
   val created_by_user: String?,
   val extra_sleep_ms: Long,
   val backoff_schedule: String?,
-  val instances: List<UiInstance>
+  val partitions: List<UiPartition>
 )
 
 class GetBackfillStatusAction @Inject constructor(
@@ -80,26 +80,26 @@ class GetBackfillStatusAction @Inject constructor(
           run.created_by_user,
           run.extra_sleep_ms,
           run.backoff_schedule,
-          run.instances(session, queryFactory).map { dbToUi(it) }
+          run.partitions(session, queryFactory).map { dbToUi(it) }
       )
     }
   }
 
-  private fun dbToUi(instance: DbRunInstance) =
-    UiInstance(
-        instance.id.id,
-        instance.instance_name,
-        instance.run_state,
-        instance.pkey_cursor?.utf8(),
-        instance.pkey_range_start?.utf8(),
-        instance.pkey_range_end?.utf8(),
-        instance.precomputing_done,
-        instance.precomputing_pkey_cursor?.utf8(),
-        instance.computed_scanned_record_count,
-        instance.computed_matching_record_count,
-        instance.backfilled_scanned_record_count,
-        instance.backfilled_matching_record_count,
-        instance.scanned_records_per_minute,
-        instance.matching_records_per_minute
+  private fun dbToUi(partition: DbRunPartition) =
+    UiPartition(
+        partition.id.id,
+        partition.partition_name,
+        partition.run_state,
+        partition.pkey_cursor?.utf8(),
+        partition.pkey_range_start?.utf8(),
+        partition.pkey_range_end?.utf8(),
+        partition.precomputing_done,
+        partition.precomputing_pkey_cursor?.utf8(),
+        partition.computed_scanned_record_count,
+        partition.computed_matching_record_count,
+        partition.backfilled_scanned_record_count,
+        partition.backfilled_matching_record_count,
+        partition.scanned_records_per_minute,
+        partition.matching_records_per_minute
     )
 }

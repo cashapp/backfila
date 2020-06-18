@@ -80,7 +80,7 @@ class LeaseHunterTest {
     assertThat(runners2).hasSize(1)
     val runner2 = runners2.single()
 
-    assertThat(runner.instanceId).isNotEqualTo(runner2.instanceId)
+    assertThat(runner.partitionId).isNotEqualTo(runner2.partitionId)
   }
 
   @Test
@@ -107,7 +107,7 @@ class LeaseHunterTest {
     val runners2 = leaseHunter.hunt()
     assertThat(runners2).hasSize(1)
 
-    assertThat(runners.single().instanceId).isNotEqualTo(runners2.single().instanceId)
+    assertThat(runners.single().partitionId).isNotEqualTo(runners2.single().partitionId)
     assertThat(leaseHunter.hunt()).isEmpty()
 
     // Advance past the lease expiry.

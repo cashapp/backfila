@@ -5,7 +5,7 @@ import app.cash.backfila.client.misk.BackfillConfig
 import app.cash.backfila.client.misk.ClientMiskService
 import app.cash.backfila.client.misk.DbMenu
 import app.cash.backfila.client.misk.MenuQuery
-import app.cash.backfila.client.misk.UnshardedInstanceProvider
+import app.cash.backfila.client.misk.UnshardedPartitionProvider
 import app.cash.backfila.client.misk.embedded.Backfila
 import app.cash.backfila.client.misk.embedded.BackfillRun
 import app.cash.backfila.client.misk.embedded.createDryRun
@@ -20,7 +20,7 @@ import okhttp3.internal.toImmutableList
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-abstract class SingleInstanceHibernateBackfillTest {
+abstract class SinglePartitionHibernateBackfillTest {
   @Inject @ClientMiskService lateinit var transacter: Transacter
   @Inject lateinit var backfila: Backfila
 
@@ -43,14 +43,14 @@ abstract class SingleInstanceHibernateBackfillTest {
       }
     }
 
-    override fun instanceProvider() = UnshardedInstanceProvider(transacter)
+    override fun partitionProvider() = UnshardedPartitionProvider(transacter)
   }
 
   @Test fun emptyTable() {
     val run = backfila.createDryRun<TestBackfill>()
         .apply { configureForTest() }
-    assertThat(run.instanceProgressSnapshot.values.single().utf8RangeStart()).isNull()
-    assertThat(run.instanceProgressSnapshot.values.single().utf8RangeEnd()).isNull()
+    assertThat(run.partitionProgressSnapshot.values.single().utf8RangeStart()).isNull()
+    assertThat(run.partitionProgressSnapshot.values.single().utf8RangeEnd()).isNull()
     // Trying to scan for a batch on an empty tablet gets nothing to execute.
     assertThat(run.singleScan().batches).isEmpty() // Check the returned scan
     assertThat(run).isFinishedScanning()
@@ -62,20 +62,20 @@ abstract class SingleInstanceHibernateBackfillTest {
     createNoMatching()
     val run = backfila.createDryRun<TestBackfill>()
         .apply { configureForTest() }
-    assertThat(run.instanceProgressSnapshot.values.single().utf8RangeStart()).isNotNull()
-    assertThat(run.instanceProgressSnapshot.values.single().utf8RangeEnd()).isNotNull()
-    assertThat(run.instanceProgressSnapshot.values.single().previousEndKey).isNull()
+    assertThat(run.partitionProgressSnapshot.values.single().utf8RangeStart()).isNotNull()
+    assertThat(run.partitionProgressSnapshot.values.single().utf8RangeEnd()).isNotNull()
+    assertThat(run.partitionProgressSnapshot.values.single().previousEndKey).isNull()
 
     val scan1 = run.singleScan()
     assertThat(scan1.batches).size().isEqualTo(1)
     assertThat(scan1.batches.single().scanned_record_count).isEqualTo(5)
     assertThat(scan1.batches.single().matching_record_count).isEqualTo(0)
-    assertThat(run.instanceProgressSnapshot.values.single()).isNotDone()
-    assertThat(run.instanceProgressSnapshot.values.single().previousEndKey).isNotNull
+    assertThat(run.partitionProgressSnapshot.values.single()).isNotDone()
+    assertThat(run.partitionProgressSnapshot.values.single().previousEndKey).isNotNull
 
     val scan2 = run.singleScan()
     assertThat(scan2.batches).isEmpty()
-    assertThat(run.instanceProgressSnapshot.values.single()).isDone()
+    assertThat(run.partitionProgressSnapshot.values.single()).isDone()
     assertThat(run).hasNoBatchesToRun().isComplete()
   }
 
@@ -85,12 +85,12 @@ abstract class SingleInstanceHibernateBackfillTest {
     val run = backfila.createDryRun<TestBackfill>(rangeStart = expectedIds[1].toString())
         .apply { configureForTest() }
     assertThat(run.rangeStart).isEqualTo(expectedIds[1].toString())
-    assertThat(run.instanceProgressSnapshot.values.single()).isNotDone()
+    assertThat(run.partitionProgressSnapshot.values.single()).isNotDone()
 
     run.singleScan()
     assertThat(run.batchesToRunSnapshot.single().utf8RangeStart()).isEqualTo(
         expectedIds[1].toString())
-    assertThat(run.instanceProgressSnapshot.values.single().utf8PreviousEndKey()).isEqualTo(
+    assertThat(run.partitionProgressSnapshot.values.single().utf8PreviousEndKey()).isEqualTo(
         expectedIds[10].toString())
 
     run.execute()
@@ -104,7 +104,7 @@ abstract class SingleInstanceHibernateBackfillTest {
     val run = backfila.createDryRun<TestBackfill>(rangeEnd = expectedIds[0].toString())
         .apply { configureForTest() }
     assertThat(run.rangeEnd).isEqualTo(expectedIds[0].toString())
-    assertThat(run.instanceProgressSnapshot.values.single()).isNotDone()
+    assertThat(run.partitionProgressSnapshot.values.single()).isNotDone()
 
     run.singleScan()
     assertThat(run.batchesToRunSnapshot.single().utf8RangeStart()).isEqualTo(
@@ -189,8 +189,8 @@ abstract class SingleInstanceHibernateBackfillTest {
     // Batches don't get added when precomputing
     assertThat(run).hasNoBatchesToRun()
     // Nor is there progress on the cursor
-    assertThat(run.instanceProgressSnapshot.values.single()).isNotDone()
-    assertThat(run.instanceProgressSnapshot.values.single().previousEndKey).isNull()
+    assertThat(run.partitionProgressSnapshot.values.single()).isNotDone()
+    assertThat(run.partitionProgressSnapshot.values.single().previousEndKey).isNull()
     // Nor is it complete
     assertThat(run).isNotComplete()
   }

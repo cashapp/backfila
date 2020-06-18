@@ -2,6 +2,8 @@ package app.cash.backfila.dashboard
 
 import app.cash.backfila.service.BackfilaDb
 import app.cash.backfila.service.DbBackfillRun
+import java.net.HttpURLConnection
+import javax.inject.Inject
 import misk.exceptions.BadRequestException
 import misk.hibernate.Id
 import misk.hibernate.Session
@@ -15,21 +17,19 @@ import misk.web.ResponseBody
 import misk.web.actions.WebAction
 import misk.web.toResponseBody
 import okhttp3.Headers
-import java.net.HttpURLConnection
-import javax.inject.Inject
 
 interface ViewLogsUrlProvider {
   fun getUrl(session: Session, backfillRun: DbBackfillRun): String
 }
 
 class ViewLogsAction @Inject constructor(
-    @BackfilaDb private val transacter: Transacter,
-    private val viewLogsUrlProvider: ViewLogsUrlProvider
+  @BackfilaDb private val transacter: Transacter,
+  private val viewLogsUrlProvider: ViewLogsUrlProvider
 ) : WebAction {
   @Get("/backfills/{id}/view-logs")
   @Authenticated
   fun viewLogs(
-      @PathParam id: Long
+    @PathParam id: Long
   ): Response<ResponseBody> {
     val url = transacter.transaction { session ->
       val backfillRun = session.loadOrNull<DbBackfillRun>(Id(id))

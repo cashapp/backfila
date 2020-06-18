@@ -6,7 +6,7 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 
 @MiskTest(startService = true)
-class VitessUnshardedHibernateBackfillTest : SingleInstanceHibernateBackfillTest() {
+class VitessUnshardedHibernateBackfillTest : SinglePartitionHibernateBackfillTest() {
   @Suppress("unused")
   @MiskTestModule
   val module: Module = ClientMiskTestingModule(true, listOf(TestBackfill::class))

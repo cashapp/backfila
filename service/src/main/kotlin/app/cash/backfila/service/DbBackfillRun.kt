@@ -1,15 +1,6 @@
 package app.cash.backfila.service
 
 import com.google.api.client.repackaged.com.google.common.base.Preconditions.checkState
-import misk.hibernate.DbTimestampedEntity
-import misk.hibernate.DbUnsharded
-import misk.hibernate.Id
-import misk.hibernate.JsonColumn
-import misk.hibernate.Query
-import misk.hibernate.Session
-import misk.hibernate.newQuery
-import okio.ByteString
-import okio.ByteString.Companion.decodeBase64
 import java.time.Instant
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -21,6 +12,15 @@ import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
 import javax.persistence.Table
 import javax.persistence.Version
+import misk.hibernate.DbTimestampedEntity
+import misk.hibernate.DbUnsharded
+import misk.hibernate.Id
+import misk.hibernate.JsonColumn
+import misk.hibernate.Query
+import misk.hibernate.Session
+import misk.hibernate.newQuery
+import okio.ByteString
+import okio.ByteString.Companion.decodeBase64
 
 /**
  * Tracks the state of a created backfill.
@@ -124,8 +124,8 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
     this.extra_sleep_ms = extra_sleep_ms
   }
 
-  fun instances(session: Session, queryFactory: Query.Factory) =
-      queryFactory.newQuery<RunInstanceQuery>()
+  fun partitions(session: Session, queryFactory: Query.Factory) =
+      queryFactory.newQuery<RunPartitionQuery>()
           .backfillRunId(id)
           .list(session)
 
@@ -133,8 +133,8 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
     // State can't be changed after being completed.
     checkState(this.state != BackfillState.COMPLETE)
     this.state = state
-    // Set the state of all the instances that are not complete
-    val query = session.hibernateSession.createQuery("update DbRunInstance " +
+    // Set the state of all the partitions that are not complete
+    val query = session.hibernateSession.createQuery("update DbRunPartition " +
             "set run_state = :newState, version = version + 1 " +
             "where backfill_run_id = :runId and run_state <> :completed")
     query.setParameter("runId", id)

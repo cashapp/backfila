@@ -17,6 +17,8 @@ import app.cash.backfila.service.BackfilaDb
 import app.cash.backfila.service.BackfillState
 import app.cash.backfila.service.DbBackfillRun
 import com.google.inject.Module
+import javax.inject.Inject
+import kotlin.test.assertNotNull
 import misk.exceptions.BadRequestException
 import misk.hibernate.Id
 import misk.hibernate.Query
@@ -28,8 +30,6 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
-import kotlin.test.assertNotNull
 
 @MiskTest(startService = true)
 class StartStopBackfillActionTest {
@@ -75,7 +75,7 @@ class StartStopBackfillActionTest {
 
       var status = getBackfillStatusAction.status(id)
       assertThat(status.state).isEqualTo(BackfillState.RUNNING)
-      assertThat(status.instances.map { it.state })
+      assertThat(status.partitions.map { it.state })
           .containsOnly(BackfillState.RUNNING)
 
       backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
@@ -86,7 +86,7 @@ class StartStopBackfillActionTest {
 
       status = getBackfillStatusAction.status(id)
       assertThat(status.state).isEqualTo(BackfillState.PAUSED)
-      assertThat(status.instances.map { it.state })
+      assertThat(status.partitions.map { it.state })
           .containsOnly(BackfillState.PAUSED)
 
       backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer")

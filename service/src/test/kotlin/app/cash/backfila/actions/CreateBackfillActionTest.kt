@@ -13,8 +13,10 @@ import app.cash.backfila.protos.service.ConfigureServiceRequest
 import app.cash.backfila.service.BackfilaDb
 import app.cash.backfila.service.BackfillRunQuery
 import app.cash.backfila.service.BackfillState
-import app.cash.backfila.service.RunInstanceQuery
+import app.cash.backfila.service.RunPartitionQuery
 import com.google.inject.Module
+import javax.inject.Inject
+import kotlin.test.assertNotNull
 import misk.exceptions.BadRequestException
 import misk.hibernate.Query
 import misk.hibernate.Transacter
@@ -26,8 +28,6 @@ import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
-import kotlin.test.assertNotNull
 
 @MiskTest(startService = true)
 class CreateBackfillActionTest {
@@ -91,17 +91,17 @@ class CreateBackfillActionTest {
         assertThat(run.parameters()).isEmpty()
         assertThat(response.id).isEqualTo(run.id.id)
 
-        val instances = queryFactory.newQuery<RunInstanceQuery>()
+        val partitions = queryFactory.newQuery<RunPartitionQuery>()
             .backfillRunId(run.id)
             .orderByName()
             .list(session)
-        assertThat(instances).hasSize(2)
-        assertThat(instances[0].instance_name).isEqualTo("-80")
-        assertThat(instances[0].lease_token).isNull()
-        assertThat(instances[0].run_state).isEqualTo(BackfillState.PAUSED)
-        assertThat(instances[1].instance_name).isEqualTo("80-")
-        assertThat(instances[1].lease_token).isNull()
-        assertThat(instances[1].run_state).isEqualTo(BackfillState.PAUSED)
+        assertThat(partitions).hasSize(2)
+        assertThat(partitions[0].partition_name).isEqualTo("-80")
+        assertThat(partitions[0].lease_token).isNull()
+        assertThat(partitions[0].run_state).isEqualTo(BackfillState.PAUSED)
+        assertThat(partitions[1].partition_name).isEqualTo("80-")
+        assertThat(partitions[1].lease_token).isNull()
+        assertThat(partitions[1].run_state).isEqualTo(BackfillState.PAUSED)
       }
     }
   }
@@ -119,9 +119,9 @@ class CreateBackfillActionTest {
 
     fakeBackfilaClientServiceClient.prepareBackfillResponses.add(
         PrepareBackfillResponse.Builder()
-            .instances(listOf(
-                PrepareBackfillResponse.Instance.Builder()
-                    .instance_name("only")
+            .partitions(listOf(
+                PrepareBackfillResponse.Partition.Builder()
+                    .partition_name("only")
                     .backfill_range(KeyRange("0".encodeUtf8(), "1000".encodeUtf8()))
                     .build()
             ))
@@ -159,9 +159,9 @@ class CreateBackfillActionTest {
 
     fakeBackfilaClientServiceClient.prepareBackfillResponses.add(
         PrepareBackfillResponse.Builder()
-            .instances(listOf(
-                PrepareBackfillResponse.Instance.Builder()
-                    .instance_name("only")
+            .partitions(listOf(
+                PrepareBackfillResponse.Partition.Builder()
+                    .partition_name("only")
                     .backfill_range(KeyRange("0".encodeUtf8(), "1000".encodeUtf8()))
                     .build()
             ))

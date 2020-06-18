@@ -35,12 +35,12 @@ internal class EmbeddedBackfillRun<B : Backfill<*, *>>(
     get() = operator.backfill as B
   override val prepareBackfillResponse: PrepareBackfillResponse
 
-  private val precomputeProgress: Map<String, MutableInstanceCursor>
+  private val precomputeProgress: Map<String, MutablePartitionCursor>
   override var precomputeMatchingCount: Long = 0L
   override var precomputeScannedCount: Long = 0L
 
-  private val scanProgress: Map<String, MutableInstanceCursor>
-  override val instanceProgressSnapshot: Map<String, InstanceCursor>
+  private val scanProgress: Map<String, MutablePartitionCursor>
+  override val partitionProgressSnapshot: Map<String, PartitionCursor>
     get() = scanProgress.mapValues { it.value.snapshot() }
 
   private val batchesToRun: ArrayDeque<BatchSnapshot> = ArrayDeque()
@@ -55,11 +55,11 @@ internal class EmbeddedBackfillRun<B : Backfill<*, *>>(
         .parameters(parameters)
         .dry_run(dryRun)
         .build())
-    precomputeProgress = prepareBackfillResponse.instances.associate {
-      it.instance_name to MutableInstanceCursor(it.instance_name, it.backfill_range)
+    precomputeProgress = prepareBackfillResponse.partitions.associate {
+      it.partition_name to MutablePartitionCursor(it.partition_name, it.backfill_range)
     }
-    scanProgress = prepareBackfillResponse.instances.associate {
-      it.instance_name to MutableInstanceCursor(it.instance_name, it.backfill_range)
+    scanProgress = prepareBackfillResponse.partitions.associate {
+      it.partition_name to MutablePartitionCursor(it.partition_name, it.backfill_range)
     }
   }
 
@@ -69,7 +69,7 @@ internal class EmbeddedBackfillRun<B : Backfill<*, *>>(
     val cursor = notDone.values.first()
     val response =
         operator.getNextBatchRange(GetNextBatchRangeRequest.Builder()
-            .instance_name(cursor.instanceName)
+            .partition_name(cursor.partitionName)
             .backfill_range(cursor.keyRange)
             .previous_end_key(cursor.previousEndKey)
             .parameters(parameters)
@@ -99,12 +99,12 @@ internal class EmbeddedBackfillRun<B : Backfill<*, *>>(
 
   override fun finishedPrecomputing() = precomputeProgress.all { it.value.done }
 
-  override fun instanceScan(instanceName: String): GetNextBatchRangeResponse {
-    val cursor = scanProgress[instanceName] ?: error(
-        "Instance $instanceName not found. Valid instances are ${scanProgress.keys}")
+  override fun partitionScan(partitionName: String): GetNextBatchRangeResponse {
+    val cursor = scanProgress[partitionName] ?: error(
+        "Partition $partitionName not found. Valid partitions are ${scanProgress.keys}")
     val response =
         operator.getNextBatchRange(GetNextBatchRangeRequest.Builder()
-            .instance_name(cursor.instanceName)
+            .partition_name(cursor.partitionName)
             .backfill_range(cursor.keyRange)
             .previous_end_key(cursor.previousEndKey)
             .parameters(parameters)
@@ -121,7 +121,7 @@ internal class EmbeddedBackfillRun<B : Backfill<*, *>>(
         .filterNot { it.matching_record_count == 0L } // Remove batches that have no matching records.
         .map {
           BatchSnapshot(
-              instanceName,
+              partitionName,
               it.batch_range,
               it.scanned_record_count,
               it.matching_record_count)
@@ -131,7 +131,7 @@ internal class EmbeddedBackfillRun<B : Backfill<*, *>>(
 
   override fun singleScan(): GetNextBatchRangeResponse {
     val cursor = scanProgress.values.first { !it.done }
-    return instanceScan(cursor.instanceName)
+    return partitionScan(cursor.partitionName)
   }
 
   override fun scanRemaining() {
@@ -146,7 +146,7 @@ internal class EmbeddedBackfillRun<B : Backfill<*, *>>(
     check(!batchesToRun.isEmpty()) { "There must be batches to run" }
     val batch = batchesToRun.remove()
     operator.runBatch(RunBatchRequest.Builder()
-        .instance_name(batch.instanceName)
+        .partition_name(batch.partitionName)
         .batch_range(batch.batchRange)
         .parameters(parameters)
         .dry_run(dryRun)
@@ -164,20 +164,20 @@ internal class EmbeddedBackfillRun<B : Backfill<*, *>>(
   override fun toString() = "BackfillRun[${this.javaClass.toGenericString()}]"
 }
 
-private class MutableInstanceCursor(
-  val instanceName: String,
+private class MutablePartitionCursor(
+  val partitionName: String,
   val keyRange: KeyRange
 ) {
   var previousEndKey: ByteString? = null
   var done: Boolean = false
 
-  fun snapshot() = InstanceCursor(
-      instanceName, keyRange, previousEndKey, done)
+  fun snapshot() = PartitionCursor(
+      partitionName, keyRange, previousEndKey, done)
 }
 
 /** Immutable snapshot of a cursor. */
-data class InstanceCursor(
-  val instanceName: String,
+data class PartitionCursor(
+  val partitionName: String,
   val keyRange: KeyRange,
   val previousEndKey: ByteString?,
   val done: Boolean
@@ -188,7 +188,7 @@ data class InstanceCursor(
 }
 
 data class BatchSnapshot(
-  val instanceName: String,
+  val partitionName: String,
   val batchRange: KeyRange,
   val scannedRecordCount: Long,
   val matchingRecordCount: Long

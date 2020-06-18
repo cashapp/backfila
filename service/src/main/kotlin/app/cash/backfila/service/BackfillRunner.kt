@@ -25,9 +25,9 @@ val DEFAULT_BACKOFF_SCHEDULE = listOf(5_000L, 15_000L, 30_000L)
 class BackfillRunner private constructor(
   val factory: Factory,
   val backfillName: String,
-  val instanceName: String,
+  val partitionName: String,
   val backfillRunId: Id<DbBackfillRun>,
-  val instanceId: Id<DbRunInstance>,
+  val partitionId: Id<DbRunPartition>,
   val leaseToken: String
 ) {
   /** Metadata about the backfill from the database. Refreshed regularly. */
@@ -85,19 +85,19 @@ class BackfillRunner private constructor(
   private suspend fun checkAndUpdateLeaseUntilPausedOrComplete() {
     while (running) {
       val dbRunning = factory.transacter.transaction { session ->
-        val dbRunInstance = session.load(instanceId)
+        val dbRunPartition = session.load(partitionId)
 
-        if (dbRunInstance.run_state != BackfillState.RUNNING) {
+        if (dbRunPartition.run_state != BackfillState.RUNNING) {
           logger.info { "Backfill is no longer in RUNNING state, stopping runner ${logLabel()}" }
           running = false
           return@transaction false
         }
-        if (dbRunInstance.lease_token != leaseToken) {
-          throw IllegalStateException("Backfill instance $instanceId has been stolen! " +
-              "our token: $leaseToken, new token: ${dbRunInstance.lease_token}")
+        if (dbRunPartition.lease_token != leaseToken) {
+          throw IllegalStateException("Backfill partition $partitionId has been stolen! " +
+              "our token: $leaseToken, new token: ${dbRunPartition.lease_token}")
         }
         // Extend our lease regularly.
-        dbRunInstance.lease_expires_at = factory.clock.instant() + LeaseHunter.LEASE_DURATION
+        dbRunPartition.lease_expires_at = factory.clock.instant() + LeaseHunter.LEASE_DURATION
 
         // While we're here, refresh metadata about the backfill in case a user made some changes,
         // such as changing batch_size or num_threads. This way we keep metadata updated but don't
@@ -112,21 +112,21 @@ class BackfillRunner private constructor(
   }
 
   private fun loadMetaData(session: Session): BackfillMetaData {
-    val dbRunInstance = session.load(instanceId)
+    val dbRunPartition = session.load(partitionId)
     return BackfillMetaData(
-        dbRunInstance.backfill_run_id,
-        dbRunInstance.pkey_cursor,
-        dbRunInstance.pkey_range_start,
-        dbRunInstance.pkey_range_end,
-        dbRunInstance.backfill_run.parameters(),
-        dbRunInstance.backfill_run.batch_size,
-        dbRunInstance.backfill_run.scan_size,
-        dbRunInstance.backfill_run.dry_run,
-        dbRunInstance.backfill_run.num_threads,
-        dbRunInstance.precomputing_done,
-        dbRunInstance.precomputing_pkey_cursor,
-        dbRunInstance.backfill_run.extra_sleep_ms,
-        dbRunInstance.backfill_run.backoffSchedule() ?: DEFAULT_BACKOFF_SCHEDULE
+        dbRunPartition.backfill_run_id,
+        dbRunPartition.pkey_cursor,
+        dbRunPartition.pkey_range_start,
+        dbRunPartition.pkey_range_end,
+        dbRunPartition.backfill_run.parameters(),
+        dbRunPartition.backfill_run.batch_size,
+        dbRunPartition.backfill_run.scan_size,
+        dbRunPartition.backfill_run.dry_run,
+        dbRunPartition.backfill_run.num_threads,
+        dbRunPartition.precomputing_done,
+        dbRunPartition.precomputing_pkey_cursor,
+        dbRunPartition.backfill_run.extra_sleep_ms,
+        dbRunPartition.backfill_run.backoffSchedule() ?: DEFAULT_BACKOFF_SCHEDULE
     )
   }
 
@@ -137,8 +137,8 @@ class BackfillRunner private constructor(
       val connectorExtraData: String?
     )
     val dbData = factory.transacter.transaction { session ->
-      val dbRunInstance = session.load(instanceId)
-      val service = dbRunInstance.backfill_run.registered_backfill.service
+      val dbRunPartition = session.load(partitionId)
+      val service = dbRunPartition.backfill_run.registered_backfill.service
       DbData(service.registry_name, service.connector, service.connector_extra_data)
     }
     return factory.connectorProvider.clientProvider(dbData.connector)
@@ -150,7 +150,7 @@ class BackfillRunner private constructor(
   ) = RunBatchRequest(
       metadata.backfillRunId.toString(),
       backfillName,
-      instanceName,
+      partitionName,
       batch.batch_range,
       metadata.parameters,
       metadata.dryRun,
@@ -185,9 +185,9 @@ class BackfillRunner private constructor(
   /** Returns true if the backfill was changed to paused, false if it was already paused. */
   private fun pauseBackfill(): Boolean {
     return factory.transacter.transaction { session ->
-      val dbRunInstance = session.load(instanceId)
-      if (dbRunInstance.backfill_run.state == BackfillState.RUNNING) {
-        dbRunInstance.backfill_run.setState(session, factory.queryFactory,
+      val dbRunPartition = session.load(partitionId)
+      if (dbRunPartition.backfill_run.state == BackfillState.RUNNING) {
+        dbRunPartition.backfill_run.setState(session, factory.queryFactory,
             BackfillState.PAUSED)
         return@transaction true
       }
@@ -197,17 +197,17 @@ class BackfillRunner private constructor(
 
   fun clearLease() {
     factory.transacter.transaction { session ->
-      val dbRunInstance = session.load(instanceId)
-      if (dbRunInstance.lease_token != leaseToken) {
-        logger.warn { "Lost lease on instance $instanceId, can't release it" }
+      val dbRunPartition = session.load(partitionId)
+      if (dbRunPartition.lease_token != leaseToken) {
+        logger.warn { "Lost lease on partition $partitionId, can't release it" }
         return@transaction
       }
-      dbRunInstance.clearLease()
+      dbRunPartition.clearLease()
       logger.info { "Released lease on ${logLabel()}" }
     }
   }
 
-  fun logLabel() = "$backfillName::$instanceName::$instanceId"
+  fun logLabel() = "$backfillName::$partitionName::$partitionId"
 
   data class BackfillMetaData(
     val backfillRunId: Id<DbBackfillRun>,
@@ -238,15 +238,15 @@ class BackfillRunner private constructor(
   ) {
     fun create(
       @Suppress("UNUSED_PARAMETER") session: Session,
-      dbRunInstance: DbRunInstance,
+      dbRunPartition: DbRunPartition,
       leaseToken: String
     ): BackfillRunner {
       return BackfillRunner(
           this,
-          dbRunInstance.backfill_run.registered_backfill.name,
-          dbRunInstance.instance_name,
-          dbRunInstance.backfill_run_id,
-          dbRunInstance.id,
+          dbRunPartition.backfill_run.registered_backfill.name,
+          dbRunPartition.partition_name,
+          dbRunPartition.backfill_run_id,
+          dbRunPartition.id,
           leaseToken
       )
     }

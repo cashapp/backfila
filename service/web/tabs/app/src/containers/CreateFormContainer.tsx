@@ -177,7 +177,7 @@ class CreateFormContainer extends React.Component<
                 />
               </FlexContainer>
               <FlexContainer>
-                <H5>Threads per instance</H5>
+                <H5>Threads per partition</H5>
                 <NumericInput
                   allowNumericCharactersOnly={true}
                   min={1}

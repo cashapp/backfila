@@ -36,9 +36,9 @@ abstract class Backfill<E : DbEntity<E>, Pkey : Any> {
   }
 
   /**
-   * Returns an instance provider that is used for database connectivity.
+   * Returns an partition provider that is used for database connectivity.
    */
-  abstract fun instanceProvider(): InstanceProvider
+  abstract fun partitionProvider(): PartitionProvider
 
   /**
    * Criteria that filters which records are selected to backfill from the table.
