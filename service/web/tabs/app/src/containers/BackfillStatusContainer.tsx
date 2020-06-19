@@ -153,7 +153,7 @@ class BackfillStatusContainer extends React.Component<
                   <td>{status.dry_run ? "dry run" : "wet run"}</td>
                 </tr>
                 <tr>
-                  <td>Threads per partitions</td>
+                  <td>Threads per partition</td>
                   <td>
                     <EditableField
                       id={this.id}
