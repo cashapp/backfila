@@ -11,12 +11,15 @@ import app.cash.backfila.client.misk.embedded.BackfillRun
 import app.cash.backfila.client.misk.embedded.createDryRun
 import app.cash.backfila.client.misk.embedded.createWetRun
 import app.cash.backfila.client.misk.testing.assertThat
+import app.cash.backfila.protos.service.Parameter
 import javax.inject.Inject
 import misk.hibernate.Id
 import misk.hibernate.Query
 import misk.hibernate.Session
 import misk.hibernate.Transacter
 import okhttp3.internal.toImmutableList
+import okio.ByteString
+import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -30,12 +33,20 @@ abstract class SinglePartitionHibernateBackfillTest {
   ) : Backfill<DbMenu, Id<DbMenu>>() {
     val idsRanDry = mutableListOf<Id<DbMenu>>()
     val idsRanWet = mutableListOf<Id<DbMenu>>()
+    val parametersLog = mutableListOf<Map<String, ByteString>>()
+
+    override val parameters = listOf(
+        Parameter("color", "like green or blue or red"),
+        Parameter("shape", "backfill shapes are square, rectangle, oval")
+    )
 
     override fun backfillCriteria(config: BackfillConfig): Query<DbMenu> {
       return queryFactory.newQuery(MenuQuery::class).name("chicken")
     }
 
     override fun runBatch(pkeys: List<Id<DbMenu>>, config: BackfillConfig) {
+      parametersLog.add(config.parameters)
+
       if (config.dryRun) {
         idsRanDry.addAll(pkeys)
       } else {
@@ -267,6 +278,25 @@ abstract class SinglePartitionHibernateBackfillTest {
     assertThat(wetRun.backfill.idsRanDry).isEmpty()
 
     assertThat(dryRun.backfill.idsRanDry).containsExactlyElementsOf(wetRun.backfill.idsRanWet)
+  }
+
+  @Test fun parameters() {
+    createSome()
+    val run = backfila.createDryRun<TestBackfill>(
+        parameters = mapOf(
+            "color" to "blue".encodeUtf8(),
+            "shape" to "square".encodeUtf8()
+        )
+    )
+        .apply { configureForTest() }
+
+    run.execute()
+    assertThat(run.backfill.parametersLog).contains(
+        mapOf(
+            "color" to "blue".encodeUtf8(),
+            "shape" to "square".encodeUtf8()
+        )
+    )
   }
 
   private fun BackfillRun<*>.configureForTest() {

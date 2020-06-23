@@ -7,6 +7,7 @@ import app.cash.backfila.client.misk.ForBackfila
 import app.cash.backfila.client.misk.client.BackfilaClientConfig
 import app.cash.backfila.protos.service.ConfigureServiceRequest
 import com.google.common.util.concurrent.AbstractIdleService
+import com.google.inject.Injector
 import com.squareup.moshi.Moshi
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -21,6 +22,7 @@ import misk.moshi.adapter
  */
 @Singleton
 internal class BackfilaStartupConfigurator @Inject internal constructor(
+  private val injector: Injector,
   private val config: BackfilaClientConfig,
   private val backfilaClient: BackfilaClient,
   @ForBackfila private val moshi: Moshi,
@@ -35,8 +37,13 @@ internal class BackfilaStartupConfigurator @Inject internal constructor(
     val request = ConfigureServiceRequest.Builder()
         .backfills(
             backfills.values.map { backfillClass ->
+              // Create an instance of the Backfill so we can ask it what its parameters are. This
+              // is a bit of a hack because we're creating the backfill object but not running a
+              // backfill with it.
+              val backfill = injector.getInstance(backfillClass.java)
               ConfigureServiceRequest.BackfillData.Builder()
                   .name(backfillClass.jvmName)
+                  .parameters(backfill.parameters)
                   .build()
             })
         .connector_type(Connectors.HTTP)
