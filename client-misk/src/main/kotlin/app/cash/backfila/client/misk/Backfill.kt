@@ -1,5 +1,6 @@
 package app.cash.backfila.client.misk
 
+import app.cash.backfila.protos.service.Parameter
 import com.squareup.moshi.Types
 import java.lang.reflect.ParameterizedType
 import kotlin.reflect.KClass
@@ -34,6 +35,13 @@ abstract class Backfill<E : DbEntity<E>, Pkey : Any> {
     @Suppress("UNCHECKED_CAST")
     pkeyClass = (Types.getRawType(supertype.actualTypeArguments[1]) as Class<Pkey>).kotlin
   }
+
+  /**
+   * Returns this backfill's available parameters. These are sent to the Backfila service which will
+   * offer fields for users to type values in for each parameter.
+   */
+  open val parameters: List<Parameter>
+    get() = listOf()
 
   /**
    * Returns an partition provider that is used for database connectivity.

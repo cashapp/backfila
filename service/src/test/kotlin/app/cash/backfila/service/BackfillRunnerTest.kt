@@ -18,6 +18,7 @@ import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.KeyRange
 import app.cash.backfila.protos.clientservice.RunBatchResponse
 import app.cash.backfila.protos.service.ConfigureServiceRequest
+import app.cash.backfila.protos.service.Parameter
 import com.google.inject.Module
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -118,6 +119,21 @@ class BackfillRunnerTest {
         assertThat(withTimeoutOrNull(1000L) {
           fakeBackfilaClientServiceClient.runBatchRequests.receive()
         }).isNotNull()
+      } finally {
+        runner.stop()
+      }
+    }
+  }
+
+  @Test fun parametersAreSupplied() {
+    fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
+    val runner = startBackfill(numThreads = 1)
+
+    runBlocking {
+      launch { runner.run() }
+      try {
+        val firstRequest = fakeBackfilaClientServiceClient.runBatchRequests.receive()
+        assertThat(firstRequest.parameters).containsEntry("cheese", "cheddar".encodeUtf8())
       } finally {
         runner.stop()
       }
@@ -559,8 +575,14 @@ class BackfillRunnerTest {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(ConfigureServiceRequest.Builder()
           .backfills(listOf(
-              ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null,
-                  null, false)))
+              ConfigureServiceRequest.BackfillData(
+                  "ChickenSandwich",
+                  "Description",
+                  listOf(Parameter("cheese", "cheddar or american")),
+                  null,
+                  null,
+                  false
+              )))
           .connector_type(ENVOY)
           .build())
     }
@@ -571,7 +593,8 @@ class BackfillRunnerTest {
               "ChickenSandwich",
               num_threads = numThreads,
               backoff_schedule = "1000",
-              extra_sleep_ms = extraSleepMs
+              extra_sleep_ms = extraSleepMs,
+              parameter_map = mapOf("cheese" to "cheddar".encodeUtf8())
           )
       )
       val id = response.id
