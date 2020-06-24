@@ -2,7 +2,7 @@ package app.cash.backfila.client.misk
 
 import app.cash.backfila.client.misk.client.BackfilaClientConfig
 import app.cash.backfila.client.misk.embedded.EmbeddedBackfilaModule
-import kotlin.reflect.KClass
+import app.cash.backfila.client.misk.hibernate.SinglePartitionHibernateTestBackfill
 import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
 import misk.hibernate.HibernateEntityModule
@@ -14,8 +14,7 @@ import misk.jdbc.DataSourceType
 import misk.logging.LogCollectorModule
 
 internal class ClientMiskTestingModule(
-  val useVitess: Boolean,
-  val backfillClasses: List<KClass<out Backfill<*, *>>>
+  val useVitess: Boolean
 ) : KAbstractModule() {
   override fun configure() {
     val dataSourceConfig = when {
@@ -48,10 +47,14 @@ internal class ClientMiskTestingModule(
     install(LogCollectorModule())
     install(MiskTestingServiceModule())
     install(EmbeddedBackfilaModule())
-    install(BackfilaModule(
-        BackfilaClientConfig(
-            url = "test.url", slack_channel = "#test"),
-        backfillClasses
-    ))
+    install(
+        BackfilaModule(
+            BackfilaClientConfig(
+                url = "test.url", slack_channel = "#test"
+            )
+        )
+    )
+
+    install(BackfillInstallModule.create<SinglePartitionHibernateTestBackfill>())
   }
 }

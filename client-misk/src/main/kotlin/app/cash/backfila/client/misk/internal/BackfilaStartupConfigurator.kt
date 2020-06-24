@@ -9,12 +9,12 @@ import app.cash.backfila.protos.service.ConfigureServiceRequest
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.Injector
 import com.squareup.moshi.Moshi
+import misk.logging.getLogger
+import misk.moshi.adapter
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
-import misk.logging.getLogger
-import misk.moshi.adapter
 
 /**
  * Sends backfill metadata to Backfila at application startup. If Backfila is unreachable then
@@ -26,7 +26,7 @@ internal class BackfilaStartupConfigurator @Inject internal constructor(
   private val config: BackfilaClientConfig,
   private val backfilaClient: BackfilaClient,
   @ForBackfila private val moshi: Moshi,
-  @ForBackfila private val backfills: Map<String, KClass<out Backfill<*, *>>>
+  @ForBackfila private val backfills: MutableMap<String, KClass<out Backfill<*, *>>>
 ) : AbstractIdleService() {
   override fun startUp() {
     logger.info { "Backfila configurator starting" }

@@ -9,5 +9,5 @@ import misk.testing.MiskTestModule
 class VitessUnshardedHibernateBackfillTest : SinglePartitionHibernateBackfillTest() {
   @Suppress("unused")
   @MiskTestModule
-  val module: Module = ClientMiskTestingModule(true, listOf(TestBackfill::class))
+  val module: Module = ClientMiskTestingModule(true)
 }

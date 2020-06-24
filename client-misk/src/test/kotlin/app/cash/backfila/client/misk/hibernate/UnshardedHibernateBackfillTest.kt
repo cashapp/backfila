@@ -9,5 +9,5 @@ import misk.testing.MiskTestModule
 class UnshardedHibernateBackfillTest : SinglePartitionHibernateBackfillTest() {
   @Suppress("unused")
   @MiskTestModule
-  val module: Module = ClientMiskTestingModule(false, listOf(TestBackfill::class))
+  val module: Module = ClientMiskTestingModule(false)
 }
