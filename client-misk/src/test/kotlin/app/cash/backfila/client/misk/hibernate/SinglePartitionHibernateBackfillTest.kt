@@ -1,64 +1,27 @@
 package app.cash.backfila.client.misk.hibernate
 
-import app.cash.backfila.client.misk.Backfill
-import app.cash.backfila.client.misk.BackfillConfig
 import app.cash.backfila.client.misk.ClientMiskService
 import app.cash.backfila.client.misk.DbMenu
-import app.cash.backfila.client.misk.MenuQuery
-import app.cash.backfila.client.misk.UnshardedPartitionProvider
 import app.cash.backfila.client.misk.embedded.Backfila
 import app.cash.backfila.client.misk.embedded.BackfillRun
 import app.cash.backfila.client.misk.embedded.createDryRun
 import app.cash.backfila.client.misk.embedded.createWetRun
 import app.cash.backfila.client.misk.testing.assertThat
-import app.cash.backfila.protos.service.Parameter
-import javax.inject.Inject
 import misk.hibernate.Id
-import misk.hibernate.Query
 import misk.hibernate.Session
 import misk.hibernate.Transacter
 import okhttp3.internal.toImmutableList
-import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import javax.inject.Inject
 
 abstract class SinglePartitionHibernateBackfillTest {
   @Inject @ClientMiskService lateinit var transacter: Transacter
   @Inject lateinit var backfila: Backfila
 
-  protected class TestBackfill @Inject constructor(
-    @ClientMiskService private val transacter: Transacter,
-    private val queryFactory: Query.Factory
-  ) : Backfill<DbMenu, Id<DbMenu>>() {
-    val idsRanDry = mutableListOf<Id<DbMenu>>()
-    val idsRanWet = mutableListOf<Id<DbMenu>>()
-    val parametersLog = mutableListOf<Map<String, ByteString>>()
-
-    override val parameters = listOf(
-        Parameter("color", "like green or blue or red"),
-        Parameter("shape", "backfill shapes are square, rectangle, oval")
-    )
-
-    override fun backfillCriteria(config: BackfillConfig): Query<DbMenu> {
-      return queryFactory.newQuery(MenuQuery::class).name("chicken")
-    }
-
-    override fun runBatch(pkeys: List<Id<DbMenu>>, config: BackfillConfig) {
-      parametersLog.add(config.parameters)
-
-      if (config.dryRun) {
-        idsRanDry.addAll(pkeys)
-      } else {
-        idsRanWet.addAll(pkeys)
-      }
-    }
-
-    override fun partitionProvider() = UnshardedPartitionProvider(transacter)
-  }
-
   @Test fun emptyTable() {
-    val run = backfila.createDryRun<TestBackfill>()
+    val run = backfila.createDryRun<SinglePartitionHibernateTestBackfill>()
         .apply { configureForTest() }
     assertThat(run.partitionProgressSnapshot.values.single().utf8RangeStart()).isNull()
     assertThat(run.partitionProgressSnapshot.values.single().utf8RangeEnd()).isNull()
@@ -71,7 +34,7 @@ abstract class SinglePartitionHibernateBackfillTest {
 
   @Test fun noMatches() {
     createNoMatching()
-    val run = backfila.createDryRun<TestBackfill>()
+    val run = backfila.createDryRun<SinglePartitionHibernateTestBackfill>()
         .apply { configureForTest() }
     assertThat(run.partitionProgressSnapshot.values.single().utf8RangeStart()).isNotNull()
     assertThat(run.partitionProgressSnapshot.values.single().utf8RangeEnd()).isNotNull()
@@ -93,16 +56,18 @@ abstract class SinglePartitionHibernateBackfillTest {
   @Test fun withStartRange() {
     val expectedIds = createSome()
     // Start at the 2nd id, so the 1st should be skipped.
-    val run = backfila.createDryRun<TestBackfill>(rangeStart = expectedIds[1].toString())
+    val run = backfila.createDryRun<SinglePartitionHibernateTestBackfill>(rangeStart = expectedIds[1].toString())
         .apply { configureForTest() }
     assertThat(run.rangeStart).isEqualTo(expectedIds[1].toString())
     assertThat(run.partitionProgressSnapshot.values.single()).isNotDone()
 
     run.singleScan()
     assertThat(run.batchesToRunSnapshot.single().utf8RangeStart()).isEqualTo(
-        expectedIds[1].toString())
+        expectedIds[1].toString()
+    )
     assertThat(run.partitionProgressSnapshot.values.single().utf8PreviousEndKey()).isEqualTo(
-        expectedIds[10].toString())
+        expectedIds[10].toString()
+    )
 
     run.execute()
     assertThat(run.backfill.idsRanDry).containsExactlyElementsOf(expectedIds.slice(1..19))
@@ -112,14 +77,15 @@ abstract class SinglePartitionHibernateBackfillTest {
   @Test fun withEndRange() {
     val expectedIds = createSome()
     // End after the 1st id, so only the first id should get backfilled.
-    val run = backfila.createDryRun<TestBackfill>(rangeEnd = expectedIds[0].toString())
+    val run = backfila.createDryRun<SinglePartitionHibernateTestBackfill>(rangeEnd = expectedIds[0].toString())
         .apply { configureForTest() }
     assertThat(run.rangeEnd).isEqualTo(expectedIds[0].toString())
     assertThat(run.partitionProgressSnapshot.values.single()).isNotDone()
 
     run.singleScan()
     assertThat(run.batchesToRunSnapshot.single().utf8RangeStart()).isEqualTo(
-        expectedIds[0].toString())
+        expectedIds[0].toString()
+    )
     assertThat(run.batchesToRunSnapshot.single().matchingRecordCount).isEqualTo(1)
     assertThat(run.batchesToRunSnapshot.single().scannedRecordCount).isEqualTo(1)
     run.runBatch()
@@ -135,15 +101,17 @@ abstract class SinglePartitionHibernateBackfillTest {
 
   @Test fun twoBatchesOf10ToGet20Records() {
     val expectedIds = createSome()
-    val run = backfila.createDryRun<TestBackfill>()
+    val run = backfila.createDryRun<SinglePartitionHibernateTestBackfill>()
         .apply { configureForTest() }
     run.precomputeRemaining()
 
     run.singleScan()
     assertThat(run.batchesToRunSnapshot.single().utf8RangeStart()).isEqualTo(
-        expectedIds[0].toString())
+        expectedIds[0].toString()
+    )
     assertThat(run.batchesToRunSnapshot.single().utf8RangeEnd()).isEqualTo(
-        expectedIds[9].toString())
+        expectedIds[9].toString()
+    )
     assertThat(run.batchesToRunSnapshot.single().matchingRecordCount).isEqualTo(10)
     assertThat(run.batchesToRunSnapshot.single().scannedRecordCount).isEqualTo(10)
     run.runBatch()
@@ -151,10 +119,12 @@ abstract class SinglePartitionHibernateBackfillTest {
 
     run.singleScan()
     assertThat(run.batchesToRunSnapshot.single().utf8RangeEnd()).isEqualTo(
-        expectedIds[19].toString())
+        expectedIds[19].toString()
+    )
     assertThat(run.batchesToRunSnapshot.single().matchingRecordCount).isEqualTo(10)
     assertThat(run.batchesToRunSnapshot.single().scannedRecordCount).isEqualTo(
-        15) // Skipped some `beef`
+        15
+    ) // Skipped some `beef`
     run.runBatch()
     assertThat(run).hasNoBatchesToRun()
 
@@ -168,7 +138,7 @@ abstract class SinglePartitionHibernateBackfillTest {
 
   @Test fun precomputingIgnoresBatchSize() {
     val expectedIds = createSome()
-    val run = backfila.createDryRun<TestBackfill>()
+    val run = backfila.createDryRun<SinglePartitionHibernateTestBackfill>()
     // Setup a small batch and scan size
     run.batchSize = 2L
     run.scanSize = 10L
@@ -208,7 +178,7 @@ abstract class SinglePartitionHibernateBackfillTest {
 
   @Test fun multipleBatches() {
     createSome()
-    val run1 = backfila.createDryRun<TestBackfill>()
+    val run1 = backfila.createDryRun<SinglePartitionHibernateTestBackfill>()
         .apply { configureForTest() }
 
     run1.computeCountLimit = 2
@@ -217,7 +187,7 @@ abstract class SinglePartitionHibernateBackfillTest {
     assertThat(scan.batches[0].batch_range.end).isLessThan(scan.batches[1].batch_range.start)
 
     // Requesting two batches should give the same batches as requesting one twice.
-    val run2 = backfila.createDryRun<TestBackfill>()
+    val run2 = backfila.createDryRun<SinglePartitionHibernateTestBackfill>()
         .apply { configureForTest() }
     val scan1 = run2.singleScan()
     val scan2 = run2.singleScan()
@@ -228,7 +198,7 @@ abstract class SinglePartitionHibernateBackfillTest {
 
   @Test fun multipleScans() {
     createSome()
-    val run1 = backfila.createDryRun<TestBackfill>()
+    val run1 = backfila.createDryRun<SinglePartitionHibernateTestBackfill>()
     run1.batchSize = 2L
     run1.scanSize = 4L
     run1.computeCountLimit = 3
@@ -238,7 +208,7 @@ abstract class SinglePartitionHibernateBackfillTest {
     assertThat(scan.batches[1].batch_range.end).isLessThan(scan.batches[2].batch_range.start)
 
     // Requesting single batches should give the same results.
-    val run2 = backfila.createDryRun<TestBackfill>()
+    val run2 = backfila.createDryRun<SinglePartitionHibernateTestBackfill>()
     run2.batchSize = 2L
     run2.scanSize = 4L
     run2.computeCountLimit = 1
@@ -253,7 +223,7 @@ abstract class SinglePartitionHibernateBackfillTest {
 
   @Test fun lessThanRequestedBatches() {
     createSome()
-    val run = backfila.createDryRun<TestBackfill>()
+    val run = backfila.createDryRun<SinglePartitionHibernateTestBackfill>()
         .apply { configureForTest() }
 
     // Requested 20 batches but only 2 batches in the table.
@@ -265,13 +235,13 @@ abstract class SinglePartitionHibernateBackfillTest {
 
   @Test fun wetAndDryRunProcessSameElements() {
     createSome()
-    val dryRun = backfila.createDryRun<TestBackfill>()
+    val dryRun = backfila.createDryRun<SinglePartitionHibernateTestBackfill>()
         .apply { configureForTest() }
     dryRun.execute()
     assertThat(dryRun).isComplete()
     assertThat(dryRun.backfill.idsRanWet).isEmpty()
 
-    val wetRun = backfila.createWetRun<TestBackfill>()
+    val wetRun = backfila.createWetRun<SinglePartitionHibernateTestBackfill>()
         .apply { configureForTest() }
     wetRun.execute()
     assertThat(wetRun).isComplete()
@@ -282,7 +252,7 @@ abstract class SinglePartitionHibernateBackfillTest {
 
   @Test fun parameters() {
     createSome()
-    val run = backfila.createDryRun<TestBackfill>(
+    val run = backfila.createDryRun<SinglePartitionHibernateTestBackfill>(
         parameters = mapOf(
             "color" to "blue".encodeUtf8(),
             "shape" to "square".encodeUtf8()
