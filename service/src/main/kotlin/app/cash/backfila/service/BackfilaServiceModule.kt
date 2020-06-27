@@ -8,13 +8,13 @@ import app.cash.backfila.client.ForConnectors
 import app.cash.backfila.client.HttpClientServiceClientProvider
 import app.cash.backfila.dashboard.BackfilaDashboardModule
 import app.cash.backfila.dashboard.BackfilaWebActionsModule
+import app.cash.backfila.service.persistence.BackfilaPersistenceModule
+import app.cash.backfila.service.scheduler.ForBackfilaScheduler
+import app.cash.backfila.service.scheduler.RunnerSchedulerServiceModule
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import com.google.inject.Provides
-import java.util.concurrent.Executors
-import javax.inject.Qualifier
-import javax.inject.Singleton
 import misk.config.ConfigModule
 import misk.environment.Deployment
 import misk.inject.KAbstractModule
@@ -22,6 +22,9 @@ import misk.security.authz.AccessAnnotationEntry
 import misk.slack.SlackModule
 import misk.web.dashboard.AdminDashboardAccess
 import okhttp3.Interceptor
+import java.util.concurrent.Executors
+import javax.inject.Qualifier
+import javax.inject.Singleton
 
 @Qualifier
 annotation class HttpClientNetworkInterceptor
@@ -40,7 +43,7 @@ class BackfilaServiceModule(
     install(BackfilaDashboardModule(deployment))
     install(ServiceWebActionsModule())
 
-    install(SchedulerLifecycleServiceModule())
+    install(RunnerSchedulerServiceModule())
 
     newMapBinder<String, BackfilaClientServiceClientProvider>(ForConnectors::class)
         .addBinding(Connectors.HTTP)

@@ -1,8 +1,9 @@
-package app.cash.backfila.service
+package app.cash.backfila.service.runner.statemachine
 
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse.Batch
 import app.cash.backfila.protos.clientservice.KeyRange
+import app.cash.backfila.service.runner.BackfillRunner
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -14,7 +15,9 @@ class BatchQueuer(
   private val backfillRunner: BackfillRunner,
   numThreads: Int
 ) {
-  private val nextBatchChannel = VariableCapacityChannel<Batch>(capacity(numThreads))
+  private val nextBatchChannel = VariableCapacityChannel<Batch>(
+      capacity(numThreads)
+  )
 
   fun nextBatchChannel(): ReceiveChannel<Batch> = nextBatchChannel.downstream()
 

@@ -1,4 +1,4 @@
-package app.cash.backfila.service
+package app.cash.backfila.service.persistence
 
 import misk.hibernate.Constraint
 import misk.hibernate.Id

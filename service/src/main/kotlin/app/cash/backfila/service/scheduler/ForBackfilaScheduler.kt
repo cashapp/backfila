@@ -1,4 +1,4 @@
-package app.cash.backfila.service
+package app.cash.backfila.service.scheduler
 
 import javax.inject.Qualifier
 

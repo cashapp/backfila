@@ -1,5 +1,8 @@
-package app.cash.backfila.service
+package app.cash.backfila.service.persistence
 
+import misk.hibernate.DbTimestampedEntity
+import misk.hibernate.DbUnsharded
+import misk.hibernate.Id
 import java.time.Clock
 import java.time.Instant
 import javax.persistence.Column
@@ -9,9 +12,6 @@ import javax.persistence.GeneratedValue
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
 import javax.persistence.Table
-import misk.hibernate.DbTimestampedEntity
-import misk.hibernate.DbUnsharded
-import misk.hibernate.Id
 
 /**
  * Stores the set of backfills that a service has registered as runnable.

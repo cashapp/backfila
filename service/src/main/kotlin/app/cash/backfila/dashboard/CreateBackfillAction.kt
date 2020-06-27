@@ -3,15 +3,14 @@ package app.cash.backfila.dashboard
 import app.cash.backfila.client.ConnectorProvider
 import app.cash.backfila.protos.clientservice.KeyRange
 import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
-import app.cash.backfila.service.BackfilaDb
-import app.cash.backfila.service.BackfillState
-import app.cash.backfila.service.DbBackfillRun
-import app.cash.backfila.service.DbRegisteredBackfill
-import app.cash.backfila.service.DbRunPartition
-import app.cash.backfila.service.DbService
-import app.cash.backfila.service.RegisteredBackfillQuery
-import app.cash.backfila.service.ServiceQuery
-import javax.inject.Inject
+import app.cash.backfila.service.persistence.BackfilaDb
+import app.cash.backfila.service.persistence.BackfillState
+import app.cash.backfila.service.persistence.DbBackfillRun
+import app.cash.backfila.service.persistence.DbRegisteredBackfill
+import app.cash.backfila.service.persistence.DbRunPartition
+import app.cash.backfila.service.persistence.DbService
+import app.cash.backfila.service.persistence.RegisteredBackfillQuery
+import app.cash.backfila.service.persistence.ServiceQuery
 import misk.MiskCaller
 import misk.exceptions.BadRequestException
 import misk.hibernate.Id
@@ -30,6 +29,7 @@ import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
+import javax.inject.Inject
 
 data class CreateBackfillRequest(
   val backfill_name: String,

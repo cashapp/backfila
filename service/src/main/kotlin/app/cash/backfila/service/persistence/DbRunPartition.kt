@@ -1,6 +1,10 @@
-package app.cash.backfila.service
+package app.cash.backfila.service.persistence
 
 import app.cash.backfila.protos.clientservice.KeyRange
+import misk.hibernate.DbTimestampedEntity
+import misk.hibernate.DbUnsharded
+import misk.hibernate.Id
+import okio.ByteString
 import java.time.Instant
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -12,10 +16,6 @@ import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
 import javax.persistence.Table
 import javax.persistence.Version
-import misk.hibernate.DbTimestampedEntity
-import misk.hibernate.DbUnsharded
-import misk.hibernate.Id
-import okio.ByteString
 
 /**
  * Backfill runs can have many partitions, e.g. one per database shard.

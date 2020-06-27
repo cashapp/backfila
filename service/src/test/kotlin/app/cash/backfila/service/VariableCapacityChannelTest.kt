@@ -1,5 +1,6 @@
 package app.cash.backfila.service
 
+import app.cash.backfila.service.runner.statemachine.VariableCapacityChannel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.ClosedReceiveChannelException

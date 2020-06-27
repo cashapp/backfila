@@ -3,13 +3,11 @@ package app.cash.backfila.api
 import app.cash.backfila.client.ConnectorProvider
 import app.cash.backfila.protos.service.ConfigureServiceRequest
 import app.cash.backfila.protos.service.ConfigureServiceResponse
-import app.cash.backfila.service.BackfilaDb
-import app.cash.backfila.service.DbRegisteredBackfill
-import app.cash.backfila.service.DbService
-import app.cash.backfila.service.RegisteredBackfillQuery
-import app.cash.backfila.service.ServiceQuery
-import java.time.Clock
-import javax.inject.Inject
+import app.cash.backfila.service.persistence.BackfilaDb
+import app.cash.backfila.service.persistence.DbRegisteredBackfill
+import app.cash.backfila.service.persistence.DbService
+import app.cash.backfila.service.persistence.RegisteredBackfillQuery
+import app.cash.backfila.service.persistence.ServiceQuery
 import misk.MiskCaller
 import misk.hibernate.Query
 import misk.hibernate.Transacter
@@ -23,6 +21,8 @@ import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
+import java.time.Clock
+import javax.inject.Inject
 
 class ConfigureServiceAction @Inject constructor(
   private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,

@@ -1,12 +1,11 @@
-package app.cash.backfila.service
+package app.cash.backfila.service.runner.statemachine
 
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse.Batch
 import app.cash.backfila.protos.clientservice.RunBatchResponse
+import app.cash.backfila.service.runner.BackfillRunner
 import com.google.common.base.Stopwatch
-import java.time.Duration
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
@@ -14,24 +13,24 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import misk.logging.getLogger
-
-data class AwaitingRun(
-  val batch: Batch,
-  val runBatchRpc: Deferred<RunBatchResponse>
-)
+import java.time.Duration
 
 class BatchRunner(
   private val backfillRunner: BackfillRunner,
   private val nextBatchChannel: ReceiveChannel<Batch>,
   private val numThreads: Int
 ) {
-  private val runChannel = VariableCapacityChannel<AwaitingRun>(capacity(numThreads))
+  private val runChannel = VariableCapacityChannel<AwaitingRun>(
+      capacity(numThreads)
+  )
 
   /**
    * This channel just signals when more RPCs can be sent, since the above channel is opened up when
    * a Deferred RPC is read, not when the RPC completes, which would cause an extra RPC to be open.
    */
-  private val rpcBackpressureChannel = VariableCapacityChannel<Unit>(capacity(numThreads))
+  private val rpcBackpressureChannel = VariableCapacityChannel<Unit>(
+      capacity(numThreads)
+  )
 
   fun runChannel(): ReceiveChannel<AwaitingRun> = runChannel.downstream()
 

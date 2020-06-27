@@ -5,7 +5,6 @@ import app.cash.backfila.client.misk.internal.UnshardedHibernateBoundingRangeStr
 import app.cash.backfila.client.misk.internal.VitessShardedBoundingRangeStrategy
 import app.cash.backfila.client.misk.internal.VitessSingleCursorBoundingRangeStrategy
 import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
-import javax.persistence.Table
 import misk.hibernate.DbEntity
 import misk.hibernate.Keyspace
 import misk.hibernate.Session
@@ -13,6 +12,7 @@ import misk.hibernate.Shard
 import misk.hibernate.Transacter
 import misk.hibernate.shards
 import misk.hibernate.transaction
+import javax.persistence.Table
 
 /**
  * Provides connectivity to a singleton database or a set of database shards.
@@ -34,8 +34,7 @@ interface PartitionProvider {
  * are using a Vitess datasource you should almost certainly be using one of the Vitess partition
  * providers. [VitessShardedPartitionProvider] [VitessSingleCursorPartitionProvider]
  */
-class UnshardedPartitionProvider(val transacter: Transacter) : PartitionProvider {
-
+class UnshardedPartitionProvider(private val transacter: Transacter) : PartitionProvider {
   override fun names(request: PrepareBackfillRequest) = listOf("only")
 
   override fun <T> transaction(partitionName: String, task: (Session) -> T) =
@@ -54,8 +53,8 @@ class UnshardedPartitionProvider(val transacter: Transacter) : PartitionProvider
  * than one thread per shard, consider using [VitessSingleCursorPartitionProvider] instead.
  */
 class VitessShardedPartitionProvider<E : DbEntity<E>, Pkey : Any>(
-  val transacter: Transacter,
-  val backfill: Backfill<E, Pkey>
+  private val transacter: Transacter,
+  backfill: Backfill<E, Pkey>
 ) : PartitionProvider {
   private val keyspace = Keyspace(backfill.entityClass.java.getAnnotation(Table::class.java).schema)
 
@@ -84,8 +83,8 @@ class VitessShardedPartitionProvider<E : DbEntity<E>, Pkey : Any>(
  * each time, rather than splitting the work by shard.
  */
 class VitessSingleCursorPartitionProvider<E : DbEntity<E>, Pkey : Any>(
-  val transacter: Transacter,
-  val backfill: Backfill<E, Pkey>
+  private val transacter: Transacter,
+  backfill: Backfill<E, Pkey>
 ) : PartitionProvider {
   private val keyspace = Keyspace(backfill.entityClass.java.getAnnotation(Table::class.java).schema)
 

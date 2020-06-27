@@ -6,15 +6,13 @@ import app.cash.backfila.client.Connectors
 import app.cash.backfila.client.FakeBackfilaClientServiceClientProvider
 import app.cash.backfila.client.ForConnectors
 import app.cash.backfila.service.BackfilaConfig
-import app.cash.backfila.service.BackfilaDb
-import app.cash.backfila.service.BackfilaPersistenceModule
-import app.cash.backfila.service.ForBackfilaScheduler
+import app.cash.backfila.service.persistence.BackfilaDb
+import app.cash.backfila.service.persistence.BackfilaPersistenceModule
+import app.cash.backfila.service.scheduler.ForBackfilaScheduler
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import com.google.inject.Provides
-import java.util.concurrent.Executors
-import javax.inject.Singleton
 import misk.MiskCaller
 import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
@@ -26,6 +24,8 @@ import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.logging.LogCollectorModule
 import misk.scope.ActionScopedProviderModule
+import java.util.concurrent.Executors
+import javax.inject.Singleton
 
 internal class BackfilaTestingModule : KAbstractModule() {
   override fun configure() {

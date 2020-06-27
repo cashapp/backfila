@@ -10,13 +10,11 @@ import app.cash.backfila.fakeCaller
 import app.cash.backfila.protos.clientservice.KeyRange
 import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
 import app.cash.backfila.protos.service.ConfigureServiceRequest
-import app.cash.backfila.service.BackfilaDb
-import app.cash.backfila.service.BackfillRunQuery
-import app.cash.backfila.service.BackfillState
-import app.cash.backfila.service.RunPartitionQuery
+import app.cash.backfila.service.persistence.BackfilaDb
+import app.cash.backfila.service.persistence.BackfillRunQuery
+import app.cash.backfila.service.persistence.BackfillState
+import app.cash.backfila.service.persistence.RunPartitionQuery
 import com.google.inject.Module
-import javax.inject.Inject
-import kotlin.test.assertNotNull
 import misk.exceptions.BadRequestException
 import misk.hibernate.Query
 import misk.hibernate.Transacter
@@ -28,6 +26,8 @@ import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import javax.inject.Inject
+import kotlin.test.assertNotNull
 
 @MiskTest(startService = true)
 class CreateBackfillActionTest {

@@ -1,8 +1,7 @@
 package app.cash.backfila.dashboard
 
-import app.cash.backfila.service.BackfilaDb
-import app.cash.backfila.service.DbBackfillRun
-import javax.inject.Inject
+import app.cash.backfila.service.persistence.BackfilaDb
+import app.cash.backfila.service.persistence.DbBackfillRun
 import misk.MiskCaller
 import misk.exceptions.BadRequestException
 import misk.hibernate.Id
@@ -18,6 +17,7 @@ import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
+import javax.inject.Inject
 
 // These values correspond to those in CreateBackfillAction. Only non null values are updated.
 data class UpdateBackfillRequest(

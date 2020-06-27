@@ -2,6 +2,7 @@ package app.cash.backfila.service
 
 import app.cash.backfila.client.BackfilaDefaultEndpointConfigModule
 import app.cash.backfila.dashboard.ViewLogsUrlProvider
+import app.cash.backfila.service.persistence.DbBackfillRun
 import misk.MiskApplication
 import misk.MiskCaller
 import misk.MiskRealServiceModule

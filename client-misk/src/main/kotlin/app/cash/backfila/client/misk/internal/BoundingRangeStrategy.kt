@@ -4,8 +4,6 @@ import app.cash.backfila.client.misk.Backfill
 import app.cash.backfila.client.misk.PartitionProvider
 import app.cash.backfila.protos.clientservice.KeyRange
 import com.google.common.collect.Ordering
-import javax.persistence.Table
-import kotlin.streams.toList
 import misk.hibernate.DbEntity
 import misk.hibernate.Keyspace
 import misk.hibernate.Session
@@ -13,6 +11,8 @@ import misk.hibernate.Transacter
 import misk.hibernate.shards
 import misk.hibernate.transaction
 import okio.ByteString
+import javax.persistence.Table
+import kotlin.streams.toList
 
 interface BoundingRangeStrategy<E : DbEntity<E>, Pkey : Any> {
   /**
@@ -30,7 +30,7 @@ interface BoundingRangeStrategy<E : DbEntity<E>, Pkey : Any> {
 }
 
 class UnshardedHibernateBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any> (
-  val partitionProvider: PartitionProvider
+  private val partitionProvider: PartitionProvider
 ) : BoundingRangeStrategy<E, Pkey> {
   override fun computeBoundingRangeMax(
     backfill: Backfill<E, Pkey>,
@@ -46,7 +46,7 @@ class UnshardedHibernateBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any> (
 }
 
 class VitessShardedBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any> (
-  val partitionProvider: PartitionProvider
+  private val partitionProvider: PartitionProvider
 ) : BoundingRangeStrategy<E, Pkey> {
   override fun computeBoundingRangeMax(
     backfill: Backfill<E, Pkey>,
@@ -63,8 +63,8 @@ class VitessShardedBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any> (
 }
 
 class VitessSingleCursorBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any> (
-  val transacter: Transacter,
-  val keyspace: Keyspace
+  private val transacter: Transacter,
+  private val keyspace: Keyspace
 ) : BoundingRangeStrategy<E, Pkey> {
 
   /**
