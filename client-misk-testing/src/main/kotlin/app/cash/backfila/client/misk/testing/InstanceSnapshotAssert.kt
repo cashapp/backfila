@@ -4,7 +4,7 @@ import app.cash.backfila.client.misk.internal.PartitionCursor
 import org.assertj.core.api.AbstractAssert
 
 class PartitionCursorAssert(
-  val partitionCursor: PartitionCursor
+  private val partitionCursor: PartitionCursor
 ) : AbstractAssert<PartitionCursorAssert, PartitionCursor>(partitionCursor, PartitionCursorAssert::class.java) {
   fun isDone(): PartitionCursorAssert {
     if (!partitionCursor.done) {

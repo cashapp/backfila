@@ -7,14 +7,11 @@ import app.cash.backfila.dashboard.GetRegisteredBackfillsAction
 import app.cash.backfila.fakeCaller
 import app.cash.backfila.protos.service.ConfigureServiceRequest
 import app.cash.backfila.protos.service.Parameter
-import app.cash.backfila.service.BackfilaDb
-import app.cash.backfila.service.RegisteredBackfillQuery
-import app.cash.backfila.service.ServiceQuery
+import app.cash.backfila.service.persistence.BackfilaDb
+import app.cash.backfila.service.persistence.RegisteredBackfillQuery
+import app.cash.backfila.service.persistence.ServiceQuery
 import com.google.inject.Module
 import com.squareup.moshi.JsonEncodingException
-import java.time.Clock
-import java.time.Instant
-import javax.inject.Inject
 import misk.hibernate.Query
 import misk.hibernate.Transacter
 import misk.hibernate.newQuery
@@ -24,6 +21,9 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import java.time.Clock
+import java.time.Instant
+import javax.inject.Inject
 
 @MiskTest(startService = true)
 class ConfigureServiceActionTest {

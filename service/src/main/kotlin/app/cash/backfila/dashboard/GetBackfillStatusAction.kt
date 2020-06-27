@@ -1,11 +1,9 @@
 package app.cash.backfila.dashboard
 
-import app.cash.backfila.service.BackfilaDb
-import app.cash.backfila.service.BackfillState
-import app.cash.backfila.service.DbBackfillRun
-import app.cash.backfila.service.DbRunPartition
-import java.time.Instant
-import javax.inject.Inject
+import app.cash.backfila.service.persistence.BackfilaDb
+import app.cash.backfila.service.persistence.BackfillState
+import app.cash.backfila.service.persistence.DbBackfillRun
+import app.cash.backfila.service.persistence.DbRunPartition
 import misk.exceptions.BadRequestException
 import misk.hibernate.Id
 import misk.hibernate.Query
@@ -18,6 +16,8 @@ import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
+import java.time.Instant
+import javax.inject.Inject
 
 data class UiPartition(
   val id: Long,

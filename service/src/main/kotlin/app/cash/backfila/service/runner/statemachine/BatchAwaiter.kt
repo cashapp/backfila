@@ -1,6 +1,8 @@
-package app.cash.backfila.service
+package app.cash.backfila.service.runner.statemachine
 
 import app.cash.backfila.protos.clientservice.RunBatchResponse
+import app.cash.backfila.service.persistence.BackfillState
+import app.cash.backfila.service.runner.BackfillRunner
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -11,8 +13,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import misk.hibernate.load
 import misk.logging.getLogger
-
-class RunBatchException(stackTrace: String) : Exception()
 
 class BatchAwaiter(
   private val backfillRunner: BackfillRunner,
@@ -104,7 +104,7 @@ class BatchAwaiter(
     }
   }
 
-  fun completePartition() {
+  private fun completePartition() {
     val runComplete = backfillRunner.factory.transacter.transaction { session ->
       val dbRunPartition = session.load(backfillRunner.partitionId)
       dbRunPartition.run_state = BackfillState.COMPLETE

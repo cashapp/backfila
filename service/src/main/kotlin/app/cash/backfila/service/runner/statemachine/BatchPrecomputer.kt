@@ -1,7 +1,8 @@
-package app.cash.backfila.service
+package app.cash.backfila.service.runner.statemachine
 
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.KeyRange
+import app.cash.backfila.service.runner.BackfillRunner
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay

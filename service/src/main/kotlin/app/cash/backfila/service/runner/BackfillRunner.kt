@@ -1,11 +1,19 @@
-package app.cash.backfila.service
+package app.cash.backfila.service.runner
 
 import app.cash.backfila.client.BackfilaClientServiceClient
 import app.cash.backfila.client.ConnectorProvider
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.RunBatchRequest
-import java.time.Clock
-import javax.inject.Inject
+import app.cash.backfila.service.SlackHelper
+import app.cash.backfila.service.persistence.BackfilaDb
+import app.cash.backfila.service.persistence.BackfillState
+import app.cash.backfila.service.persistence.DbBackfillRun
+import app.cash.backfila.service.persistence.DbRunPartition
+import app.cash.backfila.service.runner.statemachine.BatchAwaiter
+import app.cash.backfila.service.runner.statemachine.BatchPrecomputer
+import app.cash.backfila.service.runner.statemachine.BatchQueuer
+import app.cash.backfila.service.runner.statemachine.BatchRunner
+import app.cash.backfila.service.scheduler.LeaseHunter
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -16,6 +24,8 @@ import misk.hibernate.Transacter
 import misk.hibernate.load
 import misk.logging.getLogger
 import okio.ByteString
+import java.time.Clock
+import javax.inject.Inject
 
 val DEFAULT_BACKOFF_SCHEDULE = listOf(5_000L, 15_000L, 30_000L)
 
@@ -28,7 +38,7 @@ class BackfillRunner private constructor(
   val partitionName: String,
   val backfillRunId: Id<DbBackfillRun>,
   val partitionId: Id<DbRunPartition>,
-  val leaseToken: String
+  private val leaseToken: String
 ) {
   /** Metadata about the backfill from the database. Refreshed regularly. */
   lateinit var metadata: BackfillMetaData
@@ -61,10 +71,16 @@ class BackfillRunner private constructor(
 
     val batchPrecomputer = BatchPrecomputer(this)
     val batchQueuer = BatchQueuer(this, metadata.numThreads)
-    val batchRunner = BatchRunner(this, batchQueuer.nextBatchChannel(),
-        metadata.numThreads)
-    val batchAwaiter = BatchAwaiter(this, batchRunner.runChannel(),
-        batchRunner.rpcBackpressureChannel())
+    val batchRunner = BatchRunner(
+        this,
+        batchQueuer.nextBatchChannel(),
+        metadata.numThreads
+    )
+    val batchAwaiter = BatchAwaiter(
+        this,
+        batchRunner.runChannel(),
+        batchRunner.rpcBackpressureChannel()
+    )
 
     // All our tasks run on this thread.
     runBlocking {

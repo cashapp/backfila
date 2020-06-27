@@ -14,7 +14,7 @@ import misk.jdbc.DataSourceType
 import misk.logging.LogCollectorModule
 
 internal class ClientMiskTestingModule(
-  val useVitess: Boolean
+  private val useVitess: Boolean
 ) : KAbstractModule() {
   override fun configure() {
     val dataSourceConfig = when {

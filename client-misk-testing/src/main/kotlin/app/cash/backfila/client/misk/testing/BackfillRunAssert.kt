@@ -5,7 +5,7 @@ import app.cash.backfila.client.misk.embedded.BackfillRun
 import org.assertj.core.api.AbstractAssert
 
 class BackfillRunAssert(
-  val backfillRun: BackfillRun<*>
+  private val backfillRun: BackfillRun<*>
 ) : AbstractAssert<BackfillRunAssert, BackfillRun<*>>(backfillRun, BackfillRunAssert::class.java) {
 
   fun isFinishedPrecomputing(): BackfillRunAssert {
