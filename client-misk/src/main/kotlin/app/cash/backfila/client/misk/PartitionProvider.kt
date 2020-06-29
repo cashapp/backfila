@@ -5,6 +5,7 @@ import app.cash.backfila.client.misk.internal.UnshardedHibernateBoundingRangeStr
 import app.cash.backfila.client.misk.internal.VitessShardedBoundingRangeStrategy
 import app.cash.backfila.client.misk.internal.VitessSingleCursorBoundingRangeStrategy
 import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
+import javax.persistence.Table
 import misk.hibernate.DbEntity
 import misk.hibernate.Keyspace
 import misk.hibernate.Session
@@ -12,7 +13,6 @@ import misk.hibernate.Shard
 import misk.hibernate.Transacter
 import misk.hibernate.shards
 import misk.hibernate.transaction
-import javax.persistence.Table
 
 /**
  * Provides connectivity to a singleton database or a set of database shards.

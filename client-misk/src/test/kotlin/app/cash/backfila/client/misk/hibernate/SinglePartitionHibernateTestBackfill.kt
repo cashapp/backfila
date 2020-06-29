@@ -7,15 +7,15 @@ import app.cash.backfila.client.misk.DbMenu
 import app.cash.backfila.client.misk.MenuQuery
 import app.cash.backfila.client.misk.UnshardedPartitionProvider
 import app.cash.backfila.protos.service.Parameter
+import javax.inject.Inject
 import misk.hibernate.Id
 import misk.hibernate.Query
 import misk.hibernate.Transacter
 import okio.ByteString
-import javax.inject.Inject
 
 class SinglePartitionHibernateTestBackfill @Inject constructor(
-    @ClientMiskService private val transacter: Transacter,
-    private val queryFactory: Query.Factory
+  @ClientMiskService private val transacter: Transacter,
+  private val queryFactory: Query.Factory
 ) : Backfill<DbMenu, Id<DbMenu>>() {
   val idsRanDry = mutableListOf<Id<DbMenu>>()
   val idsRanWet = mutableListOf<Id<DbMenu>>()

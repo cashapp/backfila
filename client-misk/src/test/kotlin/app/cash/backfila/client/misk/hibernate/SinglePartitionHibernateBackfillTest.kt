@@ -7,6 +7,7 @@ import app.cash.backfila.client.misk.embedded.BackfillRun
 import app.cash.backfila.client.misk.embedded.createDryRun
 import app.cash.backfila.client.misk.embedded.createWetRun
 import app.cash.backfila.client.misk.testing.assertThat
+import javax.inject.Inject
 import misk.hibernate.Id
 import misk.hibernate.Session
 import misk.hibernate.Transacter
@@ -14,7 +15,6 @@ import okhttp3.internal.toImmutableList
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
 
 abstract class SinglePartitionHibernateBackfillTest {
   @Inject @ClientMiskService lateinit var transacter: Transacter

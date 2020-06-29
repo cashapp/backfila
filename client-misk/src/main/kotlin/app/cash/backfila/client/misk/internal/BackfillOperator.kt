@@ -20,6 +20,13 @@ import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
 import com.google.common.collect.ImmutableList
 import com.google.inject.Injector
+import java.util.ArrayList
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
+import javax.persistence.criteria.Path
+import javax.persistence.criteria.Root
+import kotlin.reflect.KClass
 import misk.exceptions.BadRequestException
 import misk.hibernate.DbEntity
 import misk.hibernate.Id
@@ -30,13 +37,6 @@ import misk.hibernate.Query
 import misk.logging.getLogger
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
-import java.util.ArrayList
-import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
-import javax.persistence.criteria.Path
-import javax.persistence.criteria.Root
-import kotlin.reflect.KClass
 
 /**
  * Operates on a backfill using Hibernate 5.x entities. Create instances with [Factory].

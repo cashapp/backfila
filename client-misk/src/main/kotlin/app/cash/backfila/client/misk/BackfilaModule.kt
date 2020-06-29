@@ -11,20 +11,20 @@ import com.google.inject.TypeLiteral
 import com.google.inject.multibindings.MapBinder
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import misk.ServiceModule
-import misk.inject.KAbstractModule
 import javax.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
+import misk.ServiceModule
+import misk.inject.KAbstractModule
 
 /**
  * Backfila-using applications install this and either [EmbeddedBackfilaModule] (testing and
  * development) or [BackfilaClientModule] (staging and production).
  */
 class BackfilaModule(
-    private val config: BackfilaClientConfig,
-    @Deprecated(message = "Multibind backfills instead")
-    private val backfills: List<KClass<out Backfill<*, *>>>? = null
+  private val config: BackfilaClientConfig,
+  @Deprecated(message = "Multibind backfills instead")
+  private val backfills: List<KClass<out Backfill<*, *>>>? = null
 ) : KAbstractModule() {
   override fun configure() {
     bind<BackfilaClientConfig>().toInstance(config)
@@ -48,7 +48,7 @@ class BackfilaModule(
 }
 
 class BackfillInstallModule<T : Backfill<*, *>> private constructor(
-    private val backfillClass: KClass<T>
+  private val backfillClass: KClass<T>
 ) : KAbstractModule() {
   override fun configure() {
     mapBinder(binder()).addBinding(backfillClass.jvmName).toInstance(backfillClass)
