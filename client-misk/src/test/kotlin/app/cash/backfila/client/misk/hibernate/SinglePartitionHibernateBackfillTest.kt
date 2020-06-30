@@ -254,7 +254,7 @@ abstract class SinglePartitionHibernateBackfillTest {
     createSome()
     val run = backfila.createDryRun<SinglePartitionHibernateTestBackfill>(
         parameters = mapOf(
-            "color" to "blue".encodeUtf8(),
+            "xyz" to "1".encodeUtf8(),
             "shape" to "square".encodeUtf8()
         )
     )

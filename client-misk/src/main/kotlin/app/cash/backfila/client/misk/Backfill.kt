@@ -1,17 +1,67 @@
 package app.cash.backfila.client.misk
 
 import app.cash.backfila.protos.service.Parameter
+import com.google.inject.TypeLiteral
 import com.squareup.moshi.Types
-import java.lang.reflect.ParameterizedType
-import kotlin.reflect.KClass
 import misk.hibernate.DbEntity
 import misk.hibernate.Query
 import misk.inject.typeLiteral
+import java.lang.reflect.ParameterizedType
+import kotlin.reflect.KClass
+import kotlin.reflect.KParameter
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.full.primaryConstructor
+import kotlin.reflect.jvm.jvmErasure
+
+interface Parameterized {
+  fun parameters(): List<Parameter> = listOf()
+}
+
+interface DataClassParameterized<T : Any> : Parameterized {
+  private fun dataClass(): KClass<T> {
+    // Like MyBackfill.
+    val thisType = TypeLiteral.get(this::class.java)
+
+    // Like DataClassParamProvider<MyDataClass>.
+    val supertype = thisType.getSupertype(DataClassParameterized::class.java).type as ParameterizedType
+
+    @Suppress("UNCHECKED_CAST")
+    return (Types.getRawType(supertype.actualTypeArguments[0]) as Class<T>).kotlin
+  }
+
+  override fun parameters(): List<Parameter> {
+    return dataClass().memberProperties.map { Parameter.Builder().name(it.name).build() }
+  }
+
+  fun BackfillConfig.parameters(): T {
+    return parametersFromConfig(this)
+  }
+
+  fun parametersFromConfig(config: BackfillConfig): T {
+    val dataClass = dataClass()
+    val parameters = dataClass.primaryConstructor!!.parameters
+    val map = mutableMapOf<KParameter, Any>()
+    for (parameter in parameters) {
+      if (config.parameters.containsKey(parameter.name)) {
+        val value = config.parameters[parameter.name]!!
+        if (parameter.type.jvmErasure == String::class) {
+          map[parameter] = value.utf8()
+        } else if (parameter.type.jvmErasure == Int::class) {
+          map[parameter] = value.utf8().toInt()
+        } else {
+          println("wot")
+        }
+      }
+    }
+
+    return dataClass.primaryConstructor!!.callBy(map)
+  }
+}
 
 /**
  * Implement this for each or your backfills. Install with your [BackfilaModule].
  */
-abstract class Backfill<E : DbEntity<E>, Pkey : Any> {
+abstract class Backfill<E : DbEntity<E>, Pkey : Any> : Parameterized {
   val entityClass: KClass<E>
   val pkeyClass: KClass<Pkey>
 
