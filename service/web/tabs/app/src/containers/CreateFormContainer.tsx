@@ -1,6 +1,7 @@
 import * as React from "react"
 import { connect } from "react-redux"
 import Axios from "axios"
+import queryString from "query-string"
 import {
   IDispatchProps,
   IState,
@@ -21,7 +22,6 @@ import {
   Classes,
   Spinner
 } from "@blueprintjs/core"
-import { simpleSelectorGet } from "@misk/simpleredux"
 import { BackfillSelector } from "../components"
 import { FlexContainer } from "@misk/core"
 import { Link } from "react-router-dom"
@@ -32,6 +32,7 @@ import { LayoutContainer } from "../containers"
 interface CreateFormState {
   loading: boolean
   errorText?: string
+  backfills: IBackfill[]
   backfill?: IBackfill
   dry_run: boolean
 
@@ -50,36 +51,44 @@ class CreateFormContainer extends React.Component<
   IState & CreateFormState
 > {
   private service: string = (this.props as any).match.params.service
-  private registeredBackfills: string = `${this.service}::BackfillRuns`
 
   componentDidMount() {
-    this.props.simpleNetworkGet(
-      this.registeredBackfills,
-      `/services/${this.service}/registered-backfills`
-    )
+    let params = queryString.parse((this.props as any).location.search)
+    console.log(params)
     this.setState({
       loading: false,
       errorText: null,
       backfill: null,
-      dry_run: true,
-      scan_size: 10000,
-      batch_size: 100,
-      num_threads: 1,
+      dry_run: (params.dry_run == "true") ? true : (params.dry_run == "false") ? false : true,
+      scan_size: params.scan_size || 10000,
+      batch_size: params.batch_size || 100,
+      num_threads: params.num_threads || 1,
       pkey_range_start: null,
       pkey_range_end: null,
-      backoff_schedule: null,
-      extra_sleep_ms: 0,
+      backoff_schedule: params.backoff_schedule || null,
+      extra_sleep_ms: params.extra_sleep_ms || 0,
       parameters: {}
     })
+    Axios.get(`/services/${this.service}/registered-backfills`)
+      .then(response => {
+        var selected = null
+        if (params.name) {
+          selected = response.data.backfills.find((b: IBackfill) =>
+            b.name == params.name
+          )
+        }
+        this.setState({
+          backfills: response.data.backfills,
+          backfill: selected
+        })
+      })
+      .catch(error => {
+        console.log(error)
+      })
   }
 
   render() {
-    let registeredBackfills = simpleSelectorGet(this.props.simpleNetwork, [
-      this.registeredBackfills,
-      "data"
-    ])
-
-    if (!registeredBackfills || !this.state) {
+    if (!this.state || !this.state.backfills) {
       return (
         <LayoutContainer>
           <H1>Service: {this.service}</H1>
@@ -87,6 +96,8 @@ class CreateFormContainer extends React.Component<
         </LayoutContainer>
       )
     }
+    let backfills = this.state.backfills
+
     return (
       <LayoutContainer>
         <H1>
@@ -100,7 +111,8 @@ class CreateFormContainer extends React.Component<
             <FlexContainer>
               <H5>Name</H5>
               <BackfillSelector
-                backfills={registeredBackfills.backfills}
+                backfills={backfills}
+                default={this.state.backfill}
                 onValueChange={backfill =>
                   this.setState({
                     backfill: backfill,
@@ -212,6 +224,7 @@ class CreateFormContainer extends React.Component<
                 <InputGroup
                   id="text-input"
                   placeholder="5000,15000,30000"
+                  value={this.state.backoff_schedule}
                   onChange={(event: FormEvent<HTMLElement>) => {
                     this.setState({
                       backoff_schedule: (event.target as any).value

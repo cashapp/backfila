@@ -14,6 +14,8 @@ export interface IBackfill {
 export interface IBackfillSelectorProps {
   backfills: IBackfill[]
 
+  default: IBackfill
+
   onValueChange?(value: IBackfill): void
 }
 
@@ -32,6 +34,7 @@ export default class BackfillSelector extends React.PureComponent<
         />
         <Suggest<IBackfill>
           fill={true}
+          defaultSelectedItem={this.props.default}
           popoverProps={{ minimal: true }}
           inputValueRenderer={this.renderInputValue}
           items={this.props.backfills}

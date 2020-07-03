@@ -6,7 +6,7 @@ import {
   mapDispatchToProps,
   mapStateToProps
 } from "../ducks"
-import { Classes, H2, H3, HTMLTable, Tooltip, Spinner } from "@blueprintjs/core"
+import { AnchorButton, Intent, Classes, H2, H3, HTMLTable, Tooltip, Spinner } from "@blueprintjs/core"
 import { simpleSelectorGet } from "@misk/simpleredux"
 import { Link } from "react-router-dom"
 import {
@@ -84,6 +84,10 @@ class BackfillStatusContainer extends React.Component<
     this.setState({ editing: {} })
   }
 
+  componentWillUnmount() {
+    clearInterval(this.interval)
+  }
+
   requestStatus() {
     this.props.simpleNetworkGet(
       this.backfillStatusTag,
@@ -123,6 +127,15 @@ class BackfillStatusContainer extends React.Component<
           sum + partition.computed_matching_record_count,
         0
       )
+      //name, range, dryrun, batchsize, scansize, threads, extrasleep, backoff, extraparams
+      var clone_url = `/app/services/${status.service_name}/create`
+      clone_url += "?name=" + status.name
+      clone_url += "&dry_run=" + status.dry_run
+      clone_url += "&scan_size=" + status.scan_size
+      clone_url += "&batch_size=" + status.batch_size
+      clone_url += "&num_threads=" + status.num_threads
+      clone_url += "&backoff_schedule=" + status.backoff_schedule
+      clone_url += "&extra_sleep_ms=" + status.extra_sleep_ms
       return (
         <LayoutContainer>
           <H2>
@@ -131,6 +144,9 @@ class BackfillStatusContainer extends React.Component<
               {status.service_name}
             </Link>
           </H2>
+          <Link to={clone_url}>
+            <AnchorButton text={"Clone"} intent={Intent.PRIMARY} />
+          </Link>
           <div>
             <HTMLTable>
               <thead></thead>
