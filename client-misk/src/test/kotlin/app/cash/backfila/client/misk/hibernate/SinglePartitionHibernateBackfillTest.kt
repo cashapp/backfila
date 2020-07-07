@@ -1,16 +1,11 @@
 package app.cash.backfila.client.misk.hibernate
 
 import app.cash.backfila.client.misk.ClientMiskService
-import app.cash.backfila.client.misk.DbMenu
 import app.cash.backfila.client.misk.embedded.Backfila
-import app.cash.backfila.client.misk.embedded.BackfillRun
 import app.cash.backfila.client.misk.embedded.createDryRun
 import app.cash.backfila.client.misk.embedded.createWetRun
 import app.cash.backfila.client.misk.testing.assertThat
-import misk.hibernate.Id
-import misk.hibernate.Session
 import misk.hibernate.Transacter
-import okhttp3.internal.toImmutableList
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -30,10 +25,12 @@ abstract class SinglePartitionHibernateBackfillTest {
     assertThat(run).isFinishedScanning()
         .hasNoBatchesToRun()
         .isComplete()
+    // Parameters are only recorded if they are actually set
+    assertThat(run.backfill.parametersLog).isEmpty()
   }
 
   @Test fun noMatches() {
-    createNoMatching()
+    createNoMatching(transacter)
     val run = backfila.createDryRun<SinglePartitionHibernateTestBackfill>()
         .apply { configureForTest() }
     assertThat(run.partitionProgressSnapshot.values.single().utf8RangeStart()).isNotNull()
@@ -54,7 +51,7 @@ abstract class SinglePartitionHibernateBackfillTest {
   }
 
   @Test fun withStartRange() {
-    val expectedIds = createSome()
+    val expectedIds = createSome(transacter)
     // Start at the 2nd id, so the 1st should be skipped.
     val run = backfila.createDryRun<SinglePartitionHibernateTestBackfill>(rangeStart = expectedIds[1].toString())
         .apply { configureForTest() }
@@ -72,10 +69,13 @@ abstract class SinglePartitionHibernateBackfillTest {
     run.execute()
     assertThat(run.backfill.idsRanDry).containsExactlyElementsOf(expectedIds.slice(1..19))
     assertThat(run.backfill.idsRanWet).isEmpty()
+
+    // Parameters are only recorded if they are actually set
+    assertThat(run.backfill.parametersLog).containsExactly(emptyMap(), emptyMap())
   }
 
   @Test fun withEndRange() {
-    val expectedIds = createSome()
+    val expectedIds = createSome(transacter)
     // End after the 1st id, so only the first id should get backfilled.
     val run = backfila.createDryRun<SinglePartitionHibernateTestBackfill>(rangeEnd = expectedIds[0].toString())
         .apply { configureForTest() }
@@ -100,7 +100,7 @@ abstract class SinglePartitionHibernateBackfillTest {
   }
 
   @Test fun twoBatchesOf10ToGet20Records() {
-    val expectedIds = createSome()
+    val expectedIds = createSome(transacter)
     val run = backfila.createDryRun<SinglePartitionHibernateTestBackfill>()
         .apply { configureForTest() }
     run.precomputeRemaining()
@@ -137,7 +137,7 @@ abstract class SinglePartitionHibernateBackfillTest {
   }
 
   @Test fun precomputingIgnoresBatchSize() {
-    val expectedIds = createSome()
+    val expectedIds = createSome(transacter)
     val run = backfila.createDryRun<SinglePartitionHibernateTestBackfill>()
     // Setup a small batch and scan size
     run.batchSize = 2L
@@ -177,7 +177,7 @@ abstract class SinglePartitionHibernateBackfillTest {
   }
 
   @Test fun multipleBatches() {
-    createSome()
+    createSome(transacter)
     val run1 = backfila.createDryRun<SinglePartitionHibernateTestBackfill>()
         .apply { configureForTest() }
 
@@ -197,7 +197,7 @@ abstract class SinglePartitionHibernateBackfillTest {
   }
 
   @Test fun multipleScans() {
-    createSome()
+    createSome(transacter)
     val run1 = backfila.createDryRun<SinglePartitionHibernateTestBackfill>()
     run1.batchSize = 2L
     run1.scanSize = 4L
@@ -222,7 +222,7 @@ abstract class SinglePartitionHibernateBackfillTest {
   }
 
   @Test fun lessThanRequestedBatches() {
-    createSome()
+    createSome(transacter)
     val run = backfila.createDryRun<SinglePartitionHibernateTestBackfill>()
         .apply { configureForTest() }
 
@@ -234,7 +234,7 @@ abstract class SinglePartitionHibernateBackfillTest {
   }
 
   @Test fun wetAndDryRunProcessSameElements() {
-    createSome()
+    createSome(transacter)
     val dryRun = backfila.createDryRun<SinglePartitionHibernateTestBackfill>()
         .apply { configureForTest() }
     dryRun.execute()
@@ -250,53 +250,31 @@ abstract class SinglePartitionHibernateBackfillTest {
     assertThat(dryRun.backfill.idsRanDry).containsExactlyElementsOf(wetRun.backfill.idsRanWet)
   }
 
-  @Test fun parameters() {
-    createSome()
+  @Test fun runOnBeef() {
+    createSome(transacter)
     val run = backfila.createDryRun<SinglePartitionHibernateTestBackfill>(
-        parameters = mapOf(
-            "color" to "blue".encodeUtf8(),
-            "shape" to "square".encodeUtf8()
-        )
-    )
+        parameters = mapOf("type" to "beef".encodeUtf8()))
         .apply { configureForTest() }
 
     run.execute()
-    assertThat(run.backfill.parametersLog).contains(
-        mapOf(
-            "color" to "blue".encodeUtf8(),
-            "shape" to "square".encodeUtf8()
-        )
-    )
+    assertThat(run.backfill.idsRanDry).size().isEqualTo(5)
+    assertThat(run.backfill.idsRanWet).isEmpty()
+
+    // We got beef as a parameter
+    assertThat(run.backfill.parametersLog).containsExactly(mapOf("type" to "beef".encodeUtf8()))
   }
 
-  private fun BackfillRun<*>.configureForTest() {
-    this.batchSize = 10L
-    this.scanSize = 100L
-    this.computeCountLimit = 1L
-  }
+  @Test fun runOnFish() {
+    createSome(transacter)
+    val run = backfila.createDryRun<SinglePartitionHibernateTestBackfill>(
+        parameters = mapOf("type" to "fish".encodeUtf8()))
+        .apply { configureForTest() }
 
-  private fun createSome(): List<Id<DbMenu>> {
-    return transacter.transaction { session: Session ->
-      val expected = mutableListOf<Id<DbMenu>>()
-      repeat((0..9).count()) {
-        val id = session.save(DbMenu("chicken"))
-        expected.add(id)
-      }
+    run.execute()
+    assertThat(run.backfill.idsRanDry).isEmpty()
+    assertThat(run.backfill.idsRanWet).isEmpty()
 
-      // Intersperse these to make sure we test skipping non matching records.
-      repeat((0..4).count()) { session.save(DbMenu("beef")) }
-
-      repeat((0..9).count()) {
-        val id = session.save(DbMenu("chicken"))
-        expected.add(id)
-      }
-      expected.toImmutableList()
-    }
-  }
-
-  private fun createNoMatching() {
-    transacter.transaction { session: Session ->
-      repeat((0..4).count()) { session.save(DbMenu("beef")) }
-    }
+    // "fish" isn't recorded by the backfill because no batches were run
+    assertThat(run.backfill.parametersLog).isEmpty()
   }
 }

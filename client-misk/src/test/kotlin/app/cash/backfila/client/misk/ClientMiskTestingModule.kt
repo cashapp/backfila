@@ -2,6 +2,7 @@ package app.cash.backfila.client.misk
 
 import app.cash.backfila.client.misk.client.BackfilaClientConfig
 import app.cash.backfila.client.misk.embedded.EmbeddedBackfilaModule
+import app.cash.backfila.client.misk.hibernate.RawParametersHibernateTestBackfill
 import app.cash.backfila.client.misk.hibernate.SinglePartitionHibernateTestBackfill
 import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
@@ -56,5 +57,6 @@ internal class ClientMiskTestingModule(
     )
 
     install(BackfillInstallModule.create<SinglePartitionHibernateTestBackfill>())
+    install(BackfillInstallModule.create<RawParametersHibernateTestBackfill>())
   }
 }

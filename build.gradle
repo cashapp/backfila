@@ -48,14 +48,6 @@ subprojects { subProject ->
     annotation("javax.persistence.MappedSuperclass")
   }
 
-  spotless {
-    kotlin {
-      target "**/*.kt"
-      ktlint(dep.ktlintVersion).userData(['indent_size': '2', 'continuation_indent_size': '4'])
-    }
-  }
-  compileKotlin.dependsOn 'spotlessKotlinApply'
-
   repositories {
     mavenCentral()
     jcenter()

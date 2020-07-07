@@ -2,6 +2,7 @@ package app.cash.backfila.client.misk
 
 import app.cash.backfila.client.misk.client.BackfilaClientConfig
 import app.cash.backfila.client.misk.client.BackfilaClientModule
+import app.cash.backfila.client.misk.hibernate.RawParametersHibernateTestBackfill
 import app.cash.backfila.client.misk.hibernate.SinglePartitionHibernateTestBackfill
 import misk.MiskApplication
 import misk.MiskRealServiceModule
@@ -28,6 +29,7 @@ fun main(args: Array<String>) {
       object : KAbstractModule() {
         override fun configure() {
           install(BackfillInstallModule.create<SinglePartitionHibernateTestBackfill>())
+          install(BackfillInstallModule.create<RawParametersHibernateTestBackfill>())
         }
       },
       BackfilaClientModule(),
