@@ -9,14 +9,13 @@ import app.cash.backfila.service.persistence.DbBackfillRun
 import app.cash.backfila.service.persistence.DbRegisteredBackfill
 import app.cash.backfila.service.persistence.DbRunPartition
 import app.cash.backfila.service.persistence.DbService
-import app.cash.backfila.service.persistence.RegisteredBackfillQuery
-import app.cash.backfila.service.persistence.ServiceQuery
 import misk.MiskCaller
 import misk.exceptions.BadRequestException
 import misk.hibernate.Id
 import misk.hibernate.Query
 import misk.hibernate.Transacter
-import misk.hibernate.newQuery
+import misk.hibernate.load
+import misk.hibernate.loadOrNull
 import misk.logging.getLogger
 import misk.scope.ActionScoped
 import misk.security.authz.Authenticated
@@ -31,45 +30,51 @@ import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
 import javax.inject.Inject
 
-data class CreateBackfillRequest(
-  val backfill_name: String,
-  // TODO move defaults to UI
-  val scan_size: Long = 1000,
-  val batch_size: Long = 100,
-  val num_threads: Int = 5,
-  val pkey_range_start: String? = null,
-  val pkey_range_end: String? = null,
-  // Parameters that go to the client service.
-  val parameter_map: Map<String, ByteString> = mapOf(),
-  val dry_run: Boolean = true,
-  val backoff_schedule: String? = null,
-  // Sleep that is added after every successful RunBatch.
-  val extra_sleep_ms: Long = 0
+enum class RangeCloneType {
+  RESTART,
+  CONTINUE,
+  NEW
+}
+
+data class CloneBackfillRequest(
+    // TODO move defaults to UI
+    val scan_size: Long = 1000,
+    val batch_size: Long = 100,
+    val num_threads: Int = 5,
+    val range_clone_type: RangeCloneType,
+    val pkey_range_start: String? = null,
+    val pkey_range_end: String? = null,
+    // Parameters that go to the client service.
+    val parameter_map: Map<String, ByteString> = mapOf(),
+    val dry_run: Boolean = true,
+    val backoff_schedule: String? = null,
+    // Sleep that is added after every successful RunBatch.
+    val extra_sleep_ms: Long = 0
 )
 
-data class CreateBackfillResponse(
-  val id: Long
+data class CloneBackfillResponse(
+    val id: Long
 )
 
-class CreateBackfillAction @Inject constructor(
-  private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
-  @BackfilaDb private val transacter: Transacter,
-  private val queryFactory: Query.Factory,
-  private val connectorProvider: ConnectorProvider
+class CloneBackfillAction @Inject constructor(
+    private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
+    @BackfilaDb private val transacter: Transacter,
+    private val queryFactory: Query.Factory,
+    private val connectorProvider: ConnectorProvider
 ) : WebAction {
 
-  @Post("/services/{service}/create")
+  @Post("/backfills/{id}/clone")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   // TODO allow any user
   @Authenticated(capabilities = ["users"])
   fun create(
-    @PathParam service: String,
-    @RequestBody request: CreateBackfillRequest
-  ): CreateBackfillResponse {
+      @PathParam id: Long,
+      @RequestBody request: CloneBackfillRequest
+  ): CloneBackfillResponse {
     // TODO check user has permissions for this service with access api
 
-    logger.info { "Create backfill for $service by ${caller.get()?.user}" }
+    logger.info { "Clone backfill $id by ${caller.get()?.user}" }
 
     if (request.num_threads < 1) {
       throw BadRequestException("num_threads must be >= 1")
@@ -93,34 +98,26 @@ class CreateBackfillAction @Inject constructor(
     }
 
     val dbData = transacter.transaction { session ->
-      val dbService = queryFactory.newQuery<ServiceQuery>()
-          .registryName(service)
-          .uniqueResult(session) ?: throw BadRequestException("`$service` doesn't exist")
-      val registeredBackfill = queryFactory.newQuery<RegisteredBackfillQuery>()
-          .serviceId(dbService.id)
-          .name(request.backfill_name)
-          .active()
-          .uniqueResult(session)
-          ?: throw BadRequestException("`${request.backfill_name}` doesn't exist")
-      logger.info {
-        "Found registered backfill for `$service`::`${request.backfill_name}`" +
-            " [id=${registeredBackfill.id}]"
-      }
+      val sourceBackfill = session.loadOrNull<DbBackfillRun>(Id(id))
+          ?: throw BadRequestException("backfill `$id` doesn't exist")
+      val dbService = sourceBackfill.service
       DbData(
           dbService.id,
+          dbService.registry_name,
           dbService.connector,
           dbService.connector_extra_data,
-          registeredBackfill.id
+          sourceBackfill.registered_backfill_id,
+          sourceBackfill.registered_backfill.name
       )
     }
 
     val client = connectorProvider.clientProvider(dbData.connectorType)
-        .clientFor(service, dbData.connectorExtraData)
+        .clientFor(dbData.serviceName, dbData.connectorExtraData)
     val prepareBackfillResponse = try {
       client.prepareBackfill(
           PrepareBackfillRequest(
               dbData.registeredBackfillId.toString(),
-              request.backfill_name,
+              dbData.backfillName,
               KeyRange(
                   request.pkey_range_start?.encodeUtf8(),
                   request.pkey_range_end?.encodeUtf8()
@@ -130,8 +127,8 @@ class CreateBackfillAction @Inject constructor(
           )
       )
     } catch (e: Exception) {
-      logger.info(e) { "PrepareBackfill on `$service` failed" }
-      throw BadRequestException("PrepareBackfill on `$service` failed: ${e.message}", e)
+      logger.info(e) { "PrepareBackfill on `${dbData.serviceName}` failed" }
+      throw BadRequestException("PrepareBackfill on `${dbData.serviceName}` failed: ${e.message}", e)
     }
     val partitions = prepareBackfillResponse.partitions
     if (partitions.isEmpty()) {
@@ -163,31 +160,58 @@ class CreateBackfillAction @Inject constructor(
       )
       session.save(backfillRun)
 
-      for (partition in partitions) {
-        val dbRunPartition = DbRunPartition(
-            backfillRun.id,
-            partition.partition_name,
-            partition.backfill_range ?: KeyRange.Builder().build(),
-            backfillRun.state,
-            partition.estimated_record_count
-        )
-        session.save(dbRunPartition)
+      if (request.range_clone_type == RangeCloneType.NEW) {
+        for (partition in partitions) {
+          val dbRunPartition = DbRunPartition(
+              backfillRun.id,
+              partition.partition_name,
+              partition.backfill_range ?: KeyRange.Builder().build(),
+              backfillRun.state,
+              partition.estimated_record_count
+          )
+          session.save(dbRunPartition)
+        }
+      } else {
+        // Verify partitions match source backfill, use per partition ranges.
+        val sourceBackfill = session.load<DbBackfillRun>(Id(id))
+        // Source partitions have to match new partitions.
+        val sourcePartitions = sourceBackfill.partitions(session, queryFactory)
+        if (partitions.map { it.partition_name }.toSet() != sourcePartitions.map { it.partition_name }.toSet()) {
+          throw BadRequestException("Can't clone backfill ranges from `$id`, newly computed partitions don't match.")
+        }
+
+        for (sourcePartition in sourcePartitions) {
+          val dbRunPartition = DbRunPartition(
+              backfillRun.id,
+              sourcePartition.partition_name,
+              sourcePartition.backfillRange(),
+              backfillRun.state,
+              sourcePartition.estimated_record_count
+          )
+          // Copy the cursor if continuing, otherwise just leave blank to start from beginning.
+          if (request.range_clone_type == RangeCloneType.CONTINUE) {
+            dbRunPartition.pkey_cursor = sourcePartition.pkey_cursor
+          }
+          session.save(dbRunPartition)
+        }
       }
 
       backfillRun.id
     }
 
-    return CreateBackfillResponse(backfillRunId.id)
+    return CloneBackfillResponse(backfillRunId.id)
   }
 
   data class DbData(
-    val serviceId: Id<DbService>,
-    val connectorType: String,
-    val connectorExtraData: String?,
-    val registeredBackfillId: Id<DbRegisteredBackfill>
+      val serviceId: Id<DbService>,
+      val serviceName: String,
+      val connectorType: String,
+      val connectorExtraData: String?,
+      val registeredBackfillId: Id<DbRegisteredBackfill>,
+      val backfillName: String
   )
 
   companion object {
-    private val logger = getLogger<CreateBackfillAction>()
+    private val logger = getLogger<CloneBackfillAction>()
   }
 }

@@ -132,6 +132,8 @@ class DbRunPartition() : DbUnsharded<DbRunPartition>, DbTimestampedEntity {
     this.estimated_record_count = estimated_record_count
   }
 
+  fun backfillRange() = KeyRange(pkey_range_start, pkey_range_end)
+
   fun clearLease() {
     this.lease_token = null
     this.lease_expires_at = Instant.ofEpochSecond(1L)
