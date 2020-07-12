@@ -177,7 +177,7 @@ class CloneFormContainer extends React.Component<
                 />
                 <Radio label="New range" value="NEW" />
               </RadioGroup>
-              {this.state.range_clone_type == "new" && (
+              {this.state.range_clone_type == "NEW" && (
                 <FlexContainer>
                   <H5>Range (optional)</H5>
                   <InputGroup
@@ -358,7 +358,7 @@ class CloneFormContainer extends React.Component<
   }
 
   private nullIfEmpty(str: string) {
-    return str !== null && str.length === 0 ? null : str
+    return str !== undefined && str !== null && str.length === 0 ? null : str
   }
 }
 
