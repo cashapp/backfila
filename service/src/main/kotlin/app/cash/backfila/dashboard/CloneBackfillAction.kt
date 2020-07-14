@@ -177,7 +177,8 @@ class CloneBackfillAction @Inject constructor(
         // Source partitions have to match new partitions.
         val sourcePartitions = sourceBackfill.partitions(session, queryFactory)
         if (partitions.map { it.partition_name }.toSet() != sourcePartitions.map { it.partition_name }.toSet()) {
-          throw BadRequestException("Can't clone backfill ranges from `$id`, newly computed partitions don't match.")
+          throw BadRequestException("Can't clone backfill ranges from `$id`, newly computed partitions don't match." +
+              " Clone with a new range instead.")
         }
 
         for (sourcePartition in sourcePartitions) {
