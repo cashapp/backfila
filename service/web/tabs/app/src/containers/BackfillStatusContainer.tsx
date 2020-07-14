@@ -6,7 +6,16 @@ import {
   mapDispatchToProps,
   mapStateToProps
 } from "../ducks"
-import { Classes, H2, H3, HTMLTable, Tooltip, Spinner } from "@blueprintjs/core"
+import {
+  AnchorButton,
+  Intent,
+  Classes,
+  H2,
+  H3,
+  HTMLTable,
+  Tooltip,
+  Spinner
+} from "@blueprintjs/core"
 import { simpleSelectorGet } from "@misk/simpleredux"
 import { Link } from "react-router-dom"
 import {
@@ -84,6 +93,10 @@ class BackfillStatusContainer extends React.Component<
     this.setState({ editing: {} })
   }
 
+  componentWillUnmount() {
+    clearInterval(this.interval)
+  }
+
   requestStatus() {
     this.props.simpleNetworkGet(
       this.backfillStatusTag,
@@ -131,6 +144,9 @@ class BackfillStatusContainer extends React.Component<
               {status.service_name}
             </Link>
           </H2>
+          <Link to={`/app/backfills/${this.id}/clone`}>
+            <AnchorButton text={"Clone"} intent={Intent.PRIMARY} />
+          </Link>
           <div>
             <HTMLTable>
               <thead></thead>

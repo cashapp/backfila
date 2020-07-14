@@ -19,25 +19,30 @@ import {
   H5,
   Tooltip,
   Classes,
-  Spinner
+  Spinner,
+  Radio,
+  RadioGroup
 } from "@blueprintjs/core"
-import { simpleSelectorGet } from "@misk/simpleredux"
-import { BackfillSelector } from "../components"
 import { FlexContainer } from "@misk/core"
 import { Link } from "react-router-dom"
 import { FormEvent } from "react"
 import { IBackfill } from "../components"
 import { LayoutContainer } from "../containers"
 
-interface CreateFormState {
+interface CloneFormState {
   loading: boolean
   errorText?: string
+
+  statusResponse: any
+
+  backfills: IBackfill[]
   backfill?: IBackfill
   dry_run: boolean
 
   scan_size: number
   batch_size: number
   num_threads: number
+  range_clone_type: string
   pkey_range_start?: string
   pkey_range_end?: string
   extra_sleep_ms: number
@@ -45,70 +50,107 @@ interface CreateFormState {
   parameters: any
 }
 
-class CreateFormContainer extends React.Component<
+class CloneFormContainer extends React.Component<
   IState & IDispatchProps,
-  IState & CreateFormState
+  IState & CloneFormState
 > {
-  private service: string = (this.props as any).match.params.service
-  private registeredBackfills: string = `${this.service}::BackfillRuns`
+  private id: string = (this.props as any).match.params.id
 
   componentDidMount() {
-    this.props.simpleNetworkGet(
-      this.registeredBackfills,
-      `/services/${this.service}/registered-backfills`
-    )
     this.setState({
       loading: false,
       errorText: null,
+
+      statusResponse: null,
+
       backfill: null,
-      dry_run: true,
+
+      dry_run: false,
       scan_size: 10000,
       batch_size: 100,
       num_threads: 1,
+      range_clone_type: "RESTART",
       pkey_range_start: null,
       pkey_range_end: null,
       backoff_schedule: null,
       extra_sleep_ms: 0,
       parameters: {}
     })
+    Axios.get(`/backfills/${this.id}/status`)
+      .then(response => {
+        let params: any = {}
+        Object.keys(response.data.parameters).map(function(key, index) {
+          let value = response.data.parameters[key]
+          params[key] = new Buffer(value).toString("base64")
+        })
+        this.setState({
+          statusResponse: response.data,
+
+          // Initialize these values from the existing backfill data.
+          dry_run: response.data.dry_run,
+          scan_size: response.data.scan_size,
+          batch_size: response.data.batch_size,
+          num_threads: response.data.num_threads,
+          backoff_schedule: response.data.backoff_schedule,
+          extra_sleep_ms: response.data.extra_sleep_ms,
+          parameters: params
+        })
+        this.requestRegisteredBackfills(
+          response.data.service_name,
+          response.data.name
+        )
+      })
+      .catch(error => {
+        console.log(error)
+      })
+  }
+
+  requestRegisteredBackfills(service: string, backfillName: string) {
+    Axios.get(`/services/${service}/registered-backfills`)
+      .then(response => {
+        let selected = response.data.backfills.find(
+          (b: IBackfill) => b.name == backfillName
+        )
+        if (selected) {
+          this.setState({
+            backfills: response.data.backfills,
+            backfill: selected
+          })
+        } else {
+          this.setState({ errorText: "Backfill doesn't exist" })
+        }
+      })
+      .catch(error => {
+        console.log(error)
+      })
   }
 
   render() {
-    let registeredBackfills = simpleSelectorGet(this.props.simpleNetwork, [
-      this.registeredBackfills,
-      "data"
-    ])
-
-    if (!registeredBackfills || !this.state) {
+    if (!this.state || !this.state.backfills) {
       return (
         <LayoutContainer>
-          <H1>Service: {this.service}</H1>
+          <H2>Clone backfill # {this.id}</H2>
           <Spinner />
         </LayoutContainer>
       )
     }
+
     return (
       <LayoutContainer>
         <H1>
           Service:{" "}
-          <Link to={`/app/services/${this.service}`}>{this.service}</Link>
+          <Link to={`/app/services/${this.state.statusResponse.service_name}`}>
+            {this.state.statusResponse.service_name}
+          </Link>
         </H1>
         <div style={{ width: "1000px", margin: "auto" }}>
-          <H2>Create backfill</H2>
+          <H2>
+            Clone backfill{" "}
+            <Link to={`/app/backfills/${this.id}`}>#{this.id}</Link>{" "}
+            {this.state.statusResponse.name}
+          </H2>
 
           <FormGroup>
-            <FlexContainer>
-              <H5>Name</H5>
-              <BackfillSelector
-                backfills={registeredBackfills.backfills}
-                onValueChange={backfill =>
-                  this.setState({
-                    backfill: backfill,
-                    parameters: {}
-                  })
-                }
-              />
-            </FlexContainer>
             <div hidden={!this.state.backfill}>
               Immutable options:
               <Checkbox
@@ -116,27 +158,48 @@ class CreateFormContainer extends React.Component<
                 label={"Dry Run"}
                 onChange={() => this.setState({ dry_run: !this.state.dry_run })}
               />
-              <FlexContainer>
-                <H5>Range (optional)</H5>
-                <InputGroup
-                  id="text-input"
-                  placeholder="Start"
-                  onChange={(event: FormEvent<HTMLElement>) => {
-                    this.setState({
-                      pkey_range_start: (event.target as any).value
-                    })
-                  }}
+              <RadioGroup
+                label="Range treatment"
+                onChange={(event: FormEvent<HTMLElement>) =>
+                  this.setState({
+                    range_clone_type: (event.target as any).value
+                  })
+                }
+                selectedValue={this.state.range_clone_type}
+              >
+                <Radio
+                  label="Same range, restart from beginning"
+                  value="RESTART"
                 />
-                <InputGroup
-                  id="text-input"
-                  placeholder="End"
-                  onChange={(event: FormEvent<HTMLElement>) => {
-                    this.setState({
-                      pkey_range_end: (event.target as any).value
-                    })
-                  }}
+                <Radio
+                  label="Same range, continue from last processed"
+                  value="CONTINUE"
                 />
-              </FlexContainer>
+                <Radio label="New range" value="NEW" />
+              </RadioGroup>
+              {this.state.range_clone_type == "NEW" && (
+                <FlexContainer>
+                  <H5>Range (optional)</H5>
+                  <InputGroup
+                    id="text-input"
+                    placeholder="Start"
+                    onChange={(event: FormEvent<HTMLElement>) => {
+                      this.setState({
+                        pkey_range_start: (event.target as any).value
+                      })
+                    }}
+                  />
+                  <InputGroup
+                    id="text-input"
+                    placeholder="End"
+                    onChange={(event: FormEvent<HTMLElement>) => {
+                      this.setState({
+                        pkey_range_end: (event.target as any).value
+                      })
+                    }}
+                  />
+                </FlexContainer>
+              )}
               Mutable options:
               <FlexContainer>
                 <H5>
@@ -212,6 +275,7 @@ class CreateFormContainer extends React.Component<
                 <InputGroup
                   id="text-input"
                   placeholder="5000,15000,30000"
+                  value={this.state.backoff_schedule}
                   onChange={(event: FormEvent<HTMLElement>) => {
                     this.setState({
                       backoff_schedule: (event.target as any).value
@@ -227,6 +291,11 @@ class CreateFormContainer extends React.Component<
                       <H5>{name}</H5>
                       <InputGroup
                         id="text-input"
+                        value={
+                          this.state.parameters[name]
+                            ? atob(this.state.parameters[name])
+                            : ""
+                        }
                         onChange={(event: FormEvent<HTMLElement>) => {
                           let newParams = Object.assign(
                             {},
@@ -244,12 +313,12 @@ class CreateFormContainer extends React.Component<
               )}
               <Button
                 onClick={() => {
-                  Axios.post(`/services/${this.service}/create`, {
-                    backfill_name: this.state.backfill.name,
+                  Axios.post(`/backfills/${this.id}/clone`, {
                     dry_run: this.state.dry_run,
                     scan_size: this.state.scan_size,
                     batch_size: this.state.batch_size,
                     num_threads: this.state.num_threads,
+                    range_clone_type: this.state.range_clone_type,
                     pkey_range_start: this.nullIfEmpty(
                       this.state.pkey_range_start
                     ),
@@ -276,7 +345,7 @@ class CreateFormContainer extends React.Component<
                 intent={Intent.PRIMARY}
                 loading={this.state.loading}
                 disabled={!this.state.backfill}
-                text={"Create"}
+                text={"Clone"}
               />
             </div>
             {this.state.errorText && (
@@ -293,4 +362,4 @@ class CreateFormContainer extends React.Component<
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(CreateFormContainer)
+export default connect(mapStateToProps, mapDispatchToProps)(CloneFormContainer)
