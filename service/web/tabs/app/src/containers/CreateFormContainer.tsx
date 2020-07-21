@@ -234,7 +234,7 @@ class CreateFormContainer extends React.Component<
                           )
                           let value = (event.target as any).value
                           // The server wants base64
-                          newParams[name] = new Buffer(value).toString("base64")
+                          newParams[name] = this.base64(value)
                           this.setState({ parameters: newParams })
                         }}
                       />
@@ -251,9 +251,11 @@ class CreateFormContainer extends React.Component<
                     batch_size: this.state.batch_size,
                     num_threads: this.state.num_threads,
                     pkey_range_start: this.nullIfEmpty(
-                      this.state.pkey_range_start
+                      this.base64(this.state.pkey_range_start)
                     ),
-                    pkey_range_end: this.nullIfEmpty(this.state.pkey_range_end),
+                    pkey_range_end: this.nullIfEmpty(
+                      this.base64(this.state.pkey_range_end)
+                    ),
                     backoff_schedule: this.nullIfEmpty(
                       this.state.backoff_schedule
                     ),
@@ -290,6 +292,10 @@ class CreateFormContainer extends React.Component<
 
   private nullIfEmpty(str: string) {
     return str !== undefined && str !== null && str.length === 0 ? null : str
+  }
+
+  private base64(str: string) {
+    return str ? btoa(str) : str
   }
 }
 

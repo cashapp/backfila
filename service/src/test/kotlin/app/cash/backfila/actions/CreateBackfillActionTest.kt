@@ -5,11 +5,11 @@ import app.cash.backfila.api.ConfigureServiceAction
 import app.cash.backfila.client.Connectors
 import app.cash.backfila.client.FakeBackfilaClientServiceClient
 import app.cash.backfila.dashboard.CreateBackfillAction
-import app.cash.backfila.dashboard.CreateBackfillRequest
 import app.cash.backfila.fakeCaller
 import app.cash.backfila.protos.clientservice.KeyRange
 import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
 import app.cash.backfila.protos.service.ConfigureServiceRequest
+import app.cash.backfila.protos.service.CreateBackfillRequest
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillRunQuery
 import app.cash.backfila.service.persistence.BackfillState
@@ -35,18 +35,32 @@ class CreateBackfillActionTest {
   @MiskTestModule
   val module: Module = BackfilaTestingModule()
 
-  @Inject lateinit var configureServiceAction: ConfigureServiceAction
-  @Inject lateinit var createBackfillAction: CreateBackfillAction
-  @Inject lateinit var scope: ActionScope
-  @Inject lateinit var queryFactory: Query.Factory
-  @Inject @BackfilaDb lateinit var transacter: Transacter
-  @Inject lateinit var fakeBackfilaClientServiceClient: FakeBackfilaClientServiceClient
+  @Inject
+  lateinit var configureServiceAction: ConfigureServiceAction
+
+  @Inject
+  lateinit var createBackfillAction: CreateBackfillAction
+
+  @Inject
+  lateinit var scope: ActionScope
+
+  @Inject
+  lateinit var queryFactory: Query.Factory
+
+  @Inject
+  @BackfilaDb
+  lateinit var transacter: Transacter
+
+  @Inject
+  lateinit var fakeBackfilaClientServiceClient: FakeBackfilaClientServiceClient
 
   @Test
   fun serviceDoesntExist() {
     scope.fakeCaller(user = "molly") {
       assertThatThrownBy {
-        createBackfillAction.create("deep-fryer", CreateBackfillRequest("abc"))
+        createBackfillAction.create("deep-fryer", CreateBackfillRequest.Builder()
+            .backfill_name("abc")
+            .build())
       }.isInstanceOf(BadRequestException::class.java)
     }
   }
@@ -62,7 +76,9 @@ class CreateBackfillActionTest {
 
     scope.fakeCaller(user = "molly") {
       assertThatThrownBy {
-        createBackfillAction.create("deep-fryer", CreateBackfillRequest("abc"))
+        createBackfillAction.create("deep-fryer", CreateBackfillRequest.Builder()
+            .backfill_name("abc")
+            .build())
       }.isInstanceOf(BadRequestException::class.java)
     }
   }
@@ -79,7 +95,9 @@ class CreateBackfillActionTest {
     }
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create("deep-fryer",
-          CreateBackfillRequest("ChickenSandwich"))
+          CreateBackfillRequest.Builder()
+              .backfill_name("ChickenSandwich")
+              .build())
 
       transacter.transaction { session ->
         val run = queryFactory.newQuery<BackfillRunQuery>().uniqueResult(session)
@@ -132,9 +150,9 @@ class CreateBackfillActionTest {
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create(
           "deep-fryer",
-          CreateBackfillRequest(
-              "ChickenSandwich"
-          )
+          CreateBackfillRequest.Builder()
+              .backfill_name("ChickenSandwich")
+              .build()
       )
 
       transacter.transaction { session ->
@@ -147,7 +165,8 @@ class CreateBackfillActionTest {
     }
   }
 
-  @Test fun prepareWithExtraParametersOverride() {
+  @Test
+  fun prepareWithExtraParametersOverride() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(ConfigureServiceRequest.Builder()
           .backfills(listOf(
@@ -172,10 +191,10 @@ class CreateBackfillActionTest {
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create(
           "deep-fryer",
-          CreateBackfillRequest(
-              "ChickenSandwich",
-              parameter_map = mapOf("idempotence_token" to "ketchup".encodeUtf8())
-          )
+          CreateBackfillRequest.Builder()
+              .backfill_name("ChickenSandwich")
+              .parameter_map(mapOf("idempotence_token" to "ketchup".encodeUtf8()))
+              .build()
       )
 
       transacter.transaction { session ->

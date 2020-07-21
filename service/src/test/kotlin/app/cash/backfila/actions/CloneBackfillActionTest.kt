@@ -7,13 +7,13 @@ import app.cash.backfila.client.FakeBackfilaClientServiceClient
 import app.cash.backfila.dashboard.CloneBackfillAction
 import app.cash.backfila.dashboard.CloneBackfillRequest
 import app.cash.backfila.dashboard.CreateBackfillAction
-import app.cash.backfila.dashboard.CreateBackfillRequest
 import app.cash.backfila.dashboard.GetBackfillStatusAction
 import app.cash.backfila.dashboard.RangeCloneType
 import app.cash.backfila.fakeCaller
 import app.cash.backfila.protos.clientservice.KeyRange
 import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
 import app.cash.backfila.protos.service.ConfigureServiceRequest
+import app.cash.backfila.protos.service.CreateBackfillRequest
 import app.cash.backfila.protos.service.Parameter
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillState
@@ -86,16 +86,16 @@ class CloneBackfillActionTest {
   fun `different values`() {
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create("deep-fryer",
-          CreateBackfillRequest(
-              backfill_name = "ChickenSandwich",
-              batch_size = 100,
-              scan_size = 200,
-              backoff_schedule = "1000",
-              num_threads = 1,
-              dry_run = true,
-              extra_sleep_ms = 10,
-              parameter_map = mapOf("param1" to "val1".encodeUtf8())
-          )
+          CreateBackfillRequest.Builder()
+              .backfill_name("ChickenSandwich")
+              .batch_size(100)
+              .scan_size(200)
+              .backoff_schedule("1000")
+              .num_threads(1)
+              .dry_run(true)
+              .extra_sleep_ms(10)
+              .parameter_map(mapOf("param1" to "val1".encodeUtf8()))
+              .build()
       )
 
       val cloneResponse = cloneBackfillAction.create(response.id,
@@ -137,9 +137,9 @@ class CloneBackfillActionTest {
               .build())
 
       val response = createBackfillAction.create("deep-fryer",
-          CreateBackfillRequest(
-              backfill_name = "ChickenSandwich"
-          )
+          CreateBackfillRequest.Builder()
+              .backfill_name("ChickenSandwich")
+              .build()
       )
 
       // Simulate progress
@@ -189,9 +189,9 @@ class CloneBackfillActionTest {
               .build())
 
       val response = createBackfillAction.create("deep-fryer",
-          CreateBackfillRequest(
-              backfill_name = "ChickenSandwich"
-          )
+          CreateBackfillRequest.Builder()
+              .backfill_name("ChickenSandwich")
+              .build()
       )
 
       // Simulate progress
@@ -241,9 +241,9 @@ class CloneBackfillActionTest {
               .build())
 
       val response = createBackfillAction.create("deep-fryer",
-          CreateBackfillRequest(
-              backfill_name = "ChickenSandwich"
-          )
+          CreateBackfillRequest.Builder()
+              .backfill_name("ChickenSandwich")
+              .build()
       )
 
       // Simulate progress
@@ -293,9 +293,9 @@ class CloneBackfillActionTest {
               .build())
 
       val response = createBackfillAction.create("deep-fryer",
-          CreateBackfillRequest(
-              backfill_name = "ChickenSandwich"
-          )
+          CreateBackfillRequest.Builder()
+              .backfill_name("ChickenSandwich")
+              .build()
       )
 
       // Simulate progress
@@ -340,9 +340,9 @@ class CloneBackfillActionTest {
               .build())
 
       val response = createBackfillAction.create("deep-fryer",
-          CreateBackfillRequest(
-              backfill_name = "ChickenSandwich"
-          )
+          CreateBackfillRequest.Builder()
+              .backfill_name("ChickenSandwich")
+              .build()
       )
 
       // Simulate progress

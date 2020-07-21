@@ -3,6 +3,7 @@ package app.cash.backfila.dashboard
 import app.cash.backfila.client.ConnectorProvider
 import app.cash.backfila.protos.clientservice.KeyRange
 import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
+import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.DbBackfillRun
@@ -63,19 +64,7 @@ class CloneBackfillAction @Inject constructor(
     private val connectorProvider: ConnectorProvider
 ) : WebAction {
 
-  @Post("/backfills/{id}/clone")
-  @RequestContentType(MediaTypes.APPLICATION_JSON)
-  @ResponseContentType(MediaTypes.APPLICATION_JSON)
-  // TODO allow any user
-  @Authenticated(capabilities = ["users"])
-  fun create(
-      @PathParam id: Long,
-      @RequestBody request: CloneBackfillRequest
-  ): CloneBackfillResponse {
-    // TODO check user has permissions for this service with access api
-
-    logger.info { "Clone backfill $id by ${caller.get()?.user}" }
-
+  fun validate(request: CloneBackfillRequest) {
     if (request.num_threads < 1) {
       throw BadRequestException("num_threads must be >= 1")
     }
@@ -96,6 +85,22 @@ class CloneBackfillAction @Inject constructor(
         throw BadRequestException("backoff_schedule must be a comma separated list of integers")
       }
     }
+  }
+
+  @Post("/backfills/{id}/clone")
+  @RequestContentType(MediaTypes.APPLICATION_JSON)
+  @ResponseContentType(MediaTypes.APPLICATION_JSON)
+  // TODO allow any user
+  @Authenticated(capabilities = ["users"])
+  fun create(
+      @PathParam id: Long,
+      @RequestBody request: CloneBackfillRequest
+  ): CloneBackfillResponse {
+    // TODO check user has permissions for this service with access api
+
+    logger.info { "Clone backfill $id by ${caller.get()?.user}" }
+
+    validate(request)
 
     val dbData = transacter.transaction { session ->
       val sourceBackfill = session.loadOrNull<DbBackfillRun>(Id(id))
@@ -111,36 +116,9 @@ class CloneBackfillAction @Inject constructor(
       )
     }
 
-    val client = connectorProvider.clientProvider(dbData.connectorType)
-        .clientFor(dbData.serviceName, dbData.connectorExtraData)
-    val prepareBackfillResponse = try {
-      client.prepareBackfill(
-          PrepareBackfillRequest(
-              dbData.registeredBackfillId.toString(),
-              dbData.backfillName,
-              KeyRange(
-                  request.pkey_range_start?.encodeUtf8(),
-                  request.pkey_range_end?.encodeUtf8()
-              ),
-              request.parameter_map,
-              request.dry_run
-          )
-      )
-    } catch (e: Exception) {
-      logger.info(e) { "PrepareBackfill on `${dbData.serviceName}` failed" }
-      throw BadRequestException("PrepareBackfill on `${dbData.serviceName}` failed: ${e.message}", e)
-    }
+    val prepareBackfillResponse = prepare(dbData, request)
+
     val partitions = prepareBackfillResponse.partitions
-    if (partitions.isEmpty()) {
-      throw BadRequestException("PrepareBackfill returned no partitions")
-    }
-    if (partitions.any { it.partition_name == null }) {
-      throw BadRequestException("PrepareBackfill returned unnamed partitions")
-    }
-    if (partitions.distinctBy { it.partition_name }.size != partitions.size) {
-      throw BadRequestException("PrepareBackfill did not return distinct partition names:" +
-          " ${partitions.map { it.partition_name }}")
-    }
 
     val combinedParams = request.parameter_map.plus(prepareBackfillResponse.parameters)
 
@@ -201,6 +179,40 @@ class CloneBackfillAction @Inject constructor(
     }
 
     return CloneBackfillResponse(backfillRunId.id)
+  }
+
+  private fun prepare(dbData: DbData, request: CloneBackfillRequest): PrepareBackfillResponse {
+    val client = connectorProvider.clientProvider(dbData.connectorType)
+        .clientFor(dbData.serviceName, dbData.connectorExtraData)
+    val prepareBackfillResponse = try {
+      client.prepareBackfill(
+          PrepareBackfillRequest(
+              dbData.registeredBackfillId.toString(),
+              dbData.backfillName,
+              KeyRange(
+                  request.pkey_range_start?.encodeUtf8(),
+                  request.pkey_range_end?.encodeUtf8()
+              ),
+              request.parameter_map,
+              request.dry_run
+          )
+      )
+    } catch (e: Exception) {
+      logger.info(e) { "PrepareBackfill on `${dbData.serviceName}` failed" }
+      throw BadRequestException("PrepareBackfill on `${dbData.serviceName}` failed: ${e.message}", e)
+    }
+    val partitions = prepareBackfillResponse.partitions
+    if (partitions.isEmpty()) {
+      throw BadRequestException("PrepareBackfill returned no partitions")
+    }
+    if (partitions.any { it.partition_name == null }) {
+      throw BadRequestException("PrepareBackfill returned unnamed partitions")
+    }
+    if (partitions.distinctBy { it.partition_name }.size != partitions.size) {
+      throw BadRequestException("PrepareBackfill did not return distinct partition names:" +
+          " ${partitions.map { it.partition_name }}")
+    }
+    return prepareBackfillResponse
   }
 
   data class DbData(

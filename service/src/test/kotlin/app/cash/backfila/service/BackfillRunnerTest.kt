@@ -5,7 +5,6 @@ import app.cash.backfila.api.ConfigureServiceAction
 import app.cash.backfila.client.Connectors.ENVOY
 import app.cash.backfila.client.FakeBackfilaClientServiceClient
 import app.cash.backfila.dashboard.CreateBackfillAction
-import app.cash.backfila.dashboard.CreateBackfillRequest
 import app.cash.backfila.dashboard.GetBackfillStatusAction
 import app.cash.backfila.dashboard.StartBackfillAction
 import app.cash.backfila.dashboard.StartBackfillRequest
@@ -18,6 +17,7 @@ import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.KeyRange
 import app.cash.backfila.protos.clientservice.RunBatchResponse
 import app.cash.backfila.protos.service.ConfigureServiceRequest
+import app.cash.backfila.protos.service.CreateBackfillRequest
 import app.cash.backfila.protos.service.Parameter
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillState
@@ -593,13 +593,13 @@ class BackfillRunnerTest {
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create(
           "deep-fryer",
-          CreateBackfillRequest(
-              "ChickenSandwich",
-              num_threads = numThreads,
-              backoff_schedule = "1000",
-              extra_sleep_ms = extraSleepMs,
-              parameter_map = mapOf("cheese" to "cheddar".encodeUtf8())
-          )
+          CreateBackfillRequest.Builder()
+              .backfill_name("ChickenSandwich")
+              .num_threads(numThreads)
+              .backoff_schedule("1000")
+              .extra_sleep_ms(extraSleepMs)
+              .parameter_map(mapOf("cheese" to "cheddar".encodeUtf8()))
+              .build()
       )
       val id = response.id
       startBackfillAction.start(id, StartBackfillRequest())

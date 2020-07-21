@@ -4,7 +4,6 @@ import app.cash.backfila.BackfilaTestingModule
 import app.cash.backfila.api.ConfigureServiceAction
 import app.cash.backfila.client.Connectors
 import app.cash.backfila.dashboard.CreateBackfillAction
-import app.cash.backfila.dashboard.CreateBackfillRequest
 import app.cash.backfila.dashboard.GetBackfillRunsAction
 import app.cash.backfila.dashboard.GetBackfillStatusAction
 import app.cash.backfila.dashboard.StartBackfillAction
@@ -13,6 +12,7 @@ import app.cash.backfila.dashboard.StopBackfillAction
 import app.cash.backfila.dashboard.StopBackfillRequest
 import app.cash.backfila.fakeCaller
 import app.cash.backfila.protos.service.ConfigureServiceRequest
+import app.cash.backfila.protos.service.CreateBackfillRequest
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.DbBackfillRun
@@ -37,15 +37,33 @@ class StartStopBackfillActionTest {
   @MiskTestModule
   val module: Module = BackfilaTestingModule()
 
-  @Inject lateinit var configureServiceAction: ConfigureServiceAction
-  @Inject lateinit var createBackfillAction: CreateBackfillAction
-  @Inject lateinit var startBackfillAction: StartBackfillAction
-  @Inject lateinit var stopBackfillAction: StopBackfillAction
-  @Inject lateinit var getBackfillRunsAction: GetBackfillRunsAction
-  @Inject lateinit var getBackfillStatusAction: GetBackfillStatusAction
-  @Inject lateinit var queryFactory: Query.Factory
-  @Inject lateinit var scope: ActionScope
-  @Inject @BackfilaDb lateinit var transacter: Transacter
+  @Inject
+  lateinit var configureServiceAction: ConfigureServiceAction
+
+  @Inject
+  lateinit var createBackfillAction: CreateBackfillAction
+
+  @Inject
+  lateinit var startBackfillAction: StartBackfillAction
+
+  @Inject
+  lateinit var stopBackfillAction: StopBackfillAction
+
+  @Inject
+  lateinit var getBackfillRunsAction: GetBackfillRunsAction
+
+  @Inject
+  lateinit var getBackfillStatusAction: GetBackfillStatusAction
+
+  @Inject
+  lateinit var queryFactory: Query.Factory
+
+  @Inject
+  lateinit var scope: ActionScope
+
+  @Inject
+  @BackfilaDb
+  lateinit var transacter: Transacter
 
   @Test
   fun startAndStop() {
@@ -63,7 +81,10 @@ class StartStopBackfillActionTest {
       assertThat(backfillRuns.running_backfills).hasSize(0)
 
       val response = createBackfillAction.create("deep-fryer",
-          CreateBackfillRequest("ChickenSandwich"))
+          CreateBackfillRequest.Builder()
+              .backfill_name("ChickenSandwich")
+              .build()
+      )
 
       backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
       assertThat(backfillRuns.paused_backfills).hasSize(1)
@@ -120,11 +141,15 @@ class StartStopBackfillActionTest {
       repeat(15) {
         createBackfillAction.create(
             "deep-fryer",
-            CreateBackfillRequest("ChickenSandwich")
+            CreateBackfillRequest.Builder()
+                .backfill_name("ChickenSandwich")
+                .build()
         )
         createBackfillAction.create(
             "deep-fryer",
-            CreateBackfillRequest("BeefSandwich")
+            CreateBackfillRequest.Builder()
+                .backfill_name("BeefSandwich")
+                .build()
         )
       }
       val backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
@@ -157,7 +182,10 @@ class StartStopBackfillActionTest {
     }
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create("deep-fryer",
-          CreateBackfillRequest("ChickenSandwich"))
+          CreateBackfillRequest.Builder()
+              .backfill_name("ChickenSandwich")
+              .build()
+      )
       val id = response.id
 
       assertThatThrownBy {
@@ -178,7 +206,10 @@ class StartStopBackfillActionTest {
     }
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create("deep-fryer",
-          CreateBackfillRequest("ChickenSandwich"))
+          CreateBackfillRequest.Builder()
+              .backfill_name("ChickenSandwich")
+              .build()
+      )
       val id = response.id
       startBackfillAction.start(id, StartBackfillRequest())
 
@@ -205,8 +236,12 @@ class StartStopBackfillActionTest {
           .build())
     }
     scope.fakeCaller(user = "molly") {
-      val response = createBackfillAction.create("deep-fryer",
-          CreateBackfillRequest("ChickenSandwich"))
+      val response = createBackfillAction.create(
+          "deep-fryer",
+          CreateBackfillRequest.Builder()
+              .backfill_name("ChickenSandwich")
+              .build()
+      )
       val id = response.id
       assertThatThrownBy {
         stopBackfillAction.stop(id, StopBackfillRequest())
@@ -225,8 +260,12 @@ class StartStopBackfillActionTest {
           .build())
     }
     scope.fakeCaller(user = "molly") {
-      val response = createBackfillAction.create("deep-fryer",
-          CreateBackfillRequest("ChickenSandwich"))
+      val response = createBackfillAction.create(
+          "deep-fryer",
+          CreateBackfillRequest.Builder()
+              .backfill_name("ChickenSandwich")
+              .build()
+      )
       val id = response.id
 
       transacter.transaction { session ->

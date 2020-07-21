@@ -4,19 +4,19 @@ import app.cash.backfila.BackfilaTestingModule
 import app.cash.backfila.api.ConfigureServiceAction
 import app.cash.backfila.client.Connectors
 import app.cash.backfila.dashboard.CreateBackfillAction
-import app.cash.backfila.dashboard.CreateBackfillRequest
 import app.cash.backfila.dashboard.GetServicesAction
 import app.cash.backfila.dashboard.StartBackfillAction
 import app.cash.backfila.dashboard.StartBackfillRequest
 import app.cash.backfila.fakeCaller
 import app.cash.backfila.protos.service.ConfigureServiceRequest
+import app.cash.backfila.protos.service.CreateBackfillRequest
 import com.google.inject.Module
-import javax.inject.Inject
 import misk.scope.ActionScope
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import javax.inject.Inject
 
 @MiskTest(startService = true)
 class GetServicesActionTest {
@@ -80,7 +80,9 @@ class GetServicesActionTest {
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create(
           "deep-fryer",
-          CreateBackfillRequest("ChickenSandwich")
+          CreateBackfillRequest.Builder()
+              .backfill_name("ChickenSandwich")
+              .build()
       )
       val id = response.id
       startBackfillAction.start(id, StartBackfillRequest())
