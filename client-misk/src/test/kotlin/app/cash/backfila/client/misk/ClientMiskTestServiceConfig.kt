@@ -12,10 +12,10 @@ import misk.hibernate.Id
 import misk.inject.KAbstractModule
 
 // TODO(mikepaw) Not sure we even want this anymore. Maybe I'll replace this with an injector test of some kind?
-class DummyBackfill : Backfill<DbMenu, Id<DbMenu>>() {
+class DummyBackfill : Backfill<DbMenu, Id<DbMenu>, NoParameters>() {
   override fun partitionProvider() = TODO()
 
-  override fun backfillCriteria(config: BackfillConfig) = TODO()
+  override fun backfillCriteria(config: BackfillConfig<NoParameters>) = TODO()
 }
 
 fun main(args: Array<String>) {

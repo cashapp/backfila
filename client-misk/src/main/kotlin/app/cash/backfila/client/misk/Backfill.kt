@@ -1,6 +1,5 @@
 package app.cash.backfila.client.misk
 
-import app.cash.backfila.protos.service.Parameter
 import com.squareup.moshi.Types
 import java.lang.reflect.ParameterizedType
 import kotlin.reflect.KClass
@@ -11,7 +10,7 @@ import misk.inject.typeLiteral
 /**
  * Implement this for each or your backfills. Install with your [BackfilaModule].
  */
-abstract class Backfill<E : DbEntity<E>, Pkey : Any> {
+abstract class Backfill<E : DbEntity<E>, Pkey : Any, Param : Any> {
   val entityClass: KClass<E>
   val pkeyClass: KClass<Pkey>
 
@@ -23,7 +22,7 @@ abstract class Backfill<E : DbEntity<E>, Pkey : Any> {
     // Like MyBackfill.
     val thisType = this::class.typeLiteral()
 
-    // Like Backfill<MyEntity, Id<MyEntity>.
+    // Like Backfill<MyEntity, Id<MyEntity>, Parameters>.
     val supertype = thisType.getSupertype(
         Backfill::class.java).type as ParameterizedType
 
@@ -37,13 +36,6 @@ abstract class Backfill<E : DbEntity<E>, Pkey : Any> {
   }
 
   /**
-   * Returns this backfill's available parameters. These are sent to the Backfila service which will
-   * offer fields for users to type values in for each parameter.
-   */
-  open val parameters: List<Parameter>
-    get() = listOf()
-
-  /**
    * Returns an partition provider that is used for database connectivity.
    */
   abstract fun partitionProvider(): PartitionProvider
@@ -53,7 +45,7 @@ abstract class Backfill<E : DbEntity<E>, Pkey : Any> {
    *
    * This must return a new instance of Query in every invocation.
    */
-  abstract fun backfillCriteria(config: BackfillConfig): Query<E>
+  abstract fun backfillCriteria(config: BackfillConfig<Param>): Query<E>
 
   /**
    * The name of the column that the backfill is keyed off of. Usually the primary key of the table.
@@ -71,13 +63,13 @@ abstract class Backfill<E : DbEntity<E>, Pkey : Any> {
    * Override this and throw an exception to prevent the backfill from being created.
    * This is also a good place to do any prep work before batches are run.
    */
-  open fun validate(config: BackfillConfig) {}
+  open fun validate(config: BackfillConfig<Param>) {}
 
   /**
    * Called for each batch of matching records.
    * Override in a backfill to process all records in a batch.
    */
-  open fun runBatch(pkeys: List<Pkey>, config: BackfillConfig) {
+  open fun runBatch(pkeys: List<Pkey>, config: BackfillConfig<Param>) {
     pkeys.forEach { runOne(it, config) }
   }
 
@@ -85,6 +77,11 @@ abstract class Backfill<E : DbEntity<E>, Pkey : Any> {
    * Called for each matching record.
    * Override in a backfill to process one record at a time.
    */
-  open fun runOne(pkey: Pkey, config: BackfillConfig) {
+  open fun runOne(pkey: Pkey, config: BackfillConfig<Param>) {
   }
 }
+
+/**
+ * Placeholder class to represent when a backfill has no Parameters.
+ */
+class NoParameters
