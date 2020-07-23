@@ -96,7 +96,7 @@ fun main(args: Array<String>) {
                   mapOf("backfila-001" to DataSourceClusterConfig(
                       writer = DataSourceConfig(
                           type = DataSourceType.MYSQL,
-                          database = "backfila_test",
+                          database = "backfila_development",
                           username = "root",
                           migrations_resource = "classpath:/migrations"
                       ),
