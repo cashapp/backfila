@@ -11,6 +11,7 @@ import misk.hibernate.Transacter
 import misk.hibernate.loadOrNull
 import misk.security.authz.Authenticated
 import misk.web.Get
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.PathParam
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
@@ -57,6 +58,7 @@ class GetBackfillStatusAction @Inject constructor(
   private val queryFactory: Query.Factory
 ) : WebAction {
   @Get("/backfills/{id}/status")
+  @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   // TODO allow any user

@@ -9,6 +9,7 @@ import misk.hibernate.Transacter
 import misk.hibernate.loadOrNull
 import misk.security.authz.Authenticated
 import misk.web.Get
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.PathParam
 import misk.web.Response
 import misk.web.ResponseBody
@@ -27,6 +28,7 @@ class ViewLogsAction @Inject constructor(
   private val viewLogsUrlProvider: ViewLogsUrlProvider
 ) : WebAction {
   @Get("/backfills/{id}/view-logs")
+  @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
   @Authenticated
   fun viewLogs(
     @PathParam id: Long

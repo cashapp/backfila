@@ -21,6 +21,7 @@ import misk.hibernate.pagination.newPager
 import misk.logging.getLogger
 import misk.security.authz.Authenticated
 import misk.web.Get
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.PathParam
 import misk.web.QueryParam
 import misk.web.ResponseContentType
@@ -53,6 +54,7 @@ class GetBackfillRunsAction @Inject constructor(
   private val queryFactory: Query.Factory
 ) : WebAction {
   @Get("/services/{service}/backfill-runs")
+  @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Authenticated
   fun backfillRuns(

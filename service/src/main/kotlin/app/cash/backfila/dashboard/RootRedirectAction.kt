@@ -3,6 +3,7 @@ package app.cash.backfila.dashboard
 import java.net.HttpURLConnection
 import misk.security.authz.Authenticated
 import misk.web.Get
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.Response
 import misk.web.ResponseBody
 import misk.web.actions.WebAction
@@ -11,6 +12,7 @@ import okhttp3.Headers
 
 class RootRedirectAction : WebAction {
   @Get("/")
+  @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
   @Authenticated
   fun root(): Response<ResponseBody> {
     return Response(

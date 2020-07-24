@@ -10,6 +10,7 @@ import misk.hibernate.newQuery
 import misk.logging.getLogger
 import misk.security.authz.Authenticated
 import misk.web.Get
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.PathParam
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
@@ -27,6 +28,7 @@ class GetRegisteredBackfillsAction @Inject constructor(
   private val queryFactory: Query.Factory
 ) : WebAction {
   @Get("/services/{service}/registered-backfills")
+  @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Authenticated
   fun backfills(

@@ -12,6 +12,7 @@ import misk.logging.getLogger
 import misk.scope.ActionScoped
 import misk.security.authz.Authenticated
 import misk.web.Get
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
@@ -33,6 +34,7 @@ class GetServicesAction @Inject constructor(
   )
 
   @Get("/services")
+  @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Authenticated
   fun services(): GetServicesResponse {

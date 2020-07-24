@@ -10,6 +10,7 @@ import javax.inject.Inject
 import misk.logging.getLogger
 import misk.security.authz.Authenticated
 import misk.web.Post
+import misk.web.ConcurrencyLimitsOptOut
 import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
@@ -20,6 +21,7 @@ internal class PrepareBackfillAction @Inject constructor(
   private val operatorFactory: BackfillOperator.Factory
 ) : WebAction {
   @Post("/backfila/prepare-backfill")
+  @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
   @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
   @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)
   @Authenticated(services = ["backfila"])
@@ -39,6 +41,7 @@ internal class GetNextBatchRangeAction @Inject constructor(
   private val operatorFactory: BackfillOperator.Factory
 ) : WebAction {
   @Post("/backfila/get-next-batch-range")
+  @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
   @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
   @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)
   @Authenticated(services = ["backfila"])
@@ -69,6 +72,7 @@ internal class RunBatchAction @Inject constructor(
   private val operatorFactory: BackfillOperator.Factory
 ) : WebAction {
   @Post("/backfila/run-batch")
+  @ConcurrencyLimitsOptOut // TODO: Remove after 2020-08-01 (or use @AvailableWhenDegraded).
   @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
   @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)
   @Authenticated(services = ["backfila"])
