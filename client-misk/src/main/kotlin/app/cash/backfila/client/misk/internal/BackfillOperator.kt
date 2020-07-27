@@ -1,8 +1,8 @@
 package app.cash.backfila.client.misk.internal
 
 import app.cash.backfila.client.misk.Backfill
-import app.cash.backfila.client.misk.BackfillConfig
 import app.cash.backfila.client.misk.ForBackfila
+import app.cash.backfila.client.misk.NoParameters
 import app.cash.backfila.client.misk.PkeySqlAdapter
 import app.cash.backfila.client.misk.internal.BackfillOperator.Factory
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
@@ -20,6 +20,13 @@ import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
 import com.google.common.collect.ImmutableList
 import com.google.inject.Injector
+import java.util.ArrayList
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
+import javax.persistence.criteria.Path
+import javax.persistence.criteria.Root
+import kotlin.reflect.KClass
 import misk.exceptions.BadRequestException
 import misk.hibernate.DbEntity
 import misk.hibernate.Id
@@ -30,13 +37,6 @@ import misk.hibernate.Query
 import misk.logging.getLogger
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
-import java.util.ArrayList
-import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
-import javax.persistence.criteria.Path
-import javax.persistence.criteria.Root
-import kotlin.reflect.KClass
 
 /**
  * Operates on a backfill using Hibernate 5.x entities. Create instances with [Factory].
@@ -44,11 +44,14 @@ import kotlin.reflect.KClass
  * @param <E> Entity class being backfilled. Determines the table that is iterated.
  * @param <Pkey> The type of the primary key for the backfill, i.e. the value being iterated on.
  * Usually an Id<E>.
+ * @param <Param> A class wrapping the parameters that come from backfila. The default constructor
+ * is used to specify the parameters and construct the class. Usually a data class or [NoParameters].
  */
-internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructor(
-  val backfill: Backfill<E, Pkey>,
+internal class BackfillOperator<E : DbEntity<E>, Pkey : Any, Param : Any> internal constructor(
+  val backfill: Backfill<E, Pkey, Param>,
   factory: Factory
 ) {
+  private val parametersOperator = BackfilaParametersOperator<Param>(backfill::class)
   private val partitionProvider = backfill.partitionProvider()
   private val boundingRangeStrategy = partitionProvider.boundingRangeStrategy<E, Pkey>()
   private var pkeySqlAdapter: PkeySqlAdapter = factory.pkeySqlAdapter
@@ -82,7 +85,8 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
   fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
     validateRange(request.range)
 
-    backfill.validate(BackfillConfig(request.parameters, request.dry_run))
+    backfill.validate(parametersOperator.constructBackfillConfig(
+        request.parameters, request.dry_run))
 
     return PrepareBackfillResponse.Builder()
         .partitions(partitionProvider.names(request).map { partitionForShard(it, request.range) })
@@ -164,7 +168,8 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
     private val batchSize: Long = request.batch_size
     private val scanSize: Long = request.scan_size
     private val backfillRange: KeyRange = request.backfill_range
-    private val config: BackfillConfig = BackfillConfig(request.parameters, request.dry_run)
+    private val config = parametersOperator.constructBackfillConfig(
+        request.parameters, request.dry_run)
     private val precomputing: Boolean = request.precomputing == true
 
     // Initialized from the request and gets updated as batches are returned.
@@ -275,8 +280,8 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
   }
 
   fun runBatch(request: RunBatchRequest): RunBatchResponse {
-    val config = BackfillConfig(request.parameters,
-        request.dry_run)
+    val config = parametersOperator.constructBackfillConfig(
+        request.parameters, request.dry_run)
 
     val pkeys = partitionProvider.transaction(request.partition_name) { session ->
       val minId = Id<E>(request.batch_range.start.utf8().toLong())
@@ -297,7 +302,7 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
     return RunBatchResponse.Builder().build()
   }
 
-  private fun Backfill<*, *>.getPrimaryKeyPath(queryRoot: Root<*>): Path<Number> {
+  private fun Backfill<*, *, *>.getPrimaryKeyPath(queryRoot: Root<*>): Path<Number> {
     val fields = primaryKeyHibernateName().split('.')
     var path = queryRoot as Path<Number>
     for (field in fields) {
@@ -309,7 +314,7 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
   @Singleton
   class Factory @Inject constructor(
     private val injector: Injector,
-    @ForBackfila private val backfills: MutableMap<String, KClass<out Backfill<*, *>>>,
+    @ForBackfila private val backfills: MutableMap<String, KClass<out Backfill<*, *, *>>>,
     internal var pkeySqlAdapter: PkeySqlAdapter,
     internal var queryFactory: Query.Factory
   ) {
@@ -318,12 +323,12 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
      * instances of the same backfill class, but the config is immutable per id so it is safe to
      * cache even if the backfill stores some state.
      */
-    private val instanceCache: Cache<String, Backfill<*, *>> = CacheBuilder.newBuilder()
+    private val instanceCache: Cache<String, Backfill<*, *, *>> = CacheBuilder.newBuilder()
         .expireAfterAccess(10, TimeUnit.MINUTES)
         .build()
 
     /** Creates Backfill instances. Each backfill ID gets a new Backfill instance. */
-    private fun getBackfill(name: String, backfillId: String): Backfill<*, *> {
+    private fun getBackfill(name: String, backfillId: String): Backfill<*, *, *> {
       return instanceCache.get(backfillId) {
         val backfillClass = backfills[name]
         if (backfillClass == null) {
@@ -334,13 +339,13 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
       }
     }
 
-    fun <E : DbEntity<E>, Pkey : Any> create(backfill: Backfill<E, Pkey>) =
+    fun <E : DbEntity<E>, Pkey : Any, Param : Any> create(backfill: Backfill<E, Pkey, Param>) =
         BackfillOperator(backfill, this)
 
-    fun create(backfillName: String, backfillId: String): BackfillOperator<*, *> {
+    fun create(backfillName: String, backfillId: String): BackfillOperator<*, *, *> {
       @Suppress("UNCHECKED_CAST") // We don't know the types statically, so fake them.
       val backfill = getBackfill(backfillName, backfillId)
-          as Backfill<DbPlaceholder, Any>
+          as Backfill<DbPlaceholder, Any, Any>
 
       return create(backfill)
     }
@@ -352,6 +357,6 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any> internal constructo
   }
 
   companion object {
-    private val logger = getLogger<BackfillOperator<*, *>>()
+    private val logger = getLogger<BackfillOperator<*, *, *>>()
   }
 }

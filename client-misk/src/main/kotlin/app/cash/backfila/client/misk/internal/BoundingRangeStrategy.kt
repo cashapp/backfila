@@ -4,6 +4,8 @@ import app.cash.backfila.client.misk.Backfill
 import app.cash.backfila.client.misk.PartitionProvider
 import app.cash.backfila.protos.clientservice.KeyRange
 import com.google.common.collect.Ordering
+import javax.persistence.Table
+import kotlin.streams.toList
 import misk.hibernate.DbEntity
 import misk.hibernate.Keyspace
 import misk.hibernate.Session
@@ -11,8 +13,6 @@ import misk.hibernate.Transacter
 import misk.hibernate.shards
 import misk.hibernate.transaction
 import okio.ByteString
-import javax.persistence.Table
-import kotlin.streams.toList
 
 interface BoundingRangeStrategy<E : DbEntity<E>, Pkey : Any> {
   /**
@@ -21,7 +21,7 @@ interface BoundingRangeStrategy<E : DbEntity<E>, Pkey : Any> {
    * Returns null if there is are no more records left in the table.
    */
   fun computeBoundingRangeMax(
-    backfill: Backfill<E, Pkey>,
+    backfill: Backfill<E, Pkey, *>,
     partitionName: String,
     previousEndKey: ByteString?,
     backfillRange: KeyRange,
@@ -33,7 +33,7 @@ class UnshardedHibernateBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any> (
   private val partitionProvider: PartitionProvider
 ) : BoundingRangeStrategy<E, Pkey> {
   override fun computeBoundingRangeMax(
-    backfill: Backfill<E, Pkey>,
+    backfill: Backfill<E, Pkey, *>,
     partitionName: String,
     previousEndKey: ByteString?,
     backfillRange: KeyRange,
@@ -49,7 +49,7 @@ class VitessShardedBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any> (
   private val partitionProvider: PartitionProvider
 ) : BoundingRangeStrategy<E, Pkey> {
   override fun computeBoundingRangeMax(
-    backfill: Backfill<E, Pkey>,
+    backfill: Backfill<E, Pkey, *>,
     partitionName: String,
     previousEndKey: ByteString?,
     backfillRange: KeyRange,
@@ -79,7 +79,7 @@ class VitessSingleCursorBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any> (
    * distributed across all shards.
    */
   override fun computeBoundingRangeMax(
-    backfill: Backfill<E, Pkey>,
+    backfill: Backfill<E, Pkey, *>,
     partitionName: String,
     previousEndKey: ByteString?,
     backfillRange: KeyRange,
@@ -100,7 +100,7 @@ class VitessSingleCursorBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any> (
 class SingleCursorVitess
 
 private fun <E : DbEntity<E>, Pkey : Any> selectMaxBound(
-  backfill: Backfill<E, Pkey>,
+  backfill: Backfill<E, Pkey, *>,
   session: Session,
   schemaAndTable: String,
   previousEndKey: ByteString?,
@@ -128,7 +128,7 @@ private fun <E : DbEntity<E>, Pkey : Any> selectMaxBound(
   return max as Pkey? // I think we are always getting a Pkey here so the cast should be safe.
 }
 
-private fun <E : DbEntity<E>, Pkey : Any> schemaAndTable(backfill: Backfill<E, Pkey>): String {
+private fun <E : DbEntity<E>, Pkey : Any> schemaAndTable(backfill: Backfill<E, Pkey, *>): String {
   val tableAnnotation = backfill.entityClass.java.getAnnotation(Table::class.java)
   val schema = tableAnnotation.schema
   val table = tableAnnotation.name
@@ -138,7 +138,7 @@ private fun <E : DbEntity<E>, Pkey : Any> schemaAndTable(backfill: Backfill<E, P
   }
 }
 
-private fun <E : DbEntity<E>, Pkey : Any> onlyTable(backfill: Backfill<E, Pkey>): String {
+private fun <E : DbEntity<E>, Pkey : Any> onlyTable(backfill: Backfill<E, Pkey, *>): String {
   val tableAnnotation = backfill.entityClass.java.getAnnotation(Table::class.java)
   val table = tableAnnotation.name
   return "`$table`"

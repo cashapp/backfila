@@ -5,16 +5,17 @@ import app.cash.backfila.client.HttpConnectorData
 import app.cash.backfila.client.misk.Backfill
 import app.cash.backfila.client.misk.ForBackfila
 import app.cash.backfila.client.misk.client.BackfilaClientConfig
+import app.cash.backfila.client.misk.internal.BackfilaParametersOperator.Companion.backfilaParametersForBackfill
 import app.cash.backfila.protos.service.ConfigureServiceRequest
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.Injector
 import com.squareup.moshi.Moshi
-import misk.logging.getLogger
-import misk.moshi.adapter
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
+import misk.logging.getLogger
+import misk.moshi.adapter
 
 /**
  * Sends backfill metadata to Backfila at application startup. If Backfila is unreachable then
@@ -26,7 +27,7 @@ internal class BackfilaStartupConfigurator @Inject internal constructor(
   private val config: BackfilaClientConfig,
   private val backfilaClient: BackfilaClient,
   @ForBackfila private val moshi: Moshi,
-  @ForBackfila private val backfills: MutableMap<String, KClass<out Backfill<*, *>>>
+  @ForBackfila private val backfills: MutableMap<String, KClass<out Backfill<*, *, *>>>
 ) : AbstractIdleService() {
   override fun startUp() {
     logger.info { "Backfila configurator starting" }
@@ -37,13 +38,9 @@ internal class BackfilaStartupConfigurator @Inject internal constructor(
     val request = ConfigureServiceRequest.Builder()
         .backfills(
             backfills.values.map { backfillClass ->
-              // Create an instance of the Backfill so we can ask it what its parameters are. This
-              // is a bit of a hack because we're creating the backfill object but not running a
-              // backfill with it.
-              val backfill = injector.getInstance(backfillClass.java)
               ConfigureServiceRequest.BackfillData.Builder()
                   .name(backfillClass.jvmName)
-                  .parameters(backfill.parameters)
+                  .parameters(backfilaParametersForBackfill(backfillClass as KClass<Backfill<*, *, Any>>))
                   .build()
             })
         .connector_type(Connectors.HTTP)

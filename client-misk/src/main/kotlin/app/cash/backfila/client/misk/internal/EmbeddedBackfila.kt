@@ -35,14 +35,14 @@ internal class EmbeddedBackfila @Inject internal constructor(
     return Calls.response(ConfigureServiceResponse())
   }
 
-  override fun <Type : Backfill<*, *>> createDryRun(
+  override fun <Type : Backfill<*, *, *>> createDryRun(
     backfill: KClass<Type>,
     parameters: Map<String, ByteString>,
     rangeStart: String?,
     rangeEnd: String?
   ) = createBackfill(backfill, true, parameters, rangeStart, rangeEnd)
 
-  override fun <Type : Backfill<*, *>> createWetRun(
+  override fun <Type : Backfill<*, *, *>> createWetRun(
     backfillType: KClass<Type>,
     parameters: Map<String, ByteString>,
     rangeStart: String?,
@@ -50,7 +50,7 @@ internal class EmbeddedBackfila @Inject internal constructor(
   ) = createBackfill(backfillType, false, parameters, rangeStart, rangeEnd)
 
   // TODO(mikepaw) Maybe we just annotate a data class with @Parameters or perhaps a data class that has a fromByteStringMap method and then we pass in the data object?
-  private fun <Type : Backfill<*, *>> createBackfill(
+  private fun <Type : Backfill<*, *, *>> createBackfill(
     backfillType: KClass<Type>,
     dryRun: Boolean,
     parameters: Map<String, ByteString>,

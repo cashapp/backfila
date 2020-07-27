@@ -10,7 +10,7 @@ import okio.ByteString
 /**
  * Get an instance of this from [Backfila].
  */
-interface BackfillRun<B : Backfill<*, *>> {
+interface BackfillRun<B : Backfill<*, *, *>> {
   val backfill: B
   val dryRun: Boolean
   val parameters: Map<String, ByteString>
