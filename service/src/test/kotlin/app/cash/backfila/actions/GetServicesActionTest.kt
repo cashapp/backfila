@@ -84,7 +84,7 @@ class GetServicesActionTest {
               .backfill_name("ChickenSandwich")
               .build()
       )
-      val id = response.id
+      val id = response.backfill_run_id
       startBackfillAction.start(id, StartBackfillRequest())
     }
     scope.fakeCaller(user = "molly") {

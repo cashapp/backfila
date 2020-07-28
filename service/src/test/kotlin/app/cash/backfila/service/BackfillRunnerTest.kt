@@ -601,7 +601,7 @@ class BackfillRunnerTest {
               .parameter_map(mapOf("cheese" to "cheddar".encodeUtf8()))
               .build()
       )
-      val id = response.id
+      val id = response.backfill_run_id
       startBackfillAction.start(id, StartBackfillRequest())
     }
 

@@ -64,7 +64,7 @@ message CreateBackfillRequest {
 }
 
 message CreateBackfillResponse {
-  optional uint64 id = 1;
+  optional uint64 backfill_run_id = 1;
 }
 
 // Creates a backfill under the calling service and starts it.
@@ -73,5 +73,5 @@ message CreateAndStartBackfillRequest {
 }
 
 message CreateAndStartBackfillResponse {
-  optional uint64 id = 1;
+  optional uint64 backfill_run_id = 1;
 }

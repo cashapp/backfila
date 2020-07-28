@@ -107,7 +107,7 @@ class CreateBackfillActionTest {
         assertThat(run.approved_by_user).isNull()
         assertThat(run.approved_at).isNull()
         assertThat(run.parameters()).isEmpty()
-        assertThat(response.id).isEqualTo(run.id.id)
+        assertThat(response.backfill_run_id).isEqualTo(run.id.id)
 
         val partitions = queryFactory.newQuery<RunPartitionQuery>()
             .backfillRunId(run.id)

@@ -263,7 +263,7 @@ class CreateFormContainer extends React.Component<
                     parameter_map: this.state.parameters
                   })
                     .then(response => {
-                      let id = response.data.id
+                      let id = response.data.backfill_run_id
                       let history = (this.props as any).history
                       history.push(`/app/backfills/${id}`)
                     })

@@ -98,7 +98,7 @@ class CloneBackfillActionTest {
               .build()
       )
 
-      val cloneResponse = cloneBackfillAction.create(response.id,
+      val cloneResponse = cloneBackfillAction.create(response.backfill_run_id,
           CloneBackfillRequest(
               batch_size = 123,
               scan_size = 223,
@@ -160,7 +160,7 @@ class CloneBackfillActionTest {
               ))
               .build())
 
-      val cloneResponse = cloneBackfillAction.create(response.id,
+      val cloneResponse = cloneBackfillAction.create(response.backfill_run_id,
           CloneBackfillRequest(
               range_clone_type = RangeCloneType.NEW
           )
@@ -212,7 +212,7 @@ class CloneBackfillActionTest {
               ))
               .build())
 
-      val cloneResponse = cloneBackfillAction.create(response.id,
+      val cloneResponse = cloneBackfillAction.create(response.backfill_run_id,
           CloneBackfillRequest(
               range_clone_type = RangeCloneType.CONTINUE
           )
@@ -264,7 +264,7 @@ class CloneBackfillActionTest {
               ))
               .build())
 
-      val cloneResponse = cloneBackfillAction.create(response.id,
+      val cloneResponse = cloneBackfillAction.create(response.backfill_run_id,
           CloneBackfillRequest(
               range_clone_type = RangeCloneType.RESTART
           )
@@ -317,7 +317,7 @@ class CloneBackfillActionTest {
               .build())
 
       assertThatThrownBy {
-        val cloneResponse = cloneBackfillAction.create(response.id,
+        val cloneResponse = cloneBackfillAction.create(response.backfill_run_id,
             CloneBackfillRequest(
                 range_clone_type = RangeCloneType.RESTART
             )
@@ -363,7 +363,7 @@ class CloneBackfillActionTest {
               ))
               .build())
 
-      val cloneResponse = cloneBackfillAction.create(response.id,
+      val cloneResponse = cloneBackfillAction.create(response.backfill_run_id,
           CloneBackfillRequest(
               range_clone_type = RangeCloneType.NEW
           )
