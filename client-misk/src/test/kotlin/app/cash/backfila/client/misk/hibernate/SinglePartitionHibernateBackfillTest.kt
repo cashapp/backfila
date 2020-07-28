@@ -250,7 +250,7 @@ abstract class SinglePartitionHibernateBackfillTest {
     assertThat(dryRun.backfill.idsRanDry).containsExactlyElementsOf(wetRun.backfill.idsRanWet)
   }
 
-  @Test fun parameters() {
+  @Test fun parametersAsMap() {
     createSome()
     val run = backfila.createDryRun<SinglePartitionHibernateTestBackfill>(
         parameterData = mapOf(
@@ -259,6 +259,18 @@ abstract class SinglePartitionHibernateBackfillTest {
         )
     )
         .apply { configureForTest() }
+
+    run.execute()
+    assertThat(run.backfill.parametersLog).contains(
+        ShapeParameters("blue", "square")
+    )
+  }
+
+  @Test fun parametersAsPoko() {
+    createSome()
+    val run = backfila.createDryRun<SinglePartitionHibernateTestBackfill>(
+        parameters = ShapeParameters("blue", "square")
+    ).apply { configureForTest() }
 
     run.execute()
     assertThat(run.backfill.parametersLog).contains(
