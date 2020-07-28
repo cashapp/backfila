@@ -4,11 +4,11 @@ import app.cash.backfila.BackfilaTestingModule
 import app.cash.backfila.api.ConfigureServiceAction
 import app.cash.backfila.client.Connectors.ENVOY
 import app.cash.backfila.dashboard.CreateBackfillAction
-import app.cash.backfila.dashboard.CreateBackfillRequest
 import app.cash.backfila.dashboard.StartBackfillAction
 import app.cash.backfila.dashboard.StartBackfillRequest
 import app.cash.backfila.fakeCaller
 import app.cash.backfila.protos.service.ConfigureServiceRequest
+import app.cash.backfila.protos.service.CreateBackfillRequest
 import app.cash.backfila.service.scheduler.LeaseHunter
 import com.google.inject.Module
 import misk.scope.ActionScope
@@ -48,8 +48,12 @@ class LeaseHunterTest {
           .build())
     }
     scope.fakeCaller(user = "molly") {
-      createBackfillAction.create("deep-fryer",
-          CreateBackfillRequest("ChickenSandwich"))
+      createBackfillAction.create(
+          "deep-fryer",
+          CreateBackfillRequest.Builder()
+              .backfill_name("ChickenSandwich")
+              .build()
+      )
     }
     assertThat(leaseHunter.hunt()).isEmpty()
   }
@@ -65,10 +69,14 @@ class LeaseHunterTest {
           .build())
     }
     scope.fakeCaller(user = "molly") {
-      val response = createBackfillAction.create("deep-fryer",
-          CreateBackfillRequest("ChickenSandwich"))
+      val response = createBackfillAction.create(
+          "deep-fryer",
+          CreateBackfillRequest.Builder()
+              .backfill_name("ChickenSandwich")
+              .build()
+      )
 
-      val id = response.id
+      val id = response.backfill_run_id
       startBackfillAction.start(id, StartBackfillRequest())
     }
 
@@ -95,10 +103,14 @@ class LeaseHunterTest {
           .build())
     }
     scope.fakeCaller(user = "molly") {
-      val response = createBackfillAction.create("deep-fryer",
-          CreateBackfillRequest("ChickenSandwich"))
+      val response = createBackfillAction.create(
+          "deep-fryer",
+          CreateBackfillRequest.Builder()
+              .backfill_name("ChickenSandwich")
+              .build()
+      )
 
-      val id = response.id
+      val id = response.backfill_run_id
       startBackfillAction.start(id, StartBackfillRequest())
     }
 

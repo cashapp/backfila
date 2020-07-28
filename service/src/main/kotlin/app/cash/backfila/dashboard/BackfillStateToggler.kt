@@ -46,9 +46,9 @@ class BackfillStateToggler @Inject constructor(
     }
 
     if (desiredState == RUNNING) {
-      slackHelper.runStarted(Id(id), caller.user!!)
+      slackHelper.runStarted(Id(id), caller.principal)
     } else {
-      slackHelper.runPaused(Id(id), caller.user!!)
+      slackHelper.runPaused(Id(id), caller.principal)
     }
 
     // TODO audit log event
