@@ -1,7 +1,8 @@
 package app.cash.backfila.service.runner
 
 import app.cash.backfila.client.BackfilaClientServiceClient
-import app.cash.backfila.client.ConnectorProvider
+import app.cash.backfila.client.ClientProvider
+import app.cash.backfila.client.ConnectorTypeToUrlConverter
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.RunBatchRequest
 import app.cash.backfila.service.SlackHelper
@@ -149,16 +150,15 @@ class BackfillRunner private constructor(
   private fun createClient(): BackfilaClientServiceClient {
     data class DbData(
       val serviceName: String,
-      val connector: String,
-      val connectorExtraData: String?
+      val url: String
     )
     val dbData = factory.transacter.transaction { session ->
       val dbRunPartition = session.load(partitionId)
       val service = dbRunPartition.backfill_run.registered_backfill.service
-      DbData(service.registry_name, service.connector, service.connector_extra_data)
+      DbData(service.registry_name,
+          service.url ?: factory.converter.urlForType(service.connector, service.connector_extra_data))
     }
-    return factory.connectorProvider.clientProvider(dbData.connector)
-        .clientFor(dbData.serviceName, dbData.connectorExtraData)
+    return factory.clientProvider.clientForUrl(dbData.url)
   }
 
   fun runBatchRequest(
@@ -249,7 +249,8 @@ class BackfillRunner private constructor(
     @BackfilaDb val transacter: Transacter,
     val clock: Clock,
     val queryFactory: Query.Factory,
-    val connectorProvider: ConnectorProvider,
+    val clientProvider: ClientProvider,
+    val converter: ConnectorTypeToUrlConverter,
     val slackHelper: SlackHelper
   ) {
     fun create(

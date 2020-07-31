@@ -18,9 +18,6 @@ import retrofit2.converter.wire.WireConverterFactory
 @Singleton
 class HttpClientServiceClientProvider @Inject constructor(
   @Named(HTTP) private val defaultHttpClientEndpointConfig: HttpClientEndpointConfig,
-  private val httpClientFactory: HttpClientFactory,
-  private val httpClientConfigUrlProvider: HttpClientConfigUrlProvider,
-  @HttpClientNetworkInterceptor private val networkInterceptors: List<Interceptor>,
   private val moshi: Moshi
 ) : BackfilaClientServiceClientProvider {
   override fun validateExtraData(connectorExtraData: String?) {
@@ -35,7 +32,13 @@ class HttpClientServiceClientProvider @Inject constructor(
     connectorExtraData: String?
   ): BackfilaClientServiceClient {
     val url = adapter().fromJson(connectorExtraData!!)!!.url
+    /*
+    url = getUrl()
+    val httpClientEndpointConfig = httpClientsConfig[url]
+    val okHttpClient = okHttpClient(httpClientEndpointConfig)
+    val baseUrl = url
 
+     */
     val httpClientEndpointConfig = defaultHttpClientEndpointConfig.copy(
         url = url
     )

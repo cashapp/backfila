@@ -1,6 +1,7 @@
 package app.cash.backfila
 
-import app.cash.backfila.client.ConnectorProvider
+import app.cash.backfila.client.ClientProvider
+import app.cash.backfila.client.ConnectorTypeToUrlConverter
 import app.cash.backfila.protos.clientservice.KeyRange
 import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
 import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
@@ -24,7 +25,8 @@ import javax.inject.Inject
 class BackfillCreator @Inject constructor(
     @BackfilaDb private val transacter: Transacter,
     private val queryFactory: Query.Factory,
-    private val connectorProvider: ConnectorProvider
+    private val clientProvider: ClientProvider,
+    private val converter: ConnectorTypeToUrlConverter
 ) {
   fun create(
       author: String,
@@ -57,8 +59,7 @@ class BackfillCreator @Inject constructor(
       }
       DbData(
           dbService.id,
-          dbService.connector,
-          dbService.connector_extra_data,
+          dbService.url ?: converter.urlForType(dbService.connector, dbService.connector_extra_data),
           registeredBackfill.id
       )
     }
@@ -105,8 +106,7 @@ class BackfillCreator @Inject constructor(
       request: CreateBackfillRequest,
       dry_run: Boolean
   ): PrepareBackfillResponse {
-    val client = connectorProvider.clientProvider(dbData.connectorType)
-        .clientFor(service, dbData.connectorExtraData)
+    val client = clientProvider.clientForUrl(dbData.url)
 
     val prepareBackfillResponse = try {
       client.prepareBackfill(
@@ -172,8 +172,7 @@ class BackfillCreator @Inject constructor(
 
   private data class DbData(
       val serviceId: Id<DbService>,
-      val connectorType: String,
-      val connectorExtraData: String?,
+      val url: String,
       val registeredBackfillId: Id<DbRegisteredBackfill>
   )
 

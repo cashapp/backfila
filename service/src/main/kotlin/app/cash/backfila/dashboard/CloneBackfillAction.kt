@@ -1,6 +1,7 @@
 package app.cash.backfila.dashboard
 
-import app.cash.backfila.client.ConnectorProvider
+import app.cash.backfila.client.ClientProvider
+import app.cash.backfila.client.ConnectorTypeToUrlConverter
 import app.cash.backfila.protos.clientservice.KeyRange
 import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
 import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
@@ -61,7 +62,8 @@ class CloneBackfillAction @Inject constructor(
     private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
     @BackfilaDb private val transacter: Transacter,
     private val queryFactory: Query.Factory,
-    private val connectorProvider: ConnectorProvider
+    private val connectorProvider: ClientProvider,
+    private val converter: ConnectorTypeToUrlConverter
 ) : WebAction {
 
   fun validate(request: CloneBackfillRequest) {
@@ -109,8 +111,7 @@ class CloneBackfillAction @Inject constructor(
       DbData(
           dbService.id,
           dbService.registry_name,
-          dbService.connector,
-          dbService.connector_extra_data,
+          dbService.url ?: converter.urlForType(dbService.connector, dbService.connector_extra_data),
           sourceBackfill.registered_backfill_id,
           sourceBackfill.registered_backfill.name
       )
@@ -218,8 +219,7 @@ class CloneBackfillAction @Inject constructor(
   data class DbData(
       val serviceId: Id<DbService>,
       val serviceName: String,
-      val connectorType: String,
-      val connectorExtraData: String?,
+      val url: String,
       val registeredBackfillId: Id<DbRegisteredBackfill>,
       val backfillName: String
   )

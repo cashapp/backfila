@@ -35,14 +35,19 @@ message ConfigureServiceRequest {
 
   // This isn't encoded as protobuf so connector implementations can be added without modifying
   // protos (thus avoiding modifying the core backfila codebase).
-  optional string connector_type = 2;
+  // DEPRECATED use url instead!
+  optional string connector_type = 2 [deprecated=true];
 
   // Extra data that is passed through to the connector corresponding to connector_type.
   // Suggested encoding is JSON. For example ENVOY type could have the cluster type as extra data:
   //  e.g.: `{"cluster_type": "production-jobs"}`
-  optional string connector_extra_data = 3;
+  // DEPRECATED use url instead!
+  optional string connector_extra_data = 3 [deprecated=true];
 
   optional string slack_channel = 4;
+
+  // The url that the MISK client factory uses to connect to the registering service.
+  optional string url = 5;
 }
 
 message ConfigureServiceResponse {

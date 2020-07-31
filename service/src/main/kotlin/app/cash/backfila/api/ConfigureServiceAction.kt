@@ -1,6 +1,7 @@
 package app.cash.backfila.api
 
-import app.cash.backfila.client.ConnectorProvider
+import app.cash.backfila.client.ClientProvider
+import app.cash.backfila.client.ConnectorTypeToUrlConverter
 import app.cash.backfila.protos.service.ConfigureServiceRequest
 import app.cash.backfila.protos.service.ConfigureServiceResponse
 import app.cash.backfila.service.persistence.BackfilaDb
@@ -9,6 +10,8 @@ import app.cash.backfila.service.persistence.DbService
 import app.cash.backfila.service.persistence.RegisteredBackfillQuery
 import app.cash.backfila.service.persistence.ServiceQuery
 import misk.MiskCaller
+import misk.client.HttpClientFactory
+import misk.client.HttpClientsConfig
 import misk.hibernate.Query
 import misk.hibernate.Transacter
 import misk.hibernate.newQuery
@@ -29,7 +32,10 @@ class ConfigureServiceAction @Inject constructor(
   @BackfilaDb private val transacter: Transacter,
   private val queryFactory: Query.Factory,
   private val clock: Clock,
-  private val connectorProvider: ConnectorProvider
+  private val connectorProvider: ClientProvider,
+  private val httpClientsConfig: HttpClientsConfig,
+  private val httpClientFactory: HttpClientFactory,
+  private val connectorTypeToUrlConverter: ConnectorTypeToUrlConverter
 ) : WebAction {
   @Post("/configure_service")
   @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
@@ -41,9 +47,12 @@ class ConfigureServiceAction @Inject constructor(
 
     logger.info { "Configuring service `$service` with ${request.backfills.size} backfills" }
 
-    val clientProvider = connectorProvider.clientProvider(request.connector_type)
-    // This tests that the extra data is valid, throwing an exception if invalid.
-    clientProvider.validateExtraData(request.connector_extra_data)
+    val url = request.url
+        ?: connectorTypeToUrlConverter.urlForType(request.connector_type, request.connector_extra_data)
+
+    // Test that we can parse the url into a client.
+    val httpClientEndpointConfig = httpClientsConfig[url]
+    httpClientFactory.create(httpClientEndpointConfig)
 
     transacter.transaction { session ->
       var dbService = queryFactory.newQuery<ServiceQuery>()
@@ -54,12 +63,14 @@ class ConfigureServiceAction @Inject constructor(
             service,
             request.connector_type,
             request.connector_extra_data,
+            request.url,
             request.slack_channel
         )
         session.save(dbService)
       } else {
         dbService.connector = request.connector_type
         dbService.connector_extra_data = request.connector_extra_data
+        dbService.url = request.url
         dbService.slack_channel = request.slack_channel
       }
 

@@ -19,11 +19,16 @@ class DbService() : DbUnsharded<DbService>, DbTimestampedEntity {
   @Column(nullable = false)
   lateinit var registry_name: String
 
-  @Column(nullable = false)
+  /** Deprecated, use url instead */
+  @Column
   lateinit var connector: String
 
+  /** Deprecated, use url instead */
   @Column(columnDefinition = "mediumtext")
   var connector_extra_data: String? = null
+
+  @Column
+  var url: String? = null
 
   @Column
   var slack_channel: String? = null
@@ -38,11 +43,13 @@ class DbService() : DbUnsharded<DbService>, DbTimestampedEntity {
     registry_name: String,
     connector: String,
     connector_extra_data: String?,
+    url: String?,
     slack_channel: String?
   ) : this() {
     this.registry_name = registry_name
     this.connector = connector
     this.connector_extra_data = connector_extra_data
+    this.url = url
     this.slack_channel = slack_channel
   }
 }
