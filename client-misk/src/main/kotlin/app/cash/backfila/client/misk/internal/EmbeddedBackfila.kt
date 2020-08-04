@@ -9,14 +9,14 @@ import app.cash.backfila.protos.service.ConfigureServiceRequest
 import app.cash.backfila.protos.service.ConfigureServiceResponse
 import app.cash.backfila.protos.service.CreateAndStartBackfillRequest
 import app.cash.backfila.protos.service.CreateAndStartBackfillResponse
-import okio.ByteString
-import retrofit2.Call
-import retrofit2.mock.Calls
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
+import okio.ByteString
+import retrofit2.Call
+import retrofit2.mock.Calls
 
 /**
  * A small implementation of Backfila suitable for use in test cases and development mode. Unlike

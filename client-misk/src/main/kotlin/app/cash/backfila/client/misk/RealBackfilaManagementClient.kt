@@ -4,8 +4,8 @@ import app.cash.backfila.client.misk.internal.BackfilaClient
 import app.cash.backfila.client.misk.internal.parametersToBytes
 import app.cash.backfila.protos.service.CreateAndStartBackfillRequest
 import app.cash.backfila.protos.service.CreateBackfillRequest
-import okio.ByteString
 import javax.inject.Inject
+import okio.ByteString
 
 internal class RealBackfilaManagementClient @Inject internal constructor(
   private val client: BackfilaClient

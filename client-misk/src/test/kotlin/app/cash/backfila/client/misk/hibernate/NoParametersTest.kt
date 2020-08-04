@@ -1,6 +1,5 @@
 package app.cash.backfila.client.misk.hibernate
 
-import app.cash.backfila.client.misk.BackfilaManagementClient
 import app.cash.backfila.client.misk.Backfill
 import app.cash.backfila.client.misk.BackfillConfig
 import app.cash.backfila.client.misk.ClientMiskService
@@ -9,55 +8,53 @@ import app.cash.backfila.client.misk.DbMenu
 import app.cash.backfila.client.misk.MenuQuery
 import app.cash.backfila.client.misk.NoParameters
 import app.cash.backfila.client.misk.UnshardedPartitionProvider
+import app.cash.backfila.client.misk.embedded.Backfila
+import app.cash.backfila.client.misk.embedded.createDryRun
+import app.cash.backfila.client.misk.testing.assertThat
 import com.google.inject.Module
 import javax.inject.Inject
 import misk.hibernate.Id
 import misk.hibernate.Query
 import misk.hibernate.Transacter
-import misk.hibernate.load
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 @MiskTest(startService = true)
-class BackfilaManagementClientTest {
+class NoParametersTest {
   @Suppress("unused")
   @MiskTestModule
   val module: Module = ClientMiskTestingModule(false)
 
   @Inject @ClientMiskService lateinit var transacter: Transacter
-  @Inject internal lateinit var managementClient: BackfilaManagementClient
+  @Inject lateinit var backfila: Backfila
 
   @Test
-  fun `start and create`() {
+  fun `try querying no parameters config`() {
     val id = transacter.transaction { session ->
       session.save(DbMenu("chicken"))
     }
 
-    managementClient.createAndStart(ChickenToBeefBackfill::class.java, dry_run = false)
+    val run = backfila.createDryRun<RecordNoParametersConfigValuesBackfill>()
+    run.execute()
 
-    val name = transacter.transaction { session ->
-      session.load(id).name
-    }
-    assertThat(name).isEqualTo("beef")
+    assertThat(run.backfill.configLog.single().parameters).isInstanceOf(NoParameters::class.java)
   }
 }
 
-class ChickenToBeefBackfill @Inject constructor(
+class RecordNoParametersConfigValuesBackfill @Inject constructor(
   @ClientMiskService private val transacter: Transacter,
   private val queryFactory: Query.Factory
 ) : Backfill<DbMenu, Id<DbMenu>, NoParameters>() {
+  val configLog = mutableListOf<BackfillConfig<NoParameters>>()
 
   override fun backfillCriteria(config: BackfillConfig<NoParameters>): Query<DbMenu> {
     return queryFactory.newQuery(MenuQuery::class)
-        .name("chicken")
   }
 
   override fun runOne(pkey: Id<DbMenu>, config: BackfillConfig<NoParameters>) {
-    transacter.transaction { session ->
-      session.load(pkey).name = "beef"
-    }
+    configLog.add(config)
   }
 
   override fun partitionProvider() = UnshardedPartitionProvider(transacter)
