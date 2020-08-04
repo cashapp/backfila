@@ -2,21 +2,20 @@ package app.cash.backfila.client.misk.internal
 
 import app.cash.backfila.client.misk.Backfill
 import app.cash.backfila.client.misk.BackfillConfig
-import app.cash.backfila.client.misk.internal.BackfilaParametersOperator.Companion.TYPE_CONVERTERS
 import app.cash.backfila.protos.service.Parameter
 import com.google.inject.TypeLiteral
 import com.squareup.moshi.Types
+import okio.ByteString
+import okio.ByteString.Companion.encodeUtf8
 import java.lang.reflect.ParameterizedType
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.jvmErasure
-import okio.ByteString
-import okio.ByteString.Companion.encodeUtf8
 
-inline fun <reified T : Any> parametersToBytes(parameters: T): Map<String, ByteString> {
-  val parametersClass = T::class
+fun parametersToBytes(parameters: Any): Map<String, ByteString> {
+  val parametersClass = parameters::class
 
   val map = mutableMapOf<String, ByteString>()
 

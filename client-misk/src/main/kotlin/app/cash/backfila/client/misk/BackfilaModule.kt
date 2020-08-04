@@ -11,11 +11,11 @@ import com.google.inject.TypeLiteral
 import com.google.inject.multibindings.MapBinder
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import misk.ServiceModule
+import misk.inject.KAbstractModule
 import javax.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
-import misk.ServiceModule
-import misk.inject.KAbstractModule
 
 /**
  * Backfila-using applications install this and either [EmbeddedBackfilaModule] (testing and
@@ -30,6 +30,7 @@ class BackfilaModule(
     bind<BackfilaClientConfig>().toInstance(config)
 
     bind<BackfilaClient>().to<RealBackfilaClient>()
+    bind<BackfilaManagementClient>().to<RealBackfilaManagementClient>()
 
     mapBinder(binder())
 

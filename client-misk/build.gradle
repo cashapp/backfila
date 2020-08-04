@@ -21,6 +21,8 @@ dependencies {
 
   implementation dep.misk
   api dep.miskHibernate
+
+  testImplementation dep.assertj
   testImplementation(dep.miskTesting)
   testImplementation(dep.miskHibernateTesting)
   testImplementation dep.junitEngine
