@@ -19,6 +19,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.slf4j.MDCContext
 import misk.hibernate.Id
 import misk.hibernate.Query
 import misk.hibernate.Session
@@ -65,37 +66,39 @@ class BackfillRunner private constructor(
   }
 
   fun run() {
-    logger.info { "Runner starting: ${logLabel()} " }
+    factory.loggingSetupProvider.withLogging(backfillName, backfillRunId, partitionName) {
+      logger.info { "Runner starting: ${logLabel()} " }
 
-    metadata = factory.transacter.transaction { session -> loadMetaData(session) }
+      metadata = factory.transacter.transaction { session -> loadMetaData(session) }
 
-    val batchPrecomputer = BatchPrecomputer(this)
-    val batchQueuer = BatchQueuer(this, metadata.numThreads)
-    val batchRunner = BatchRunner(
-        this,
-        batchQueuer.nextBatchChannel(),
-        metadata.numThreads
-    )
-    val batchAwaiter = BatchAwaiter(
-        this,
-        batchRunner.runChannel(),
-        batchRunner.rpcBackpressureChannel()
-    )
+      val batchPrecomputer = BatchPrecomputer(this)
+      val batchQueuer = BatchQueuer(this, metadata.numThreads)
+      val batchRunner = BatchRunner(
+          this,
+          batchQueuer.nextBatchChannel(),
+          metadata.numThreads
+      )
+      val batchAwaiter = BatchAwaiter(
+          this,
+          batchRunner.runChannel(),
+          batchRunner.rpcBackpressureChannel()
+      )
 
-    // All our tasks run on this thread.
-    runBlocking {
-      batchPrecomputer.run(this)
-      batchQueuer.run(this)
-      batchRunner.run(this)
-      batchAwaiter.run(this)
+      // All our tasks run on this thread.
+      runBlocking(MDCContext()) {
+        batchPrecomputer.run(this)
+        batchQueuer.run(this)
+        batchRunner.run(this)
+        batchAwaiter.run(this)
 
-      checkAndUpdateLeaseUntilPausedOrComplete()
-      coroutineContext.cancelChildren()
+        checkAndUpdateLeaseUntilPausedOrComplete()
+        coroutineContext.cancelChildren()
+      }
+
+      logger.info { "Runner cleaning up: ${logLabel()}" }
+      clearLease()
+      logger.info { "Runner finished: ${logLabel()}" }
     }
-
-    logger.info { "Runner cleaning up: ${logLabel()}" }
-    clearLease()
-    logger.info { "Runner finished: ${logLabel()}" }
   }
 
   private suspend fun checkAndUpdateLeaseUntilPausedOrComplete() {
@@ -223,7 +226,7 @@ class BackfillRunner private constructor(
     }
   }
 
-  fun logLabel() = "$backfillName::$partitionName::$partitionId"
+  fun logLabel() = "$backfillName::$backfillRunId::$partitionName::$partitionId"
 
   data class BackfillMetaData(
     val backfillRunId: Id<DbBackfillRun>,
@@ -250,7 +253,8 @@ class BackfillRunner private constructor(
     val clock: Clock,
     val queryFactory: Query.Factory,
     val connectorProvider: ConnectorProvider,
-    val slackHelper: SlackHelper
+    val slackHelper: SlackHelper,
+    val loggingSetupProvider: BackfillRunnerLoggingSetupProvider
   ) {
     fun create(
       @Suppress("UNUSED_PARAMETER") session: Session,

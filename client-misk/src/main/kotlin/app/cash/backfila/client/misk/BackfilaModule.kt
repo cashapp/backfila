@@ -1,6 +1,8 @@
 package app.cash.backfila.client.misk
 
 import app.cash.backfila.client.misk.client.BackfilaClientConfig
+import app.cash.backfila.client.misk.client.BackfilaClientLoggingSetupProvider
+import app.cash.backfila.client.misk.client.BackfilaClientNoLoggingSetupProvider
 import app.cash.backfila.client.misk.internal.BackfilaClient
 import app.cash.backfila.client.misk.internal.BackfilaStartupConfigurator
 import app.cash.backfila.client.misk.internal.RealBackfilaClient
@@ -24,13 +26,16 @@ import misk.inject.KAbstractModule
 class BackfilaModule(
   private val config: BackfilaClientConfig,
   @Deprecated(message = "Multibind backfills instead")
-  private val backfills: List<KClass<out Backfill<*, *, *>>>? = null
+  private val backfills: List<KClass<out Backfill<*, *, *>>>? = null,
+  private val loggingSetupProvider: KClass<out BackfilaClientLoggingSetupProvider> =
+      BackfilaClientNoLoggingSetupProvider::class
 ) : KAbstractModule() {
   override fun configure() {
     bind<BackfilaClientConfig>().toInstance(config)
 
     bind<BackfilaClient>().to<RealBackfilaClient>()
     bind<BackfilaManagementClient>().to<RealBackfilaManagementClient>()
+    bind<BackfilaClientLoggingSetupProvider>().to(loggingSetupProvider.java)
 
     mapBinder(binder())
 

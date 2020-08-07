@@ -9,6 +9,8 @@ import app.cash.backfila.client.HttpClientServiceClientProvider
 import app.cash.backfila.dashboard.BackfilaDashboardModule
 import app.cash.backfila.dashboard.BackfilaWebActionsModule
 import app.cash.backfila.service.persistence.BackfilaPersistenceModule
+import app.cash.backfila.service.runner.BackfillRunnerLoggingSetupProvider
+import app.cash.backfila.service.runner.BackfillRunnerNoLoggingSetupProvider
 import app.cash.backfila.service.scheduler.ForBackfilaScheduler
 import app.cash.backfila.service.scheduler.RunnerSchedulerServiceModule
 import com.google.common.util.concurrent.ListeningExecutorService
@@ -18,6 +20,7 @@ import com.google.inject.Provides
 import java.util.concurrent.Executors
 import javax.inject.Qualifier
 import javax.inject.Singleton
+import kotlin.reflect.KClass
 import misk.config.ConfigModule
 import misk.environment.Deployment
 import misk.inject.KAbstractModule
@@ -31,7 +34,9 @@ annotation class HttpClientNetworkInterceptor
 
 class BackfilaServiceModule(
   private val deployment: Deployment,
-  private val config: BackfilaConfig
+  private val config: BackfilaConfig,
+  private val runnerLoggingSetupProvider: Class<out BackfillRunnerLoggingSetupProvider> =
+      BackfillRunnerNoLoggingSetupProvider::class.java
 ) : KAbstractModule() {
   override fun configure() {
     multibind<AccessAnnotationEntry>().toInstance(
@@ -53,6 +58,8 @@ class BackfilaServiceModule(
         .to(EnvoyClientServiceClientProvider::class.java)
 
     newMultibinder<Interceptor>(HttpClientNetworkInterceptor::class)
+
+    bind<BackfillRunnerLoggingSetupProvider>().to(runnerLoggingSetupProvider)
 
     if (config.slack != null) {
       install(SlackModule(config.slack))

@@ -8,6 +8,8 @@ import app.cash.backfila.client.ForConnectors
 import app.cash.backfila.service.BackfilaConfig
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfilaPersistenceModule
+import app.cash.backfila.service.runner.BackfillRunnerLoggingSetupProvider
+import app.cash.backfila.service.runner.BackfillRunnerNoLoggingSetupProvider
 import app.cash.backfila.service.scheduler.ForBackfilaScheduler
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
@@ -57,6 +59,9 @@ internal class BackfilaTestingModule : KAbstractModule() {
 
     bind(BackfilaClientServiceClientProvider::class.java)
         .to(FakeBackfilaClientServiceClientProvider::class.java)
+
+    bind(BackfillRunnerLoggingSetupProvider::class.java)
+        .to(BackfillRunnerNoLoggingSetupProvider::class.java)
 
     install(object : ActionScopedProviderModule() {
       override fun configureProviders() {
