@@ -4,14 +4,14 @@ import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.RunPartitionQuery
 import app.cash.backfila.service.runner.BackfillRunner
-import misk.hibernate.Query
-import misk.hibernate.Transacter
-import misk.hibernate.newQuery
-import misk.tokens.TokenGenerator
 import java.time.Clock
 import java.time.Duration
 import javax.inject.Inject
 import javax.inject.Singleton
+import misk.hibernate.Query
+import misk.hibernate.Transacter
+import misk.hibernate.newQuery
+import misk.tokens.TokenGenerator
 
 @Singleton
 class LeaseHunter @Inject constructor(

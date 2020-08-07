@@ -24,6 +24,8 @@ import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.runner.BackfillRunner
 import app.cash.backfila.service.scheduler.LeaseHunter
 import com.google.inject.Module
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -39,8 +41,6 @@ import misk.time.FakeClock
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.util.concurrent.TimeUnit
-import javax.inject.Inject
 
 @MiskTest(startService = true)
 class BackfillRunnerTest {

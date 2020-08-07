@@ -1,11 +1,11 @@
 package app.cash.backfila.service.persistence
 
+import java.time.Instant
 import misk.hibernate.Constraint
 import misk.hibernate.Id
 import misk.hibernate.Operator
 import misk.hibernate.Order
 import misk.hibernate.Query
-import java.time.Instant
 
 interface RunPartitionQuery : Query<DbRunPartition> {
   @Constraint("backfill_run_id")

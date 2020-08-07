@@ -1,13 +1,9 @@
 package app.cash.backfila.client
 
-import app.cash.backfila.client.Connectors.ENVOY
 import com.squareup.moshi.Moshi
-import misk.client.EnvoyClientEndpointProvider
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
-import misk.client.HttpClientConfigUrlProvider
-import misk.client.HttpClientEndpointConfig
+import misk.client.EnvoyClientEndpointProvider
 import misk.client.HttpClientEnvoyConfig
 import misk.client.HttpClientFactory
 import misk.client.HttpClientsConfig
