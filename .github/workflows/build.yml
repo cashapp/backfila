@@ -1,9 +1,7 @@
 name: build
 
 on:
-  push:
-    branches:
-      - master
+  push
 
 #env:
 #  GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4g -Dorg.gradle.daemon=false -Dkotlin.incremental=false"
