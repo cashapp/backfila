@@ -1,11 +1,9 @@
 name: build
 
 on:
-  push
-
-#env:
-#  GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4g -Dorg.gradle.daemon=false -Dkotlin.incremental=false"
-
+  push:
+    branches:
+      - master
 
 jobs:
   build:
