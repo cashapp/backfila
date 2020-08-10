@@ -1,10 +1,8 @@
 package app.cash.backfila.client
 
 import com.google.inject.Provides
-import misk.client.HttpClientConfig
 import java.time.Duration
-import javax.inject.Named
-import misk.client.HttpClientEndpointConfig
+import misk.client.HttpClientConfig
 import misk.client.HttpClientsConfig
 import misk.inject.KAbstractModule
 

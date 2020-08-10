@@ -4,6 +4,7 @@ import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse.Batch
 import app.cash.backfila.protos.clientservice.RunBatchResponse
 import app.cash.backfila.service.runner.BackfillRunner
 import com.google.common.base.Stopwatch
+import java.time.Duration
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -13,7 +14,6 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import misk.logging.getLogger
-import java.time.Duration
 
 class BatchRunner(
   private val backfillRunner: BackfillRunner,

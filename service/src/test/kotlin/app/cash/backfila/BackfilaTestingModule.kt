@@ -13,6 +13,8 @@ import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import com.google.inject.Provides
+import java.util.concurrent.Executors
+import javax.inject.Singleton
 import misk.MiskCaller
 import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
@@ -24,8 +26,6 @@ import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.logging.LogCollectorModule
 import misk.scope.ActionScopedProviderModule
-import java.util.concurrent.Executors
-import javax.inject.Singleton
 
 internal class BackfilaTestingModule : KAbstractModule() {
   override fun configure() {

@@ -13,23 +13,23 @@ import app.cash.backfila.service.persistence.DbRunPartition
 import app.cash.backfila.service.persistence.DbService
 import app.cash.backfila.service.persistence.RegisteredBackfillQuery
 import app.cash.backfila.service.persistence.ServiceQuery
+import javax.inject.Inject
 import misk.exceptions.BadRequestException
 import misk.hibernate.Id
 import misk.hibernate.Query
 import misk.hibernate.Transacter
 import misk.hibernate.newQuery
 import misk.logging.getLogger
-import javax.inject.Inject
 
 class BackfillCreator @Inject constructor(
-    @BackfilaDb private val transacter: Transacter,
-    private val queryFactory: Query.Factory,
-    private val connectorProvider: ConnectorProvider
+  @BackfilaDb private val transacter: Transacter,
+  private val queryFactory: Query.Factory,
+  private val connectorProvider: ConnectorProvider
 ) {
   fun create(
-      author: String,
-      service: String,
-      request: CreateBackfillRequest
+    author: String,
+    service: String,
+    request: CreateBackfillRequest
   ): Id<DbBackfillRun> {
     logger.info { "Create backfill for `$service` by `$author`" }
 
@@ -100,10 +100,10 @@ class BackfillCreator @Inject constructor(
   }
 
   private fun prepare(
-      dbData: DbData,
-      service: String,
-      request: CreateBackfillRequest,
-      dry_run: Boolean
+    dbData: DbData,
+    service: String,
+    request: CreateBackfillRequest,
+    dry_run: Boolean
   ): PrepareBackfillResponse {
     val client = connectorProvider.clientProvider(dbData.connectorType)
         .clientFor(service, dbData.connectorExtraData)
@@ -142,11 +142,11 @@ class BackfillCreator @Inject constructor(
   }
 
   private fun validate(
-      request: CreateBackfillRequest,
-      num_threads: Int,
-      scan_size: Long,
-      batch_size: Long,
-      extra_sleep_ms: Long
+    request: CreateBackfillRequest,
+    num_threads: Int,
+    scan_size: Long,
+    batch_size: Long,
+    extra_sleep_ms: Long
   ) {
     if (num_threads < 1) {
       throw BadRequestException("num_threads must be >= 1")
@@ -171,10 +171,10 @@ class BackfillCreator @Inject constructor(
   }
 
   private data class DbData(
-      val serviceId: Id<DbService>,
-      val connectorType: String,
-      val connectorExtraData: String?,
-      val registeredBackfillId: Id<DbRegisteredBackfill>
+    val serviceId: Id<DbService>,
+    val connectorType: String,
+    val connectorExtraData: String?,
+    val registeredBackfillId: Id<DbRegisteredBackfill>
   )
 
   companion object {
