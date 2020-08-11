@@ -84,4 +84,4 @@ abstract class Backfill<E : DbEntity<E>, Pkey : Any, Param : Any> {
 /**
  * Placeholder class to represent when a backfill has no Parameters.
  */
-class NoParameters
+class NoParameters private fun constructor() { /* Never create this */ }

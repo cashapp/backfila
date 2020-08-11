@@ -19,6 +19,7 @@ import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.RunPartitionQuery
 import com.google.inject.Module
+import javax.inject.Inject
 import misk.hibernate.Query
 import misk.hibernate.Transacter
 import misk.hibernate.newQuery
@@ -30,7 +31,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
 
 @MiskTest(startService = true)
 class CloneBackfillActionTest {

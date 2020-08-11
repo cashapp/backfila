@@ -9,14 +9,14 @@ import app.cash.backfila.protos.service.ConfigureServiceRequest
 import app.cash.backfila.protos.service.ConfigureServiceResponse
 import app.cash.backfila.protos.service.CreateAndStartBackfillRequest
 import app.cash.backfila.protos.service.CreateAndStartBackfillResponse
-import okio.ByteString
-import retrofit2.Call
-import retrofit2.mock.Calls
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
+import okio.ByteString
+import retrofit2.Call
+import retrofit2.mock.Calls
 
 /**
  * A small implementation of Backfila suitable for use in test cases and development mode. Unlike
@@ -37,7 +37,9 @@ internal class EmbeddedBackfila @Inject internal constructor(
     return Calls.response(ConfigureServiceResponse())
   }
 
-  override fun createAndStartbackfill(request: CreateAndStartBackfillRequest): Call<CreateAndStartBackfillResponse> {
+  override fun createAndStartbackfill(
+    request: CreateAndStartBackfillRequest
+  ): Call<CreateAndStartBackfillResponse> {
     checkNotNull(serviceData) { "Must register the service before creating a backfill" }
 
     val createRequest = request.create_request
@@ -52,8 +54,8 @@ internal class EmbeddedBackfila @Inject internal constructor(
         operator = operator,
         dryRun = createRequest.dry_run,
         parameters = createRequest.parameter_map,
-        rangeStart = createRequest.pkey_range_start.utf8(),
-        rangeEnd = createRequest.pkey_range_end.utf8()
+        rangeStart = createRequest.pkey_range_start?.utf8(),
+        rangeEnd = createRequest.pkey_range_end?.utf8()
     )
 
     run.execute()
@@ -75,7 +77,6 @@ internal class EmbeddedBackfila @Inject internal constructor(
     rangeEnd: String?
   ) = createBackfill(backfillType, false, parameters, rangeStart, rangeEnd)
 
-  // TODO(mikepaw) Maybe we just annotate a data class with @Parameters or perhaps a data class that has a fromByteStringMap method and then we pass in the data object?
   private fun <Type : Backfill<*, *, *>> createBackfill(
     backfillType: KClass<Type>,
     dryRun: Boolean,

@@ -10,6 +10,7 @@ import app.cash.backfila.protos.service.CreateBackfillRequest
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillState
 import com.google.inject.Module
+import javax.inject.Inject
 import misk.hibernate.Query
 import misk.hibernate.Transacter
 import misk.scope.ActionScope
@@ -17,7 +18,6 @@ import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
 
 @MiskTest(startService = true)
 class CreateAndStartBackfillActionTest {

@@ -6,6 +6,7 @@ import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.BackfillState.PAUSED
 import app.cash.backfila.service.persistence.BackfillState.RUNNING
 import app.cash.backfila.service.persistence.DbBackfillRun
+import javax.inject.Inject
 import misk.MiskCaller
 import misk.exceptions.BadRequestException
 import misk.hibernate.Id
@@ -13,7 +14,6 @@ import misk.hibernate.Query
 import misk.hibernate.Transacter
 import misk.hibernate.loadOrNull
 import misk.logging.getLogger
-import javax.inject.Inject
 
 class BackfillStateToggler @Inject constructor(
   @BackfilaDb private val transacter: Transacter,

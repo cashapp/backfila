@@ -30,6 +30,7 @@ class BackfilaModule(
     bind<BackfilaClientConfig>().toInstance(config)
 
     bind<BackfilaClient>().to<RealBackfilaClient>()
+    bind<BackfilaManagementClient>().to<RealBackfilaManagementClient>()
 
     mapBinder(binder())
 

@@ -11,12 +11,12 @@ import app.cash.backfila.fakeCaller
 import app.cash.backfila.protos.service.ConfigureServiceRequest
 import app.cash.backfila.protos.service.CreateBackfillRequest
 import com.google.inject.Module
+import javax.inject.Inject
 import misk.scope.ActionScope
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
 
 @MiskTest(startService = true)
 class GetServicesActionTest {

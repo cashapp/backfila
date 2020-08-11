@@ -16,6 +16,7 @@ import okio.ByteString.Companion.encodeUtf8
 
 fun parametersToBytes(parameters: Any): Map<String, ByteString> {
   val parametersClass = parameters::class
+
   val map = mutableMapOf<String, ByteString>()
 
   for (property in parametersClass.memberProperties) {

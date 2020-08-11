@@ -1,14 +1,12 @@
 package app.cash.backfila.client
 
-import app.cash.backfila.client.Connectors.HTTP
 import app.cash.backfila.service.HttpClientNetworkInterceptor
 import com.squareup.moshi.Moshi
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 import misk.client.HttpClientConfigUrlProvider
-import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientFactory
+import misk.client.HttpClientsConfig
 import misk.moshi.adapter
 import okhttp3.Interceptor
 import retrofit2.Retrofit
@@ -17,7 +15,7 @@ import retrofit2.converter.wire.WireConverterFactory
 
 @Singleton
 class HttpClientServiceClientProvider @Inject constructor(
-  @Named(HTTP) private val defaultHttpClientEndpointConfig: HttpClientEndpointConfig,
+  private val httpClientsConfig: HttpClientsConfig,
   private val httpClientFactory: HttpClientFactory,
   private val httpClientConfigUrlProvider: HttpClientConfigUrlProvider,
   @HttpClientNetworkInterceptor private val networkInterceptors: List<Interceptor>,
@@ -36,9 +34,7 @@ class HttpClientServiceClientProvider @Inject constructor(
   ): BackfilaClientServiceClient {
     val url = adapter().fromJson(connectorExtraData!!)!!.url
 
-    val httpClientEndpointConfig = defaultHttpClientEndpointConfig.copy(
-        url = url
-    )
+    val httpClientEndpointConfig = httpClientsConfig[url]
     val okHttpClient = httpClientFactory.create(httpClientEndpointConfig)
         .newBuilder()
         .apply {

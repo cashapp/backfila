@@ -10,6 +10,7 @@ import app.cash.backfila.service.persistence.DbBackfillRun
 import app.cash.backfila.service.persistence.DbRegisteredBackfill
 import app.cash.backfila.service.persistence.DbRunPartition
 import app.cash.backfila.service.persistence.DbService
+import javax.inject.Inject
 import misk.MiskCaller
 import misk.exceptions.BadRequestException
 import misk.hibernate.Id
@@ -29,7 +30,6 @@ import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
-import javax.inject.Inject
 
 enum class RangeCloneType {
   RESTART,
@@ -39,29 +39,29 @@ enum class RangeCloneType {
 
 data class CloneBackfillRequest(
     // TODO move defaults to UI
-    val scan_size: Long = 1000,
-    val batch_size: Long = 100,
-    val num_threads: Int = 5,
-    val range_clone_type: RangeCloneType,
-    val pkey_range_start: String? = null,
-    val pkey_range_end: String? = null,
+  val scan_size: Long = 1000,
+  val batch_size: Long = 100,
+  val num_threads: Int = 5,
+  val range_clone_type: RangeCloneType,
+  val pkey_range_start: String? = null,
+  val pkey_range_end: String? = null,
     // Parameters that go to the client service.
-    val parameter_map: Map<String, ByteString> = mapOf(),
-    val dry_run: Boolean = true,
-    val backoff_schedule: String? = null,
+  val parameter_map: Map<String, ByteString> = mapOf(),
+  val dry_run: Boolean = true,
+  val backoff_schedule: String? = null,
     // Sleep that is added after every successful RunBatch.
-    val extra_sleep_ms: Long = 0
+  val extra_sleep_ms: Long = 0
 )
 
 data class CloneBackfillResponse(
-    val id: Long
+  val id: Long
 )
 
 class CloneBackfillAction @Inject constructor(
-    private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
-    @BackfilaDb private val transacter: Transacter,
-    private val queryFactory: Query.Factory,
-    private val connectorProvider: ConnectorProvider
+  private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
+  @BackfilaDb private val transacter: Transacter,
+  private val queryFactory: Query.Factory,
+  private val connectorProvider: ConnectorProvider
 ) : WebAction {
 
   fun validate(request: CloneBackfillRequest) {
@@ -93,8 +93,8 @@ class CloneBackfillAction @Inject constructor(
   // TODO allow any user
   @Authenticated(capabilities = ["users"])
   fun create(
-      @PathParam id: Long,
-      @RequestBody request: CloneBackfillRequest
+    @PathParam id: Long,
+    @RequestBody request: CloneBackfillRequest
   ): CloneBackfillResponse {
     // TODO check user has permissions for this service with access api
 
@@ -216,12 +216,12 @@ class CloneBackfillAction @Inject constructor(
   }
 
   data class DbData(
-      val serviceId: Id<DbService>,
-      val serviceName: String,
-      val connectorType: String,
-      val connectorExtraData: String?,
-      val registeredBackfillId: Id<DbRegisteredBackfill>,
-      val backfillName: String
+    val serviceId: Id<DbService>,
+    val serviceName: String,
+    val connectorType: String,
+    val connectorExtraData: String?,
+    val registeredBackfillId: Id<DbRegisteredBackfill>,
+    val backfillName: String
   )
 
   companion object {

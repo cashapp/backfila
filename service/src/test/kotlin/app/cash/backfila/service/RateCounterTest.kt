@@ -1,10 +1,10 @@
 package app.cash.backfila.service
 
 import app.cash.backfila.service.runner.statemachine.RateCounter
+import java.util.concurrent.TimeUnit
 import misk.time.FakeClock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.util.concurrent.TimeUnit
 
 class RateCounterTest {
   @Test
