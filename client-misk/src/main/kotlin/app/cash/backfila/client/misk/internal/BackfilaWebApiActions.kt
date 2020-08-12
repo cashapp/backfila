@@ -1,5 +1,6 @@
 package app.cash.backfila.client.misk.internal
 
+import app.cash.backfila.client.misk.client.BackfilaClientLoggingSetupProvider
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
@@ -17,17 +18,20 @@ import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 
 internal class PrepareBackfillAction @Inject constructor(
-  private val operatorFactory: BackfillOperator.Factory
+  private val operatorFactory: BackfillOperator.Factory,
+  private val loggingSetupProvider: BackfilaClientLoggingSetupProvider
 ) : WebAction {
   @Post("/backfila/prepare-backfill")
   @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
   @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)
   @Authenticated(services = ["backfila"])
   fun prepareBackfill(@RequestBody request: PrepareBackfillRequest): PrepareBackfillResponse {
-    logger.info { "Preparing backfill `${request.backfill_name}::${request.backfill_id}`" }
+    return loggingSetupProvider.withBackfillRunLogging(request.backfill_name, request.backfill_id) {
+      logger.info { "Preparing backfill `${request.backfill_name}::${request.backfill_id}`" }
 
-    val operator = operatorFactory.create(request.backfill_name, request.backfill_id)
-    return operator.prepareBackfill(request)
+      val operator = operatorFactory.create(request.backfill_name, request.backfill_id)
+      return@withBackfillRunLogging operator.prepareBackfill(request)
+    }
   }
 
   companion object {
@@ -36,28 +40,31 @@ internal class PrepareBackfillAction @Inject constructor(
 }
 
 internal class GetNextBatchRangeAction @Inject constructor(
-  private val operatorFactory: BackfillOperator.Factory
+  private val operatorFactory: BackfillOperator.Factory,
+  private val loggingSetupProvider: BackfilaClientLoggingSetupProvider
 ) : WebAction {
   @Post("/backfila/get-next-batch-range")
   @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
   @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)
   @Authenticated(services = ["backfila"])
   fun getNextBatchRange(@RequestBody request: GetNextBatchRangeRequest): GetNextBatchRangeResponse {
-    logger.info {
-      "Computing batch for backfill `${request.backfill_name}::${request.partition_name}" +
-          "::${request.backfill_id}`. Previous end: `${request.previous_end_key}`"
-    }
+    return loggingSetupProvider.withBackfillPartitionLogging(request.backfill_name, request.backfill_id, request.partition_name) {
+      logger.info {
+        "Computing batch for backfill `${request.backfill_name}::${request.partition_name}" +
+            "::${request.backfill_id}`. Previous end: `${request.previous_end_key}`"
+      }
 
-    val operator = operatorFactory.create(request.backfill_name, request.backfill_id)
+      val operator = operatorFactory.create(request.backfill_name, request.backfill_id)
 
-    return operator.getNextBatchRange(request)
-        .also {
-          logger.info {
-            "Next batches computed for backfill " +
-                "`${request.backfill_name}::${request.partition_name}::${request.backfill_id}`. " +
-                "${it.batches}"
+      return@withBackfillPartitionLogging operator.getNextBatchRange(request)
+          .also {
+            logger.info {
+              "Next batches computed for backfill " +
+                  "`${request.backfill_name}::${request.partition_name}::${request.backfill_id}`. " +
+                  "${it.batches}"
+            }
           }
-        }
+    }
   }
 
   companion object {
@@ -66,21 +73,24 @@ internal class GetNextBatchRangeAction @Inject constructor(
 }
 
 internal class RunBatchAction @Inject constructor(
-  private val operatorFactory: BackfillOperator.Factory
+  private val operatorFactory: BackfillOperator.Factory,
+  private val loggingSetupProvider: BackfilaClientLoggingSetupProvider
 ) : WebAction {
   @Post("/backfila/run-batch")
   @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
   @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)
   @Authenticated(services = ["backfila"])
   fun runBatch(@RequestBody request: RunBatchRequest): RunBatchResponse {
-    logger.info {
-      "Running backfila batch " +
-          "`${request.backfill_name}::${request.partition_name}::${request.backfill_id}`: " +
-          "[${request.batch_range.start.utf8()}, ${request.batch_range.end.utf8()}]"
-    }
+    return loggingSetupProvider.withBackfillPartitionLogging(request.backfill_name, request.backfill_id, request.partition_name) {
+      logger.info {
+        "Running backfila batch " +
+            "`${request.backfill_name}::${request.partition_name}::${request.backfill_id}`: " +
+            "[${request.batch_range.start.utf8()}, ${request.batch_range.end.utf8()}]"
+      }
 
-    val operator = operatorFactory.create(request.backfill_name, request.backfill_id)
-    return operator.runBatch(request)
+      val operator = operatorFactory.create(request.backfill_name, request.backfill_id)
+      return@withBackfillPartitionLogging operator.runBatch(request)
+    }
   }
 
   companion object {

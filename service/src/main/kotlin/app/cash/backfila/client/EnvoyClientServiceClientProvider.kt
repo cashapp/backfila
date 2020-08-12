@@ -16,9 +16,11 @@ import retrofit2.converter.wire.WireConverterFactory
 class EnvoyClientServiceClientProvider @Inject constructor(
   private val httpClientsConfig: HttpClientsConfig,
   private val httpClientFactory: HttpClientFactory,
-  private val envoyClientEndpointProvider: EnvoyClientEndpointProvider,
   private val moshi: Moshi
 ) : BackfilaClientServiceClientProvider {
+  @com.google.inject.Inject(optional = true)
+  lateinit var envoyClientEndpointProvider: EnvoyClientEndpointProvider
+
   override fun validateExtraData(connectorExtraData: String?) {
     connectorExtraData?.let { adapter().fromJson(connectorExtraData)?.clusterType }
   }
