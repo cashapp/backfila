@@ -11,6 +11,7 @@ import misk.moshi.adapter
 import retrofit2.Retrofit
 import retrofit2.adapter.guava.GuavaCallAdapterFactory
 import retrofit2.converter.wire.WireConverterFactory
+import java.net.URL
 
 @Singleton
 class EnvoyClientServiceClientProvider @Inject constructor(
@@ -36,7 +37,7 @@ class EnvoyClientServiceClientProvider @Inject constructor(
         app = serviceName,
         env = env
       )
-    val baseUrl = envoyClientEndpointProvider.url(envoyConfig)
+    val baseUrl = URL(envoyClientEndpointProvider.url(envoyConfig))
     val httpClientEndpointConfig = httpClientsConfig[baseUrl]
     val okHttpClient = httpClientFactory.create(httpClientEndpointConfig)
     val retrofit = Retrofit.Builder()

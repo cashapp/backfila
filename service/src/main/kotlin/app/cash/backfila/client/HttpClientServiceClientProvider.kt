@@ -12,6 +12,7 @@ import okhttp3.Interceptor
 import retrofit2.Retrofit
 import retrofit2.adapter.guava.GuavaCallAdapterFactory
 import retrofit2.converter.wire.WireConverterFactory
+import java.net.URL
 
 @Singleton
 class HttpClientServiceClientProvider @Inject constructor(
@@ -32,7 +33,7 @@ class HttpClientServiceClientProvider @Inject constructor(
     serviceName: String,
     connectorExtraData: String?
   ): BackfilaClientServiceClient {
-    val url = adapter().fromJson(connectorExtraData!!)!!.url
+    val url = URL(adapter().fromJson(connectorExtraData!!)!!.url)
 
     val httpClientEndpointConfig = httpClientsConfig[url]
     val okHttpClient = httpClientFactory.create(httpClientEndpointConfig)
