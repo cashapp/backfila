@@ -30,6 +30,8 @@ abstract class SinglePartitionHibernateBackfillTest {
     assertThat(run).isFinishedScanning()
         .hasNoBatchesToRun()
         .isComplete()
+    // Parameters are only recorded if work is done
+    assertThat(run.backfill.parametersLog).isEmpty()
   }
 
   @Test fun noMatches() {
@@ -72,6 +74,8 @@ abstract class SinglePartitionHibernateBackfillTest {
     run.execute()
     assertThat(run.backfill.idsRanDry).containsExactlyElementsOf(expectedIds.slice(1..19))
     assertThat(run.backfill.idsRanWet).isEmpty()
+    // Only default parameters are used
+    assertThat(run.backfill.parametersLog).containsOnly(SandwichParameters("chicken"))
   }
 
   @Test fun withEndRange() {
@@ -250,20 +254,32 @@ abstract class SinglePartitionHibernateBackfillTest {
     assertThat(dryRun.backfill.idsRanDry).containsExactlyElementsOf(wetRun.backfill.idsRanWet)
   }
 
-  @Test fun parameters() {
+  @Test fun runOnBeef() {
     createSome()
     val run = backfila.createDryRun<SinglePartitionHibernateTestBackfill>(
-        parameterData = mapOf(
-            "color" to "blue".encodeUtf8(),
-            "shape" to "square".encodeUtf8()
-        )
+        parameterData = mapOf("type" to "beef".encodeUtf8())
     )
         .apply { configureForTest() }
 
     run.execute()
-    assertThat(run.backfill.parametersLog).contains(
-        ShapeParameters("blue", "square")
+    assertThat(run.backfill.idsRanDry).size().isEqualTo(5)
+    assertThat(run.backfill.idsRanWet).isEmpty()
+    // We got beef as a parameter
+    assertThat(run.backfill.parametersLog).containsExactly(SandwichParameters("beef"))
+  }
+
+  @Test fun runOnFish() {
+    createSome()
+    val run = backfila.createDryRun<SinglePartitionHibernateTestBackfill>(
+        parameterData = mapOf("type" to "fish".encodeUtf8())
     )
+        .apply { configureForTest() }
+
+    run.execute()
+    assertThat(run.backfill.idsRanDry).isEmpty()
+    assertThat(run.backfill.idsRanWet).isEmpty()
+    // "fish" isn't recorded by the backfill because no batches were run
+    assertThat(run.backfill.parametersLog).isEmpty()
   }
 
   private fun BackfillRun<*>.configureForTest() {

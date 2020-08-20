@@ -14,16 +14,16 @@ import misk.hibernate.Transacter
 class SinglePartitionHibernateTestBackfill @Inject constructor(
   @ClientMiskService private val transacter: Transacter,
   private val queryFactory: Query.Factory
-) : Backfill<DbMenu, Id<DbMenu>, ShapeParameters>() {
+) : Backfill<DbMenu, Id<DbMenu>, SandwichParameters>() {
   val idsRanDry = mutableListOf<Id<DbMenu>>()
   val idsRanWet = mutableListOf<Id<DbMenu>>()
-  val parametersLog = mutableListOf<ShapeParameters>()
+  val parametersLog = mutableListOf<SandwichParameters>()
 
-  override fun backfillCriteria(config: BackfillConfig<ShapeParameters>): Query<DbMenu> {
-    return queryFactory.newQuery(MenuQuery::class).name("chicken")
+  override fun backfillCriteria(config: BackfillConfig<SandwichParameters>): Query<DbMenu> {
+    return queryFactory.newQuery(MenuQuery::class).name(config.parameters.type)
   }
 
-  override fun runBatch(pkeys: List<Id<DbMenu>>, config: BackfillConfig<ShapeParameters>) {
+  override fun runBatch(pkeys: List<Id<DbMenu>>, config: BackfillConfig<SandwichParameters>) {
     parametersLog.add(config.parameters)
 
     if (config.dryRun) {
@@ -35,8 +35,7 @@ class SinglePartitionHibernateTestBackfill @Inject constructor(
 
   override fun partitionProvider() = UnshardedPartitionProvider(transacter)
 }
-data class ShapeParameters(
+data class SandwichParameters(
   // TODO add description fields
-  val color: String = "red", // "like green or blue or red"
-  val shape: String = "circle" // "backfill shapes are square, rectangle, oval"
+  val type: String = "chicken" // "The type of sandwich to backfill. e.g. chicken, beef"
 )
