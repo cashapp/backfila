@@ -27,8 +27,11 @@ import retrofit2.mock.Calls
 internal class EmbeddedBackfila @Inject internal constructor(
   private val operatorFactory: BackfillOperator.Factory
 ) : Backfila, BackfilaApi {
-  private var serviceData: ConfigureServiceRequest? = null
+  var serviceData: ConfigureServiceRequest? = null
   private var backfillIdGenerator = AtomicInteger(10)
+
+  override val configureServiceData: ConfigureServiceRequest?
+    get() = serviceData
 
   override fun configureService(request: ConfigureServiceRequest): Call<ConfigureServiceResponse> {
     check(serviceData == null) { "Should only be configuring a single backfila service." }

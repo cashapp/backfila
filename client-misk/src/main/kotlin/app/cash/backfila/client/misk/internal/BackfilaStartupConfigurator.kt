@@ -3,12 +3,12 @@ package app.cash.backfila.client.misk.internal
 import app.cash.backfila.client.Connectors
 import app.cash.backfila.client.HttpConnectorData
 import app.cash.backfila.client.misk.Backfill
+import app.cash.backfila.client.misk.Description
 import app.cash.backfila.client.misk.ForBackfila
 import app.cash.backfila.client.misk.client.BackfilaClientConfig
 import app.cash.backfila.client.misk.internal.BackfilaParametersOperator.Companion.backfilaParametersForBackfill
 import app.cash.backfila.protos.service.ConfigureServiceRequest
 import com.google.common.util.concurrent.AbstractIdleService
-import com.google.inject.Injector
 import com.squareup.moshi.Moshi
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -23,7 +23,6 @@ import misk.moshi.adapter
  */
 @Singleton
 internal class BackfilaStartupConfigurator @Inject internal constructor(
-  private val injector: Injector,
   private val config: BackfilaClientConfig,
   private val backfilaClient: BackfilaClient,
   @ForBackfila private val moshi: Moshi,
@@ -38,9 +37,13 @@ internal class BackfilaStartupConfigurator @Inject internal constructor(
     val request = ConfigureServiceRequest.Builder()
         .backfills(
             backfills.values.map { backfillClass ->
+              val description = (backfillClass.annotations.find { it is Description } as? Description)?.text
+              @Suppress("UNCHECKED_CAST")
+              val parameters = backfilaParametersForBackfill(backfillClass as KClass<Backfill<*, *, Any>>)
               ConfigureServiceRequest.BackfillData.Builder()
                   .name(backfillClass.jvmName)
-                  .parameters(backfilaParametersForBackfill(backfillClass as KClass<Backfill<*, *, Any>>))
+                  .description(description)
+                  .parameters(parameters)
                   .build()
             })
         .connector_type(Connectors.HTTP)
