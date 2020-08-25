@@ -4,6 +4,7 @@ import app.cash.backfila.client.misk.Backfill
 import app.cash.backfila.client.misk.BackfillConfig
 import app.cash.backfila.client.misk.ClientMiskService
 import app.cash.backfila.client.misk.DbMenu
+import app.cash.backfila.client.misk.Description
 import app.cash.backfila.client.misk.MenuQuery
 import app.cash.backfila.client.misk.UnshardedPartitionProvider
 import javax.inject.Inject
@@ -11,6 +12,7 @@ import misk.hibernate.Id
 import misk.hibernate.Query
 import misk.hibernate.Transacter
 
+@Description("So we can backfill menus.")
 class SinglePartitionHibernateTestBackfill @Inject constructor(
   @ClientMiskService private val transacter: Transacter,
   private val queryFactory: Query.Factory
@@ -36,6 +38,6 @@ class SinglePartitionHibernateTestBackfill @Inject constructor(
   override fun partitionProvider() = UnshardedPartitionProvider(transacter)
 }
 data class SandwichParameters(
-  // TODO add description fields
-  val type: String = "chicken" // "The type of sandwich to backfill. e.g. chicken, beef"
+  @Description("The type of sandwich to backfill. e.g. chicken, beef")
+  val type: String = "chicken"
 )

@@ -2,6 +2,7 @@ package app.cash.backfila.client.misk.embedded
 
 import app.cash.backfila.client.misk.Backfill
 import app.cash.backfila.client.misk.internal.parametersToBytes
+import app.cash.backfila.protos.service.ConfigureServiceRequest
 import kotlin.reflect.KClass
 import okio.ByteString
 
@@ -23,6 +24,8 @@ interface Backfila {
     rangeStart: String?,
     rangeEnd: String?
   ): BackfillRun<Type>
+
+  val configureServiceData: ConfigureServiceRequest?
 }
 
 inline fun <reified Type : Backfill<*, *, *>> Backfila.createDryRun(

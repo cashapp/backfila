@@ -2,6 +2,7 @@ package app.cash.backfila.client.misk.internal
 
 import app.cash.backfila.client.misk.Backfill
 import app.cash.backfila.client.misk.BackfillConfig
+import app.cash.backfila.client.misk.Description
 import app.cash.backfila.protos.service.Parameter
 import com.google.inject.TypeLiteral
 import com.squareup.moshi.Types
@@ -80,7 +81,11 @@ internal class BackfilaParametersOperator<T : Any>(
         }
       }
       return parametersClass.primaryConstructor?.parameters?.map {
-        Parameter.Builder().name(it.name).build()
+        val description = (it.annotations.find { it -> it is Description } as? Description)?.text
+        Parameter.Builder()
+            .name(it.name)
+            .description(description)
+            .build()
       } ?: emptyList()
     }
   }

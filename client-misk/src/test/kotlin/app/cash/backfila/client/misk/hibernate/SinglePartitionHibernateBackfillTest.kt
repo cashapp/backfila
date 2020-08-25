@@ -254,6 +254,15 @@ abstract class SinglePartitionHibernateBackfillTest {
     assertThat(dryRun.backfill.idsRanDry).containsExactlyElementsOf(wetRun.backfill.idsRanWet)
   }
 
+  @Test fun checkForDescriptions() {
+    val configData = backfila.configureServiceData!!.backfills
+        .first { it.name == SinglePartitionHibernateTestBackfill::class.java.canonicalName }
+    assertThat(configData.description)
+        .isEqualTo("So we can backfill menus.")
+    assertThat(configData.parameters.single().description)
+        .isEqualTo("The type of sandwich to backfill. e.g. chicken, beef")
+  }
+
   @Test fun runOnBeef() {
     createSome()
     val run = backfila.createDryRun<SinglePartitionHibernateTestBackfill>(
