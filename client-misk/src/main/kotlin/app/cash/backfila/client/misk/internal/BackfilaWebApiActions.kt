@@ -15,6 +15,7 @@ import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
+import misk.web.interceptors.LogRequestResponse
 import misk.web.mediatype.MediaTypes
 
 internal class PrepareBackfillAction @Inject constructor(
@@ -25,6 +26,7 @@ internal class PrepareBackfillAction @Inject constructor(
   @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
   @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)
   @Authenticated(services = ["backfila"])
+  @LogRequestResponse(bodySampling = 1.0, errorBodySampling = 1.0)
   fun prepareBackfill(@RequestBody request: PrepareBackfillRequest): PrepareBackfillResponse {
     return loggingSetupProvider.withBackfillRunLogging(request.backfill_name, request.backfill_id) {
       logger.info { "Preparing backfill `${request.backfill_name}::${request.backfill_id}`" }
