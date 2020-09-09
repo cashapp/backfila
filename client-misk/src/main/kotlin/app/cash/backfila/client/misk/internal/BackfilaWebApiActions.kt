@@ -19,7 +19,7 @@ import misk.web.interceptors.LogRequestResponse
 import misk.web.mediatype.MediaTypes
 
 internal class PrepareBackfillAction @Inject constructor(
-  private val operatorFactory: BackfillOperator.Factory,
+  private val operatorFactoryHibernate: HibernateBackfillOperator.Factory,
   private val loggingSetupProvider: BackfilaClientLoggingSetupProvider
 ) : WebAction {
   @Post("/backfila/prepare-backfill")
@@ -31,7 +31,7 @@ internal class PrepareBackfillAction @Inject constructor(
     return loggingSetupProvider.withBackfillRunLogging(request.backfill_name, request.backfill_id) {
       logger.info { "Preparing backfill `${request.backfill_name}::${request.backfill_id}`" }
 
-      val operator = operatorFactory.create(request.backfill_name, request.backfill_id)
+      val operator = operatorFactoryHibernate.create(request.backfill_name, request.backfill_id)
       return@withBackfillRunLogging operator.prepareBackfill(request)
     }
   }
@@ -42,7 +42,7 @@ internal class PrepareBackfillAction @Inject constructor(
 }
 
 internal class GetNextBatchRangeAction @Inject constructor(
-  private val operatorFactory: BackfillOperator.Factory,
+  private val operatorFactoryHibernate: HibernateBackfillOperator.Factory,
   private val loggingSetupProvider: BackfilaClientLoggingSetupProvider
 ) : WebAction {
   @Post("/backfila/get-next-batch-range")
@@ -56,7 +56,7 @@ internal class GetNextBatchRangeAction @Inject constructor(
             "::${request.backfill_id}`. Previous end: `${request.previous_end_key}`"
       }
 
-      val operator = operatorFactory.create(request.backfill_name, request.backfill_id)
+      val operator = operatorFactoryHibernate.create(request.backfill_name, request.backfill_id)
 
       return@withBackfillPartitionLogging operator.getNextBatchRange(request)
           .also {
@@ -75,7 +75,7 @@ internal class GetNextBatchRangeAction @Inject constructor(
 }
 
 internal class RunBatchAction @Inject constructor(
-  private val operatorFactory: BackfillOperator.Factory,
+  private val operatorFactoryHibernate: HibernateBackfillOperator.Factory,
   private val loggingSetupProvider: BackfilaClientLoggingSetupProvider
 ) : WebAction {
   @Post("/backfila/run-batch")
@@ -90,7 +90,7 @@ internal class RunBatchAction @Inject constructor(
             "[${request.batch_range.start.utf8()}, ${request.batch_range.end.utf8()}]"
       }
 
-      val operator = operatorFactory.create(request.backfill_name, request.backfill_id)
+      val operator = operatorFactoryHibernate.create(request.backfill_name, request.backfill_id)
       return@withBackfillPartitionLogging operator.runBatch(request)
     }
   }

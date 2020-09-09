@@ -25,7 +25,7 @@ import retrofit2.mock.Calls
  */
 @Singleton
 internal class EmbeddedBackfila @Inject internal constructor(
-  private val operatorFactory: BackfillOperator.Factory
+  private val operatorFactoryHibernate: HibernateBackfillOperator.Factory
 ) : Backfila, BackfilaApi {
   var serviceData: ConfigureServiceRequest? = null
   private var backfillIdGenerator = AtomicInteger(10)
@@ -51,7 +51,7 @@ internal class EmbeddedBackfila @Inject internal constructor(
     }
 
     val backfillId = backfillIdGenerator.getAndIncrement()
-    val operator = operatorFactory.create(createRequest.backfill_name, backfillId.toString())
+    val operator = operatorFactoryHibernate.create(createRequest.backfill_name, backfillId.toString())
 
     val run = EmbeddedBackfillRun<Backfill<*, *, *>>(
         operator = operator,
@@ -93,7 +93,7 @@ internal class EmbeddedBackfila @Inject internal constructor(
     }
 
     val backfillId = backfillIdGenerator.getAndIncrement().toString()
-    val operator = operatorFactory.create(backfillType.jvmName, backfillId)
+    val operator = operatorFactoryHibernate.create(backfillType.jvmName, backfillId)
 
     @Suppress("UNCHECKED_CAST") // We don't know the types statically, so fake them.
     return EmbeddedBackfillRun(

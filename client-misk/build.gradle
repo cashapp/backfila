@@ -26,6 +26,17 @@ dependencies {
   testImplementation(dep.miskTesting)
   testImplementation(dep.miskHibernateTesting)
   testImplementation dep.junitEngine
+
+
+// TODO: dynamodb things
+
+  implementation "app.cash.tempest:tempest:1.0.0"
+
+  testImplementation dep.miskAwsDynamodbTesting
+  testImplementation dep.assertj
+  testImplementation dep.miskTesting
+  testImplementation dep.junitApi
+  testImplementation dep.junitEngine
 }
 
 jar {

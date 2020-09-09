@@ -80,8 +80,3 @@ abstract class Backfill<E : DbEntity<E>, Pkey : Any, Param : Any> {
   open fun runOne(pkey: Pkey, config: BackfillConfig<Param>) {
   }
 }
-
-/**
- * Placeholder class to represent when a backfill has no Parameters.
- */
-class NoParameters private fun constructor() { /* Never create this */ }

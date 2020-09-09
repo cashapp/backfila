@@ -4,7 +4,7 @@ import app.cash.backfila.client.misk.Backfill
 import app.cash.backfila.client.misk.ForBackfila
 import app.cash.backfila.client.misk.NoParameters
 import app.cash.backfila.client.misk.PkeySqlAdapter
-import app.cash.backfila.client.misk.internal.BackfillOperator.Factory
+import app.cash.backfila.client.misk.internal.HibernateBackfillOperator.Factory
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse.Batch
@@ -38,6 +38,16 @@ import misk.logging.getLogger
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
 
+interface BackfillOperator {
+  fun name(): String
+  fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse
+  fun getNextBatchRange(
+    request: GetNextBatchRangeRequest
+  ): GetNextBatchRangeResponse
+
+  fun runBatch(request: RunBatchRequest): RunBatchResponse
+}
+
 /**
  * Operates on a backfill using Hibernate 5.x entities. Create instances with [Factory].
  *
@@ -47,17 +57,17 @@ import okio.ByteString.Companion.encodeUtf8
  * @param <Param> A class wrapping the parameters that come from backfila. The default constructor
  * is used to specify the parameters and construct the class. Usually a data class or [NoParameters].
  */
-internal class BackfillOperator<E : DbEntity<E>, Pkey : Any, Param : Any> internal constructor(
+internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : Any> internal constructor(
   val backfill: Backfill<E, Pkey, Param>,
   factory: Factory
-) {
+) : BackfillOperator {
   private val parametersOperator = BackfilaParametersOperator<Param>(backfill::class)
   private val partitionProvider = backfill.partitionProvider()
   private val boundingRangeStrategy = partitionProvider.boundingRangeStrategy<E, Pkey>()
   private var pkeySqlAdapter: PkeySqlAdapter = factory.pkeySqlAdapter
   internal var queryFactory: Query.Factory = factory.queryFactory
 
-  fun name() = backfill.javaClass.toString()
+  override fun name() = backfill.javaClass.toString()
 
   private fun pkeyFromString(string: String): Pkey =
       pkeySqlAdapter.pkeyFromString(backfill.pkeyClass.java, string)
@@ -82,7 +92,7 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any, Param : Any> intern
     }
   }
 
-  fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
+  override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
     validateRange(request.range)
 
     backfill.validate(parametersOperator.constructBackfillConfig(
@@ -131,7 +141,7 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any, Param : Any> intern
         .build()
   }
 
-  fun getNextBatchRange(
+  override fun getNextBatchRange(
     request: GetNextBatchRangeRequest
   ): GetNextBatchRangeResponse {
     checkArgument(request.compute_count_limit > 0, "batch limit must be > 0")
@@ -279,7 +289,7 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any, Param : Any> intern
     }
   }
 
-  fun runBatch(request: RunBatchRequest): RunBatchResponse {
+  override fun runBatch(request: RunBatchRequest): RunBatchResponse {
     val config = parametersOperator.constructBackfillConfig(
         request.parameters, request.dry_run)
 
@@ -340,9 +350,9 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any, Param : Any> intern
     }
 
     fun <E : DbEntity<E>, Pkey : Any, Param : Any> create(backfill: Backfill<E, Pkey, Param>) =
-        BackfillOperator(backfill, this)
+        HibernateBackfillOperator(backfill, this)
 
-    fun create(backfillName: String, backfillId: String): BackfillOperator<*, *, *> {
+    fun create(backfillName: String, backfillId: String): HibernateBackfillOperator<*, *, *> {
       @Suppress("UNCHECKED_CAST") // We don't know the types statically, so fake them.
       val backfill = getBackfill(backfillName, backfillId)
           as Backfill<DbPlaceholder, Any, Any>
@@ -357,6 +367,6 @@ internal class BackfillOperator<E : DbEntity<E>, Pkey : Any, Param : Any> intern
   }
 
   companion object {
-    private val logger = getLogger<BackfillOperator<*, *, *>>()
+    private val logger = getLogger<HibernateBackfillOperator<*, *, *>>()
   }
 }

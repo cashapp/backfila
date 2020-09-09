@@ -19,7 +19,7 @@ import okio.ByteString.Companion.encodeUtf8
  * This is not thread safe.
  */
 internal class EmbeddedBackfillRun<B : Backfill<*, *, *>>(
-  private val operator: BackfillOperator<*, *, *>,
+  private val operator: HibernateBackfillOperator<*, *, *>,
   override val dryRun: Boolean,
   override val parameters: Map<String, ByteString>,
   override val rangeStart: String?,
