@@ -58,7 +58,7 @@ internal class BackfilaParametersOperator<T : Any>(
     for (parameter in constructorParameters) {
       if (parameters.containsKey(parameter.name)) {
         val value = parameters[parameter.name]!!
-        map[parameter] = TYPE_CONVERTERS.getValue(parameter.type.jvmErasure).invoke(value)
+        map[parameter] = TYPE_CONVERTERS[parameter.type.jvmErasure]!!.invoke(value)
       }
     }
     val instance = parametersClass.primaryConstructor!!.callBy(map)

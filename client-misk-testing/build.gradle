@@ -1,5 +1,4 @@
 apply plugin: 'kotlin'
-apply plugin: 'org.junit.platform.gradle.plugin'
 
 dependencies {
   api project(':client-misk')
