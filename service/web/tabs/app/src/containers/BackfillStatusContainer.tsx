@@ -1,4 +1,5 @@
 import * as React from "react"
+import { createRef } from "react"
 import { connect } from "react-redux"
 import {
   IDispatchProps,
@@ -10,6 +11,7 @@ import {
   AnchorButton,
   Intent,
   Classes,
+  Dialog,
   H2,
   H3,
   HTMLTable,
@@ -74,6 +76,8 @@ function prettyEta(durationSeconds: number) {
 
 interface BackfillStatusState {
   editing: any
+  event_data?: string
+  event_title?: string
 }
 
 class BackfillStatusContainer extends React.Component<
@@ -84,6 +88,7 @@ class BackfillStatusContainer extends React.Component<
   private backfillStatusTag: string = `${this.id}::BackfillRuns`
   private status: any
   private interval: any
+  private dialogTextRef: any = createRef()
 
   componentDidMount() {
     this.requestStatus()
@@ -115,7 +120,7 @@ class BackfillStatusContainer extends React.Component<
         clearInterval(this.interval)
       }
     }
-    if (!this.status) {
+    if (!this.status || !this.state) {
       return (
         <LayoutContainer>
           <Spinner />
@@ -312,7 +317,7 @@ class BackfillStatusContainer extends React.Component<
             />
           </div>
           <H3>Partitions</H3>
-          <HTMLTable bordered={true} striped={true}>
+          <HTMLTable bordered={true} striped={true} style={{width:"100%"}}>
             <thead>
               <tr>
                 <th>Name</th>
@@ -387,6 +392,56 @@ class BackfillStatusContainer extends React.Component<
                           )}{" "}
                         </span>
                       )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </HTMLTable>
+
+          <Dialog
+            isOpen={!!this.state.event_data}
+            title={this.state.event_title}
+            onClose={() => this.setState({event_data: null})}
+            style={{width: 1000}}
+          >
+            <div style={{width:'100%', height: 600}}>
+               <AnchorButton text={"Copy"} intent={Intent.PRIMARY} onClick={() => {this.dialogTextRef.current.select(); document.execCommand('copy')}} />
+              <textarea ref={this.dialogTextRef} style={{width: '100%', height: 600}}>
+                 {this.state.event_data}
+              </textarea>
+            </div>
+          </Dialog>
+          <H3>Event log (last 50)</H3>
+          <HTMLTable bordered={true} striped={true} style={{width:"100%"}}>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>User</th>
+                <th>Partition</th>
+                <th>Event</th>
+                <th>More data</th>
+              </tr>
+            </thead>
+            <tbody>
+              {status.event_logs.map((event_log: any) => (
+                <tr>
+                  <td style={{paddingTop: 0, paddingBottom: 0}}>{event_log.occurred_at}</td>
+                  <td style={{paddingTop: 0, paddingBottom: 0}}>{event_log.user}</td>
+                  <td style={{paddingTop: 0, paddingBottom: 0}}>{event_log.partition_name}</td>
+                  <td style={{paddingTop: 0, paddingBottom: 0}}>{event_log.message}</td>
+                  <td style={{paddingTop: 0, paddingBottom: 0}}>
+                    {!!event_log.extra_data && (
+                      <div>
+                        <a
+                          onClick={event => this.setState({
+                            event_data: event_log.extra_data,
+                            event_title: event_log.occurred_at + " " + event_log.message
+                          })}
+                        >
+                          show&nbsp;more
+                        </a>
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))}

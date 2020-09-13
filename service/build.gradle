@@ -15,6 +15,7 @@ sourceSets {
 }
 
 dependencies {
+  implementation dep.apacheCommonsLang3
   implementation dep.guava
   implementation dep.guice
   implementation dep.guiceMultibindings

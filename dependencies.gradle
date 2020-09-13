@@ -1,5 +1,6 @@
 ext.dep = [
   "assertj": "org.assertj:assertj-core:3.13.2",
+  "apacheCommonsLang3": "org.apache.commons:commons-lang3:3.11",
   "guava": "com.google.guava:guava:28.1-jre",
   "guice": "com.google.inject:guice:4.2.2",
   "guiceMultibindings": "com.google.inject.extensions:guice-multibindings:4.2.2",

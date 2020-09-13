@@ -8,13 +8,17 @@ import app.cash.backfila.service.SlackHelper
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.DbBackfillRun
+import app.cash.backfila.service.persistence.DbEventLog
 import app.cash.backfila.service.persistence.DbRunPartition
 import app.cash.backfila.service.runner.statemachine.BatchAwaiter
 import app.cash.backfila.service.runner.statemachine.BatchPrecomputer
 import app.cash.backfila.service.runner.statemachine.BatchQueuer
 import app.cash.backfila.service.runner.statemachine.BatchRunner
+import app.cash.backfila.service.runner.statemachine.RunBatchException
 import app.cash.backfila.service.scheduler.LeaseHunter
+import java.net.SocketTimeoutException
 import java.time.Clock
+import java.time.Duration
 import javax.inject.Inject
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
@@ -27,6 +31,7 @@ import misk.hibernate.Transacter
 import misk.hibernate.load
 import misk.logging.getLogger
 import okio.ByteString
+import org.apache.commons.lang3.exception.ExceptionUtils
 
 val DEFAULT_BACKOFF_SCHEDULE = listOf(5_000L, 15_000L, 30_000L)
 
@@ -55,6 +60,7 @@ class BackfillRunner private constructor(
 
   /** Backoff for all RPCs for this runner. */
   val globalBackoff = Backoff(factory.clock)
+
   /** Backoff just for RunBatch RPCs. */
   val runBatchBackoff = Backoff(factory.clock)
 
@@ -155,6 +161,7 @@ class BackfillRunner private constructor(
       val connector: String,
       val connectorExtraData: String?
     )
+
     val dbData = factory.transacter.transaction { session ->
       val dbRunPartition = session.load(partitionId)
       val service = dbRunPartition.backfill_run.registered_backfill.service
@@ -180,14 +187,20 @@ class BackfillRunner private constructor(
     failuresSinceSuccess = 0
   }
 
-  fun onRpcFailure() {
+  suspend fun onRpcFailure(
+    exception: Exception,
+    action: String,
+    elapsed: Duration
+  ) {
     // If there is an intermittent server issue, all the current batches will likely fail.
     // So to consider those as only one failure, only increment failure count if the backoff
     // finished.
     if (globalBackoff.backingOff()) {
       logger.info { "Ignoring rpc error because runner is already backing off ${logLabel()}" }
+      recordErrorEvent(exception, action, elapsed, backoffMs = null, paused = false)
       return
     }
+
     failuresSinceSuccess++
     if (failuresSinceSuccess > metadata.backoffSchedule.size) {
       logger.info {
@@ -195,9 +208,17 @@ class BackfillRunner private constructor(
       }
       if (pauseBackfill()) {
         factory.slackHelper.runErrored(backfillRunId)
+
+        recordErrorEvent(exception, action, elapsed, backoffMs = null, paused = true)
       }
+
+      // Give the main loop a chance to run and exit.
+      running = false
+      delay(1000)
     } else {
-      globalBackoff.addMillis(metadata.backoffSchedule[failuresSinceSuccess - 1])
+      val backoffMs = metadata.backoffSchedule[failuresSinceSuccess - 1]
+      globalBackoff.addMillis(backoffMs)
+      recordErrorEvent(exception, action, elapsed, backoffMs, paused = false)
     }
   }
 
@@ -223,6 +244,54 @@ class BackfillRunner private constructor(
       }
       dbRunPartition.clearLease()
       logger.info { "Released lease on ${logLabel()}" }
+    }
+  }
+
+  private fun recordErrorEvent(
+    exception: Exception,
+    action: String,
+    elapsed: Duration,
+    backoffMs: Long?,
+    paused: Boolean
+  ) {
+    val elapsedMs = elapsed.toMillis()
+
+    val endMessage = when {
+      paused -> "paused backfill due to $failuresSinceSuccess consecutive errors"
+      backoffMs != null -> "backing off for ${backoffMs}ms"
+      else -> "already backing off"
+    }
+
+    factory.transacter.transaction { session ->
+      when (exception) {
+        is RunBatchException -> {
+          session.save(DbEventLog(
+              backfillRunId,
+              partition_id = partitionId,
+              type = DbEventLog.Type.ERROR,
+              message = "error $action, client exception after ${elapsedMs}ms. $endMessage",
+              extra_data = exception.stackTrace
+          ))
+        }
+        is SocketTimeoutException -> {
+          session.save(DbEventLog(
+              backfillRunId,
+              partition_id = partitionId,
+              type = DbEventLog.Type.ERROR,
+              message = "error $action, timeout after ${elapsedMs}ms. $endMessage",
+              extra_data = ExceptionUtils.getStackTrace(exception)
+          ))
+        }
+        else -> {
+          session.save(DbEventLog(
+              backfillRunId,
+              partition_id = partitionId,
+              type = DbEventLog.Type.ERROR,
+              message = "error $action, RPC error after ${elapsedMs}ms. $endMessage",
+              extra_data = ExceptionUtils.getStackTrace(exception)
+          ))
+        }
+      }
     }
   }
 

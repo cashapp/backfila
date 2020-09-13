@@ -98,6 +98,8 @@ class StartStopBackfillActionTest {
       assertThat(status.state).isEqualTo(BackfillState.RUNNING)
       assertThat(status.partitions.map { it.state })
           .containsOnly(BackfillState.RUNNING)
+      assertThat(status.event_logs[0].message).isEqualTo("backfill started")
+      assertThat(status.event_logs[0].user).isEqualTo("molly")
 
       backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
       assertThat(backfillRuns.paused_backfills).hasSize(0)
@@ -109,6 +111,8 @@ class StartStopBackfillActionTest {
       assertThat(status.state).isEqualTo(BackfillState.PAUSED)
       assertThat(status.partitions.map { it.state })
           .containsOnly(BackfillState.PAUSED)
+      assertThat(status.event_logs[0].message).isEqualTo("backfill stopped")
+      assertThat(status.event_logs[0].user).isEqualTo("molly")
 
       backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
       assertThat(backfillRuns.paused_backfills).hasSize(1)
