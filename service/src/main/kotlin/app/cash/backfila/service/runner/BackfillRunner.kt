@@ -212,7 +212,9 @@ class BackfillRunner private constructor(
         recordErrorEvent(exception, action, elapsed, backoffMs = null, paused = true)
       }
 
-      // Give the main loop a chance to run and exit.
+      // With very frequent errors the caller may never suspend and give other coroutines
+      // a chance to execute. Suspend here to give the lease updater loop a chance to run
+      // and exit the runner.
       running = false
       delay(1000)
     } else {
