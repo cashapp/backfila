@@ -101,6 +101,8 @@ class BackfillRunnerTest {
     assertThat(partition.computed_matching_record_count).isEqualTo(1001)
     assertThat(partition.backfilled_scanned_record_count).isEqualTo(1001)
     assertThat(partition.backfilled_matching_record_count).isEqualTo(1001)
+
+    assertThat(status.event_logs[0].message).isEqualTo("backfill completed")
   }
 
   // An important use case is serial / single thread backfills.
@@ -375,12 +377,17 @@ class BackfillRunnerTest {
         runner.stop()
       }
     }
+
+    val status = getBackfillStatusAction.status(runner.backfillRunId.id)
+    val partition = status.partitions.find { it.id == runner.partitionId.id }!!
     // Cursor not updated, backfill paused
-    transacter.transaction { session ->
-      val partition = session.load(runner.partitionId)
-      assertThat(partition.pkey_cursor).isNull()
-      assertThat(partition.run_state).isEqualTo(BackfillState.PAUSED)
-    }
+    assertThat(partition.pkey_cursor).isNull()
+    assertThat(partition.state).isEqualTo(BackfillState.PAUSED)
+
+    assertThat(status.event_logs[0].message).isEqualTo(
+        "error running batch [0, 99], RPC error after 1000ms. paused backfill due to 2 consecutive errors")
+    assertThat(status.event_logs[1].message).isEqualTo(
+        "error running batch [0, 99], RPC error after 0ms. backing off for 1000ms")
   }
 
   @Test fun `fails batch when stack trace is returned`() {
@@ -395,7 +402,7 @@ class BackfillRunnerTest {
 
         fakeBackfilaClientServiceClient.runBatchResponses.send(
             Result.success(RunBatchResponse.Builder()
-                .exception_stack_trace("stacktrace")
+                .exception_stack_trace("fake stacktrace")
                 .build())
         )
         fakeBackfilaClientServiceClient.runBatchResponses.send(
@@ -424,12 +431,15 @@ class BackfillRunnerTest {
         runner.stop()
       }
     }
+    val status = getBackfillStatusAction.status(runner.backfillRunId.id)
+    val partition = status.partitions.find { it.id == runner.partitionId.id }!!
     // Cursor updated
-    transacter.transaction { session ->
-      val partition = session.load(runner.partitionId)
-      assertThat(partition.pkey_cursor).isEqualTo("199".encodeUtf8())
-      assertThat(partition.run_state).isEqualTo(BackfillState.RUNNING)
-    }
+    assertThat(partition.pkey_cursor).isEqualTo("199")
+    assertThat(partition.state).isEqualTo(BackfillState.RUNNING)
+
+    assertThat(status.event_logs[0].message).isEqualTo(
+        "error running batch [0, 99], client exception after 0ms. backing off for 1000ms")
+    assertThat(status.event_logs[0].extra_data).isEqualTo("fake stacktrace")
   }
 
   @Test fun skipEmptyBatches() {
@@ -543,8 +553,12 @@ class BackfillRunnerTest {
         yield()
         assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNull()
 
-        updateBackfillAction.update(runner.backfillRunId.id,
-            UpdateBackfillRequest(num_threads = 4))
+        scope.fakeCaller(user = "molly") {
+          updateBackfillAction.update(
+              runner.backfillRunId.id,
+              UpdateBackfillRequest(num_threads = 4)
+          )
+        }
         // Wait for runner to reload metadata.
         delay(2000)
 

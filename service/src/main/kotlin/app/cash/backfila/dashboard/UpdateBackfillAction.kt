@@ -2,6 +2,7 @@ package app.cash.backfila.dashboard
 
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.DbBackfillRun
+import app.cash.backfila.service.persistence.DbEventLog
 import javax.inject.Inject
 import misk.MiskCaller
 import misk.exceptions.BadRequestException
@@ -67,35 +68,62 @@ class UpdateBackfillAction @Inject constructor(
       if (newScanSize < newBatchSize) {
         throw BadRequestException("scan_size must be >= batch_size")
       }
-      run.scan_size = newScanSize
+      val changesLog = mutableListOf<String>()
+
+      if (run.scan_size != newScanSize) {
+        changesLog += "scan_size ${run.scan_size}->$newScanSize"
+        run.scan_size = newScanSize
+      }
+      if (run.batch_size != newBatchSize) {
+        changesLog += "batch_size ${run.batch_size}->$newBatchSize"
+        run.batch_size = newBatchSize
+      }
       run.batch_size = newBatchSize
 
       if (request.num_threads != null) {
         if (request.num_threads < 1) {
           throw BadRequestException("num_threads must be >= 1")
         }
-        run.num_threads = request.num_threads
+        if (run.num_threads != request.num_threads) {
+          changesLog += "num_threads ${run.num_threads}->${request.num_threads}"
+          run.num_threads = request.num_threads
+        }
       }
 
       if (request.extra_sleep_ms != null) {
         if (request.extra_sleep_ms < 0) {
           throw BadRequestException("extra_sleep_ms must be >= 0")
         }
-        run.extra_sleep_ms = request.extra_sleep_ms
+        if (run.extra_sleep_ms != request.extra_sleep_ms) {
+          changesLog += "extra_sleep_ms ${run.extra_sleep_ms}->${request.extra_sleep_ms}"
+          run.extra_sleep_ms = request.extra_sleep_ms
+        }
       }
 
       request.backoff_schedule?.let { schedule ->
         if (request.backoff_schedule.isEmpty()) {
+          changesLog += "backoff_schedule ${run.backoff_schedule}->"
           run.backoff_schedule = null
           return@let
         }
         if (schedule.split(',').any { it.toLongOrNull() == null }) {
           throw BadRequestException("backoff_schedule must be a comma separated list of integers")
         }
+        if (run.backoff_schedule != request.backoff_schedule) {
+          changesLog += "backoff_schedule ${run.backoff_schedule}->${request.backoff_schedule}"
+          run.backoff_schedule = request.backoff_schedule
+        }
         run.backoff_schedule = request.backoff_schedule
       }
+
+      session.save(DbEventLog(
+          run.id,
+          partition_id = null,
+          user = caller.get()!!.principal,
+          type = DbEventLog.Type.CONFIG_CHANGE,
+          message = "updated settings: " + changesLog.joinToString(", ")
+      ))
     }
-    // TODO audit log event
 
     return UpdateBackfillResponse()
   }

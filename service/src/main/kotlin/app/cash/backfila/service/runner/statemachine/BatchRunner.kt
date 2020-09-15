@@ -97,7 +97,13 @@ class BatchRunner(
           // TODO for pipelined backfills, await result and start a second RPC to the target
         }
       }
-      runChannel.upstream().send(AwaitingRun(batch, run))
+      runChannel.upstream().send(
+          AwaitingRun(
+              batch,
+              run,
+              backfillRunner.factory.clock.instant()
+          )
+      )
       rpcBackpressureChannel.upstream().send(Unit)
     }
     logger.info { "BatchRunner stopped ${backfillRunner.logLabel()}" }

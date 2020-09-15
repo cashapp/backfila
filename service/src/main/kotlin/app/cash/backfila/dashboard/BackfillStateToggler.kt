@@ -6,6 +6,7 @@ import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.BackfillState.PAUSED
 import app.cash.backfila.service.persistence.BackfillState.RUNNING
 import app.cash.backfila.service.persistence.DbBackfillRun
+import app.cash.backfila.service.persistence.DbEventLog
 import javax.inject.Inject
 import misk.MiskCaller
 import misk.exceptions.BadRequestException
@@ -43,6 +44,15 @@ class BackfillStateToggler @Inject constructor(
             "backfill $id isn't $requiredCurrentState, can't move to state $desiredState")
       }
       run.setState(session, queryFactory, desiredState)
+
+      val startedOrStopped = if (desiredState == RUNNING) "started" else "stopped"
+      session.save(DbEventLog(
+          run.id,
+          partition_id = null,
+          user = caller.principal,
+          type = DbEventLog.Type.STATE_CHANGE,
+          message = "backfill $startedOrStopped"
+      ))
     }
 
     if (desiredState == RUNNING) {
@@ -50,8 +60,6 @@ class BackfillStateToggler @Inject constructor(
     } else {
       slackHelper.runPaused(Id(id), caller.principal)
     }
-
-    // TODO audit log event
   }
 
   companion object {

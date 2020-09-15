@@ -3,14 +3,18 @@ package app.cash.backfila.dashboard
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.DbBackfillRun
+import app.cash.backfila.service.persistence.DbEventLog
 import app.cash.backfila.service.persistence.DbRunPartition
+import app.cash.backfila.service.persistence.EventLogQuery
 import java.time.Instant
 import javax.inject.Inject
 import misk.exceptions.BadRequestException
 import misk.hibernate.Id
 import misk.hibernate.Query
+import misk.hibernate.Session
 import misk.hibernate.Transacter
 import misk.hibernate.loadOrNull
+import misk.hibernate.newQuery
 import misk.security.authz.Authenticated
 import misk.web.Get
 import misk.web.PathParam
@@ -36,6 +40,15 @@ data class UiPartition(
   val matching_records_per_minute: Long?
 )
 
+data class UiEventLog(
+  val occurred_at: Instant,
+  val type: DbEventLog.Type,
+  val user: String?,
+  val partition_name: String?,
+  val message: String,
+  val extra_data: String?
+)
+
 data class GetBackfillStatusResponse(
   val service_name: String,
   val name: String,
@@ -49,7 +62,8 @@ data class GetBackfillStatusResponse(
   val created_by_user: String?,
   val extra_sleep_ms: Long,
   val backoff_schedule: String?,
-  val partitions: List<UiPartition>
+  val partitions: List<UiPartition>,
+  val event_logs: List<UiEventLog>
 )
 
 class GetBackfillStatusAction @Inject constructor(
@@ -67,6 +81,7 @@ class GetBackfillStatusAction @Inject constructor(
     return transacter.transaction { session ->
       val run = session.loadOrNull<DbBackfillRun>(Id(id))
           ?: throw BadRequestException("backfill $id doesn't exist")
+      val partitions = run.partitions(session, queryFactory)
       GetBackfillStatusResponse(
           run.service.registry_name,
           run.registered_backfill.name,
@@ -80,26 +95,50 @@ class GetBackfillStatusAction @Inject constructor(
           run.created_by_user,
           run.extra_sleep_ms,
           run.backoff_schedule,
-          run.partitions(session, queryFactory).map { dbToUi(it) }
+          partitions.map { dbToUi(it) },
+          events(session, run, partitions)
       )
     }
   }
 
   private fun dbToUi(partition: DbRunPartition) =
-    UiPartition(
-        partition.id.id,
-        partition.partition_name,
-        partition.run_state,
-        partition.pkey_cursor?.utf8(),
-        partition.pkey_range_start?.utf8(),
-        partition.pkey_range_end?.utf8(),
-        partition.precomputing_done,
-        partition.precomputing_pkey_cursor?.utf8(),
-        partition.computed_scanned_record_count,
-        partition.computed_matching_record_count,
-        partition.backfilled_scanned_record_count,
-        partition.backfilled_matching_record_count,
-        partition.scanned_records_per_minute,
-        partition.matching_records_per_minute
-    )
+      UiPartition(
+          partition.id.id,
+          partition.partition_name,
+          partition.run_state,
+          partition.pkey_cursor?.utf8(),
+          partition.pkey_range_start?.utf8(),
+          partition.pkey_range_end?.utf8(),
+          partition.precomputing_done,
+          partition.precomputing_pkey_cursor?.utf8(),
+          partition.computed_scanned_record_count,
+          partition.computed_matching_record_count,
+          partition.backfilled_scanned_record_count,
+          partition.backfilled_matching_record_count,
+          partition.scanned_records_per_minute,
+          partition.matching_records_per_minute
+      )
+
+  private fun events(
+    session: Session,
+    run: DbBackfillRun,
+    partitions: List<DbRunPartition>
+  ): List<UiEventLog> {
+    val partitionsById = partitions.associateBy { it.id }
+    return queryFactory.newQuery<EventLogQuery>()
+        .backfillRunId(run.id)
+        .orderByIdDesc()
+        .apply { maxRows = 50 }
+        .list(session)
+        .map {
+          UiEventLog(
+              it.created_at,
+              it.type,
+              it.user,
+              partitionsById[it.partition_id]?.partition_name,
+              it.message,
+              it.extra_data
+          )
+        }
+  }
 }

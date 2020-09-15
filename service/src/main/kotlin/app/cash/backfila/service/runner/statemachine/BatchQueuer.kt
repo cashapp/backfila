@@ -4,6 +4,7 @@ import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse.Batch
 import app.cash.backfila.protos.clientservice.KeyRange
 import app.cash.backfila.service.runner.BackfillRunner
+import com.google.common.base.Stopwatch
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -33,6 +34,8 @@ class BatchQueuer(
     // since the DB stores how far we've completed batches, and we are likely ahead of that.
     var pkeyCursor = backfillRunner.metadata.pkeyCursor
 
+    val stopwatch = Stopwatch.createUnstarted()
+
     while (true) {
       // Use the latest metadata snapshot.
       val metadata = backfillRunner.metadata
@@ -52,6 +55,10 @@ class BatchQueuer(
       try {
         val computeTimeLimitMs = 5_000L // half of HTTP timeout
         val computeCountLimit = nextBatchChannel.capacity
+
+        stopwatch.reset()
+        stopwatch.start()
+
         val response = backfillRunner.client.getNextBatchRange(GetNextBatchRangeRequest(
             metadata.backfillRunId.toString(),
             backfillRunner.backfillName,
@@ -84,7 +91,7 @@ class BatchQueuer(
         break
       } catch (e: Exception) {
         logger.info(e) { "Rpc failure when computing next batch for ${backfillRunner.logLabel()}" }
-        backfillRunner.onRpcFailure()
+        backfillRunner.onRpcFailure(e, "computing batch", stopwatch.elapsed())
       }
     }
     logger.info { "BatchQueuer stopped ${backfillRunner.logLabel()}" }

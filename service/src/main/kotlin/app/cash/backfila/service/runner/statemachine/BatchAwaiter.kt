@@ -2,7 +2,9 @@ package app.cash.backfila.service.runner.statemachine
 
 import app.cash.backfila.protos.clientservice.RunBatchResponse
 import app.cash.backfila.service.persistence.BackfillState
+import app.cash.backfila.service.persistence.DbEventLog
 import app.cash.backfila.service.runner.BackfillRunner
+import java.time.Duration
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -28,7 +30,7 @@ class BatchAwaiter(
   ) = scope.launch {
     logger.info { "BatchAwaiter started ${backfillRunner.logLabel()}" }
     main@ while (true) {
-      var (batch, runBatchRpc) = try {
+      var (batch, runBatchRpc, startedAt) = try {
         receiveChannel.receive()
       } catch (e: CancellationException) {
         logger.info(e) { "BatchAwaiter job cancelled ${backfillRunner.logLabel()}" }
@@ -78,11 +80,12 @@ class BatchAwaiter(
           break@main
         } catch (e: Exception) {
           logger.info(e) { "Rpc failure when running batch for ${backfillRunner.logLabel()}" }
-          backfillRunner.onRpcFailure()
 
-          if (e is RunBatchException) {
-            // TODO: write exception to event log
-          }
+          backfillRunner.onRpcFailure(
+              e,
+              "running batch [${batch.batch_range.start.utf8()}, ${batch.batch_range.end.utf8()}]",
+              Duration.between(startedAt, backfillRunner.factory.clock.instant())
+          )
 
           if (backfillRunner.globalBackoff.backingOff()) {
             val backoffMs = backfillRunner.globalBackoff.backoffMs()
@@ -109,6 +112,13 @@ class BatchAwaiter(
       val dbRunPartition = session.load(backfillRunner.partitionId)
       dbRunPartition.run_state = BackfillState.COMPLETE
 
+      session.save(DbEventLog(
+          backfillRunner.backfillRunId,
+          partition_id = dbRunPartition.id,
+          type = DbEventLog.Type.STATE_CHANGE,
+          message = "partition completed"
+      ))
+
       // If all states are COMPLETE the whole backfill will be completed.
       // If multiple partitions finish at the same time they will retry due to the hibernate
       // version mismatch on the DbBackfillRun.
@@ -117,7 +127,13 @@ class BatchAwaiter(
       if (partitions.all { it.run_state == BackfillState.COMPLETE }) {
         dbRunPartition.backfill_run.complete()
         logger.info { "Backfill ${backfillRunner.backfillName} completed" }
-        // TODO audit log
+
+        session.save(DbEventLog(
+            backfillRunner.backfillRunId,
+            type = DbEventLog.Type.STATE_CHANGE,
+            message = "backfill completed"
+        ))
+
         return@transaction true
       }
       false
