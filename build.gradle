@@ -53,7 +53,7 @@ subprojects { subProject ->
       ktlint(dep.ktlintVersion).userData(['indent_size': '2', 'continuation_indent_size': '4'])
     }
   }
-  compileKotlin.dependsOn 'spotlessKotlinApply'
+  //compileKotlin.dependsOn 'spotlessKotlinApply'
 
   repositories {
     mavenCentral()

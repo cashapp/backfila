@@ -1,0 +1,44 @@
+apply plugin: 'kotlin'
+
+dependencies {
+    implementation dep.guava
+    implementation dep.moshiCore
+    implementation dep.moshiKotlin
+    implementation dep.wireRuntime
+    implementation dep.guice
+    implementation dep.okHttp
+    implementation dep.retrofit
+    implementation dep.retrofitMock
+    implementation dep.retrofitMoshi
+    implementation dep.retrofitWire
+    implementation dep.okio
+    implementation dep.kotlinStdLib
+    implementation dep.tempest
+    implementation dep.wireMoshiAdapter
+
+    api project(':client')
+    testApi project(':client-misk-testing')
+
+    implementation dep.misk
+
+    testImplementation dep.miskAwsDynamodbTesting
+    testImplementation dep.assertj
+    testImplementation dep.miskTesting
+    testImplementation dep.junitApi
+    testImplementation dep.junitEngine
+}
+
+jar {
+    baseName = "backfila-client-misk-tempest"
+}
+
+afterEvaluate { project ->
+    project.tasks.dokka {
+        outputDirectory = "$rootDir/docs/0.x"
+        outputFormat = 'gfm'
+    }
+}
+
+if (rootProject.file("hooks.gradle").exists()) {
+    apply from: rootProject.file("hooks.gradle")
+}
