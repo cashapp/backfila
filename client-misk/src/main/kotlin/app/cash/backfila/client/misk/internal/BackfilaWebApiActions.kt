@@ -10,6 +10,7 @@ import app.cash.backfila.protos.clientservice.RunBatchResponse
 import javax.inject.Inject
 import misk.logging.getLogger
 import misk.security.authz.Authenticated
+import misk.web.AvailableWhenDegraded
 import misk.web.Post
 import misk.web.RequestBody
 import misk.web.RequestContentType
@@ -27,6 +28,7 @@ internal class PrepareBackfillAction @Inject constructor(
   @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)
   @Authenticated(services = ["backfila"])
   @LogRequestResponse(bodySampling = 1.0, errorBodySampling = 1.0)
+  @AvailableWhenDegraded
   fun prepareBackfill(@RequestBody request: PrepareBackfillRequest): PrepareBackfillResponse {
     return loggingSetupProvider.withBackfillRunLogging(request.backfill_name, request.backfill_id) {
       logger.info { "Preparing backfill `${request.backfill_name}::${request.backfill_id}`" }
@@ -49,6 +51,7 @@ internal class GetNextBatchRangeAction @Inject constructor(
   @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
   @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)
   @Authenticated(services = ["backfila"])
+  @AvailableWhenDegraded
   fun getNextBatchRange(@RequestBody request: GetNextBatchRangeRequest): GetNextBatchRangeResponse {
     return loggingSetupProvider.withBackfillPartitionLogging(request.backfill_name, request.backfill_id, request.partition_name) {
       logger.info {
@@ -82,6 +85,7 @@ internal class RunBatchAction @Inject constructor(
   @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
   @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)
   @Authenticated(services = ["backfila"])
+  @AvailableWhenDegraded
   fun runBatch(@RequestBody request: RunBatchRequest): RunBatchResponse {
     return loggingSetupProvider.withBackfillPartitionLogging(request.backfill_name, request.backfill_id, request.partition_name) {
       logger.info {
