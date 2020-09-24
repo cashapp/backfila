@@ -20,7 +20,6 @@ import com.google.inject.Provides
 import java.util.concurrent.Executors
 import javax.inject.Qualifier
 import javax.inject.Singleton
-import kotlin.reflect.KClass
 import misk.config.ConfigModule
 import misk.environment.Deployment
 import misk.inject.KAbstractModule
