@@ -385,7 +385,7 @@ class BackfillRunnerTest {
     assertThat(partition.state).isEqualTo(BackfillState.PAUSED)
 
     assertThat(status.event_logs[0].message).isEqualTo(
-        "error running batch [0, 99], RPC error after 1000ms. paused backfill due to 2 consecutive errors")
+        "error running batch [0, 99], RPC error after 0ms. paused backfill due to 2 consecutive errors")
     assertThat(status.event_logs[1].message).isEqualTo(
         "error running batch [0, 99], RPC error after 0ms. backing off for 1000ms")
   }

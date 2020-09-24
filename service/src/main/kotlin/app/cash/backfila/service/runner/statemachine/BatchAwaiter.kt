@@ -98,6 +98,7 @@ class BatchAwaiter(
           runBatchRpc = async(SupervisorJob()) {
             backfillRunner.client.runBatch(backfillRunner.runBatchRequest(batch))
           }
+          startedAt = backfillRunner.factory.clock.instant()
           logger.info { "${backfillRunner.logLabel()} enqueued runbatch retry for $batch" }
         }
       }
