@@ -4,6 +4,7 @@ import app.cash.backfila.protos.clientservice.RunBatchResponse
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.DbEventLog
 import app.cash.backfila.service.runner.BackfillRunner
+import java.time.Duration
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -14,7 +15,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import misk.hibernate.load
 import misk.logging.getLogger
-import java.time.Duration
 
 class BatchAwaiter(
   private val backfillRunner: BackfillRunner,
