@@ -9,10 +9,7 @@ import app.cash.tempest.Offset
 import app.cash.tempest.Page
 import app.cash.tempest.ScanConfig
 import app.cash.tempest.WorkerId
-import com.amazonaws.client.builder.AwsClientBuilder
-import com.amazonaws.regions.Regions
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBIndexHashKey
@@ -24,159 +21,20 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.google.inject.Provides
 import com.google.inject.Singleton
 import misk.MiskTestingServiceModule
-import misk.ServiceModule
-import misk.aws.dynamodb.testing.CreateTablesService
 import misk.aws.dynamodb.testing.DockerDynamoDb
+import misk.aws.dynamodb.testing.DockerDynamoDbModule
 import misk.aws.dynamodb.testing.DynamoDbTable
 import misk.inject.KAbstractModule
 import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import okio.Buffer
-import okio.ByteString
-import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.inject.Inject
 
-interface MusicTable : LogicalTable<MusicItem> {
-  val albumInfo: InlineView<AlbumInfo.Key, AlbumInfo>
-  val albumTracks: InlineView<AlbumTrack.Key, AlbumTrack>
-}
-
-/*
-A_456   INFO_      album_title="Thriller"  artist_name="michael jackson"
-A_456   TRACK_T3   track_name="Black or White"
-PL_789  INFO_      madeby="swankJesse"  artist_name="best of jackson"
-PL_789  TRACK_P1   track_name="Billy Jean"
- */
-
-data class AlbumInfo(
-  @Attribute(name = "partition_key")
-  val album_token: String,
-  val album_title: String,
-  val artist_name: String,
-  val genre_name: String
-) {
-  @Attribute(prefix = "INFO_")
-  val sort_key: String = ""
-
-  @Transient
-  val key = Key(album_token)
-
-  data class Key(
-    val album_token: String
-  ) {
-    val sort_key: String = ""
-  }
-}
-
-data class AlbumTrack(
-  @Attribute(name = "partition_key")
-  val album_token: String,
-  @Attribute(name = "sort_key", prefix = "TRACK_")
-  val track_token: String,
-  val track_title: String
-) {
-  constructor(
-    album_token: String,
-    track_number: Long,
-    track_title: String
-  ) : this(album_token, "%016x".format(track_number), track_title)
-
-  @Transient
-  val key = Key(album_token, track_token)
-
-  @Transient
-  val track_number = track_token.toLong(radix = 16)
-
-  data class Key(
-    val album_token: String,
-    val track_token: String = ""
-  ) {
-    constructor(album_token: String, track_number: Long) : this(album_token, "%016x".format(
-        track_number))
-
-    @Transient
-    val track_number = when {
-      track_token.startsWith("INFO_") -> {
-        println("WTF")
-        5
-      }
-      track_token.isEmpty() -> 0
-      else -> track_token.toLong(radix = 16)
-    }
-  }
-}
-
-@DynamoDBTable(tableName = "music_items")
-class MusicItem {
-  // All Items.
-  @DynamoDBHashKey
-  @DynamoDBIndexRangeKey(globalSecondaryIndexNames = ["genre_album_index", "artist_album_index"])
-  var partition_key: String? = null
-
-  @DynamoDBRangeKey
-  var sort_key: String? = null
-
-  // AlbumInfo.
-  @DynamoDBAttribute
-  var album_title: String? = null
-
-  @DynamoDBIndexHashKey(globalSecondaryIndexName = "artist_album_index")
-  @DynamoDBAttribute
-  var artist_name: String? = null
-
-  @DynamoDBAttribute
-  @DynamoDBIndexHashKey(globalSecondaryIndexName = "genre_album_index")
-  var genre_name: String? = null
-
-  // AlbumTrack.
-  @DynamoDBAttribute
-  @DynamoDBIndexRangeKey(localSecondaryIndexName = "album_track_title_index")
-  var track_title: String? = null
-}
-
-class MusicDbTestModule : KAbstractModule() {
-  override fun configure() {
-    install(MiskTestingServiceModule())
-    multibind<DynamoDbTable>().toInstance(DynamoDbTable(MusicItem::class))
-    install(ServiceModule<CreateTablesService>())
-  }
-
-  @Provides @Singleton
-  fun provideDynamoDbMapper(amazonDynamoDB: AmazonDynamoDB): DynamoDBMapper {
-    return DynamoDBMapper(amazonDynamoDB)
-  }
-
-  @Provides @Singleton
-  fun provideDynamoDb(): AmazonDynamoDB {
-    return AmazonDynamoDBClientBuilder
-        .standard()
-        // The values that you supply for the AWS access key and the Region are only used to name the database file.
-        .withCredentials(DockerDynamoDb.awsCredentialsProvider)
-        .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(
-            "http://localhost:8000/",
-            Regions.US_WEST_2.toString()
-        ))
-        .build()
-  }
-
-  @Provides
-  @Singleton
-  fun provideTestDb(amazonDynamoDB: AmazonDynamoDB): MusicDb {
-    val dynamoDbMapper = DynamoDBMapper(amazonDynamoDB)
-    return LogicalDb(dynamoDbMapper)
-  }
-
-  @Provides
-  fun provideTestData(musicDb: MusicDb): MusicTableTestData {
-    return MusicTableTestData(musicDb)
-  }
-}
 
 @MiskTest(startService = true)
-class TempestTest {
+class DynamoDbTest {
   @MiskTestModule
   val module = MusicDbTestModule()
 
@@ -265,7 +123,7 @@ class TempestTest {
 
     val secondObservedTracks = getTrackByWorkerScan(numWorkers)
     originalObservedTracks.forEach{ (workerIndex, tracks) -> tracks.forEachIndexed{
-      index, track -> println( "worker$workerIndex fancy ${fancyThing(track)}") }
+      index, track -> println( "worker $workerIndex originalkey $track secondkey ${secondObservedTracks.getValue(workerIndex)[index]}") }
     }
     originalObservedTracks.forEach{ (workerIndex, tracks) ->
       assertThat(tracks).containsExactlyElementsOf(secondObservedTracks.getValue(workerIndex))
@@ -298,17 +156,6 @@ class TempestTest {
         println("Item left ${it}")
       }*/
     }
-  }
-
-  private fun fancyThing(track: AlbumTrack.Key): String {
-
-    val sha1 = Buffer()
-        .write(byteArrayOf(76, 111, 99, 97, 108, 68, 100, 98))
-        .writeUtf8(track.album_token)
-        .sha1()
-
-    return sha1.hex()
-
   }
 
   @OptIn(ExperimentalStdlibApi::class)
@@ -416,7 +263,7 @@ class TempestTest {
   }
 }
 
-class MusicTableTestData(
+class DynamoMusicTableTestData(
   @Inject val musicDb: MusicDb
 ) {
   private val musicTable get() = musicDb.music
@@ -561,10 +408,6 @@ class MusicTableTestData(
           name))
     }
   }
-}
-
-interface MusicDb : LogicalDb {
-  val music: MusicTable
 }
 /*
 
