@@ -5,6 +5,8 @@ import app.cash.backfila.client.misk.client.BackfilaClientLoggingSetupProvider
 import app.cash.backfila.client.misk.client.BackfilaClientNoLoggingSetupProvider
 import app.cash.backfila.client.misk.internal.BackfilaClient
 import app.cash.backfila.client.misk.internal.BackfilaStartupConfigurator
+import app.cash.backfila.client.misk.internal.BackfillOperator
+import app.cash.backfila.client.misk.internal.HibernateBackfillOperator
 import app.cash.backfila.client.misk.internal.RealBackfilaClient
 import com.google.inject.Binder
 import com.google.inject.BindingAnnotation
@@ -32,6 +34,7 @@ class BackfilaModule(
 ) : KAbstractModule() {
   override fun configure() {
     bind<BackfilaClientConfig>().toInstance(config)
+    multibind<BackfillOperator.Backend>().to<HibernateBackfillOperator.HibernateBackend>()
 
     bind<BackfilaClient>().to<RealBackfilaClient>()
     bind<BackfilaManagementClient>().to<RealBackfilaManagementClient>()
