@@ -1,6 +1,5 @@
 package app.cash.backfila.client.misk.internal
 
-import app.cash.backfila.client.misk.Backfill
 import app.cash.backfila.client.misk.embedded.BackfillRun
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
@@ -18,7 +17,7 @@ import okio.ByteString.Companion.encodeUtf8
  *
  * This is not thread safe.
  */
-internal class EmbeddedBackfillRun<B : Backfill<*, *, *>>(
+internal class EmbeddedBackfillRun<B : Any>(
   private val operator: BackfillOperator,
   override val dryRun: Boolean,
   override val parameters: Map<String, ByteString>,

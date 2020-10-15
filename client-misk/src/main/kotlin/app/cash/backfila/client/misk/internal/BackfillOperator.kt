@@ -11,6 +11,7 @@ import com.google.common.cache.CacheBuilder
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.reflect.KClass
 import misk.exceptions.BadRequestException
 import misk.logging.getLogger
 

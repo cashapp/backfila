@@ -62,8 +62,8 @@ internal class ClientMiskTestingModule(
     bind(BackfilaClientLoggingSetupProvider::class.java)
         .to(BackfilaClientNoLoggingSetupProvider::class.java)
 
-    install(BackfillInstallModule.create<SinglePartitionHibernateTestBackfill>())
-    install(BackfillInstallModule.create<ChickenToBeefBackfill>())
-    install(BackfillInstallModule.create<RecordNoParametersConfigValuesBackfill>())
+    install(HibernateBackfillInstallModule.create<SinglePartitionHibernateTestBackfill>())
+    install(HibernateBackfillInstallModule.create<ChickenToBeefBackfill>())
+    install(HibernateBackfillInstallModule.create<RecordNoParametersConfigValuesBackfill>())
   }
 }

@@ -2,83 +2,57 @@ package app.cash.backfila.client.misk
 
 import app.cash.backfila.client.misk.client.BackfilaClientConfig
 import app.cash.backfila.client.misk.client.BackfilaClientLoggingSetupProvider
+import app.cash.backfila.client.misk.client.BackfilaClientModule
 import app.cash.backfila.client.misk.client.BackfilaClientNoLoggingSetupProvider
+import app.cash.backfila.client.misk.embedded.EmbeddedBackfilaModule
 import app.cash.backfila.client.misk.internal.BackfilaClient
 import app.cash.backfila.client.misk.internal.BackfilaStartupConfigurator
-import app.cash.backfila.client.misk.internal.BackfillOperator
-import app.cash.backfila.client.misk.internal.HibernateBackfillOperator
 import app.cash.backfila.client.misk.internal.RealBackfilaClient
-import com.google.inject.Binder
 import com.google.inject.BindingAnnotation
 import com.google.inject.Provides
-import com.google.inject.TypeLiteral
-import com.google.inject.multibindings.MapBinder
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import javax.inject.Singleton
 import kotlin.reflect.KClass
-import kotlin.reflect.jvm.jvmName
 import misk.ServiceModule
 import misk.inject.KAbstractModule
 
 /**
- * Backfila-using applications install this and either [EmbeddedBackfilaModule] (testing and
- * development) or [BackfilaClientModule] (staging and production).
+ * Backfila-using applications install this, one or more specific client implementation modules such
+ * as [HibernateBackfilaClientModule] and either [EmbeddedBackfilaModule] (testing and development)
+ * or [BackfilaClientModule] (staging and production).
  */
 class BackfilaModule(
   private val config: BackfilaClientConfig,
-  @Deprecated(message = "Multibind backfills instead")
+  @Deprecated(message = "Multibind backfills using 'HibernateBackfillInstallModule.create' instead")
   private val backfills: List<KClass<out Backfill<*, *, *>>>? = null,
   private val loggingSetupProvider: KClass<out BackfilaClientLoggingSetupProvider> =
       BackfilaClientNoLoggingSetupProvider::class
 ) : KAbstractModule() {
   override fun configure() {
     bind<BackfilaClientConfig>().toInstance(config)
-    multibind<BackfillOperator.Backend>().to<HibernateBackfillOperator.HibernateBackend>()
 
     bind<BackfilaClient>().to<RealBackfilaClient>()
     bind<BackfilaManagementClient>().to<RealBackfilaManagementClient>()
     bind<BackfilaClientLoggingSetupProvider>().to(loggingSetupProvider.java)
 
-    mapBinder(binder())
+    // For backwards compatibility for now we install the Hibernate Backfila Client implementation
+    // and support the old backfills parameter.
+    install(HibernateBackfilaClientModule())
 
     if (backfills != null) {
       for (backfill in backfills) {
-        install(BackfillInstallModule.create(backfill))
+        install(HibernateBackfillInstallModule.create(backfill))
       }
     }
 
     install(ServiceModule<BackfilaStartupConfigurator>())
   }
 
-  @Singleton @Provides @ForBackfila fun provideMoshi() = Moshi.Builder()
+  @Singleton @Provides @ForBackfila fun provideMoshi(): Moshi = Moshi.Builder()
       .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
       .build()
 }
-
-class BackfillInstallModule<T : Backfill<*, *, *>> private constructor(
-  private val backfillClass: KClass<T>
-) : KAbstractModule() {
-  override fun configure() {
-    mapBinder(binder()).addBinding(backfillClass.jvmName).toInstance(backfillClass)
-  }
-
-  companion object {
-    inline fun <reified T : Backfill<*, *, *>> create(): BackfillInstallModule<T> = create(T::class)
-
-    @JvmStatic
-    fun <T : Backfill<*, *, *>> create(backfillClass: KClass<T>): BackfillInstallModule<T> {
-      return BackfillInstallModule(backfillClass)
-    }
-  }
-}
-
-private fun mapBinder(binder: Binder) = MapBinder.newMapBinder(
-    binder,
-    object : TypeLiteral<String>() {},
-    object : TypeLiteral<KClass<out Backfill<*, *, *>>>() {},
-    ForBackfila::class.java
-)
 
 @BindingAnnotation
 internal annotation class ForBackfila
