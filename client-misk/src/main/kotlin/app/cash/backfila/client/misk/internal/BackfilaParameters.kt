@@ -22,29 +22,11 @@ fun parametersToBytes(parameters: Any): Map<String, ByteString> {
   return map
 }
 
-private fun <T : Any> parametersClass(backfillClass: KClass<out Backfill<*, *, T>>): KClass<T> {
-  // Like MyBackfill.
-  val thisType = TypeLiteral.get(backfillClass.java)
-
-  // Like Backfill<E, Id<E>, MyDataClass>.
-  val supertype = thisType.getSupertype(Backfill::class.java).type as ParameterizedType
-
-  // Like MyDataClass
-  return (Types.getRawType(supertype.actualTypeArguments[2]) as Class<T>).kotlin
-}
-
 internal class BackfilaParametersOperator<T : Any>(
-  backfillClass: KClass<out Backfill<*, *, T>>
+  val parametersClass: KClass<T>
 ) {
-  val parametersClass: KClass<T> = parametersClass(backfillClass)
-
-  /** Constructor parameters to create a new T. */
-  val constructorParameters: List<KParameter>
-
-  init {
-    constructorParameters = parametersClass.primaryConstructor!!.parameters
-    // TODO check parameters
-  }
+  /** Constructor parameters used as defaults when missing to create a new T. */
+  val constructorParameters: List<KParameter> = parametersClass.primaryConstructor!!.parameters
 
   fun constructBackfillConfig(
     parameters: MutableMap<String, ByteString>,
@@ -67,9 +49,7 @@ internal class BackfilaParametersOperator<T : Any>(
         Int::class to { value: ByteString -> value.utf8().toInt() }
     )
 
-    internal inline fun <reified T : Any> backfilaParametersForBackfill(backfillClass: KClass<Backfill<*, *, T>>): List<Parameter> {
-      val parametersClass = parametersClass(backfillClass)
-
+    internal inline fun <reified T : Any> backfilaParametersFromClass(parametersClass: KClass<T>): List<Parameter> {
       // Validate that we can handle the parameters if they are specified.
       for (parameter in parametersClass.primaryConstructor!!.parameters) {
         check(parameter.type.jvmErasure in TYPE_CONVERTERS.keys) {

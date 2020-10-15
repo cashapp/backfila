@@ -1,6 +1,7 @@
 package app.cash.backfila.client.misk.internal
 
 import app.cash.backfila.client.misk.Backfill
+import app.cash.backfila.client.misk.Description
 import app.cash.backfila.client.misk.ForBackfila
 import app.cash.backfila.client.misk.NoParameters
 import app.cash.backfila.client.misk.PkeySqlAdapter
@@ -17,6 +18,8 @@ import com.google.common.base.Preconditions.checkArgument
 import com.google.common.base.Stopwatch
 import com.google.common.collect.ImmutableList
 import com.google.inject.Injector
+import com.google.inject.TypeLiteral
+import com.squareup.moshi.Types
 import java.util.ArrayList
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -34,6 +37,7 @@ import misk.hibernate.Query
 import misk.logging.getLogger
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
+import java.lang.reflect.ParameterizedType
 
 /**
  * Operates on a backfill using Hibernate 5.x entities. Create instances with [Factory].
@@ -46,9 +50,9 @@ import okio.ByteString.Companion.encodeUtf8
  */
 internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : Any> internal constructor(
   override val backfill: Backfill<E, Pkey, Param>,
+  private val parametersOperator: BackfilaParametersOperator<Param>,
   backend: HibernateBackend
 ) : BackfillOperator {
-  private val parametersOperator = BackfilaParametersOperator<Param>(backfill::class)
   private val partitionProvider = backfill.partitionProvider()
   private val boundingRangeStrategy = partitionProvider.boundingRangeStrategy<E, Pkey>()
   private var pkeySqlAdapter: PkeySqlAdapter = backend.pkeySqlAdapter
@@ -329,7 +333,10 @@ internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : An
 
     private fun <E : DbEntity<E>, Pkey : Any, Param : Any> createHibernateOperator(
       backfill: Backfill<E, Pkey, Param>
-    ) = HibernateBackfillOperator(backfill, this)
+    ) = HibernateBackfillOperator(
+        backfill,
+        BackfilaParametersOperator(parametersClass(backfill::class)),
+        this)
 
     override fun create(backfillName: String, backfillId: String): BackfillOperator? {
       val backfill = getBackfill(backfillName, backfillId)
@@ -340,6 +347,25 @@ internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : An
       }
 
       return null
+    }
+
+    override fun backfills(): Set<BackfillOperator.BackfillRegistration> {
+      return backfills.map { BackfillOperator.BackfillRegistration(
+          name = it.key,
+          description = (it.value.annotations.find { it is Description } as? Description)?.text,
+          parametersClass = parametersClass(it.value as KClass<Backfill<*, *, Any>>)
+      ) }.toSet()
+    }
+
+    private fun <T : Any> parametersClass(backfillClass: KClass<out Backfill<*, *, T>>): KClass<T> {
+      // Like MyBackfill.
+      val thisType = TypeLiteral.get(backfillClass.java)
+
+      // Like Backfill<E, Id<E>, MyDataClass>.
+      val supertype = thisType.getSupertype(Backfill::class.java).type as ParameterizedType
+
+      // Like MyDataClass
+      return (Types.getRawType(supertype.actualTypeArguments[2]) as Class<T>).kotlin
     }
 
     /** This placeholder exists so we can create a backfill without a type parameter. */
