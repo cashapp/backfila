@@ -2,18 +2,14 @@ package app.cash.backfila.client.misk.internal
 
 import app.cash.backfila.client.Connectors
 import app.cash.backfila.client.HttpConnectorData
-import app.cash.backfila.client.misk.Backfill
-import app.cash.backfila.client.misk.Description
 import app.cash.backfila.client.misk.ForBackfila
 import app.cash.backfila.client.misk.client.BackfilaClientConfig
-import app.cash.backfila.client.misk.internal.BackfilaParametersOperator.Companion.backfilaParametersForBackfill
+import app.cash.backfila.client.misk.internal.BackfilaParametersOperator.Companion.backfilaParametersFromClass
 import app.cash.backfila.protos.service.ConfigureServiceRequest
 import com.google.common.util.concurrent.AbstractIdleService
 import com.squareup.moshi.Moshi
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.reflect.KClass
-import kotlin.reflect.jvm.jvmName
 import misk.logging.getLogger
 import misk.moshi.adapter
 
@@ -26,7 +22,7 @@ internal class BackfilaStartupConfigurator @Inject internal constructor(
   private val config: BackfilaClientConfig,
   private val backfilaClient: BackfilaClient,
   @ForBackfila private val moshi: Moshi,
-  @ForBackfila private val backfills: MutableMap<String, KClass<out Backfill<*, *, *>>>
+  private val backends: Set<BackfillOperator.Backend>
 ) : AbstractIdleService() {
   override fun startUp() {
     logger.info { "Backfila configurator starting" }
@@ -34,15 +30,26 @@ internal class BackfilaStartupConfigurator @Inject internal constructor(
     val connectorDataAdapter = moshi.adapter<HttpConnectorData>()
     val httpConnectorData = HttpConnectorData(url = config.url)
 
+    // Build a list of registered Backfills from the different client backend implementations.
+    val registrations = mutableSetOf<BackfillOperator.BackfillRegistration>()
+    for (backend in backends) {
+      val backfills = backend.backfills()
+      // Make sure each backfill name is ony registered once in the service.
+      val intersection = registrations.map { it.name }.intersect(backfills.map { it.name })
+      require(intersection.isEmpty()) { "Found duplicate registrations: $intersection " }
+
+      registrations.addAll(backfills)
+    }
+
+    // Send the Backfila registration request
     val request = ConfigureServiceRequest.Builder()
         .backfills(
-            backfills.values.map { backfillClass ->
-              val description = (backfillClass.annotations.find { it is Description } as? Description)?.text
+            registrations.map { registration ->
               @Suppress("UNCHECKED_CAST")
-              val parameters = backfilaParametersForBackfill(backfillClass as KClass<Backfill<*, *, Any>>)
+              val parameters = backfilaParametersFromClass(registration.parametersClass)
               ConfigureServiceRequest.BackfillData.Builder()
-                  .name(backfillClass.jvmName)
-                  .description(description)
+                  .name(registration.name)
+                  .description(registration.description)
                   .parameters(parameters)
                   .build()
             })
@@ -57,7 +64,7 @@ internal class BackfilaStartupConfigurator @Inject internal constructor(
 
       logger.info {
         "Backfila lifecycle listener initialized. " +
-            "Updated backfila with ${backfills.size} backfills."
+            "Updated backfila with ${registrations.size} backfills."
       }
     } catch (e: Exception) {
       logger.error(e) { "Exception making startup call to configure backfila, skipped!" }

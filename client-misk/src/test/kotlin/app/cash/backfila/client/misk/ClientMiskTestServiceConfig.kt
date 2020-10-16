@@ -27,7 +27,7 @@ fun main(args: Array<String>) {
       ),
       object : KAbstractModule() {
         override fun configure() {
-          install(BackfillInstallModule.create<SinglePartitionHibernateTestBackfill>())
+          install(HibernateBackfillInstallModule.create<SinglePartitionHibernateTestBackfill>())
         }
       },
       BackfilaClientModule(),

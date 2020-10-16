@@ -1,6 +1,5 @@
 package app.cash.backfila.client.misk.embedded
 
-import app.cash.backfila.client.misk.Backfill
 import app.cash.backfila.client.misk.internal.parametersToBytes
 import app.cash.backfila.protos.service.ConfigureServiceRequest
 import kotlin.reflect.KClass
@@ -11,14 +10,14 @@ import okio.ByteString
  * the Backfila dashboard UI.
  */
 interface Backfila {
-  fun <Type : Backfill<*, *, *>> createDryRun(
+  fun <Type : Any> createDryRun(
     backfill: KClass<Type>,
     parameters: Map<String, ByteString>,
     rangeStart: String?,
     rangeEnd: String?
   ): BackfillRun<Type>
 
-  fun <Type : Backfill<*, *, *>> createWetRun(
+  fun <Type : Any> createWetRun(
     backfillType: KClass<Type>,
     parameters: Map<String, ByteString>,
     rangeStart: String?,
@@ -28,7 +27,7 @@ interface Backfila {
   val configureServiceData: ConfigureServiceRequest?
 }
 
-inline fun <reified Type : Backfill<*, *, *>> Backfila.createDryRun(
+inline fun <reified Type : Any> Backfila.createDryRun(
   parameters: Any? = null,
   parameterData: Map<String, ByteString> = mapOf(),
   rangeStart: String? = null,
@@ -42,7 +41,7 @@ inline fun <reified Type : Backfill<*, *, *>> Backfila.createDryRun(
   return createDryRun(Type::class, parameterBytes, rangeStart, rangeEnd)
 }
 
-inline fun <reified Type : Backfill<*, *, *>> Backfila.createWetRun(
+inline fun <reified Type : Any> Backfila.createWetRun(
   parameters: Any? = null,
   parameterData: Map<String, ByteString> = mapOf(),
   rangeStart: String? = null,

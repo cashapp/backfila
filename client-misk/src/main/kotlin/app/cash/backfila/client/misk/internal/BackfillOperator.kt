@@ -11,6 +11,7 @@ import com.google.common.cache.CacheBuilder
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.reflect.KClass
 import misk.exceptions.BadRequestException
 import misk.logging.getLogger
 
@@ -24,7 +25,14 @@ interface BackfillOperator {
   /** Service provider interface for backends like Hibernate and DynamoDb. */
   interface Backend {
     fun create(backfillName: String, backfillId: String): BackfillOperator?
+    fun backfills(): Set<BackfillRegistration>
   }
+
+  data class BackfillRegistration(
+    val name: String,
+    val description: String?,
+    val parametersClass: KClass<Any>
+  )
 
   @Singleton
   class Factory @Inject constructor(

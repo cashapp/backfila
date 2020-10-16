@@ -2,7 +2,6 @@ package app.cash.backfila.client.misk.internal
 
 import app.cash.backfila.client.BackfilaApi
 import app.cash.backfila.client.Connectors
-import app.cash.backfila.client.misk.Backfill
 import app.cash.backfila.client.misk.embedded.Backfila
 import app.cash.backfila.client.misk.embedded.BackfillRun
 import app.cash.backfila.protos.service.ConfigureServiceRequest
@@ -53,7 +52,7 @@ internal class EmbeddedBackfila @Inject internal constructor(
     val backfillId = backfillIdGenerator.getAndIncrement()
     val operator = operatorFactory.create(createRequest.backfill_name, backfillId.toString())
 
-    val run = EmbeddedBackfillRun<Backfill<*, *, *>>(
+    val run = EmbeddedBackfillRun<Any>(
         operator = operator,
         dryRun = createRequest.dry_run,
         parameters = createRequest.parameter_map,
@@ -66,21 +65,21 @@ internal class EmbeddedBackfila @Inject internal constructor(
     return Calls.response(CreateAndStartBackfillResponse(backfillId.toLong()))
   }
 
-  override fun <Type : Backfill<*, *, *>> createDryRun(
+  override fun <Type : Any> createDryRun(
     backfill: KClass<Type>,
     parameters: Map<String, ByteString>,
     rangeStart: String?,
     rangeEnd: String?
   ) = createBackfill(backfill, true, parameters, rangeStart, rangeEnd)
 
-  override fun <Type : Backfill<*, *, *>> createWetRun(
+  override fun <Type : Any> createWetRun(
     backfillType: KClass<Type>,
     parameters: Map<String, ByteString>,
     rangeStart: String?,
     rangeEnd: String?
   ) = createBackfill(backfillType, false, parameters, rangeStart, rangeEnd)
 
-  private fun <Type : Backfill<*, *, *>> createBackfill(
+  private fun <Type : Any> createBackfill(
     backfillType: KClass<Type>,
     dryRun: Boolean,
     parameters: Map<String, ByteString>,

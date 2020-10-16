@@ -1,6 +1,5 @@
 package app.cash.backfila.client.misk.embedded
 
-import app.cash.backfila.client.misk.Backfill
 import app.cash.backfila.client.misk.internal.BatchSnapshot
 import app.cash.backfila.client.misk.internal.PartitionCursor
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
@@ -10,7 +9,7 @@ import okio.ByteString
 /**
  * Get an instance of this from [Backfila].
  */
-interface BackfillRun<B : Backfill<*, *, *>> {
+interface BackfillRun<B : Any> {
   val backfill: B
   val dryRun: Boolean
   val parameters: Map<String, ByteString>
