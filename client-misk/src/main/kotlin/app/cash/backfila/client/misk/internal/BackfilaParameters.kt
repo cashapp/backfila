@@ -49,7 +49,7 @@ internal class BackfilaParametersOperator<T : Any>(
         Int::class to { value: ByteString -> value.utf8().toInt() }
     )
 
-    internal inline fun <reified T : Any> backfilaParametersFromClass(parametersClass: KClass<T>): List<Parameter> {
+    internal inline fun <reified P : Any> backfilaParametersFromClass(parametersClass: KClass<P>): List<Parameter> {
       // Validate that we can handle the parameters if they are specified.
       for (parameter in parametersClass.primaryConstructor!!.parameters) {
         check(parameter.type.jvmErasure in TYPE_CONVERTERS.keys) {

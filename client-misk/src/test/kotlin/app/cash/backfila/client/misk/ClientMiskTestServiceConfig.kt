@@ -2,6 +2,8 @@ package app.cash.backfila.client.misk
 
 import app.cash.backfila.client.misk.client.BackfilaClientConfig
 import app.cash.backfila.client.misk.client.BackfilaClientModule
+import app.cash.backfila.client.misk.hibernate.HibernateBackfill
+import app.cash.backfila.client.misk.hibernate.HibernateBackfillModule
 import app.cash.backfila.client.misk.hibernate.SinglePartitionHibernateTestBackfill
 import misk.MiskApplication
 import misk.MiskRealServiceModule
@@ -12,7 +14,7 @@ import misk.hibernate.Id
 import misk.inject.KAbstractModule
 
 // TODO(mikepaw) Not sure we even want this anymore. Maybe I'll replace this with an injector test of some kind?
-class DummyBackfill : Backfill<DbMenu, Id<DbMenu>, NoParameters>() {
+class DummyBackfill : HibernateBackfill<DbMenu, Id<DbMenu>, NoParameters>() {
   override fun partitionProvider() = TODO()
 
   override fun backfillCriteria(config: BackfillConfig<NoParameters>) = TODO()
@@ -20,14 +22,14 @@ class DummyBackfill : Backfill<DbMenu, Id<DbMenu>, NoParameters>() {
 
 fun main(args: Array<String>) {
   MiskApplication(
-      BackfilaModule(
+      BackfillModule(
           BackfilaClientConfig(
               url = "#test", slack_channel = "#test"
           )
       ),
       object : KAbstractModule() {
         override fun configure() {
-          install(HibernateBackfillInstallModule.create<SinglePartitionHibernateTestBackfill>())
+          install(HibernateBackfillModule.create<SinglePartitionHibernateTestBackfill>())
         }
       },
       BackfilaClientModule(),

@@ -1,9 +1,9 @@
-package app.cash.backfila.client.misk
+package app.cash.backfila.client.misk.hibernate
 
-import app.cash.backfila.client.misk.internal.BoundingRangeStrategy
-import app.cash.backfila.client.misk.internal.UnshardedHibernateBoundingRangeStrategy
-import app.cash.backfila.client.misk.internal.VitessShardedBoundingRangeStrategy
-import app.cash.backfila.client.misk.internal.VitessSingleCursorBoundingRangeStrategy
+import app.cash.backfila.client.misk.hibernate.internal.BoundingRangeStrategy
+import app.cash.backfila.client.misk.hibernate.internal.UnshardedHibernateBoundingRangeStrategy
+import app.cash.backfila.client.misk.hibernate.internal.VitessShardedBoundingRangeStrategy
+import app.cash.backfila.client.misk.hibernate.internal.VitessSingleCursorBoundingRangeStrategy
 import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
 import javax.persistence.Table
 import misk.hibernate.DbEntity
@@ -54,7 +54,7 @@ class UnshardedPartitionProvider(private val transacter: Transacter) : Partition
  */
 class VitessShardedPartitionProvider<E : DbEntity<E>, Pkey : Any>(
   private val transacter: Transacter,
-  backfill: Backfill<E, Pkey, *>
+  backfill: HibernateBackfill<E, Pkey, *>
 ) : PartitionProvider {
   private val keyspace = Keyspace(backfill.entityClass.java.getAnnotation(Table::class.java).schema)
 
@@ -84,7 +84,7 @@ class VitessShardedPartitionProvider<E : DbEntity<E>, Pkey : Any>(
  */
 class VitessSingleCursorPartitionProvider<E : DbEntity<E>, Pkey : Any>(
   private val transacter: Transacter,
-  backfill: Backfill<E, Pkey, *>
+  backfill: HibernateBackfill<E, Pkey, *>
 ) : PartitionProvider {
   private val keyspace = Keyspace(backfill.entityClass.java.getAnnotation(Table::class.java).schema)
 

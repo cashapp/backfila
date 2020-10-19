@@ -1,7 +1,7 @@
 package app.cash.backfila.client.misk.testing
 
-import app.cash.backfila.client.misk.Backfill
 import app.cash.backfila.client.misk.embedded.BackfillRun
+import app.cash.backfila.client.misk.hibernate.HibernateBackfill
 import org.assertj.core.api.AbstractAssert
 
 class BackfillRunAssert(
@@ -59,6 +59,6 @@ class BackfillRunAssert(
   }
 }
 
-fun <T : Backfill<*, *, *>> assertThat(backfillRun: BackfillRun<T>): BackfillRunAssert {
+fun <T : HibernateBackfill<*, *, *>> assertThat(backfillRun: BackfillRun<T>): BackfillRunAssert {
   return BackfillRunAssert(backfillRun)
 }

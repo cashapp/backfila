@@ -1,10 +1,11 @@
-package app.cash.backfila.client.misk.internal
+package app.cash.backfila.client.misk.hibernate.internal
 
-import app.cash.backfila.client.misk.Backfill
-import app.cash.backfila.client.misk.Description
-import app.cash.backfila.client.misk.ForBackfila
 import app.cash.backfila.client.misk.NoParameters
-import app.cash.backfila.client.misk.PkeySqlAdapter
+import app.cash.backfila.client.misk.hibernate.HibernateBackfill
+import app.cash.backfila.client.misk.hibernate.PkeySqlAdapter
+import app.cash.backfila.client.misk.internal.BackfilaParametersOperator
+import app.cash.backfila.client.misk.spi.BackfillOperator
+import app.cash.backfila.client.misk.internal.BackfillOperatorFactory
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse.Batch
@@ -17,16 +18,10 @@ import app.cash.backfila.protos.clientservice.RunBatchResponse
 import com.google.common.base.Preconditions.checkArgument
 import com.google.common.base.Stopwatch
 import com.google.common.collect.ImmutableList
-import com.google.inject.Injector
-import com.google.inject.TypeLiteral
-import com.squareup.moshi.Types
 import java.util.ArrayList
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
 import javax.persistence.criteria.Path
 import javax.persistence.criteria.Root
-import kotlin.reflect.KClass
 import misk.exceptions.BadRequestException
 import misk.hibernate.DbEntity
 import misk.hibernate.Id
@@ -37,10 +32,9 @@ import misk.hibernate.Query
 import misk.logging.getLogger
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
-import java.lang.reflect.ParameterizedType
 
 /**
- * Operates on a backfill using Hibernate 5.x entities. Create instances with [Factory].
+ * Operates on a backfill using Hibernate 5.x entities. Create instances with [BackfillOperatorFactory].
  *
  * @param <E> Entity class being backfilled. Determines the table that is iterated.
  * @param <Pkey> The type of the primary key for the backfill, i.e. the value being iterated on.
@@ -49,7 +43,7 @@ import java.lang.reflect.ParameterizedType
  * is used to specify the parameters and construct the class. Usually a data class or [NoParameters].
  */
 internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : Any> internal constructor(
-  override val backfill: Backfill<E, Pkey, Param>,
+  override val backfill: HibernateBackfill<E, Pkey, Param>,
   private val parametersOperator: BackfilaParametersOperator<Param>,
   backend: HibernateBackend
 ) : BackfillOperator {
@@ -304,74 +298,13 @@ internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : An
     return RunBatchResponse.Builder().build()
   }
 
-  private fun Backfill<*, *, *>.getPrimaryKeyPath(queryRoot: Root<*>): Path<Number> {
+  private fun HibernateBackfill<*, *, *>.getPrimaryKeyPath(queryRoot: Root<*>): Path<Number> {
     val fields = primaryKeyHibernateName().split('.')
     var path = queryRoot as Path<Number>
     for (field in fields) {
       path = path.get(field)
     }
     return path
-  }
-
-  @Singleton
-  class HibernateBackend @Inject constructor(
-    private val injector: Injector,
-    @ForBackfila private val backfills: MutableMap<String, KClass<out Backfill<*, *, *>>>,
-    internal var pkeySqlAdapter: PkeySqlAdapter,
-    internal var queryFactory: Query.Factory
-  ) : BackfillOperator.Backend {
-
-    /** Creates Backfill instances. Each backfill ID gets a new Backfill instance. */
-    private fun getBackfill(name: String, backfillId: String): Backfill<*, *, *>? {
-      val backfillClass = backfills[name]
-      return if (backfillClass != null) {
-        injector.getInstance(backfillClass.java) as Backfill<*, *, *>
-      } else {
-        null
-      }
-    }
-
-    private fun <E : DbEntity<E>, Pkey : Any, Param : Any> createHibernateOperator(
-      backfill: Backfill<E, Pkey, Param>
-    ) = HibernateBackfillOperator(
-        backfill,
-        BackfilaParametersOperator(parametersClass(backfill::class)),
-        this)
-
-    override fun create(backfillName: String, backfillId: String): BackfillOperator? {
-      val backfill = getBackfill(backfillName, backfillId)
-
-      if (backfill != null) {
-        @Suppress("UNCHECKED_CAST") // We don't know the types statically, so fake them.
-        return createHibernateOperator(backfill as Backfill<DbPlaceholder, Any, Any>)
-      }
-
-      return null
-    }
-
-    override fun backfills(): Set<BackfillOperator.BackfillRegistration> {
-      return backfills.map { BackfillOperator.BackfillRegistration(
-          name = it.key,
-          description = (it.value.annotations.find { it is Description } as? Description)?.text,
-          parametersClass = parametersClass(it.value as KClass<Backfill<*, *, Any>>)
-      ) }.toSet()
-    }
-
-    private fun <T : Any> parametersClass(backfillClass: KClass<out Backfill<*, *, T>>): KClass<T> {
-      // Like MyBackfill.
-      val thisType = TypeLiteral.get(backfillClass.java)
-
-      // Like Backfill<E, Id<E>, MyDataClass>.
-      val supertype = thisType.getSupertype(Backfill::class.java).type as ParameterizedType
-
-      // Like MyDataClass
-      return (Types.getRawType(supertype.actualTypeArguments[2]) as Class<T>).kotlin
-    }
-
-    /** This placeholder exists so we can create a backfill without a type parameter. */
-    private class DbPlaceholder : DbEntity<DbPlaceholder> {
-      override val id: Id<DbPlaceholder> get() = throw IllegalStateException("unreachable")
-    }
   }
 
   companion object {
