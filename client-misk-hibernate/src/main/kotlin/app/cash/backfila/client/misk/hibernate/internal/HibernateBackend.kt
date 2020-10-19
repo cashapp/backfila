@@ -1,23 +1,23 @@
 package app.cash.backfila.client.misk.hibernate.internal
 
 import app.cash.backfila.client.misk.Description
-import app.cash.backfila.client.misk.ForBackfila
+import app.cash.backfila.client.misk.hibernate.ForBackfila
 import app.cash.backfila.client.misk.hibernate.HibernateBackfill
 import app.cash.backfila.client.misk.hibernate.PkeySqlAdapter
-import app.cash.backfila.client.misk.internal.BackfilaParametersOperator
+import app.cash.backfila.client.misk.spi.BackfilaParametersOperator
 import app.cash.backfila.client.misk.spi.BackfillBackend
 import app.cash.backfila.client.misk.spi.BackfillOperator
 import app.cash.backfila.client.misk.spi.BackfillRegistration
 import com.google.inject.Injector
 import com.google.inject.TypeLiteral
 import com.squareup.moshi.Types
-import misk.hibernate.DbEntity
-import misk.hibernate.Id
-import misk.hibernate.Query
 import java.lang.reflect.ParameterizedType
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
+import misk.hibernate.DbEntity
+import misk.hibernate.Id
+import misk.hibernate.Query
 
 @Singleton
 class HibernateBackend @Inject constructor(

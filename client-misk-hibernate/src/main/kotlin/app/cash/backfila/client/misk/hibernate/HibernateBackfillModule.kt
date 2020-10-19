@@ -1,10 +1,10 @@
 package app.cash.backfila.client.misk.hibernate
 
 import app.cash.backfila.client.misk.BackfillModule
-import app.cash.backfila.client.misk.ForBackfila
 import app.cash.backfila.client.misk.hibernate.internal.HibernateBackend
 import app.cash.backfila.client.misk.spi.BackfillBackend
 import com.google.inject.Binder
+import com.google.inject.BindingAnnotation
 import com.google.inject.TypeLiteral
 import com.google.inject.multibindings.MapBinder
 import kotlin.reflect.KClass
@@ -44,3 +44,6 @@ private fun mapBinder(binder: Binder) = MapBinder.newMapBinder(
     object : TypeLiteral<KClass<out HibernateBackfill<*, *, *>>>() {},
     ForBackfila::class.java
 )
+
+@BindingAnnotation
+internal annotation class ForBackfila

@@ -1,7 +1,7 @@
 package app.cash.backfila.client.misk.embedded
 
 import app.cash.backfila.client.misk.Backfill
-import app.cash.backfila.client.misk.internal.parametersToBytes
+import app.cash.backfila.client.misk.spi.parametersToBytes
 import app.cash.backfila.protos.service.ConfigureServiceRequest
 import kotlin.reflect.KClass
 import okio.ByteString

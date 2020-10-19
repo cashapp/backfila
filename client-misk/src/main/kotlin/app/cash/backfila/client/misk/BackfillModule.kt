@@ -2,9 +2,7 @@ package app.cash.backfila.client.misk
 
 import app.cash.backfila.client.misk.client.BackfilaClientConfig
 import app.cash.backfila.client.misk.client.BackfilaClientLoggingSetupProvider
-import app.cash.backfila.client.misk.client.BackfilaClientModule
 import app.cash.backfila.client.misk.client.BackfilaClientNoLoggingSetupProvider
-import app.cash.backfila.client.misk.embedded.EmbeddedBackfilaModule
 import app.cash.backfila.client.misk.internal.BackfilaClient
 import app.cash.backfila.client.misk.internal.BackfilaStartupConfigurator
 import app.cash.backfila.client.misk.internal.RealBackfilaClient

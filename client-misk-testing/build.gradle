@@ -4,9 +4,7 @@ dependencies {
   api project(':client-misk')
 
   implementation(dep.misk)
-  implementation(dep.miskHibernate)
   implementation(dep.miskTesting)
-  implementation(dep.miskHibernateTesting)
   implementation dep.junitEngine
 }
 

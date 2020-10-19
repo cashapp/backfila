@@ -4,7 +4,7 @@ import app.cash.backfila.client.Connectors
 import app.cash.backfila.client.HttpConnectorData
 import app.cash.backfila.client.misk.ForBackfila
 import app.cash.backfila.client.misk.client.BackfilaClientConfig
-import app.cash.backfila.client.misk.internal.BackfilaParametersOperator.Companion.backfilaParametersFromClass
+import app.cash.backfila.client.misk.spi.BackfilaParametersOperator.Companion.backfilaParametersFromClass
 import app.cash.backfila.client.misk.spi.BackfillBackend
 import app.cash.backfila.client.misk.spi.BackfillRegistration
 import app.cash.backfila.protos.service.ConfigureServiceRequest

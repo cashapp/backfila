@@ -1,7 +1,7 @@
 package app.cash.backfila.client.misk
 
 import app.cash.backfila.client.misk.internal.BackfilaClient
-import app.cash.backfila.client.misk.internal.parametersToBytes
+import app.cash.backfila.client.misk.spi.parametersToBytes
 import app.cash.backfila.protos.service.CreateAndStartBackfillRequest
 import app.cash.backfila.protos.service.CreateBackfillRequest
 import javax.inject.Inject

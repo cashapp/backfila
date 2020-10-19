@@ -4,11 +4,11 @@ import app.cash.backfila.client.misk.spi.BackfillBackend
 import app.cash.backfila.client.misk.spi.BackfillOperator
 import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
-import misk.exceptions.BadRequestException
-import misk.logging.getLogger
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
+import misk.exceptions.BadRequestException
+import misk.logging.getLogger
 
 /**
  * Creates BackfillOperators using the registered Backends.
