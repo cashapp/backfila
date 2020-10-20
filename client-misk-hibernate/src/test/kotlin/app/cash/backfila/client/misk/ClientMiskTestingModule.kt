@@ -5,6 +5,7 @@ import app.cash.backfila.client.misk.client.BackfilaClientLoggingSetupProvider
 import app.cash.backfila.client.misk.client.BackfilaClientNoLoggingSetupProvider
 import app.cash.backfila.client.misk.embedded.EmbeddedBackfilaModule
 import app.cash.backfila.client.misk.hibernate.ChickenToBeefBackfill
+import app.cash.backfila.client.misk.hibernate.HibernateBackfillModule.Companion.create
 import app.cash.backfila.client.misk.hibernate.RecordNoParametersConfigValuesBackfill
 import app.cash.backfila.client.misk.hibernate.SinglePartitionHibernateTestBackfill
 import misk.MiskTestingServiceModule
@@ -51,19 +52,17 @@ internal class ClientMiskTestingModule(
     install(LogCollectorModule())
     install(MiskTestingServiceModule())
     install(EmbeddedBackfilaModule())
-    install(
-        BackfilaModule(
-            BackfilaClientConfig(
-                url = "test.url", slack_channel = "#test"
-            )
+    install(BackfillModule(
+        BackfilaClientConfig(
+            url = "test.url", slack_channel = "#test"
         )
-    )
+    ))
 
     bind(BackfilaClientLoggingSetupProvider::class.java)
         .to(BackfilaClientNoLoggingSetupProvider::class.java)
 
-    install(HibernateBackfillInstallModule.create<SinglePartitionHibernateTestBackfill>())
-    install(HibernateBackfillInstallModule.create<ChickenToBeefBackfill>())
-    install(HibernateBackfillInstallModule.create<RecordNoParametersConfigValuesBackfill>())
+    install(create<SinglePartitionHibernateTestBackfill>())
+    install(create<ChickenToBeefBackfill>())
+    install(create<RecordNoParametersConfigValuesBackfill>())
   }
 }

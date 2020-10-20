@@ -4,7 +4,9 @@ import app.cash.backfila.client.Connectors
 import app.cash.backfila.client.HttpConnectorData
 import app.cash.backfila.client.misk.ForBackfila
 import app.cash.backfila.client.misk.client.BackfilaClientConfig
-import app.cash.backfila.client.misk.internal.BackfilaParametersOperator.Companion.backfilaParametersFromClass
+import app.cash.backfila.client.misk.spi.BackfilaParametersOperator.Companion.backfilaParametersFromClass
+import app.cash.backfila.client.misk.spi.BackfillBackend
+import app.cash.backfila.client.misk.spi.BackfillRegistration
 import app.cash.backfila.protos.service.ConfigureServiceRequest
 import com.google.common.util.concurrent.AbstractIdleService
 import com.squareup.moshi.Moshi
@@ -22,7 +24,7 @@ internal class BackfilaStartupConfigurator @Inject internal constructor(
   private val config: BackfilaClientConfig,
   private val backfilaClient: BackfilaClient,
   @ForBackfila private val moshi: Moshi,
-  private val backends: Set<BackfillOperator.Backend>
+  private val backends: Set<BackfillBackend>
 ) : AbstractIdleService() {
   override fun startUp() {
     logger.info { "Backfila configurator starting" }
@@ -31,7 +33,7 @@ internal class BackfilaStartupConfigurator @Inject internal constructor(
     val httpConnectorData = HttpConnectorData(url = config.url)
 
     // Build a list of registered Backfills from the different client backend implementations.
-    val registrations = mutableSetOf<BackfillOperator.BackfillRegistration>()
+    val registrations = mutableSetOf<BackfillRegistration>()
     for (backend in backends) {
       val backfills = backend.backfills()
       // Make sure each backfill name is ony registered once in the service.

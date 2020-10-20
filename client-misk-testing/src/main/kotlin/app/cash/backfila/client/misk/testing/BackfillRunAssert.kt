@@ -59,6 +59,6 @@ class BackfillRunAssert(
   }
 }
 
-fun <T : Backfill<*, *, *>> assertThat(backfillRun: BackfillRun<T>): BackfillRunAssert {
+fun <T : Backfill> assertThat(backfillRun: BackfillRun<T>): BackfillRunAssert {
   return BackfillRunAssert(backfillRun)
 }

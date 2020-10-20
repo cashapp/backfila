@@ -2,9 +2,7 @@ package app.cash.backfila.client.misk
 
 import app.cash.backfila.client.misk.client.BackfilaClientConfig
 import app.cash.backfila.client.misk.client.BackfilaClientLoggingSetupProvider
-import app.cash.backfila.client.misk.client.BackfilaClientModule
 import app.cash.backfila.client.misk.client.BackfilaClientNoLoggingSetupProvider
-import app.cash.backfila.client.misk.embedded.EmbeddedBackfilaModule
 import app.cash.backfila.client.misk.internal.BackfilaClient
 import app.cash.backfila.client.misk.internal.BackfilaStartupConfigurator
 import app.cash.backfila.client.misk.internal.RealBackfilaClient
@@ -18,14 +16,15 @@ import misk.ServiceModule
 import misk.inject.KAbstractModule
 
 /**
- * Backfila-using applications install this, one or more specific client implementation modules such
- * as [HibernateBackfilaClientModule] and either [EmbeddedBackfilaModule] (testing and development)
- * or [BackfilaClientModule] (staging and production).
+ * Backfila-using applications install at minimum 3 things.
+ *  - This module
+ *  - One or more specific client backend implementation modules such as `HibernateBackfillModule`
+ *  - Either:
+ *       [EmbeddedBackfilaModule] (testing and development)
+ *       or [BackfilaClientModule] (staging and production).
  */
-class BackfilaModule(
+class BackfillModule(
   private val config: BackfilaClientConfig,
-  @Deprecated(message = "Multibind backfills using 'HibernateBackfillInstallModule.create' instead")
-  private val backfills: List<KClass<out Backfill<*, *, *>>>? = null,
   private val loggingSetupProvider: KClass<out BackfilaClientLoggingSetupProvider> =
       BackfilaClientNoLoggingSetupProvider::class
 ) : KAbstractModule() {
@@ -35,16 +34,6 @@ class BackfilaModule(
     bind<BackfilaClient>().to<RealBackfilaClient>()
     bind<BackfilaManagementClient>().to<RealBackfilaManagementClient>()
     bind<BackfilaClientLoggingSetupProvider>().to(loggingSetupProvider.java)
-
-    // For backwards compatibility for now we install the Hibernate Backfila Client implementation
-    // and support the old backfills parameter.
-    install(HibernateBackfilaClientModule())
-
-    if (backfills != null) {
-      for (backfill in backfills) {
-        install(HibernateBackfillInstallModule.create(backfill))
-      }
-    }
 
     install(ServiceModule<BackfilaStartupConfigurator>())
   }

@@ -1,4 +1,4 @@
-package app.cash.backfila.client.misk.internal
+package app.cash.backfila.client.misk.spi
 
 import app.cash.backfila.client.misk.BackfillConfig
 import app.cash.backfila.client.misk.Description
@@ -22,11 +22,11 @@ fun parametersToBytes(parameters: Any): Map<String, ByteString> {
   return map
 }
 
-internal class BackfilaParametersOperator<T : Any>(
+class BackfilaParametersOperator<T : Any>(
   val parametersClass: KClass<T>
 ) {
   /** Constructor parameters used as defaults when missing to create a new T. */
-  val constructorParameters: List<KParameter> = parametersClass.primaryConstructor!!.parameters
+  private val constructorParameters: List<KParameter> = parametersClass.primaryConstructor!!.parameters
 
   fun constructBackfillConfig(
     parameters: MutableMap<String, ByteString>,
@@ -49,7 +49,7 @@ internal class BackfilaParametersOperator<T : Any>(
         Int::class to { value: ByteString -> value.utf8().toInt() }
     )
 
-    internal inline fun <reified T : Any> backfilaParametersFromClass(parametersClass: KClass<T>): List<Parameter> {
+    internal inline fun <reified P : Any> backfilaParametersFromClass(parametersClass: KClass<P>): List<Parameter> {
       // Validate that we can handle the parameters if they are specified.
       for (parameter in parametersClass.primaryConstructor!!.parameters) {
         check(parameter.type.jvmErasure in TYPE_CONVERTERS.keys) {

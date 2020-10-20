@@ -2,6 +2,7 @@ package app.cash.backfila.client.misk.internal
 
 import app.cash.backfila.client.BackfilaApi
 import app.cash.backfila.client.Connectors
+import app.cash.backfila.client.misk.Backfill
 import app.cash.backfila.client.misk.embedded.Backfila
 import app.cash.backfila.client.misk.embedded.BackfillRun
 import app.cash.backfila.protos.service.ConfigureServiceRequest
@@ -24,9 +25,9 @@ import retrofit2.mock.Calls
  */
 @Singleton
 internal class EmbeddedBackfila @Inject internal constructor(
-  private val operatorFactory: BackfillOperator.Factory
+  private val operatorFactory: BackfillOperatorFactory
 ) : Backfila, BackfilaApi {
-  var serviceData: ConfigureServiceRequest? = null
+  private var serviceData: ConfigureServiceRequest? = null
   private var backfillIdGenerator = AtomicInteger(10)
 
   override val configureServiceData: ConfigureServiceRequest?
@@ -52,7 +53,7 @@ internal class EmbeddedBackfila @Inject internal constructor(
     val backfillId = backfillIdGenerator.getAndIncrement()
     val operator = operatorFactory.create(createRequest.backfill_name, backfillId.toString())
 
-    val run = EmbeddedBackfillRun<Any>(
+    val run = EmbeddedBackfillRun<Backfill>(
         operator = operator,
         dryRun = createRequest.dry_run,
         parameters = createRequest.parameter_map,
@@ -65,21 +66,21 @@ internal class EmbeddedBackfila @Inject internal constructor(
     return Calls.response(CreateAndStartBackfillResponse(backfillId.toLong()))
   }
 
-  override fun <Type : Any> createDryRun(
+  override fun <Type : Backfill> createDryRun(
     backfill: KClass<Type>,
     parameters: Map<String, ByteString>,
     rangeStart: String?,
     rangeEnd: String?
   ) = createBackfill(backfill, true, parameters, rangeStart, rangeEnd)
 
-  override fun <Type : Any> createWetRun(
+  override fun <Type : Backfill> createWetRun(
     backfillType: KClass<Type>,
     parameters: Map<String, ByteString>,
     rangeStart: String?,
     rangeEnd: String?
   ) = createBackfill(backfillType, false, parameters, rangeStart, rangeEnd)
 
-  private fun <Type : Any> createBackfill(
+  private fun <Type : Backfill> createBackfill(
     backfillType: KClass<Type>,
     dryRun: Boolean,
     parameters: Map<String, ByteString>,

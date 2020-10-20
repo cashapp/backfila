@@ -20,7 +20,7 @@ import misk.web.interceptors.LogRequestResponse
 import misk.web.mediatype.MediaTypes
 
 internal class PrepareBackfillAction @Inject constructor(
-  private val operatorFactory: BackfillOperator.Factory,
+  private val operatorFactory: BackfillOperatorFactory,
   private val loggingSetupProvider: BackfilaClientLoggingSetupProvider
 ) : WebAction {
   @Post("/backfila/prepare-backfill")
@@ -44,7 +44,7 @@ internal class PrepareBackfillAction @Inject constructor(
 }
 
 internal class GetNextBatchRangeAction @Inject constructor(
-  private val operatorFactory: BackfillOperator.Factory,
+  private val operatorFactory: BackfillOperatorFactory,
   private val loggingSetupProvider: BackfilaClientLoggingSetupProvider
 ) : WebAction {
   @Post("/backfila/get-next-batch-range")
@@ -78,7 +78,7 @@ internal class GetNextBatchRangeAction @Inject constructor(
 }
 
 internal class RunBatchAction @Inject constructor(
-  private val operatorFactory: BackfillOperator.Factory,
+  private val operatorFactory: BackfillOperatorFactory,
   private val loggingSetupProvider: BackfilaClientLoggingSetupProvider
 ) : WebAction {
   @Post("/backfila/run-batch")

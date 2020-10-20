@@ -3,11 +3,11 @@ package app.cash.backfila.client.misk
 import okio.ByteString
 
 interface BackfilaManagementClient {
-  fun <B : Backfill<*, *, P>, P : Any> createAndStart(
+  fun <B : Backfill> createAndStart(
     backfillClass: Class<B>,
     dry_run: Boolean,
     num_threads: Int? = null,
-    parameters: P? = null,
+    parameters: Any? = null,
     extra_sleep_ms: Long? = null,
     backoff_schedule: String? = null,
     batch_size: Long? = null,
