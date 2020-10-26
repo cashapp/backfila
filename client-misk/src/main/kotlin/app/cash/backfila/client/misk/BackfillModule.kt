@@ -5,7 +5,9 @@ import app.cash.backfila.client.misk.client.BackfilaClientLoggingSetupProvider
 import app.cash.backfila.client.misk.client.BackfilaClientNoLoggingSetupProvider
 import app.cash.backfila.client.misk.internal.BackfilaClient
 import app.cash.backfila.client.misk.internal.BackfilaStartupConfigurator
+import app.cash.backfila.client.misk.internal.EmptyBackend
 import app.cash.backfila.client.misk.internal.RealBackfilaClient
+import app.cash.backfila.client.misk.spi.BackfillBackend
 import com.google.inject.BindingAnnotation
 import com.google.inject.Provides
 import com.squareup.moshi.Moshi
@@ -36,6 +38,8 @@ class BackfillModule(
     bind<BackfilaClientLoggingSetupProvider>().to(loggingSetupProvider.java)
 
     install(ServiceModule<BackfilaStartupConfigurator>())
+
+    multibind<BackfillBackend>().to<EmptyBackend>()
   }
 
   @Singleton @Provides @ForBackfila fun provideMoshi(): Moshi = Moshi.Builder()
