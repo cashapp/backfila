@@ -1,0 +1,36 @@
+package app.cash.backfila.client.misk
+
+import app.cash.backfila.client.misk.dynamodb.BackfillsModule
+import app.cash.backfila.client.misk.dynamodb.TrackItem
+import app.cash.backfila.client.misk.embedded.EmbeddedBackfilaModule
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
+import com.google.inject.Provides
+import com.google.inject.Singleton
+import misk.MiskTestingServiceModule
+import misk.aws.dynamodb.testing.DockerDynamoDbModule
+import misk.aws.dynamodb.testing.DynamoDbTable
+import misk.environment.DeploymentModule
+import misk.inject.KAbstractModule
+import misk.logging.LogCollectorModule
+
+/**
+ * Simulates a specific service implementation module
+ */
+class TestingModule : KAbstractModule() {
+  override fun configure() {
+    install(DeploymentModule.forTesting())
+    install(LogCollectorModule())
+    install(MiskTestingServiceModule())
+    install(BackfillsModule())
+
+    install(EmbeddedBackfilaModule())
+
+    install(DockerDynamoDbModule(DynamoDbTable(TrackItem::class)))
+  }
+
+  @Provides @Singleton
+  fun provideDynamoDbMapper(amazonDynamoDB: AmazonDynamoDB): DynamoDBMapper {
+    return DynamoDBMapper(amazonDynamoDB)
+  }
+}

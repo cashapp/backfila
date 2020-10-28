@@ -1,6 +1,7 @@
 ext.dep = [
   "apacheCommonsLang3": "org.apache.commons:commons-lang3:3.11",
   "assertj": "org.assertj:assertj-core:3.16.1",
+  "awsDynamoDb": "com.amazonaws:aws-java-sdk-dynamodb:1.11.774",
   "guava": "com.google.guava:guava:29.0-jre",
   "guice": "com.google.inject:guice:4.2.3",
   "guiceMultibindings": "com.google.inject.extensions:guice-multibindings:4.2.3",
@@ -30,6 +31,7 @@ ext.dep = [
   "metricsCore": "io.dropwizard.metrics:metrics-core:4.0.2",
   "metricsParent": "io.dropwizard.metrics:metrics-parent:4.0.2",
   "misk": "com.squareup.misk:misk:0.14.0-20200811-6a7f7cbb",
+  "miskAwsDynamodbTesting": "com.squareup.misk:misk-aws-dynamodb-testing:0.14.0-20200811-6a7f7cbb",
   "miskHibernate": "com.squareup.misk:misk-hibernate:0.14.0-20200811-6a7f7cbb",
   "miskHibernateTesting": "com.squareup.misk:misk-hibernate-testing:0.14.0-20200811-6a7f7cbb",
   "miskSlack": "com.squareup.misk:misk-slack:0.14.0-20200811-6a7f7cbb",
