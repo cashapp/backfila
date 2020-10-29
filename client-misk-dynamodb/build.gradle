@@ -1,0 +1,46 @@
+apply plugin: 'kotlin'
+
+dependencies {
+  implementation dep.guava
+  implementation dep.moshiCore
+  implementation dep.moshiKotlin
+  implementation dep.wireRuntime
+  implementation dep.guice
+  implementation dep.okHttp
+  implementation dep.retrofit
+  implementation dep.retrofitMock
+  implementation dep.retrofitMoshi
+  implementation dep.retrofitWire
+  implementation dep.okio
+  implementation dep.kotlinStdLib
+  implementation dep.wireMoshiAdapter
+  implementation dep.awsDynamoDb
+
+  api project(':client')
+  api project(':client-misk')
+  testApi project(':client-misk-testing')
+
+  implementation dep.misk
+  api dep.miskHibernate
+
+  testImplementation dep.assertj
+  testImplementation(dep.miskTesting)
+  testImplementation(dep.miskHibernateTesting)
+  testImplementation dep.junitEngine
+  testImplementation dep.miskAwsDynamodbTesting
+}
+
+jar {
+  baseName = "backfila-misk-client-dynamodb"
+}
+
+afterEvaluate { project ->
+  project.tasks.dokka {
+    outputDirectory = "$rootDir/docs/0.x"
+    outputFormat = 'gfm'
+  }
+}
+
+if (rootProject.file("hooks.gradle").exists()) {
+  apply from: rootProject.file("hooks.gradle")
+}
