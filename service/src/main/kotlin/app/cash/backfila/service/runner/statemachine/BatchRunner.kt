@@ -7,7 +7,6 @@ import com.google.common.base.Stopwatch
 import java.time.Duration
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -80,6 +79,8 @@ class BatchRunner(
         logger.info { "BatchRunner ${backfillRunner.logLabel()} backing off for $backoffMs" }
         delay(backoffMs)
       }
+      // Backoff specifically applied only to the starting of the next runBatch request. In addition
+      // to any overall backfill backoff.
       if (backfillRunner.runBatchBackoff.backingOff()) {
         val backoffMs = backfillRunner.runBatchBackoff.backoffMs()
         delay(backoffMs)
@@ -91,11 +92,7 @@ class BatchRunner(
         // update cursors.
         async { RunBatchResponse.Builder().build() }
       } else {
-        // Supervisor here allows us to handle the exception, rather than failing the job.
-        async(SupervisorJob()) {
-          backfillRunner.client.runBatch(backfillRunner.runBatchRequest(batch))
-          // TODO for pipelined backfills, await result and start a second RPC to the target
-        }
+        backfillRunner.runBatchAsync(this, batch)
       }
       runChannel.upstream().send(
           AwaitingRun(

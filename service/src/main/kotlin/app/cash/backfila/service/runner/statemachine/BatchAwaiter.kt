@@ -7,8 +7,7 @@ import app.cash.backfila.service.runner.BackfillRunner
 import java.time.Duration
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.async
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.delay
@@ -43,6 +42,7 @@ class BatchAwaiter(
 
       // Repeat this batch until it succeeds.
       retry@ while (true) {
+        var retry: Deferred<RunBatchResponse>? = null
         try {
           val response: RunBatchResponse = runBatchRpc.await()
 
@@ -57,7 +57,31 @@ class BatchAwaiter(
               backfillRunner.runBatchBackoff.addMillis(backfillRunner.metadata.extraSleepMs)
             }
           }
+        } catch (e: CancellationException) {
+          logger.info(e) { "BatchAwaiter job cancelled ${backfillRunner.logLabel()}" }
+          break@main
+        } catch (e: Exception) {
+          logger.info(e) { "Rpc failure when running batch for ${backfillRunner.logLabel()}" }
 
+          backfillRunner.onRpcFailure(
+              e,
+              "running batch [${batch.batch_range.start.utf8()}, ${batch.batch_range.end.utf8()}]",
+              Duration.between(startedAt, backfillRunner.factory.clock.instant())
+          )
+
+          // After backing off retry.
+          if (backfillRunner.globalBackoff.backingOff()) {
+            val backoffMs = backfillRunner.globalBackoff.backoffMs()
+            logger.info {
+              "BatchAwaiter ${backfillRunner.logLabel()} backing off for $backoffMs ms"
+            }
+            delay(backoffMs)
+          }
+          retry = backfillRunner.runBatchAsync(this, batch)
+        }
+
+        // If we haven't attempted a retry this iteration then the batch must be completed.
+        if (retry == null) {
           logger.info { "Runbatch finished for ${backfillRunner.logLabel()} $batch" }
 
           backfillRunner.onRpcSuccess()
@@ -75,32 +99,11 @@ class BatchAwaiter(
             dbRunPartition.matching_records_per_minute = matchingRateCounter.projectedRate()
           }
           break@retry
-        } catch (e: CancellationException) {
-          logger.info(e) { "BatchAwaiter job cancelled ${backfillRunner.logLabel()}" }
-          break@main
-        } catch (e: Exception) {
-          logger.info(e) { "Rpc failure when running batch for ${backfillRunner.logLabel()}" }
-
-          backfillRunner.onRpcFailure(
-              e,
-              "running batch [${batch.batch_range.start.utf8()}, ${batch.batch_range.end.utf8()}]",
-              Duration.between(startedAt, backfillRunner.factory.clock.instant())
-          )
-
-          if (backfillRunner.globalBackoff.backingOff()) {
-            val backoffMs = backfillRunner.globalBackoff.backoffMs()
-            logger.info {
-              "BatchAwaiter ${backfillRunner.logLabel()} backing off for $backoffMs ms"
-            }
-            delay(backoffMs)
-          }
-          // Supervisor here allows us to handle the exception, rather than failing the job.
-          runBatchRpc = async(SupervisorJob()) {
-            backfillRunner.client.runBatch(backfillRunner.runBatchRequest(batch))
-          }
-          startedAt = backfillRunner.factory.clock.instant()
-          logger.info { "${backfillRunner.logLabel()} enqueued runbatch retry for $batch" }
         }
+
+        runBatchRpc = retry
+        startedAt = backfillRunner.factory.clock.instant()
+        logger.info { "${backfillRunner.logLabel()} running runbatch retry for $batch" }
       }
 
       // Signal to the rpc sender that there is more capacity to send rpcs.
