@@ -3,7 +3,9 @@ package app.cash.backfila.service.runner
 import app.cash.backfila.client.BackfilaClientServiceClient
 import app.cash.backfila.client.ConnectorProvider
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
+import app.cash.backfila.protos.clientservice.PipelinedData
 import app.cash.backfila.protos.clientservice.RunBatchRequest
+import app.cash.backfila.protos.clientservice.RunBatchResponse
 import app.cash.backfila.service.SlackHelper
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillState
@@ -20,6 +22,10 @@ import java.net.SocketTimeoutException
 import java.time.Clock
 import java.time.Duration
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -171,17 +177,24 @@ class BackfillRunner private constructor(
         .clientFor(dbData.serviceName, dbData.connectorExtraData)
   }
 
-  fun runBatchRequest(
-    batch: GetNextBatchRangeResponse.Batch
-  ) = RunBatchRequest(
-      metadata.backfillRunId.toString(),
-      backfillName,
-      partitionName,
-      batch.batch_range,
-      metadata.parameters,
-      metadata.dryRun,
-      null
-  )
+  fun runBatchAsync(
+    scope: CoroutineScope,
+    batch: GetNextBatchRangeResponse.Batch,
+    pipelinedData: PipelinedData? = null
+  ): Deferred<RunBatchResponse> {
+    // Supervisor here allows us to handle the exception, rather than failing the job.
+    return scope.async(SupervisorJob()) {
+      client.runBatch(RunBatchRequest(
+          metadata.backfillRunId.toString(),
+          backfillName,
+          partitionName,
+          batch.batch_range,
+          metadata.parameters,
+          metadata.dryRun,
+          pipelinedData
+      ))
+    }
+  }
 
   fun onRpcSuccess() {
     failuresSinceSuccess = 0
