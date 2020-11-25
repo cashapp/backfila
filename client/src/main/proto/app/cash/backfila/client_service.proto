@@ -105,7 +105,16 @@ message RunBatchResponse {
 
   optional PipelinedData pipelined_data = 2;
 
+  // Stacktrace that will be surfaced to the user.
+  // If this is provided this batch request is assumed to have failed.
   optional string exception_stack_trace = 3;
+
+  // Provided data from the backfila client telling backfila what part of the batch was not
+  // completed yet. Backfila will end up resuming with a new request containing either the remaining
+  // range or the original range.
+  // This is used by Backfila clients to relay what progress was completed in situations like
+  // time consuming batches.
+  optional KeyRange remaining_batch_range = 8;
 }
 
 // Pipelined data can be any format as long as both the consumer and provider agree on it.

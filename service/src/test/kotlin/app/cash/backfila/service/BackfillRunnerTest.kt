@@ -31,7 +31,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
-import kotlinx.coroutines.yield
 import misk.hibernate.Transacter
 import misk.hibernate.load
 import misk.scope.ActionScope
@@ -116,7 +115,7 @@ class BackfillRunnerTest {
       try {
         // We should only get numthreads=1 calls in parallel, then it must wait for more room.
         assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
-        yield()
+        waitForOtherCoroutines()
         assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNull()
 
         // After one rpc completes, another one is enqueued.
@@ -157,7 +156,7 @@ class BackfillRunnerTest {
         assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
         assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
         assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
-        yield()
+        waitForOtherCoroutines()
         assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNull()
 
         // After one rpc completes, another one is enqueued.
@@ -244,7 +243,7 @@ class BackfillRunnerTest {
         fakeBackfilaClientServiceClient.getNextBatchRangeResponses.send(Result.success(
             nextBatchResponse(start = "200", end = "299", scannedCount = 100, matchingCount = 100)))
         // Not buffering any more batches
-        yield()
+        waitForOtherCoroutines()
         assertThat(fakeBackfilaClientServiceClient.getNextBatchRangeResponses.poll()).isNull()
 
         assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
@@ -550,7 +549,7 @@ class BackfillRunnerTest {
         assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
         assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
         assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
-        yield()
+        waitForOtherCoroutines()
         assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNull()
 
         scope.fakeCaller(user = "molly") {
@@ -587,6 +586,180 @@ class BackfillRunnerTest {
       assertThat(partition.pkey_cursor).isEqualTo("199".encodeUtf8())
       assertThat(partition.run_state).isEqualTo(BackfillState.RUNNING)
     }
+  }
+
+  @Test fun `returning remaining batch range makes followup runbatch`() {
+    fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
+    val runner = startBackfill(numThreads = 1)
+
+    runBlocking {
+      launch { runner.run() }
+      try {
+        val initialRequest = fakeBackfilaClientServiceClient.runBatchRequests.receive()
+
+        // Managed to complete the first item only
+        val newStart = initialRequest.batch_range.start.utf8().toInt() + 1
+        var remainingRange = initialRequest.batch_range.newBuilder()
+            .start(newStart.toString().encodeUtf8())
+            .build()
+        fakeBackfilaClientServiceClient.runBatchResponses.send(
+            Result.success(RunBatchResponse.Builder().remaining_batch_range(remainingRange).build()))
+
+        // Follow up request is sent immediately
+        val followup1 = withTimeout(100) {
+          fakeBackfilaClientServiceClient.runBatchRequests.receive()
+        }
+
+        // Batch ranges should be the remaining range
+        assertThat(remainingRange).isEqualTo(followup1.batch_range)
+
+        // Now we complete the last item in the batch
+        val newEnd = followup1.batch_range.end.utf8().toInt() - 1
+        remainingRange = followup1.batch_range.newBuilder()
+            .end(newEnd.toString().encodeUtf8())
+            .build()
+        fakeBackfilaClientServiceClient.runBatchResponses.send(
+            Result.success(RunBatchResponse.Builder().remaining_batch_range(remainingRange).build()))
+
+        // Follow up request is sent immediately
+        val followup2 = withTimeout(100) {
+          fakeBackfilaClientServiceClient.runBatchRequests.receive()
+        }
+
+        // Batch range is updated to the new remainingRange
+        assertThat(followup2.batch_range).isEqualTo(remainingRange)
+
+        // Cursor hasn't been updated yet
+        waitForOtherCoroutines()
+        assertThat(getSinglePartitionCursor(runner)).isNull()
+
+        // But that second follow up fails
+        fakeBackfilaClientServiceClient.runBatchResponses.send(Result.success(
+            RunBatchResponse.Builder()
+                .exception_stack_trace("It Failed")
+                .build()))
+
+        // Retry request is sent after the error backoff
+        val retry = withTimeout(1500) {
+          fakeBackfilaClientServiceClient.runBatchRequests.receive()
+        }
+
+        // Batch range retried with the same remaining range.
+        assertThat(retry.batch_range).isEqualTo(remainingRange)
+
+        // Cursor hasn't been updated yet
+        waitForOtherCoroutines()
+        assertThat(getSinglePartitionCursor(runner)).isNull()
+
+        // Batch is done
+        fakeBackfilaClientServiceClient.runBatchResponses.send(
+            Result.success(RunBatchResponse.Builder().build()))
+
+        // Cursor is updated once the batch succeeds
+        waitForOtherCoroutines()
+        assertThat(getSinglePartitionCursor(runner))
+            .isEqualTo(initialRequest.batch_range.end.utf8().toLong())
+
+        val nextBatch = fakeBackfilaClientServiceClient.runBatchRequests.receive()
+        // Batch ranges are no longer the same
+        assertThat(initialRequest.batch_range).isNotEqualTo(nextBatch.batch_range)
+      } finally {
+        runner.stop()
+      }
+    }
+  }
+
+  @Test fun `remaining batch range reduces parallelism`() {
+    // This is desired behaviour so backfila quickly backs off when encountering the unexpected.
+    fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
+    val runner = startBackfill(numThreads = 3)
+
+    runBlocking {
+      launch { runner.run() }
+      try {
+
+        // We should only get numthreads=3 calls in parallel, then it must wait for more room.
+        assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull
+        val initialRequest = fakeBackfilaClientServiceClient.runBatchRequests.receive()
+        assertThat(initialRequest).isNotNull
+        assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull
+        waitForOtherCoroutines()
+        assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNull()
+        // Nothing has completed so the cursor has not been set yet
+        assertThat(getSinglePartitionCursor(runner)).isNull()
+
+        // The second request sends a partial result and the rest return normally
+        fakeBackfilaClientServiceClient.runBatchResponses.send(
+            Result.success(RunBatchResponse.Builder().build()))
+
+        waitForOtherCoroutines()
+        var firstBatchCursor = getSinglePartitionCursor(runner)
+        checkNotNull(firstBatchCursor) // cursor was set when the first batch succeeded
+
+        // return a remaining batch
+        val newStart = initialRequest.batch_range.start.utf8().toInt() + 1
+        val remainingRange = initialRequest.batch_range.newBuilder()
+            .start(newStart.toString().encodeUtf8())
+            .build()
+        fakeBackfilaClientServiceClient.runBatchResponses.send(
+            Result.success(RunBatchResponse.Builder().remaining_batch_range(remainingRange).build()))
+
+        waitForOtherCoroutines()
+        assertThat(getSinglePartitionCursor(runner)).isEqualTo(firstBatchCursor) // cursor is unchanged
+        fakeBackfilaClientServiceClient.runBatchResponses.send(
+            Result.success(RunBatchResponse.Builder().build()))
+
+        waitForOtherCoroutines()
+        assertThat(getSinglePartitionCursor(runner)).isEqualTo(firstBatchCursor) // cursor is unchanged
+
+        // Only two requests are sent. The first is in response to the first batch succeeding and
+        // the second is the follow up request
+        val queuedRequest = fakeBackfilaClientServiceClient.runBatchRequests.receive()
+        assertThat(queuedRequest).isNotNull
+        val followupRequest = fakeBackfilaClientServiceClient.runBatchRequests.receive()
+        assertThat(remainingRange).isEqualTo(followupRequest.batch_range)
+
+        waitForOtherCoroutines()
+        assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNull()
+
+        // complete the two stuck requests currently being processed
+        fakeBackfilaClientServiceClient.runBatchResponses.send(
+            Result.success(RunBatchResponse.Builder().build()))
+        waitForOtherCoroutines()
+        assertThat(getSinglePartitionCursor(runner)).isEqualTo(firstBatchCursor) // cursor is still unchanged
+        fakeBackfilaClientServiceClient.runBatchResponses.send(
+            Result.success(RunBatchResponse.Builder().build()))
+        waitForOtherCoroutines()
+        val cursor = getSinglePartitionCursor(runner)
+        assertThat(cursor).isGreaterThan(firstBatchCursor) // cursor increased
+        assertThat(cursor).isEqualTo(queuedRequest.batch_range.end.utf8().toLong())
+
+        // And we can get another 3
+        assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull
+        assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull
+        assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull
+
+        waitForOtherCoroutines()
+        assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNull()
+      } finally {
+        runner.stop()
+      }
+    }
+  }
+
+  private suspend fun waitForOtherCoroutines() {
+    // Allow the other coroutine scopes to complete by giving it many short yield opportunities.
+    // If we want to use yield() instead we need to make sure the correct scope is used.
+    repeat(10) {
+      delay(1)
+    }
+  }
+
+  private fun getSinglePartitionCursor(runner: BackfillRunner): Long? {
+    var currentPartitionStatus = getBackfillStatusAction
+        .status(runner.backfillRunId.id)
+        .partitions.find { it.id == runner.partitionId.id }!!
+    return currentPartitionStatus.pkey_cursor?.toLong()
   }
 
   private fun startBackfill(numThreads: Int = 3, extraSleepMs: Long = 0): BackfillRunner {
