@@ -23,6 +23,8 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
   override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
     val config =
         parametersOperator.constructBackfillConfig(request.parameters, request.dry_run)
+    backfill.validate(config)
+
     // TODO(mikepaw): dynamically select the segment count by probing DynamoDB.
     val segmentCount = backfill.fixedSegmentCount(config) ?: 2048
     val partitionCount = backfill.partitionCount(config)
