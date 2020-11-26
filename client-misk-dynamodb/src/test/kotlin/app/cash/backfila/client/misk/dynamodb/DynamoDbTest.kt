@@ -31,7 +31,7 @@ class DynamoDbBackfillTest {
   fun `happy path`() {
     val trackItem = TrackItem().apply {
       this.album_token = "ALBUM_2"
-      this.track_token = "03"
+      this.sort_key = "TRACK_03"
       this.track_title = "Thriller"
     }
     dynamoDb.save(trackItem)

@@ -81,6 +81,8 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
         if (lastEvaluatedKey != null) {
           exclusiveStartKey = lastEvaluatedKey
         }
+        this.filterExpression = backfill.filterExpression(config)
+        this.expressionAttributeValues = backfill.expressionAttributeValues(config)
       }
       val result = dynamoDb.scanPage(backfill.itemType.java, scanRequest)
       backfill.runBatch(result.results, config)
