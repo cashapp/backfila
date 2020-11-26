@@ -2,6 +2,8 @@ package app.cash.backfila.client.misk.dynamodb
 
 import app.cash.backfila.client.misk.Backfill
 import app.cash.backfila.client.misk.BackfillConfig
+import com.amazonaws.services.dynamodbv2.model.AttributeValue
+import com.amazonaws.services.dynamodbv2.model.ScanRequest
 import com.squareup.moshi.Types
 import java.lang.reflect.ParameterizedType
 import kotlin.reflect.KClass
@@ -56,4 +58,10 @@ abstract class DynamoDbBackfill<I : Any, P : Any> : Backfill {
    * the Backfill will run at least 8 batches concurrently.
    */
   open fun partitionCount(config: BackfillConfig<P>): Int = 8
+
+  /** See [ScanRequest.setFilterExpression]. */
+  open fun filterExpression(config: BackfillConfig<P>): String? = null
+
+  /** See [ScanRequest.setExpressionAttributeValues]. */
+  open fun expressionAttributeValues(config: BackfillConfig<P>): Map<String, AttributeValue>? = null
 }

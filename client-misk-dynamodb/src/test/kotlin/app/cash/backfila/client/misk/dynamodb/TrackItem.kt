@@ -10,9 +10,16 @@ class TrackItem {
   @DynamoDBHashKey
   var album_token: String? = null
 
+  // Either an album info or a track number
   @DynamoDBRangeKey
-  var track_token: String? = null
+  var sort_key: String? = null
 
   @DynamoDBAttribute
   var track_title: String? = null
+
+  @DynamoDBAttribute
+  var album_title: String? = null
+
+  @DynamoDBAttribute
+  var artist_name: String? = null
 }
