@@ -36,7 +36,6 @@ class DynamoDbFilteringTest {
     val run = backfila.createWetRun<FilteredMakeTracksExplicitBackfill>()
     run.execute()
     assertThat(run.backfill.nonTrackCount).isEqualTo(5)
-
   }
 
   @Test
