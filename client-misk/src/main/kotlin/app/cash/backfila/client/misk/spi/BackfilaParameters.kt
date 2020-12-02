@@ -17,7 +17,7 @@ fun parametersToBytes(parameters: Any): Map<String, ByteString> {
   val map = mutableMapOf<String, ByteString>()
 
   for (property in parametersClass.memberProperties) {
-    map[property.name] = (property.getter.call(parameters) as String).encodeUtf8()
+    map[property.name] = (property.getter.call(parameters).toString()).encodeUtf8()
   }
   return map
 }

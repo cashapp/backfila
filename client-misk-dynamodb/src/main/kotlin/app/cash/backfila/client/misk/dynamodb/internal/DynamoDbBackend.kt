@@ -20,7 +20,8 @@ import kotlin.reflect.KClass
 class DynamoDbBackend @Inject constructor(
   private val injector: Injector,
   @ForBackfila private val backfills: MutableMap<String, KClass<out DynamoDbBackfill<*, *>>>,
-  val dynamoDb: DynamoDBMapper
+  val dynamoDb: DynamoDBMapper,
+  val keyRangeCodec: DynamoDbKeyRangeCodec
 ) : BackfillBackend {
 
   /** Creates Backfill instances. Each backfill ID gets a new Backfill instance. */
@@ -38,7 +39,8 @@ class DynamoDbBackend @Inject constructor(
   ) = DynamoDbBackfillOperator(
       dynamoDb,
       backfill,
-      BackfilaParametersOperator(parametersClass(backfill::class))
+      BackfilaParametersOperator(parametersClass(backfill::class)),
+      keyRangeCodec
   )
 
   override fun create(backfillName: String, backfillId: String): BackfillOperator? {

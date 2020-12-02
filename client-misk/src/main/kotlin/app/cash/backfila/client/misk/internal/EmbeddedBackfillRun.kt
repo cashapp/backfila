@@ -9,6 +9,7 @@ import app.cash.backfila.protos.clientservice.KeyRange
 import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
 import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
 import app.cash.backfila.protos.clientservice.RunBatchRequest
+import app.cash.backfila.protos.clientservice.RunBatchResponse
 import java.util.ArrayDeque
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
@@ -145,13 +146,26 @@ internal class EmbeddedBackfillRun<B : Backfill>(
 
   override fun runBatch() {
     check(!batchesToRun.isEmpty()) { "There must be batches to run" }
-    val batch = batchesToRun.remove()
-    operator.runBatch(RunBatchRequest.Builder()
-        .partition_name(batch.partitionName)
-        .batch_range(batch.batchRange)
-        .parameters(parameters)
-        .dry_run(dryRun)
-        .build())
+    val batch = batchesToRun.peek()
+    var response: RunBatchResponse
+    var remainingRange = batch.batchRange
+    do {
+      val remainingBatch = batch.copy(batchRange = remainingRange)
+      response = operator.runBatch(RunBatchRequest.Builder()
+          .partition_name(remainingBatch.partitionName)
+          .batch_range(remainingBatch.batchRange)
+          .parameters(parameters)
+          .dry_run(dryRun)
+          .build())
+      check(response.exception_stack_trace == null) {
+        "RunBatch returned stack trace: ${response.exception_stack_trace}"
+      }
+      if (response.remaining_batch_range != null) {
+        remainingRange = response.remaining_batch_range
+      }
+    } while (response.remaining_batch_range != null)
+    val removed = batchesToRun.remove()
+    require(removed == batch)
   }
 
   override fun runAllScanned() {
