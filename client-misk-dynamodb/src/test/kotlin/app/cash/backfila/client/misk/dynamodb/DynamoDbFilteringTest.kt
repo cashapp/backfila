@@ -65,8 +65,10 @@ class DynamoDbFilteringTest {
     }
 
     companion object {
-      val TRACK_SORT_START = "TRACK_"
+      const val TRACK_SORT_START = "TRACK_"
     }
+
+    override fun fixedSegmentCount(config: BackfillConfig<NoParameters>): Int? = 16
   }
 
   class DynamoFilterMakeTracksExplicitBackfill @Inject constructor(

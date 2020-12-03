@@ -1,11 +1,23 @@
 package app.cash.backfila.client.misk.dynamodb
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression
 import javax.inject.Inject
 
 class DynamoMusicTableTestData @Inject constructor(
   var dynamoDb: DynamoDBMapper
 ) {
+
+  fun getTracksDump(): List<TrackItem> {
+    return getRowsDump().filter { it.sort_key?.startsWith("TRACK_") == true }
+  }
+
+  fun getRowsDump(): List<TrackItem> {
+    val scanRequest = DynamoDBScanExpression().apply {
+      limit = 10000
+    }
+    return dynamoDb.scan(TrackItem::class.java, scanRequest)
+  }
 
   fun addAllTheMusic() {
     addMichaelJackson()

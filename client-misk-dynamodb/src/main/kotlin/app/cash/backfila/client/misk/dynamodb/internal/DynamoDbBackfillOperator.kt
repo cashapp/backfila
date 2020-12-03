@@ -5,6 +5,7 @@ import app.cash.backfila.client.misk.spi.BackfilaParametersOperator
 import app.cash.backfila.client.misk.spi.BackfillOperator
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
+import app.cash.backfila.protos.clientservice.KeyRange
 import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
 import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
 import app.cash.backfila.protos.clientservice.RunBatchRequest
@@ -12,11 +13,14 @@ import app.cash.backfila.protos.clientservice.RunBatchResponse
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
+import com.google.common.base.Stopwatch
+import java.time.Duration
 
 class DynamoDbBackfillOperator<I : Any, P : Any>(
   val dynamoDb: DynamoDBMapper,
   override val backfill: DynamoDbBackfill<I, P>,
-  val parametersOperator: BackfilaParametersOperator<P>
+  val parametersOperator: BackfilaParametersOperator<P>,
+  val keyRangeCodec: DynamoDbKeyRangeCodec
 ) : BackfillOperator {
   override fun name(): String = backfill.javaClass.toString()
 
@@ -28,6 +32,12 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
     // TODO(mikepaw): dynamically select the segment count by probing DynamoDB.
     val segmentCount = backfill.fixedSegmentCount(config) ?: 2048
     val partitionCount = backfill.partitionCount(config)
+    require(partitionCount in 1..segmentCount &&
+        Integer.bitCount(partitionCount) == 1 &&
+        Integer.bitCount(segmentCount) == 1) {
+      "partitionCount and segmentCount must be positive powers of 2, and partitionCount must be" +
+          " greater than segmentCount (partitionCount=$partitionCount, segmentCount=$segmentCount)"
+    }
     val segmentsPerPartition = segmentCount / partitionCount
 
     val partitions = mutableListOf<PrepareBackfillResponse.Partition>()
@@ -36,7 +46,7 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
       val segmentEndExclusive = (i + 1) * segmentsPerPartition
       partitions += PrepareBackfillResponse.Partition.Builder()
           .partition_name("$i of $partitionCount")
-          .backfill_range(encodeKeyRange(segmentStartInclusive, segmentEndExclusive, segmentCount))
+          .backfill_range(keyRangeCodec.encodeKeyRange(segmentStartInclusive, segmentEndExclusive, segmentCount))
           .build()
     }
 
@@ -46,19 +56,23 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
   }
 
   override fun getNextBatchRange(request: GetNextBatchRangeRequest): GetNextBatchRangeResponse {
-    var (start, end, count) = decodeKeyRange(request.backfill_range)
+    var (start, end, count) = keyRangeCodec.decodeKeyRange(request.backfill_range)
 
     // If this isn't the first batch range, start where we last left off.
     if (request.previous_end_key != null) {
-      start = decodeSegment(request.previous_end_key).first
+      val segmentData = keyRangeCodec.decodeSegment(request.previous_end_key)
+      require(segmentData.count == count) // Segment count cannot change.
+      require(segmentData.lastEvaluatedKey == null) // No partial batches until a batch is running.
+      start = segmentData.offset
     }
 
     val batches = mutableListOf<GetNextBatchRangeResponse.Batch>()
     for (i in start until minOf(start + 1, end)) {
       batches += GetNextBatchRangeResponse.Batch.Builder()
-          .batch_range(encodeKeyRange(i, i + 1, count))
-          .matching_record_count(100L)
-          .scanned_record_count(100L)
+          .batch_range(keyRangeCodec.encodeKeyRange(i, i + 1, count))
+          // TODO(mikepaw) calculate counts accurately when requested.
+          .matching_record_count(1L)
+          .scanned_record_count(1L)
           .build()
     }
 
@@ -68,17 +82,19 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
   }
 
   override fun runBatch(request: RunBatchRequest): RunBatchResponse {
-    val (start, end, count) = decodeKeyRange(request.batch_range)
-    require(end == start + 1)
+    val keyRange = keyRangeCodec.decodeKeyRange(request.batch_range)
+    require(keyRange.end == keyRange.start + 1)
 
     val config =
         parametersOperator.constructBackfillConfig(request.parameters, request.dry_run)
 
-    var lastEvaluatedKey: Map<String, AttributeValue>? = null
+    var lastEvaluatedKey: Map<String, AttributeValue>? = keyRange.lastEvaluatedKey
+
+    val stopwatch = Stopwatch.createStarted()
     do {
       val scanRequest = DynamoDBScanExpression().apply {
-        segment = start
-        totalSegments = count
+        segment = keyRange.start
+        totalSegments = keyRange.count
         limit = 4
         if (lastEvaluatedKey != null) {
           exclusiveStartKey = lastEvaluatedKey
@@ -89,9 +105,18 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
       val result = dynamoDb.scanPage(backfill.itemType.java, scanRequest)
       backfill.runBatch(result.results, config)
       lastEvaluatedKey = result.lastEvaluatedKey
+      if (stopwatch.elapsed() > Duration.ofMillis(1_000L)) {
+        break
+      }
     } while (lastEvaluatedKey != null)
 
     return RunBatchResponse.Builder()
+        .remaining_batch_range(lastEvaluatedKey?.toKeyRange(keyRange))
         .build()
+  }
+
+  private fun Map<String, AttributeValue>.toKeyRange(originalRange: DynamoDbKeyRange): KeyRange {
+    require(originalRange.start + 1 == originalRange.end)
+    return keyRangeCodec.encodeKeyRange(originalRange.start, originalRange.end, originalRange.count, this)
   }
 }

@@ -74,5 +74,7 @@ class DynamoDbBackfillTest {
     data class ExplicitParameters(
       val validate: Boolean = true
     )
+
+    override fun fixedSegmentCount(config: BackfillConfig<ExplicitParameters>): Int? = 16
   }
 }
