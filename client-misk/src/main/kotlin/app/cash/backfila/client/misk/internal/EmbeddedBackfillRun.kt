@@ -156,6 +156,7 @@ internal class EmbeddedBackfillRun<B : Backfill>(
           .batch_range(remainingBatch.batchRange)
           .parameters(parameters)
           .dry_run(dryRun)
+          .batch_size(batchSize)
           .build())
       check(response.exception_stack_trace == null) {
         "RunBatch returned stack trace: ${response.exception_stack_trace}"

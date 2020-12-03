@@ -191,7 +191,8 @@ class BackfillRunner private constructor(
           batch.batch_range,
           metadata.parameters,
           metadata.dryRun,
-          pipelinedData
+          pipelinedData,
+          metadata.batchSize
       ))
     }
   }

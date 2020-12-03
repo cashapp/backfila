@@ -145,6 +145,27 @@ class BackfillRunnerTest {
     }
   }
 
+  @Test fun `batch size is supplied`() {
+    fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
+    val runner = startBackfill(numThreads = 1)
+    scope.fakeCaller(user = "molly") {
+      updateBackfillAction.update(
+          runner.backfillRunId.id,
+          UpdateBackfillRequest(batch_size = 10)
+      )
+    }
+
+    runBlocking {
+      launch { runner.run() }
+      try {
+        val firstRequest = fakeBackfilaClientServiceClient.runBatchRequests.receive()
+        assertThat(firstRequest.batch_size).isEqualTo(10)
+      } finally {
+        runner.stop()
+      }
+    }
+  }
+
   @Test fun parallelCallsLimited() {
     fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
     val runner = startBackfill(numThreads = 3)
