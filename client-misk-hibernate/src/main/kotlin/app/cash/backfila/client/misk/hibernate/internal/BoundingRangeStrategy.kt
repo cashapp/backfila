@@ -7,11 +7,11 @@ import com.google.common.collect.Ordering
 import javax.persistence.Table
 import kotlin.streams.toList
 import misk.hibernate.DbEntity
-import misk.hibernate.Keyspace
 import misk.hibernate.Session
 import misk.hibernate.Transacter
 import misk.hibernate.shards
 import misk.hibernate.transaction
+import misk.vitess.Keyspace
 import okio.ByteString
 
 interface BoundingRangeStrategy<E : DbEntity<E>, Pkey : Any> {

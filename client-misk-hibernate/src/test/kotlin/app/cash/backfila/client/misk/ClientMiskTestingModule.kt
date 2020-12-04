@@ -24,7 +24,7 @@ internal class ClientMiskTestingModule(
   override fun configure() {
     val dataSourceConfig = when {
       useVitess -> DataSourceConfig(
-          type = DataSourceType.VITESS,
+          type = DataSourceType.VITESS_MYSQL,
           username = "root",
           migrations_resource = "classpath:/schema",
           vitess_schema_resource_root = "classpath:/schema"
