@@ -68,6 +68,7 @@ jar {
     attributes 'Main-Class': 'app.cash.backfila.service.BackfilaServiceKt'
   }
   zip64 = true
+  classifier = 'unshaded'
 }
 
 shadowJar {
