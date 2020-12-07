@@ -98,6 +98,10 @@ message RunBatchRequest {
 
   // Provided data from the source backfill if this is the target backfill in a pipelined backfill.
   optional PipelinedData pipelined_data = 7;
+
+  // Current batch size set for this backfill run. A backfila client may use choose to use this but
+  // others may run the entire range. Consult your client implementations for exact behaviour.
+  optional uint64 batch_size = 8;
 }
 message RunBatchResponse {
   // How much to sleep before starting new batches. For example can be set to replication lag.

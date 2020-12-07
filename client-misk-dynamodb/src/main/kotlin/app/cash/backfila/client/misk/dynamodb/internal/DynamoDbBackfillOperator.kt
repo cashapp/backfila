@@ -95,7 +95,7 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
       val scanRequest = DynamoDBScanExpression().apply {
         segment = keyRange.start
         totalSegments = keyRange.count
-        limit = 4
+        limit = request.batch_size.toInt()
         if (lastEvaluatedKey != null) {
           exclusiveStartKey = lastEvaluatedKey
         }

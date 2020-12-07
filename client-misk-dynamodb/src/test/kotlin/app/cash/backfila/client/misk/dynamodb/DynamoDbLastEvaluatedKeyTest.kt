@@ -30,10 +30,12 @@ class DynamoDbLastEvaluatedKeyTest {
   fun `one big segment with one second batch execution time works`() {
     testData.addThriller()
 
-    // TODO(mikepaw) use batch size to change how many items show up in a batch.
+    // Pause so at most two dynamo batches run per runBatch service call
     val run = backfila.createWetRun<PausingBackfill>(
-        parameters = PausingBackfill.Parameters(1, 1, 128L)
+        parameters = PausingBackfill.Parameters(segmentCount = 1, partitionCount = 1,
+            pauseMilliseconds = 500L, requireMaxBatchSize = 5)
     )
+    run.batchSize = 5
     run.execute()
 
     val rows = testData.getTracksDump()
@@ -44,10 +46,12 @@ class DynamoDbLastEvaluatedKeyTest {
   fun `really long run batches work`() {
     testData.addLinkinPark()
 
-    // TODO(mikepaw) use batch size to change how many items show up in a batch.
+    // Pause so only one dynamo batch runs per runBatch service call
     val run = backfila.createWetRun<PausingBackfill>(
-        parameters = PausingBackfill.Parameters(4, 2, 256L)
+        parameters = PausingBackfill.Parameters(segmentCount = 4, partitionCount = 2,
+            pauseMilliseconds = 1000L, requireMaxBatchSize = 5)
     )
+    run.batchSize = 5
     run.execute()
 
     val rows = testData.getTracksDump()
@@ -58,18 +62,24 @@ class DynamoDbLastEvaluatedKeyTest {
     dynamoDb: DynamoDBMapper
   ) : UpdateInPlaceDynamoDbBackfill<TrackItem, PausingBackfill.Parameters>(dynamoDb) {
 
+    override fun runBatch(items: List<TrackItem>, config: BackfillConfig<Parameters>) {
+      require(items.size <= config.parameters.requireMaxBatchSize)
+      super.runBatch(items, config)
+      Thread.sleep(config.parameters.pauseMilliseconds)
+    }
+
     override fun runOne(item: TrackItem, config: BackfillConfig<Parameters>): Boolean {
       val trackTitle = item.track_title ?: return false
       if (trackTitle.endsWith(" (EXPLICIT)")) return false // Idempotent retry?
       item.track_title = "$trackTitle (EXPLICIT)"
-      Thread.sleep(config.parameters.pauseMilliseconds)
       return true
     }
 
     data class Parameters(
       val segmentCount: Int = 4,
       val partitionCount: Int = 2,
-      val pauseMilliseconds: Long = 1000L
+      val pauseMilliseconds: Long = 1000L,
+      val requireMaxBatchSize: Long = 100L
     )
 
     override fun fixedSegmentCount(config: BackfillConfig<Parameters>): Int? = config.parameters.segmentCount
