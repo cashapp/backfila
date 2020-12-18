@@ -8,8 +8,6 @@ import app.cash.backfila.client.misk.embedded.createWetRun
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import javax.inject.Inject
-import misk.aws.dynamodb.testing.DockerDynamoDb
-import misk.testing.MiskExternalDependency
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -20,10 +18,6 @@ class DynamoDbFilteringTest {
   @Suppress("unused")
   @MiskTestModule
   val module = TestingModule()
-
-  @Suppress("unused")
-  @MiskExternalDependency
-  val dockerDynamoDb = DockerDynamoDb
 
   @Inject lateinit var backfila: Backfila
   @Inject lateinit var testData: DynamoMusicTableTestData

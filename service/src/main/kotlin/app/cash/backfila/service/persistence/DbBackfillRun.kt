@@ -1,6 +1,6 @@
 package app.cash.backfila.service.persistence
 
-import com.google.api.client.repackaged.com.google.common.base.Preconditions.checkState
+import com.google.common.base.Preconditions.checkState
 import java.time.Instant
 import javax.persistence.Column
 import javax.persistence.Entity
