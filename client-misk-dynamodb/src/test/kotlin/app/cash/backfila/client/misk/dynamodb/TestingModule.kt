@@ -8,8 +8,8 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
 import com.google.inject.Provides
 import com.google.inject.Singleton
 import misk.MiskTestingServiceModule
-import misk.aws.dynamodb.testing.DockerDynamoDbModule
 import misk.aws.dynamodb.testing.DynamoDbTable
+import misk.aws.dynamodb.testing.InProcessDynamoDbModule
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.logging.LogCollectorModule
@@ -26,7 +26,7 @@ class TestingModule : KAbstractModule() {
 
     install(EmbeddedBackfilaModule())
 
-    install(DockerDynamoDbModule(DynamoDbTable(TrackItem::class)))
+    install(InProcessDynamoDbModule(DynamoDbTable(TrackItem::class)))
   }
 
   @Provides @Singleton
