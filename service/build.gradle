@@ -65,7 +65,7 @@ dependencies {
 
 jar {
   manifest {
-    attributes 'Main-Class': 'app.cash.backfila.service.BackfilaServiceKt'
+    attributes 'Main-Class': 'app.cash.backfila.service.BackfilaDevelopmentServiceKt'
   }
   zip64 = true
   classifier = 'unshaded'
