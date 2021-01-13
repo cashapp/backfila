@@ -95,9 +95,12 @@ fun main(args: Array<String>) {
                   mapOf("backfila-001" to DataSourceClusterConfig(
                       writer = DataSourceConfig(
                           type = DataSourceType.MYSQL,
-                          database = "backfila_development",
-                          username = "root",
-                          migrations_resource = "classpath:/migrations"
+                          database = System.getenv("BACKFILA_DB_NAME") ?: "backfila_development",
+                          username = System.getenv("BACKFILA_DB_USER") ?: "root",
+                          migrations_resource = "classpath:/migrations",
+                          host = System.getenv("BACKFILA_DB_HOST") ?: "127.0.0.1",
+                          port = (System.getenv("BACKFILA_DB_PORT") ?: "3306").toInt(),
+                          password = System.getenv("BACKFILA_DB_PASSWORD")
                       ),
                       reader = null
                   ))
