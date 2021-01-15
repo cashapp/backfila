@@ -46,7 +46,7 @@ fun main(args: Array<String>) {
           val webConfig = WebConfig(
               port = 8080,
               idle_timeout = 500000,
-              host = "127.0.0.1"
+              host = "0.0.0.0"
           )
           install(MiskWebModule(webConfig))
           multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
