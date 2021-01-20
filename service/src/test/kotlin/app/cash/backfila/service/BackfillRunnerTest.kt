@@ -249,7 +249,11 @@ class BackfillRunnerTest {
     runBlocking {
       launch { runner.run() }
       try {
-        // 1 thread, so it should send 1 rpc and buffer 2 batches
+        /**
+         * 1 thread, so it should send 4 rpcs. One will get consumed by the runner and enqueued
+         * as a run batch request, two will get buffered, and one will be stuck waiting on the
+         * channel
+         */
         assertThat(
             fakeBackfilaClientServiceClient.getNextBatchRangeRequests.receive().previous_end_key).isNull()
         fakeBackfilaClientServiceClient.getNextBatchRangeResponses.send(Result.success(
@@ -263,9 +267,13 @@ class BackfillRunnerTest {
             .previous_end_key).isEqualTo("199".encodeUtf8())
         fakeBackfilaClientServiceClient.getNextBatchRangeResponses.send(Result.success(
             nextBatchResponse(start = "200", end = "299", scannedCount = 100, matchingCount = 100)))
+        assertThat(fakeBackfilaClientServiceClient.getNextBatchRangeRequests.receive()
+            .previous_end_key).isEqualTo("299".encodeUtf8())
+        fakeBackfilaClientServiceClient.getNextBatchRangeResponses.send(Result.success(
+            nextBatchResponse(start = "300", end = "399", scannedCount = 100, matchingCount = 100)))
         // Not buffering any more batches
         waitForOtherCoroutines()
-        assertThat(fakeBackfilaClientServiceClient.getNextBatchRangeResponses.poll()).isNull()
+        assertThat(fakeBackfilaClientServiceClient.getNextBatchRangeRequests.poll()).isNull()
 
         assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
         fakeBackfilaClientServiceClient.runBatchResponses.send(
@@ -283,7 +291,7 @@ class BackfillRunnerTest {
         // After the batch completed, another one is buffered.
         // The next batch request should start higher than the pkey cursor in db
         assertThat(fakeBackfilaClientServiceClient.getNextBatchRangeRequests.receive()
-            .previous_end_key).isEqualTo("299".encodeUtf8())
+            .previous_end_key).isEqualTo("399".encodeUtf8())
 
         // Complete the RunBatch
         fakeBackfilaClientServiceClient.runBatchResponses.send(
