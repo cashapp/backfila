@@ -236,7 +236,7 @@ class BackfillRunnerTest {
     }
   }
 
-  // The cursor for GetNextBatch should be ahead of the DB.
+  // The cursor for GetNextBatch should be ahead of the DB cursor.
   @Test fun getNextBatchCursorSeparateFromDb() {
     val runner = startBackfill(numThreads = 1)
 
@@ -249,11 +249,7 @@ class BackfillRunnerTest {
     runBlocking {
       launch { runner.run() }
       try {
-        /**
-         * 1 thread, so it should send 4 rpcs. One will get consumed by the runner and enqueued
-         * as a run batch request, two will get buffered, and one will be stuck waiting on the
-         * channel
-         */
+        // Process 4 getNextBatchRangeRequests
         assertThat(
             fakeBackfilaClientServiceClient.getNextBatchRangeRequests.receive().previous_end_key).isNull()
         fakeBackfilaClientServiceClient.getNextBatchRangeResponses.send(Result.success(
@@ -271,14 +267,19 @@ class BackfillRunnerTest {
             .previous_end_key).isEqualTo("299".encodeUtf8())
         fakeBackfilaClientServiceClient.getNextBatchRangeResponses.send(Result.success(
             nextBatchResponse(start = "300", end = "399", scannedCount = 100, matchingCount = 100)))
-        // Not buffering any more batches
+        // Wait for Backfila to process the responses.
         waitForOtherCoroutines()
+        // Check that the channel where we sent the responses is empty.
+        assertThat(fakeBackfilaClientServiceClient.getNextBatchRangeResponses.poll()).isNull()
+        // We will no longer get getNextBatchRequests until some batches are run.
         assertThat(fakeBackfilaClientServiceClient.getNextBatchRangeRequests.poll()).isNull()
 
+        // Run a RunBatch
         assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
         fakeBackfilaClientServiceClient.runBatchResponses.send(
             Result.success(RunBatchResponse.Builder().build()))
 
+        // We should immediately get another RunBatch to run.
         assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
 
         // Cursor should be updated by RunBatch
@@ -288,7 +289,7 @@ class BackfillRunnerTest {
           assertThat(partition.run_state).isEqualTo(BackfillState.RUNNING)
         }
 
-        // After the batch completed, another one is buffered.
+        // After the RunBatch completed, a getNextBatch request is buffered.
         // The next batch request should start higher than the pkey cursor in db
         assertThat(fakeBackfilaClientServiceClient.getNextBatchRangeRequests.receive()
             .previous_end_key).isEqualTo("399".encodeUtf8())
