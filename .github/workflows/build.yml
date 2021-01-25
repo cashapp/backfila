@@ -1,4 +1,4 @@
-name: build
+name: Publish a release
 
 on:
   push:
@@ -15,6 +15,7 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
+
       - name: install misk-web
         run: |
           mkdir ~/.npm-global
@@ -22,14 +23,17 @@ jobs:
           PATH=~/.npm-global/bin:$PATH
           npm install -g @misk/cli
           miskweb ci-build -e
+
       - name: Cache Gradle packages
         uses: actions/cache@v1
         with:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
+
       - name: Set gradle version
-        run: echo "version=String.valueOf(project.version).replace(\"-SNAPSHOT\", \"\") + '-$(date +%Y%m%d)-$(git rev-parse --short HEAD)-SNAPSHOT'" > hooks.gradle
+        run: sed --in-place -e "s/-SNAPSHOT/-$(date +%Y%m%d.%H%M)-$(git rev-parse --short HEAD)/" gradle.properties
+
       - name: Publish packages
         run: ./gradlew uploadArchives
         env:
