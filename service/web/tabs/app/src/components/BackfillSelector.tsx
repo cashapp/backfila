@@ -3,7 +3,7 @@
 import * as React from "react"
 
 import { MenuItem } from "@blueprintjs/core"
-import { Global, css, jsx } from "@emotion/core"
+import { Global, css, jsx } from "@emotion/react"
 import { ItemPredicate, ItemRenderer, Suggest } from "@blueprintjs/select"
 
 export interface IBackfill {
@@ -17,9 +17,7 @@ export interface IBackfillSelectorProps {
   onValueChange?(value: IBackfill): void
 }
 
-export default class BackfillSelector extends React.PureComponent<
-  IBackfillSelectorProps
-> {
+export default class BackfillSelector extends React.PureComponent<IBackfillSelectorProps> {
   public render() {
     return (
       <div style={{ width: "100%" }}>
