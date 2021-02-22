@@ -6,6 +6,7 @@ import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.PipelinedData
 import app.cash.backfila.protos.clientservice.RunBatchRequest
 import app.cash.backfila.protos.clientservice.RunBatchResponse
+import app.cash.backfila.service.BackfilaMetrics
 import app.cash.backfila.service.SlackHelper
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillState
@@ -46,6 +47,7 @@ val DEFAULT_BACKOFF_SCHEDULE = listOf(5_000L, 15_000L, 30_000L)
  */
 class BackfillRunner private constructor(
   val factory: Factory,
+  serviceName: String,
   val backfillName: String,
   val partitionName: String,
   val backfillRunId: Id<DbBackfillRun>,
@@ -55,6 +57,13 @@ class BackfillRunner private constructor(
   /** Metadata about the backfill from the database. Refreshed regularly. */
   lateinit var metadata: BackfillMetaData
     private set
+
+  val metricLabels: Array<String> = arrayOf(
+    serviceName,
+    backfillName,
+    backfillRunId.toString(),
+    partitionName
+  )
 
   /**
    * Set to false when subtasks should begin to gracefully stop.
@@ -86,14 +95,14 @@ class BackfillRunner private constructor(
       val batchPrecomputer = BatchPrecomputer(this)
       val batchQueuer = BatchQueuer(this, metadata.numThreads)
       val batchRunner = BatchRunner(
-          this,
-          batchQueuer.nextBatchChannel(),
-          metadata.numThreads
+        this,
+        batchQueuer.nextBatchChannel(),
+        metadata.numThreads
       )
       val batchAwaiter = BatchAwaiter(
-          this,
-          batchRunner.runChannel(),
-          batchRunner.rpcBackpressureChannel()
+        this,
+        batchRunner.runChannel(),
+        batchRunner.rpcBackpressureChannel()
       )
 
       // All our tasks run on this thread.
@@ -124,8 +133,10 @@ class BackfillRunner private constructor(
           return@transaction false
         }
         if (dbRunPartition.lease_token != leaseToken) {
-          throw IllegalStateException("Backfill partition $partitionId has been stolen! " +
-              "our token: $leaseToken, new token: ${dbRunPartition.lease_token}")
+          throw IllegalStateException(
+            "Backfill partition $partitionId has been stolen! " +
+                "our token: $leaseToken, new token: ${dbRunPartition.lease_token}"
+          )
         }
         // Extend our lease regularly.
         dbRunPartition.lease_expires_at = factory.clock.instant() + LeaseHunter.LEASE_DURATION
@@ -145,19 +156,19 @@ class BackfillRunner private constructor(
   private fun loadMetaData(session: Session): BackfillMetaData {
     val dbRunPartition = session.load(partitionId)
     return BackfillMetaData(
-        dbRunPartition.backfill_run_id,
-        dbRunPartition.pkey_cursor,
-        dbRunPartition.pkey_range_start,
-        dbRunPartition.pkey_range_end,
-        dbRunPartition.backfill_run.parameters(),
-        dbRunPartition.backfill_run.batch_size,
-        dbRunPartition.backfill_run.scan_size,
-        dbRunPartition.backfill_run.dry_run,
-        dbRunPartition.backfill_run.num_threads,
-        dbRunPartition.precomputing_done,
-        dbRunPartition.precomputing_pkey_cursor,
-        dbRunPartition.backfill_run.extra_sleep_ms,
-        dbRunPartition.backfill_run.backoffSchedule() ?: DEFAULT_BACKOFF_SCHEDULE
+      dbRunPartition.backfill_run_id,
+      dbRunPartition.pkey_cursor,
+      dbRunPartition.pkey_range_start,
+      dbRunPartition.pkey_range_end,
+      dbRunPartition.backfill_run.parameters(),
+      dbRunPartition.backfill_run.batch_size,
+      dbRunPartition.backfill_run.scan_size,
+      dbRunPartition.backfill_run.dry_run,
+      dbRunPartition.backfill_run.num_threads,
+      dbRunPartition.precomputing_done,
+      dbRunPartition.precomputing_pkey_cursor,
+      dbRunPartition.backfill_run.extra_sleep_ms,
+      dbRunPartition.backfill_run.backoffSchedule() ?: DEFAULT_BACKOFF_SCHEDULE
     )
   }
 
@@ -174,7 +185,7 @@ class BackfillRunner private constructor(
       DbData(service.registry_name, service.connector, service.connector_extra_data)
     }
     return factory.connectorProvider.clientProvider(dbData.connector)
-        .clientFor(dbData.serviceName, dbData.connectorExtraData)
+      .clientFor(dbData.serviceName, dbData.connectorExtraData)
   }
 
   fun runBatchAsync(
@@ -184,7 +195,10 @@ class BackfillRunner private constructor(
   ): Deferred<RunBatchResponse> {
     // Supervisor here allows us to handle the exception, rather than failing the job.
     return scope.async(SupervisorJob()) {
-      client.runBatch(RunBatchRequest(
+      val callStartedAt = factory.clock.instant()
+
+      val response = client.runBatch(
+        RunBatchRequest(
           metadata.backfillRunId.toString(),
           backfillName,
           partitionName,
@@ -193,7 +207,15 @@ class BackfillRunner private constructor(
           metadata.dryRun,
           pipelinedData,
           metadata.batchSize
-      ))
+        )
+      )
+
+      val duration = Duration.between(callStartedAt, factory.clock.instant())
+      factory.metrics.runBatchDuration.record(
+        duration.toMillis().toDouble(),
+        *metricLabels
+      )
+      response
     }
   }
 
@@ -243,8 +265,10 @@ class BackfillRunner private constructor(
     return factory.transacter.transaction { session ->
       val dbRunPartition = session.load(partitionId)
       if (dbRunPartition.backfill_run.state == BackfillState.RUNNING) {
-        dbRunPartition.backfill_run.setState(session, factory.queryFactory,
-            BackfillState.PAUSED)
+        dbRunPartition.backfill_run.setState(
+          session, factory.queryFactory,
+          BackfillState.PAUSED
+        )
         return@transaction true
       }
       return@transaction false
@@ -281,31 +305,37 @@ class BackfillRunner private constructor(
     factory.transacter.transaction { session ->
       when (exception) {
         is RunBatchException -> {
-          session.save(DbEventLog(
+          session.save(
+            DbEventLog(
               backfillRunId,
               partition_id = partitionId,
               type = DbEventLog.Type.ERROR,
               message = "error $action, client exception after ${elapsedMs}ms. $endMessage",
               extra_data = exception.stackTrace
-          ))
+            )
+          )
         }
         is SocketTimeoutException -> {
-          session.save(DbEventLog(
+          session.save(
+            DbEventLog(
               backfillRunId,
               partition_id = partitionId,
               type = DbEventLog.Type.ERROR,
               message = "error $action, timeout after ${elapsedMs}ms. $endMessage",
               extra_data = ExceptionUtils.getStackTrace(exception)
-          ))
+            )
+          )
         }
         else -> {
-          session.save(DbEventLog(
+          session.save(
+            DbEventLog(
               backfillRunId,
               partition_id = partitionId,
               type = DbEventLog.Type.ERROR,
               message = "error $action, RPC error after ${elapsedMs}ms. $endMessage",
               extra_data = ExceptionUtils.getStackTrace(exception)
-          ))
+            )
+          )
         }
       }
     }
@@ -339,7 +369,8 @@ class BackfillRunner private constructor(
     val queryFactory: Query.Factory,
     val connectorProvider: ConnectorProvider,
     val slackHelper: SlackHelper,
-    val loggingSetupProvider: BackfillRunnerLoggingSetupProvider
+    val loggingSetupProvider: BackfillRunnerLoggingSetupProvider,
+    val metrics: BackfilaMetrics,
   ) {
     fun create(
       @Suppress("UNUSED_PARAMETER") session: Session,
@@ -347,12 +378,13 @@ class BackfillRunner private constructor(
       leaseToken: String
     ): BackfillRunner {
       return BackfillRunner(
-          this,
-          dbRunPartition.backfill_run.registered_backfill.name,
-          dbRunPartition.partition_name,
-          dbRunPartition.backfill_run_id,
-          dbRunPartition.id,
-          leaseToken
+        this,
+        dbRunPartition.backfill_run.service.registry_name,
+        dbRunPartition.backfill_run.registered_backfill.name,
+        dbRunPartition.partition_name,
+        dbRunPartition.backfill_run_id,
+        dbRunPartition.id,
+        leaseToken
       )
     }
   }

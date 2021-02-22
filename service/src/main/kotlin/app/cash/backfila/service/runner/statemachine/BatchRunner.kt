@@ -14,13 +14,17 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import misk.logging.getLogger
 
+/**
+ * Receives batch ranges from the BatchQueuer and starts RPCs to the client service to run batches.
+ * The futures are sent along a channel and are handled in the BatchAwaiter.
+ */
 class BatchRunner(
   private val backfillRunner: BackfillRunner,
   private val nextBatchChannel: ReceiveChannel<Batch>,
   private val numThreads: Int
 ) {
   private val runChannel = VariableCapacityChannel<AwaitingRun>(
-      capacity(numThreads)
+    capacity(numThreads)
   )
 
   /**
@@ -28,7 +32,7 @@ class BatchRunner(
    * a Deferred RPC is read, not when the RPC completes, which would cause an extra RPC to be open.
    */
   private val rpcBackpressureChannel = VariableCapacityChannel<Unit>(
-      capacity(numThreads)
+    capacity(numThreads)
   )
 
   fun runChannel(): ReceiveChannel<AwaitingRun> = runChannel.downstream()
@@ -70,8 +74,10 @@ class BatchRunner(
         break
       }
       if (stopwatch.elapsed() > Duration.ofMillis(500)) {
-        logger.info { "Runner stalled ${stopwatch.elapsed()} ms waiting for batch from " +
-            "queuer ${backfillRunner.logLabel()}" }
+        logger.info {
+          "Runner stalled ${stopwatch.elapsed()} ms waiting for batch from " +
+            "queuer ${backfillRunner.logLabel()}"
+        }
       }
 
       if (backfillRunner.globalBackoff.backingOff()) {
@@ -95,11 +101,11 @@ class BatchRunner(
         backfillRunner.runBatchAsync(this, batch)
       }
       runChannel.upstream().send(
-          AwaitingRun(
-              batch,
-              run,
-              backfillRunner.factory.clock.instant()
-          )
+        AwaitingRun(
+          batch,
+          run,
+          backfillRunner.factory.clock.instant()
+        )
       )
       rpcBackpressureChannel.upstream().send(Unit)
     }
