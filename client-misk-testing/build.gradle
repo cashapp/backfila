@@ -3,9 +3,10 @@ apply plugin: 'kotlin'
 dependencies {
   api project(':client-misk')
 
-  implementation(dep.misk)
-  implementation(dep.miskTesting)
+  implementation dep.misk
+  implementation dep.miskTesting
   implementation dep.junitEngine
+  implementation dep.assertj
 }
 
 jar {

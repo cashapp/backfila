@@ -14,11 +14,17 @@ dependencies {
   implementation dep.okio
   implementation dep.kotlinStdLib
   implementation dep.wireMoshiAdapter
+  implementation dep.slf4jApi
+  implementation dep.loggingApi
 
   api project(':client')
   testApi project(':client-misk-testing')
 
   implementation dep.misk
+  implementation dep.miskActions
+  implementation dep.miskCore
+  implementation dep.miskInject
+  implementation dep.miskService
 
   testImplementation dep.assertj
   testImplementation(dep.miskTesting)
