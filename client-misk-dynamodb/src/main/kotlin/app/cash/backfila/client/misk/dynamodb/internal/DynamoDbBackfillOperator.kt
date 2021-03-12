@@ -29,6 +29,19 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
         parametersOperator.constructBackfillConfig(request.parameters, request.dry_run)
     backfill.validate(config)
 
+    if (backfill.mustHaveProvisionedBillingMode()) {
+      val tableMapper = dynamoDb.newTableMapper<I, Any, Any>(backfill.itemType.java)
+      val tableDescription = tableMapper.describeTable()
+      // It's odd but a null billingModeSummary implies "PROVISIONED"
+      require(tableDescription.billingModeSummary == null ||
+          tableDescription.billingModeSummary.billingMode == "PROVISIONED",
+          { "Trying to prepare a backfill on a Dynamo table named ${tableDescription.tableName} " +
+              "with a billing mode that is not PROVISIONED, it is " +
+              "${tableDescription.billingModeSummary.billingMode}. This can get very expensive. " +
+              "Please provision your dynamo capacity for this table and try again."
+          })
+    }
+
     // TODO(mikepaw): dynamically select the segment count by probing DynamoDB.
     val segmentCount = backfill.fixedSegmentCount(config) ?: 2048
     val partitionCount = backfill.partitionCount(config)

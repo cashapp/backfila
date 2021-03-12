@@ -59,6 +59,13 @@ abstract class DynamoDbBackfill<I : Any, P : Any> : Backfill {
    */
   open fun partitionCount(config: BackfillConfig<P>): Int = 8
 
+  /**
+   * It is rather easy to run a backfill against a dynamo instance that is configured expensively.
+   * Update dynamo so the billing mode is PROVISIONED rather than PAY_PER_REQUEST as the latter can
+   * be very expensive.
+   */
+  open fun mustHaveProvisionedBillingMode(): Boolean = true
+
   /** See [ScanRequest.setFilterExpression]. */
   open fun filterExpression(config: BackfillConfig<P>): String? = null
 

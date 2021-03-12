@@ -25,7 +25,6 @@ dependencies {
 
   testImplementation dep.assertj
   testImplementation(dep.miskTesting)
-  testImplementation(dep.miskHibernateTesting)
   testImplementation dep.junitEngine
   testImplementation dep.miskAwsDynamodbTesting
 }
