@@ -21,12 +21,14 @@ dependencies {
   testApi project(':client-misk-testing')
 
   implementation dep.misk
+  implementation dep.miskInject
   api dep.miskHibernate
 
   testImplementation dep.assertj
-  testImplementation(dep.miskTesting)
+  testImplementation dep.miskTesting
   testImplementation dep.junitEngine
   testImplementation dep.miskAwsDynamodbTesting
+  testImplementation dep.kotlinTest
 }
 
 jar {

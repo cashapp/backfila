@@ -11,3 +11,6 @@ docs/0.x/*
 docs/index.md
 docs/changelog.md
 docs/releasing.md
+
+# Local gradle includes
+local.settings.gradle
