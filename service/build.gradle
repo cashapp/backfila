@@ -36,7 +36,11 @@ dependencies {
   implementation dep.metricsCore
   implementation dep.metricsParent
   implementation dep.misk
+  implementation dep.miskActions
+  implementation dep.miskCore
   implementation dep.miskHibernate
+  implementation dep.miskInject
+  implementation dep.miskService
   implementation dep.miskSlack
   implementation dep.moshiCore
   implementation dep.moshiKotlin
@@ -46,6 +50,7 @@ dependencies {
   implementation dep.openTracingOkHttp
   implementation dep.retrofit
   implementation dep.retrofitGuavaAdapter
+  implementation dep.retrofitWire
   implementation dep.tracingJaeger
   implementation dep.wireRuntime
   implementation dep.wireCompiler
@@ -58,6 +63,7 @@ dependencies {
   testImplementation dep.junitApi
   testImplementation dep.junitParams
   testImplementation dep.junitEngine
+  testImplementation dep.kotlinTest
   testImplementation dep.kotlinxCoroutinesTest
   testImplementation dep.assertj
   testImplementation dep.openTracingMock

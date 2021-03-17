@@ -8,18 +8,24 @@ dependencies {
   implementation dep.guice
   implementation dep.okio
   implementation dep.kotlinStdLib
+  implementation dep.loggingApi
   implementation dep.wireMoshiAdapter
 
   api project(':client-misk')
   testApi project(':client-misk-testing')
 
   implementation dep.misk
+  implementation dep.miskActions
+  implementation dep.miskCore
+  implementation dep.miskInject
   api dep.miskHibernate
 
   testImplementation dep.assertj
   testImplementation(dep.miskTesting)
   testImplementation(dep.miskHibernateTesting)
+  testImplementation dep.kotlinTest
   testImplementation dep.junitEngine
+  testImplementation dep.okHttp
 }
 
 jar {
