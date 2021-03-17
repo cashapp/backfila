@@ -104,10 +104,11 @@ class BatchAwaiter(
               if (dbRunPartition.precomputing_done && dbRunPartition.matching_records_per_minute!! > 0) {
                 val remaining = (dbRunPartition.computed_matching_record_count
                     - dbRunPartition.backfilled_matching_record_count)
-                val etaMillis = remaining / (dbRunPartition.matching_records_per_minute!! / 60) * 1000
+                val etaMinutes = remaining.toDouble() / dbRunPartition.matching_records_per_minute!!
+                val etaMillis = etaMinutes * 60 * 1000
                 backfillRunner.factory.metrics.eta
                   .labels(*backfillRunner.metricLabels)
-                  .set(etaMillis.toDouble())
+                  .set(etaMillis)
               }
             }
             break@retry

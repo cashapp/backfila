@@ -19,6 +19,7 @@ import app.cash.backfila.service.runner.statemachine.BatchQueuer
 import app.cash.backfila.service.runner.statemachine.BatchRunner
 import app.cash.backfila.service.runner.statemachine.RunBatchException
 import app.cash.backfila.service.scheduler.LeaseHunter
+import com.google.common.base.Stopwatch
 import java.net.SocketTimeoutException
 import java.time.Clock
 import java.time.Duration
@@ -195,7 +196,7 @@ class BackfillRunner private constructor(
   ): Deferred<RunBatchResponse> {
     // Supervisor here allows us to handle the exception, rather than failing the job.
     return scope.async(SupervisorJob()) {
-      val callStartedAt = factory.clock.instant()
+      val stopwatch = Stopwatch.createStarted()
 
       val response = client.runBatch(
         RunBatchRequest(
@@ -210,9 +211,8 @@ class BackfillRunner private constructor(
         )
       )
 
-      val duration = Duration.between(callStartedAt, factory.clock.instant())
       factory.metrics.runBatchDuration.record(
-        duration.toMillis().toDouble(),
+        stopwatch.elapsed().toMillis().toDouble(),
         *metricLabels
       )
       response
