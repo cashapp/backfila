@@ -10,7 +10,7 @@ import misk.hibernate.Query
 import misk.inject.typeLiteral
 
 /**
- * Implement this for each or your backfills. Install using [HibernateBackfillModule.create].
+ * Implement this for each of your backfills. Install using [HibernateBackfillModule.create].
  */
 abstract class HibernateBackfill<E : DbEntity<E>, Pkey : Any, Param : Any> : Backfill {
   val entityClass: KClass<E>

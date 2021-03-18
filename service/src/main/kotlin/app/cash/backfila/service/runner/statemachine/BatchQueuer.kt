@@ -12,12 +12,16 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import misk.logging.getLogger
 
+/**
+ * Sends RPCs to the client service to compute batch ranges and sends them along a channel to the
+ * BatchQueuer.
+ */
 class BatchQueuer(
   private val backfillRunner: BackfillRunner,
   numThreads: Int
 ) {
   private val nextBatchChannel = VariableCapacityChannel<Batch>(
-      capacity(numThreads)
+    capacity(numThreads)
   )
 
   fun nextBatchChannel(): ReceiveChannel<Batch> = nextBatchChannel.downstream()
@@ -27,8 +31,10 @@ class BatchQueuer(
   fun run(coroutineScope: CoroutineScope) = coroutineScope.launch {
     nextBatchChannel.proxy(coroutineScope)
 
-    logger.info { "BatchQueuer started ${backfillRunner.logLabel()} with buffer size=" +
-        "${nextBatchChannel.capacity}" }
+    logger.info {
+      "BatchQueuer started ${backfillRunner.logLabel()} with buffer size=" +
+        "${nextBatchChannel.capacity}"
+    }
 
     // Start at the cursor we have in the DB, but after that we need to maintain our own,
     // since the DB stores how far we've completed batches, and we are likely ahead of that.
@@ -59,7 +65,8 @@ class BatchQueuer(
         stopwatch.reset()
         stopwatch.start()
 
-        val response = backfillRunner.client.getNextBatchRange(GetNextBatchRangeRequest(
+        val response = backfillRunner.client.getNextBatchRange(
+          GetNextBatchRangeRequest(
             metadata.backfillRunId.toString(),
             backfillRunner.backfillName,
             backfillRunner.partitionName,
@@ -72,8 +79,23 @@ class BatchQueuer(
             computeCountLimit.toLong(),
             metadata.dryRun,
             false
-        ))
+          )
+        )
 
+        backfillRunner.factory.metrics.getNextBatchSuccesses
+          .labels(*backfillRunner.metricLabels).inc()
+        backfillRunner.factory.metrics.getNextBatchDuration.record(
+          stopwatch.elapsed().toMillis().toDouble(),
+          *backfillRunner.metricLabels
+        )
+        backfillRunner.factory.metrics.computedBatchCount
+          .labels(*backfillRunner.metricLabels).inc(response.batches.size.toDouble())
+        backfillRunner.factory.metrics.computedRecordsMatching
+          .labels(*backfillRunner.metricLabels)
+          .inc(response.batches.sumByDouble { it.matching_record_count.toDouble() })
+        backfillRunner.factory.metrics.computedRecordsScanned
+          .labels(*backfillRunner.metricLabels)
+          .inc(response.batches.sumByDouble { it.scanned_record_count.toDouble() })
         backfillRunner.onRpcSuccess()
 
         if (response.batches.isEmpty()) {
@@ -91,6 +113,12 @@ class BatchQueuer(
         break
       } catch (e: Exception) {
         logger.info(e) { "Rpc failure when computing next batch for ${backfillRunner.logLabel()}" }
+        backfillRunner.factory.metrics.getNextBatchFailures
+          .labels(*backfillRunner.metricLabels).inc()
+        backfillRunner.factory.metrics.getNextBatchDuration.record(
+          stopwatch.elapsed().toMillis().toDouble(),
+          *backfillRunner.metricLabels
+        )
         backfillRunner.onRpcFailure(e, "computing batch", stopwatch.elapsed())
       }
     }
