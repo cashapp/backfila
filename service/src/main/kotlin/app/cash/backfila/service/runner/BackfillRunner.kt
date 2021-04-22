@@ -114,43 +114,48 @@ class BackfillRunner private constructor(
         batchAwaiter.run(this)
 
         checkAndUpdateLeaseUntilPausedOrComplete()
+        logger.info { "Runner cleaning up coroutines: ${logLabel()}" }
         coroutineContext.cancelChildren()
       }
 
-      logger.info { "Runner cleaning up: ${logLabel()}" }
+      logger.info { "Runner cleaning up lease: ${logLabel()}" }
       clearLease()
       logger.info { "Runner finished: ${logLabel()}" }
     }
   }
 
   private suspend fun checkAndUpdateLeaseUntilPausedOrComplete() {
-    while (running) {
-      val dbRunning = factory.transacter.transaction { session ->
-        val dbRunPartition = session.load(partitionId)
+    try {
+      while (running) {
+        val dbRunning = factory.transacter.transaction { session ->
+          val dbRunPartition = session.load(partitionId)
 
-        if (dbRunPartition.run_state != BackfillState.RUNNING) {
-          logger.info { "Backfill is no longer in RUNNING state, stopping runner ${logLabel()}" }
-          running = false
-          return@transaction false
+          if (dbRunPartition.run_state != BackfillState.RUNNING) {
+            logger.info { "Backfill is no longer in RUNNING state, stopping runner ${logLabel()}" }
+            running = false
+            return@transaction false
+          }
+          if (dbRunPartition.lease_token != leaseToken) {
+            throw IllegalStateException(
+                "Backfill partition $partitionId has been stolen! " +
+                    "our token: $leaseToken, new token: ${dbRunPartition.lease_token}"
+            )
+          }
+          // Extend our lease regularly.
+          dbRunPartition.lease_expires_at = factory.clock.instant() + LeaseHunter.LEASE_DURATION
+
+          // While we're here, refresh metadata about the backfill in case a user made some changes,
+          // such as changing batch_size or num_threads. This way we keep metadata updated but don't
+          // have to load it repeatedly in every task.
+          metadata = loadMetaData(session)
+
+          return@transaction true
         }
-        if (dbRunPartition.lease_token != leaseToken) {
-          throw IllegalStateException(
-            "Backfill partition $partitionId has been stolen! " +
-                "our token: $leaseToken, new token: ${dbRunPartition.lease_token}"
-          )
-        }
-        // Extend our lease regularly.
-        dbRunPartition.lease_expires_at = factory.clock.instant() + LeaseHunter.LEASE_DURATION
-
-        // While we're here, refresh metadata about the backfill in case a user made some changes,
-        // such as changing batch_size or num_threads. This way we keep metadata updated but don't
-        // have to load it repeatedly in every task.
-        metadata = loadMetaData(session)
-
-        return@transaction true
+        if (!dbRunning) break
+        delay(1000)
       }
-      if (!dbRunning) break
-      delay(1000)
+    } catch (e: Throwable) {
+      logger.info(e) { "Encountered an exception while monitoring the lease for ${logLabel()}" }
     }
   }
 
