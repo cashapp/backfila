@@ -37,6 +37,10 @@ class RunnerSchedulerService @Inject constructor(
 
   override fun run() {
     while (running) {
+      // once the noop runs there is space for another runner
+      runnerExecutorService.submit { "noop task" }.get()
+      if (!running) break; // We stopped running while waiting for an open runner thread.
+
       val newRunners = leaseHunter.hunt()
 
       newRunners.forEach(::addRunner)
