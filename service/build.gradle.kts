@@ -87,3 +87,5 @@ val shadowJar by tasks.getting(com.github.jengelman.gradle.plugins.shadow.tasks.
 if (rootProject.file("hooks.gradle").exists()) {
   apply(from = rootProject.file("hooks.gradle"))
 }
+
+apply(from = "$rootDir/gradle-mvn-publish.gradle")

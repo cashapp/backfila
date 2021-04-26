@@ -91,6 +91,4 @@ subprojects {
       attributes.attribute(Usage.USAGE_ATTRIBUTE, this@subprojects.objects.named(Usage::class, Usage.JAVA_RUNTIME))
     }
   }
-
-  apply(from = "$rootDir/gradle-mvn-publish.gradle")
 }
