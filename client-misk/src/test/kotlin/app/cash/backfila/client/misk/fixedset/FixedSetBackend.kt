@@ -34,9 +34,9 @@ class FixedSetBackend @Inject constructor(
   private fun <Param : Any> createOperator(
     backfill: FixedSetBackfill<Param>
   ) = FixedSetBackfillOperator(
-      backfill = backfill,
-      datastore = datastore,
-      parametersOperator = BackfilaParametersOperator(parametersClass(backfill::class))
+    backfill = backfill,
+    datastore = datastore,
+    parametersOperator = BackfilaParametersOperator(parametersClass(backfill::class))
   )
 
   override fun create(backfillName: String, backfillId: String): BackfillOperator? {
@@ -53,9 +53,9 @@ class FixedSetBackend @Inject constructor(
   override fun backfills(): Set<BackfillRegistration> {
     return backfills.map {
       BackfillRegistration(
-          name = it.key,
-          description = (it.value.annotations.find { it is Description } as? Description)?.text,
-          parametersClass = parametersClass(it.value as KClass<FixedSetBackfill<Any>>)
+        name = it.key,
+        description = (it.value.annotations.find { it is Description } as? Description)?.text,
+        parametersClass = parametersClass(it.value as KClass<FixedSetBackfill<Any>>)
       )
     }.toSet()
   }

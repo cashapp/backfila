@@ -43,23 +43,23 @@ class BackfillCreator @Inject constructor(
 
     val dbData = transacter.transaction { session ->
       val dbService = queryFactory.newQuery<ServiceQuery>()
-          .registryName(service)
-          .uniqueResult(session) ?: throw BadRequestException("`$service` doesn't exist")
+        .registryName(service)
+        .uniqueResult(session) ?: throw BadRequestException("`$service` doesn't exist")
       val registeredBackfill = queryFactory.newQuery<RegisteredBackfillQuery>()
-          .serviceId(dbService.id)
-          .name(request.backfill_name)
-          .active()
-          .uniqueResult(session)
-          ?: throw BadRequestException("`${request.backfill_name}` doesn't exist")
+        .serviceId(dbService.id)
+        .name(request.backfill_name)
+        .active()
+        .uniqueResult(session)
+        ?: throw BadRequestException("`${request.backfill_name}` doesn't exist")
       logger.info {
         "Found registered backfill for `$service`::`${request.backfill_name}`" +
-            " [id=${registeredBackfill.id}]"
+          " [id=${registeredBackfill.id}]"
       }
       DbData(
-          dbService.id,
-          dbService.connector,
-          dbService.connector_extra_data,
-          registeredBackfill.id
+        dbService.id,
+        dbService.connector,
+        dbService.connector_extra_data,
+        registeredBackfill.id
       )
     }
 
@@ -70,27 +70,27 @@ class BackfillCreator @Inject constructor(
 
     return transacter.transaction { session ->
       val backfillRun = DbBackfillRun(
-          dbData.serviceId,
-          dbData.registeredBackfillId,
-          combinedParams,
-          BackfillState.PAUSED,
-          author,
-          scan_size,
-          batch_size,
-          num_threads,
-          request.backoff_schedule,
-          dry_run,
-          extra_sleep_ms
+        dbData.serviceId,
+        dbData.registeredBackfillId,
+        combinedParams,
+        BackfillState.PAUSED,
+        author,
+        scan_size,
+        batch_size,
+        num_threads,
+        request.backoff_schedule,
+        dry_run,
+        extra_sleep_ms
       )
       session.save(backfillRun)
 
       for (partition in partitions) {
         val dbRunPartition = DbRunPartition(
-            backfillRun.id,
-            partition.partition_name,
-            partition.backfill_range ?: KeyRange.Builder().build(),
-            backfillRun.state,
-            partition.estimated_record_count
+          backfillRun.id,
+          partition.partition_name,
+          partition.backfill_range ?: KeyRange.Builder().build(),
+          backfillRun.state,
+          partition.estimated_record_count
         )
         session.save(dbRunPartition)
       }
@@ -106,20 +106,20 @@ class BackfillCreator @Inject constructor(
     dry_run: Boolean
   ): PrepareBackfillResponse {
     val client = connectorProvider.clientProvider(dbData.connectorType)
-        .clientFor(service, dbData.connectorExtraData)
+      .clientFor(service, dbData.connectorExtraData)
 
     val prepareBackfillResponse = try {
       client.prepareBackfill(
-          PrepareBackfillRequest(
-              dbData.registeredBackfillId.toString(),
-              request.backfill_name,
-              KeyRange(
-                  request.pkey_range_start,
-                  request.pkey_range_end
-              ),
-              request.parameter_map,
-              dry_run
-          )
+        PrepareBackfillRequest(
+          dbData.registeredBackfillId.toString(),
+          request.backfill_name,
+          KeyRange(
+            request.pkey_range_start,
+            request.pkey_range_end
+          ),
+          request.parameter_map,
+          dry_run
+        )
       )
     } catch (e: Exception) {
       logger.info(e) { "PrepareBackfill on `$service` failed" }
@@ -134,8 +134,10 @@ class BackfillCreator @Inject constructor(
       throw BadRequestException("PrepareBackfill returned unnamed partitions")
     }
     if (partitions.distinctBy { it.partition_name }.size != partitions.size) {
-      throw BadRequestException("PrepareBackfill did not return distinct partition names:" +
-          " ${partitions.map { it.partition_name }}")
+      throw BadRequestException(
+        "PrepareBackfill did not return distinct partition names:" +
+          " ${partitions.map { it.partition_name }}"
+      )
     }
 
     return prepareBackfillResponse

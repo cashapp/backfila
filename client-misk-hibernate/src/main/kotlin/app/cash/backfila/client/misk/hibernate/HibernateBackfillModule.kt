@@ -39,10 +39,10 @@ private object HibernateBackfillBackendModule : KAbstractModule() {
 }
 
 private fun mapBinder(binder: Binder) = MapBinder.newMapBinder(
-    binder,
-    object : TypeLiteral<String>() {},
-    object : TypeLiteral<KClass<out HibernateBackfill<*, *, *>>>() {},
-    ForBackfila::class.java
+  binder,
+  object : TypeLiteral<String>() {},
+  object : TypeLiteral<KClass<out HibernateBackfill<*, *, *>>>() {},
+  ForBackfila::class.java
 )
 
 @BindingAnnotation

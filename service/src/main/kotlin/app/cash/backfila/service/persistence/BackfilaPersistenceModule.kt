@@ -7,9 +7,12 @@ import misk.inject.KAbstractModule
 
 class BackfilaPersistenceModule(private val config: BackfilaConfig) : KAbstractModule() {
   override fun configure() {
-    install(HibernateModule(
+    install(
+      HibernateModule(
         BackfilaDb::class,
-        config.data_source_clusters.values.single().writer))
+        config.data_source_clusters.values.single().writer
+      )
+    )
     install(object : HibernateEntityModule(BackfilaDb::class) {
       override fun configureHibernate() {
         addEntities(DbService::class)

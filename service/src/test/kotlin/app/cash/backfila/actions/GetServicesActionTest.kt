@@ -46,12 +46,13 @@ class GetServicesActionTest {
   fun oneService() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(
-          ConfigureServiceRequest.Builder().connector_type(Connectors.ENVOY).build())
+        ConfigureServiceRequest.Builder().connector_type(Connectors.ENVOY).build()
+      )
     }
 
     scope.fakeCaller(user = "molly") {
       assertThat(getServicesAction.services().services).containsOnly(
-          GetServicesAction.UiService("deep-fryer", 0)
+        GetServicesAction.UiService("deep-fryer", 0)
       )
     }
   }
@@ -60,37 +61,37 @@ class GetServicesActionTest {
   fun twoServices() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(
-          ConfigureServiceRequest.Builder()
-              .backfills(
-                  listOf(
-                      ConfigureServiceRequest.BackfillData.Builder()
-                          .name("ChickenSandwich")
-                          .build()
-                  )
-              )
-              .connector_type(Connectors.ENVOY)
-              .build()
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData.Builder()
+                .name("ChickenSandwich")
+                .build()
+            )
+          )
+          .connector_type(Connectors.ENVOY)
+          .build()
       )
     }
     scope.fakeCaller(service = "freezer") {
       configureServiceAction.configureService(
-          ConfigureServiceRequest.Builder().connector_type(Connectors.ENVOY).build()
+        ConfigureServiceRequest.Builder().connector_type(Connectors.ENVOY).build()
       )
     }
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create(
-          "deep-fryer",
-          CreateBackfillRequest.Builder()
-              .backfill_name("ChickenSandwich")
-              .build()
+        "deep-fryer",
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build()
       )
       val id = response.backfill_run_id
       startBackfillAction.start(id, StartBackfillRequest())
     }
     scope.fakeCaller(user = "molly") {
       assertThat(getServicesAction.services().services).containsOnly(
-          GetServicesAction.UiService("deep-fryer", 1),
-          GetServicesAction.UiService("freezer", 0)
+        GetServicesAction.UiService("deep-fryer", 1),
+        GetServicesAction.UiService("freezer", 0)
       )
     }
   }

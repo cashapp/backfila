@@ -31,36 +31,52 @@ class DynamoDbBillingModeTest {
     backfila.createWetRun<EmptyTrackBackfill>()
 
     // PAY_PER_REQUEST fails
-    db.updateTable(UpdateTableRequest().withTableName("music_tracks")
-        .withBillingMode(BillingMode.PAY_PER_REQUEST).withProvisionedThroughput(ProvisionedThroughput()
+    db.updateTable(
+      UpdateTableRequest().withTableName("music_tracks")
+        .withBillingMode(BillingMode.PAY_PER_REQUEST).withProvisionedThroughput(
+          ProvisionedThroughput()
             .withReadCapacityUnits(2)
-            .withWriteCapacityUnits(2)))
+            .withWriteCapacityUnits(2)
+        )
+    )
     assertThatCode {
       backfila.createWetRun<EmptyTrackBackfill>()
     }.hasMessageContaining("billing mode that is not PROVISIONED")
 
     // Setting it back to provisioned and it works again.
-    db.updateTable(UpdateTableRequest().withTableName("music_tracks")
-        .withBillingMode(BillingMode.PROVISIONED).withProvisionedThroughput(ProvisionedThroughput()
+    db.updateTable(
+      UpdateTableRequest().withTableName("music_tracks")
+        .withBillingMode(BillingMode.PROVISIONED).withProvisionedThroughput(
+          ProvisionedThroughput()
             .withReadCapacityUnits(2)
-            .withWriteCapacityUnits(2)))
+            .withWriteCapacityUnits(2)
+        )
+    )
     backfila.createWetRun<EmptyTrackBackfill>()
   }
 
   @Test
   fun `incorrectly configured dynamo does not fail for special backfills`() {
     // PAY_PER_REQUEST passes
-    db.updateTable(UpdateTableRequest().withTableName("music_tracks")
-        .withBillingMode(BillingMode.PAY_PER_REQUEST).withProvisionedThroughput(ProvisionedThroughput()
+    db.updateTable(
+      UpdateTableRequest().withTableName("music_tracks")
+        .withBillingMode(BillingMode.PAY_PER_REQUEST).withProvisionedThroughput(
+          ProvisionedThroughput()
             .withReadCapacityUnits(2)
-            .withWriteCapacityUnits(2)))
+            .withWriteCapacityUnits(2)
+        )
+    )
     backfila.createWetRun<ReallyExpensiveBackfill>()
 
     // And PROVISIONED passes
-    db.updateTable(UpdateTableRequest().withTableName("music_tracks")
-        .withBillingMode(BillingMode.PROVISIONED).withProvisionedThroughput(ProvisionedThroughput()
+    db.updateTable(
+      UpdateTableRequest().withTableName("music_tracks")
+        .withBillingMode(BillingMode.PROVISIONED).withProvisionedThroughput(
+          ProvisionedThroughput()
             .withReadCapacityUnits(2)
-            .withWriteCapacityUnits(2)))
+            .withWriteCapacityUnits(2)
+        )
+    )
     backfila.createWetRun<ReallyExpensiveBackfill>()
   }
 

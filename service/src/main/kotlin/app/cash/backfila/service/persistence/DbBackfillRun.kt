@@ -125,18 +125,20 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
   }
 
   fun partitions(session: Session, queryFactory: Query.Factory) =
-      queryFactory.newQuery<RunPartitionQuery>()
-          .backfillRunId(id)
-          .list(session)
+    queryFactory.newQuery<RunPartitionQuery>()
+      .backfillRunId(id)
+      .list(session)
 
   fun setState(session: Session, queryFactory: Query.Factory, state: BackfillState) {
     // State can't be changed after being completed.
     checkState(this.state != BackfillState.COMPLETE)
     this.state = state
     // Set the state of all the partitions that are not complete
-    val query = session.hibernateSession.createQuery("update DbRunPartition " +
-            "set run_state = :newState, version = version + 1 " +
-            "where backfill_run_id = :runId and run_state <> :completed")
+    val query = session.hibernateSession.createQuery(
+      "update DbRunPartition " +
+        "set run_state = :newState, version = version + 1 " +
+        "where backfill_run_id = :runId and run_state <> :completed"
+    )
     query.setParameter("runId", id)
     query.setParameter("newState", state)
     query.setParameter("completed", BackfillState.COMPLETE)

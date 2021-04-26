@@ -49,7 +49,7 @@ class ChickenToBeefBackfill @Inject constructor(
 
   override fun backfillCriteria(config: BackfillConfig<NoParameters>): Query<DbMenu> {
     return queryFactory.newQuery(MenuQuery::class)
-        .name("chicken")
+      .name("chicken")
   }
 
   override fun runOne(pkey: Id<DbMenu>, config: BackfillConfig<NoParameters>) {

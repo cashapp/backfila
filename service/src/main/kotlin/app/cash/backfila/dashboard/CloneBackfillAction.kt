@@ -38,18 +38,18 @@ enum class RangeCloneType {
 }
 
 data class CloneBackfillRequest(
-    // TODO move defaults to UI
+  // TODO move defaults to UI
   val scan_size: Long = 1000,
   val batch_size: Long = 100,
   val num_threads: Int = 5,
   val range_clone_type: RangeCloneType,
   val pkey_range_start: String? = null,
   val pkey_range_end: String? = null,
-    // Parameters that go to the client service.
+  // Parameters that go to the client service.
   val parameter_map: Map<String, ByteString> = mapOf(),
   val dry_run: Boolean = true,
   val backoff_schedule: String? = null,
-    // Sleep that is added after every successful RunBatch.
+  // Sleep that is added after every successful RunBatch.
   val extra_sleep_ms: Long = 0
 )
 
@@ -104,15 +104,15 @@ class CloneBackfillAction @Inject constructor(
 
     val dbData = transacter.transaction { session ->
       val sourceBackfill = session.loadOrNull<DbBackfillRun>(Id(id))
-          ?: throw BadRequestException("backfill `$id` doesn't exist")
+        ?: throw BadRequestException("backfill `$id` doesn't exist")
       val dbService = sourceBackfill.service
       DbData(
-          dbService.id,
-          dbService.registry_name,
-          dbService.connector,
-          dbService.connector_extra_data,
-          sourceBackfill.registered_backfill_id,
-          sourceBackfill.registered_backfill.name
+        dbService.id,
+        dbService.registry_name,
+        dbService.connector,
+        dbService.connector_extra_data,
+        sourceBackfill.registered_backfill_id,
+        sourceBackfill.registered_backfill.name
       )
     }
 
@@ -124,28 +124,28 @@ class CloneBackfillAction @Inject constructor(
 
     val backfillRunId = transacter.transaction { session ->
       val backfillRun = DbBackfillRun(
-          dbData.serviceId,
-          dbData.registeredBackfillId,
-          combinedParams,
-          BackfillState.PAUSED,
-          caller.get()?.user,
-          request.scan_size,
-          request.batch_size,
-          request.num_threads,
-          request.backoff_schedule,
-          request.dry_run,
-          request.extra_sleep_ms
+        dbData.serviceId,
+        dbData.registeredBackfillId,
+        combinedParams,
+        BackfillState.PAUSED,
+        caller.get()?.user,
+        request.scan_size,
+        request.batch_size,
+        request.num_threads,
+        request.backoff_schedule,
+        request.dry_run,
+        request.extra_sleep_ms
       )
       session.save(backfillRun)
 
       if (request.range_clone_type == RangeCloneType.NEW) {
         for (partition in partitions) {
           val dbRunPartition = DbRunPartition(
-              backfillRun.id,
-              partition.partition_name,
-              partition.backfill_range ?: KeyRange.Builder().build(),
-              backfillRun.state,
-              partition.estimated_record_count
+            backfillRun.id,
+            partition.partition_name,
+            partition.backfill_range ?: KeyRange.Builder().build(),
+            backfillRun.state,
+            partition.estimated_record_count
           )
           session.save(dbRunPartition)
         }
@@ -155,17 +155,19 @@ class CloneBackfillAction @Inject constructor(
         // Source partitions have to match new partitions.
         val sourcePartitions = sourceBackfill.partitions(session, queryFactory)
         if (partitions.map { it.partition_name }.toSet() != sourcePartitions.map { it.partition_name }.toSet()) {
-          throw BadRequestException("Can't clone backfill ranges from `$id`, newly computed partitions don't match." +
-              " Clone with a new range instead.")
+          throw BadRequestException(
+            "Can't clone backfill ranges from `$id`, newly computed partitions don't match." +
+              " Clone with a new range instead."
+          )
         }
 
         for (sourcePartition in sourcePartitions) {
           val dbRunPartition = DbRunPartition(
-              backfillRun.id,
-              sourcePartition.partition_name,
-              sourcePartition.backfillRange(),
-              backfillRun.state,
-              sourcePartition.estimated_record_count
+            backfillRun.id,
+            sourcePartition.partition_name,
+            sourcePartition.backfillRange(),
+            backfillRun.state,
+            sourcePartition.estimated_record_count
           )
           // Copy the cursor if continuing, otherwise just leave blank to start from beginning.
           if (request.range_clone_type == RangeCloneType.CONTINUE) {
@@ -183,19 +185,19 @@ class CloneBackfillAction @Inject constructor(
 
   private fun prepare(dbData: DbData, request: CloneBackfillRequest): PrepareBackfillResponse {
     val client = connectorProvider.clientProvider(dbData.connectorType)
-        .clientFor(dbData.serviceName, dbData.connectorExtraData)
+      .clientFor(dbData.serviceName, dbData.connectorExtraData)
     val prepareBackfillResponse = try {
       client.prepareBackfill(
-          PrepareBackfillRequest(
-              dbData.registeredBackfillId.toString(),
-              dbData.backfillName,
-              KeyRange(
-                  request.pkey_range_start?.encodeUtf8(),
-                  request.pkey_range_end?.encodeUtf8()
-              ),
-              request.parameter_map,
-              request.dry_run
-          )
+        PrepareBackfillRequest(
+          dbData.registeredBackfillId.toString(),
+          dbData.backfillName,
+          KeyRange(
+            request.pkey_range_start?.encodeUtf8(),
+            request.pkey_range_end?.encodeUtf8()
+          ),
+          request.parameter_map,
+          request.dry_run
+        )
       )
     } catch (e: Exception) {
       logger.info(e) { "PrepareBackfill on `${dbData.serviceName}` failed" }
@@ -209,8 +211,10 @@ class CloneBackfillAction @Inject constructor(
       throw BadRequestException("PrepareBackfill returned unnamed partitions")
     }
     if (partitions.distinctBy { it.partition_name }.size != partitions.size) {
-      throw BadRequestException("PrepareBackfill did not return distinct partition names:" +
-          " ${partitions.map { it.partition_name }}")
+      throw BadRequestException(
+        "PrepareBackfill did not return distinct partition names:" +
+          " ${partitions.map { it.partition_name }}"
+      )
     }
     return prepareBackfillResponse
   }

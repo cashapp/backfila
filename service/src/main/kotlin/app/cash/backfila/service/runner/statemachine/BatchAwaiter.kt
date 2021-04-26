@@ -72,7 +72,7 @@ class BatchAwaiter(
               .build()
             backoffAndSendRunBatchAsync(remainingBatch) {
               "${backfillRunner.logLabel()} continuing remaining range " +
-                  "${response.remaining_batch_range} of for partially completed batch $initialBatch"
+                "${response.remaining_batch_range} of for partially completed batch $initialBatch"
             }
           } else {
             // We got a 200 response on the batch with no error or partial bookmark. This batch is
@@ -102,8 +102,10 @@ class BatchAwaiter(
               dbRunPartition.scanned_records_per_minute = scannedRateCounter.projectedRate()
               dbRunPartition.matching_records_per_minute = matchingRateCounter.projectedRate()
               if (dbRunPartition.precomputing_done && dbRunPartition.matching_records_per_minute!! > 0) {
-                val remaining = (dbRunPartition.computed_matching_record_count
-                    - dbRunPartition.backfilled_matching_record_count)
+                val remaining = (
+                  dbRunPartition.computed_matching_record_count -
+                    dbRunPartition.backfilled_matching_record_count
+                  )
                 val etaMinutes = remaining.toDouble() / dbRunPartition.matching_records_per_minute!!
                 val etaMillis = etaMinutes * 60 * 1000
                 backfillRunner.factory.metrics.eta
@@ -124,13 +126,13 @@ class BatchAwaiter(
           backfillRunner.onRpcFailure(
             e,
             "running batch [${remainingBatch.batch_range.start.utf8()}, " +
-                "${remainingBatch.batch_range.end.utf8()}]",
+              "${remainingBatch.batch_range.end.utf8()}]",
             Duration.between(callStartedAt, backfillRunner.factory.clock.instant())
           )
 
           backoffAndSendRunBatchAsync(remainingBatch) {
             "${backfillRunner.logLabel()} running runbatch retry with range " +
-                "${remainingBatch.batch_range} for $initialBatch"
+              "${remainingBatch.batch_range} for $initialBatch"
           }
         }
 

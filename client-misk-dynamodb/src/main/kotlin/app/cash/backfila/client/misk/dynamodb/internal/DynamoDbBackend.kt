@@ -37,10 +37,10 @@ class DynamoDbBackend @Inject constructor(
   private fun <E : Any, Param : Any> createDynamoDbOperator(
     backfill: DynamoDbBackfill<E, Param>
   ) = DynamoDbBackfillOperator(
-      dynamoDb,
-      backfill,
-      BackfilaParametersOperator(parametersClass(backfill::class)),
-      keyRangeCodec
+    dynamoDb,
+    backfill,
+    BackfilaParametersOperator(parametersClass(backfill::class)),
+    keyRangeCodec
   )
 
   override fun create(backfillName: String, backfillId: String): BackfillOperator? {
@@ -57,9 +57,9 @@ class DynamoDbBackend @Inject constructor(
   override fun backfills(): Set<BackfillRegistration> {
     return backfills.map {
       BackfillRegistration(
-          name = it.key,
-          description = (it.value.annotations.find { it is Description } as? Description)?.text,
-          parametersClass = parametersClass(it.value as KClass<DynamoDbBackfill<Any, Any>>)
+        name = it.key,
+        description = (it.value.annotations.find { it is Description } as? Description)?.text,
+        parametersClass = parametersClass(it.value as KClass<DynamoDbBackfill<Any, Any>>)
       )
     }.toSet()
   }

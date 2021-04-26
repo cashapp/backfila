@@ -45,10 +45,10 @@ class BackfilaParametersOperator<T : Any>(
 
   companion object {
     val TYPE_CONVERTERS = mapOf(
-        String::class to { value: ByteString -> value.utf8() },
-        Int::class to { value: ByteString -> value.utf8().toInt() },
-        Long::class to { value: ByteString -> value.utf8().toLong() },
-        Boolean::class to { value: ByteString -> value.utf8().toBoolean() }
+      String::class to { value: ByteString -> value.utf8() },
+      Int::class to { value: ByteString -> value.utf8().toInt() },
+      Long::class to { value: ByteString -> value.utf8().toLong() },
+      Boolean::class to { value: ByteString -> value.utf8().toBoolean() }
     )
 
     internal inline fun <reified P : Any> backfilaParametersFromClass(parametersClass: KClass<P>): List<Parameter> {
@@ -61,9 +61,9 @@ class BackfilaParametersOperator<T : Any>(
       return parametersClass.primaryConstructor?.parameters?.map {
         val description = (it.annotations.find { it -> it is Description } as? Description)?.text
         Parameter.Builder()
-            .name(it.name)
-            .description(description)
-            .build()
+          .name(it.name)
+          .description(description)
+          .build()
       } ?: emptyList()
     }
   }

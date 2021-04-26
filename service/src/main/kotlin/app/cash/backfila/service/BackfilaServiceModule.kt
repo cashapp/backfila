@@ -35,11 +35,12 @@ class BackfilaServiceModule(
   private val deployment: Deployment,
   private val config: BackfilaConfig,
   private val runnerLoggingSetupProvider: Class<out BackfillRunnerLoggingSetupProvider> =
-      BackfillRunnerNoLoggingSetupProvider::class.java
+    BackfillRunnerNoLoggingSetupProvider::class.java
 ) : KAbstractModule() {
   override fun configure() {
     multibind<AccessAnnotationEntry>().toInstance(
-        AccessAnnotationEntry<AdminDashboardAccess>(capabilities = listOf("backfila--owners")))
+      AccessAnnotationEntry<AdminDashboardAccess>(capabilities = listOf("backfila--owners"))
+    )
 
     install(ConfigModule.create("backfila", config))
     install(BackfilaPersistenceModule(config))
@@ -50,11 +51,11 @@ class BackfilaServiceModule(
     install(RunnerSchedulerServiceModule())
 
     newMapBinder<String, BackfilaClientServiceClientProvider>(ForConnectors::class)
-        .addBinding(Connectors.HTTP)
-        .to(HttpClientServiceClientProvider::class.java)
+      .addBinding(Connectors.HTTP)
+      .to(HttpClientServiceClientProvider::class.java)
     newMapBinder<String, BackfilaClientServiceClientProvider>(ForConnectors::class)
-        .addBinding(Connectors.ENVOY)
-        .to(EnvoyClientServiceClientProvider::class.java)
+      .addBinding(Connectors.ENVOY)
+      .to(EnvoyClientServiceClientProvider::class.java)
 
     newMultibinder<Interceptor>(HttpClientNetworkInterceptor::class)
 
@@ -70,9 +71,13 @@ class BackfilaServiceModule(
 
   @Provides @ForBackfilaScheduler @Singleton
   fun backfillRunnerExecutor(): ListeningExecutorService {
-    return MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(config.backfill_runner_threads ?: 40,
+    return MoreExecutors.listeningDecorator(
+      Executors.newFixedThreadPool(
+        config.backfill_runner_threads ?: 40,
         ThreadFactoryBuilder()
-            .setNameFormat("backfila-runner-%d")
-            .build()))
+          .setNameFormat("backfila-runner-%d")
+          .build()
+      )
+    )
   }
 }

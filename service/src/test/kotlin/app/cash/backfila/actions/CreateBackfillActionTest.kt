@@ -58,9 +58,12 @@ class CreateBackfillActionTest {
   fun serviceDoesntExist() {
     scope.fakeCaller(user = "molly") {
       assertThatThrownBy {
-        createBackfillAction.create("deep-fryer", CreateBackfillRequest.Builder()
+        createBackfillAction.create(
+          "deep-fryer",
+          CreateBackfillRequest.Builder()
             .backfill_name("abc")
-            .build())
+            .build()
+        )
       }.isInstanceOf(BadRequestException::class.java)
     }
   }
@@ -69,16 +72,20 @@ class CreateBackfillActionTest {
   fun backfillDoesntExist() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(
-          ConfigureServiceRequest.Builder()
-              .connector_type(Connectors.ENVOY)
-              .build())
+        ConfigureServiceRequest.Builder()
+          .connector_type(Connectors.ENVOY)
+          .build()
+      )
     }
 
     scope.fakeCaller(user = "molly") {
       assertThatThrownBy {
-        createBackfillAction.create("deep-fryer", CreateBackfillRequest.Builder()
+        createBackfillAction.create(
+          "deep-fryer",
+          CreateBackfillRequest.Builder()
             .backfill_name("abc")
-            .build())
+            .build()
+        )
       }.isInstanceOf(BadRequestException::class.java)
     }
   }
@@ -86,18 +93,27 @@ class CreateBackfillActionTest {
   @Test
   fun created() {
     scope.fakeCaller(service = "deep-fryer") {
-      configureServiceAction.configureService(ConfigureServiceRequest.Builder()
-          .backfills(listOf(
-              ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null,
-                  null, false)))
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "ChickenSandwich", "Description", listOf(), null,
+                null, false
+              )
+            )
+          )
           .connector_type(Connectors.ENVOY)
-          .build())
+          .build()
+      )
     }
     scope.fakeCaller(user = "molly") {
-      val response = createBackfillAction.create("deep-fryer",
-          CreateBackfillRequest.Builder()
-              .backfill_name("ChickenSandwich")
-              .build())
+      val response = createBackfillAction.create(
+        "deep-fryer",
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build()
+      )
 
       transacter.transaction { session ->
         val run = queryFactory.newQuery<BackfillRunQuery>().uniqueResult(session)
@@ -110,9 +126,9 @@ class CreateBackfillActionTest {
         assertThat(response.backfill_run_id).isEqualTo(run.id.id)
 
         val partitions = queryFactory.newQuery<RunPartitionQuery>()
-            .backfillRunId(run.id)
-            .orderByName()
-            .list(session)
+          .backfillRunId(run.id)
+          .orderByName()
+          .list(session)
         assertThat(partitions).hasSize(2)
         assertThat(partitions[0].partition_name).isEqualTo("-80")
         assertThat(partitions[0].lease_token).isNull()
@@ -127,39 +143,48 @@ class CreateBackfillActionTest {
   @Test
   fun prepareWithExtraParameters() {
     scope.fakeCaller(service = "deep-fryer") {
-      configureServiceAction.configureService(ConfigureServiceRequest.Builder()
-          .backfills(listOf(
-              ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null,
-                  null, false)))
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "ChickenSandwich", "Description", listOf(), null,
+                null, false
+              )
+            )
+          )
           .connector_type(Connectors.ENVOY)
-          .build())
+          .build()
+      )
     }
 
     fakeBackfilaClientServiceClient.prepareBackfillResponses.add(
-        PrepareBackfillResponse.Builder()
-            .partitions(listOf(
-                PrepareBackfillResponse.Partition.Builder()
-                    .partition_name("only")
-                    .backfill_range(KeyRange("0".encodeUtf8(), "1000".encodeUtf8()))
-                    .build()
-            ))
-            .parameters(mapOf("idempotence_token" to "filaback".encodeUtf8()))
-            .build()
+      PrepareBackfillResponse.Builder()
+        .partitions(
+          listOf(
+            PrepareBackfillResponse.Partition.Builder()
+              .partition_name("only")
+              .backfill_range(KeyRange("0".encodeUtf8(), "1000".encodeUtf8()))
+              .build()
+          )
+        )
+        .parameters(mapOf("idempotence_token" to "filaback".encodeUtf8()))
+        .build()
     )
 
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create(
-          "deep-fryer",
-          CreateBackfillRequest.Builder()
-              .backfill_name("ChickenSandwich")
-              .build()
+        "deep-fryer",
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build()
       )
 
       transacter.transaction { session ->
         val run = queryFactory.newQuery<BackfillRunQuery>().uniqueResult(session)
         assertNotNull(run)
         assertThat(run.parameters()).isEqualTo(
-            mapOf("idempotence_token" to "filaback".encodeUtf8())
+          mapOf("idempotence_token" to "filaback".encodeUtf8())
         )
       }
     }
@@ -168,40 +193,49 @@ class CreateBackfillActionTest {
   @Test
   fun prepareWithExtraParametersOverride() {
     scope.fakeCaller(service = "deep-fryer") {
-      configureServiceAction.configureService(ConfigureServiceRequest.Builder()
-          .backfills(listOf(
-              ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null,
-                  null, false)))
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "ChickenSandwich", "Description", listOf(), null,
+                null, false
+              )
+            )
+          )
           .connector_type(Connectors.ENVOY)
-          .build())
+          .build()
+      )
     }
 
     fakeBackfilaClientServiceClient.prepareBackfillResponses.add(
-        PrepareBackfillResponse.Builder()
-            .partitions(listOf(
-                PrepareBackfillResponse.Partition.Builder()
-                    .partition_name("only")
-                    .backfill_range(KeyRange("0".encodeUtf8(), "1000".encodeUtf8()))
-                    .build()
-            ))
-            .parameters(mapOf("idempotence_token" to "filaback".encodeUtf8()))
-            .build()
+      PrepareBackfillResponse.Builder()
+        .partitions(
+          listOf(
+            PrepareBackfillResponse.Partition.Builder()
+              .partition_name("only")
+              .backfill_range(KeyRange("0".encodeUtf8(), "1000".encodeUtf8()))
+              .build()
+          )
+        )
+        .parameters(mapOf("idempotence_token" to "filaback".encodeUtf8()))
+        .build()
     )
 
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create(
-          "deep-fryer",
-          CreateBackfillRequest.Builder()
-              .backfill_name("ChickenSandwich")
-              .parameter_map(mapOf("idempotence_token" to "ketchup".encodeUtf8()))
-              .build()
+        "deep-fryer",
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .parameter_map(mapOf("idempotence_token" to "ketchup".encodeUtf8()))
+          .build()
       )
 
       transacter.transaction { session ->
         val run = queryFactory.newQuery<BackfillRunQuery>().uniqueResult(session)
         assertNotNull(run)
         assertThat(run.parameters()).isEqualTo(
-            mapOf("idempotence_token" to "filaback".encodeUtf8())
+          mapOf("idempotence_token" to "filaback".encodeUtf8())
         )
       }
     }

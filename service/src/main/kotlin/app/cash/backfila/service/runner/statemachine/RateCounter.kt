@@ -47,7 +47,7 @@ class RateCounter(
    */
   fun projectedRate(): Long {
     val startedAt = startedAt
-        ?: return sum()
+      ?: return sum()
 
     val seconds = seconds()
     val delta = seconds - startedAt

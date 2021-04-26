@@ -46,7 +46,8 @@ class BatchPrecomputer(
         stopwatch.reset()
         stopwatch.start()
 
-        val response = backfillRunner.client.getNextBatchRange(GetNextBatchRangeRequest(
+        val response = backfillRunner.client.getNextBatchRange(
+          GetNextBatchRangeRequest(
             metadata.backfillRunId.toString(),
             backfillRunner.backfillName,
             backfillRunner.partitionName,
@@ -59,7 +60,8 @@ class BatchPrecomputer(
             computeCountLimit,
             metadata.dryRun,
             true
-        ))
+          )
+        )
 
         backfillRunner.onRpcSuccess()
 
@@ -68,12 +70,14 @@ class BatchPrecomputer(
             val dbRunPartition = session.load(backfillRunner.partitionId)
             dbRunPartition.precomputing_done = true
 
-            session.save(DbEventLog(
+            session.save(
+              DbEventLog(
                 backfillRunner.backfillRunId,
                 partition_id = backfillRunner.partitionId,
                 type = DbEventLog.Type.STATE_CHANGE,
                 message = "precomputing complete"
-            ))
+              )
+            )
           }
           logger.info { "Precomputing completed for ${backfillRunner.logLabel()}" }
           break

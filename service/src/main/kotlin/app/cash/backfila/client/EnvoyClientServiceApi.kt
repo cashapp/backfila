@@ -14,28 +14,34 @@ import retrofit2.http.POST
 // Methods implemented by the client service library that backfila calls out to.
 interface EnvoyClientServiceApi {
   @POST("$BASE_PATH/prepare_backfill")
-  @Headers(value = [
-    "Accept: application/x-protobuf",
-    "Content-Type: application/x-protobuf"
-  ])
+  @Headers(
+    value = [
+      "Accept: application/x-protobuf",
+      "Content-Type: application/x-protobuf"
+    ]
+  )
   fun prepareBackfill(
     @Body request: PrepareBackfillRequest
   ): Call<PrepareBackfillResponse>
 
   @POST("$BASE_PATH/get_next_batch_range")
-  @Headers(value = [
-    "Accept: application/x-protobuf",
-    "Content-Type: application/x-protobuf"
-  ])
+  @Headers(
+    value = [
+      "Accept: application/x-protobuf",
+      "Content-Type: application/x-protobuf"
+    ]
+  )
   suspend fun getNextBatchRange(
     @Body request: GetNextBatchRangeRequest
   ): GetNextBatchRangeResponse
 
   @POST("$BASE_PATH/run_batch")
-  @Headers(value = [
-    "Accept: application/x-protobuf",
-    "Content-Type: application/x-protobuf"
-  ])
+  @Headers(
+    value = [
+      "Accept: application/x-protobuf",
+      "Content-Type: application/x-protobuf"
+    ]
+  )
   suspend fun runBatch(
     @Body request: RunBatchRequest
   ): RunBatchResponse

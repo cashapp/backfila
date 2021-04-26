@@ -32,94 +32,107 @@ class DynamoMusicTableTestData @Inject constructor(
 
   fun addOffTheWall() {
     addAlbum(
-        "ALBUM_1",
+      "ALBUM_1",
+      "Off the Wall",
+      "Michael Jackson",
+      listOf(
+        "Don't Stop 'Til You Get Enough",
+        "Rock with You",
+        "Working Day and Night",
+        "Get on the Floor",
         "Off the Wall",
-        "Michael Jackson",
-        listOf(
-            "Don't Stop 'Til You Get Enough",
-            "Rock with You",
-            "Working Day and Night",
-            "Get on the Floor",
-            "Off the Wall",
-            "Girlfriend",
-            "She's Out of My Life",
-            "I Can't Help It",
-            "It's the Falling in Love",
-            "Burn This Disco Out"))
+        "Girlfriend",
+        "She's Out of My Life",
+        "I Can't Help It",
+        "It's the Falling in Love",
+        "Burn This Disco Out"
+      )
+    )
   }
 
   fun addThriller() {
     addAlbum(
-        "ALBUM_2",
+      "ALBUM_2",
+      "Thriller",
+      "Michael Jackson",
+      listOf(
+        "Wanna Be Startin' Somethin'",
+        "Baby Be Mine",
+        "The Girl Is Mine",
         "Thriller",
-        "Michael Jackson",
-        listOf(
-            "Wanna Be Startin' Somethin'",
-            "Baby Be Mine",
-            "The Girl Is Mine",
-            "Thriller",
-            "Beat It",
-            "Billie Jean",
-            "Human Nature",
-            "P.Y.T. (Pretty Young Thing)",
-            "The Lady in My Life"))
+        "Beat It",
+        "Billie Jean",
+        "Human Nature",
+        "P.Y.T. (Pretty Young Thing)",
+        "The Lady in My Life"
+      )
+    )
   }
 
   fun addMichaelBuble() {
     addAlbum(
-        "ALBUM_3",
-        "Michael Bublé",
-        "Michael Bublé",
-        listOf("Fever",
-            "Moondance",
-            "Kissing a Fool",
-            "For Once in My Life",
-            "How Can You Mend a Broken Heart",
-            "Summer Wind",
-            "You'll Never Find Another Love like Mine",
-            "Crazy Little Thing Called Love",
-            "Put Your Head on My Shoulder",
-            "Sway",
-            "The Way You Look Tonight",
-            "Come Fly with Me",
-            "That's All"))
+      "ALBUM_3",
+      "Michael Bublé",
+      "Michael Bublé",
+      listOf(
+        "Fever",
+        "Moondance",
+        "Kissing a Fool",
+        "For Once in My Life",
+        "How Can You Mend a Broken Heart",
+        "Summer Wind",
+        "You'll Never Find Another Love like Mine",
+        "Crazy Little Thing Called Love",
+        "Put Your Head on My Shoulder",
+        "Sway",
+        "The Way You Look Tonight",
+        "Come Fly with Me",
+        "That's All"
+      )
+    )
   }
 
   fun addLinkinPark() {
     addAlbum(
-        "ALBUM_4",
-        "Hybrid Theory",
-        "Linkin Park",
-        listOf("Papercut",
-            "One Step Closer",
-            "With You",
-            "Points of Authority",
-            "Crawling",
-            "Runaway",
-            "By Myself",
-            "In the End",
-            "A Place for My Head",
-            "Forgotten",
-            "Cure for the Itch",
-            "Pushing Me Away"))
+      "ALBUM_4",
+      "Hybrid Theory",
+      "Linkin Park",
+      listOf(
+        "Papercut",
+        "One Step Closer",
+        "With You",
+        "Points of Authority",
+        "Crawling",
+        "Runaway",
+        "By Myself",
+        "In the End",
+        "A Place for My Head",
+        "Forgotten",
+        "Cure for the Itch",
+        "Pushing Me Away"
+      )
+    )
 
     addAlbum(
-        "ALBUM_5",
-        "Meteora",
-        "Linkin Park",
-        listOf("Foreword",
-            "Don't Stay",
-            "Somewhere I Belong",
-            "Lying from You",
-            "Hit the Floor",
-            "Easier to Run",
-            "Faint",
-            "Figure.09",
-            "Breaking the Habit",
-            "From the Inside",
-            "Nobody's Listening",
-            "Session",
-            "Numb"))
+      "ALBUM_5",
+      "Meteora",
+      "Linkin Park",
+      listOf(
+        "Foreword",
+        "Don't Stay",
+        "Somewhere I Belong",
+        "Lying from You",
+        "Hit the Floor",
+        "Easier to Run",
+        "Faint",
+        "Figure.09",
+        "Breaking the Habit",
+        "From the Inside",
+        "Nobody's Listening",
+        "Session",
+        "Numb"
+      )
+    )
   }
 
   private fun addAlbum(

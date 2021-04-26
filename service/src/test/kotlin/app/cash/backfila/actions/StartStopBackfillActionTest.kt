@@ -68,22 +68,30 @@ class StartStopBackfillActionTest {
   @Test
   fun startAndStop() {
     scope.fakeCaller(service = "deep-fryer") {
-      configureServiceAction.configureService(ConfigureServiceRequest.Builder()
-          .backfills(listOf(
-              ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null,
-                  null, false)))
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "ChickenSandwich", "Description", listOf(), null,
+                null, false
+              )
+            )
+          )
           .connector_type(Connectors.ENVOY)
-          .build())
+          .build()
+      )
     }
     scope.fakeCaller(user = "molly") {
       var backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
       assertThat(backfillRuns.paused_backfills).hasSize(0)
       assertThat(backfillRuns.running_backfills).hasSize(0)
 
-      val response = createBackfillAction.create("deep-fryer",
-          CreateBackfillRequest.Builder()
-              .backfill_name("ChickenSandwich")
-              .build()
+      val response = createBackfillAction.create(
+        "deep-fryer",
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build()
       )
 
       backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
@@ -97,7 +105,7 @@ class StartStopBackfillActionTest {
       var status = getBackfillStatusAction.status(id)
       assertThat(status.state).isEqualTo(BackfillState.RUNNING)
       assertThat(status.partitions.map { it.state })
-          .containsOnly(BackfillState.RUNNING)
+        .containsOnly(BackfillState.RUNNING)
       assertThat(status.event_logs[0].message).isEqualTo("backfill started")
       assertThat(status.event_logs[0].user).isEqualTo("molly")
 
@@ -110,7 +118,7 @@ class StartStopBackfillActionTest {
       status = getBackfillStatusAction.status(id)
       assertThat(status.state).isEqualTo(BackfillState.PAUSED)
       assertThat(status.partitions.map { it.state })
-          .containsOnly(BackfillState.PAUSED)
+        .containsOnly(BackfillState.PAUSED)
       assertThat(status.event_logs[0].message).isEqualTo("backfill stopped")
       assertThat(status.event_logs[0].user).isEqualTo("molly")
 
@@ -124,44 +132,44 @@ class StartStopBackfillActionTest {
   fun pagination() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(
-          ConfigureServiceRequest.Builder()
-              .backfills(
-                  listOf(
-                      ConfigureServiceRequest.BackfillData.Builder()
-                          .name("ChickenSandwich")
-                          .description("Description")
-                          .build(),
-                      ConfigureServiceRequest.BackfillData.Builder()
-                          .name("BeefSandwich")
-                          .description("Description")
-                          .build()
-                  )
-              )
-              .connector_type(Connectors.ENVOY)
-              .build()
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData.Builder()
+                .name("ChickenSandwich")
+                .description("Description")
+                .build(),
+              ConfigureServiceRequest.BackfillData.Builder()
+                .name("BeefSandwich")
+                .description("Description")
+                .build()
+            )
+          )
+          .connector_type(Connectors.ENVOY)
+          .build()
       )
     }
     scope.fakeCaller(user = "molly") {
       repeat(15) {
         createBackfillAction.create(
-            "deep-fryer",
-            CreateBackfillRequest.Builder()
-                .backfill_name("ChickenSandwich")
-                .build()
+          "deep-fryer",
+          CreateBackfillRequest.Builder()
+            .backfill_name("ChickenSandwich")
+            .build()
         )
         createBackfillAction.create(
-            "deep-fryer",
-            CreateBackfillRequest.Builder()
-                .backfill_name("BeefSandwich")
-                .build()
+          "deep-fryer",
+          CreateBackfillRequest.Builder()
+            .backfill_name("BeefSandwich")
+            .build()
         )
       }
       val backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
       assertThat(backfillRuns.paused_backfills).hasSize(20)
 
       val backfillRunsPage2 = getBackfillRunsAction.backfillRuns(
-          "deep-fryer",
-          pagination_token = backfillRuns.next_pagination_token
+        "deep-fryer",
+        pagination_token = backfillRuns.next_pagination_token
       )
       assertThat(backfillRunsPage2.paused_backfills).hasSize(10)
     }
@@ -171,24 +179,25 @@ class StartStopBackfillActionTest {
   fun backfillDoesntExist() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(
-          ConfigureServiceRequest.Builder()
-              .backfills(
-                  listOf(
-                      ConfigureServiceRequest.BackfillData(
-                          "ChickenSandwich", "Description", listOf(), null,
-                          null, false
-                      )
-                  )
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "ChickenSandwich", "Description", listOf(), null,
+                null, false
               )
-              .connector_type(Connectors.ENVOY)
-              .build()
+            )
+          )
+          .connector_type(Connectors.ENVOY)
+          .build()
       )
     }
     scope.fakeCaller(user = "molly") {
-      val response = createBackfillAction.create("deep-fryer",
-          CreateBackfillRequest.Builder()
-              .backfill_name("ChickenSandwich")
-              .build()
+      val response = createBackfillAction.create(
+        "deep-fryer",
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build()
       )
       val id = response.backfill_run_id
 
@@ -201,18 +210,26 @@ class StartStopBackfillActionTest {
   @Test
   fun cantStartRunningBackfill() {
     scope.fakeCaller(service = "deep-fryer") {
-      configureServiceAction.configureService(ConfigureServiceRequest.Builder()
-          .backfills(listOf(
-              ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null,
-                  null, false)))
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "ChickenSandwich", "Description", listOf(), null,
+                null, false
+              )
+            )
+          )
           .connector_type(Connectors.ENVOY)
-          .build())
+          .build()
+      )
     }
     scope.fakeCaller(user = "molly") {
-      val response = createBackfillAction.create("deep-fryer",
-          CreateBackfillRequest.Builder()
-              .backfill_name("ChickenSandwich")
-              .build()
+      val response = createBackfillAction.create(
+        "deep-fryer",
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build()
       )
       val id = response.backfill_run_id
       startBackfillAction.start(id, StartBackfillRequest())
@@ -232,19 +249,26 @@ class StartStopBackfillActionTest {
   @Test
   fun cantStopPausedBackfill() {
     scope.fakeCaller(service = "deep-fryer") {
-      configureServiceAction.configureService(ConfigureServiceRequest.Builder()
-          .backfills(listOf(
-              ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null,
-                  null, false)))
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "ChickenSandwich", "Description", listOf(), null,
+                null, false
+              )
+            )
+          )
           .connector_type(Connectors.ENVOY)
-          .build())
+          .build()
+      )
     }
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create(
-          "deep-fryer",
-          CreateBackfillRequest.Builder()
-              .backfill_name("ChickenSandwich")
-              .build()
+        "deep-fryer",
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build()
       )
       val id = response.backfill_run_id
       assertThatThrownBy {
@@ -256,19 +280,26 @@ class StartStopBackfillActionTest {
   @Test
   fun cantToggleCompletedBackfill() {
     scope.fakeCaller(service = "deep-fryer") {
-      configureServiceAction.configureService(ConfigureServiceRequest.Builder()
-          .backfills(listOf(
-              ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null,
-                  null, false)))
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "ChickenSandwich", "Description", listOf(), null,
+                null, false
+              )
+            )
+          )
           .connector_type(Connectors.ENVOY)
-          .build())
+          .build()
+      )
     }
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create(
-          "deep-fryer",
-          CreateBackfillRequest.Builder()
-              .backfill_name("ChickenSandwich")
-              .build()
+        "deep-fryer",
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build()
       )
       val id = response.backfill_run_id
 

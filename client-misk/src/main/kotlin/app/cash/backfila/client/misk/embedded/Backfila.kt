@@ -38,7 +38,7 @@ inline fun <reified Type : Backfill> Backfila.createDryRun(
     "Only one of parameters and parameterData can be set"
   }
   val parameterBytes =
-      if (parameters != null) { parametersToBytes(parameters) } else { parameterData }
+    if (parameters != null) { parametersToBytes(parameters) } else { parameterData }
   return createDryRun(Type::class, parameterBytes, rangeStart, rangeEnd)
 }
 
@@ -52,6 +52,6 @@ inline fun <reified Type : Backfill> Backfila.createWetRun(
     "Only one of parameters and parameterData can be set"
   }
   val parameterBytes =
-      if (parameters != null) { parametersToBytes(parameters) } else { parameterData }
+    if (parameters != null) { parametersToBytes(parameters) } else { parameterData }
   return createWetRun(Type::class, parameterBytes, rangeStart, rangeEnd)
 }

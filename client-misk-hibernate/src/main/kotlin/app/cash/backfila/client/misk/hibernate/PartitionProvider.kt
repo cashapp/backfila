@@ -38,7 +38,7 @@ class UnshardedPartitionProvider(private val transacter: Transacter) : Partition
   override fun names(request: PrepareBackfillRequest) = listOf("only")
 
   override fun <T> transaction(partitionName: String, task: (Session) -> T) =
-      transacter.transaction(task)
+    transacter.transaction(task)
 
   override fun <E : DbEntity<E>, Pkey : Any> boundingRangeStrategy(): BoundingRangeStrategy<E, Pkey> {
     return UnshardedHibernateBoundingRangeStrategy(this)
@@ -61,7 +61,7 @@ class VitessShardedPartitionProvider<E : DbEntity<E>, Pkey : Any>(
   override fun names(request: PrepareBackfillRequest) = shards().map { it.name }
 
   override fun <T> transaction(partitionName: String, task: (Session) -> T) =
-      transacter.transaction(Shard(keyspace, partitionName), task)
+    transacter.transaction(Shard(keyspace, partitionName), task)
 
   override fun <E : DbEntity<E>, Pkey : Any> boundingRangeStrategy(): BoundingRangeStrategy<E, Pkey> {
     return VitessShardedBoundingRangeStrategy(this)
@@ -91,7 +91,7 @@ class VitessSingleCursorPartitionProvider<E : DbEntity<E>, Pkey : Any>(
   override fun names(request: PrepareBackfillRequest) = listOf("only")
 
   override fun <T> transaction(partitionName: String, task: (Session) -> T) =
-      transacter.transaction(task)
+    transacter.transaction(task)
 
   override fun <E : DbEntity<E>, Pkey : Any> boundingRangeStrategy(): BoundingRangeStrategy<E, Pkey> {
     return VitessSingleCursorBoundingRangeStrategy<E, Pkey>(transacter, keyspace)

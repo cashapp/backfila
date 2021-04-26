@@ -9,6 +9,7 @@ class ConnectorProvider @Inject constructor(
   @ForConnectors private val connectors: Map<String, BackfilaClientServiceClientProvider>
 ) {
   fun clientProvider(connectorType: String) =
-      connectors[connectorType] ?: throw BadRequestException(
-          "Client has unknown connector type: `$connectorType`")
+    connectors[connectorType] ?: throw BadRequestException(
+      "Client has unknown connector type: `$connectorType`"
+    )
 }

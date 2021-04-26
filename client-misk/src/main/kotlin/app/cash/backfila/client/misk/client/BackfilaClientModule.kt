@@ -20,11 +20,15 @@ import retrofit2.converter.wire.WireConverterFactory
  */
 class BackfilaClientModule : KAbstractModule() {
   override fun configure() {
-    install(TypedHttpClientModule(
+    install(
+      TypedHttpClientModule(
         kclass = BackfilaApi::class,
         name = "backfila",
         retrofitBuilderProvider = getProvider(
-            Key.get(Retrofit.Builder::class.java, ForBackfila::class.java))))
+          Key.get(Retrofit.Builder::class.java, ForBackfila::class.java)
+        )
+      )
+    )
 
     install(WebActionModule.create<PrepareBackfillAction>())
     install(WebActionModule.create<GetNextBatchRangeAction>())
@@ -32,5 +36,5 @@ class BackfilaClientModule : KAbstractModule() {
   }
 
   @Provides @ForBackfila internal fun wireRetrofitBuilder() =
-      Retrofit.Builder().addConverterFactory(WireConverterFactory.create())
+    Retrofit.Builder().addConverterFactory(WireConverterFactory.create())
 }

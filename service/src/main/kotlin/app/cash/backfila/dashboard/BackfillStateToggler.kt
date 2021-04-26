@@ -30,29 +30,32 @@ class BackfillStateToggler @Inject constructor(
 
     transacter.transaction { session ->
       val run = session.loadOrNull<DbBackfillRun>(Id(id))
-          ?: throw BadRequestException("backfill $id doesn't exist")
+        ?: throw BadRequestException("backfill $id doesn't exist")
       logger.info {
         "Found backfill $id for `${run.registered_backfill.service.registry_name}`" +
-            "::`${run.registered_backfill.name}`"
+          "::`${run.registered_backfill.name}`"
       }
       if (run.state != requiredCurrentState) {
         logger.info {
           "Backfill $id can't move to state $desiredState, " +
-              "in state ${run.state}, requires $requiredCurrentState"
+            "in state ${run.state}, requires $requiredCurrentState"
         }
         throw BadRequestException(
-            "backfill $id isn't $requiredCurrentState, can't move to state $desiredState")
+          "backfill $id isn't $requiredCurrentState, can't move to state $desiredState"
+        )
       }
       run.setState(session, queryFactory, desiredState)
 
       val startedOrStopped = if (desiredState == RUNNING) "started" else "stopped"
-      session.save(DbEventLog(
+      session.save(
+        DbEventLog(
           run.id,
           partition_id = null,
           user = caller.principal,
           type = DbEventLog.Type.STATE_CHANGE,
           message = "backfill $startedOrStopped"
-      ))
+        )
+      )
     }
 
     if (desiredState == RUNNING) {

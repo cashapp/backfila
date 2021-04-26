@@ -37,20 +37,20 @@ class HttpClientServiceClientProvider @Inject constructor(
 
     val httpClientEndpointConfig = httpClientsConfig[url]
     val okHttpClient = httpClientFactory.create(httpClientEndpointConfig)
-        .newBuilder()
-        .apply {
-          networkInterceptors.forEach {
-            addNetworkInterceptor(it)
-          }
+      .newBuilder()
+      .apply {
+        networkInterceptors.forEach {
+          addNetworkInterceptor(it)
         }
-        .build()
+      }
+      .build()
     val baseUrl = httpClientConfigUrlProvider.getUrl(httpClientEndpointConfig)
     val retrofit = Retrofit.Builder()
-        .baseUrl(baseUrl)
-        .client(okHttpClient)
-        .addConverterFactory(WireConverterFactory.create())
-        .addCallAdapterFactory(GuavaCallAdapterFactory.create())
-        .build()
+      .baseUrl(baseUrl)
+      .client(okHttpClient)
+      .addConverterFactory(WireConverterFactory.create())
+      .addCallAdapterFactory(GuavaCallAdapterFactory.create())
+      .build()
     val api = retrofit.create(HttpClientServiceApi::class.java)
     return HttpClientServiceClient(api)
   }

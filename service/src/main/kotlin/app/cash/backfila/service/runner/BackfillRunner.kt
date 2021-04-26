@@ -137,8 +137,8 @@ class BackfillRunner private constructor(
           }
           if (dbRunPartition.lease_token != leaseToken) {
             throw IllegalStateException(
-                "Backfill partition $partitionId has been stolen! " +
-                    "our token: $leaseToken, new token: ${dbRunPartition.lease_token}"
+              "Backfill partition $partitionId has been stolen! " +
+                "our token: $leaseToken, new token: ${dbRunPartition.lease_token}"
             )
           }
           // Extend our lease regularly.

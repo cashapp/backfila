@@ -28,7 +28,7 @@ class DynamoDbSegmentingTest {
 
     assertThrows<IllegalArgumentException> {
       backfila.createWetRun<SegmentingBackfill>(
-          parameters = SegmentingParameters(2, 4)
+        parameters = SegmentingParameters(2, 4)
       )
     }
   }
@@ -39,25 +39,25 @@ class DynamoDbSegmentingTest {
 
     assertThrows<IllegalArgumentException> {
       backfila.createWetRun<SegmentingBackfill>(
-          parameters = SegmentingParameters(0, 4)
+        parameters = SegmentingParameters(0, 4)
       )
     }
 
     assertThrows<IllegalArgumentException> {
       backfila.createWetRun<SegmentingBackfill>(
-          parameters = SegmentingParameters(2, 0)
+        parameters = SegmentingParameters(2, 0)
       )
     }
 
     assertThrows<IllegalArgumentException> {
       backfila.createWetRun<SegmentingBackfill>(
-          parameters = SegmentingParameters(2, -1)
+        parameters = SegmentingParameters(2, -1)
       )
     }
 
     assertThrows<IllegalArgumentException> {
       backfila.createWetRun<SegmentingBackfill>(
-          parameters = SegmentingParameters(0, 0)
+        parameters = SegmentingParameters(0, 0)
       )
     }
   }
@@ -67,7 +67,7 @@ class DynamoDbSegmentingTest {
     testData.addThriller()
 
     val run = backfila.createWetRun<SegmentingBackfill>(
-        parameters = SegmentingParameters(2, 2)
+      parameters = SegmentingParameters(2, 2)
     )
     run.execute()
     assertThat(run.backfill.updateCounter).isEqualTo(9)
@@ -78,12 +78,12 @@ class DynamoDbSegmentingTest {
     testData.addLinkinPark()
 
     val run = backfila.createWetRun<SegmentingBackfill>(
-        parameters = SegmentingParameters(8, 2)
+      parameters = SegmentingParameters(8, 2)
     )
 
     assertThat(run.prepareBackfillResponse.partitions).hasSize(2)
-        .extracting<Int> { it.backfill_range.start.utf8().split("/").first().last().toString().toInt() }
-        .contains(0, 4)
+      .extracting<Int> { it.backfill_range.start.utf8().split("/").first().last().toString().toInt() }
+      .contains(0, 4)
 
     run.execute()
     assertThat(run.backfill.updateCounter).isEqualTo(25)

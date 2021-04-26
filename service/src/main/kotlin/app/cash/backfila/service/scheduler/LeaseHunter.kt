@@ -26,9 +26,9 @@ class LeaseHunter @Inject constructor(
     // will win the lease.
     return transacter.transaction { session ->
       val unleasedPartitions = queryFactory.newQuery<RunPartitionQuery>()
-          .runState(BackfillState.RUNNING)
-          .leaseExpiresAtBefore(clock.instant())
-          .list(session)
+        .runState(BackfillState.RUNNING)
+        .leaseExpiresAtBefore(clock.instant())
+        .list(session)
 
       if (unleasedPartitions.isEmpty()) {
         return@transaction setOf()
@@ -42,11 +42,13 @@ class LeaseHunter @Inject constructor(
 
       // Only get one lease at a time to promote distribution of work and to ramp up
       // the backfill slowly.
-      setOf(backfillRunnerFactory.create(
+      setOf(
+        backfillRunnerFactory.create(
           session,
           partition,
           leaseToken
-      ))
+        )
+      )
     }
   }
 

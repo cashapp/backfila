@@ -21,7 +21,7 @@ class FixedSetDatastore @Inject constructor() {
   }
 
   fun valuesToList(): List<String> = dataByInstance.values
-      .flatMap { it }
-      .sortedBy { it.id }
-      .map { it.value }
+    .flatMap { it }
+    .sortedBy { it.id }
+    .map { it.value }
 }

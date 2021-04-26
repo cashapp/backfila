@@ -26,8 +26,10 @@ class DynamoDbLastEvaluatedKeyTest {
 
     // Pause so at most two dynamo batches run per runBatch service call
     val run = backfila.createWetRun<PausingBackfill>(
-        parameters = PausingBackfill.Parameters(segmentCount = 1, partitionCount = 1,
-            pauseMilliseconds = 500L, requireMaxBatchSize = 5)
+      parameters = PausingBackfill.Parameters(
+        segmentCount = 1, partitionCount = 1,
+        pauseMilliseconds = 500L, requireMaxBatchSize = 5
+      )
     )
     run.batchSize = 5
     run.execute()
@@ -42,8 +44,10 @@ class DynamoDbLastEvaluatedKeyTest {
 
     // Pause so only one dynamo batch runs per runBatch service call
     val run = backfila.createWetRun<PausingBackfill>(
-        parameters = PausingBackfill.Parameters(segmentCount = 4, partitionCount = 2,
-            pauseMilliseconds = 1000L, requireMaxBatchSize = 5)
+      parameters = PausingBackfill.Parameters(
+        segmentCount = 4, partitionCount = 2,
+        pauseMilliseconds = 1000L, requireMaxBatchSize = 5
+      )
     )
     run.batchSize = 5
     run.execute()

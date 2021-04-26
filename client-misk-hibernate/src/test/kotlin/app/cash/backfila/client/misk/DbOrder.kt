@@ -23,8 +23,10 @@ class DbOrder private constructor() : DbChild<DbRestaurant, DbOrder> {
   @EmbeddedId
   @AttributeOverride(name = "rootId", column = Column(name = "restaurant_id"))
   @GeneratedValue(generator = "child")
-  @GenericGenerator(name = "child", strategy = "misk.hibernate.GidGenerator",
-      parameters = [Parameter(name = "rootColumn", value = "restaurant_id")])
+  @GenericGenerator(
+    name = "child", strategy = "misk.hibernate.GidGenerator",
+    parameters = [Parameter(name = "rootColumn", value = "restaurant_id")]
+  )
   override lateinit var gid: Gid<DbRestaurant, DbOrder>
 
   @Column(updatable = false, insertable = false)

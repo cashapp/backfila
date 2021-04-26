@@ -45,20 +45,21 @@ internal class BackfilaStartupConfigurator @Inject internal constructor(
 
     // Send the Backfila registration request
     val request = ConfigureServiceRequest.Builder()
-        .backfills(
-            registrations.map { registration ->
-              @Suppress("UNCHECKED_CAST")
-              val parameters = backfilaParametersFromClass(registration.parametersClass)
-              ConfigureServiceRequest.BackfillData.Builder()
-                  .name(registration.name)
-                  .description(registration.description)
-                  .parameters(parameters)
-                  .build()
-            })
-        .connector_type(Connectors.HTTP)
-        .connector_extra_data(connectorDataAdapter.toJson(httpConnectorData))
-        .slack_channel(config.slack_channel)
-        .build()
+      .backfills(
+        registrations.map { registration ->
+          @Suppress("UNCHECKED_CAST")
+          val parameters = backfilaParametersFromClass(registration.parametersClass)
+          ConfigureServiceRequest.BackfillData.Builder()
+            .name(registration.name)
+            .description(registration.description)
+            .parameters(parameters)
+            .build()
+        }
+      )
+      .connector_type(Connectors.HTTP)
+      .connector_extra_data(connectorDataAdapter.toJson(httpConnectorData))
+      .slack_channel(config.slack_channel)
+      .build()
 
     // TODO(mikepaw): make this async.
     try {
@@ -66,7 +67,7 @@ internal class BackfilaStartupConfigurator @Inject internal constructor(
 
       logger.info {
         "Backfila lifecycle listener initialized. " +
-            "Updated backfila with ${registrations.size} backfills."
+          "Updated backfila with ${registrations.size} backfills."
       }
     } catch (e: Exception) {
       logger.error(e) { "Exception making startup call to configure backfila, skipped!" }

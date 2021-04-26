@@ -70,9 +70,9 @@ class DynamoDbFilteringTest {
   ) : FilteredMakeTracksExplicitBackfill(dynamoDb) {
 
     override fun filterExpression(config: BackfillConfig<NoParameters>): String? =
-        "begins_with (sort_key, :sort_start)"
+      "begins_with (sort_key, :sort_start)"
 
     override fun expressionAttributeValues(config: BackfillConfig<NoParameters>): Map<String, AttributeValue>? =
-        mapOf(":sort_start" to AttributeValue(TRACK_SORT_START))
+      mapOf(":sort_start" to AttributeValue(TRACK_SORT_START))
   }
 }
