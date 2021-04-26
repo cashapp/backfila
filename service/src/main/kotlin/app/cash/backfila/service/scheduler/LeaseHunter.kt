@@ -1,7 +1,7 @@
 package app.cash.backfila.service.scheduler
 
 import app.cash.backfila.service.persistence.BackfilaDb
-import app.cash.backfila.service.persistence.BackfillState
+import app.cash.backfila.service.persistence.BackfillPartitionState
 import app.cash.backfila.service.persistence.RunPartitionQuery
 import app.cash.backfila.service.runner.BackfillRunner
 import java.time.Clock
@@ -26,7 +26,7 @@ class LeaseHunter @Inject constructor(
     // will win the lease.
     return transacter.transaction { session ->
       val unleasedPartitions = queryFactory.newQuery<RunPartitionQuery>()
-        .runState(BackfillState.RUNNING)
+        .runState(BackfillPartitionState.RUNNING)
         .leaseExpiresAtBefore(clock.instant())
         .list(session)
 

@@ -14,6 +14,7 @@ import app.cash.backfila.fakeCaller
 import app.cash.backfila.protos.service.ConfigureServiceRequest
 import app.cash.backfila.protos.service.CreateBackfillRequest
 import app.cash.backfila.service.persistence.BackfilaDb
+import app.cash.backfila.service.persistence.BackfillPartitionState
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.DbBackfillRun
 import com.google.inject.Module
@@ -105,7 +106,7 @@ class StartStopBackfillActionTest {
       var status = getBackfillStatusAction.status(id)
       assertThat(status.state).isEqualTo(BackfillState.RUNNING)
       assertThat(status.partitions.map { it.state })
-        .containsOnly(BackfillState.RUNNING)
+        .containsOnly(BackfillPartitionState.RUNNING)
       assertThat(status.event_logs[0].message).isEqualTo("backfill started")
       assertThat(status.event_logs[0].user).isEqualTo("molly")
 
@@ -118,7 +119,7 @@ class StartStopBackfillActionTest {
       status = getBackfillStatusAction.status(id)
       assertThat(status.state).isEqualTo(BackfillState.PAUSED)
       assertThat(status.partitions.map { it.state })
-        .containsOnly(BackfillState.PAUSED)
+        .containsOnly(BackfillPartitionState.PAUSED)
       assertThat(status.event_logs[0].message).isEqualTo("backfill stopped")
       assertThat(status.event_logs[0].user).isEqualTo("molly")
 
