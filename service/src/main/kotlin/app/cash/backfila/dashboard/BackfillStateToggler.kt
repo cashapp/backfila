@@ -3,6 +3,7 @@ package app.cash.backfila.dashboard
 import app.cash.backfila.service.SlackHelper
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillState
+import app.cash.backfila.service.persistence.BackfillState.CANCELLED
 import app.cash.backfila.service.persistence.BackfillState.PAUSED
 import app.cash.backfila.service.persistence.BackfillState.RUNNING
 import app.cash.backfila.service.persistence.DbBackfillRun
@@ -25,7 +26,10 @@ class BackfillStateToggler @Inject constructor(
     val requiredCurrentState = when (desiredState) {
       PAUSED -> RUNNING
       RUNNING -> PAUSED
-      else -> throw IllegalArgumentException("can only toggle to RUNNING or PAUSED")
+      CANCELLED -> PAUSED
+      else -> throw IllegalArgumentException(
+        "can only toggle between RUNNING and PAUSED or cancel a PAUSED run. "
+      )
     }
 
     transacter.transaction { session ->
@@ -46,22 +50,27 @@ class BackfillStateToggler @Inject constructor(
       }
       run.setState(session, queryFactory, desiredState)
 
-      val startedOrStopped = if (desiredState == RUNNING) "started" else "stopped"
+      val action = when (desiredState) {
+        PAUSED -> "stopped"
+        RUNNING -> "started"
+        CANCELLED -> "cancelled"
+        else -> desiredState.name
+      }
       session.save(
         DbEventLog(
           run.id,
           partition_id = null,
           user = caller.principal,
           type = DbEventLog.Type.STATE_CHANGE,
-          message = "backfill $startedOrStopped"
+          message = "backfill $action"
         )
       )
     }
 
-    if (desiredState == RUNNING) {
-      slackHelper.runStarted(Id(id), caller.principal)
-    } else {
-      slackHelper.runPaused(Id(id), caller.principal)
+    when (desiredState) {
+      RUNNING -> slackHelper.runStarted(Id(id), caller.principal)
+      PAUSED -> slackHelper.runPaused(Id(id), caller.principal)
+      CANCELLED -> slackHelper.runCancelled(Id(id), caller.principal)
     }
   }
 

@@ -55,7 +55,7 @@ class DbRunPartition() : DbUnsharded<DbRunPartition>, DbTimestampedEntity {
    */
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
-  lateinit var run_state: BackfillState
+  lateinit var partition_state: BackfillPartitionState
 
   @Column
   var lease_token: String? = null
@@ -120,14 +120,14 @@ class DbRunPartition() : DbUnsharded<DbRunPartition>, DbTimestampedEntity {
     backfill_run_id: Id<DbBackfillRun>,
     partition_name: String,
     backfill_range: KeyRange,
-    run_state: BackfillState,
+    run_state: BackfillPartitionState,
     estimated_record_count: Long?
   ) : this() {
     this.backfill_run_id = backfill_run_id
     this.partition_name = partition_name
     this.pkey_range_start = backfill_range.start
     this.pkey_range_end = backfill_range.end
-    this.run_state = run_state
+    this.partition_state = run_state
     this.lease_expires_at = Instant.ofEpochSecond(1L)
     this.estimated_record_count = estimated_record_count
   }

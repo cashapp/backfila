@@ -1,6 +1,7 @@
 package app.cash.backfila.dashboard
 
 import app.cash.backfila.service.persistence.BackfilaDb
+import app.cash.backfila.service.persistence.BackfillPartitionState
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.DbBackfillRun
 import app.cash.backfila.service.persistence.DbEventLog
@@ -26,7 +27,7 @@ import misk.web.mediatype.MediaTypes
 data class UiPartition(
   val id: Long,
   val name: String,
-  val state: BackfillState,
+  val state: BackfillPartitionState,
   val pkey_cursor: String?,
   val pkey_start: String?,
   val pkey_end: String?,
@@ -105,7 +106,7 @@ class GetBackfillStatusAction @Inject constructor(
     UiPartition(
       partition.id.id,
       partition.partition_name,
-      partition.run_state,
+      partition.partition_state,
       partition.pkey_cursor?.utf8(),
       partition.pkey_range_start?.utf8(),
       partition.pkey_range_end?.utf8(),

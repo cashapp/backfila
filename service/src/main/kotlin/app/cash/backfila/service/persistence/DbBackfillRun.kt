@@ -1,5 +1,6 @@
 package app.cash.backfila.service.persistence
 
+import app.cash.backfila.service.persistence.BackfillState.Companion.getPartitionState
 import com.google.common.base.Preconditions.checkState
 import java.time.Instant
 import javax.persistence.Column
@@ -130,18 +131,18 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
       .list(session)
 
   fun setState(session: Session, queryFactory: Query.Factory, state: BackfillState) {
-    // State can't be changed after being completed.
-    checkState(this.state != BackfillState.COMPLETE)
+    // Backfills in final states cannot change.
+    checkState(!BackfillState.FINAL_STATES.contains(this.state))
     this.state = state
     // Set the state of all the partitions that are not complete
     val query = session.hibernateSession.createQuery(
       "update DbRunPartition " +
-        "set run_state = :newState, version = version + 1 " +
-        "where backfill_run_id = :runId and run_state <> :completed"
+        "set partition_state = :newPartitionState, version = version + 1 " +
+        "where backfill_run_id = :runId and partition_state not in ( :finalPartitionStates )"
     )
     query.setParameter("runId", id)
-    query.setParameter("newState", state)
-    query.setParameter("completed", BackfillState.COMPLETE)
+    query.setParameter("newPartitionState", state.getPartitionState())
+    query.setParameterList("finalPartitionStates", BackfillPartitionState.FINAL_STATES)
     query.executeUpdate()
   }
 

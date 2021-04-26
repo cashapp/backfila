@@ -2,7 +2,7 @@ package app.cash.backfila.service.runner.statemachine
 
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.RunBatchResponse
-import app.cash.backfila.service.persistence.BackfillState
+import app.cash.backfila.service.persistence.BackfillPartitionState
 import app.cash.backfila.service.persistence.DbEventLog
 import app.cash.backfila.service.persistence.DbRunPartition
 import app.cash.backfila.service.runner.BackfillRunner
@@ -171,7 +171,7 @@ class BatchAwaiter(
   private fun completePartition() {
     val runComplete = backfillRunner.factory.transacter.transaction { session ->
       val dbRunPartition = session.load(backfillRunner.partitionId)
-      dbRunPartition.run_state = BackfillState.COMPLETE
+      dbRunPartition.partition_state = BackfillPartitionState.COMPLETE
       updateProgress(dbRunPartition)
 
       session.save(
@@ -190,7 +190,7 @@ class BatchAwaiter(
         session,
         backfillRunner.factory.queryFactory
       )
-      if (partitions.all { it.run_state == BackfillState.COMPLETE }) {
+      if (partitions.all { it.partition_state == BackfillPartitionState.COMPLETE }) {
         dbRunPartition.backfill_run.complete()
         logger.info { "Backfill ${backfillRunner.backfillName} completed" }
 
