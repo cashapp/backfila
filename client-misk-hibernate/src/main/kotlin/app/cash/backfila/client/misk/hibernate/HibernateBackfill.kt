@@ -26,7 +26,8 @@ abstract class HibernateBackfill<E : DbEntity<E>, Pkey : Any, Param : Any> : Bac
 
     // Like Backfill<MyEntity, Id<MyEntity>, Parameters>.
     val supertype = thisType.getSupertype(
-        HibernateBackfill::class.java).type as ParameterizedType
+      HibernateBackfill::class.java
+    ).type as ParameterizedType
 
     // Like MyEntity.
     @Suppress("UNCHECKED_CAST")

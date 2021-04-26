@@ -34,17 +34,17 @@ class GetRegisteredBackfillsAction @Inject constructor(
   ): GetRegisteredBackfillsResponse {
     val backfills = transacter.transaction { session ->
       val dbService = queryFactory.newQuery<ServiceQuery>()
-          .registryName(service)
-          .uniqueResult(session) ?: throw BadRequestException("`$service` doesn't exist")
+        .registryName(service)
+        .uniqueResult(session) ?: throw BadRequestException("`$service` doesn't exist")
       val backfills = queryFactory.newQuery<RegisteredBackfillQuery>()
-          .serviceId(dbService.id)
-          .active()
-          .orderByName()
-          .list(session)
+        .serviceId(dbService.id)
+        .active()
+        .orderByName()
+        .list(session)
       backfills.map {
         RegisteredBackfill(
-            it.name,
-            it.parameterNames()
+          it.name,
+          it.parameterNames()
         )
       }
     }

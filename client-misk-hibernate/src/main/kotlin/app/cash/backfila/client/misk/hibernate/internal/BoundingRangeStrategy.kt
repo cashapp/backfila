@@ -88,12 +88,13 @@ class VitessSingleCursorBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any> (
     return transacter.shards(keyspace).parallelStream().map {
       transacter.transaction(it) {
         // We don't provide a schema when pinned to a shard.
-        session -> selectMaxBound(backfill, session, onlyTable(backfill), previousEndKey, backfillRange, scanSize)
+        session ->
+        selectMaxBound(backfill, session, onlyTable(backfill), previousEndKey, backfillRange, scanSize)
       }
     }.toList()
-        .filterNotNull()
-        // Pkey must have a natural ordering
-        .minWith(Ordering.natural<Comparable<Pkey>>() as Comparator<Pkey>)
+      .filterNotNull()
+      // Pkey must have a natural ordering
+      .minWith(Ordering.natural<Comparable<Pkey>>() as Comparator<Pkey>)
   }
 }
 

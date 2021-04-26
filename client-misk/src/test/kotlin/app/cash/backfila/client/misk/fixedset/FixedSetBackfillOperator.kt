@@ -20,48 +20,53 @@ class FixedSetBackfillOperator<Param : Any>(
 
   override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
     backfill.checkBackfillConfig(
-        parametersOperator.constructBackfillConfig(request.parameters, request.dry_run))
+      parametersOperator.constructBackfillConfig(request.parameters, request.dry_run)
+    )
 
     val partitions = mutableListOf<PrepareBackfillResponse.Partition>()
 
     for (fixedPartition in datastore.dataByInstance) {
-      partitions.add(PrepareBackfillResponse.Partition.Builder()
+      partitions.add(
+        PrepareBackfillResponse.Partition.Builder()
           .partition_name(fixedPartition.key)
           .backfill_range(makeKeyRange(0, fixedPartition.value.size - 1))
-          .build())
+          .build()
+      )
     }
 
     return PrepareBackfillResponse.Builder()
-        .partitions(partitions)
-        .build()
+      .partitions(partitions)
+      .build()
   }
 
   override fun getNextBatchRange(request: GetNextBatchRangeRequest): GetNextBatchRangeResponse {
     backfill.checkBackfillConfig(
-        parametersOperator.constructBackfillConfig(request.parameters, request.dry_run))
+      parametersOperator.constructBackfillConfig(request.parameters, request.dry_run)
+    )
 
     val partition = datastore.dataByInstance[request.partition_name] ?: error("Invalid partition name")
     val previousEndKey: Int = request.previous_end_key?.utf8()?.toInt() ?: -1
     if (previousEndKey == partition.size - 1) {
       return GetNextBatchRangeResponse.Builder()
-          .build()
+        .build()
     } else {
       val end = minOf(previousEndKey + request.batch_size.toInt(), partition.size - 1)
       val start = previousEndKey + 1
       val batch = GetNextBatchRangeResponse.Batch.Builder()
-          .batch_range(makeKeyRange(start, end))
-          .matching_record_count((end - start).toLong())
-          .scanned_record_count((end - start).toLong())
-          .build()
+        .batch_range(makeKeyRange(start, end))
+        .matching_record_count((end - start).toLong())
+        .scanned_record_count((end - start).toLong())
+        .build()
       return GetNextBatchRangeResponse.Builder()
-          .batches(listOf(batch))
-          .build()
+        .batches(listOf(batch))
+        .build()
     }
   }
 
   override fun runBatch(request: RunBatchRequest): RunBatchResponse {
     backfill.checkBackfillConfig(
-        parametersOperator.constructBackfillConfig(request.parameters, request.dry_run))
+      parametersOperator.constructBackfillConfig(request.parameters, request.dry_run)
+    )
     val partition = datastore.dataByInstance[request.partition_name]!!
     val start = request.batch_range.start.utf8().toInt()
     val end = request.batch_range.end.utf8().toInt()
@@ -77,8 +82,8 @@ class FixedSetBackfillOperator<Param : Any>(
     end: Int
   ): KeyRange? {
     return KeyRange.Builder()
-        .start(start.toString().encodeUtf8())
-        .end(end.toString().encodeUtf8())
-        .build()
+      .start(start.toString().encodeUtf8())
+      .end(end.toString().encodeUtf8())
+      .build()
   }
 }

@@ -34,18 +34,18 @@ class EnvoyClientServiceClientProvider @Inject constructor(
     val env = connectorExtraData?.let { adapter().fromJson(connectorExtraData)?.clusterType }
 
     val envoyConfig = HttpClientEnvoyConfig(
-        app = serviceName,
-        env = env
-      )
+      app = serviceName,
+      env = env
+    )
     val baseUrl = URL(envoyClientEndpointProvider.url(envoyConfig))
     val httpClientEndpointConfig = httpClientsConfig[baseUrl]
     val okHttpClient = httpClientFactory.create(httpClientEndpointConfig)
     val retrofit = Retrofit.Builder()
-        .baseUrl(baseUrl)
-        .client(okHttpClient)
-        .addConverterFactory(WireConverterFactory.create())
-        .addCallAdapterFactory(GuavaCallAdapterFactory.create())
-        .build()
+      .baseUrl(baseUrl)
+      .client(okHttpClient)
+      .addConverterFactory(WireConverterFactory.create())
+      .addCallAdapterFactory(GuavaCallAdapterFactory.create())
+      .build()
     val api = retrofit.create(EnvoyClientServiceApi::class.java)
     return EnvoyClientServiceClient(api)
   }

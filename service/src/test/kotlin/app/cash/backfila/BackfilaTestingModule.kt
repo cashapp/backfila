@@ -32,20 +32,22 @@ import misk.scope.ActionScopedProviderModule
 internal class BackfilaTestingModule : KAbstractModule() {
   override fun configure() {
     val config = BackfilaConfig(
-        backfill_runner_threads = null,
-        data_source_clusters = DataSourceClustersConfig(
-            mapOf("backfila-001" to DataSourceClusterConfig(
-                writer = DataSourceConfig(
-                    type = DataSourceType.MYSQL,
-                    database = "backfila_test",
-                    username = "root",
-                    migrations_resource = "classpath:/migrations"
-                ),
-                reader = null
-            ))
-        ),
-        web_url_root = "",
-        slack = null
+      backfill_runner_threads = null,
+      data_source_clusters = DataSourceClustersConfig(
+        mapOf(
+          "backfila-001" to DataSourceClusterConfig(
+            writer = DataSourceConfig(
+              type = DataSourceType.MYSQL,
+              database = "backfila_test",
+              username = "root",
+              migrations_resource = "classpath:/migrations"
+            ),
+            reader = null
+          )
+        )
+      ),
+      web_url_root = "",
+      slack = null
     )
     bind<BackfilaConfig>().toInstance(config)
     install(DeploymentModule.forTesting())
@@ -58,10 +60,10 @@ internal class BackfilaTestingModule : KAbstractModule() {
     install(ServiceWebActionsModule())
 
     bind(BackfilaClientServiceClientProvider::class.java)
-        .to(FakeBackfilaClientServiceClientProvider::class.java)
+      .to(FakeBackfilaClientServiceClientProvider::class.java)
 
     bind(BackfillRunnerLoggingSetupProvider::class.java)
-        .to(BackfillRunnerNoLoggingSetupProvider::class.java)
+      .to(BackfillRunnerNoLoggingSetupProvider::class.java)
 
     install(object : ActionScopedProviderModule() {
       override fun configureProviders() {
@@ -70,18 +72,22 @@ internal class BackfilaTestingModule : KAbstractModule() {
     })
 
     newMapBinder<String, BackfilaClientServiceClientProvider>(ForConnectors::class)
-        .addBinding(Connectors.HTTP)
-        .to(FakeBackfilaClientServiceClientProvider::class.java)
+      .addBinding(Connectors.HTTP)
+      .to(FakeBackfilaClientServiceClientProvider::class.java)
     newMapBinder<String, BackfilaClientServiceClientProvider>(ForConnectors::class)
-        .addBinding(Connectors.ENVOY)
-        .to(FakeBackfilaClientServiceClientProvider::class.java)
+      .addBinding(Connectors.ENVOY)
+      .to(FakeBackfilaClientServiceClientProvider::class.java)
   }
 
   @Provides @ForBackfilaScheduler @Singleton
   fun backfillRunnerExecutor(): ListeningExecutorService {
     // TODO better executor for testing
-    return MoreExecutors.listeningDecorator(Executors.newCachedThreadPool(ThreadFactoryBuilder()
-        .setNameFormat("backfila-runner-%d")
-        .build()))
+    return MoreExecutors.listeningDecorator(
+      Executors.newCachedThreadPool(
+        ThreadFactoryBuilder()
+          .setNameFormat("backfila-runner-%d")
+          .build()
+      )
+    )
   }
 }

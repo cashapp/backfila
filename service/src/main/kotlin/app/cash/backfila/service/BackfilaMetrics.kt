@@ -75,7 +75,7 @@ class BackfilaMetrics @Inject internal constructor(metrics: Metrics) {
   val eta = metrics.gauge(
     name = "backfill_eta",
     help = "Estimated remaining time for backfill completion in milliseconds based on the" +
-        " records completed in the last minute",
+      " records completed in the last minute",
     labelNames = perBackfillLabelNames
   )
 

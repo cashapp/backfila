@@ -61,53 +61,53 @@ class GetBackfillRunsAction @Inject constructor(
   ): GetBackfillRunsResponse {
     return transacter.transaction { session ->
       val dbService = queryFactory.newQuery<ServiceQuery>()
-          .registryName(service)
-          .uniqueResult(session) ?: throw BadRequestException("`$service` doesn't exist")
+        .registryName(service)
+        .uniqueResult(session) ?: throw BadRequestException("`$service` doesn't exist")
 
       val runningBackfills = queryFactory.newQuery<BackfillRunQuery>()
-          .serviceId(dbService.id)
-          .state(BackfillState.RUNNING)
-          .orderByIdDesc()
-          .list(session)
+        .serviceId(dbService.id)
+        .state(BackfillState.RUNNING)
+        .orderByIdDesc()
+        .list(session)
 
       val runningPartitions = partitions(session, runningBackfills)
       val runningRegisteredBackfills = registeredBackfills(session, runningBackfills)
       val runningUiBackfills = runningBackfills
-          .map {
-            dbToUi(
-                session,
-                it,
-                runningPartitions.getValue(it.id),
-                runningRegisteredBackfills.getValue(it.registered_backfill_id)
-            )
-          }
+        .map {
+          dbToUi(
+            session,
+            it,
+            runningPartitions.getValue(it.id),
+            runningRegisteredBackfills.getValue(it.registered_backfill_id)
+          )
+        }
 
       val (pausedBackfills, nextOffset) = queryFactory.newQuery<BackfillRunQuery>()
-          .serviceId(dbService.id)
-          .stateNot(BackfillState.RUNNING)
-          .newPager(
-              idDescPaginator(),
-              initialOffset = pagination_token?.let { Offset(it) },
-              pageSize = 20
-          )
-          .nextPage(session) ?: Page.empty()
+        .serviceId(dbService.id)
+        .stateNot(BackfillState.RUNNING)
+        .newPager(
+          idDescPaginator(),
+          initialOffset = pagination_token?.let { Offset(it) },
+          pageSize = 20
+        )
+        .nextPage(session) ?: Page.empty()
 
       val pausedRegisteredBackfills = registeredBackfills(session, pausedBackfills)
       val pausedPartitions = partitions(session, pausedBackfills)
       val pausedUiBackfills = pausedBackfills
-          .map {
-            dbToUi(
-                session,
-                it,
-                pausedPartitions.getValue(it.id),
-                pausedRegisteredBackfills.getValue(it.registered_backfill_id)
-            )
-          }
+        .map {
+          dbToUi(
+            session,
+            it,
+            pausedPartitions.getValue(it.id),
+            pausedRegisteredBackfills.getValue(it.registered_backfill_id)
+          )
+        }
 
       GetBackfillRunsResponse(
-          runningUiBackfills,
-          pausedUiBackfills,
-          next_pagination_token = nextOffset?.offset
+        runningUiBackfills,
+        pausedUiBackfills,
+        next_pagination_token = nextOffset?.offset
       )
     }
   }
@@ -116,17 +116,17 @@ class GetBackfillRunsAction @Inject constructor(
     session: Session,
     runs: List<DbBackfillRun>
   ) = queryFactory.newQuery<RegisteredBackfillQuery>()
-      .idIn(runs.map { it.registered_backfill_id }.toSet())
-      .list(session)
-      .associateBy { it.id }
+    .idIn(runs.map { it.registered_backfill_id }.toSet())
+    .list(session)
+    .associateBy { it.id }
 
   private fun partitions(
     session: Session,
     pausedBackfills: List<DbBackfillRun>
   ) = queryFactory.newQuery<RunPartitionQuery>()
-      .backfillRunIdIn(pausedBackfills.map { it.id })
-      .list(session)
-      .groupBy { it.backfill_run_id }
+    .backfillRunIdIn(pausedBackfills.map { it.id })
+    .list(session)
+    .groupBy { it.backfill_run_id }
 
   private fun dbToUi(
     @Suppress("UNUSED_PARAMETER") session: Session,
@@ -136,22 +136,22 @@ class GetBackfillRunsAction @Inject constructor(
   ): UiBackfillRun {
     val precomputingDone = partitions.all { it.precomputing_done }
     val computedMatchingRecordCount = partitions
-        .map { it.computed_matching_record_count }
-        .sum()
+      .map { it.computed_matching_record_count }
+      .sum()
     val backfilledMatchingRecordCount = partitions
-        .map { it.backfilled_matching_record_count }
-        .sum()
+      .map { it.backfilled_matching_record_count }
+      .sum()
     return UiBackfillRun(
-        run.id.toString(),
-        registeredBackfill.name,
-        run.state,
-        run.dry_run,
-        run.created_at,
-        run.created_by_user,
-        run.updated_at,
-        precomputingDone,
-        computedMatchingRecordCount,
-        backfilledMatchingRecordCount
+      run.id.toString(),
+      registeredBackfill.name,
+      run.state,
+      run.dry_run,
+      run.created_at,
+      run.created_by_user,
+      run.updated_at,
+      precomputingDone,
+      computedMatchingRecordCount,
+      backfilledMatchingRecordCount
     )
   }
 

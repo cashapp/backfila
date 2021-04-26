@@ -11,19 +11,23 @@ import retrofit2.http.POST
 
 interface BackfilaApi {
   @POST("/configure_service")
-  @Headers(value = [
-    "Accept: application/x-protobuf",
-    "Content-Type: application/x-protobuf"
-  ])
+  @Headers(
+    value = [
+      "Accept: application/x-protobuf",
+      "Content-Type: application/x-protobuf"
+    ]
+  )
   fun configureService(
     @Body request: ConfigureServiceRequest
   ): Call<ConfigureServiceResponse>
 
   @POST("/create-and-start-backfill")
-  @Headers(value = [
-    "Accept: application/x-protobuf",
-    "Content-Type: application/x-protobuf"
-  ])
+  @Headers(
+    value = [
+      "Accept: application/x-protobuf",
+      "Content-Type: application/x-protobuf"
+    ]
+  )
   fun createAndStartbackfill(
     @Body request: CreateAndStartBackfillRequest
   ): Call<CreateAndStartBackfillResponse>

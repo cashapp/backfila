@@ -44,18 +44,26 @@ class UpdateBackfillActionTest {
   @Test
   fun update() {
     scope.fakeCaller(service = "deep-fryer") {
-      configureServiceAction.configureService(ConfigureServiceRequest.Builder()
-          .backfills(listOf(
-              ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null,
-                  null, false)))
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "ChickenSandwich", "Description", listOf(), null,
+                null, false
+              )
+            )
+          )
           .connector_type(Connectors.ENVOY)
-          .build())
+          .build()
+      )
     }
     scope.fakeCaller(user = "molly") {
-      val response = createBackfillAction.create("deep-fryer",
-          CreateBackfillRequest.Builder()
-              .backfill_name("ChickenSandwich")
-              .build()
+      val response = createBackfillAction.create(
+        "deep-fryer",
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build()
       )
 
       val id = response.backfill_run_id
@@ -90,18 +98,26 @@ class UpdateBackfillActionTest {
   @Test
   fun `scan size must be at least batch size`() {
     scope.fakeCaller(service = "deep-fryer") {
-      configureServiceAction.configureService(ConfigureServiceRequest.Builder()
-          .backfills(listOf(
-              ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null,
-                  null, false)))
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "ChickenSandwich", "Description", listOf(), null,
+                null, false
+              )
+            )
+          )
           .connector_type(Connectors.ENVOY)
-          .build())
+          .build()
+      )
     }
     scope.fakeCaller(user = "molly") {
-      val response = createBackfillAction.create("deep-fryer",
-          CreateBackfillRequest.Builder()
-              .backfill_name("ChickenSandwich")
-              .build()
+      val response = createBackfillAction.create(
+        "deep-fryer",
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build()
       )
 
       val id = response.backfill_run_id
@@ -109,30 +125,38 @@ class UpdateBackfillActionTest {
       assertThatThrownBy {
         updateBackfillAction.update(id, UpdateBackfillRequest(scan_size = 12))
       }.isInstanceOf(BadRequestException::class.java)
-          .hasMessageContaining("scan_size must be >= batch_size")
+        .hasMessageContaining("scan_size must be >= batch_size")
 
       assertThatThrownBy {
         updateBackfillAction.update(id, UpdateBackfillRequest(batch_size = 10000))
       }.isInstanceOf(BadRequestException::class.java)
-          .hasMessageContaining("scan_size must be >= batch_size")
+        .hasMessageContaining("scan_size must be >= batch_size")
     }
   }
 
   @Test
   fun `minimum values`() {
     scope.fakeCaller(service = "deep-fryer") {
-      configureServiceAction.configureService(ConfigureServiceRequest.Builder()
-          .backfills(listOf(
-              ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null,
-                  null, false)))
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "ChickenSandwich", "Description", listOf(), null,
+                null, false
+              )
+            )
+          )
           .connector_type(Connectors.ENVOY)
-          .build())
+          .build()
+      )
     }
     scope.fakeCaller(user = "molly") {
-      val response = createBackfillAction.create("deep-fryer",
-          CreateBackfillRequest.Builder()
-              .backfill_name("ChickenSandwich")
-              .build()
+      val response = createBackfillAction.create(
+        "deep-fryer",
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build()
       )
 
       val id = response.backfill_run_id
@@ -140,22 +164,22 @@ class UpdateBackfillActionTest {
       assertThatThrownBy {
         updateBackfillAction.update(id, UpdateBackfillRequest(scan_size = 0))
       }.isInstanceOf(BadRequestException::class.java)
-          .hasMessageContaining("scan_size must be >= 1")
+        .hasMessageContaining("scan_size must be >= 1")
 
       assertThatThrownBy {
         updateBackfillAction.update(id, UpdateBackfillRequest(batch_size = 0))
       }.isInstanceOf(BadRequestException::class.java)
-          .hasMessageContaining("batch_size must be >= 1")
+        .hasMessageContaining("batch_size must be >= 1")
 
       assertThatThrownBy {
         updateBackfillAction.update(id, UpdateBackfillRequest(num_threads = 0))
       }.isInstanceOf(BadRequestException::class.java)
-          .hasMessageContaining("num_threads must be >= 1")
+        .hasMessageContaining("num_threads must be >= 1")
 
       assertThatThrownBy {
         updateBackfillAction.update(id, UpdateBackfillRequest(extra_sleep_ms = -1))
       }.isInstanceOf(BadRequestException::class.java)
-          .hasMessageContaining("extra_sleep_ms must be >= 0")
+        .hasMessageContaining("extra_sleep_ms must be >= 0")
     }
   }
 }

@@ -24,25 +24,25 @@ internal class ClientMiskTestingModule(
   override fun configure() {
     val dataSourceConfig = when {
       useVitess -> DataSourceConfig(
-          type = DataSourceType.VITESS_MYSQL,
-          username = "root",
-          migrations_resource = "classpath:/schema",
-          vitess_schema_resource_root = "classpath:/schema"
+        type = DataSourceType.VITESS_MYSQL,
+        username = "root",
+        migrations_resource = "classpath:/schema",
+        vitess_schema_resource_root = "classpath:/schema"
       )
       else -> DataSourceConfig(
-          type = DataSourceType.MYSQL,
-          database = "backfila_clientmiskservice_test",
-          username = "root",
-          migrations_resource = "classpath:/schema"
+        type = DataSourceType.MYSQL,
+        database = "backfila_clientmiskservice_test",
+        username = "root",
+        migrations_resource = "classpath:/schema"
       )
     }
     install(HibernateModule(ClientMiskService::class, dataSourceConfig))
     install(object : HibernateEntityModule(ClientMiskService::class) {
       override fun configureHibernate() {
         addEntities(
-            DbMenu::class,
-            DbOrder::class,
-            DbRestaurant::class
+          DbMenu::class,
+          DbOrder::class,
+          DbRestaurant::class
         )
       }
     })
@@ -52,14 +52,16 @@ internal class ClientMiskTestingModule(
     install(LogCollectorModule())
     install(MiskTestingServiceModule())
     install(EmbeddedBackfilaModule())
-    install(BackfillModule(
+    install(
+      BackfillModule(
         BackfilaClientConfig(
-            url = "test.url", slack_channel = "#test"
+          url = "test.url", slack_channel = "#test"
         )
-    ))
+      )
+    )
 
     bind(BackfilaClientLoggingSetupProvider::class.java)
-        .to(BackfilaClientNoLoggingSetupProvider::class.java)
+      .to(BackfilaClientNoLoggingSetupProvider::class.java)
 
     install(create<SinglePartitionHibernateTestBackfill>())
     install(create<ChickenToBeefBackfill>())

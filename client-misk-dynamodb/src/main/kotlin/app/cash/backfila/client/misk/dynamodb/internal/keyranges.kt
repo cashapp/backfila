@@ -42,7 +42,7 @@ class DynamoDbKeyRangeCodec @Inject constructor(
   @ForBackfila moshi: Moshi
 ) {
   private val adapter = moshi.adapter<Map<String, AttributeValue>>(
-      Types.newParameterizedType(Map::class.java, String::class.java, AttributeValue::class.java)
+    Types.newParameterizedType(Map::class.java, String::class.java, AttributeValue::class.java)
   )
 
   companion object {
@@ -61,10 +61,11 @@ class DynamoDbKeyRangeCodec @Inject constructor(
     require(endSegment.lastEvaluatedKey == null)
 
     return DynamoDbKeyRange(
-        startSegment.offset,
-        endSegment.offset,
-        startSegment.count,
-        startSegment.lastEvaluatedKey)
+      startSegment.offset,
+      endSegment.offset,
+      startSegment.count,
+      startSegment.lastEvaluatedKey
+    )
   }
 
   internal fun decodeSegment(segment: ByteString): SegmentData {
@@ -72,7 +73,7 @@ class DynamoDbKeyRangeCodec @Inject constructor(
     val tag = buffer.readUtf8(2)
     require(tag == VERSION) {
       "Encountered an incorrect version $tag instead of $VERSION . Make sure any deploys have " +
-          "completed and re-create the backfill."
+        "completed and re-create the backfill."
     }
     require(buffer.readUtf8(1) == ":")
     val offset = buffer.readUtf8(10).toInt()
@@ -94,9 +95,9 @@ class DynamoDbKeyRangeCodec @Inject constructor(
     lastEvaluatedKey: Map<String, AttributeValue>? = null
   ): KeyRange {
     return KeyRange.Builder()
-        .start(encodeSegment(start, count, lastEvaluatedKey))
-        .end(encodeSegment(end, count))
-        .build()
+      .start(encodeSegment(start, count, lastEvaluatedKey))
+      .end(encodeSegment(end, count))
+      .build()
   }
 
   private fun encodeSegment(
@@ -108,7 +109,7 @@ class DynamoDbKeyRangeCodec @Inject constructor(
     val stringOffset = INT_FORMAT.format(offset)
     val stringCount = INT_FORMAT.format(count)
     val buffer = Buffer()
-        .writeUtf8("$VERSION:$stringOffset/$stringCount")
+      .writeUtf8("$VERSION:$stringOffset/$stringCount")
     if (lastEvaluatedKey != null) {
       buffer.writeUtf8(":").writeUtf8(adapter.toJson(lastEvaluatedKey))
     }
@@ -138,30 +139,30 @@ class DynamoDbKeyRangeCodec @Inject constructor(
 object AwsAttributeValueAdapter {
   @ToJson internal fun toJson(attributeValue: AttributeValue): DynamoDbKeyRangeCodec.AttributeValueJson {
     return DynamoDbKeyRangeCodec.AttributeValueJson(
-        attributeValue.s,
-        attributeValue.n,
-        attributeValue.b?.toByteString(),
-        attributeValue.ss,
-        attributeValue.ns,
-        attributeValue.bs?.map { it.toByteString() },
-        attributeValue.m?.mapValues { toJson(it.value) },
-        attributeValue.l?.map { toJson(it) },
-        attributeValue.getNULL(),
-        attributeValue.bool
+      attributeValue.s,
+      attributeValue.n,
+      attributeValue.b?.toByteString(),
+      attributeValue.ss,
+      attributeValue.ns,
+      attributeValue.bs?.map { it.toByteString() },
+      attributeValue.m?.mapValues { toJson(it.value) },
+      attributeValue.l?.map { toJson(it) },
+      attributeValue.getNULL(),
+      attributeValue.bool
     )
   }
 
   @FromJson internal fun fromJson(json: DynamoDbKeyRangeCodec.AttributeValueJson): AttributeValue {
     return AttributeValue()
-        .withS(json.s)
-        .withN(json.n)
-        .withB(json.b?.asByteBuffer())
-        .withSS(json.sS)
-        .withNS(json.nS)
-        .withBS(json.bS?.map { it.asByteBuffer() })
-        .withM(json.m?.mapValues { fromJson(it.value) })
-        .withL(json.l?.map { fromJson(it) })
-        .withNULL(json.nULLValue)
-        .withBOOL(json.bOOL)
+      .withS(json.s)
+      .withN(json.n)
+      .withB(json.b?.asByteBuffer())
+      .withSS(json.sS)
+      .withNS(json.nS)
+      .withBS(json.bS?.map { it.asByteBuffer() })
+      .withM(json.m?.mapValues { fromJson(it.value) })
+      .withL(json.l?.map { fromJson(it) })
+      .withNULL(json.nULLValue)
+      .withBOOL(json.bOOL)
   }
 }

@@ -41,17 +41,17 @@ private object DynamoDbBackfillBackendModule : KAbstractModule() {
   @Provides @Singleton @ForBackfila
   fun provideMoshi(): Moshi {
     return Moshi.Builder()
-        .add(AwsAttributeValueAdapter)
-        .add(KotlinJsonAdapterFactory()) // Must be last.
-        .build()
+      .add(AwsAttributeValueAdapter)
+      .add(KotlinJsonAdapterFactory()) // Must be last.
+      .build()
   }
 }
 
 private fun mapBinder(binder: Binder) = MapBinder.newMapBinder(
-    binder,
-    object : TypeLiteral<String>() {},
-    object : TypeLiteral<KClass<out DynamoDbBackfill<*, *>>>() {},
-    ForBackfila::class.java
+  binder,
+  object : TypeLiteral<String>() {},
+  object : TypeLiteral<KClass<out DynamoDbBackfill<*, *>>>() {},
+  ForBackfila::class.java
 )
 
 @BindingAnnotation

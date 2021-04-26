@@ -80,44 +80,44 @@ class GetBackfillStatusAction @Inject constructor(
   ): GetBackfillStatusResponse {
     return transacter.transaction { session ->
       val run = session.loadOrNull<DbBackfillRun>(Id(id))
-          ?: throw BadRequestException("backfill $id doesn't exist")
+        ?: throw BadRequestException("backfill $id doesn't exist")
       val partitions = run.partitions(session, queryFactory)
       GetBackfillStatusResponse(
-          run.service.registry_name,
-          run.registered_backfill.name,
-          run.state,
-          run.parameters()?.mapValues { (k, v) -> v.utf8() },
-          run.batch_size,
-          run.scan_size,
-          run.dry_run,
-          run.num_threads,
-          run.created_at,
-          run.created_by_user,
-          run.extra_sleep_ms,
-          run.backoff_schedule,
-          partitions.map { dbToUi(it) },
-          events(session, run, partitions)
+        run.service.registry_name,
+        run.registered_backfill.name,
+        run.state,
+        run.parameters()?.mapValues { (k, v) -> v.utf8() },
+        run.batch_size,
+        run.scan_size,
+        run.dry_run,
+        run.num_threads,
+        run.created_at,
+        run.created_by_user,
+        run.extra_sleep_ms,
+        run.backoff_schedule,
+        partitions.map { dbToUi(it) },
+        events(session, run, partitions)
       )
     }
   }
 
   private fun dbToUi(partition: DbRunPartition) =
-      UiPartition(
-          partition.id.id,
-          partition.partition_name,
-          partition.run_state,
-          partition.pkey_cursor?.utf8(),
-          partition.pkey_range_start?.utf8(),
-          partition.pkey_range_end?.utf8(),
-          partition.precomputing_done,
-          partition.precomputing_pkey_cursor?.utf8(),
-          partition.computed_scanned_record_count,
-          partition.computed_matching_record_count,
-          partition.backfilled_scanned_record_count,
-          partition.backfilled_matching_record_count,
-          partition.scanned_records_per_minute,
-          partition.matching_records_per_minute
-      )
+    UiPartition(
+      partition.id.id,
+      partition.partition_name,
+      partition.run_state,
+      partition.pkey_cursor?.utf8(),
+      partition.pkey_range_start?.utf8(),
+      partition.pkey_range_end?.utf8(),
+      partition.precomputing_done,
+      partition.precomputing_pkey_cursor?.utf8(),
+      partition.computed_scanned_record_count,
+      partition.computed_matching_record_count,
+      partition.backfilled_scanned_record_count,
+      partition.backfilled_matching_record_count,
+      partition.scanned_records_per_minute,
+      partition.matching_records_per_minute
+    )
 
   private fun events(
     session: Session,
@@ -126,19 +126,19 @@ class GetBackfillStatusAction @Inject constructor(
   ): List<UiEventLog> {
     val partitionsById = partitions.associateBy { it.id }
     return queryFactory.newQuery<EventLogQuery>()
-        .backfillRunId(run.id)
-        .orderByIdDesc()
-        .apply { maxRows = 50 }
-        .list(session)
-        .map {
-          UiEventLog(
-              it.created_at,
-              it.type,
-              it.user,
-              partitionsById[it.partition_id]?.partition_name,
-              it.message,
-              it.extra_data
-          )
-        }
+      .backfillRunId(run.id)
+      .orderByIdDesc()
+      .apply { maxRows = 50 }
+      .list(session)
+      .map {
+        UiEventLog(
+          it.created_at,
+          it.type,
+          it.user,
+          partitionsById[it.partition_id]?.partition_name,
+          it.message,
+          it.extra_data
+        )
+      }
   }
 }

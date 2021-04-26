@@ -11,8 +11,9 @@ class PkeySqlAdapter @Inject constructor() {
       String::class.java -> sqlString as Pkey
       Id::class.java -> Id<DbPlaceholder>(sqlString.toLong()) as Pkey
       else -> throw IllegalArgumentException(
-          "Unsupported backfill primary key type: $type. Add an adapter to this class or " +
-              "use a different type as your pkey.")
+        "Unsupported backfill primary key type: $type. Add an adapter to this class or " +
+          "use a different type as your pkey."
+      )
     }
   }
 

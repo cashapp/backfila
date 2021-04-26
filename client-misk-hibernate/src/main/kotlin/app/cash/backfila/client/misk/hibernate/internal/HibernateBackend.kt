@@ -40,9 +40,10 @@ class HibernateBackend @Inject constructor(
   private fun <E : DbEntity<E>, Pkey : Any, Param : Any> createHibernateOperator(
     backfill: HibernateBackfill<E, Pkey, Param>
   ) = HibernateBackfillOperator(
-      backfill,
-      BackfilaParametersOperator(parametersClass(backfill::class)),
-      this)
+    backfill,
+    BackfilaParametersOperator(parametersClass(backfill::class)),
+    this
+  )
 
   override fun create(backfillName: String, backfillId: String): BackfillOperator? {
     val backfill = getBackfill(backfillName, backfillId)
@@ -58,9 +59,9 @@ class HibernateBackend @Inject constructor(
   override fun backfills(): Set<BackfillRegistration> {
     return backfills.map {
       BackfillRegistration(
-          name = it.key,
-          description = (it.value.annotations.find { it is Description } as? Description)?.text,
-          parametersClass = parametersClass(it.value as KClass<HibernateBackfill<*, *, Any>>)
+        name = it.key,
+        description = (it.value.annotations.find { it is Description } as? Description)?.text,
+        parametersClass = parametersClass(it.value as KClass<HibernateBackfill<*, *, Any>>)
       )
     }.toSet()
   }

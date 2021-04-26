@@ -23,8 +23,8 @@ class BackfillOperatorFactory @Inject constructor(
    * cache even if the backfill stores some state.
    */
   private val instanceCache: Cache<String, BackfillOperator> = CacheBuilder.newBuilder()
-      .expireAfterAccess(10, TimeUnit.MINUTES)
-      .build()
+    .expireAfterAccess(10, TimeUnit.MINUTES)
+    .build()
 
   fun create(backfillName: String, backfillId: String): BackfillOperator {
     return instanceCache.get(backfillId) {

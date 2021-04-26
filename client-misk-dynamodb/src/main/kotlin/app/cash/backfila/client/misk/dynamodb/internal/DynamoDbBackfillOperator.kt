@@ -26,30 +26,35 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
 
   override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
     val config =
-        parametersOperator.constructBackfillConfig(request.parameters, request.dry_run)
+      parametersOperator.constructBackfillConfig(request.parameters, request.dry_run)
     backfill.validate(config)
 
     if (backfill.mustHaveProvisionedBillingMode()) {
       val tableMapper = dynamoDb.newTableMapper<I, Any, Any>(backfill.itemType.java)
       val tableDescription = tableMapper.describeTable()
       // It's odd but a null billingModeSummary implies "PROVISIONED"
-      require(tableDescription.billingModeSummary == null ||
+      require(
+        tableDescription.billingModeSummary == null ||
           tableDescription.billingModeSummary.billingMode == "PROVISIONED",
-          { "Trying to prepare a backfill on a Dynamo table named ${tableDescription.tableName} " +
-              "with a billing mode that is not PROVISIONED, it is " +
-              "${tableDescription.billingModeSummary.billingMode}. This can get very expensive. " +
-              "Please provision your dynamo capacity for this table and try again."
-          })
+        {
+          "Trying to prepare a backfill on a Dynamo table named ${tableDescription.tableName} " +
+            "with a billing mode that is not PROVISIONED, it is " +
+            "${tableDescription.billingModeSummary.billingMode}. This can get very expensive. " +
+            "Please provision your dynamo capacity for this table and try again."
+        }
+      )
     }
 
     // TODO(mikepaw): dynamically select the segment count by probing DynamoDB.
     val segmentCount = backfill.fixedSegmentCount(config) ?: 2048
     val partitionCount = backfill.partitionCount(config)
-    require(partitionCount in 1..segmentCount &&
+    require(
+      partitionCount in 1..segmentCount &&
         Integer.bitCount(partitionCount) == 1 &&
-        Integer.bitCount(segmentCount) == 1) {
+        Integer.bitCount(segmentCount) == 1
+    ) {
       "partitionCount and segmentCount must be positive powers of 2, and partitionCount must be" +
-          " greater than segmentCount (partitionCount=$partitionCount, segmentCount=$segmentCount)"
+        " greater than segmentCount (partitionCount=$partitionCount, segmentCount=$segmentCount)"
     }
     val segmentsPerPartition = segmentCount / partitionCount
 
@@ -58,14 +63,14 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
       val segmentStartInclusive = i * segmentsPerPartition
       val segmentEndExclusive = (i + 1) * segmentsPerPartition
       partitions += PrepareBackfillResponse.Partition.Builder()
-          .partition_name("$i of $partitionCount")
-          .backfill_range(keyRangeCodec.encodeKeyRange(segmentStartInclusive, segmentEndExclusive, segmentCount))
-          .build()
+        .partition_name("$i of $partitionCount")
+        .backfill_range(keyRangeCodec.encodeKeyRange(segmentStartInclusive, segmentEndExclusive, segmentCount))
+        .build()
     }
 
     return PrepareBackfillResponse.Builder()
-        .partitions(partitions)
-        .build()
+      .partitions(partitions)
+      .build()
   }
 
   override fun getNextBatchRange(request: GetNextBatchRangeRequest): GetNextBatchRangeResponse {
@@ -82,16 +87,16 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
     val batches = mutableListOf<GetNextBatchRangeResponse.Batch>()
     for (i in start until minOf(start + 1, end)) {
       batches += GetNextBatchRangeResponse.Batch.Builder()
-          .batch_range(keyRangeCodec.encodeKeyRange(i, i + 1, count))
-          // TODO(mikepaw) calculate counts accurately when requested.
-          .matching_record_count(1L)
-          .scanned_record_count(1L)
-          .build()
+        .batch_range(keyRangeCodec.encodeKeyRange(i, i + 1, count))
+        // TODO(mikepaw) calculate counts accurately when requested.
+        .matching_record_count(1L)
+        .scanned_record_count(1L)
+        .build()
     }
 
     return GetNextBatchRangeResponse.Builder()
-        .batches(batches)
-        .build()
+      .batches(batches)
+      .build()
   }
 
   override fun runBatch(request: RunBatchRequest): RunBatchResponse {
@@ -99,7 +104,7 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
     require(keyRange.end == keyRange.start + 1)
 
     val config =
-        parametersOperator.constructBackfillConfig(request.parameters, request.dry_run)
+      parametersOperator.constructBackfillConfig(request.parameters, request.dry_run)
 
     var lastEvaluatedKey: Map<String, AttributeValue>? = keyRange.lastEvaluatedKey
 
@@ -124,8 +129,8 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
     } while (lastEvaluatedKey != null)
 
     return RunBatchResponse.Builder()
-        .remaining_batch_range(lastEvaluatedKey?.toKeyRange(keyRange))
-        .build()
+      .remaining_batch_range(lastEvaluatedKey?.toKeyRange(keyRange))
+      .build()
   }
 
   private fun Map<String, AttributeValue>.toKeyRange(originalRange: DynamoDbKeyRange): KeyRange {

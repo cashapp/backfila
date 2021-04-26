@@ -7,13 +7,15 @@ import misk.web.dashboard.WebTabResourceModule
 
 class BackfilaDashboardModule(val deployment: Deployment) : KAbstractModule() {
   override fun configure() {
-    install(WebTabResourceModule(
+    install(
+      WebTabResourceModule(
         deployment = deployment,
         slug = "app",
         web_proxy_url = "http://localhost:4200/",
         url_path_prefix = "/app/",
         resourcePath = "classpath:/web/app/"
-    ))
+      )
+    )
   }
 }
 

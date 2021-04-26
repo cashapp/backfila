@@ -41,16 +41,16 @@ class GetServicesAction @Inject constructor(
 
     val services = transacter.transaction { session ->
       val services = queryFactory.newQuery<ServiceQuery>()
-          .orderByName()
-          .list(session)
+        .orderByName()
+        .list(session)
       val runningByService = queryFactory.newQuery<BackfillRunQuery>()
-          .state(BackfillState.RUNNING)
-          .list(session)
-          .groupBy { it.service_id }
+        .state(BackfillState.RUNNING)
+        .list(session)
+        .groupBy { it.service_id }
       services.map {
         UiService(
-            name = it.registry_name,
-            running_backfills = runningByService[it.id]?.size ?: 0
+          name = it.registry_name,
+          running_backfills = runningByService[it.id]?.size ?: 0
         )
       }
     }

@@ -22,21 +22,24 @@ class DummyBackfill : HibernateBackfill<DbMenu, Id<DbMenu>, NoParameters>() {
 
 fun main(args: Array<String>) {
   MiskApplication(
-      BackfillModule(
-          BackfilaClientConfig(
-              url = "#test", slack_channel = "#test"
-          )
-      ),
-      object : KAbstractModule() {
-        override fun configure() {
-          install(HibernateBackfillModule.create<SinglePartitionHibernateTestBackfill>())
-        }
-      },
-      BackfilaClientModule(),
-      HttpClientsConfigModule(
-          HttpClientsConfig(endpoints = mapOf(
-              "backfila" to HttpClientEndpointConfig(url = "http://localhost:8080")))
-      ),
-      MiskRealServiceModule()
+    BackfillModule(
+      BackfilaClientConfig(
+        url = "#test", slack_channel = "#test"
+      )
+    ),
+    object : KAbstractModule() {
+      override fun configure() {
+        install(HibernateBackfillModule.create<SinglePartitionHibernateTestBackfill>())
+      }
+    },
+    BackfilaClientModule(),
+    HttpClientsConfigModule(
+      HttpClientsConfig(
+        endpoints = mapOf(
+          "backfila" to HttpClientEndpointConfig(url = "http://localhost:8080")
+        )
+      )
+    ),
+    MiskRealServiceModule()
   ).run(args)
 }

@@ -47,22 +47,29 @@ class CreateAndStartBackfillActionTest {
   @Test
   fun `create and start`() {
     scope.fakeCaller(service = "deep-fryer") {
-      configureServiceAction.configureService(ConfigureServiceRequest.Builder()
-          .backfills(listOf(
-              ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null,
-                  null, false)))
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "ChickenSandwich", "Description", listOf(), null,
+                null, false
+              )
+            )
+          )
           .connector_type(Connectors.ENVOY)
-          .build())
+          .build()
+      )
     }
     scope.fakeCaller(service = "deep-fryer") {
       val response = createAndStartBackfillAction.createAndStartBackfill(
-          CreateAndStartBackfillRequest.Builder()
-              .create_request(
-                  CreateBackfillRequest.Builder()
-                      .backfill_name("ChickenSandwich")
-                      .build()
-              )
+        CreateAndStartBackfillRequest.Builder()
+          .create_request(
+            CreateBackfillRequest.Builder()
+              .backfill_name("ChickenSandwich")
               .build()
+          )
+          .build()
       )
 
       val status = getBackfillStatusAction.status(response.backfill_run_id)

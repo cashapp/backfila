@@ -34,8 +34,8 @@ private object FixedSetBackfillBackendModule : KAbstractModule() {
 }
 
 private fun mapBinder(binder: Binder) = MapBinder.newMapBinder(
-    binder,
-    object : TypeLiteral<String>() {},
-    object : TypeLiteral<KClass<out FixedSetBackfill<*>>>() {},
-    ForBackfila::class.java
+  binder,
+  object : TypeLiteral<String>() {},
+  object : TypeLiteral<KClass<out FixedSetBackfill<*>>>() {},
+  ForBackfila::class.java
 )

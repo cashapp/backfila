@@ -41,77 +41,82 @@ fun main(args: Array<String>) {
   val deployment = Deployment(name = "backfila", isLocalDevelopment = true)
 
   MiskApplication(
-      object : KAbstractModule() {
-        override fun configure() {
-          val webConfig = WebConfig(
-              port = 8080,
-              idle_timeout = 500000,
-              host = "0.0.0.0"
-          )
-          install(MiskWebModule(webConfig))
-          multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
-          bind<MiskCaller>().annotatedWith<DevelopmentOnly>()
-              .toInstance(MiskCaller(user = "testfila"))
-          bind<ViewLogsUrlProvider>().to<DevelopmentViewLogsUrlProvider>()
+    object : KAbstractModule() {
+      override fun configure() {
+        val webConfig = WebConfig(
+          port = 8080,
+          idle_timeout = 500000,
+          host = "0.0.0.0"
+        )
+        install(MiskWebModule(webConfig))
+        multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
+        bind<MiskCaller>().annotatedWith<DevelopmentOnly>()
+          .toInstance(MiskCaller(user = "testfila"))
+        bind<ViewLogsUrlProvider>().to<DevelopmentViewLogsUrlProvider>()
 
-          newMapBinder<String, BackfilaClientServiceClientProvider>(ForConnectors::class)
-              .permitDuplicates().addBinding("DEV")
-              .toInstance(object : BackfilaClientServiceClientProvider {
-                override fun validateExtraData(connectorExtraData: String?) {
-                }
+        newMapBinder<String, BackfilaClientServiceClientProvider>(ForConnectors::class)
+          .permitDuplicates().addBinding("DEV")
+          .toInstance(object : BackfilaClientServiceClientProvider {
+            override fun validateExtraData(connectorExtraData: String?) {
+            }
 
-                override fun clientFor(serviceName: String, connectorExtraData: String?): BackfilaClientServiceClient {
-                  return object : BackfilaClientServiceClient {
-                    override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
-                      return PrepareBackfillResponse(listOf(
-                          PrepareBackfillResponse.Partition(
-                              "-80", KeyRange("0".encodeUtf8(), "1000".encodeUtf8()), null
-                          ),
-                          PrepareBackfillResponse.Partition(
-                              "80-", KeyRange("0".encodeUtf8(), "1000".encodeUtf8()), null
-                          )
-                      ), mapOf())
-                    }
-
-                    override suspend fun getNextBatchRange(request: GetNextBatchRangeRequest): GetNextBatchRangeResponse {
-                      TODO("Not yet implemented")
-                    }
-
-                    override suspend fun runBatch(request: RunBatchRequest): RunBatchResponse {
-                      TODO("Not yet implemented")
-                    }
-                  }
-                }
-              })
-        }
-      },
-      EnvironmentModule(environment = environment),
-      DeploymentModule(deployment, env),
-      BackfilaServiceModule(
-          deployment,
-          BackfilaConfig(
-              backfill_runner_threads = null,
-              data_source_clusters = DataSourceClustersConfig(
-                  mapOf("backfila-001" to DataSourceClusterConfig(
-                      writer = DataSourceConfig(
-                          type = DataSourceType.MYSQL,
-                          database = System.getenv("BACKFILA_DB_NAME") ?: "backfila_development",
-                          username = System.getenv("BACKFILA_DB_USER") ?: "root",
-                          migrations_resource = "classpath:/migrations",
-                          host = System.getenv("BACKFILA_DB_HOST") ?: "127.0.0.1",
-                          port = (System.getenv("BACKFILA_DB_PORT") ?: "3306").toInt(),
-                          password = System.getenv("BACKFILA_DB_PASSWORD")
+            override fun clientFor(serviceName: String, connectorExtraData: String?): BackfilaClientServiceClient {
+              return object : BackfilaClientServiceClient {
+                override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
+                  return PrepareBackfillResponse(
+                    listOf(
+                      PrepareBackfillResponse.Partition(
+                        "-80", KeyRange("0".encodeUtf8(), "1000".encodeUtf8()), null
                       ),
-                      reader = null
-                  ))
+                      PrepareBackfillResponse.Partition(
+                        "80-", KeyRange("0".encodeUtf8(), "1000".encodeUtf8()), null
+                      )
+                    ),
+                    mapOf()
+                  )
+                }
+
+                override suspend fun getNextBatchRange(request: GetNextBatchRangeRequest): GetNextBatchRangeResponse {
+                  TODO("Not yet implemented")
+                }
+
+                override suspend fun runBatch(request: RunBatchRequest): RunBatchResponse {
+                  TODO("Not yet implemented")
+                }
+              }
+            }
+          })
+      }
+    },
+    EnvironmentModule(environment = environment),
+    DeploymentModule(deployment, env),
+    BackfilaServiceModule(
+      deployment,
+      BackfilaConfig(
+        backfill_runner_threads = null,
+        data_source_clusters = DataSourceClustersConfig(
+          mapOf(
+            "backfila-001" to DataSourceClusterConfig(
+              writer = DataSourceConfig(
+                type = DataSourceType.MYSQL,
+                database = System.getenv("BACKFILA_DB_NAME") ?: "backfila_development",
+                username = System.getenv("BACKFILA_DB_USER") ?: "root",
+                migrations_resource = "classpath:/migrations",
+                host = System.getenv("BACKFILA_DB_HOST") ?: "127.0.0.1",
+                port = (System.getenv("BACKFILA_DB_PORT") ?: "3306").toInt(),
+                password = System.getenv("BACKFILA_DB_PASSWORD")
               ),
-              web_url_root = "http://localhost:8080/app/",
-              slack = null
+              reader = null
+            )
           )
-      ),
-      AdminDashboardModule(isDevelopment = true),
-      BackfilaDefaultEndpointConfigModule(),
-      MiskRealServiceModule()
+        ),
+        web_url_root = "http://localhost:8080/app/",
+        slack = null
+      )
+    ),
+    AdminDashboardModule(isDevelopment = true),
+    BackfilaDefaultEndpointConfigModule(),
+    MiskRealServiceModule()
   ).run(args)
 }
 

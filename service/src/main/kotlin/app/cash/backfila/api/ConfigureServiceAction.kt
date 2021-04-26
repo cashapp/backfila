@@ -47,14 +47,14 @@ class ConfigureServiceAction @Inject constructor(
 
     transacter.transaction { session ->
       var dbService = queryFactory.newQuery<ServiceQuery>()
-          .registryName(service)
-          .uniqueResult(session)
+        .registryName(service)
+        .uniqueResult(session)
       if (dbService == null) {
         dbService = DbService(
-            service,
-            request.connector_type,
-            request.connector_extra_data,
-            request.slack_channel
+          service,
+          request.connector_type,
+          request.connector_extra_data,
+          request.slack_channel
         )
         session.save(dbService)
       } else {
@@ -65,21 +65,21 @@ class ConfigureServiceAction @Inject constructor(
 
       // Add any missing backfills, update modified ones, and mark missing ones as deleted.
       val existingBackfills = queryFactory.newQuery<RegisteredBackfillQuery>()
-          .serviceId(dbService.id)
-          .active()
-          .list(session)
-          .associateBy { it.name }
+        .serviceId(dbService.id)
+        .active()
+        .list(session)
+        .associateBy { it.name }
       logger.info { "Found ${existingBackfills.size} existing backfills for `$service`" }
 
       for (backfill in request.backfills) {
         val existingBackfill = existingBackfills[backfill.name]
         val newBackfill = DbRegisteredBackfill(
-            dbService.id,
-            backfill.name,
-            backfill.parameters.map { it.name },
-            backfill.type_provided,
-            backfill.type_consumed,
-            backfill.requires_approval == true
+          dbService.id,
+          backfill.name,
+          backfill.parameters.map { it.name },
+          backfill.type_provided,
+          backfill.type_consumed,
+          backfill.requires_approval == true
         )
         var save = false
         if (existingBackfill != null) {

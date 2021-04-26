@@ -51,12 +51,14 @@ internal class EmbeddedBackfillRun<B : Backfill>(
 
   /** Prepares a backfill for a run. */
   init {
-    prepareBackfillResponse = operator.prepareBackfill(PrepareBackfillRequest.Builder()
+    prepareBackfillResponse = operator.prepareBackfill(
+      PrepareBackfillRequest.Builder()
         .backfill_name(operator.name())
         .range(KeyRange(rangeStart?.encodeUtf8(), rangeEnd?.encodeUtf8()))
         .parameters(parameters)
         .dry_run(dryRun)
-        .build())
+        .build()
+    )
     precomputeProgress = prepareBackfillResponse.partitions.associate {
       it.partition_name to MutablePartitionCursor(it.partition_name, it.backfill_range)
     }
@@ -70,17 +72,19 @@ internal class EmbeddedBackfillRun<B : Backfill>(
     check(notDone.isNotEmpty()) { "Nothing left to precompute" }
     val cursor = notDone.values.first()
     val response =
-        operator.getNextBatchRange(GetNextBatchRangeRequest.Builder()
-            .partition_name(cursor.partitionName)
-            .backfill_range(cursor.keyRange)
-            .previous_end_key(cursor.previousEndKey)
-            .parameters(parameters)
-            .batch_size(batchSize)
-            .scan_size(scanSize)
-            .compute_count_limit(computeCountLimit)
-            .precomputing(true)
-            .dry_run(dryRun)
-            .build())
+      operator.getNextBatchRange(
+        GetNextBatchRangeRequest.Builder()
+          .partition_name(cursor.partitionName)
+          .backfill_range(cursor.keyRange)
+          .previous_end_key(cursor.previousEndKey)
+          .parameters(parameters)
+          .batch_size(batchSize)
+          .scan_size(scanSize)
+          .compute_count_limit(computeCountLimit)
+          .precomputing(true)
+          .dry_run(dryRun)
+          .build()
+      )
     if (response.batches.isEmpty()) {
       cursor.done = true
     } else {
@@ -103,31 +107,37 @@ internal class EmbeddedBackfillRun<B : Backfill>(
 
   override fun partitionScan(partitionName: String): GetNextBatchRangeResponse {
     val cursor = scanProgress[partitionName] ?: error(
-        "Partition $partitionName not found. Valid partitions are ${scanProgress.keys}")
+      "Partition $partitionName not found. Valid partitions are ${scanProgress.keys}"
+    )
     val response =
-        operator.getNextBatchRange(GetNextBatchRangeRequest.Builder()
-            .partition_name(cursor.partitionName)
-            .backfill_range(cursor.keyRange)
-            .previous_end_key(cursor.previousEndKey)
-            .parameters(parameters)
-            .batch_size(batchSize)
-            .scan_size(scanSize)
-            .compute_count_limit(computeCountLimit)
-            .dry_run(dryRun)
-            .build())
+      operator.getNextBatchRange(
+        GetNextBatchRangeRequest.Builder()
+          .partition_name(cursor.partitionName)
+          .backfill_range(cursor.keyRange)
+          .previous_end_key(cursor.previousEndKey)
+          .parameters(parameters)
+          .batch_size(batchSize)
+          .scan_size(scanSize)
+          .compute_count_limit(computeCountLimit)
+          .dry_run(dryRun)
+          .build()
+      )
     when (response.batches.isEmpty()) {
       true -> cursor.done = true
       false -> cursor.previousEndKey = response.batches.map { it.batch_range.end }.max()
     }
-    batchesToRun.addAll(response.batches
+    batchesToRun.addAll(
+      response.batches
         .filterNot { it.matching_record_count == 0L } // Remove batches that have no matching records.
         .map {
           BatchSnapshot(
-              partitionName,
-              it.batch_range,
-              it.scanned_record_count,
-              it.matching_record_count)
-        })
+            partitionName,
+            it.batch_range,
+            it.scanned_record_count,
+            it.matching_record_count
+          )
+        }
+    )
     return response
   }
 
@@ -151,13 +161,15 @@ internal class EmbeddedBackfillRun<B : Backfill>(
     var remainingRange = batch.batchRange
     do {
       val remainingBatch = batch.copy(batchRange = remainingRange)
-      response = operator.runBatch(RunBatchRequest.Builder()
+      response = operator.runBatch(
+        RunBatchRequest.Builder()
           .partition_name(remainingBatch.partitionName)
           .batch_range(remainingBatch.batchRange)
           .parameters(parameters)
           .dry_run(dryRun)
           .batch_size(batchSize)
-          .build())
+          .build()
+      )
       check(response.exception_stack_trace == null) {
         "RunBatch returned stack trace: ${response.exception_stack_trace}"
       }
@@ -188,7 +200,8 @@ private class MutablePartitionCursor(
   var done: Boolean = false
 
   fun snapshot() = PartitionCursor(
-      partitionName, keyRange, previousEndKey, done)
+    partitionName, keyRange, previousEndKey, done
+  )
 }
 
 /** Immutable snapshot of a cursor. */

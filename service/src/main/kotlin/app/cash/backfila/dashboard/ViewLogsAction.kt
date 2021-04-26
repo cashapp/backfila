@@ -33,13 +33,13 @@ class ViewLogsAction @Inject constructor(
   ): Response<ResponseBody> {
     val url = transacter.transaction { session ->
       val backfillRun = session.loadOrNull<DbBackfillRun>(Id(id))
-          ?: throw BadRequestException("backfill $id doesn't exist")
+        ?: throw BadRequestException("backfill $id doesn't exist")
       viewLogsUrlProvider.getUrl(session, backfillRun)
     }
     return Response(
-        body = "go to $url".toResponseBody(),
-        statusCode = HttpURLConnection.HTTP_MOVED_TEMP,
-        headers = Headers.headersOf("Location", url)
+      body = "go to $url".toResponseBody(),
+      statusCode = HttpURLConnection.HTTP_MOVED_TEMP,
+      headers = Headers.headersOf("Location", url)
     )
   }
 }

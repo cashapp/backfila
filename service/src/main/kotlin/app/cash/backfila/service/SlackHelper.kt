@@ -55,11 +55,11 @@ class SlackHelper @Inject constructor(
     "[${env.name}] ${run.service.registry_name} `${run.registered_backfill.name}` (${idLink(run.id)})"
 
   private fun dryRunEmoji(run: DbBackfillRun) =
-      if (run.dry_run) {
-        ":backfila_dryrun:"
-      } else {
-        ":backfila_wetrun:"
-      }
+    if (run.dry_run) {
+      ":backfila_dryrun:"
+    } else {
+      ":backfila_wetrun:"
+    }
 
   private fun idLink(id: Id<DbBackfillRun>): String {
     val url = "${backfilaConfig.web_url_root}backfills/$id"

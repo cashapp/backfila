@@ -15,11 +15,13 @@ class NoBackfillsModule : KAbstractModule() {
     install(MiskTestingServiceModule())
 
     // We install the common backfila code but not any particular backend
-    install(BackfillModule(
+    install(
+      BackfillModule(
         BackfilaClientConfig(
-            url = "test.url", slack_channel = "#test"
+          url = "test.url", slack_channel = "#test"
         )
-    ))
+      )
+    )
     install(EmbeddedBackfilaModule())
   }
 }

@@ -7,7 +7,9 @@ import misk.jdbc.SchemaMigratorService
 
 class RunnerSchedulerServiceModule : KAbstractModule() {
   override fun configure() {
-    install(ServiceModule<RunnerSchedulerService>()
-        .dependsOn<SchemaMigratorService>(BackfilaDb::class))
+    install(
+      ServiceModule<RunnerSchedulerService>()
+        .dependsOn<SchemaMigratorService>(BackfilaDb::class)
+    )
   }
 }

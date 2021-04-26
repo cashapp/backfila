@@ -18,9 +18,9 @@ internal class EnvoyClientServiceClient internal constructor(
   }
 
   override suspend fun getNextBatchRange(request: GetNextBatchRangeRequest):
-      GetNextBatchRangeResponse {
-    return api.getNextBatchRange(request)
-  }
+    GetNextBatchRangeResponse {
+      return api.getNextBatchRange(request)
+    }
 
   override suspend fun runBatch(request: RunBatchRequest): RunBatchResponse {
     return api.runBatch(request)

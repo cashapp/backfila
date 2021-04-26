@@ -40,19 +40,26 @@ class LeaseHunterTest {
   @Test
   fun pausedBackfillNotLeased() {
     scope.fakeCaller(service = "deep-fryer") {
-      configureServiceAction.configureService(ConfigureServiceRequest.Builder()
-          .backfills(listOf(
-              ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null,
-                  null, false)))
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "ChickenSandwich", "Description", listOf(), null,
+                null, false
+              )
+            )
+          )
           .connector_type(ENVOY)
-          .build())
+          .build()
+      )
     }
     scope.fakeCaller(user = "molly") {
       createBackfillAction.create(
-          "deep-fryer",
-          CreateBackfillRequest.Builder()
-              .backfill_name("ChickenSandwich")
-              .build()
+        "deep-fryer",
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build()
       )
     }
     assertThat(leaseHunter.hunt()).isEmpty()
@@ -61,19 +68,26 @@ class LeaseHunterTest {
   @Test
   fun runningBackfillLeased() {
     scope.fakeCaller(service = "deep-fryer") {
-      configureServiceAction.configureService(ConfigureServiceRequest.Builder()
-          .backfills(listOf(
-              ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null,
-                  null, false)))
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "ChickenSandwich", "Description", listOf(), null,
+                null, false
+              )
+            )
+          )
           .connector_type(ENVOY)
-          .build())
+          .build()
+      )
     }
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create(
-          "deep-fryer",
-          CreateBackfillRequest.Builder()
-              .backfill_name("ChickenSandwich")
-              .build()
+        "deep-fryer",
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build()
       )
 
       val id = response.backfill_run_id
@@ -95,19 +109,26 @@ class LeaseHunterTest {
   @Test
   fun activeLeaseNotStolen() {
     scope.fakeCaller(service = "deep-fryer") {
-      configureServiceAction.configureService(ConfigureServiceRequest.Builder()
-          .backfills(listOf(
-              ConfigureServiceRequest.BackfillData("ChickenSandwich", "Description", listOf(), null,
-                  null, false)))
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "ChickenSandwich", "Description", listOf(), null,
+                null, false
+              )
+            )
+          )
           .connector_type(ENVOY)
-          .build())
+          .build()
+      )
     }
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create(
-          "deep-fryer",
-          CreateBackfillRequest.Builder()
-              .backfill_name("ChickenSandwich")
-              .build()
+        "deep-fryer",
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build()
       )
 
       val id = response.backfill_run_id

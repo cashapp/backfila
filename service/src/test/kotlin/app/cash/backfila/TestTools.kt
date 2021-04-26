@@ -10,5 +10,5 @@ fun <T> ActionScope.fakeCaller(
   function: () -> T
 ): T {
   return enter(mapOf(keyOf<MiskCaller>() to MiskCaller(service = service, user = user)))
-      .use { function() }
+    .use { function() }
 }

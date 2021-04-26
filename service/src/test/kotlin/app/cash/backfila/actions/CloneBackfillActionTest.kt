@@ -66,49 +66,57 @@ class CloneBackfillActionTest {
   @BeforeEach
   fun setup() {
     scope.fakeCaller(service = "deep-fryer") {
-      configureServiceAction.configureService(ConfigureServiceRequest.Builder()
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
           .backfills(
-              listOf(
-                  ConfigureServiceRequest.BackfillData.Builder()
-                      .name("ChickenSandwich")
-                      .parameters(listOf(Parameter.Builder()
-                          .name("param1")
-                          .build()))
+            listOf(
+              ConfigureServiceRequest.BackfillData.Builder()
+                .name("ChickenSandwich")
+                .parameters(
+                  listOf(
+                    Parameter.Builder()
+                      .name("param1")
                       .build()
-              )
+                  )
+                )
+                .build()
+            )
           )
           .connector_type(Connectors.ENVOY)
-          .build())
+          .build()
+      )
     }
   }
 
   @Test
   fun `different values`() {
     scope.fakeCaller(user = "molly") {
-      val response = createBackfillAction.create("deep-fryer",
-          CreateBackfillRequest.Builder()
-              .backfill_name("ChickenSandwich")
-              .batch_size(100)
-              .scan_size(200)
-              .backoff_schedule("1000")
-              .num_threads(1)
-              .dry_run(true)
-              .extra_sleep_ms(10)
-              .parameter_map(mapOf("param1" to "val1".encodeUtf8()))
-              .build()
+      val response = createBackfillAction.create(
+        "deep-fryer",
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .batch_size(100)
+          .scan_size(200)
+          .backoff_schedule("1000")
+          .num_threads(1)
+          .dry_run(true)
+          .extra_sleep_ms(10)
+          .parameter_map(mapOf("param1" to "val1".encodeUtf8()))
+          .build()
       )
 
-      val cloneResponse = cloneBackfillAction.create(response.backfill_run_id,
-          CloneBackfillRequest(
-              batch_size = 123,
-              scan_size = 223,
-              backoff_schedule = "1000,2000",
-              num_threads = 5,
-              dry_run = false,
-              extra_sleep_ms = 15,
-              parameter_map = mapOf("param1" to "val2".encodeUtf8()),
-              range_clone_type = RangeCloneType.RESTART
-          )
+      val cloneResponse = cloneBackfillAction.create(
+        response.backfill_run_id,
+        CloneBackfillRequest(
+          batch_size = 123,
+          scan_size = 223,
+          backoff_schedule = "1000,2000",
+          num_threads = 5,
+          dry_run = false,
+          extra_sleep_ms = 15,
+          parameter_map = mapOf("param1" to "val2".encodeUtf8()),
+          range_clone_type = RangeCloneType.RESTART
+        )
       )
 
       val status = getBackfillStatusAction.status(cloneResponse.id)
@@ -127,43 +135,51 @@ class CloneBackfillActionTest {
   fun `new range`() {
     scope.fakeCaller(user = "molly") {
       fakeBackfilaClientServiceClient.prepareBackfillResponses.add(
-          PrepareBackfillResponse.Builder()
-              .partitions(listOf(
-                  PrepareBackfillResponse.Partition.Builder()
-                      .partition_name("only")
-                      .backfill_range(KeyRange("0".encodeUtf8(), "1000".encodeUtf8()))
-                      .build()
-              ))
-              .build())
+        PrepareBackfillResponse.Builder()
+          .partitions(
+            listOf(
+              PrepareBackfillResponse.Partition.Builder()
+                .partition_name("only")
+                .backfill_range(KeyRange("0".encodeUtf8(), "1000".encodeUtf8()))
+                .build()
+            )
+          )
+          .build()
+      )
 
-      val response = createBackfillAction.create("deep-fryer",
-          CreateBackfillRequest.Builder()
-              .backfill_name("ChickenSandwich")
-              .build()
+      val response = createBackfillAction.create(
+        "deep-fryer",
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build()
       )
 
       // Simulate progress
       transacter.transaction { session ->
         val partition = queryFactory.newQuery<RunPartitionQuery>()
-            .uniqueResult(session)!!
+          .uniqueResult(session)!!
         partition.pkey_cursor = "123".encodeUtf8()
       }
 
       // Return a different range the second time.
       fakeBackfilaClientServiceClient.prepareBackfillResponses.add(
-          PrepareBackfillResponse.Builder()
-              .partitions(listOf(
-                  PrepareBackfillResponse.Partition.Builder()
-                      .partition_name("only")
-                      .backfill_range(KeyRange("2000".encodeUtf8(), "3000".encodeUtf8()))
-                      .build()
-              ))
-              .build())
-
-      val cloneResponse = cloneBackfillAction.create(response.backfill_run_id,
-          CloneBackfillRequest(
-              range_clone_type = RangeCloneType.NEW
+        PrepareBackfillResponse.Builder()
+          .partitions(
+            listOf(
+              PrepareBackfillResponse.Partition.Builder()
+                .partition_name("only")
+                .backfill_range(KeyRange("2000".encodeUtf8(), "3000".encodeUtf8()))
+                .build()
+            )
           )
+          .build()
+      )
+
+      val cloneResponse = cloneBackfillAction.create(
+        response.backfill_run_id,
+        CloneBackfillRequest(
+          range_clone_type = RangeCloneType.NEW
+        )
       )
 
       val status = getBackfillStatusAction.status(cloneResponse.id)
@@ -179,43 +195,51 @@ class CloneBackfillActionTest {
   fun `continue range`() {
     scope.fakeCaller(user = "molly") {
       fakeBackfilaClientServiceClient.prepareBackfillResponses.add(
-          PrepareBackfillResponse.Builder()
-              .partitions(listOf(
-                  PrepareBackfillResponse.Partition.Builder()
-                      .partition_name("only")
-                      .backfill_range(KeyRange("0".encodeUtf8(), "1000".encodeUtf8()))
-                      .build()
-              ))
-              .build())
+        PrepareBackfillResponse.Builder()
+          .partitions(
+            listOf(
+              PrepareBackfillResponse.Partition.Builder()
+                .partition_name("only")
+                .backfill_range(KeyRange("0".encodeUtf8(), "1000".encodeUtf8()))
+                .build()
+            )
+          )
+          .build()
+      )
 
-      val response = createBackfillAction.create("deep-fryer",
-          CreateBackfillRequest.Builder()
-              .backfill_name("ChickenSandwich")
-              .build()
+      val response = createBackfillAction.create(
+        "deep-fryer",
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build()
       )
 
       // Simulate progress
       transacter.transaction { session ->
         val partition = queryFactory.newQuery<RunPartitionQuery>()
-            .uniqueResult(session)!!
+          .uniqueResult(session)!!
         partition.pkey_cursor = "123".encodeUtf8()
       }
 
       // Return a different range the second time.
       fakeBackfilaClientServiceClient.prepareBackfillResponses.add(
-          PrepareBackfillResponse.Builder()
-              .partitions(listOf(
-                  PrepareBackfillResponse.Partition.Builder()
-                      .partition_name("only")
-                      .backfill_range(KeyRange("2000".encodeUtf8(), "3000".encodeUtf8()))
-                      .build()
-              ))
-              .build())
-
-      val cloneResponse = cloneBackfillAction.create(response.backfill_run_id,
-          CloneBackfillRequest(
-              range_clone_type = RangeCloneType.CONTINUE
+        PrepareBackfillResponse.Builder()
+          .partitions(
+            listOf(
+              PrepareBackfillResponse.Partition.Builder()
+                .partition_name("only")
+                .backfill_range(KeyRange("2000".encodeUtf8(), "3000".encodeUtf8()))
+                .build()
+            )
           )
+          .build()
+      )
+
+      val cloneResponse = cloneBackfillAction.create(
+        response.backfill_run_id,
+        CloneBackfillRequest(
+          range_clone_type = RangeCloneType.CONTINUE
+        )
       )
 
       val status = getBackfillStatusAction.status(cloneResponse.id)
@@ -231,43 +255,51 @@ class CloneBackfillActionTest {
   fun `restart range`() {
     scope.fakeCaller(user = "molly") {
       fakeBackfilaClientServiceClient.prepareBackfillResponses.add(
-          PrepareBackfillResponse.Builder()
-              .partitions(listOf(
-                  PrepareBackfillResponse.Partition.Builder()
-                      .partition_name("only")
-                      .backfill_range(KeyRange("0".encodeUtf8(), "1000".encodeUtf8()))
-                      .build()
-              ))
-              .build())
+        PrepareBackfillResponse.Builder()
+          .partitions(
+            listOf(
+              PrepareBackfillResponse.Partition.Builder()
+                .partition_name("only")
+                .backfill_range(KeyRange("0".encodeUtf8(), "1000".encodeUtf8()))
+                .build()
+            )
+          )
+          .build()
+      )
 
-      val response = createBackfillAction.create("deep-fryer",
-          CreateBackfillRequest.Builder()
-              .backfill_name("ChickenSandwich")
-              .build()
+      val response = createBackfillAction.create(
+        "deep-fryer",
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build()
       )
 
       // Simulate progress
       transacter.transaction { session ->
         val partition = queryFactory.newQuery<RunPartitionQuery>()
-            .uniqueResult(session)!!
+          .uniqueResult(session)!!
         partition.pkey_cursor = "123".encodeUtf8()
       }
 
       // Return a different range the second time.
       fakeBackfilaClientServiceClient.prepareBackfillResponses.add(
-          PrepareBackfillResponse.Builder()
-              .partitions(listOf(
-                  PrepareBackfillResponse.Partition.Builder()
-                      .partition_name("only")
-                      .backfill_range(KeyRange("2000".encodeUtf8(), "3000".encodeUtf8()))
-                      .build()
-              ))
-              .build())
-
-      val cloneResponse = cloneBackfillAction.create(response.backfill_run_id,
-          CloneBackfillRequest(
-              range_clone_type = RangeCloneType.RESTART
+        PrepareBackfillResponse.Builder()
+          .partitions(
+            listOf(
+              PrepareBackfillResponse.Partition.Builder()
+                .partition_name("only")
+                .backfill_range(KeyRange("2000".encodeUtf8(), "3000".encodeUtf8()))
+                .build()
+            )
           )
+          .build()
+      )
+
+      val cloneResponse = cloneBackfillAction.create(
+        response.backfill_run_id,
+        CloneBackfillRequest(
+          range_clone_type = RangeCloneType.RESTART
+        )
       )
 
       val status = getBackfillStatusAction.status(cloneResponse.id)
@@ -283,44 +315,52 @@ class CloneBackfillActionTest {
   fun `restart range but partitions are different`() {
     scope.fakeCaller(user = "molly") {
       fakeBackfilaClientServiceClient.prepareBackfillResponses.add(
-          PrepareBackfillResponse.Builder()
-              .partitions(listOf(
-                  PrepareBackfillResponse.Partition.Builder()
-                      .partition_name("only")
-                      .backfill_range(KeyRange("0".encodeUtf8(), "1000".encodeUtf8()))
-                      .build()
-              ))
-              .build())
+        PrepareBackfillResponse.Builder()
+          .partitions(
+            listOf(
+              PrepareBackfillResponse.Partition.Builder()
+                .partition_name("only")
+                .backfill_range(KeyRange("0".encodeUtf8(), "1000".encodeUtf8()))
+                .build()
+            )
+          )
+          .build()
+      )
 
-      val response = createBackfillAction.create("deep-fryer",
-          CreateBackfillRequest.Builder()
-              .backfill_name("ChickenSandwich")
-              .build()
+      val response = createBackfillAction.create(
+        "deep-fryer",
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build()
       )
 
       // Simulate progress
       transacter.transaction { session ->
         val partition = queryFactory.newQuery<RunPartitionQuery>()
-            .uniqueResult(session)!!
+          .uniqueResult(session)!!
         partition.pkey_cursor = "123".encodeUtf8()
       }
 
       // Return a different range the second time.
       fakeBackfilaClientServiceClient.prepareBackfillResponses.add(
-          PrepareBackfillResponse.Builder()
-              .partitions(listOf(
-                  PrepareBackfillResponse.Partition.Builder()
-                      .partition_name("different-name")
-                      .backfill_range(KeyRange("2000".encodeUtf8(), "3000".encodeUtf8()))
-                      .build()
-              ))
-              .build())
+        PrepareBackfillResponse.Builder()
+          .partitions(
+            listOf(
+              PrepareBackfillResponse.Partition.Builder()
+                .partition_name("different-name")
+                .backfill_range(KeyRange("2000".encodeUtf8(), "3000".encodeUtf8()))
+                .build()
+            )
+          )
+          .build()
+      )
 
       assertThatThrownBy {
-        val cloneResponse = cloneBackfillAction.create(response.backfill_run_id,
-            CloneBackfillRequest(
-                range_clone_type = RangeCloneType.RESTART
-            )
+        val cloneResponse = cloneBackfillAction.create(
+          response.backfill_run_id,
+          CloneBackfillRequest(
+            range_clone_type = RangeCloneType.RESTART
+          )
         )
       }.hasMessageContaining("partitions don't match")
     }
@@ -330,43 +370,51 @@ class CloneBackfillActionTest {
   fun `new range but partitions are different is ok`() {
     scope.fakeCaller(user = "molly") {
       fakeBackfilaClientServiceClient.prepareBackfillResponses.add(
-          PrepareBackfillResponse.Builder()
-              .partitions(listOf(
-                  PrepareBackfillResponse.Partition.Builder()
-                      .partition_name("only")
-                      .backfill_range(KeyRange("0".encodeUtf8(), "1000".encodeUtf8()))
-                      .build()
-              ))
-              .build())
+        PrepareBackfillResponse.Builder()
+          .partitions(
+            listOf(
+              PrepareBackfillResponse.Partition.Builder()
+                .partition_name("only")
+                .backfill_range(KeyRange("0".encodeUtf8(), "1000".encodeUtf8()))
+                .build()
+            )
+          )
+          .build()
+      )
 
-      val response = createBackfillAction.create("deep-fryer",
-          CreateBackfillRequest.Builder()
-              .backfill_name("ChickenSandwich")
-              .build()
+      val response = createBackfillAction.create(
+        "deep-fryer",
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build()
       )
 
       // Simulate progress
       transacter.transaction { session ->
         val partition = queryFactory.newQuery<RunPartitionQuery>()
-            .uniqueResult(session)!!
+          .uniqueResult(session)!!
         partition.pkey_cursor = "123".encodeUtf8()
       }
 
       // Return a different range the second time.
       fakeBackfilaClientServiceClient.prepareBackfillResponses.add(
-          PrepareBackfillResponse.Builder()
-              .partitions(listOf(
-                  PrepareBackfillResponse.Partition.Builder()
-                      .partition_name("different-name")
-                      .backfill_range(KeyRange("2000".encodeUtf8(), "3000".encodeUtf8()))
-                      .build()
-              ))
-              .build())
-
-      val cloneResponse = cloneBackfillAction.create(response.backfill_run_id,
-          CloneBackfillRequest(
-              range_clone_type = RangeCloneType.NEW
+        PrepareBackfillResponse.Builder()
+          .partitions(
+            listOf(
+              PrepareBackfillResponse.Partition.Builder()
+                .partition_name("different-name")
+                .backfill_range(KeyRange("2000".encodeUtf8(), "3000".encodeUtf8()))
+                .build()
+            )
           )
+          .build()
+      )
+
+      val cloneResponse = cloneBackfillAction.create(
+        response.backfill_run_id,
+        CloneBackfillRequest(
+          range_clone_type = RangeCloneType.NEW
+        )
       )
 
       val status = getBackfillStatusAction.status(cloneResponse.id)

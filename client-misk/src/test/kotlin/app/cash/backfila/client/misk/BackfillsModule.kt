@@ -6,11 +6,13 @@ import misk.inject.KAbstractModule
 
 class BackfillsModule : KAbstractModule() {
   override fun configure() {
-    install(BackfillModule(
+    install(
+      BackfillModule(
         BackfilaClientConfig(
-            url = "test.url", slack_channel = "#test"
+          url = "test.url", slack_channel = "#test"
         )
-    ))
+      )
+    )
     install(FixedSetBackfillModule.create<FixedSetTest.ToUpperCaseBackfill>())
   }
 }

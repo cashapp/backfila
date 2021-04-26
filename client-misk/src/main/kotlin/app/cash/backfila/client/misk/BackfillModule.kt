@@ -28,7 +28,7 @@ import misk.inject.KAbstractModule
 class BackfillModule(
   private val config: BackfilaClientConfig,
   private val loggingSetupProvider: KClass<out BackfilaClientLoggingSetupProvider> =
-      BackfilaClientNoLoggingSetupProvider::class
+    BackfilaClientNoLoggingSetupProvider::class
 ) : KAbstractModule() {
   override fun configure() {
     bind<BackfilaClientConfig>().toInstance(config)
@@ -43,8 +43,8 @@ class BackfillModule(
   }
 
   @Singleton @Provides @ForBackfila fun provideMoshi(): Moshi = Moshi.Builder()
-      .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
-      .build()
+    .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
+    .build()
 }
 
 @BindingAnnotation

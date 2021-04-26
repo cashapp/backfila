@@ -61,7 +61,7 @@ internal class GetNextBatchRangeAction @Inject constructor(
     ) {
       logger.info {
         "Computing batch for backfill `${request.backfill_name}::${request.partition_name}" +
-            "::${request.backfill_id}`. Previous end: `${request.previous_end_key}`"
+          "::${request.backfill_id}`. Previous end: `${request.previous_end_key}`"
       }
 
       val operator = operatorFactory.create(request.backfill_name, request.backfill_id)
@@ -69,8 +69,8 @@ internal class GetNextBatchRangeAction @Inject constructor(
       val nextBatchRange = operator.getNextBatchRange(request)
       logger.info {
         "Next batches computed for backfill " +
-            "`${request.backfill_name}::${request.partition_name}::${request.backfill_id}`. " +
-            "${nextBatchRange.batches}"
+          "`${request.backfill_name}::${request.partition_name}::${request.backfill_id}`. " +
+          "${nextBatchRange.batches}"
       }
       return@withBackfillPartitionLogging nextBatchRange
     }
@@ -98,8 +98,8 @@ internal class RunBatchAction @Inject constructor(
     ) {
       logger.info {
         "Running backfila batch " +
-            "`${request.backfill_name}::${request.partition_name}::${request.backfill_id}`: " +
-            "[${request.batch_range.start.utf8()}, ${request.batch_range.end.utf8()}]"
+          "`${request.backfill_name}::${request.partition_name}::${request.backfill_id}`: " +
+          "[${request.batch_range.start.utf8()}, ${request.batch_range.end.utf8()}]"
       }
 
       val operator = operatorFactory.create(request.backfill_name, request.backfill_id)

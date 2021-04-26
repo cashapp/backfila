@@ -45,7 +45,7 @@ class DynamoDbBackfillTest {
 
     assertThatCode {
       val run = backfila.createWetRun<MakeTracksExplicitBackfill>(
-          parameterData = mapOf("validate" to "false".encodeUtf8())
+        parameterData = mapOf("validate" to "false".encodeUtf8())
       )
     }.hasMessageContaining("Validate failed")
   }

@@ -54,11 +54,11 @@ internal class EmbeddedBackfila @Inject internal constructor(
     val operator = operatorFactory.create(createRequest.backfill_name, backfillId.toString())
 
     val run = EmbeddedBackfillRun<Backfill>(
-        operator = operator,
-        dryRun = createRequest.dry_run,
-        parameters = createRequest.parameter_map,
-        rangeStart = createRequest.pkey_range_start?.utf8(),
-        rangeEnd = createRequest.pkey_range_end?.utf8()
+      operator = operator,
+      dryRun = createRequest.dry_run,
+      parameters = createRequest.parameter_map,
+      rangeStart = createRequest.pkey_range_start?.utf8(),
+      rangeEnd = createRequest.pkey_range_end?.utf8()
     )
 
     run.execute()
@@ -97,11 +97,11 @@ internal class EmbeddedBackfila @Inject internal constructor(
 
     @Suppress("UNCHECKED_CAST") // We don't know the types statically, so fake them.
     return EmbeddedBackfillRun(
-        operator = operator,
-        dryRun = dryRun,
-        parameters = parameters,
-        rangeStart = rangeStart,
-        rangeEnd = rangeEnd
+      operator = operator,
+      dryRun = dryRun,
+      parameters = parameters,
+      rangeStart = rangeStart,
+      rangeEnd = rangeEnd
     )
   }
 }

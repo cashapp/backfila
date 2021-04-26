@@ -51,10 +51,10 @@ class UpdateBackfillAction @Inject constructor(
 
     transacter.transaction { session ->
       val run = session.loadOrNull<DbBackfillRun>(Id(id))
-          ?: throw BadRequestException("backfill $id doesn't exist")
+        ?: throw BadRequestException("backfill $id doesn't exist")
       logger.info {
         "Found backfill $id for `${run.registered_backfill.service.registry_name}`" +
-            "::`${run.registered_backfill.name}`"
+          "::`${run.registered_backfill.name}`"
       }
 
       val newScanSize = request.scan_size ?: run.scan_size
@@ -116,13 +116,15 @@ class UpdateBackfillAction @Inject constructor(
         run.backoff_schedule = request.backoff_schedule
       }
 
-      session.save(DbEventLog(
+      session.save(
+        DbEventLog(
           run.id,
           partition_id = null,
           user = caller.get()!!.principal,
           type = DbEventLog.Type.CONFIG_CHANGE,
           message = "updated settings: " + changesLog.joinToString(", ")
-      ))
+        )
+      )
     }
 
     return UpdateBackfillResponse()
