@@ -87,20 +87,23 @@ class BackfillRunner private constructor(
     running = false
   }
 
+  lateinit var batchPrecomputer: BatchPrecomputer
+  lateinit var batchAwaiter: BatchAwaiter
+
   fun run() {
     factory.loggingSetupProvider.withLogging(backfillName, backfillRunId, partitionName) {
       logger.info { "Runner starting: ${logLabel()} " }
 
       metadata = factory.transacter.transaction { session -> loadMetaData(session) }
 
-      val batchPrecomputer = BatchPrecomputer(this)
+      batchPrecomputer = BatchPrecomputer(this)
       val batchQueuer = BatchQueuer(this, metadata.numThreads)
       val batchRunner = BatchRunner(
         this,
         batchQueuer.nextBatchChannel(),
         metadata.numThreads
       )
-      val batchAwaiter = BatchAwaiter(
+      batchAwaiter = BatchAwaiter(
         this,
         batchRunner.runChannel(),
         batchRunner.rpcBackpressureChannel()
@@ -130,17 +133,26 @@ class BackfillRunner private constructor(
         val dbRunning = factory.transacter.transaction { session ->
           val dbRunPartition = session.load(partitionId)
 
-          if (dbRunPartition.run_state != BackfillState.RUNNING) {
-            logger.info { "Backfill is no longer in RUNNING state, stopping runner ${logLabel()}" }
-            running = false
-            return@transaction false
-          }
           if (dbRunPartition.lease_token != leaseToken) {
             throw IllegalStateException(
               "Backfill partition $partitionId has been stolen! " +
                 "our token: $leaseToken, new token: ${dbRunPartition.lease_token}"
             )
           }
+
+          // Save current state before potentially exiting.
+          // We save state here instead of in the actors to avoid excessive writes.
+          // This state is saved for when the runner loses the lease and another runner takes it over.
+          // Therefore it is sufficient to save it every so often rather than after every operation.
+          batchPrecomputer.saveProgress(dbRunPartition)
+          batchAwaiter.saveProgress(dbRunPartition)
+
+          if (dbRunPartition.run_state != BackfillState.RUNNING) {
+            logger.info { "Backfill is no longer in RUNNING state, stopping runner ${logLabel()}" }
+            running = false
+            return@transaction false
+          }
+
           // Extend our lease regularly.
           dbRunPartition.lease_expires_at = factory.clock.instant() + LeaseHunter.LEASE_DURATION
 
@@ -162,19 +174,23 @@ class BackfillRunner private constructor(
   private fun loadMetaData(session: Session): BackfillMetaData {
     val dbRunPartition = session.load(partitionId)
     return BackfillMetaData(
-      dbRunPartition.backfill_run_id,
-      dbRunPartition.pkey_cursor,
-      dbRunPartition.pkey_range_start,
-      dbRunPartition.pkey_range_end,
-      dbRunPartition.backfill_run.parameters(),
-      dbRunPartition.backfill_run.batch_size,
-      dbRunPartition.backfill_run.scan_size,
-      dbRunPartition.backfill_run.dry_run,
-      dbRunPartition.backfill_run.num_threads,
-      dbRunPartition.precomputing_done,
-      dbRunPartition.precomputing_pkey_cursor,
-      dbRunPartition.backfill_run.extra_sleep_ms,
-      dbRunPartition.backfill_run.backoffSchedule() ?: DEFAULT_BACKOFF_SCHEDULE
+      backfillRunId = dbRunPartition.backfill_run_id,
+      pkeyCursor = dbRunPartition.pkey_cursor,
+      pkeyStart = dbRunPartition.pkey_range_start,
+      pkeyEnd = dbRunPartition.pkey_range_end,
+      parameters = dbRunPartition.backfill_run.parameters(),
+      batchSize = dbRunPartition.backfill_run.batch_size,
+      scanSize = dbRunPartition.backfill_run.scan_size,
+      dryRun = dbRunPartition.backfill_run.dry_run,
+      numThreads = dbRunPartition.backfill_run.num_threads,
+      precomputingDone = dbRunPartition.precomputing_done,
+      precomputingPkeyCursor = dbRunPartition.precomputing_pkey_cursor,
+      computedScannedRecordCount = dbRunPartition.computed_scanned_record_count,
+      computedMatchingRecordCount = dbRunPartition.computed_matching_record_count,
+      extraSleepMs = dbRunPartition.backfill_run.extra_sleep_ms,
+      backoffSchedule = dbRunPartition.backfill_run.backoffSchedule() ?: DEFAULT_BACKOFF_SCHEDULE,
+      backfilledScannedRecordCount = dbRunPartition.backfilled_scanned_record_count,
+      backfilledMatchingRecordCount = dbRunPartition.backfilled_matching_record_count,
     )
   }
 
@@ -360,8 +376,12 @@ class BackfillRunner private constructor(
     val numThreads: Int,
     val precomputingDone: Boolean,
     val precomputingPkeyCursor: ByteString?,
+    val computedScannedRecordCount: Long,
+    val computedMatchingRecordCount: Long,
     val extraSleepMs: Long,
-    val backoffSchedule: List<Long>
+    val backoffSchedule: List<Long>,
+    val backfilledScannedRecordCount: Long,
+    val backfilledMatchingRecordCount: Long,
   )
 
   companion object {
