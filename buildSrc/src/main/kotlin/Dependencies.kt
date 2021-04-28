@@ -38,6 +38,7 @@ object Dependencies {
   val miskHibernate = "com.squareup.misk:misk-hibernate:0.17.0"
   val miskHibernateTesting = "com.squareup.misk:misk-hibernate-testing:0.17.0"
   val miskInject = "com.squareup.misk:misk-inject:0.17.0"
+  val miskMetrics = "com.squareup.misk:misk-metrics:0.17.0"
   val miskService = "com.squareup.misk:misk-service:0.17.0"
   val miskSlack = "com.squareup.misk:misk-slack:0.17.0"
   val miskTesting = "com.squareup.misk:misk-testing:0.17.0"
