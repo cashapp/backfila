@@ -29,9 +29,9 @@ import misk.hibernate.Operator.GE
 import misk.hibernate.Operator.GT
 import misk.hibernate.Operator.LE
 import misk.hibernate.Query
-import misk.logging.getLogger
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
+import wisp.logging.getLogger
 
 /**
  * Operates on a backfill using Hibernate 5.x entities. Create instances with [BackfillOperatorFactory].

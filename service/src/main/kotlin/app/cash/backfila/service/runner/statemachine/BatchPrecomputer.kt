@@ -10,7 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import misk.hibernate.load
-import misk.logging.getLogger
+import wisp.logging.getLogger
 
 class BatchPrecomputer(
   private val backfillRunner: BackfillRunner

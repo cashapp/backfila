@@ -19,7 +19,7 @@ import misk.hibernate.Id
 import misk.hibernate.Query
 import misk.hibernate.Transacter
 import misk.hibernate.newQuery
-import misk.logging.getLogger
+import wisp.logging.getLogger
 
 class BackfillCreator @Inject constructor(
   @BackfilaDb private val transacter: Transacter,

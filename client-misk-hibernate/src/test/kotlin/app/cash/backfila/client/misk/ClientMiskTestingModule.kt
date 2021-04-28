@@ -12,10 +12,10 @@ import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
 import misk.hibernate.HibernateEntityModule
 import misk.hibernate.HibernateModule
-import misk.hibernate.HibernateTestingModule
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
+import misk.jdbc.JdbcTestingModule
 import misk.logging.LogCollectorModule
 
 internal class ClientMiskTestingModule(
@@ -46,7 +46,7 @@ internal class ClientMiskTestingModule(
         )
       }
     })
-    install(HibernateTestingModule(ClientMiskService::class))
+    install(JdbcTestingModule(ClientMiskService::class))
 
     install(DeploymentModule.forTesting())
     install(LogCollectorModule())

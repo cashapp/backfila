@@ -3,7 +3,6 @@ package app.cash.backfila.dashboard
 import app.cash.backfila.service.persistence.BackfillState
 import javax.inject.Inject
 import misk.MiskCaller
-import misk.logging.getLogger
 import misk.scope.ActionScoped
 import misk.security.authz.Authenticated
 import misk.web.PathParam
@@ -13,6 +12,7 @@ import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
+import wisp.logging.getLogger
 
 class StartBackfillRequest
 class StartBackfillResponse

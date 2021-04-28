@@ -8,13 +8,13 @@ import misk.exceptions.BadRequestException
 import misk.hibernate.Query
 import misk.hibernate.Transacter
 import misk.hibernate.newQuery
-import misk.logging.getLogger
 import misk.security.authz.Authenticated
 import misk.web.Get
 import misk.web.PathParam
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
+import wisp.logging.getLogger
 
 data class RegisteredBackfill(
   val name: String,

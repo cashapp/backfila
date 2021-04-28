@@ -88,7 +88,7 @@ internal class EmbeddedBackfillRun<B : Backfill>(
     if (response.batches.isEmpty()) {
       cursor.done = true
     } else {
-      cursor.previousEndKey = response.batches.map { it.batch_range.end }.max()
+      cursor.previousEndKey = response.batches.map { it.batch_range.end }.maxOrNull()
       response.batches.onEach {
         precomputeMatchingCount += it.matching_record_count
         precomputeScannedCount += it.scanned_record_count
@@ -124,7 +124,7 @@ internal class EmbeddedBackfillRun<B : Backfill>(
       )
     when (response.batches.isEmpty()) {
       true -> cursor.done = true
-      false -> cursor.previousEndKey = response.batches.map { it.batch_range.end }.max()
+      false -> cursor.previousEndKey = response.batches.map { it.batch_range.end }.maxOrNull()
     }
     batchesToRun.addAll(
       response.batches
