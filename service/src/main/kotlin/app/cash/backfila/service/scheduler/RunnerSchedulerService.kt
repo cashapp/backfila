@@ -9,7 +9,7 @@ import java.util.concurrent.RejectedExecutionException
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
-import misk.logging.getLogger
+import wisp.logging.getLogger
 
 /**
  * Runs a background thread, looking for unleased backfills to run.

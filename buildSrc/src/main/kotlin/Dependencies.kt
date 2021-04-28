@@ -62,4 +62,5 @@ object Dependencies {
   val wireMoshiAdapter = "com.squareup.wire:wire-moshi-adapter:3.6.0"
   val wireRuntime = "com.squareup.wire:wire-runtime:3.6.0"
   val wireSchema = "com.squareup.wire:wire-schema:3.6.0"
+  val wispLogging = "com.squareup.misk:wisp-logging:2021.04.22-1619131614-2df6b0ee"
 }

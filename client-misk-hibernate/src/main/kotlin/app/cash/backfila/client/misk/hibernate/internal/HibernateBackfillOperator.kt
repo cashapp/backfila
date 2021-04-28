@@ -18,10 +18,6 @@ import app.cash.backfila.protos.clientservice.RunBatchResponse
 import com.google.common.base.Preconditions.checkArgument
 import com.google.common.base.Stopwatch
 import com.google.common.collect.ImmutableList
-import java.util.ArrayList
-import java.util.concurrent.TimeUnit
-import javax.persistence.criteria.Path
-import javax.persistence.criteria.Root
 import misk.exceptions.BadRequestException
 import misk.hibernate.DbEntity
 import misk.hibernate.Id
@@ -29,9 +25,12 @@ import misk.hibernate.Operator.GE
 import misk.hibernate.Operator.GT
 import misk.hibernate.Operator.LE
 import misk.hibernate.Query
-import misk.logging.getLogger
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
+import wisp.logging.getLogger
+import java.util.concurrent.TimeUnit
+import javax.persistence.criteria.Path
+import javax.persistence.criteria.Root
 
 /**
  * Operates on a backfill using Hibernate 5.x entities. Create instances with [BackfillOperatorFactory].

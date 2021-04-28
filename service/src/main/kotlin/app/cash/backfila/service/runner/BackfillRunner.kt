@@ -20,10 +20,6 @@ import app.cash.backfila.service.runner.statemachine.BatchRunner
 import app.cash.backfila.service.runner.statemachine.RunBatchException
 import app.cash.backfila.service.scheduler.LeaseHunter
 import com.google.common.base.Stopwatch
-import java.net.SocketTimeoutException
-import java.time.Clock
-import java.time.Duration
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.SupervisorJob
@@ -37,9 +33,13 @@ import misk.hibernate.Query
 import misk.hibernate.Session
 import misk.hibernate.Transacter
 import misk.hibernate.load
-import misk.logging.getLogger
 import okio.ByteString
 import org.apache.commons.lang3.exception.ExceptionUtils
+import wisp.logging.getLogger
+import java.net.SocketTimeoutException
+import java.time.Clock
+import java.time.Duration
+import javax.inject.Inject
 
 val DEFAULT_BACKOFF_SCHEDULE = listOf(5_000L, 15_000L, 30_000L)
 

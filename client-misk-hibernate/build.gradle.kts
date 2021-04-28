@@ -19,6 +19,7 @@ dependencies {
   implementation(Dependencies.miskCore)
   implementation(Dependencies.miskInject)
   api(Dependencies.miskHibernate)
+  implementation(Dependencies.wispLogging)
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.miskTesting)

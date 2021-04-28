@@ -10,7 +10,6 @@ import app.cash.backfila.service.persistence.DbBackfillRun
 import app.cash.backfila.service.persistence.DbRegisteredBackfill
 import app.cash.backfila.service.persistence.DbRunPartition
 import app.cash.backfila.service.persistence.DbService
-import javax.inject.Inject
 import misk.MiskCaller
 import misk.exceptions.BadRequestException
 import misk.hibernate.Id
@@ -18,7 +17,6 @@ import misk.hibernate.Query
 import misk.hibernate.Transacter
 import misk.hibernate.load
 import misk.hibernate.loadOrNull
-import misk.logging.getLogger
 import misk.scope.ActionScoped
 import misk.security.authz.Authenticated
 import misk.web.PathParam
@@ -30,6 +28,8 @@ import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
+import wisp.logging.getLogger
+import javax.inject.Inject
 
 enum class RangeCloneType {
   RESTART,
@@ -154,7 +154,9 @@ class CloneBackfillAction @Inject constructor(
         val sourceBackfill = session.load<DbBackfillRun>(Id(id))
         // Source partitions have to match new partitions.
         val sourcePartitions = sourceBackfill.partitions(session, queryFactory)
-        if (partitions.map { it.partition_name }.toSet() != sourcePartitions.map { it.partition_name }.toSet()) {
+        if (partitions.map { it.partition_name }
+          .toSet() != sourcePartitions.map { it.partition_name }.toSet()
+        ) {
           throw BadRequestException(
             "Can't clone backfill ranges from `$id`, newly computed partitions don't match." +
               " Clone with a new range instead."
@@ -201,7 +203,10 @@ class CloneBackfillAction @Inject constructor(
       )
     } catch (e: Exception) {
       logger.info(e) { "PrepareBackfill on `${dbData.serviceName}` failed" }
-      throw BadRequestException("PrepareBackfill on `${dbData.serviceName}` failed: ${e.message}", e)
+      throw BadRequestException(
+        "PrepareBackfill on `${dbData.serviceName}` failed: ${e.message}",
+        e
+      )
     }
     val partitions = prepareBackfillResponse.partitions
     if (partitions.isEmpty()) {

@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 import misk.exceptions.BadRequestException
-import misk.logging.getLogger
+import wisp.logging.getLogger
 
 /**
  * Creates BackfillOperators using the registered Backends.

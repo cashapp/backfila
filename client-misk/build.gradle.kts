@@ -25,6 +25,7 @@ dependencies {
   implementation(Dependencies.miskCore)
   implementation(Dependencies.miskInject)
   implementation(Dependencies.miskService)
+  implementation(Dependencies.wispLogging)
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.miskTesting)

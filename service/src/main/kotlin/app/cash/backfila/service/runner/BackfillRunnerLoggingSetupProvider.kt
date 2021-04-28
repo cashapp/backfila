@@ -1,18 +1,28 @@
 package app.cash.backfila.service.runner
 
 import app.cash.backfila.service.persistence.DbBackfillRun
-import javax.inject.Inject
 import misk.hibernate.Id
-import misk.logging.getLogger
 import org.slf4j.MDC
+import wisp.logging.getLogger
+import javax.inject.Inject
 
 interface BackfillRunnerLoggingSetupProvider {
-  fun <T> withLogging(backfillName: String, backfillId: Id<DbBackfillRun>, partitionName: String, wrapped: () -> T): T
+  fun <T> withLogging(
+    backfillName: String,
+    backfillId: Id<DbBackfillRun>,
+    partitionName: String,
+    wrapped: () -> T
+  ): T
 }
 
 class BackfillRunnerNoLoggingSetupProvider
 @Inject constructor() : BackfillRunnerLoggingSetupProvider {
-  override fun <T> withLogging(backfillName: String, backfillId: Id<DbBackfillRun>, partitionName: String, wrapped: () -> T): T {
+  override fun <T> withLogging(
+    backfillName: String,
+    backfillId: Id<DbBackfillRun>,
+    partitionName: String,
+    wrapped: () -> T
+  ): T {
     return wrapped.invoke()
   }
 }
@@ -20,7 +30,12 @@ class BackfillRunnerNoLoggingSetupProvider
 class BackfillRunnerMDCLoggingSetupProvider
 @Inject constructor() : BackfillRunnerLoggingSetupProvider {
 
-  override fun <T> withLogging(backfillName: String, backfillId: Id<DbBackfillRun>, partitionName: String, wrapped: () -> T): T {
+  override fun <T> withLogging(
+    backfillName: String,
+    backfillId: Id<DbBackfillRun>,
+    partitionName: String,
+    wrapped: () -> T
+  ): T {
     try {
       MDC.put(MDC_BACKFILL_NAME, backfillName)
       MDC.put(MDC_BACKFILL_ID, backfillId.toString())

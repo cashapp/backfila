@@ -1,8 +1,8 @@
 package app.cash.backfila.client.misk.client
 
-import javax.inject.Inject
-import misk.logging.getLogger
 import org.slf4j.MDC
+import wisp.logging.getLogger
+import javax.inject.Inject
 
 interface BackfilaClientLoggingSetupProvider {
   fun <T> withBackfillRunLogging(backfillName: String, backfillId: String, wrapped: () -> T): T

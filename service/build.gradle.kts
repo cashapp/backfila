@@ -55,6 +55,7 @@ dependencies {
   implementation(Dependencies.wireRuntime)
   implementation(Dependencies.wireCompiler)
   implementation(Dependencies.wireSchema)
+  implementation(Dependencies.wispLogging)
 
   implementation(project(":client"))
 
