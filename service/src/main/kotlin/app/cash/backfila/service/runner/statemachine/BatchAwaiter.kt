@@ -14,7 +14,7 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import misk.hibernate.load
-import misk.logging.getLogger
+import wisp.logging.getLogger
 
 /**
  * Receives RunBatch RPC futures from the BatchRunner and handles the results, potentially

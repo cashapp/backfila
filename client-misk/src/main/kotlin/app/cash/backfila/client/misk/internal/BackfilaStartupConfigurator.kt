@@ -12,8 +12,8 @@ import com.google.common.util.concurrent.AbstractIdleService
 import com.squareup.moshi.Moshi
 import javax.inject.Inject
 import javax.inject.Singleton
-import misk.logging.getLogger
 import misk.moshi.adapter
+import wisp.logging.getLogger
 
 /**
  * Sends backfill metadata to Backfila at application startup. If Backfila is unreachable then

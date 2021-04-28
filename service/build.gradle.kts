@@ -40,6 +40,7 @@ dependencies {
   implementation(Dependencies.miskCore)
   implementation(Dependencies.miskHibernate)
   implementation(Dependencies.miskInject)
+  implementation(Dependencies.miskMetrics)
   implementation(Dependencies.miskService)
   implementation(Dependencies.miskSlack)
   implementation(Dependencies.moshiCore)

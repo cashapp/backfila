@@ -4,14 +4,14 @@ import com.squareup.moshi.Moshi
 import java.net.URL
 import javax.inject.Inject
 import javax.inject.Singleton
-import misk.client.EnvoyClientEndpointProvider
-import misk.client.HttpClientEnvoyConfig
 import misk.client.HttpClientFactory
 import misk.client.HttpClientsConfig
 import misk.moshi.adapter
 import retrofit2.Retrofit
 import retrofit2.adapter.guava.GuavaCallAdapterFactory
 import retrofit2.converter.wire.WireConverterFactory
+import wisp.client.EnvoyClientEndpointProvider
+import wisp.client.HttpClientEnvoyConfig
 
 @Singleton
 class EnvoyClientServiceClientProvider @Inject constructor(

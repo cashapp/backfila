@@ -37,9 +37,9 @@ import misk.hibernate.Query
 import misk.hibernate.Session
 import misk.hibernate.Transacter
 import misk.hibernate.load
-import misk.logging.getLogger
 import okio.ByteString
 import org.apache.commons.lang3.exception.ExceptionUtils
+import wisp.logging.getLogger
 
 val DEFAULT_BACKOFF_SCHEDULE = listOf(5_000L, 15_000L, 30_000L)
 

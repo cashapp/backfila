@@ -94,7 +94,7 @@ class VitessSingleCursorBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any> (
     }.toList()
       .filterNotNull()
       // Pkey must have a natural ordering
-      .minWith(Ordering.natural<Comparable<Pkey>>() as Comparator<Pkey>)
+      .minWithOrNull(Ordering.natural<Comparable<Pkey>>() as Comparator<Pkey>)
   }
 }
 
