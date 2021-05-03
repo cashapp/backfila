@@ -19,17 +19,20 @@ import app.cash.backfila.service.runner.statemachine.BatchQueuer
 import app.cash.backfila.service.runner.statemachine.BatchRunner
 import app.cash.backfila.service.runner.statemachine.RunBatchException
 import app.cash.backfila.service.scheduler.LeaseHunter
+import com.google.common.annotations.VisibleForTesting
 import com.google.common.base.Stopwatch
 import java.net.SocketTimeoutException
 import java.time.Clock
 import java.time.Duration
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.slf4j.MDCContext
 import misk.hibernate.Id
@@ -42,6 +45,9 @@ import org.apache.commons.lang3.exception.ExceptionUtils
 import wisp.logging.getLogger
 
 val DEFAULT_BACKOFF_SCHEDULE = listOf(5_000L, 15_000L, 30_000L)
+
+/** How frequently to extend the lease and update state. */
+internal val EXTEND_LEASE_PERIOD: Duration = Duration.ofMillis(1000)
 
 /**
  * Coordinator of the backfill run. Starts a few actors as coroutines and updates the lease.
@@ -92,80 +98,90 @@ class BackfillRunner private constructor(
 
   fun run() {
     factory.loggingSetupProvider.withLogging(backfillName, backfillRunId, partitionName) {
-      logger.info { "Runner starting: ${logLabel()} " }
-
-      metadata = factory.transacter.transaction { session -> loadMetaData(session) }
-
-      batchPrecomputer = BatchPrecomputer(this)
-      val batchQueuer = BatchQueuer(this, metadata.numThreads)
-      val batchRunner = BatchRunner(
-        this,
-        batchQueuer.nextBatchChannel(),
-        metadata.numThreads
-      )
-      batchAwaiter = BatchAwaiter(
-        this,
-        batchRunner.runChannel(),
-        batchRunner.rpcBackpressureChannel()
-      )
-
-      // All our tasks run on this thread.
       runBlocking(MDCContext()) {
-        batchPrecomputer.run(this)
-        batchQueuer.run(this)
-        batchRunner.run(this)
-        batchAwaiter.run(this)
-
-        checkAndUpdateLeaseUntilPausedOrComplete()
-        logger.info { "Runner cleaning up coroutines: ${logLabel()}" }
-        coroutineContext.cancelChildren()
+        start(this)
       }
-
       logger.info { "Runner cleaning up lease: ${logLabel()}" }
       clearLease()
       logger.info { "Runner finished: ${logLabel()}" }
     }
   }
 
+  @VisibleForTesting
+  fun start(coroutineScope: CoroutineScope) {
+    logger.info { "Runner starting: ${logLabel()} " }
+
+    metadata = factory.transacter.transaction { session -> loadMetaData(session) }
+
+    batchPrecomputer = BatchPrecomputer(this)
+    val batchQueuer = BatchQueuer(this, metadata.numThreads)
+    val batchRunner = BatchRunner(
+      this,
+      batchQueuer.nextBatchChannel(),
+      metadata.numThreads
+    )
+    batchAwaiter = BatchAwaiter(
+      this,
+      batchRunner.runChannel(),
+      batchRunner.rpcBackpressureChannel()
+    )
+
+    // All our tasks run on this thread.
+    coroutineScope.launch {
+      batchPrecomputer.run(this)
+      batchQueuer.run(this)
+      batchRunner.run(this)
+      batchAwaiter.run(this)
+
+      checkAndUpdateLeaseUntilPausedOrComplete()
+      logger.info { "Runner cleaning up coroutines: ${logLabel()}" }
+      coroutineContext.cancelChildren()
+    }
+  }
+
   private suspend fun checkAndUpdateLeaseUntilPausedOrComplete() {
     try {
       while (running) {
-        delay(1000)
+        delay(EXTEND_LEASE_PERIOD.toMillis())
 
-        factory.transacter.transaction { session ->
-          val dbRunPartition = session.load(partitionId)
-
-          if (dbRunPartition.lease_token != leaseToken) {
-            throw IllegalStateException(
-              "Backfill partition $partitionId has been stolen! " +
-                "our token: $leaseToken, new token: ${dbRunPartition.lease_token}"
-            )
-          }
-
-          // We save state here instead of in the actors to avoid excessive writes.
-          // This state is saved for when the runner loses the lease and another runner takes it over.
-          // Therefore it is sufficient to save it every so often rather than after every operation.
-          batchPrecomputer.updateProgress(dbRunPartition)
-          batchAwaiter.updateProgress(dbRunPartition)
-
-          // Now that state is stored, check if we should exit.
-          if (dbRunPartition.run_state != BackfillState.RUNNING) {
-            logger.info { "Backfill is no longer in RUNNING state, stopping runner ${logLabel()}" }
-            running = false
-            return@transaction
-          }
-
-          // Extend our lease regularly.
-          dbRunPartition.lease_expires_at = factory.clock.instant() + LeaseHunter.LEASE_DURATION
-
-          // While we're here, refresh metadata about the backfill in case a user made some changes,
-          // such as changing batch_size or num_threads. This way we keep metadata updated but don't
-          // have to load it repeatedly in every task.
-          metadata = loadMetaData(session)
-        }
+        checkAndUpdateLeaseAndPersistState()
       }
     } catch (e: Throwable) {
       logger.info(e) { "Encountered an exception while monitoring the lease for ${logLabel()}" }
+    }
+  }
+
+  private fun checkAndUpdateLeaseAndPersistState() {
+    factory.transacter.transaction { session ->
+      val dbRunPartition = session.load(partitionId)
+
+      if (dbRunPartition.lease_token != leaseToken) {
+        throw IllegalStateException(
+          "Backfill partition $partitionId has been stolen! " +
+            "our token: $leaseToken, new token: ${dbRunPartition.lease_token}"
+        )
+      }
+
+      // We save state here instead of in the actors to avoid excessive writes.
+      // This state is saved for when the runner loses the lease and another runner takes it over.
+      // Therefore it is sufficient to save it every so often rather than after every operation.
+      batchPrecomputer.updateProgress(dbRunPartition)
+      batchAwaiter.updateProgress(dbRunPartition)
+
+      // Now that state is stored, check if we should exit.
+      if (dbRunPartition.run_state != BackfillState.RUNNING) {
+        logger.info { "Backfill is no longer in RUNNING state, stopping runner ${logLabel()}" }
+        running = false
+        return@transaction
+      }
+
+      // Extend our lease regularly.
+      dbRunPartition.lease_expires_at = factory.clock.instant() + LeaseHunter.LEASE_DURATION
+
+      // While we're here, refresh metadata about the backfill in case a user made some changes,
+      // such as changing batch_size or num_threads. This way we keep metadata updated but don't
+      // have to load it repeatedly in every task.
+      metadata = loadMetaData(session)
     }
   }
 
@@ -214,7 +230,7 @@ class BackfillRunner private constructor(
     pipelinedData: PipelinedData? = null
   ): Deferred<RunBatchResponse> {
     // Supervisor here allows us to handle the exception, rather than failing the job.
-    return scope.async(SupervisorJob()) {
+    return scope.async(SupervisorJob() + CoroutineName("RunBatch RPC")) {
       val stopwatch = Stopwatch.createStarted()
 
       val response = client.runBatch(
