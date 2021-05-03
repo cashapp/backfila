@@ -87,8 +87,8 @@ class BackfillRunner private constructor(
     running = false
   }
 
-  lateinit var batchPrecomputer: BatchPrecomputer
-  lateinit var batchAwaiter: BatchAwaiter
+  private lateinit var batchPrecomputer: BatchPrecomputer
+  private lateinit var batchAwaiter: BatchAwaiter
 
   fun run() {
     factory.loggingSetupProvider.withLogging(backfillName, backfillRunId, partitionName) {
@@ -130,7 +130,9 @@ class BackfillRunner private constructor(
   private suspend fun checkAndUpdateLeaseUntilPausedOrComplete() {
     try {
       while (running) {
-        val dbRunning = factory.transacter.transaction { session ->
+        delay(1000)
+
+        factory.transacter.transaction { session ->
           val dbRunPartition = session.load(partitionId)
 
           if (dbRunPartition.lease_token != leaseToken) {
@@ -140,17 +142,17 @@ class BackfillRunner private constructor(
             )
           }
 
-          // Save current state before potentially exiting.
           // We save state here instead of in the actors to avoid excessive writes.
           // This state is saved for when the runner loses the lease and another runner takes it over.
           // Therefore it is sufficient to save it every so often rather than after every operation.
-          batchPrecomputer.saveProgress(dbRunPartition)
-          batchAwaiter.saveProgress(dbRunPartition)
+          batchPrecomputer.updateProgress(dbRunPartition)
+          batchAwaiter.updateProgress(dbRunPartition)
 
+          // Now that state is stored, check if we should exit.
           if (dbRunPartition.run_state != BackfillState.RUNNING) {
             logger.info { "Backfill is no longer in RUNNING state, stopping runner ${logLabel()}" }
             running = false
-            return@transaction false
+            return@transaction
           }
 
           // Extend our lease regularly.
@@ -160,11 +162,7 @@ class BackfillRunner private constructor(
           // such as changing batch_size or num_threads. This way we keep metadata updated but don't
           // have to load it repeatedly in every task.
           metadata = loadMetaData(session)
-
-          return@transaction true
         }
-        if (!dbRunning) break
-        delay(1000)
       }
     } catch (e: Throwable) {
       logger.info(e) { "Encountered an exception while monitoring the lease for ${logLabel()}" }
