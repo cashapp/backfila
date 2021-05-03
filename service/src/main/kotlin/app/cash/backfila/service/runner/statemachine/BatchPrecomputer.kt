@@ -71,7 +71,7 @@ class BatchPrecomputer(
           backfillRunner.factory.transacter.transaction { session ->
             val dbRunPartition = session.load(backfillRunner.partitionId)
             dbRunPartition.precomputing_done = true
-            saveProgress(dbRunPartition)
+            updateProgress(dbRunPartition)
 
             session.save(
               DbEventLog(
@@ -104,7 +104,7 @@ class BatchPrecomputer(
     logger.info { "BatchPrecomputer stopped ${backfillRunner.logLabel()}" }
   }
 
-  fun saveProgress(dbRunPartition: DbRunPartition) {
+  fun updateProgress(dbRunPartition: DbRunPartition) {
     dbRunPartition.precomputing_pkey_cursor = pkeyCursor
     dbRunPartition.computed_scanned_record_count = computedScannedRecordCount
     dbRunPartition.computed_matching_record_count = computedScannedRecordCount

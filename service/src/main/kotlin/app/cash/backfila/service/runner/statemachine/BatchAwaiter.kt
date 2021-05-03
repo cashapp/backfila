@@ -169,7 +169,7 @@ class BatchAwaiter(
     val runComplete = backfillRunner.factory.transacter.transaction { session ->
       val dbRunPartition = session.load(backfillRunner.partitionId)
       dbRunPartition.run_state = BackfillState.COMPLETE
-      saveProgress(dbRunPartition)
+      updateProgress(dbRunPartition)
 
       session.save(
         DbEventLog(
@@ -209,7 +209,7 @@ class BatchAwaiter(
     }
   }
 
-  fun saveProgress(dbRunPartition: DbRunPartition) {
+  fun updateProgress(dbRunPartition: DbRunPartition) {
     dbRunPartition.pkey_cursor = pkeyCursor
     dbRunPartition.backfilled_scanned_record_count = backfilledScannedRecordCount
     dbRunPartition.backfilled_matching_record_count = backfilledMatchingRecordCount
