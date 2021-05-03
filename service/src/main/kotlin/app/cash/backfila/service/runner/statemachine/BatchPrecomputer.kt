@@ -3,6 +3,7 @@ package app.cash.backfila.service.runner.statemachine
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.KeyRange
 import app.cash.backfila.service.persistence.DbEventLog
+import app.cash.backfila.service.persistence.DbRunPartition
 import app.cash.backfila.service.runner.BackfillRunner
 import com.google.common.base.Stopwatch
 import kotlinx.coroutines.CancellationException
@@ -10,17 +11,18 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import misk.hibernate.load
+import okio.ByteString
 import wisp.logging.getLogger
 
 class BatchPrecomputer(
   private val backfillRunner: BackfillRunner
 ) {
+  private var pkeyCursor: ByteString? = backfillRunner.metadata.precomputingPkeyCursor
+  private var computedScannedRecordCount: Long = backfillRunner.metadata.computedScannedRecordCount
+  private var computedMatchingRecordCount: Long = backfillRunner.metadata.computedMatchingRecordCount
+
   fun run(coroutineScope: CoroutineScope) = coroutineScope.launch {
     logger.info { "BatchPrecomputer started ${backfillRunner.logLabel()}" }
-
-    // Start at the cursor we have in the DB, but after that we need to maintain our own,
-    // since the DB stores how far we've completed batches, and we are likely ahead of that.
-    var pkeyCursor = backfillRunner.metadata.precomputingPkeyCursor
 
     val stopwatch = Stopwatch.createUnstarted()
 
@@ -69,6 +71,7 @@ class BatchPrecomputer(
           backfillRunner.factory.transacter.transaction { session ->
             val dbRunPartition = session.load(backfillRunner.partitionId)
             dbRunPartition.precomputing_done = true
+            updateProgress(dbRunPartition)
 
             session.save(
               DbEventLog(
@@ -83,16 +86,11 @@ class BatchPrecomputer(
           break
         }
 
-        backfillRunner.factory.transacter.transaction { session ->
-          val dbRunPartition = session.load(backfillRunner.partitionId)
-          for (batch in response.batches) {
-            pkeyCursor = batch.batch_range.end
-            dbRunPartition.computed_scanned_record_count += batch.scanned_record_count
-            dbRunPartition.computed_matching_record_count += batch.matching_record_count
-          }
-          dbRunPartition.precomputing_pkey_cursor = pkeyCursor
-          logger.debug { "Precomputer advanced to $pkeyCursor after scanning ${response.batches}" }
-        }
+        pkeyCursor = response.batches.last().batch_range.end
+        computedScannedRecordCount += response.batches.sumOf { it.scanned_record_count }
+        computedMatchingRecordCount += response.batches.sumOf { it.matching_record_count }
+
+        logger.debug { "Precomputer advanced to $pkeyCursor after scanning ${response.batches}" }
       } catch (e: CancellationException) {
         logger.info(e) { "BatchPrecomputer job cancelled ${backfillRunner.logLabel()}" }
         break
@@ -104,6 +102,12 @@ class BatchPrecomputer(
       }
     }
     logger.info { "BatchPrecomputer stopped ${backfillRunner.logLabel()}" }
+  }
+
+  fun updateProgress(dbRunPartition: DbRunPartition) {
+    dbRunPartition.precomputing_pkey_cursor = pkeyCursor
+    dbRunPartition.computed_scanned_record_count = computedScannedRecordCount
+    dbRunPartition.computed_matching_record_count = computedScannedRecordCount
   }
 
   companion object {

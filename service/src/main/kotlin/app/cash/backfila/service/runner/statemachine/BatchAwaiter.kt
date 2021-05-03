@@ -4,6 +4,7 @@ import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.RunBatchResponse
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.DbEventLog
+import app.cash.backfila.service.persistence.DbRunPartition
 import app.cash.backfila.service.runner.BackfillRunner
 import java.time.Duration
 import kotlinx.coroutines.CancellationException
@@ -14,6 +15,7 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import misk.hibernate.load
+import okio.ByteString
 import wisp.logging.getLogger
 
 /**
@@ -27,6 +29,12 @@ class BatchAwaiter(
 ) {
   private val scannedRateCounter = RateCounter(backfillRunner.factory.clock)
   private val matchingRateCounter = RateCounter(backfillRunner.factory.clock)
+
+  private var pkeyCursor: ByteString? = backfillRunner.metadata.pkeyCursor
+  private var backfilledScannedRecordCount: Long = backfillRunner.metadata.backfilledScannedRecordCount
+  private var backfilledMatchingRecordCount: Long = backfillRunner.metadata.backfilledMatchingRecordCount
+  private var scannedRecordsPerMinute: Long? = null
+  private var matchingRecordsPerMinute: Long? = null
 
   // TODO on shutdown can this wait for all rpcs to finish, with a ~5s time bound?
   fun run(
@@ -92,27 +100,22 @@ class BatchAwaiter(
             matchingRateCounter.add(initialBatch.matching_record_count)
             scannedRateCounter.add(initialBatch.scanned_record_count)
 
-            // Track our progress in DB for when another runner takes over.
-            // TODO update this less often, probably in the lease updater task
-            backfillRunner.factory.transacter.transaction { session ->
-              val dbRunPartition = session.load(backfillRunner.partitionId)
-              dbRunPartition.pkey_cursor = initialBatch.batch_range.end
-              dbRunPartition.backfilled_scanned_record_count += initialBatch.scanned_record_count
-              dbRunPartition.backfilled_matching_record_count += initialBatch.matching_record_count
-              dbRunPartition.scanned_records_per_minute = scannedRateCounter.projectedRate()
-              dbRunPartition.matching_records_per_minute = matchingRateCounter.projectedRate()
-              if (dbRunPartition.precomputing_done && dbRunPartition.matching_records_per_minute!! > 0) {
-                val remaining = (
-                  dbRunPartition.computed_matching_record_count -
-                    dbRunPartition.backfilled_matching_record_count
-                  )
-                val etaMinutes = remaining.toDouble() / dbRunPartition.matching_records_per_minute!!
-                val etaMillis = etaMinutes * 60 * 1000
-                backfillRunner.factory.metrics.eta
-                  .labels(*backfillRunner.metricLabels)
-                  .set(etaMillis)
-              }
+            pkeyCursor = initialBatch.batch_range.end
+            backfilledScannedRecordCount += initialBatch.scanned_record_count
+            backfilledMatchingRecordCount += initialBatch.matching_record_count
+            scannedRecordsPerMinute = scannedRateCounter.projectedRate()
+            matchingRecordsPerMinute = matchingRateCounter.projectedRate()
+
+            if (backfillRunner.metadata.precomputingDone && matchingRecordsPerMinute!! > 0) {
+              val remaining = (backfillRunner.metadata.computedMatchingRecordCount
+                - backfilledMatchingRecordCount)
+              val etaMinutes = remaining.toDouble() / matchingRecordsPerMinute!!
+              val etaMillis = etaMinutes * 60 * 1000
+              backfillRunner.factory.metrics.eta
+                .labels(*backfillRunner.metricLabels)
+                .set(etaMillis)
             }
+
             break@retry
           }
         } catch (e: CancellationException) {
@@ -166,6 +169,7 @@ class BatchAwaiter(
     val runComplete = backfillRunner.factory.transacter.transaction { session ->
       val dbRunPartition = session.load(backfillRunner.partitionId)
       dbRunPartition.run_state = BackfillState.COMPLETE
+      updateProgress(dbRunPartition)
 
       session.save(
         DbEventLog(
@@ -202,6 +206,16 @@ class BatchAwaiter(
 
     if (runComplete) {
       backfillRunner.factory.slackHelper.runCompleted(backfillRunner.backfillRunId)
+    }
+  }
+
+  fun updateProgress(dbRunPartition: DbRunPartition) {
+    dbRunPartition.pkey_cursor = pkeyCursor
+    dbRunPartition.backfilled_scanned_record_count = backfilledScannedRecordCount
+    dbRunPartition.backfilled_matching_record_count = backfilledMatchingRecordCount
+    if (scannedRecordsPerMinute != null) {
+      dbRunPartition.scanned_records_per_minute = scannedRecordsPerMinute
+      dbRunPartition.matching_records_per_minute = matchingRecordsPerMinute
     }
   }
 

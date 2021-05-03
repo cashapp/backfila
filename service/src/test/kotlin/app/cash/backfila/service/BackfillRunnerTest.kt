@@ -192,6 +192,7 @@ class BackfillRunnerTest {
             fakeBackfilaClientServiceClient.runBatchRequests.receive()
           }
         ).isNotNull()
+        delay(2000)
       } finally {
         runner.stop()
       }
@@ -233,6 +234,8 @@ class BackfillRunnerTest {
         fakeBackfilaClientServiceClient.runBatchResponses.send(
           Result.success(RunBatchResponse.Builder().build())
         )
+
+        delay(2000)
       } finally {
         runner.stop()
       }
@@ -311,6 +314,8 @@ class BackfillRunnerTest {
 
         // We should immediately get another RunBatch to run.
         assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
+
+        delay(2000)
 
         // Cursor should be updated by RunBatch
         transacter.transaction { session ->
@@ -403,6 +408,7 @@ class BackfillRunnerTest {
         fakeBackfilaClientServiceClient.runBatchResponses.send(
           Result.success(RunBatchResponse.Builder().build())
         )
+        delay(2000)
       } finally {
         runner.stop()
       }
@@ -500,6 +506,7 @@ class BackfillRunnerTest {
         fakeBackfilaClientServiceClient.runBatchResponses.send(
           Result.success(RunBatchResponse.Builder().build())
         )
+        delay(2000)
       } finally {
         runner.stop()
       }
@@ -580,6 +587,7 @@ class BackfillRunnerTest {
         fakeBackfilaClientServiceClient.runBatchResponses.send(
           Result.success(RunBatchResponse.Builder().build())
         )
+        delay(2000)
       } finally {
         runner.stop()
       }
@@ -616,6 +624,7 @@ class BackfillRunnerTest {
         fakeBackfilaClientServiceClient.runBatchResponses.send(
           Result.success(RunBatchResponse.Builder().build())
         )
+        delay(2000)
       } finally {
         runner.stop()
       }
@@ -674,6 +683,7 @@ class BackfillRunnerTest {
             fakeBackfilaClientServiceClient.runBatchRequests.receive()
           }
         ).isNotNull()
+        delay(2000)
       } finally {
         runner.stop()
       }
@@ -761,6 +771,7 @@ class BackfillRunnerTest {
 
         // Cursor is updated once the batch succeeds
         waitForOtherCoroutines()
+        delay(2000)
         assertThat(getSinglePartitionCursor(runner))
           .isEqualTo(initialRequest.batch_range.end.utf8().toLong())
 
@@ -798,6 +809,7 @@ class BackfillRunnerTest {
         )
 
         waitForOtherCoroutines()
+        delay(2000)
         var firstBatchCursor = getSinglePartitionCursor(runner)
         checkNotNull(firstBatchCursor) // cursor was set when the first batch succeeded
 
@@ -839,6 +851,7 @@ class BackfillRunnerTest {
           Result.success(RunBatchResponse.Builder().build())
         )
         waitForOtherCoroutines()
+        delay(2000)
         val cursor = getSinglePartitionCursor(runner)
         assertThat(cursor).isGreaterThan(firstBatchCursor) // cursor increased
         assertThat(cursor).isEqualTo(queuedRequest.batch_range.end.utf8().toLong())
