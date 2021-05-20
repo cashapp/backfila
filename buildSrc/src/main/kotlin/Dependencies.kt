@@ -15,6 +15,7 @@ object Dependencies {
   val jettyWebsocketServer = "org.eclipse.jetty.websocket:websocket-server:9.4.31.v20200723"
   val jettyWebsocketServlet = "org.eclipse.jetty.websocket:websocket-servlet:9.4.31.v20200723"
   val jnrUnixsocket = "com.github.jnr:jnr-unixsocket:0.30"
+  val jooq = "org.jooq:jooq:3.14.8"
   val junitApi = "org.junit.jupiter:junit-jupiter-api:5.7.0"
   val junitEngine = "org.junit.jupiter:junit-jupiter-engine:5.7.0"
   val junitParams = "org.junit.jupiter:junit-jupiter-params:5.7.0"
