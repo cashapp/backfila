@@ -1,45 +1,35 @@
-package com.squareup.backfila.client.base.jooq;
+package app.cash.backfila.client.misk.jooq
 
-import java.util.List;
-import javax.annotation.Nullable;
-import org.jooq.Condition;
-import org.jooq.Field;
-import org.jooq.Record;
+import org.jooq.Condition
+import org.jooq.Field
+import org.jooq.Record
 
 /**
  * Responsible for building JOOQ conditions when comparing compound key values.
+ * @param compoundKeyFields the list of fields that make up the compound key, in order.
  */
-public class CompoundKeyComparer {
-  private final List<Field<?>> compoundKeyFields;
-
-  /**
-   * Constructs a comparer for the given compound key fields.
-   *
-   * @param compoundKeyFields the list of fields that make up the compound key, in order.
-   */
-  public CompoundKeyComparer(List<Field<?>> compoundKeyFields) {
-    this.compoundKeyFields = compoundKeyFields;
-  }
-
+class CompoundKeyComparer<T>(private val compoundKeyFields: List<Field<*>>) {
   /**
    * Builds JOOQ conditions for comparing compound key values using greater than (>) semantics.
    *
    * Some examples will make it clear how this works.
    *
    * For a single-field (f1) comparison against a single value (v1), this produces:
-   *   f1 > v1
+   * f1 > v1
    *
    * For a double-field (f1, f2) comparison against a compound value (v1, v2), this produces:
-   *   f1 > v1 OR (f1 = v1 AND f2 > v2)
+   * f1 > v1 OR (f1 = v1 AND f2 > v2)
    *
    * For a triple-field (f1, f2, f3) comparison against a compound value (v1, v2, v3), this produces:
-   *   f1 > v1 OR (f1 = v1 AND f2 > v2) OR (f1 = v1 AND f2 = v2 AND f3 > v3)
+   * f1 > v1 OR (f1 = v1 AND f2 > v2) OR (f1 = v1 AND f2 = v2 AND f3 > v3)
    *
    * @param compoundKeyValue JOOQ record containing the field values.
    * @return JOOQ condition
    */
-  public Condition gt(Record compoundKeyValue) {
-    return buildCondition(compoundKeyValue, Field::greaterThan);
+  fun gt(compoundKeyValue: Record): Condition {
+    return buildCondition(
+      compoundKeyValue
+    ) { obj: Field<T>, value: T -> obj.greaterThan(value) }
   }
 
   /**
@@ -48,19 +38,23 @@ public class CompoundKeyComparer {
    * Some examples will make it clear how this works.
    *
    * For a single-field (f1) comparison against a single value (v1), this produces:
-   *   f1 >= v1
+   * f1 >= v1
    *
    * For a double-field (f1, f2) comparison against a compound value (v1, v2), this produces:
-   *   f1 > v1 OR (f1 = v1 AND f2 >= v2)
+   * f1 > v1 OR (f1 = v1 AND f2 >= v2)
    *
    * For a triple-field (f1, f2, f3) comparison against a compound value (v1, v2, v3), this produces:
-   *   f1 > v1 OR (f1 = v1 AND f2 > v2) OR (f1 = v1 AND f2 = v2 AND f3 >= v3)
+   * f1 > v1 OR (f1 = v1 AND f2 > v2) OR (f1 = v1 AND f2 = v2 AND f3 >= v3)
    *
    * @param compoundKeyValue JOOQ record containing the field values.
    * @return JOOQ condition
    */
-  public Condition gte(Record compoundKeyValue) {
-    return buildCondition(compoundKeyValue, Field::greaterThan, Field::greaterOrEqual);
+  fun gte(compoundKeyValue: Record): Condition {
+    return buildCondition(
+      compoundKeyValue,
+      { obj: Field<T>, value: T -> obj.greaterThan(value) },
+      { obj: Field<T>, value: T -> obj.greaterOrEqual(value) }
+    )
   }
 
   /**
@@ -69,98 +63,94 @@ public class CompoundKeyComparer {
    * Some examples will make it clear how this works.
    *
    * For a single-field (f1) comparison against a single value (v1), this produces:
-   *   f1 < v1
+   * f1 < v1
    *
    * For a double-field (f1, f2) comparison against a compound value (v1, v2), this produces:
-   *   f1 < v1 OR (f1 = v1 AND f2 < v2)
+   * f1 < v1 OR (f1 = v1 AND f2 < v2)
    *
    * For a triple-field (f1, f2, f3) comparison against a compound value (v1, v2, v3), this produces:
-   *   f1 < v1 OR (f1 = v1 AND f2 < v2) OR (f1 = v1 AND f2 = v2 AND f3 < v3)
+   * f1 < v1 OR (f1 = v1 AND f2 < v2) OR (f1 = v1 AND f2 = v2 AND f3 < v3)
    *
    * @param compoundKeyValue JOOQ record containing the field values.
    * @return JOOQ condition
    */
-  public Condition lt(Record compoundKeyValue) {
-    return buildCondition(compoundKeyValue, Field::lessThan);
+  fun lt(compoundKeyValue: Record): Condition {
+    return buildCondition(
+      compoundKeyValue
+    ) { obj: Field<T>, value: T -> obj.lessThan(value) }
   }
 
   /**
    * Builds JOOQ conditions for comparing compound key values using less than or equal to (<=) semantics.
    *
    * For a single-field (f1) comparison against a single value (v1), this produces:
-   *   f1 <= v1
+   * f1 <= v1
    *
    * For a double-field (f1, f2) comparison against a compound value (v1, v2), this produces:
-   *   f1 < v1 OR (f1 = v1 AND f2 <= v2)
+   * f1 < v1 OR (f1 = v1 AND f2 <= v2)
    *
    * For a triple-field (f1, f2, f3) comparison against a compound value (v1, v2, v3), this produces:
-   *   f1 < v1 OR (f1 = v1 AND f2 < v2) OR (f1 = v1 AND f2 = v2 AND f3 <= v3)
+   * f1 < v1 OR (f1 = v1 AND f2 < v2) OR (f1 = v1 AND f2 = v2 AND f3 <= v3)
    *
    * @param compoundKeyValue JOOQ record containing the field values.
    * @return JOOQ condition
    */
-  public Condition lte(Record compoundKeyValue) {
-    return buildCondition(compoundKeyValue, Field::lessThan, Field::lessOrEqual);
+  fun lte(compoundKeyValue: Record): Condition {
+    return buildCondition(
+      compoundKeyValue,
+      { obj: Field<T>, value: T -> obj.lessThan(value) },
+      { obj: Field<T>, value: T -> obj.lessOrEqual(value) }
+    )
   }
 
-  private Condition buildCondition(Record compoundKeyValue, CompareField comparison) {
-    return buildCondition(compoundKeyValue, comparison, comparison);
+  private fun buildCondition(
+    compoundKeyValue: Record,
+    comparison: (field: Field<T>, value: T) -> Condition
+  ): Condition {
+    return buildCondition(compoundKeyValue, comparison, comparison)
   }
 
-  private Condition buildCondition(Record compoundKeyValue,
-      CompareField mainComparison,
-      CompareField lastFieldComparison) {
-    @Nullable Condition overallCondition = null;
-    @Nullable Condition priorFieldsEqualCondition = null;
+  private fun buildCondition(
+    compoundKeyValue: Record,
+    mainComparison: (field: Field<T>, value: T) -> Condition,
+    lastFieldComparison: (field: Field<T>, value: T) -> Condition
+  ): Condition {
+    var overallCondition: Condition? = null
+    var priorFieldsEqualCondition: Condition? = null
+    for (i in compoundKeyFields.indices) {
+      val field = compoundKeyFields[i]
+      val comparison = if (i == compoundKeyFields.size - 1) lastFieldComparison else mainComparison
+      overallCondition = or(
+        overallCondition,
+        and(
+          priorFieldsEqualCondition,
+          @Suppress("UNCHECKED_CAST")
+          comparison(field as Field<T>, compoundKeyValue.get(field))
+        )
+      )
+      priorFieldsEqualCondition = and(
+        priorFieldsEqualCondition,
+        field.eq(compoundKeyValue.get(field))
+      )
+    }
+    return overallCondition ?: throw IllegalStateException("overall condition cannot be null")
+  }
 
-    for (int i = 0; i < compoundKeyFields.size(); i++) {
-      Field<?> field = compoundKeyFields.get(i);
-      CompareField comparison = i == compoundKeyFields.size() - 1 ?
-          lastFieldComparison :
-          mainComparison;
-
-      overallCondition = or(overallCondition,
-          and(priorFieldsEqualCondition,
-              compareField(field, compoundKeyValue, comparison)));
-
-      priorFieldsEqualCondition = and(priorFieldsEqualCondition,
-          compareField(field, compoundKeyValue, Field::eq));
+  companion object {
+    /**
+     * Like [Condition.and] but tolerates a null condition so we don't have to
+     * pollute our generated SQL with an "always true" condition.
+     */
+    private fun and(c1: Condition?, c2: Condition): Condition {
+      return c1?.and(c2) ?: c2
     }
 
-    return overallCondition;
-  }
-
-  /**
-   * Compares a single field against a single value using a comparison operator.
-   *
-   * Defined as a separate method to allow the Java generic system to match up the T types.
-   */
-  private static <T> Condition compareField(
-      Field<T> field,
-      Record compoundKeyValue,
-      CompareField fieldComparison) {
-    return fieldComparison.compare(field, compoundKeyValue.get(field));
-  }
-
-  /**
-   * Like {@link Condition#and(Condition)} but tolerates a null condition so we don't have to
-   * pollute our generated SQL with an "always true" condition.
-   */
-  private static Condition and(@Nullable Condition c1, Condition c2) {
-    if (c1 == null) return c2;
-    return c1.and(c2);
-  }
-
-  /**
-   * Like {@link Condition#or(Condition)} but tolerates a null condition so we don't have to
-   * pollute our generated SQL with an "always false" condition.
-   */
-  private static Condition or(@Nullable Condition c1, Condition c2) {
-    if (c1 == null) return c2;
-    return c1.or(c2);
-  }
-
-  @FunctionalInterface private interface CompareField {
-    <T> Condition compare(Field<T> field, T value);
+    /**
+     * Like [Condition.or] but tolerates a null condition so we don't have to
+     * pollute our generated SQL with an "always false" condition.
+     */
+    private fun or(c1: Condition?, c2: Condition): Condition {
+      return c1?.or(c2) ?: c2
+    }
   }
 }

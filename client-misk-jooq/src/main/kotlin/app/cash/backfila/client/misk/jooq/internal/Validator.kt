@@ -1,9 +1,8 @@
 package app.cash.backfila.client.misk.jooq.internal
 
+import app.cash.backfila.client.misk.jooq.ByteStringSerializer
 import app.cash.backfila.protos.clientservice.KeyRange
-import com.squareup.backfila.client.base.jooq.ByteStringSerializer
 import misk.exceptions.BadRequestException
-
 
 object Validator {
   /**

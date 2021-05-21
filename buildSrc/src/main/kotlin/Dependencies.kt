@@ -45,6 +45,7 @@ object Dependencies {
   val miskTesting = "com.squareup.misk:misk-testing:0.17.0"
   val moshiCore = "com.squareup.moshi:moshi:1.11.0"
   val moshiKotlin = "com.squareup.moshi:moshi-kotlin:1.11.0"
+  val mysql = "mysql:mysql-connector-java:8.0.22"
   val okHttp = "com.squareup.okhttp3:okhttp:4.10.0-RC1"
   val okio = "com.squareup.okio:okio:2.9.0"
   val openTracing = "io.opentracing:opentracing-api:0.33.0"

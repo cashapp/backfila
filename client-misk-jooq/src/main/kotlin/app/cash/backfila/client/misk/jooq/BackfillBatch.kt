@@ -5,7 +5,7 @@ import app.cash.backfila.client.misk.BackfillConfig
 /**
  * Encapsulates the data we pass to the `batchConsumer` callback.
  */
-data class BackfillBatch<K, Param: Any> (
+data class BackfillBatch<K, Param : Any> (
   /**
    * The name of the database shard.
    */

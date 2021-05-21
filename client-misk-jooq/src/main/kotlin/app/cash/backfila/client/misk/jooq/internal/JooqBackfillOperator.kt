@@ -1,6 +1,7 @@
 package app.cash.backfila.client.misk.jooq.internal
 
 import app.cash.backfila.client.misk.jooq.BackfillBatch
+import app.cash.backfila.client.misk.jooq.CompoundKeyComparer
 import app.cash.backfila.client.misk.jooq.JooqBackfill
 import app.cash.backfila.client.misk.spi.BackfilaParametersOperator
 import app.cash.backfila.client.misk.spi.BackfillOperator
@@ -13,7 +14,6 @@ import app.cash.backfila.protos.clientservice.PrepareBackfillResponse.Partition
 import app.cash.backfila.protos.clientservice.RunBatchRequest
 import app.cash.backfila.protos.clientservice.RunBatchResponse
 import com.google.common.collect.Streams
-import com.squareup.backfila.client.base.jooq.CompoundKeyComparer
 import okio.ByteString
 import java.util.stream.Collectors
 
@@ -81,12 +81,12 @@ class JooqBackfillOperator<K, Param : Any> internal constructor(
         .where(backfill.filterCondition)
         .and(
           backfill.compareCompoundKey(
-            backfill.fromByteString(request.batch_range.start), CompoundKeyComparer::gte
+            backfill.fromByteString(request.batch_range.start), CompoundKeyComparer<K>::gte
           )
         )
         .and(
           backfill.compareCompoundKey(
-            backfill.fromByteString(request.batch_range.end), CompoundKeyComparer::lte
+            backfill.fromByteString(request.batch_range.end), CompoundKeyComparer<K>::lte
           )
         )
         .orderBy(backfill.compoundKeyFields)
@@ -141,5 +141,4 @@ class JooqBackfillOperator<K, Param : Any> internal constructor(
       .end(rangeEnd)
       .build()
   }
-
 }

@@ -4,16 +4,15 @@ import app.cash.backfila.client.misk.Backfill
 import app.cash.backfila.client.misk.BackfillConfig
 import app.cash.backfila.protos.clientservice.KeyRange
 import com.google.common.base.Preconditions
-import com.squareup.backfila.client.base.jooq.ByteStringSerializer
-import com.squareup.backfila.client.base.jooq.CompoundKeyComparer
-import com.squareup.backfila.client.base.jooq.CompoundKeyComparisonOperator
 import okio.ByteString
 import org.jooq.Condition
 import org.jooq.DSLContext
 import org.jooq.Field
 import org.jooq.Record
+import org.jooq.SQLDialect
 import org.jooq.SortField
 import org.jooq.TableLike
+import org.jooq.impl.DefaultDSLContext
 
 /**
  * Implement this interface in your project to run a backfill with Jooq
@@ -21,50 +20,60 @@ import org.jooq.TableLike
  * @param <K> the type of key being backfilled over
  * @param <Param> backfill parameters
 */
-interface JooqBackfill<K, Param: Any>: Backfill {
+abstract class JooqBackfill<K, Param : Any> : Backfill {
+
+  val sqlDialect: SQLDialect = SQLDialect.MYSQL
   /**
    * A map of jooq transacters, indexed by shard database name, used to interact with the
    * database(s). For the unsharded case, this will will be a map of one entry.
    */
-  val shardedTransacterMapBackfill: Map<String, BackfillJooqTransacter>
+  abstract val shardedTransacterMapBackfill: Map<String, BackfillJooqTransacter>
 
   /**
    * The table containing the rows the backfill will run over.
    */
-  val table: TableLike<*>
+  abstract val table: TableLike<*>
 
   /**
    * Jooq condition that limits which rows the backfill runs over.
    */
-  val filterCondition: Condition
+  abstract val filterCondition: Condition
 
   /**
    * List of fields that uniquely identifies keys to backfill.
    *
    * Note: this could be a list of a single field when you aren't using a real compound key.
    */
-  val compoundKeyFields: List<Field<*>>
+  abstract val compoundKeyFields: List<Field<*>>
 
   /**
    * Convert from a JOOQ Record to the K type.
    */
-  fun recordToKey(record: Record): K
+  open fun recordToKey(record: Record): K {
+    return record.getValue(compoundKeyFields.first()) as K
+  }
 
   /**
    * Convert from the K type to a JOOQ Record.
    */
-  fun keyToRecord(key: K): Record
+  open fun keyToRecord(key: K): Record {
+    val emptyRecordFactory: DSLContext = DefaultDSLContext(sqlDialect)
+    @Suppress("UNCHECKED_CAST")
+    return emptyRecordFactory
+      .newRecord(compoundKeyFields.first())
+      .with(compoundKeyFields.first() as Field<K>, key)
+  }
 
   /**
    * A serializer for the configured key type, since the Backfila protos use [ByteString]s.
    */
-  val keySerializer: ByteStringSerializer<K>
+  abstract val keySerializer: ByteStringSerializer<K>
 
   /**
    * Hook that gives you a place to prepare or validate the backfill. Throw an exception from your
    * consumer to indicate the backfill is invalid.
    */
-  fun prepareAndValidateBackfill(config: BackfillConfig<Param>) {}
+  open fun prepareAndValidateBackfill(config: BackfillConfig<Param>) {}
 
   /**
    * Function that performs the work of the backfill by applying some side effect to the given
@@ -72,14 +81,13 @@ interface JooqBackfill<K, Param: Any>: Backfill {
    *
    * Note: this will be called outside of a transaction.
    */
-  fun backfill(backfillBatch: BackfillBatch<K, Param>)
-
+  abstract fun backfill(backfillBatch: BackfillBatch<K, Param>)
 
   fun toByteString(key: K): ByteString {
     return keySerializer.toByteString(key)
   }
 
-  fun fromByteString(byteString: ByteString?): K {
+  fun fromByteString(byteString: ByteString): K {
     return keySerializer.fromByteString(byteString)
   }
 
@@ -137,11 +145,11 @@ interface JooqBackfill<K, Param: Any>: Backfill {
     return transacterBackfill!!
   }
 
-  fun compareCompoundKey(compoundKey: K, compare: CompoundKeyComparisonOperator): Condition {
-    return compare.compare(compoundKeyComparer(), keyToRecord(compoundKey))
+  fun compareCompoundKey(compoundKey: K, compare: CompoundKeyComparisonOperator<K>): Condition {
+    return compare(compoundKeyComparer(), keyToRecord(compoundKey))
   }
 
-  fun compoundKeyComparer(): CompoundKeyComparer {
+  fun compoundKeyComparer(): CompoundKeyComparer<K> {
     return CompoundKeyComparer(compoundKeyFields)
   }
 }

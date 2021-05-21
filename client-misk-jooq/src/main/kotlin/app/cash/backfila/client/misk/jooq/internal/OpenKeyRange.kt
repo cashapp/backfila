@@ -2,22 +2,21 @@ package app.cash.backfila.client.misk.jooq.internal
 
 import app.cash.backfila.client.misk.jooq.JooqBackfill
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
-import com.squareup.backfila.client.base.jooq.CompoundKeyComparer
-import com.squareup.backfila.client.base.jooq.CompoundKeyComparisonOperator
+import app.cash.backfila.client.misk.jooq.CompoundKeyComparer
+import app.cash.backfila.client.misk.jooq.CompoundKeyComparisonOperator
 import org.jooq.Condition
 import org.jooq.DSLContext
 import org.jooq.Record
 import org.jooq.impl.DSL.select
 
-
 data class OpenKeyRange<K>(
-  private val jooqBackfill: JooqBackfill<K>,
+  private val jooqBackfill: JooqBackfill<K, *>,
   /**
    * Comparison function to use as a bound for the start value. Generally set to either
    * `CompoundKeyComparer::gte` or `CompoundKeyComparer::gt` depending on whether the start of the
    * range is inclusive or exclusive.
    */
-  private val startComparison: CompoundKeyComparisonOperator,
+  private val startComparison: CompoundKeyComparisonOperator<K>,
   /**
    * The start of the range.
    */
@@ -34,19 +33,22 @@ data class OpenKeyRange<K>(
   fun determineEnd(keyValues: List<K>): K =
     keyValues.lastOrNull() ?: upperBound
 
-
   fun betweenStartAndUpperBoundCondition(): Condition {
     return jooqBackfill.compareCompoundKey(start, startComparison)
-      .and(jooqBackfill.compareCompoundKey(upperBound) { keyCompare, compoundKeyValue ->
-        keyCompare.lte(compoundKeyValue)
-      })
+      .and(
+        jooqBackfill.compareCompoundKey(upperBound) { keyCompare, compoundKeyValue ->
+          keyCompare.lte(compoundKeyValue)
+        }
+      )
   }
 
   fun betweenStartAndEndCondition(end: K): Condition {
     return jooqBackfill.compareCompoundKey(start, startComparison)
-      .and(jooqBackfill.compareCompoundKey(end) { keyCompare, compoundKeyValue ->
-        keyCompare.lte(compoundKeyValue)
-      })
+      .and(
+        jooqBackfill.compareCompoundKey(end) { keyCompare, compoundKeyValue ->
+          keyCompare.lte(compoundKeyValue)
+        }
+      )
   }
 
   /**
@@ -57,31 +59,30 @@ data class OpenKeyRange<K>(
       jooqBackfill = jooqBackfill,
       upperBound = upperBound,
       start = end,
-      startComparison = { keyCompare: CompoundKeyComparer, compoundKeyValue: Record ->
+      startComparison = { keyCompare: CompoundKeyComparer<K>, compoundKeyValue: Record ->
         keyCompare.gt(compoundKeyValue)
       }
     )
   }
-
 
   companion object {
     /**
      * Builds the initial range that we start with when iterating over a sequence of ranges.
      */
     fun <K> initialRangeFor(
-      jooqBackfill: JooqBackfill<K>,
+      jooqBackfill: JooqBackfill<K, *>,
       request: GetNextBatchRangeRequest,
       session: DSLContext
     ): OpenKeyRange<K> {
-      val startComparison: CompoundKeyComparisonOperator =
-      // If this is the first batch, we want to start with the provided value on the backfila
+      val startComparison: CompoundKeyComparisonOperator<K> =
+        // If this is the first batch, we want to start with the provided value on the backfila
         // screen. If not, then, we need to start with one after the previous end value
         if (request.previous_end_key == null) {
-          CompoundKeyComparisonOperator { keyComparer: CompoundKeyComparer, compoundKeyValue: Record ->
+          { keyComparer: CompoundKeyComparer<K>, compoundKeyValue: Record ->
             keyComparer.gte(compoundKeyValue)
           }
         } else {
-          CompoundKeyComparisonOperator { keyComparer: CompoundKeyComparer, compoundKeyValue: Record ->
+          { keyComparer: CompoundKeyComparer<K>, compoundKeyValue: Record ->
             keyComparer.gt(
               compoundKeyValue
             )
@@ -89,8 +90,8 @@ data class OpenKeyRange<K>(
         }
 
       val start = request.previous_end_key
-        ?.let { jooqBackfill.fromByteString(request.backfill_range.start) }
-        ?: jooqBackfill.fromByteString(request.previous_end_key)
+        ?.let { jooqBackfill.fromByteString(request.previous_end_key) }
+        ?: jooqBackfill.fromByteString(request.backfill_range.start)
 
       return OpenKeyRange(
         jooqBackfill = jooqBackfill,
@@ -117,13 +118,13 @@ data class OpenKeyRange<K>(
      *      where (backfill fields > end of previous range or >= start of backfill)
      *      order by <backfill fields> asc
      *      limit <scan size>
- *      )
+     *      )
      *  order by <backfill fields> desc
      *  limit 1
      * </pre>
      */
     private fun <K> computeUpperBound(
-      jooqBackfill: JooqBackfill<K>,
+      jooqBackfill: JooqBackfill<K, *>,
       request: GetNextBatchRangeRequest,
       session: DSLContext,
       afterPreceedingRowsCondition: Condition

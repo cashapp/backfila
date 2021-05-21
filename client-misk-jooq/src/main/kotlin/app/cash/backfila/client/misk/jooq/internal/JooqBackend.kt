@@ -37,7 +37,7 @@ class JooqBackend @Inject constructor(
     }.toSet()
   }
 
-  private fun <K: Any, Param: Any> createJooqOperator(
+  private fun <K : Any, Param : Any> createJooqOperator(
     backfill: JooqBackfill<K, Param>
   ) = JooqBackfillOperator(
     backfill,
@@ -64,6 +64,4 @@ class JooqBackend @Inject constructor(
     // Like MyDataClass
     return (Types.getRawType(supertype.actualTypeArguments[1]) as Class<T>).kotlin
   }
-
-
 }

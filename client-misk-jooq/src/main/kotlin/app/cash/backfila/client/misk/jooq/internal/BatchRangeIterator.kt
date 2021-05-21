@@ -50,14 +50,14 @@ class BatchRangeIterator<K>(
   }
 
   private fun selectKeyValues(keyRange: OpenKeyRange<K>): List<K> {
-    val limit = if (request.precomputing) request.scan_size else request.batch_size
+    val limit = if (request.precomputing == true) request.scan_size else request.batch_size
     return session.select(jooqBackfill.compoundKeyFields)
       .from(jooqBackfill.table)
       .where(jooqBackfill.filterCondition)
       .and(keyRange.betweenStartAndUpperBoundCondition())
       .orderBy(jooqBackfill.compoundKeyFields)
       .limit(limit)
-      .fetch{ jooqBackfill.recordToKey(it) }
+      .fetch { jooqBackfill.recordToKey(it) }
   }
 
   /**
