@@ -1,5 +1,6 @@
 package app.cash.backfila.client.misk.jooq.internal
 
+import app.cash.backfila.client.misk.BackfillConfig
 import app.cash.backfila.client.misk.jooq.JooqBackfill
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
@@ -13,10 +14,11 @@ import java.util.function.Supplier
 /**
  * Helper class that helps us iterate over batch ranges.
  */
-class BatchRangeIterator<K>(
-  private val jooqBackfill: JooqBackfill<K, *>,
+class BatchRangeIterator<K, Param : Any>(
+  private val jooqBackfill: JooqBackfill<K, Param>,
   private val session: DSLContext,
-  private val request: GetNextBatchRangeRequest
+  private val request: GetNextBatchRangeRequest,
+  private val config: BackfillConfig<Param>
 ) : AbstractIterator<GetNextBatchRangeResponse.Batch>() {
 
   private val timeElapsed: Supplier<Boolean>
@@ -53,7 +55,7 @@ class BatchRangeIterator<K>(
     val limit = if (request.precomputing == true) request.scan_size else request.batch_size
     return session.select(jooqBackfill.compoundKeyFields)
       .from(jooqBackfill.table)
-      .where(jooqBackfill.filterCondition)
+      .where(jooqBackfill.filterCondition(config))
       .and(keyRange.betweenStartAndUpperBoundCondition())
       .orderBy(jooqBackfill.compoundKeyFields)
       .limit(limit)

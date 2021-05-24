@@ -32,14 +32,14 @@ dependencies {
   testApi(project(":client-misk-testing"))
 
   implementation(Dependencies.misk)
+  implementation(Dependencies.miskJdbc)
   implementation(Dependencies.miskActions)
   implementation(Dependencies.miskCore)
   implementation(Dependencies.miskInject)
-  api(Dependencies.miskHibernate)
 
+  testImplementation(Dependencies.miskJdbcTesting)
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.miskTesting)
-  testImplementation(Dependencies.miskHibernateTesting)
   testImplementation(Dependencies.kotlinTest)
   testImplementation(Dependencies.junitEngine)
   testImplementation(Dependencies.okHttp)

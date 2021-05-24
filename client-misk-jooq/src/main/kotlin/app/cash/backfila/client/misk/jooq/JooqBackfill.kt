@@ -3,7 +3,6 @@ package app.cash.backfila.client.misk.jooq
 import app.cash.backfila.client.misk.Backfill
 import app.cash.backfila.client.misk.BackfillConfig
 import app.cash.backfila.protos.clientservice.KeyRange
-import com.google.common.base.Preconditions
 import okio.ByteString
 import org.jooq.Condition
 import org.jooq.DSLContext
@@ -12,6 +11,7 @@ import org.jooq.Record
 import org.jooq.SQLDialect
 import org.jooq.SortField
 import org.jooq.TableLike
+import org.jooq.impl.DSL.noCondition
 import org.jooq.impl.DefaultDSLContext
 
 /**
@@ -37,7 +37,9 @@ abstract class JooqBackfill<K, Param : Any> : Backfill {
   /**
    * Jooq condition that limits which rows the backfill runs over.
    */
-  abstract val filterCondition: Condition
+  open fun filterCondition(config: BackfillConfig<Param>): Condition {
+    return noCondition()
+  }
 
   /**
    * List of fields that uniquely identifies keys to backfill.
@@ -134,15 +136,10 @@ abstract class JooqBackfill<K, Param : Any> : Backfill {
   }
 
   fun getTransacter(partitionName: String?): BackfillJooqTransacter {
-    val transacterBackfill: BackfillJooqTransacter? = shardedTransacterMapBackfill[partitionName]
-    Preconditions.checkArgument(
-      transacterBackfill != null,
-      String.format(
-        "A JooqTransacter for the following partitionName was not found: %s",
-        partitionName
+    return shardedTransacterMapBackfill[partitionName]
+      ?: throw IllegalStateException(
+        "A JooqTransacter for the following partitionName was not found $partitionName"
       )
-    )
-    return transacterBackfill!!
   }
 
   fun compareCompoundKey(compoundKey: K, compare: CompoundKeyComparisonOperator<K>): Condition {

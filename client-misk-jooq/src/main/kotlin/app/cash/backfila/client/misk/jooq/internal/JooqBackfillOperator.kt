@@ -29,8 +29,6 @@ class JooqBackfillOperator<K, Param : Any> internal constructor(
   override fun name(): String = backfill.javaClass.name
 
   override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
-    Validator.validateRange(request.range, backfill.keySerializer)
-
     backfill.prepareAndValidateBackfill(
       parametersOperator.constructBackfillConfig(
         request.parameters, request.dry_run
@@ -57,14 +55,17 @@ class JooqBackfillOperator<K, Param : Any> internal constructor(
         .batches(emptyList())
         .build()
     }
+    val config = parametersOperator.constructBackfillConfig(
+      request.parameters, request.dry_run
+    )
 
     return backfill.inTransactionReturning(
-      "JooqBackfill#getNextBatchRange",
+      "${name()}#JooqBackfillOperator#getNextBatchRange",
       request.partition_name
     ) { dslContext ->
       GetNextBatchRangeResponse.Builder()
         .batches(
-          Streams.stream(BatchRangeIterator(backfill, dslContext, request))
+          Streams.stream(BatchRangeIterator(backfill, dslContext, request, config))
             .limit(request.compute_count_limit)
             .collect(Collectors.toList())
         )
@@ -73,12 +74,16 @@ class JooqBackfillOperator<K, Param : Any> internal constructor(
   }
 
   override fun runBatch(request: RunBatchRequest): RunBatchResponse {
+    val config = parametersOperator.constructBackfillConfig(
+      request.parameters, request.dry_run
+    )
+
     val keysInRange = backfill.inTransactionReturning(
-      "JooqBackfill#runBatch", request.partition_name
+      "${name()}#JooqBackfillOperator#runBatch", request.partition_name
     ) { dslContext ->
       dslContext.select(backfill.compoundKeyFields)
         .from(backfill.table)
-        .where(backfill.filterCondition)
+        .where(backfill.filterCondition(config))
         .and(
           backfill.compareCompoundKey(
             backfill.fromByteString(request.batch_range.start), CompoundKeyComparer<K>::gte
@@ -98,9 +103,7 @@ class JooqBackfillOperator<K, Param : Any> internal constructor(
         shardName = request.partition_name,
         transacter = backfill.getTransacter(request.partition_name),
         keys = keysInRange,
-        config = parametersOperator.constructBackfillConfig(
-          request.parameters, request.dry_run
-        )
+        config = config
       )
     )
 

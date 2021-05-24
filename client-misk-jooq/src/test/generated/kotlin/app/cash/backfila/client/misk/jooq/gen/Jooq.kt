@@ -3,8 +3,8 @@
  */
 package app.cash.backfila.client.misk.jooq.gen
 
-import app.cash.backfila.client.misk.jooq.gen.tables.Orders
-import app.cash.backfila.client.misk.jooq.gen.tables.Restaurants
+import app.cash.backfila.client.misk.jooq.gen.tables.Menu
+import app.cash.backfila.client.misk.jooq.gen.tables.Widgets
 
 import kotlin.collections.List
 
@@ -26,19 +26,19 @@ open class Jooq : SchemaImpl("jooq", DefaultCatalog.DEFAULT_CATALOG) {
   }
 
   /**
-   * The table <code>jooq.orders</code>.
+   * The table <code>jooq.menu</code>.
    */
-  val ORDERS get() = Orders.ORDERS
+  val MENU get() = Menu.MENU
 
   /**
-   * The table <code>jooq.restaurants</code>.
+   * The table <code>jooq.widgets</code>.
    */
-  val RESTAURANTS get() = Restaurants.RESTAURANTS
+  val WIDGETS get() = Widgets.WIDGETS
 
   override fun getCatalog(): Catalog = DefaultCatalog.DEFAULT_CATALOG
 
   override fun getTables(): List<Table<*>> = listOf(
-    Orders.ORDERS,
-    Restaurants.RESTAURANTS
+    Menu.MENU,
+    Widgets.WIDGETS
   )
 }

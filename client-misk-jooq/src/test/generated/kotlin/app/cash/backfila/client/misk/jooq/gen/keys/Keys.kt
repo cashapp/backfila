@@ -3,10 +3,10 @@
  */
 package app.cash.backfila.client.misk.jooq.gen.keys
 
-import app.cash.backfila.client.misk.jooq.gen.tables.Orders
-import app.cash.backfila.client.misk.jooq.gen.tables.Restaurants
-import app.cash.backfila.client.misk.jooq.gen.tables.records.OrdersRecord
-import app.cash.backfila.client.misk.jooq.gen.tables.records.RestaurantsRecord
+import app.cash.backfila.client.misk.jooq.gen.tables.Menu
+import app.cash.backfila.client.misk.jooq.gen.tables.Widgets
+import app.cash.backfila.client.misk.jooq.gen.tables.records.MenuRecord
+import app.cash.backfila.client.misk.jooq.gen.tables.records.WidgetsRecord
 
 import org.jooq.UniqueKey
 import org.jooq.impl.DSL
@@ -16,5 +16,5 @@ import org.jooq.impl.Internal
 // UNIQUE and PRIMARY KEY definitions
 // -------------------------------------------------------------------------
 
-val KEY_ORDERS_PRIMARY: UniqueKey<OrdersRecord> = Internal.createUniqueKey(Orders.ORDERS, DSL.name("KEY_orders_PRIMARY"), arrayOf(Orders.ORDERS.ID), true)
-val KEY_RESTAURANTS_PRIMARY: UniqueKey<RestaurantsRecord> = Internal.createUniqueKey(Restaurants.RESTAURANTS, DSL.name("KEY_restaurants_PRIMARY"), arrayOf(Restaurants.RESTAURANTS.ID), true)
+val KEY_MENU_PRIMARY: UniqueKey<MenuRecord> = Internal.createUniqueKey(Menu.MENU, DSL.name("KEY_menu_PRIMARY"), arrayOf(Menu.MENU.ID), true)
+val KEY_WIDGETS_PRIMARY: UniqueKey<WidgetsRecord> = Internal.createUniqueKey(Widgets.WIDGETS, DSL.name("KEY_widgets_PRIMARY"), arrayOf(Widgets.WIDGETS.WIDGET_TOKEN), true)

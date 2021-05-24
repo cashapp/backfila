@@ -3,15 +3,15 @@
  */
 package app.cash.backfila.client.misk.jooq.gen.tables.references
 
-import app.cash.backfila.client.misk.jooq.gen.tables.Orders
-import app.cash.backfila.client.misk.jooq.gen.tables.Restaurants
+import app.cash.backfila.client.misk.jooq.gen.tables.Menu
+import app.cash.backfila.client.misk.jooq.gen.tables.Widgets
 
 /**
- * The table <code>jooq.orders</code>.
+ * The table <code>jooq.menu</code>.
  */
-val ORDERS = Orders.ORDERS
+val MENU = Menu.MENU
 
 /**
- * The table <code>jooq.restaurants</code>.
+ * The table <code>jooq.widgets</code>.
  */
-val RESTAURANTS = Restaurants.RESTAURANTS
+val WIDGETS = Widgets.WIDGETS

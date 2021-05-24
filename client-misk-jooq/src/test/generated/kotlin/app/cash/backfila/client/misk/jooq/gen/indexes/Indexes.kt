@@ -3,7 +3,7 @@
  */
 package app.cash.backfila.client.misk.jooq.gen.indexes
 
-import app.cash.backfila.client.misk.jooq.gen.tables.Orders
+import app.cash.backfila.client.misk.jooq.gen.tables.Widgets
 
 import org.jooq.Index
 import org.jooq.impl.DSL
@@ -13,4 +13,4 @@ import org.jooq.impl.Internal
 // INDEX definitions
 // -------------------------------------------------------------------------
 
-val ORDERS_IDX_RESTAURANT_ID: Index = Internal.createIndex(DSL.name("idx_restaurant_id"), Orders.ORDERS, arrayOf(Orders.ORDERS.RESTAURANT_ID), false)
+val WIDGETS_MANUFACTURER_CREATED_AT: Index = Internal.createIndex(DSL.name("manufacturer_created_at"), Widgets.WIDGETS, arrayOf(Widgets.WIDGETS.MANUFACTURER_TOKEN, Widgets.WIDGETS.CREATED_AT_MS), false)

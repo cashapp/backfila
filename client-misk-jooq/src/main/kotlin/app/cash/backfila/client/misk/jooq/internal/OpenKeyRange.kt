@@ -33,6 +33,10 @@ data class OpenKeyRange<K>(
   fun determineEnd(keyValues: List<K>): K =
     keyValues.lastOrNull() ?: upperBound
 
+  /**
+   * Builds a jooq condition that limits a query to the start of the range and the overall upper
+   * bound.
+   */
   fun betweenStartAndUpperBoundCondition(): Condition {
     return jooqBackfill.compareCompoundKey(start, startComparison)
       .and(
@@ -42,6 +46,10 @@ data class OpenKeyRange<K>(
       )
   }
 
+  /**
+   * Builds a jooq condition that limits a query to the start of the range and the provided
+   * `end`.
+   */
   fun betweenStartAndEndCondition(end: K): Condition {
     return jooqBackfill.compareCompoundKey(start, startComparison)
       .and(

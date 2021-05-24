@@ -88,7 +88,8 @@ class ClientJooqTestingModule : KAbstractModule() {
       .to(BackfilaClientNoLoggingSetupProvider::class.java)
 
     // Registers all your backfills here
-    install(JooqBackfillModule.create<JooqTestBackfill>())
+    install(JooqBackfillModule.create<JooqMenuTestBackfill>())
+    install(JooqBackfillModule.create<JooqWidgetCompoundKeyBackfill>())
   }
 
   private fun dslContext(

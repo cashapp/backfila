@@ -28,7 +28,7 @@ interface ByteStringSerializer<T> {
   fun <U> composeWith(
     serialize: (serialiseTo: U) -> T,
     deserialize: (deserialiseFrom: T) -> U
-  ): ByteStringSerializer<U>? {
+  ): ByteStringSerializer<U> {
     val outerSerializer = this
     return object : ByteStringSerializer<U> {
       override fun toByteString(value: U): ByteString {
