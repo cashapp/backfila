@@ -13,6 +13,7 @@ import com.google.inject.TypeLiteral
 import com.squareup.moshi.Types
 import java.lang.reflect.ParameterizedType
 import kotlin.reflect.KClass
+import kotlin.reflect.full.findAnnotation
 
 @Singleton
 class JooqBackend @Inject constructor(
@@ -31,7 +32,7 @@ class JooqBackend @Inject constructor(
     return backfills.map {
       BackfillRegistration(
         name = it.key,
-        description = (it.value.annotations.find { it is Description } as? Description)?.text,
+        description = it.value.findAnnotation<Description>()?.text,
         parametersClass = parametersClass(it.value as KClass<JooqBackfill<*, Any>>)
       )
     }.toSet()

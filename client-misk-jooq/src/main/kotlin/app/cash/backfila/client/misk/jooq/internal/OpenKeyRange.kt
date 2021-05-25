@@ -82,9 +82,9 @@ data class OpenKeyRange<K>(
       request: GetNextBatchRangeRequest,
       session: DSLContext
     ): OpenKeyRange<K> {
+      // If this is the first batch, we want to start with the provided value on the backfila
+      // screen. If not, then, we need to start with one after the previous end value
       val startComparison: CompoundKeyComparisonOperator<K> =
-        // If this is the first batch, we want to start with the provided value on the backfila
-        // screen. If not, then, we need to start with one after the previous end value
         if (request.previous_end_key == null) {
           { keyComparer: CompoundKeyComparer<K>, compoundKeyValue: Record ->
             keyComparer.gte(compoundKeyValue)
@@ -98,8 +98,9 @@ data class OpenKeyRange<K>(
         }
 
       val start = request.previous_end_key
-        ?.let { jooqBackfill.fromByteString(request.previous_end_key) }
-        ?: jooqBackfill.fromByteString(request.backfill_range.start)
+        ?.let {
+          jooqBackfill.fromByteString(request.previous_end_key)
+        } ?: jooqBackfill.fromByteString(request.backfill_range.start)
 
       return OpenKeyRange(
         jooqBackfill = jooqBackfill,

@@ -9,7 +9,6 @@ import com.google.common.collect.AbstractIterator
 import org.jooq.DSLContext
 import java.lang.IllegalStateException
 import java.util.concurrent.TimeUnit
-import java.util.function.Supplier
 
 /**
  * Helper class that helps us iterate over batch ranges.
@@ -21,22 +20,21 @@ class BatchRangeIterator<K, Param : Any>(
   private val config: BackfillConfig<Param>
 ) : AbstractIterator<GetNextBatchRangeResponse.Batch>() {
 
-  private val timeElapsed: Supplier<Boolean>
+  private val timeElapsed: () -> Boolean
   private var nextKeyRange: OpenKeyRange<K>
   init {
-    timeElapsed = if (request.compute_time_limit_ms == null) Supplier { false } else timer(
-      request.compute_time_limit_ms
-    )
+    timeElapsed =
+      if (request.compute_time_limit_ms == null) { { false } } else timer(request.compute_time_limit_ms)
     nextKeyRange = OpenKeyRange.initialRangeFor(jooqBackfill, request, session)
   }
 
-  private fun timer(timeLimitMs: Long): Supplier<Boolean> {
+  private fun timer(timeLimitMs: Long): () -> Boolean {
     val stopwatch = Stopwatch.createStarted()
-    return Supplier { stopwatch.elapsed(TimeUnit.MILLISECONDS) > timeLimitMs }
+    return { stopwatch.elapsed(TimeUnit.MILLISECONDS) > timeLimitMs }
   }
 
   override fun computeNext(): GetNextBatchRangeResponse.Batch? {
-    if (timeElapsed.get() || request.backfill_range.start == null) return endOfData()
+    if (timeElapsed() || request.backfill_range.start == null) return endOfData()
     val keyRange = nextKeyRange
     val keyValues = selectKeyValues(keyRange)
     val start = keyRange.determineStart(keyValues)

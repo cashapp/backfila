@@ -22,7 +22,8 @@ import kotlin.reflect.KClass
 
 /**
  * This test is good in a way that it avoids duplication, but it could get a little complicated to
- * setup. The test will work only work if all the backfills have data set up in this manner:
+ * setup. The test will work only work if all the backfills have data set up in the same manner:
+ * For example most of the tests in this class creates tests like the below:
  * 10 records that match the backfill criteria
  * followed by 5 records that do not batch the criteria
  * followed by 10 records that match the criteria
