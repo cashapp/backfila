@@ -3,7 +3,7 @@
 import * as React from "react"
 
 import { MenuItem } from "@blueprintjs/core"
-import { Global, css, jsx } from "@emotion/react"
+import { Global, css, jsx } from "@emotion/core"
 import { ItemPredicate, ItemRenderer, Suggest } from "@blueprintjs/select"
 
 export interface IBackfill {
