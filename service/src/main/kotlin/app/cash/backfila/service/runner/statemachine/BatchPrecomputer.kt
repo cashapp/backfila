@@ -107,7 +107,7 @@ class BatchPrecomputer(
   fun updateProgress(dbRunPartition: DbRunPartition) {
     dbRunPartition.precomputing_pkey_cursor = pkeyCursor
     dbRunPartition.computed_scanned_record_count = computedScannedRecordCount
-    dbRunPartition.computed_matching_record_count = computedScannedRecordCount
+    dbRunPartition.computed_matching_record_count = computedMatchingRecordCount
   }
 
   companion object {
