@@ -35,7 +35,7 @@ class JooqBackfillOperator<K, Param : Any> internal constructor(
       )
     )
 
-    val partitions = backfill.shardedTransacterMapBackfill.keys.map { partitionName ->
+    val partitions = backfill.shardedTransacterMap.keys.map { partitionName ->
       Partition.Builder()
         .partition_name(partitionName)
         .backfill_range(computeOverallRange(partitionName, request))

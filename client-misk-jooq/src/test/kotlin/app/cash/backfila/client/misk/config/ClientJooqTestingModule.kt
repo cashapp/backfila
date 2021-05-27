@@ -1,4 +1,4 @@
-package app.cash.backfila.client.misk.setup
+package app.cash.backfila.client.misk.config
 
 import app.cash.backfila.client.misk.BackfillModule
 import app.cash.backfila.client.misk.client.BackfilaClientConfig
@@ -39,7 +39,7 @@ class ClientJooqTestingModule : KAbstractModule() {
       type = DataSourceType.MYSQL,
       username = "root",
       password = "",
-      database = "backfila_clientjooq_testing",
+      database = "backfila_client_jooq_testing",
       migrations_resource = "classpath:/db-migrations"
     )
     install(

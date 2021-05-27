@@ -7,7 +7,7 @@ import org.assertj.core.api.Assertions.assertThat
 
 class ByteStringSerializerTest {
   @Test fun forLongCanRoundTripLongValues() {
-    val value: Long = 12345L
+    val value: Long = Long.MAX_VALUE
     val byteStringSerializer = ByteStringSerializer.forLong
     val serialized: ByteString = byteStringSerializer.toByteString(value)
     val actual = byteStringSerializer.fromByteString(serialized)

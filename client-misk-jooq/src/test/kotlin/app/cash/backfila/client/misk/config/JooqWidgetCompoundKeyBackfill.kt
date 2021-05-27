@@ -1,4 +1,4 @@
-package app.cash.backfila.client.misk.setup
+package app.cash.backfila.client.misk.config
 
 import app.cash.backfila.client.misk.BackfillConfig
 import app.cash.backfila.client.misk.Description
@@ -97,11 +97,11 @@ data class WidgetParametersBackfill(
 class JooqWidgetCompoundKeyBackfill @Inject constructor(
   @JooqDBIdentifier private val jooqTransacter: JooqTransacter
 ) : JooqBackfill<CompoundKey, WidgetParametersBackfill>(),
-  TestBackFill<CompoundKey, WidgetParametersBackfill> {
+  IdRecorder<CompoundKey, WidgetParametersBackfill> {
   override val idsRanDry = mutableListOf<CompoundKey>()
   override val idsRanWet = mutableListOf<CompoundKey>()
 
-  override val shardedTransacterMapBackfill: Map<String, BackfillJooqTransacter>
+  override val shardedTransacterMap: Map<String, BackfillJooqTransacter>
     get() = mapOf("unsharded" to jooqTransacter)
 
   override val table: TableLike<*>

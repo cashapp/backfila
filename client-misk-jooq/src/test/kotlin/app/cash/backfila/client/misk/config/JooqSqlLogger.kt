@@ -1,4 +1,4 @@
-package app.cash.backfila.client.misk.setup
+package app.cash.backfila.client.misk.config
 
 import org.jooq.ExecuteContext
 import org.jooq.conf.Settings

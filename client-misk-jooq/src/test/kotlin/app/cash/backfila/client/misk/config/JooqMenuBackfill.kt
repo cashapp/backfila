@@ -1,4 +1,4 @@
-package app.cash.backfila.client.misk.setup
+package app.cash.backfila.client.misk.config
 
 import app.cash.backfila.client.misk.BackfillConfig
 import app.cash.backfila.client.misk.Description
@@ -17,10 +17,10 @@ import javax.inject.Inject
 @Description("So we can backfill menus.")
 class JooqMenuTestBackfill @Inject constructor(
   @JooqDBIdentifier private val jooqTransacter: JooqTransacter
-) : JooqBackfill<Long, SandwichParameters>(), TestBackFill<Long, SandwichParameters> {
+) : JooqBackfill<Long, SandwichParameters>(), IdRecorder<Long, SandwichParameters> {
   override val idsRanDry = mutableListOf<Long>()
   override val idsRanWet = mutableListOf<Long>()
-  override val shardedTransacterMapBackfill: Map<String, BackfillJooqTransacter>
+  override val shardedTransacterMap: Map<String, BackfillJooqTransacter>
     get() = mapOf("unsharded" to jooqTransacter)
 
   override val table: TableLike<*>

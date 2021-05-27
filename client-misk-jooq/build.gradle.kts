@@ -4,14 +4,14 @@ import org.jooq.meta.jaxb.ForcedType
 
 buildscript {
   dependencies {
-    classpath("gradle.plugin.com.boxfuse.client:flyway-release:5.0.2")
+    classpath(Dependencies.flywayGradleBuildscriptDep)
     classpath(Dependencies.mysql)
   }
 }
 
 plugins {
-  id("org.flywaydb.flyway") version "5.2.4"
-  id("nu.studer.jooq") version "5.2"
+  id("org.flywaydb.flyway") version Versions.flywayDBPlugin
+  id("nu.studer.jooq") version Versions.jooqGenPlugin
 }
 
 apply(plugin = "kotlin")
@@ -42,6 +42,7 @@ dependencies {
   testImplementation(Dependencies.miskTesting)
   testImplementation(Dependencies.kotlinTest)
   testImplementation(Dependencies.junitEngine)
+  testImplementation(Dependencies.junitParams)
   testImplementation(Dependencies.okHttp)
   testImplementation(Dependencies.mysql)
 

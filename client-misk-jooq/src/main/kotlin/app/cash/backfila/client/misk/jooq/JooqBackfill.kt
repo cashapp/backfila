@@ -27,7 +27,7 @@ abstract class JooqBackfill<K, Param : Any> : Backfill {
    * A map of jooq transacters, indexed by shard database name, used to interact with the
    * database(s). For the unsharded case, this will will be a map of one entry.
    */
-  abstract val shardedTransacterMapBackfill: Map<String, BackfillJooqTransacter>
+  abstract val shardedTransacterMap: Map<String, BackfillJooqTransacter>
 
   /**
    * The table containing the rows the backfill will run over.
@@ -136,7 +136,7 @@ abstract class JooqBackfill<K, Param : Any> : Backfill {
   }
 
   fun getTransacter(partitionName: String?): BackfillJooqTransacter {
-    return shardedTransacterMapBackfill[partitionName]
+    return shardedTransacterMap[partitionName]
       ?: throw IllegalStateException(
         "A JooqTransacter for the following partitionName was not found $partitionName"
       )

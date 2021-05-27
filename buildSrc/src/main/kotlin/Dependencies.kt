@@ -2,6 +2,7 @@ object Dependencies {
   val apacheCommonsLang3 = "org.apache.commons:commons-lang3:3.11"
   val assertj = "org.assertj:assertj-core:3.16.1"
   val awsDynamoDb = "com.amazonaws:aws-java-sdk-dynamodb:1.11.774"
+  val flywayGradleBuildscriptDep = "gradle.plugin.com.boxfuse.client:flyway-release:5.0.2"
   val guava = "com.google.guava:guava:30.0-jre"
   val guice = "com.google.inject:guice:4.2.3"
   val guiceMultibindings = "com.google.inject.extensions:guice-multibindings:4.2.3"
@@ -68,3 +69,9 @@ object Dependencies {
   val wireRuntime = "com.squareup.wire:wire-runtime:3.6.0"
   val wireSchema = "com.squareup.wire:wire-schema:3.6.0"
 }
+
+object Versions {
+  val flywayDBPlugin = "5.2.4"
+  val jooqGenPlugin = "5.2"
+}
+

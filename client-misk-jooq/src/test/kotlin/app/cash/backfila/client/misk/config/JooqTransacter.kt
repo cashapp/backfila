@@ -1,4 +1,4 @@
-package app.cash.backfila.client.misk.setup
+package app.cash.backfila.client.misk.config
 
 import app.cash.backfila.client.misk.jooq.BackfillJooqTransacter
 import org.jooq.DSLContext

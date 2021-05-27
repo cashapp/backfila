@@ -1,13 +1,13 @@
 package app.cash.backfila.client.misk
 
 import app.cash.backfila.client.misk.jooq.gen.tables.references.MENU
-import app.cash.backfila.client.misk.setup.JooqTransacter
+import app.cash.backfila.client.misk.config.JooqTransacter
 import okhttp3.internal.toImmutableList
 
-object JooqMenuBackfillDbSetup {
+object JooqMenuBackfillDbDataSetup {
 
   fun createNoMatching(transacter: JooqTransacter): List<Long> {
-    transacter.transaction("") { session ->
+    transacter.transaction("JooqMenuBackfillDbDataSetup#createNoMatching") { session ->
       repeat((0..4).count()) {
         session.newRecord(MENU)
           .apply {
@@ -22,7 +22,7 @@ object JooqMenuBackfillDbSetup {
   }
 
   fun createSome(transacter: JooqTransacter): List<Long> {
-    return transacter.transaction("") { session ->
+    return transacter.transaction("JooqMenuBackfillDbDataSetup#transacter") { session ->
       val expected = mutableListOf<Long>()
       repeat((0..9).count()) {
         session.newRecord(MENU)
