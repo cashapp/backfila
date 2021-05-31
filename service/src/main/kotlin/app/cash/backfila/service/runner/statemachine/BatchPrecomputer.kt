@@ -7,6 +7,7 @@ import app.cash.backfila.service.persistence.DbRunPartition
 import app.cash.backfila.service.runner.BackfillRunner
 import com.google.common.base.Stopwatch
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -21,7 +22,7 @@ class BatchPrecomputer(
   private var computedScannedRecordCount: Long = backfillRunner.metadata.computedScannedRecordCount
   private var computedMatchingRecordCount: Long = backfillRunner.metadata.computedMatchingRecordCount
 
-  fun run(coroutineScope: CoroutineScope) = coroutineScope.launch {
+  fun run(coroutineScope: CoroutineScope) = coroutineScope.launch(CoroutineName("Precomputer")) {
     logger.info { "BatchPrecomputer started ${backfillRunner.logLabel()}" }
 
     val stopwatch = Stopwatch.createUnstarted()

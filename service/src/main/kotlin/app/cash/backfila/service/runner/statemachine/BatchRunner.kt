@@ -6,6 +6,7 @@ import app.cash.backfila.service.runner.BackfillRunner
 import com.google.common.base.Stopwatch
 import java.time.Duration
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
@@ -41,7 +42,7 @@ class BatchRunner(
 
   private fun capacity(numThreads: Int) = numThreads
 
-  fun run(coroutineScope: CoroutineScope) = coroutineScope.launch {
+  fun run(coroutineScope: CoroutineScope) = coroutineScope.launch(CoroutineName("BatchRunner")) {
     logger.info { "BatchRunner started ${backfillRunner.logLabel()} with numThreads=$numThreads" }
 
     runChannel.proxy(coroutineScope)
@@ -109,6 +110,7 @@ class BatchRunner(
       )
       rpcBackpressureChannel.upstream().send(Unit)
     }
+    rpcBackpressureChannel.upstream().close()
     logger.info { "BatchRunner stopped ${backfillRunner.logLabel()}" }
   }
 
