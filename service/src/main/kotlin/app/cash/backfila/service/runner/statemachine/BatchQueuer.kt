@@ -6,6 +6,7 @@ import app.cash.backfila.protos.clientservice.KeyRange
 import app.cash.backfila.service.runner.BackfillRunner
 import com.google.common.base.Stopwatch
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.delay
@@ -28,7 +29,7 @@ class BatchQueuer(
 
   private fun capacity(numThreads: Int) = numThreads * 2
 
-  fun run(coroutineScope: CoroutineScope) = coroutineScope.launch {
+  fun run(coroutineScope: CoroutineScope) = coroutineScope.launch(CoroutineName("BatchQueuer")) {
     nextBatchChannel.proxy(coroutineScope)
 
     logger.info {
@@ -102,11 +103,11 @@ class BatchQueuer(
           logger.info { "No more batches, finished computing for ${backfillRunner.logLabel()}" }
           nextBatchChannel.upstream().close()
           break
-        } else {
-          for (batch in response.batches) {
-            nextBatchChannel.upstream().send(batch)
-            pkeyCursor = batch.batch_range.end
-          }
+        }
+
+        for (batch in response.batches) {
+          nextBatchChannel.upstream().send(batch)
+          pkeyCursor = batch.batch_range.end
         }
       } catch (e: CancellationException) {
         logger.info(e) { "BatchQueuer job cancelled ${backfillRunner.logLabel()}" }

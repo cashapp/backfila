@@ -2,6 +2,7 @@ package app.cash.backfila.service.runner.statemachine
 
 import java.util.LinkedList
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -41,7 +42,7 @@ class VariableCapacityChannel<T>(
 
   @ExperimentalCoroutinesApi
   fun proxy(coroutineScope: CoroutineScope): ReceiveChannel<T> {
-    coroutineScope.launch {
+    coroutineScope.launch(CoroutineName("VariableCapacityChannel")) {
       var upstreamClosed = false
       while (!upstreamClosed || buffer.size > 0) {
         try {

@@ -8,6 +8,7 @@ import app.cash.backfila.service.persistence.DbRunPartition
 import app.cash.backfila.service.runner.BackfillRunner
 import java.time.Duration
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
@@ -39,7 +40,7 @@ class BatchAwaiter(
   // TODO on shutdown can this wait for all rpcs to finish, with a ~5s time bound?
   fun run(
     scope: CoroutineScope
-  ) = scope.launch {
+  ) = scope.launch(CoroutineName("BatchAwaiter")) {
     logger.info { "BatchAwaiter started ${backfillRunner.logLabel()}" }
     main@ while (true) {
       val (initialBatch, initialRunBatchRpc, batchStartedAt) = try {
