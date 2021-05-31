@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import javax.inject.Inject
+import app.cash.backfila.client.misk.testing.assertThat as miskTestingAssertThat
 
 /**
  * This test is good in a way that it avoids duplication, but it could get a little complicated to
@@ -55,7 +56,7 @@ class MiskJooqBackfillTests {
     assertThat(run.partitionProgressSnapshot.values.single().utf8RangeEnd()).isNull()
     // Trying to scan for a batch on an empty tablet gets nothing to execute.
     assertThat(run.singleScan().batches).isEmpty() // Check the returned scan
-    app.cash.backfila.client.misk.testing.assertThat(run).isFinishedScanning()
+    miskTestingAssertThat(run).isFinishedScanning()
       .hasNoBatchesToRun()
       .isComplete()
   }
@@ -73,15 +74,15 @@ class MiskJooqBackfillTests {
     assertThat(scan1.batches).size().isEqualTo(1)
     assertThat(scan1.batches.single().scanned_record_count).isEqualTo(5)
     assertThat(scan1.batches.single().matching_record_count).isEqualTo(0)
-    app.cash.backfila.client.misk.testing.assertThat(run.partitionProgressSnapshot.values.single())
+    miskTestingAssertThat(run.partitionProgressSnapshot.values.single())
       .isNotDone()
     assertThat(run.partitionProgressSnapshot.values.single().previousEndKey).isNotNull
 
     val scan2 = run.singleScan()
     assertThat(scan2.batches).isEmpty()
-    app.cash.backfila.client.misk.testing.assertThat(run.partitionProgressSnapshot.values.single())
+    miskTestingAssertThat(run.partitionProgressSnapshot.values.single())
       .isDone()
-    app.cash.backfila.client.misk.testing.assertThat(run).hasNoBatchesToRun().isComplete()
+    miskTestingAssertThat(run).hasNoBatchesToRun().isComplete()
   }
 
   @ParameterizedTest(name = "withStartRange test - {0}")
@@ -96,7 +97,7 @@ class MiskJooqBackfillTests {
     )
       .apply { configureForTest() }
     assertThat(run.rangeStart).isEqualTo(backfillRowKeys[1].toString())
-    app.cash.backfila.client.misk.testing.assertThat(run.partitionProgressSnapshot.values.single())
+    miskTestingAssertThat(run.partitionProgressSnapshot.values.single())
       .isNotDone()
 
     run.singleScan()
@@ -129,7 +130,7 @@ class MiskJooqBackfillTests {
     )
       .apply { configureForTest() }
     assertThat(run.rangeEnd).isEqualTo(backfillRowKeys[0].toString())
-    app.cash.backfila.client.misk.testing.assertThat(run.partitionProgressSnapshot.values.single())
+    miskTestingAssertThat(run.partitionProgressSnapshot.values.single())
       .isNotDone()
 
     run.singleScan()
@@ -141,10 +142,10 @@ class MiskJooqBackfillTests {
     run.runBatch()
 
     run.singleScan()
-    app.cash.backfila.client.misk.testing.assertThat(run).hasNoBatchesToRun()
-    app.cash.backfila.client.misk.testing.assertThat(run).isFinishedScanning()
+    miskTestingAssertThat(run).hasNoBatchesToRun()
+    miskTestingAssertThat(run).isFinishedScanning()
 
-    app.cash.backfila.client.misk.testing.assertThat(run).isComplete()
+    miskTestingAssertThat(run).isComplete()
     assertThat(run.backfill.idsRanDry).containsExactly(backfillRowKeys[0])
     assertThat(run.backfill.idsRanWet).isEmpty()
   }
@@ -169,7 +170,7 @@ class MiskJooqBackfillTests {
     assertThat(run.batchesToRunSnapshot.single().matchingRecordCount).isEqualTo(10)
     assertThat(run.batchesToRunSnapshot.single().scannedRecordCount).isEqualTo(10)
     run.runBatch()
-    app.cash.backfila.client.misk.testing.assertThat(run).hasNoBatchesToRun()
+    miskTestingAssertThat(run).hasNoBatchesToRun()
 
     run.singleScan()
     assertThat(run.batchesToRunSnapshot.single().utf8RangeEnd()).isEqualTo(
@@ -180,12 +181,12 @@ class MiskJooqBackfillTests {
       15
     ) // Skipped 5 records in between
     run.runBatch()
-    app.cash.backfila.client.misk.testing.assertThat(run).hasNoBatchesToRun()
+    miskTestingAssertThat(run).hasNoBatchesToRun()
 
     run.singleScan()
-    app.cash.backfila.client.misk.testing.assertThat(run).hasNoBatchesToRun().isFinishedScanning()
+    miskTestingAssertThat(run).hasNoBatchesToRun().isFinishedScanning()
 
-    app.cash.backfila.client.misk.testing.assertThat(run).isComplete()
+    miskTestingAssertThat(run).isComplete()
     assertThat(run.backfill.idsRanDry).containsExactlyElementsOf(backfillRowKeys)
     assertThat(run.backfill.idsRanWet).isEmpty()
   }
@@ -220,19 +221,19 @@ class MiskJooqBackfillTests {
     run.scanSize = 100L
     val scan3 = run.precomputeScan()
     assertThat(scan3.batches).isEmpty()
-    app.cash.backfila.client.misk.testing.assertThat(run).isFinishedPrecomputing()
+    miskTestingAssertThat(run).isFinishedPrecomputing()
 
     assertThat(run.precomputeMatchingCount).isEqualTo(20)
     assertThat(run.precomputeScannedCount).isEqualTo(25)
 
     // Batches don't get added when precomputing
-    app.cash.backfila.client.misk.testing.assertThat(run).hasNoBatchesToRun()
+    miskTestingAssertThat(run).hasNoBatchesToRun()
     // Nor is there progress on the cursor
-    app.cash.backfila.client.misk.testing.assertThat(run.partitionProgressSnapshot.values.single())
+    miskTestingAssertThat(run.partitionProgressSnapshot.values.single())
       .isNotDone()
     assertThat(run.partitionProgressSnapshot.values.single().previousEndKey).isNull()
     // Nor is it complete
-    app.cash.backfila.client.misk.testing.assertThat(run).isNotComplete()
+    miskTestingAssertThat(run).isNotComplete()
   }
 
   @ParameterizedTest(name = "multipleBatches test - {0}")
@@ -313,13 +314,13 @@ class MiskJooqBackfillTests {
     val dryRun = backfillOption.createDryRun(backfila)
       .apply { configureForTest() }
     dryRun.execute()
-    app.cash.backfila.client.misk.testing.assertThat(dryRun).isComplete()
+    miskTestingAssertThat(dryRun).isComplete()
     assertThat(dryRun.backfill.idsRanWet).isEmpty()
 
     val wetRun = backfillOption.createWetRun(backfila)
       .apply { configureForTest() }
     wetRun.execute()
-    app.cash.backfila.client.misk.testing.assertThat(wetRun).isComplete()
+    miskTestingAssertThat(wetRun).isComplete()
     assertThat(wetRun.backfill.idsRanDry).isEmpty()
 
     assertThat(dryRun.backfill.idsRanDry).containsExactlyElementsOf(wetRun.backfill.idsRanWet)

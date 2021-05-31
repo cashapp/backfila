@@ -33,8 +33,8 @@ import javax.inject.Qualifier
 
 class ClientJooqTestingModule : KAbstractModule() {
   override fun configure() {
-    install(DeploymentModule.forTesting())
     install(MiskTestingServiceModule())
+    install(DeploymentModule.forTesting())
     val datasourceConfig = DataSourceConfig(
       type = DataSourceType.MYSQL,
       username = "root",

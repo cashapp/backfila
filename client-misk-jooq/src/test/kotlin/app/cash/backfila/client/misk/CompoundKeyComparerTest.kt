@@ -3,7 +3,7 @@ package app.cash.backfila.client.misk
 import app.cash.backfila.client.misk.jooq.CompoundKeyComparer
 import app.cash.backfila.client.misk.jooq.gen.tables.references.WIDGETS
 import com.google.common.collect.ImmutableList
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.jooq.Condition
 import org.jooq.Field
 import org.jooq.Record
@@ -12,7 +12,8 @@ import org.jooq.impl.DefaultDSLContext
 import org.junit.jupiter.api.Test
 
 class CompoundKeyComparerTest {
-  @Test fun gtWithOneField() {
+  @Test
+  fun gtWithOneField() {
     val sqlCondition = compare(
       { obj: CompoundKeyComparer<*>, compoundKeyValue: Record? ->
         obj.gt(
@@ -23,15 +24,11 @@ class CompoundKeyComparerTest {
         WIDGETS.NAME, "w1"
       )
     )
-    Assertions.assertThat(sqlCondition).isEqualTo(
-      java.lang.String.format(
-        "%s > 'w1'",
-        WIDGETS.NAME
-      )
-    )
+    assertThat(sqlCondition).isEqualTo("${WIDGETS.NAME} > 'w1'")
   }
 
-  @Test fun gtWithTwoFields() {
+  @Test
+  fun gtWithTwoFields() {
     val sqlCondition = compare(
       { obj: CompoundKeyComparer<*>, compoundKeyValue: Record? ->
         obj.gt(
@@ -43,12 +40,8 @@ class CompoundKeyComparerTest {
         WIDGETS.CREATED_AT_MS, 10L
       )
     )
-    Assertions.assertThat(sqlCondition).isEqualTo(
-      java.lang.String.format(
-        "(%s > 'w1' OR (%s = 'w1' AND %s > 10))",
-        WIDGETS.NAME,
-        WIDGETS.NAME, WIDGETS.CREATED_AT_MS
-      )
+    assertThat(sqlCondition).isEqualTo(
+      "(${WIDGETS.NAME} > 'w1' OR (${WIDGETS.NAME} = 'w1' AND ${WIDGETS.CREATED_AT_MS} > 10))"
     )
   }
 
@@ -66,13 +59,10 @@ class CompoundKeyComparerTest {
         WIDGETS.CREATED_AT_MS, 10L
       )
     )
-    Assertions.assertThat(sqlCondition).isEqualTo(
-      java.lang.String.format(
-        "(%s > 'm1' OR (%s = 'm1' AND %s > 'w1') OR (%s = 'm1' AND %s = 'w1' AND %s > 10))",
-        WIDGETS.MANUFACTURER_TOKEN,
-        WIDGETS.MANUFACTURER_TOKEN, WIDGETS.NAME,
-        WIDGETS.MANUFACTURER_TOKEN, WIDGETS.NAME, WIDGETS.CREATED_AT_MS
-      )
+    assertThat(sqlCondition).isEqualTo(
+      "(${WIDGETS.MANUFACTURER_TOKEN} > 'm1' OR " +
+        "(${WIDGETS.MANUFACTURER_TOKEN} = 'm1' AND ${WIDGETS.NAME} > 'w1') OR " +
+        "(${WIDGETS.MANUFACTURER_TOKEN} = 'm1' AND ${WIDGETS.NAME} = 'w1' AND ${WIDGETS.CREATED_AT_MS} > 10))"
     )
   }
 
@@ -88,11 +78,8 @@ class CompoundKeyComparerTest {
         WIDGETS.NAME, "w1"
       )
     )
-    Assertions.assertThat(sqlCondition).isEqualTo(
-      java.lang.String.format(
-        "%s >= 'w1'",
-        WIDGETS.NAME
-      )
+    assertThat(sqlCondition).isEqualTo(
+      "${WIDGETS.NAME} >= 'w1'",
     )
   }
 
@@ -109,12 +96,8 @@ class CompoundKeyComparerTest {
         WIDGETS.CREATED_AT_MS, 10L
       )
     )
-    Assertions.assertThat(sqlCondition).isEqualTo(
-      java.lang.String.format(
-        "(%s > 'w1' OR (%s = 'w1' AND %s >= 10))",
-        WIDGETS.NAME,
-        WIDGETS.NAME, WIDGETS.CREATED_AT_MS
-      )
+    assertThat(sqlCondition).isEqualTo(
+      "(${WIDGETS.NAME} > 'w1' OR (${WIDGETS.NAME} = 'w1' AND ${WIDGETS.CREATED_AT_MS} >= 10))",
     )
   }
 
@@ -132,13 +115,10 @@ class CompoundKeyComparerTest {
         WIDGETS.CREATED_AT_MS, 10L
       )
     )
-    Assertions.assertThat(sqlCondition).isEqualTo(
-      java.lang.String.format(
-        "(%s > 'm1' OR (%s = 'm1' AND %s > 'w1') OR (%s = 'm1' AND %s = 'w1' AND %s >= 10))",
-        WIDGETS.MANUFACTURER_TOKEN,
-        WIDGETS.MANUFACTURER_TOKEN, WIDGETS.NAME,
-        WIDGETS.MANUFACTURER_TOKEN, WIDGETS.NAME, WIDGETS.CREATED_AT_MS
-      )
+    assertThat(sqlCondition).isEqualTo(
+      "(${WIDGETS.MANUFACTURER_TOKEN} > 'm1' OR " +
+        "(${WIDGETS.MANUFACTURER_TOKEN} = 'm1' AND ${WIDGETS.NAME} > 'w1') OR " +
+        "(${WIDGETS.MANUFACTURER_TOKEN} = 'm1' AND ${WIDGETS.NAME} = 'w1' AND ${WIDGETS.CREATED_AT_MS} >= 10))",
     )
   }
 
@@ -154,11 +134,8 @@ class CompoundKeyComparerTest {
         WIDGETS.NAME, "w1"
       )
     )
-    Assertions.assertThat(sqlCondition).isEqualTo(
-      java.lang.String.format(
-        "%s < 'w1'",
-        WIDGETS.NAME
-      )
+    assertThat(sqlCondition).isEqualTo(
+      "${WIDGETS.NAME} < 'w1'",
     )
   }
 
@@ -175,12 +152,8 @@ class CompoundKeyComparerTest {
         WIDGETS.CREATED_AT_MS, 10L
       )
     )
-    Assertions.assertThat(sqlCondition).isEqualTo(
-      java.lang.String.format(
-        "(%s < 'w1' OR (%s = 'w1' AND %s < 10))",
-        WIDGETS.NAME,
-        WIDGETS.NAME, WIDGETS.CREATED_AT_MS
-      )
+    assertThat(sqlCondition).isEqualTo(
+      "(${WIDGETS.NAME} < 'w1' OR (${WIDGETS.NAME} = 'w1' AND ${WIDGETS.CREATED_AT_MS} < 10))",
     )
   }
 
@@ -198,13 +171,10 @@ class CompoundKeyComparerTest {
         WIDGETS.CREATED_AT_MS, 10L
       )
     )
-    Assertions.assertThat(sqlCondition).isEqualTo(
-      java.lang.String.format(
-        "(%s < 'm1' OR (%s = 'm1' AND %s < 'w1') OR (%s = 'm1' AND %s = 'w1' AND %s < 10))",
-        WIDGETS.MANUFACTURER_TOKEN,
-        WIDGETS.MANUFACTURER_TOKEN, WIDGETS.NAME,
-        WIDGETS.MANUFACTURER_TOKEN, WIDGETS.NAME, WIDGETS.CREATED_AT_MS
-      )
+    assertThat(sqlCondition).isEqualTo(
+      "(${WIDGETS.MANUFACTURER_TOKEN} < 'm1' OR " +
+        "(${WIDGETS.MANUFACTURER_TOKEN} = 'm1' AND ${WIDGETS.NAME} < 'w1') OR " +
+        "(${WIDGETS.MANUFACTURER_TOKEN} = 'm1' AND ${WIDGETS.NAME} = 'w1' AND ${WIDGETS.CREATED_AT_MS} < 10))",
     )
   }
 
@@ -220,11 +190,8 @@ class CompoundKeyComparerTest {
         WIDGETS.NAME, "w1"
       )
     )
-    Assertions.assertThat(sqlCondition).isEqualTo(
-      java.lang.String.format(
-        "%s <= 'w1'",
-        WIDGETS.NAME
-      )
+    assertThat(sqlCondition).isEqualTo(
+      "${WIDGETS.NAME} <= 'w1'",
     )
   }
 
@@ -241,12 +208,8 @@ class CompoundKeyComparerTest {
         WIDGETS.CREATED_AT_MS, 10L
       )
     )
-    Assertions.assertThat(sqlCondition).isEqualTo(
-      java.lang.String.format(
-        "(%s < 'w1' OR (%s = 'w1' AND %s <= 10))",
-        WIDGETS.NAME,
-        WIDGETS.NAME, WIDGETS.CREATED_AT_MS
-      )
+    assertThat(sqlCondition).isEqualTo(
+      "(${WIDGETS.NAME} < 'w1' OR (${WIDGETS.NAME} = 'w1' AND ${WIDGETS.CREATED_AT_MS} <= 10))",
     )
   }
 
@@ -264,13 +227,10 @@ class CompoundKeyComparerTest {
         WIDGETS.CREATED_AT_MS, 10L
       )
     )
-    Assertions.assertThat(sqlCondition).isEqualTo(
-      java.lang.String.format(
-        "(%s < 'm1' OR (%s = 'm1' AND %s < 'w1') OR (%s = 'm1' AND %s = 'w1' AND %s <= 10))",
-        WIDGETS.MANUFACTURER_TOKEN,
-        WIDGETS.MANUFACTURER_TOKEN, WIDGETS.NAME,
-        WIDGETS.MANUFACTURER_TOKEN, WIDGETS.NAME, WIDGETS.CREATED_AT_MS
-      )
+    assertThat(sqlCondition).isEqualTo(
+      "(${WIDGETS.MANUFACTURER_TOKEN} < 'm1' OR " +
+        "(${WIDGETS.MANUFACTURER_TOKEN} = 'm1' AND ${WIDGETS.NAME} < 'w1') OR " +
+        "(${WIDGETS.MANUFACTURER_TOKEN} = 'm1' AND ${WIDGETS.NAME} = 'w1' AND ${WIDGETS.CREATED_AT_MS} <= 10))",
     )
   }
 

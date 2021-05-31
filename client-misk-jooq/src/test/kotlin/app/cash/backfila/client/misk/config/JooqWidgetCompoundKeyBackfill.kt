@@ -17,6 +17,10 @@ import org.jooq.Record
 import org.jooq.TableLike
 import javax.inject.Inject
 
+/**
+ * Ideally you wouldn't need to override toString equals and hashcode, but since there is a ByteArray
+ * field, the compiler throws a warning if you don't override it.
+ */
 data class CompoundKey(
   val manufacturerToken: String,
   val createdAtMs: Long,
