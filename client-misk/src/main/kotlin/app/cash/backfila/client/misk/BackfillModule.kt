@@ -8,7 +8,9 @@ import app.cash.backfila.client.misk.internal.BackfilaStartupConfigurator
 import app.cash.backfila.client.misk.internal.EmptyBackend
 import app.cash.backfila.client.misk.internal.RealBackfilaClient
 import app.cash.backfila.client.misk.spi.BackfillBackend
+import com.google.common.util.concurrent.Service
 import com.google.inject.BindingAnnotation
+import com.google.inject.Key
 import com.google.inject.Provides
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -16,6 +18,7 @@ import javax.inject.Singleton
 import kotlin.reflect.KClass
 import misk.ServiceModule
 import misk.inject.KAbstractModule
+import misk.inject.toKey
 
 /**
  * Backfila-using applications install at minimum 3 things.
@@ -25,10 +28,11 @@ import misk.inject.KAbstractModule
  *       [EmbeddedBackfilaModule] (testing and development)
  *       or [BackfilaClientModule] (staging and production).
  */
-class BackfillModule(
+class BackfillModule @JvmOverloads constructor(
   private val config: BackfilaClientConfig,
   private val loggingSetupProvider: KClass<out BackfilaClientLoggingSetupProvider> =
-    BackfilaClientNoLoggingSetupProvider::class
+    BackfilaClientNoLoggingSetupProvider::class,
+  private val dependsOn: List<Key<out Service>> = listOf()
 ) : KAbstractModule() {
   override fun configure() {
     bind<BackfilaClientConfig>().toInstance(config)
@@ -37,7 +41,10 @@ class BackfillModule(
     bind<BackfilaManagementClient>().to<RealBackfilaManagementClient>()
     bind<BackfilaClientLoggingSetupProvider>().to(loggingSetupProvider.java)
 
-    install(ServiceModule<BackfilaStartupConfigurator>())
+    install(ServiceModule(
+      key = BackfilaStartupConfigurator::class.toKey(),
+      dependsOn = dependsOn
+    ))
 
     multibind<BackfillBackend>().to<EmptyBackend>()
   }
