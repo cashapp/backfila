@@ -14,7 +14,7 @@ dependencies {
   implementation(Dependencies.okio)
   implementation(Dependencies.kotlinStdLib)
   implementation(Dependencies.wireMoshiAdapter)
-  implementation(Dependencies.awsDynamoDb)
+  implementation(Dependencies.awsDynamodb)
 
   api(project(":client"))
   api(project(":client-misk"))
