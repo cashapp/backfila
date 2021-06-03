@@ -2,6 +2,7 @@ object Dependencies {
   val apacheCommonsLang3 = "org.apache.commons:commons-lang3:3.11"
   val assertj = "org.assertj:assertj-core:3.16.1"
   val awsDynamodb = "com.amazonaws:aws-java-sdk-dynamodb:1.11.774"
+  val flywayGradleBuildscriptDep = "gradle.plugin.com.boxfuse.client:flyway-release:5.0.2"
   val guava = "com.google.guava:guava:30.0-jre"
   val guice = "com.google.inject:guice:4.2.3"
   val guiceMultibindings = "com.google.inject.extensions:guice-multibindings:4.2.3"
@@ -15,6 +16,7 @@ object Dependencies {
   val jettyWebsocketServer = "org.eclipse.jetty.websocket:websocket-server:9.4.31.v20200723"
   val jettyWebsocketServlet = "org.eclipse.jetty.websocket:websocket-servlet:9.4.31.v20200723"
   val jnrUnixsocket = "com.github.jnr:jnr-unixsocket:0.30"
+  val jooq = "org.jooq:jooq:${Versions.jooq}"
   val junitApi = "org.junit.jupiter:junit-jupiter-api:5.7.0"
   val junitEngine = "org.junit.jupiter:junit-jupiter-engine:5.7.0"
   val junitParams = "org.junit.jupiter:junit-jupiter-params:5.7.0"
@@ -37,6 +39,8 @@ object Dependencies {
   val miskCore = "com.squareup.misk:misk-core:0.17.0"
   val miskHibernate = "com.squareup.misk:misk-hibernate:0.17.0"
   val miskHibernateTesting = "com.squareup.misk:misk-hibernate-testing:0.17.0"
+  val miskJdbc = "com.squareup.misk:misk-jdbc:0.17.0"
+  val miskJdbcTesting = "com.squareup.misk:misk-jdbc-testing:0.17.0"
   val miskInject = "com.squareup.misk:misk-inject:0.17.0"
   val miskMetrics = "com.squareup.misk:misk-metrics:0.17.0"
   val miskService = "com.squareup.misk:misk-service:0.17.0"
@@ -44,6 +48,7 @@ object Dependencies {
   val miskTesting = "com.squareup.misk:misk-testing:0.17.0"
   val moshiCore = "com.squareup.moshi:moshi:1.11.0"
   val moshiKotlin = "com.squareup.moshi:moshi-kotlin:1.11.0"
+  val mysql = "mysql:mysql-connector-java:8.0.22"
   val okHttp = "com.squareup.okhttp3:okhttp:4.10.0-RC1"
   val okio = "com.squareup.okio:okio:2.9.0"
   val openTracing = "io.opentracing:opentracing-api:0.33.0"
@@ -64,3 +69,10 @@ object Dependencies {
   val wireRuntime = "com.squareup.wire:wire-runtime:3.6.0"
   val wireSchema = "com.squareup.wire:wire-schema:3.6.0"
 }
+
+object Versions {
+  val flywayDBPlugin = "5.2.4"
+  val jooqGenPlugin = "5.2"
+  val jooq = "3.14.8"
+}
+
