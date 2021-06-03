@@ -45,7 +45,7 @@ class BatchRangeIterator<K, Param : Any>(
     return GetNextBatchRangeResponse.Batch.Builder()
       .batch_range(jooqBackfill.buildKeyRange(start, end))
       .scanned_record_count(scannedCount.toLong())
-      .matching_record_count(Integer.toUnsignedLong(keyValues.size))
+      .matching_record_count(keyValues.size.toLong())
       .build()
   }
 

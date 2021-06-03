@@ -25,7 +25,7 @@ abstract class JooqBackfill<K, Param : Any> : Backfill {
   val sqlDialect: SQLDialect = SQLDialect.MYSQL
   /**
    * A map of jooq transacters, indexed by shard database name, used to interact with the
-   * database(s). For the unsharded case, this will will be a map of one entry.
+   * database(s). For the unsharded case, this will be a map of one entry.
    */
   abstract val shardedTransacterMap: Map<String, BackfillJooqTransacter>
 
