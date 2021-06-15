@@ -41,10 +41,12 @@ class BackfillModule @JvmOverloads constructor(
     bind<BackfilaManagementClient>().to<RealBackfilaManagementClient>()
     bind<BackfilaClientLoggingSetupProvider>().to(loggingSetupProvider.java)
 
-    install(ServiceModule(
-      key = BackfilaStartupConfigurator::class.toKey(),
-      dependsOn = dependsOn
-    ))
+    install(
+      ServiceModule(
+        key = BackfilaStartupConfigurator::class.toKey(),
+        dependsOn = dependsOn
+      )
+    )
 
     multibind<BackfillBackend>().to<EmptyBackend>()
   }

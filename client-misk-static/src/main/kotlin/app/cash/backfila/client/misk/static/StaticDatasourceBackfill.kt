@@ -38,10 +38,19 @@ abstract class StaticDatasourceBackfill<I : Any, P : Any> : Backfill {
    * Called for each batch of matching records.
    * Override in a backfill to process all records in a batch.
    */
-  abstract fun runBatch(items: List<I>, config: BackfillConfig<P>)
+  open fun runBatch(items: List<I>, config: BackfillConfig<P>) {
+    items.forEach { runOne(it, config) }
+  }
+
+  /**
+   * Called for each matching record.
+   * Override in a backfill to process one record at a time.
+   */
+  open fun runOne(item: I, config: BackfillConfig<P>) {
+  }
 
   /**
    * This invokes the static list of items that the backfill will iterate over.
    */
-  abstract val staticDatasource : List<I>
+  abstract val staticDatasource: List<I>
 }

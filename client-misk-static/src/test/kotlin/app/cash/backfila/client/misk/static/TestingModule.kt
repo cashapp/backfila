@@ -1,15 +1,7 @@
-package app.cash.backfila.client.misk
+package app.cash.backfila.client.misk.static
 
-import app.cash.backfila.client.misk.static.BackfillsModule
-import app.cash.backfila.client.misk.static.TrackItem
 import app.cash.backfila.client.misk.embedded.EmbeddedBackfilaModule
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
-import com.google.inject.Provides
-import com.google.inject.Singleton
 import misk.MiskTestingServiceModule
-import misk.aws.dynamodb.testing.DynamoDbTable
-import misk.aws.dynamodb.testing.InProcessDynamoDbModule
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.logging.LogCollectorModule
@@ -25,12 +17,5 @@ class TestingModule : KAbstractModule() {
     install(BackfillsModule())
 
     install(EmbeddedBackfilaModule())
-
-    install(InProcessDynamoDbModule(DynamoDbTable(TrackItem::class)))
-  }
-
-  @Provides @Singleton
-  fun provideDynamoDbMapper(amazonDynamoDB: AmazonDynamoDB): DynamoDBMapper {
-    return DynamoDBMapper(amazonDynamoDB)
   }
 }

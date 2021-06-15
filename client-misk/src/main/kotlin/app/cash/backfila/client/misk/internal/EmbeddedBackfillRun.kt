@@ -124,7 +124,7 @@ internal class EmbeddedBackfillRun<B : Backfill>(
       )
     when (response.batches.isEmpty()) {
       true -> cursor.done = true
-      false -> cursor.previousEndKey = response.batches.map { it.batch_range.end }.maxOrNull()
+      false -> cursor.previousEndKey = response.batches.last().batch_range.end
     }
     batchesToRun.addAll(
       response.batches
