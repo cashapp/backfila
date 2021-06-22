@@ -14,7 +14,6 @@ dependencies {
   implementation(Dependencies.okio)
   implementation(Dependencies.kotlinStdLib)
   implementation(Dependencies.wireMoshiAdapter)
-  implementation(Dependencies.awsDynamodb)
 
   api(project(":client"))
   api(project(":client-misk"))
@@ -22,16 +21,16 @@ dependencies {
 
   implementation(Dependencies.misk)
   implementation(Dependencies.miskInject)
+  implementation(Dependencies.miskActions)
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.miskTesting)
   testImplementation(Dependencies.junitEngine)
-  testImplementation(Dependencies.miskAwsDynamodbTesting)
   testImplementation(Dependencies.kotlinTest)
 }
 
 val jar by tasks.getting(Jar::class) {
-  baseName = "backfila-misk-client-dynamodb"
+  baseName = "backfila-misk-client-static"
 }
 
 afterEvaluate {
