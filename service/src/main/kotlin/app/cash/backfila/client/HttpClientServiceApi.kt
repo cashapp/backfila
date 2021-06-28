@@ -47,6 +47,6 @@ interface HttpClientServiceApi {
   ): RunBatchResponse
 
   companion object {
-    private const val BASE_PATH = "/backfila"
+    private const val BASE_PATH = "backfila"
   }
 }
