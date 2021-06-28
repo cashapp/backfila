@@ -21,6 +21,7 @@ dependencies {
   testApi(project(":client-misk-testing"))
 
   implementation(Dependencies.misk)
+  implementation(Dependencies.miskAwsDynamodb)
   implementation(Dependencies.miskInject)
 
   testImplementation(Dependencies.assertj)

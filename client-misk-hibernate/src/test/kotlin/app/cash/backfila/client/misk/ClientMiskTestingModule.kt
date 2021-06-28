@@ -48,7 +48,7 @@ internal class ClientMiskTestingModule(
     })
     install(JdbcTestingModule(ClientMiskService::class))
 
-    install(DeploymentModule.forTesting())
+    install(DeploymentModule(wisp.deployment.TESTING))
     install(LogCollectorModule())
     install(MiskTestingServiceModule())
     install(EmbeddedBackfilaModule())

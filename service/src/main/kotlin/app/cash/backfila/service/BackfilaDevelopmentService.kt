@@ -16,11 +16,7 @@ import app.cash.backfila.service.persistence.DbBackfillRun
 import misk.MiskApplication
 import misk.MiskCaller
 import misk.MiskRealServiceModule
-import misk.environment.Deployment
 import misk.environment.DeploymentModule
-import misk.environment.Env
-import misk.environment.Environment
-import misk.environment.EnvironmentModule
 import misk.hibernate.Session
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceClusterConfig
@@ -34,10 +30,9 @@ import misk.web.MiskWebModule
 import misk.web.WebConfig
 import misk.web.dashboard.AdminDashboardModule
 import okio.ByteString.Companion.encodeUtf8
+import wisp.deployment.Deployment
 
 fun main(args: Array<String>) {
-  val environment = Environment.DEVELOPMENT
-  val env = Env(environment.toString())
   val deployment = Deployment(name = "backfila", isLocalDevelopment = true)
 
   MiskApplication(
@@ -60,7 +55,10 @@ fun main(args: Array<String>) {
             override fun validateExtraData(connectorExtraData: String?) {
             }
 
-            override fun clientFor(serviceName: String, connectorExtraData: String?): BackfilaClientServiceClient {
+            override fun clientFor(
+              serviceName: String,
+              connectorExtraData: String?
+            ): BackfilaClientServiceClient {
               return object : BackfilaClientServiceClient {
                 override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
                   return PrepareBackfillResponse(
@@ -88,8 +86,7 @@ fun main(args: Array<String>) {
           })
       }
     },
-    EnvironmentModule(environment = environment),
-    DeploymentModule(deployment, env),
+    DeploymentModule(deployment),
     BackfilaServiceModule(
       deployment,
       BackfilaConfig(

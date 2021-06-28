@@ -2,18 +2,22 @@ package app.cash.backfila.client.misk.dynamodb
 
 import app.cash.backfila.client.misk.BackfillModule
 import app.cash.backfila.client.misk.client.BackfilaClientConfig
+import misk.dynamodb.DynamoDbService
 import misk.inject.KAbstractModule
+import misk.inject.toKey
 
 /**
  * Simulates a Backfills module where all the relevant backfills are registered.
  */
 class BackfillsModule : KAbstractModule() {
   override fun configure() {
+    val dependsOn = listOf(DynamoDbService::class.toKey())
     install(
       BackfillModule(
         BackfilaClientConfig(
           url = "test.url", slack_channel = "#test"
-        )
+        ),
+        dependsOn = dependsOn
       )
     )
     install(DynamoDbBackfillModule.create<DynamoDbBackfillTest.MakeTracksExplicitBackfill>())

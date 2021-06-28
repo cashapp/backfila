@@ -8,7 +8,7 @@ import misk.logging.LogCollectorModule
 
 class TestingModule : KAbstractModule() {
   override fun configure() {
-    install(DeploymentModule.forTesting())
+    install(DeploymentModule(wisp.deployment.TESTING))
     install(LogCollectorModule())
     install(MiskTestingServiceModule())
     install(BackfillsModule())

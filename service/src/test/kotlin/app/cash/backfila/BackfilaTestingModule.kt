@@ -50,7 +50,7 @@ internal class BackfilaTestingModule : KAbstractModule() {
       slack = null
     )
     bind<BackfilaConfig>().toInstance(config)
-    install(DeploymentModule.forTesting())
+    install(DeploymentModule(wisp.deployment.TESTING))
     install(LogCollectorModule())
     install(MiskTestingServiceModule())
 

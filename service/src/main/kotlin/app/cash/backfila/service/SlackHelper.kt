@@ -2,7 +2,6 @@ package app.cash.backfila.service
 
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.DbBackfillRun
-import misk.environment.Env
 import misk.hibernate.Id
 import misk.hibernate.Transacter
 import misk.hibernate.load
@@ -13,7 +12,7 @@ class SlackHelper @Inject constructor(
   @BackfilaDb private val transacter: Transacter,
   private val slackClient: SlackClient,
   private val backfilaConfig: BackfilaConfig,
-  private val env: Env
+  private val deployment: wisp.deployment.Deployment
 ) {
   fun runStarted(id: Id<DbBackfillRun>, user: String) {
     val (message, channel) = transacter.transaction { session ->
@@ -52,7 +51,11 @@ class SlackHelper @Inject constructor(
   }
 
   private fun nameAndId(run: DbBackfillRun) =
-    "[${env.name}] ${run.service.registry_name} `${run.registered_backfill.name}` (${idLink(run.id)})"
+    "[${deployment.name}] ${run.service.registry_name} `${run.registered_backfill.name}` (${
+    idLink(
+      run.id
+    )
+    })"
 
   private fun dryRunEmoji(run: DbBackfillRun) =
     if (run.dry_run) {

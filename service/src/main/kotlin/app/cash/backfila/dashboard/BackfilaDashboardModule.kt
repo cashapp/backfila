@@ -1,7 +1,7 @@
 package app.cash.backfila.dashboard
 
 import javax.inject.Qualifier
-import misk.environment.Deployment
+import wisp.deployment.Deployment
 import misk.inject.KAbstractModule
 import misk.web.dashboard.WebTabResourceModule
 

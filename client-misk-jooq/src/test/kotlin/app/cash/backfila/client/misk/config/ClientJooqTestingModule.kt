@@ -34,7 +34,7 @@ import javax.inject.Qualifier
 class ClientJooqTestingModule : KAbstractModule() {
   override fun configure() {
     install(MiskTestingServiceModule())
-    install(DeploymentModule.forTesting())
+    install(DeploymentModule(wisp.deployment.TESTING))
     val datasourceConfig = DataSourceConfig(
       type = DataSourceType.MYSQL,
       username = "root",
