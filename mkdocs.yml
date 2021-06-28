@@ -9,7 +9,7 @@ remote_branch: gh-pages
 copyright: 'Copyright &copy; 2019 Square, Inc.'
 
 theme:
-  name: 'mkdocs'
+  name: 'material'
   favicon: img/favicon.ico
   logo: img/cashapp.png
   feature:
