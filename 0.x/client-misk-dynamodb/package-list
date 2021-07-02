@@ -1,0 +1,5 @@
+$dokka.format:gfm
+$dokka.linkExtension:md
+
+app.cash.backfila.client.misk.dynamodb
+app.cash.backfila.client.misk.dynamodb.internal

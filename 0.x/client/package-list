@@ -1,0 +1,6 @@
+$dokka.format:gfm
+$dokka.linkExtension:md
+
+app.cash.backfila.client
+app.cash.backfila.protos.clientservice
+app.cash.backfila.protos.service

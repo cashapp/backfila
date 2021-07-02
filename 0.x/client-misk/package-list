@@ -1,0 +1,8 @@
+$dokka.format:gfm
+$dokka.linkExtension:md
+
+app.cash.backfila.client.misk
+app.cash.backfila.client.misk.client
+app.cash.backfila.client.misk.embedded
+app.cash.backfila.client.misk.internal
+app.cash.backfila.client.misk.spi

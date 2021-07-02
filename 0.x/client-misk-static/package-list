@@ -1,0 +1,5 @@
+$dokka.format:gfm
+$dokka.linkExtension:md
+
+app.cash.backfila.client.misk.static
+app.cash.backfila.client.misk.static.internal
