@@ -14,13 +14,14 @@ dependencies {
   implementation(Dependencies.okio)
   implementation(Dependencies.kotlinStdLib)
   implementation(Dependencies.wireMoshiAdapter)
-  implementation(Dependencies.awsDynamodb)
 
   api(project(":client"))
   api(project(":client-misk"))
   testApi(project(":client-misk-testing"))
 
   implementation(Dependencies.misk)
+  implementation(Dependencies.awsDynamodb)
+  implementation(Dependencies.miskAwsDynamodb)
   implementation(Dependencies.miskInject)
 
   testImplementation(Dependencies.assertj)
@@ -28,6 +29,8 @@ dependencies {
   testImplementation(Dependencies.junitEngine)
   testImplementation(Dependencies.miskAwsDynamodbTesting)
   testImplementation(Dependencies.kotlinTest)
+
+  testImplementation(Dependencies.awsDynamodb)
 }
 
 val jar by tasks.getting(Jar::class) {

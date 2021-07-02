@@ -3,6 +3,7 @@ repo_name: Backfila
 repo_url: https://github.com/cashapp/backfila
 site_description: "Backfila: Service that manages backfill state, calling into other services to do batched work"
 site_author: Square, Inc.
+site_url: ''
 remote_branch: gh-pages
 
 copyright: 'Copyright &copy; 2019 Square, Inc.'
