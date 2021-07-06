@@ -1,4 +1,4 @@
-package app.cash.backfila.client.misk.internal
+package app.cash.backfila.client.internal
 
 import app.cash.backfila.client.BackfilaApi
 import app.cash.backfila.protos.service.ConfigureServiceRequest
@@ -11,7 +11,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class RealBackfilaClient @Inject internal constructor(
+class RealBackfilaClient @Inject internal constructor(
   private val backfilaApi: BackfilaApi
 ) : BackfilaClient {
   override fun configureService(request: ConfigureServiceRequest): ConfigureServiceResponse {

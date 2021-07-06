@@ -1,13 +1,13 @@
-package app.cash.backfila.client.misk
+package app.cash.backfila.client
 
-import app.cash.backfila.client.misk.internal.BackfilaClient
-import app.cash.backfila.client.misk.spi.parametersToBytes
+import app.cash.backfila.client.internal.BackfilaClient
+import app.cash.backfila.client.spi.parametersToBytes
 import app.cash.backfila.protos.service.CreateAndStartBackfillRequest
 import app.cash.backfila.protos.service.CreateBackfillRequest
 import javax.inject.Inject
 import okio.ByteString
 
-internal class RealBackfilaManagementClient @Inject internal constructor(
+class RealBackfilaManagementClient @Inject internal constructor(
   private val client: BackfilaClient
 ) : BackfilaManagementClient {
   override fun <B : Backfill> createAndStart(

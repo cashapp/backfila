@@ -1,7 +1,7 @@
 package app.cash.backfila.client.misk.jooq
 
-import app.cash.backfila.client.misk.Backfill
-import app.cash.backfila.client.misk.BackfillConfig
+import app.cash.backfila.client.Backfill
+import app.cash.backfila.client.BackfillConfig
 import app.cash.backfila.protos.clientservice.KeyRange
 import okio.ByteString
 import org.jooq.Condition

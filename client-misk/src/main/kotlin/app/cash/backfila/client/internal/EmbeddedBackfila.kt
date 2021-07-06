@@ -1,10 +1,11 @@
-package app.cash.backfila.client.misk.internal
+package app.cash.backfila.client.internal
 
 import app.cash.backfila.client.BackfilaApi
 import app.cash.backfila.client.Connectors
-import app.cash.backfila.client.misk.Backfill
-import app.cash.backfila.client.misk.embedded.Backfila
-import app.cash.backfila.client.misk.embedded.BackfillRun
+import app.cash.backfila.client.Backfill
+import app.cash.backfila.client.embedded.Backfila
+import app.cash.backfila.client.embedded.BackfillRun
+import app.cash.backfila.client.misk.internal.BackfillOperatorFactory
 import app.cash.backfila.protos.service.ConfigureServiceRequest
 import app.cash.backfila.protos.service.ConfigureServiceResponse
 import app.cash.backfila.protos.service.CreateAndStartBackfillRequest

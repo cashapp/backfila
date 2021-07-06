@@ -1,4 +1,4 @@
-package app.cash.backfila.client.misk
+package app.cash.backfila.client
 
 data class BackfillConfig<Param : Any>(
   val parameters: Param,

@@ -1,6 +1,6 @@
 package app.cash.backfila.client.misk.jooq.internal
 
-import app.cash.backfila.client.misk.BackfillConfig
+import app.cash.backfila.client.BackfillConfig
 import app.cash.backfila.client.misk.jooq.JooqBackfill
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse

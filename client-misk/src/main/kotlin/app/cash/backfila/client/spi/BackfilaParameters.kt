@@ -1,7 +1,7 @@
-package app.cash.backfila.client.misk.spi
+package app.cash.backfila.client.spi
 
-import app.cash.backfila.client.misk.BackfillConfig
-import app.cash.backfila.client.misk.Description
+import app.cash.backfila.client.BackfillConfig
+import app.cash.backfila.client.Description
 import app.cash.backfila.protos.service.Parameter
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
@@ -51,7 +51,7 @@ class BackfilaParametersOperator<T : Any>(
       Boolean::class to { value: ByteString -> value.utf8().toBoolean() }
     )
 
-    internal inline fun <reified P : Any> backfilaParametersFromClass(parametersClass: KClass<P>): List<Parameter> {
+    inline fun <reified P : Any> backfilaParametersFromClass(parametersClass: KClass<P>): List<Parameter> {
       // Validate that we can handle the parameters if they are specified.
       for (parameter in parametersClass.primaryConstructor!!.parameters) {
         check(parameter.type.jvmErasure in TYPE_CONVERTERS.keys) {

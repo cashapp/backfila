@@ -1,6 +1,6 @@
 package app.cash.backfila.client.misk.dynamodb
 
-import app.cash.backfila.client.misk.BackfillConfig
+import app.cash.backfila.client.BackfillConfig
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
 
 /**

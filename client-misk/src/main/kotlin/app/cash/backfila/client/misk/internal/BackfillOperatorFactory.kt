@@ -1,7 +1,7 @@
 package app.cash.backfila.client.misk.internal
 
-import app.cash.backfila.client.misk.spi.BackfillBackend
-import app.cash.backfila.client.misk.spi.BackfillOperator
+import app.cash.backfila.client.spi.BackfillBackend
+import app.cash.backfila.client.spi.BackfillOperator
 import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
 import java.util.concurrent.TimeUnit

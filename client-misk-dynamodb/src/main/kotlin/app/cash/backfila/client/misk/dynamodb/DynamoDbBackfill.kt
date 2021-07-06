@@ -1,7 +1,7 @@
 package app.cash.backfila.client.misk.dynamodb
 
-import app.cash.backfila.client.misk.Backfill
-import app.cash.backfila.client.misk.BackfillConfig
+import app.cash.backfila.client.Backfill
+import app.cash.backfila.client.BackfillConfig
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.amazonaws.services.dynamodbv2.model.ScanRequest
 import com.squareup.moshi.Types

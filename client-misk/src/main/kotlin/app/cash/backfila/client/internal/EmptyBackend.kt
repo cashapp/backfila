@@ -1,8 +1,8 @@
-package app.cash.backfila.client.misk.internal
+package app.cash.backfila.client.internal
 
-import app.cash.backfila.client.misk.spi.BackfillBackend
-import app.cash.backfila.client.misk.spi.BackfillOperator
-import app.cash.backfila.client.misk.spi.BackfillRegistration
+import app.cash.backfila.client.spi.BackfillBackend
+import app.cash.backfila.client.spi.BackfillOperator
+import app.cash.backfila.client.spi.BackfillRegistration
 import javax.inject.Inject
 import javax.inject.Singleton
 

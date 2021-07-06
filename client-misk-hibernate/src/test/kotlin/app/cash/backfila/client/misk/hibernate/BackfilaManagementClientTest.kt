@@ -1,12 +1,12 @@
 package app.cash.backfila.client.misk.hibernate
 
-import app.cash.backfila.client.misk.BackfilaManagementClient
-import app.cash.backfila.client.misk.BackfillConfig
+import app.cash.backfila.client.BackfilaManagementClient
+import app.cash.backfila.client.BackfillConfig
 import app.cash.backfila.client.misk.ClientMiskService
 import app.cash.backfila.client.misk.ClientMiskTestingModule
 import app.cash.backfila.client.misk.DbMenu
 import app.cash.backfila.client.misk.MenuQuery
-import app.cash.backfila.client.misk.NoParameters
+import app.cash.backfila.client.NoParameters
 import com.google.inject.Module
 import javax.inject.Inject
 import misk.hibernate.Id
