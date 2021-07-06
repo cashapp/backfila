@@ -2,7 +2,7 @@ package app.cash.backfila.client.misk.dynamodb
 
 import app.cash.backfila.client.misk.dynamodb.internal.AwsAttributeValueAdapter
 import app.cash.backfila.client.misk.dynamodb.internal.DynamoDbBackend
-import app.cash.backfila.client.misk.spi.BackfillBackend
+import app.cash.backfila.client.spi.BackfillBackend
 import com.google.inject.Binder
 import com.google.inject.BindingAnnotation
 import com.google.inject.Provides

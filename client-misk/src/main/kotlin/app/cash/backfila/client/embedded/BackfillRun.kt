@@ -1,8 +1,8 @@
-package app.cash.backfila.client.misk.embedded
+package app.cash.backfila.client.embedded
 
-import app.cash.backfila.client.misk.Backfill
-import app.cash.backfila.client.misk.internal.BatchSnapshot
-import app.cash.backfila.client.misk.internal.PartitionCursor
+import app.cash.backfila.client.Backfill
+import app.cash.backfila.client.internal.BatchSnapshot
+import app.cash.backfila.client.internal.PartitionCursor
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
 import okio.ByteString

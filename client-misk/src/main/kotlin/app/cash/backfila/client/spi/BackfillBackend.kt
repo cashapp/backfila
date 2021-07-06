@@ -1,4 +1,4 @@
-package app.cash.backfila.client.misk.spi
+package app.cash.backfila.client.spi
 
 /**
  * Service provider interface for backends like Hibernate and DynamoDb. Backends construct operators

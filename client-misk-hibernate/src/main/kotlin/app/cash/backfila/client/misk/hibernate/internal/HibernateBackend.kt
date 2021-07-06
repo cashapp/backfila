@@ -1,13 +1,13 @@
 package app.cash.backfila.client.misk.hibernate.internal
 
-import app.cash.backfila.client.misk.Description
+import app.cash.backfila.client.Description
 import app.cash.backfila.client.misk.hibernate.ForBackfila
 import app.cash.backfila.client.misk.hibernate.HibernateBackfill
 import app.cash.backfila.client.misk.hibernate.PkeySqlAdapter
-import app.cash.backfila.client.misk.spi.BackfilaParametersOperator
-import app.cash.backfila.client.misk.spi.BackfillBackend
-import app.cash.backfila.client.misk.spi.BackfillOperator
-import app.cash.backfila.client.misk.spi.BackfillRegistration
+import app.cash.backfila.client.spi.BackfilaParametersOperator
+import app.cash.backfila.client.spi.BackfillBackend
+import app.cash.backfila.client.spi.BackfillOperator
+import app.cash.backfila.client.spi.BackfillRegistration
 import com.google.inject.Injector
 import com.google.inject.TypeLiteral
 import com.squareup.moshi.Types

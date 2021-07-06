@@ -1,4 +1,4 @@
-package app.cash.backfila.client.misk.spi
+package app.cash.backfila.client.spi
 
 import kotlin.reflect.KClass
 
