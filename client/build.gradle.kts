@@ -22,8 +22,6 @@ dependencies {
   implementation(Dependencies.okio)
   implementation(Dependencies.kotlinStdLib)
   implementation(Dependencies.wireMoshiAdapter)
-
-  testImplementation(Dependencies.junitEngine)
 }
 
 val jar by tasks.getting(Jar::class) {

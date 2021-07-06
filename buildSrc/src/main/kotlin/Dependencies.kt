@@ -15,7 +15,6 @@ object Dependencies {
   val jettyServlet = "org.eclipse.jetty:jetty-servlet:9.4.31.v20200723"
   val jettyWebsocketServer = "org.eclipse.jetty.websocket:websocket-server:9.4.31.v20200723"
   val jettyWebsocketServlet = "org.eclipse.jetty.websocket:websocket-servlet:9.4.31.v20200723"
-  val jnrUnixsocket = "com.github.jnr:jnr-unixsocket:0.30"
   val jooq = "org.jooq:jooq:${Versions.jooq}"
   val junitApi = "org.junit.jupiter:junit-jupiter-api:5.7.0"
   val junitEngine = "org.junit.jupiter:junit-jupiter-engine:5.7.0"
@@ -69,6 +68,7 @@ object Dependencies {
   val wireMoshiAdapter = "com.squareup.wire:wire-moshi-adapter:3.6.0"
   val wireRuntime = "com.squareup.wire:wire-runtime:3.6.0"
   val wireSchema = "com.squareup.wire:wire-schema:3.6.0"
+  val wispLogging = "com.squareup.misk:wisp-logging:0.19.0"
 }
 
 object Versions {

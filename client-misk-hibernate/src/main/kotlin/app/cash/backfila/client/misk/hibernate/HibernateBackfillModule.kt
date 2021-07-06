@@ -2,7 +2,7 @@ package app.cash.backfila.client.misk.hibernate
 
 import app.cash.backfila.client.misk.BackfillModule
 import app.cash.backfila.client.misk.hibernate.internal.HibernateBackend
-import app.cash.backfila.client.misk.spi.BackfillBackend
+import app.cash.backfila.client.spi.BackfillBackend
 import com.google.inject.Binder
 import com.google.inject.BindingAnnotation
 import com.google.inject.TypeLiteral

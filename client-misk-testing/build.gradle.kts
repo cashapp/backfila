@@ -1,16 +1,15 @@
 apply(plugin = "kotlin")
 
 dependencies {
-  api(project(":client-misk"))
+  api(project(":client"))
+  implementation(project(":backfila-embedded"))
 
-  implementation(Dependencies.misk)
-  implementation(Dependencies.miskTesting)
   implementation(Dependencies.junitEngine)
   implementation(Dependencies.assertj)
 }
 
 val jar by tasks.getting(Jar::class) {
-  baseName = "backfila-client-misk-testing"
+  baseName = "backfila-client-misk-testing" // This should get renamed to just backfila-client-testing
 }
 
 afterEvaluate {

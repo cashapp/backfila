@@ -29,6 +29,7 @@ class StartBackfillAction @Inject constructor(
   @Authenticated(capabilities = ["users"])
   fun start(
     @PathParam id: Long,
+    @Suppress("unused")
     @RequestBody request: StartBackfillRequest
   ): StartBackfillResponse {
     // TODO check user has permissions for this service with access api

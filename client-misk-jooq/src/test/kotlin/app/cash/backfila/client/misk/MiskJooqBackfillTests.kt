@@ -1,7 +1,7 @@
 package app.cash.backfila.client.misk
 
-import app.cash.backfila.client.misk.embedded.Backfila
-import app.cash.backfila.client.misk.embedded.BackfillRun
+import app.cash.backfila.embedded.Backfila
+import app.cash.backfila.embedded.BackfillRun
 import app.cash.backfila.client.misk.config.ClientJooqTestingModule
 import app.cash.backfila.client.misk.config.JooqDBIdentifier
 import app.cash.backfila.client.misk.config.JooqMenuTestBackfill

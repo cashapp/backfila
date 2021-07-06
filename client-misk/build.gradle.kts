@@ -19,7 +19,9 @@ dependencies {
   implementation(Dependencies.loggingApi)
 
   api(project(":client"))
-  testApi(project(":client-misk-testing"))
+  implementation(project(":client-base"))
+  testImplementation(project(":backfila-embedded"))
+  testImplementation(project(":client-misk-testing"))
 
   implementation(Dependencies.misk)
   implementation(Dependencies.miskActions)

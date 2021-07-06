@@ -1,13 +1,13 @@
 package app.cash.backfila.client.misk.hibernate
 
-import app.cash.backfila.client.misk.BackfillConfig
+import app.cash.backfila.client.BackfillConfig
 import app.cash.backfila.client.misk.ClientMiskService
 import app.cash.backfila.client.misk.ClientMiskTestingModule
 import app.cash.backfila.client.misk.DbMenu
 import app.cash.backfila.client.misk.MenuQuery
-import app.cash.backfila.client.misk.NoParameters
-import app.cash.backfila.client.misk.embedded.Backfila
-import app.cash.backfila.client.misk.embedded.createDryRun
+import app.cash.backfila.client.NoParameters
+import app.cash.backfila.embedded.Backfila
+import app.cash.backfila.embedded.createDryRun
 import com.google.inject.Module
 import javax.inject.Inject
 import misk.hibernate.Id
@@ -29,7 +29,7 @@ class NoParametersTest {
 
   @Test
   fun `try querying no parameters config`() {
-    val id = transacter.transaction { session ->
+    transacter.transaction { session ->
       session.save(DbMenu("chicken"))
     }
 

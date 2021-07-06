@@ -1,6 +1,6 @@
 package app.cash.backfila.client.misk.backend
 
-import app.cash.backfila.client.misk.embedded.Backfila
+import app.cash.backfila.embedded.Backfila
 import com.google.inject.Module
 import javax.inject.Inject
 import misk.testing.MiskTest
