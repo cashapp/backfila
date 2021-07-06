@@ -1,6 +1,7 @@
 package app.cash.backfila.client.misk.jooq.internal
 
 import app.cash.backfila.client.misk.Description
+import app.cash.backfila.client.misk.LongTerm
 import app.cash.backfila.client.misk.jooq.ForBackfila
 import app.cash.backfila.client.misk.jooq.JooqBackfill
 import app.cash.backfila.client.misk.spi.BackfilaParametersOperator
@@ -14,6 +15,7 @@ import com.squareup.moshi.Types
 import java.lang.reflect.ParameterizedType
 import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.hasAnnotation
 
 @Singleton
 class JooqBackend @Inject constructor(
@@ -33,7 +35,8 @@ class JooqBackend @Inject constructor(
       BackfillRegistration(
         name = it.key,
         description = it.value.findAnnotation<Description>()?.text,
-        parametersClass = parametersClass(it.value as KClass<JooqBackfill<*, Any>>)
+        parametersClass = parametersClass(it.value as KClass<JooqBackfill<*, Any>>),
+        longTerm = it.value.hasAnnotation<LongTerm>()
       )
     }.toSet()
   }

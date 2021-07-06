@@ -1,6 +1,7 @@
 package app.cash.backfila.client.misk.static.internal
 
 import app.cash.backfila.client.misk.Description
+import app.cash.backfila.client.misk.LongTerm
 import app.cash.backfila.client.misk.static.ForBackfila
 import app.cash.backfila.client.misk.spi.BackfilaParametersOperator
 import app.cash.backfila.client.misk.spi.BackfillBackend
@@ -14,6 +15,8 @@ import java.lang.reflect.ParameterizedType
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.hasAnnotation
 
 @Singleton
 class StaticDatasourceBackend @Inject constructor(
@@ -53,8 +56,10 @@ class StaticDatasourceBackend @Inject constructor(
     return backfills.map {
       BackfillRegistration(
         name = it.key,
-        description = (it.value.annotations.find { it is Description } as? Description)?.text,
-        parametersClass = parametersClass(it.value as KClass<StaticDatasourceBackfill<Any, Any>>)
+        description = it.value.findAnnotation<Description>()?.text,
+        parametersClass = parametersClass(it.value as KClass<StaticDatasourceBackfill<Any, Any>>),
+        // It might make sense that for this Backend that the default is true rather than false.
+        longTerm = it.value.hasAnnotation<LongTerm>()
       )
     }.toSet()
   }

@@ -108,8 +108,10 @@ class BatchAwaiter(
             matchingRecordsPerMinute = matchingRateCounter.projectedRate()
 
             if (backfillRunner.metadata.precomputingDone && matchingRecordsPerMinute!! > 0) {
-              val remaining = (backfillRunner.metadata.computedMatchingRecordCount
-                - backfilledMatchingRecordCount)
+              val remaining = (
+                backfillRunner.metadata.computedMatchingRecordCount -
+                  backfilledMatchingRecordCount
+                )
               val etaMinutes = remaining.toDouble() / matchingRecordsPerMinute!!
               val etaMillis = etaMinutes * 60 * 1000
               backfillRunner.factory.metrics.eta

@@ -53,6 +53,7 @@ internal class BackfilaStartupConfigurator @Inject internal constructor(
             .name(registration.name)
             .description(registration.description)
             .parameters(parameters)
+            .long_term(registration.longTerm)
             .build()
         }
       )
