@@ -1,6 +1,7 @@
 package app.cash.backfila.client.misk.dynamodb.internal
 
 import app.cash.backfila.client.misk.Description
+import app.cash.backfila.client.misk.LongTerm
 import app.cash.backfila.client.misk.dynamodb.DynamoDbBackfill
 import app.cash.backfila.client.misk.dynamodb.ForBackfila
 import app.cash.backfila.client.misk.spi.BackfilaParametersOperator
@@ -15,6 +16,8 @@ import java.lang.reflect.ParameterizedType
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.hasAnnotation
 
 @Singleton
 class DynamoDbBackend @Inject constructor(
@@ -58,8 +61,9 @@ class DynamoDbBackend @Inject constructor(
     return backfills.map {
       BackfillRegistration(
         name = it.key,
-        description = (it.value.annotations.find { it is Description } as? Description)?.text,
-        parametersClass = parametersClass(it.value as KClass<DynamoDbBackfill<Any, Any>>)
+        description = it.value.findAnnotation<Description>()?.text,
+        parametersClass = parametersClass(it.value as KClass<DynamoDbBackfill<Any, Any>>),
+        longTerm = it.value.hasAnnotation<LongTerm>()
       )
     }.toSet()
   }

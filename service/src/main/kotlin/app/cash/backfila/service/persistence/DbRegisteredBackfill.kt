@@ -66,13 +66,17 @@ class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimestampedE
   @Column
   var requires_approval: Boolean = false
 
+  @Column
+  var long_term: Boolean = false
+
   constructor(
     service_id: Id<DbService>,
     name: String,
     parameter_names: List<String>,
     type_provided: String?,
     type_consumed: String?,
-    requires_approval: Boolean
+    requires_approval: Boolean,
+    long_term: Boolean
   ) : this() {
     this.service_id = service_id
     this.name = name
@@ -83,6 +87,7 @@ class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimestampedE
     this.type_consumed = type_consumed
     this.active = true
     this.requires_approval = requires_approval
+    this.long_term = long_term
   }
 
   /** True if the variables configured by the client service are equal to what is stored. */
@@ -91,6 +96,7 @@ class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimestampedE
     if (type_provided != other.type_provided) return false
     if (type_consumed != other.type_consumed) return false
     if (requires_approval != other.requires_approval) return false
+    if (long_term != other.long_term) return false
 
     return true
   }

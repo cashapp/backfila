@@ -74,7 +74,7 @@ class StartStopBackfillActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "ChickenSandwich", "Description", listOf(), null,
-                null, false
+                null, false, false
               )
             )
           )
@@ -184,7 +184,7 @@ class StartStopBackfillActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "ChickenSandwich", "Description", listOf(), null,
-                null, false
+                null, false, false
               )
             )
           )
@@ -216,7 +216,7 @@ class StartStopBackfillActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "ChickenSandwich", "Description", listOf(), null,
-                null, false
+                null, false, false
               )
             )
           )
@@ -255,7 +255,7 @@ class StartStopBackfillActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "ChickenSandwich", "Description", listOf(), null,
-                null, false
+                null, false, false
               )
             )
           )
@@ -286,7 +286,7 @@ class StartStopBackfillActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "ChickenSandwich", "Description", listOf(), null,
-                null, false
+                null, false, false
               )
             )
           )

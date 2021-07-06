@@ -1,6 +1,7 @@
 package app.cash.backfila.client.misk.hibernate.internal
 
 import app.cash.backfila.client.misk.Description
+import app.cash.backfila.client.misk.LongTerm
 import app.cash.backfila.client.misk.hibernate.ForBackfila
 import app.cash.backfila.client.misk.hibernate.HibernateBackfill
 import app.cash.backfila.client.misk.hibernate.PkeySqlAdapter
@@ -18,6 +19,8 @@ import kotlin.reflect.KClass
 import misk.hibernate.DbEntity
 import misk.hibernate.Id
 import misk.hibernate.Query
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.hasAnnotation
 
 @Singleton
 class HibernateBackend @Inject constructor(
@@ -60,8 +63,9 @@ class HibernateBackend @Inject constructor(
     return backfills.map {
       BackfillRegistration(
         name = it.key,
-        description = (it.value.annotations.find { it is Description } as? Description)?.text,
-        parametersClass = parametersClass(it.value as KClass<HibernateBackfill<*, *, Any>>)
+        description = it.value.findAnnotation<Description>()?.text,
+        parametersClass = parametersClass(it.value as KClass<HibernateBackfill<*, *, Any>>),
+        longTerm = it.value.hasAnnotation<LongTerm>()
       )
     }.toSet()
   }

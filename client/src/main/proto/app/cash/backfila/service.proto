@@ -28,6 +28,10 @@ message ConfigureServiceRequest {
 
     // If true the backfill will need approval from another user before it can be started.
     optional bool requires_approval = 6;
+
+    // If true the backfill is considered to be a permanent part of the service and is opting out of
+    // removal reminders. Generally this should be false.
+    optional bool long_term = 7;
   }
 
   // List of all available backfills in this service

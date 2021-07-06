@@ -91,7 +91,7 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, null,
-                null
+                null, false
               )
             )
           )
@@ -107,7 +107,7 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "zzz", "Description", listOf(), null, null,
-                false
+                false, false
               )
             )
           )
@@ -128,11 +128,11 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, null,
-                false
+                false, false
               ),
               ConfigureServiceRequest.BackfillData(
                 "zzz", "Description", listOf(), null, null,
-                false
+                false, false
               )
             )
           )
@@ -148,7 +148,7 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "zzz", "Description", listOf(), null, null,
-                false
+                false, false
               )
             )
           )
@@ -176,7 +176,7 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, null,
-                false
+                false, false
               )
             )
           )
@@ -200,7 +200,7 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, null,
-                false
+                false, false
               )
             )
           )
@@ -223,7 +223,7 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, null,
-                false
+                false, false
               )
             )
           )
@@ -239,7 +239,7 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, null,
-                true
+                true, false
               )
             )
           )
@@ -255,7 +255,7 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, null,
-                false
+                false, false
               )
             )
           )
@@ -266,15 +266,82 @@ class ConfigureServiceActionTest {
       assertThat(backfills).containsOnly(
         Backfill(
           "xyz", clock.instant(), type_provided = null, type_consumed = null,
-          parameter_names = null, requires_approval = false
+          parameter_names = null, requires_approval = false, long_term = false
         ),
         Backfill(
           "xyz", clock.instant(), type_provided = null, type_consumed = null,
-          parameter_names = null, requires_approval = true
+          parameter_names = null, requires_approval = true, long_term = false
         ),
         Backfill(
           "xyz", null, type_provided = null, type_consumed = null,
-          parameter_names = null, requires_approval = false
+          parameter_names = null, requires_approval = false, long_term = false
+        )
+      )
+    }
+  }
+
+  @Test
+  fun modifyBackfillLongTermBackAndForth() {
+    scope.fakeCaller(service = "deep-fryer") {
+      // Going back and forth between approval required creates new registered backfills.
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "xyz", "Description", listOf(), null, null,
+                false, false
+              )
+            )
+          )
+          .connector_type(ENVOY)
+          .build()
+      )
+      assertThat(backfillNames("deep-fryer")).containsOnly("xyz")
+      assertThat(deletedBackfillNames("deep-fryer")).isEmpty()
+
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "xyz", "Description", listOf(), null, null,
+                false, true
+              )
+            )
+          )
+          .connector_type(ENVOY)
+          .build()
+      )
+      assertThat(backfillNames("deep-fryer")).containsOnly("xyz")
+      assertThat(deletedBackfillNames("deep-fryer")).containsOnly("xyz")
+
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "xyz", "Description", listOf(), null, null,
+                false, false
+              )
+            )
+          )
+          .connector_type(ENVOY)
+          .build()
+      )
+      val backfills = backfills("deep-fryer")
+      assertThat(backfills).containsOnly(
+        Backfill(
+          "xyz", clock.instant(), type_provided = null, type_consumed = null,
+          parameter_names = null, requires_approval = false, long_term = false
+        ),
+        Backfill(
+          "xyz", clock.instant(), type_provided = null, type_consumed = null,
+          parameter_names = null, requires_approval = false, long_term = true
+        ),
+        Backfill(
+          "xyz", null, type_provided = null, type_consumed = null,
+          parameter_names = null, requires_approval = false, long_term = false
         )
       )
     }
@@ -289,7 +356,7 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, null,
-                false
+                false, false
               )
             )
           )
@@ -303,7 +370,7 @@ class ConfigureServiceActionTest {
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description",
                 listOf(Parameter.Builder().name("abc").build()),
-                null, null, false
+                null, null, false, false
               )
             )
           )
@@ -314,11 +381,11 @@ class ConfigureServiceActionTest {
       assertThat(backfills).containsOnly(
         Backfill(
           "xyz", clock.instant(), type_provided = null, type_consumed = null,
-          parameter_names = null, requires_approval = false
+          parameter_names = null, requires_approval = false, long_term = false
         ),
         Backfill(
           "xyz", null, type_provided = null, type_consumed = null,
-          parameter_names = "abc", requires_approval = false
+          parameter_names = "abc", requires_approval = false, long_term = false
         )
       )
     }
@@ -333,7 +400,7 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), "String", null,
-                false
+                false, false
               )
             )
           )
@@ -346,7 +413,7 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), "Int", null,
-                false
+                false, false
               )
             )
           )
@@ -357,11 +424,11 @@ class ConfigureServiceActionTest {
       assertThat(backfills).containsOnly(
         Backfill(
           "xyz", clock.instant(), type_provided = "String", type_consumed = null,
-          parameter_names = null, requires_approval = false
+          parameter_names = null, requires_approval = false, long_term = false
         ),
         Backfill(
           "xyz", null, type_provided = "Int", type_consumed = null,
-          parameter_names = null, requires_approval = false
+          parameter_names = null, requires_approval = false, long_term = false
         )
       )
     }
@@ -376,7 +443,7 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, "String",
-                false
+                false, false
               )
             )
           )
@@ -389,7 +456,7 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, "Int",
-                false
+                false, false
               )
             )
           )
@@ -400,11 +467,11 @@ class ConfigureServiceActionTest {
       assertThat(backfills).containsOnly(
         Backfill(
           "xyz", clock.instant(), type_provided = null, type_consumed = "String",
-          parameter_names = null, requires_approval = false
+          parameter_names = null, requires_approval = false, long_term = false
         ),
         Backfill(
           "xyz", null, type_provided = null, type_consumed = "Int",
-          parameter_names = null, requires_approval = false
+          parameter_names = null, requires_approval = false, long_term = false
         )
       )
     }
@@ -419,7 +486,7 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, "String",
-                false
+                false, false
               )
             )
           )
@@ -432,7 +499,7 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, "String",
-                false
+                false, false
               )
             )
           )
@@ -443,7 +510,7 @@ class ConfigureServiceActionTest {
       assertThat(backfills).containsOnly(
         Backfill(
           "xyz", deleted_in_service_at = null, type_provided = null,
-          type_consumed = "String", parameter_names = null, requires_approval = false
+          type_consumed = "String", parameter_names = null, requires_approval = false, long_term = false
         )
       )
     }
@@ -459,7 +526,7 @@ class ConfigureServiceActionTest {
               listOf(
                 ConfigureServiceRequest.BackfillData(
                   "xyz", "Description", listOf(), null, "String",
-                  false
+                  false, false
                 )
               )
             )
@@ -495,7 +562,8 @@ class ConfigureServiceActionTest {
     val type_provided: String?,
     val type_consumed: String?,
     val parameter_names: String?,
-    val requires_approval: Boolean
+    val requires_approval: Boolean,
+    val long_term: Boolean
   )
 
   private fun backfills(serviceName: String): List<Backfill> {
@@ -513,7 +581,8 @@ class ConfigureServiceActionTest {
             it.type_provided,
             it.type_consumed,
             it.parameter_names,
-            it.requires_approval
+            it.requires_approval,
+            it.long_term
           )
         }
     }

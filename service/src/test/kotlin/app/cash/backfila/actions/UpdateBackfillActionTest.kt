@@ -50,7 +50,7 @@ class UpdateBackfillActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "ChickenSandwich", "Description", listOf(), null,
-                null, false
+                null, false, false
               )
             )
           )
@@ -104,7 +104,7 @@ class UpdateBackfillActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "ChickenSandwich", "Description", listOf(), null,
-                null, false
+                null, false, false
               )
             )
           )
@@ -143,7 +143,7 @@ class UpdateBackfillActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "ChickenSandwich", "Description", listOf(), null,
-                null, false
+                null, false, false
               )
             )
           )
