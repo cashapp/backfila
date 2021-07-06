@@ -1,6 +1,8 @@
 package app.cash.backfila.client.misk.dynamodb.internal
 
 import app.cash.backfila.client.Description
+import app.cash.backfila.client.DeleteBy
+import app.cash.backfila.client.parseDeleteByDate
 import app.cash.backfila.client.misk.dynamodb.DynamoDbBackfill
 import app.cash.backfila.client.misk.dynamodb.ForBackfila
 import app.cash.backfila.client.spi.BackfilaParametersOperator
@@ -15,6 +17,7 @@ import java.lang.reflect.ParameterizedType
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
+import kotlin.reflect.full.findAnnotation
 
 @Singleton
 class DynamoDbBackend @Inject constructor(
@@ -58,8 +61,9 @@ class DynamoDbBackend @Inject constructor(
     return backfills.map {
       BackfillRegistration(
         name = it.key,
-        description = (it.value.annotations.find { it is Description } as? Description)?.text,
-        parametersClass = parametersClass(it.value as KClass<DynamoDbBackfill<Any, Any>>)
+        description = it.value.findAnnotation<Description>()?.text,
+        parametersClass = parametersClass(it.value as KClass<DynamoDbBackfill<Any, Any>>),
+        deleteBy = it.value.findAnnotation<DeleteBy>()?.parseDeleteByDate(),
       )
     }.toSet()
   }

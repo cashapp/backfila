@@ -24,6 +24,7 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import java.time.temporal.ChronoUnit.DAYS
 
 @MiskTest(startService = true)
 class ConfigureServiceActionTest {
@@ -91,7 +92,7 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, null,
-                null
+                null, null
               )
             )
           )
@@ -107,7 +108,7 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "zzz", "Description", listOf(), null, null,
-                false
+                false, null
               )
             )
           )
@@ -128,11 +129,11 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, null,
-                false
+                false, null
               ),
               ConfigureServiceRequest.BackfillData(
                 "zzz", "Description", listOf(), null, null,
-                false
+                false, null
               )
             )
           )
@@ -148,7 +149,7 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "zzz", "Description", listOf(), null, null,
-                false
+                false, null
               )
             )
           )
@@ -176,7 +177,7 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, null,
-                false
+                false, null
               )
             )
           )
@@ -200,7 +201,7 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, null,
-                false
+                false, null
               )
             )
           )
@@ -223,7 +224,7 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, null,
-                false
+                false, null
               )
             )
           )
@@ -239,7 +240,7 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, null,
-                true
+                true, null
               )
             )
           )
@@ -255,7 +256,7 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, null,
-                false
+                false, null
               )
             )
           )
@@ -266,15 +267,82 @@ class ConfigureServiceActionTest {
       assertThat(backfills).containsOnly(
         Backfill(
           "xyz", clock.instant(), type_provided = null, type_consumed = null,
-          parameter_names = null, requires_approval = false
+          parameter_names = null, requires_approval = false, delete_by = null
         ),
         Backfill(
           "xyz", clock.instant(), type_provided = null, type_consumed = null,
-          parameter_names = null, requires_approval = true
+          parameter_names = null, requires_approval = true, delete_by = null
         ),
         Backfill(
           "xyz", null, type_provided = null, type_consumed = null,
-          parameter_names = null, requires_approval = false
+          parameter_names = null, requires_approval = false, delete_by = null
+        )
+      )
+    }
+  }
+
+  @Test
+  fun modifyBackfillDeleteBy() {
+    scope.fakeCaller(service = "deep-fryer") {
+      // Going back and forth between approval required creates new registered backfills.
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "xyz", "Description", listOf(), null, null,
+                false, null
+              )
+            )
+          )
+          .connector_type(ENVOY)
+          .build()
+      )
+      assertThat(backfillNames("deep-fryer")).containsOnly("xyz")
+      assertThat(deletedBackfillNames("deep-fryer")).isEmpty()
+
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "xyz", "Description", listOf(), null, null,
+                false, clock.instant().plus(1L, DAYS).toEpochMilli()
+              )
+            )
+          )
+          .connector_type(ENVOY)
+          .build()
+      )
+      assertThat(backfillNames("deep-fryer")).containsOnly("xyz")
+      assertThat(deletedBackfillNames("deep-fryer")).containsOnly("xyz")
+
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "xyz", "Description", listOf(), null, null,
+                false, null
+              )
+            )
+          )
+          .connector_type(ENVOY)
+          .build()
+      )
+      val backfills = backfills("deep-fryer")
+      assertThat(backfills).containsOnly(
+        Backfill(
+          "xyz", clock.instant(), type_provided = null, type_consumed = null,
+          parameter_names = null, requires_approval = false, delete_by = null
+        ),
+        Backfill(
+          "xyz", clock.instant(), type_provided = null, type_consumed = null,
+          parameter_names = null, requires_approval = false, delete_by = clock.instant().plus(1L, DAYS)
+        ),
+        Backfill(
+          "xyz", null, type_provided = null, type_consumed = null,
+          parameter_names = null, requires_approval = false, delete_by = null
         )
       )
     }
@@ -289,7 +357,7 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, null,
-                false
+                false, null
               )
             )
           )
@@ -303,7 +371,7 @@ class ConfigureServiceActionTest {
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description",
                 listOf(Parameter.Builder().name("abc").build()),
-                null, null, false
+                null, null, false, null
               )
             )
           )
@@ -314,11 +382,11 @@ class ConfigureServiceActionTest {
       assertThat(backfills).containsOnly(
         Backfill(
           "xyz", clock.instant(), type_provided = null, type_consumed = null,
-          parameter_names = null, requires_approval = false
+          parameter_names = null, requires_approval = false, delete_by = null
         ),
         Backfill(
           "xyz", null, type_provided = null, type_consumed = null,
-          parameter_names = "abc", requires_approval = false
+          parameter_names = "abc", requires_approval = false, delete_by = null
         )
       )
     }
@@ -333,7 +401,7 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), "String", null,
-                false
+                false, null
               )
             )
           )
@@ -346,7 +414,7 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), "Int", null,
-                false
+                false, null
               )
             )
           )
@@ -357,11 +425,11 @@ class ConfigureServiceActionTest {
       assertThat(backfills).containsOnly(
         Backfill(
           "xyz", clock.instant(), type_provided = "String", type_consumed = null,
-          parameter_names = null, requires_approval = false
+          parameter_names = null, requires_approval = false, delete_by = null
         ),
         Backfill(
           "xyz", null, type_provided = "Int", type_consumed = null,
-          parameter_names = null, requires_approval = false
+          parameter_names = null, requires_approval = false, delete_by = null
         )
       )
     }
@@ -376,7 +444,7 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, "String",
-                false
+                false, null
               )
             )
           )
@@ -389,7 +457,7 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, "Int",
-                false
+                false, null
               )
             )
           )
@@ -400,11 +468,11 @@ class ConfigureServiceActionTest {
       assertThat(backfills).containsOnly(
         Backfill(
           "xyz", clock.instant(), type_provided = null, type_consumed = "String",
-          parameter_names = null, requires_approval = false
+          parameter_names = null, requires_approval = false, delete_by = null
         ),
         Backfill(
           "xyz", null, type_provided = null, type_consumed = "Int",
-          parameter_names = null, requires_approval = false
+          parameter_names = null, requires_approval = false, delete_by = null
         )
       )
     }
@@ -419,7 +487,7 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, "String",
-                false
+                false, null
               )
             )
           )
@@ -432,7 +500,7 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, "String",
-                false
+                false, null
               )
             )
           )
@@ -443,7 +511,7 @@ class ConfigureServiceActionTest {
       assertThat(backfills).containsOnly(
         Backfill(
           "xyz", deleted_in_service_at = null, type_provided = null,
-          type_consumed = "String", parameter_names = null, requires_approval = false
+          type_consumed = "String", parameter_names = null, requires_approval = false, delete_by = null
         )
       )
     }
@@ -459,7 +527,7 @@ class ConfigureServiceActionTest {
               listOf(
                 ConfigureServiceRequest.BackfillData(
                   "xyz", "Description", listOf(), null, "String",
-                  false
+                  false, null
                 )
               )
             )
@@ -495,7 +563,8 @@ class ConfigureServiceActionTest {
     val type_provided: String?,
     val type_consumed: String?,
     val parameter_names: String?,
-    val requires_approval: Boolean
+    val requires_approval: Boolean,
+    val delete_by: Instant?
   )
 
   private fun backfills(serviceName: String): List<Backfill> {
@@ -513,7 +582,8 @@ class ConfigureServiceActionTest {
             it.type_provided,
             it.type_consumed,
             it.parameter_names,
-            it.requires_approval
+            it.requires_approval,
+            it.delete_by
           )
         }
     }

@@ -23,6 +23,7 @@ import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import wisp.logging.getLogger
+import java.time.Instant
 
 class ConfigureServiceAction @Inject constructor(
   private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
@@ -79,7 +80,8 @@ class ConfigureServiceAction @Inject constructor(
           backfill.parameters.map { it.name },
           backfill.type_provided,
           backfill.type_consumed,
-          backfill.requires_approval == true
+          backfill.requires_approval == true,
+          backfill.delete_by?.let(Instant::ofEpochMilli),
         )
         var save = false
         if (existingBackfill != null) {

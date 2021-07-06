@@ -1,6 +1,6 @@
 object Dependencies {
   val apacheCommonsLang3 = "org.apache.commons:commons-lang3:3.11"
-  val assertj = "org.assertj:assertj-core:3.16.1"
+  val assertj = "org.assertj:assertj-core:3.20.2"
   val awsDynamodb = "com.amazonaws:aws-java-sdk-dynamodb:1.11.774"
   val flywayGradleBuildscriptDep = "gradle.plugin.com.boxfuse.client:flyway-release:5.0.2"
   val guava = "com.google.guava:guava:30.0-jre"

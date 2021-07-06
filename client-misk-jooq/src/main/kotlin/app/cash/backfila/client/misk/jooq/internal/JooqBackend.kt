@@ -1,6 +1,8 @@
 package app.cash.backfila.client.misk.jooq.internal
 
 import app.cash.backfila.client.Description
+import app.cash.backfila.client.DeleteBy
+import app.cash.backfila.client.parseDeleteByDate
 import app.cash.backfila.client.misk.jooq.ForBackfila
 import app.cash.backfila.client.misk.jooq.JooqBackfill
 import app.cash.backfila.client.spi.BackfilaParametersOperator
@@ -33,7 +35,8 @@ class JooqBackend @Inject constructor(
       BackfillRegistration(
         name = it.key,
         description = it.value.findAnnotation<Description>()?.text,
-        parametersClass = parametersClass(it.value as KClass<JooqBackfill<*, Any>>)
+        parametersClass = parametersClass(it.value as KClass<JooqBackfill<*, Any>>),
+        deleteBy = it.value.findAnnotation<DeleteBy>()?.parseDeleteByDate(),
       )
     }.toSet()
   }
