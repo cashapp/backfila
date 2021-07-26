@@ -75,3 +75,18 @@ message CreateAndStartBackfillRequest {
 message CreateAndStartBackfillResponse {
   optional uint64 backfill_run_id = 1;
 }
+
+// Checks on the status of a backfill.
+message CheckBackfillStatusRequest {
+  optional uint64 backfill_run_id = 1;
+}
+
+message CheckBackfillStatusResponse {
+  optional Status status = 1;
+
+  enum Status {
+    PAUSED = 1;
+    RUNNING = 2;
+    COMPLETE = 3;
+  }
+}

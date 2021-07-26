@@ -1,6 +1,8 @@
 package app.cash.backfila.client.misk.internal
 
 import app.cash.backfila.client.BackfilaApi
+import app.cash.backfila.protos.service.CheckBackfillStatusRequest
+import app.cash.backfila.protos.service.CheckBackfillStatusResponse
 import app.cash.backfila.protos.service.ConfigureServiceRequest
 import app.cash.backfila.protos.service.ConfigureServiceResponse
 import app.cash.backfila.protos.service.CreateAndStartBackfillRequest
@@ -29,6 +31,18 @@ internal class RealBackfilaClient @Inject internal constructor(
   override fun createAndStartBackfill(request: CreateAndStartBackfillRequest): CreateAndStartBackfillResponse {
     try {
       val response = backfilaApi.createAndStartbackfill(request).execute()
+      if (!response.isSuccessful) {
+        throw IOException("Call failed: ${response.code()} ${response.message()}")
+      }
+      return response.body()!!
+    } catch (e: IOException) {
+      throw UncheckedIOException(e)
+    }
+  }
+
+  override fun checkBackfillStatus(request: CheckBackfillStatusRequest): CheckBackfillStatusResponse {
+    try {
+      val response = backfilaApi.checkBackfillStatus(request).execute()
       if (!response.isSuccessful) {
         throw IOException("Call failed: ${response.code()} ${response.message()}")
       }

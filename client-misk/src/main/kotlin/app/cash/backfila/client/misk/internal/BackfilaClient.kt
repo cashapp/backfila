@@ -1,5 +1,7 @@
 package app.cash.backfila.client.misk.internal
 
+import app.cash.backfila.protos.service.CheckBackfillStatusRequest
+import app.cash.backfila.protos.service.CheckBackfillStatusResponse
 import app.cash.backfila.protos.service.ConfigureServiceRequest
 import app.cash.backfila.protos.service.ConfigureServiceResponse
 import app.cash.backfila.protos.service.CreateAndStartBackfillRequest
@@ -9,4 +11,6 @@ internal interface BackfilaClient {
   fun configureService(request: ConfigureServiceRequest): ConfigureServiceResponse
 
   fun createAndStartBackfill(request: CreateAndStartBackfillRequest): CreateAndStartBackfillResponse
+
+  fun checkBackfillStatus(request: CheckBackfillStatusRequest): CheckBackfillStatusResponse
 }

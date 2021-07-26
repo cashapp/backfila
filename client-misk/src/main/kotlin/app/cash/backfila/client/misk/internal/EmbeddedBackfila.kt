@@ -5,6 +5,8 @@ import app.cash.backfila.client.Connectors
 import app.cash.backfila.client.misk.Backfill
 import app.cash.backfila.client.misk.embedded.Backfila
 import app.cash.backfila.client.misk.embedded.BackfillRun
+import app.cash.backfila.protos.service.CheckBackfillStatusRequest
+import app.cash.backfila.protos.service.CheckBackfillStatusResponse
 import app.cash.backfila.protos.service.ConfigureServiceRequest
 import app.cash.backfila.protos.service.ConfigureServiceResponse
 import app.cash.backfila.protos.service.CreateAndStartBackfillRequest
@@ -64,6 +66,12 @@ internal class EmbeddedBackfila @Inject internal constructor(
     run.execute()
 
     return Calls.response(CreateAndStartBackfillResponse(backfillId.toLong()))
+  }
+
+  override fun checkBackfillStatus(request: CheckBackfillStatusRequest): Call<CheckBackfillStatusResponse> {
+    checkNotNull(request.backfill_run_id)
+    // TODO(hdou): actually check the status
+    return Calls.response(CheckBackfillStatusResponse(CheckBackfillStatusResponse.Status.RUNNING))
   }
 
   override fun <Type : Backfill> createDryRun(
