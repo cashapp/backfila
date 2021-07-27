@@ -1,5 +1,7 @@
 package app.cash.backfila.client
 
+import app.cash.backfila.protos.service.CheckBackfillStatusRequest
+import app.cash.backfila.protos.service.CheckBackfillStatusResponse
 import app.cash.backfila.protos.service.ConfigureServiceRequest
 import app.cash.backfila.protos.service.ConfigureServiceResponse
 import app.cash.backfila.protos.service.CreateAndStartBackfillRequest
@@ -31,4 +33,15 @@ interface BackfilaApi {
   fun createAndStartbackfill(
     @Body request: CreateAndStartBackfillRequest
   ): Call<CreateAndStartBackfillResponse>
+
+  @POST("/check-backfill-status")
+  @Headers(
+    value = [
+      "Accept: application/x-protobuf",
+      "Content-Type: application/x-protobuf"
+    ]
+  )
+  fun checkBackfillStatus(
+    @Body request: CheckBackfillStatusRequest
+  ): Call<CheckBackfillStatusResponse>
 }
