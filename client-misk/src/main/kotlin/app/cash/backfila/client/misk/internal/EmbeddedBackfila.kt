@@ -71,7 +71,7 @@ internal class EmbeddedBackfila @Inject internal constructor(
   override fun checkBackfillStatus(request: CheckBackfillStatusRequest): Call<CheckBackfillStatusResponse> {
     checkNotNull(request.backfill_run_id)
     // TODO(hdou): actually check the status
-    return Calls.response(CheckBackfillStatusResponse(CheckBackfillStatusResponse.Status.RUNNING))
+    return Calls.response(CheckBackfillStatusResponse(CheckBackfillStatusResponse.Status.COMPLETE))
   }
 
   override fun <Type : Backfill> createDryRun(
