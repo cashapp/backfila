@@ -82,7 +82,7 @@ val shadowJar by tasks.getting(com.github.jengelman.gradle.plugins.shadow.tasks.
   exclude("module-info.class") // https://github.com/johnrengelman/shadow/issues/352
   mergeServiceFiles()
   isZip64 = true
-  classifier = null
+  classifier = "shaded"
 }
 
 if (rootProject.file("hooks.gradle").exists()) {
