@@ -56,6 +56,10 @@ dependencies {
   implementation(Dependencies.wireRuntime)
   implementation(Dependencies.wireCompiler)
   implementation(Dependencies.wireSchema)
+  implementation(Dependencies.wispClient)
+  implementation(Dependencies.wispConfig)
+  implementation(Dependencies.wispDeployment)
+  implementation(Dependencies.wispLogging)
 
   implementation(project(":client"))
 
@@ -80,9 +84,14 @@ val jar by tasks.getting(Jar::class) {
 
 val shadowJar by tasks.getting(com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar::class) {
   exclude("module-info.class") // https://github.com/johnrengelman/shadow/issues/352
+  // https://youtrack.jetbrains.com/issue/KT-25709
+  exclude("**/*.kotlin_metadata")
+  exclude("**/*.kotlin_module")
+  exclude("**/*.kotlin_builtins")
+
   mergeServiceFiles()
   isZip64 = true
-  classifier = null
+  classifier = "shaded"
 }
 
 if (rootProject.file("hooks.gradle").exists()) {
