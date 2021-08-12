@@ -1,9 +1,9 @@
 package app.cash.backfila.client.misk.dynamodb
 
-import app.cash.backfila.client.misk.BackfillConfig
+import app.cash.backfila.client.BackfillConfig
 import app.cash.backfila.client.misk.TestingModule
-import app.cash.backfila.client.misk.embedded.Backfila
-import app.cash.backfila.client.misk.embedded.createWetRun
+import app.cash.backfila.embedded.Backfila
+import app.cash.backfila.embedded.createWetRun
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
 import javax.inject.Inject
 import misk.testing.MiskTest
@@ -44,7 +44,7 @@ class DynamoDbBackfillTest {
     testData.addThriller()
 
     assertThatCode {
-      val run = backfila.createWetRun<MakeTracksExplicitBackfill>(
+      backfila.createWetRun<MakeTracksExplicitBackfill>(
         parameterData = mapOf("validate" to "false".encodeUtf8())
       )
     }.hasMessageContaining("Validate failed")

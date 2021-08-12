@@ -29,6 +29,7 @@ class StopBackfillAction @Inject constructor(
   @Authenticated(capabilities = ["users"])
   fun stop(
     @PathParam id: Long,
+    @Suppress("unused")
     @RequestBody request: StopBackfillRequest
   ): StopBackfillResponse {
     // TODO check user has permissions for this service with access api

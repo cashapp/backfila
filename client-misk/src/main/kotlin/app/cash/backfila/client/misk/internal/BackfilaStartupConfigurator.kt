@@ -3,10 +3,11 @@ package app.cash.backfila.client.misk.internal
 import app.cash.backfila.client.Connectors
 import app.cash.backfila.client.HttpConnectorData
 import app.cash.backfila.client.misk.ForBackfila
-import app.cash.backfila.client.misk.client.BackfilaClientConfig
-import app.cash.backfila.client.misk.spi.BackfilaParametersOperator.Companion.backfilaParametersFromClass
-import app.cash.backfila.client.misk.spi.BackfillBackend
-import app.cash.backfila.client.misk.spi.BackfillRegistration
+import app.cash.backfila.client.internal.BackfilaClient
+import app.cash.backfila.client.config.BackfilaClientConfig
+import app.cash.backfila.client.spi.BackfilaParametersOperator.Companion.backfilaParametersFromClass
+import app.cash.backfila.client.spi.BackfillBackend
+import app.cash.backfila.client.spi.BackfillRegistration
 import app.cash.backfila.protos.service.ConfigureServiceRequest
 import com.google.common.util.concurrent.AbstractIdleService
 import com.squareup.moshi.Moshi

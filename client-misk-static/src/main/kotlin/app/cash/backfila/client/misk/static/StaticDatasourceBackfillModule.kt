@@ -1,6 +1,6 @@
 package app.cash.backfila.client.misk.static
 
-import app.cash.backfila.client.misk.spi.BackfillBackend
+import app.cash.backfila.client.spi.BackfillBackend
 import app.cash.backfila.client.misk.static.internal.StaticDatasourceBackend
 import com.google.inject.Binder
 import com.google.inject.BindingAnnotation

@@ -1,7 +1,7 @@
 package app.cash.backfila.client.misk.config
 
-import app.cash.backfila.client.misk.BackfillConfig
-import app.cash.backfila.client.misk.Description
+import app.cash.backfila.client.BackfillConfig
+import app.cash.backfila.client.Description
 import app.cash.backfila.client.misk.jooq.BackfillBatch
 import app.cash.backfila.client.misk.jooq.BackfillJooqTransacter
 import app.cash.backfila.client.misk.jooq.ByteStringSerializer

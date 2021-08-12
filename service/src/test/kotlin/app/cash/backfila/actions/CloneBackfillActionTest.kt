@@ -356,7 +356,7 @@ class CloneBackfillActionTest {
       )
 
       assertThatThrownBy {
-        val cloneResponse = cloneBackfillAction.create(
+        cloneBackfillAction.create(
           response.backfill_run_id,
           CloneBackfillRequest(
             range_clone_type = RangeCloneType.RESTART

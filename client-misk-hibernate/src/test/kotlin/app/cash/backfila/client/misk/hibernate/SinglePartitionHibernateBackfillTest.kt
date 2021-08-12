@@ -2,10 +2,10 @@ package app.cash.backfila.client.misk.hibernate
 
 import app.cash.backfila.client.misk.ClientMiskService
 import app.cash.backfila.client.misk.DbMenu
-import app.cash.backfila.client.misk.embedded.Backfila
-import app.cash.backfila.client.misk.embedded.BackfillRun
-import app.cash.backfila.client.misk.embedded.createDryRun
-import app.cash.backfila.client.misk.embedded.createWetRun
+import app.cash.backfila.embedded.Backfila
+import app.cash.backfila.embedded.BackfillRun
+import app.cash.backfila.embedded.createDryRun
+import app.cash.backfila.embedded.createWetRun
 import app.cash.backfila.client.misk.testing.assertThat
 import javax.inject.Inject
 import misk.hibernate.Id

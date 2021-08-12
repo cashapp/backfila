@@ -1,11 +1,11 @@
 package app.cash.backfila.client.misk.hibernate.internal
 
-import app.cash.backfila.client.misk.NoParameters
+import app.cash.backfila.client.NoParameters
 import app.cash.backfila.client.misk.hibernate.HibernateBackfill
 import app.cash.backfila.client.misk.hibernate.PkeySqlAdapter
-import app.cash.backfila.client.misk.internal.BackfillOperatorFactory
-import app.cash.backfila.client.misk.spi.BackfilaParametersOperator
-import app.cash.backfila.client.misk.spi.BackfillOperator
+import app.cash.backfila.client.internal.BackfillOperatorFactory
+import app.cash.backfila.client.spi.BackfilaParametersOperator
+import app.cash.backfila.client.spi.BackfillOperator
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse.Batch

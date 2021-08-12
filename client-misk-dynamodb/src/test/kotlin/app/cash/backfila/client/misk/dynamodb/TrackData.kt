@@ -142,13 +142,13 @@ class DynamoMusicTableTestData @Inject constructor(
     tracks: List<String>
   ) {
     // Insert the album info
-    val trackItem = TrackItem().apply {
+    val albumItem = TrackItem().apply {
       this.album_token = album_token
       this.sort_key = "INFO_"
       this.album_title = album_title
       this.artist_name = artist_name
     }
-    dynamoDb.save(trackItem)
+    dynamoDb.save(albumItem)
     // Insert the tracks info
     tracks.forEachIndexed { index, name ->
       val trackItem = TrackItem().apply {

@@ -1,7 +1,7 @@
 package app.cash.backfila.client.misk.fixedset
 
 import app.cash.backfila.client.misk.ForBackfila
-import app.cash.backfila.client.misk.spi.BackfillBackend
+import app.cash.backfila.client.spi.BackfillBackend
 import com.google.inject.Binder
 import com.google.inject.TypeLiteral
 import com.google.inject.multibindings.MapBinder

@@ -1,6 +1,6 @@
 package app.cash.backfila.client.misk
 
-import app.cash.backfila.client.misk.embedded.EmbeddedBackfilaModule
+import app.cash.backfila.embedded.EmbeddedBackfilaModule
 import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule

@@ -1,7 +1,7 @@
 package app.cash.backfila.client.misk.testing
 
-import app.cash.backfila.client.misk.Backfill
-import app.cash.backfila.client.misk.embedded.BackfillRun
+import app.cash.backfila.client.Backfill
+import app.cash.backfila.embedded.BackfillRun
 import org.assertj.core.api.AbstractAssert
 
 class BackfillRunAssert(

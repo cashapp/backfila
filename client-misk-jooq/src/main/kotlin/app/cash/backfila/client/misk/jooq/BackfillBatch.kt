@@ -1,6 +1,6 @@
 package app.cash.backfila.client.misk.jooq
 
-import app.cash.backfila.client.misk.BackfillConfig
+import app.cash.backfila.client.BackfillConfig
 
 /**
  * Encapsulates the data we pass to the `batchConsumer` callback.
