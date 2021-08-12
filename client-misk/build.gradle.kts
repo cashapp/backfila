@@ -20,8 +20,6 @@ dependencies {
 
   api(project(":client"))
   implementation(project(":client-base"))
-  testImplementation(project(":backfila-embedded"))
-  testImplementation(project(":client-misk-testing"))
 
   implementation(Dependencies.misk)
   implementation(Dependencies.miskActions)
@@ -32,6 +30,9 @@ dependencies {
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.miskTesting)
   testImplementation(Dependencies.junitEngine)
+
+  testImplementation(project(":backfila-embedded"))
+  testImplementation(project(":client-misk-testing"))
 }
 
 val jar by tasks.getting(Jar::class) {

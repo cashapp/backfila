@@ -16,7 +16,7 @@ dependencies {
   implementation(Dependencies.wireMoshiAdapter)
   implementation(Dependencies.wispLogging)
 
-  api(project(":client")) // TODO Should this be an implementation?
+  api(project(":client"))
 
   testImplementation(Dependencies.junitEngine)
   testImplementation(Dependencies.assertj)

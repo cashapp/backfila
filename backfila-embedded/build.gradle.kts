@@ -8,7 +8,7 @@ dependencies {
   implementation(Dependencies.retrofit)
   implementation(Dependencies.retrofitMock)
 
-  api(project(":client")) // TODO Should this be an implementation?
+  api(project(":client"))
   implementation(project(":client-base"))
 
 

@@ -1,6 +1,5 @@
+
 import nu.studer.gradle.jooq.JooqEdition
-import org.jetbrains.kotlin.backend.common.push
-import org.jooq.meta.jaxb.ForcedType
 
 buildscript {
   dependencies {
@@ -30,8 +29,6 @@ dependencies {
 
   api(project(":client-misk"))
   implementation(project(":client-base"))
-  testImplementation(project(":backfila-embedded"))
-  testImplementation(project(":client-misk-testing"))
 
   implementation(Dependencies.misk)
   implementation(Dependencies.miskJdbc)
@@ -47,6 +44,9 @@ dependencies {
   testImplementation(Dependencies.junitParams)
   testImplementation(Dependencies.okHttp)
   testImplementation(Dependencies.mysql)
+
+  testImplementation(project(":backfila-embedded"))
+  testImplementation(project(":client-misk-testing"))
 
   jooqGenerator(Dependencies.mysql)
 }

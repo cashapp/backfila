@@ -1,38 +1,38 @@
 apply(plugin = "kotlin")
 
 dependencies {
+  implementation(Dependencies.awsDynamodb)
+  implementation(Dependencies.kotlinStdLib)
   implementation(Dependencies.guava)
+  implementation(Dependencies.guice)
+  implementation(Dependencies.misk)
+  implementation(Dependencies.miskAwsDynamodb)
+  implementation(Dependencies.miskInject)
   implementation(Dependencies.moshiCore)
   implementation(Dependencies.moshiKotlin)
-  implementation(Dependencies.wireRuntime)
-  implementation(Dependencies.guice)
   implementation(Dependencies.okHttp)
+  implementation(Dependencies.okio)
   implementation(Dependencies.retrofit)
   implementation(Dependencies.retrofitMock)
   implementation(Dependencies.retrofitMoshi)
   implementation(Dependencies.retrofitWire)
-  implementation(Dependencies.okio)
-  implementation(Dependencies.kotlinStdLib)
   implementation(Dependencies.wireMoshiAdapter)
+  implementation(Dependencies.wireRuntime)
 
   api(project(":client"))
-  api(project(":client-misk"))
   implementation(project(":client-base"))
-  testImplementation(project(":backfila-embedded"))
-  testImplementation(project(":client-misk-testing"))
-
-  implementation(Dependencies.misk)
-  implementation(Dependencies.awsDynamodb)
-  implementation(Dependencies.miskAwsDynamodb)
-  implementation(Dependencies.miskInject)
+  // TODO: should not depend on misk
+  implementation(project(":client-misk"))
 
   testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.miskTesting)
-  testImplementation(Dependencies.junitEngine)
-  testImplementation(Dependencies.miskAwsDynamodbTesting)
-  testImplementation(Dependencies.kotlinTest)
-
   testImplementation(Dependencies.awsDynamodb)
+  testImplementation(Dependencies.junitEngine)
+  testImplementation(Dependencies.kotlinTest)
+  testImplementation(Dependencies.miskAwsDynamodbTesting)
+  testImplementation(Dependencies.miskTesting)
+
+  testImplementation(project(":backfila-embedded"))
+  testImplementation(project(":client-misk-testing"))
 }
 
 val jar by tasks.getting(Jar::class) {

@@ -18,8 +18,6 @@ dependencies {
   api(project(":client"))
   api(project(":client-misk"))
   implementation(project(":client-base"))
-  testImplementation(project(":backfila-embedded"))
-  testImplementation(project(":client-misk-testing"))
 
   implementation(Dependencies.misk)
   implementation(Dependencies.miskInject)
@@ -29,6 +27,9 @@ dependencies {
   testImplementation(Dependencies.miskTesting)
   testImplementation(Dependencies.junitEngine)
   testImplementation(Dependencies.kotlinTest)
+
+  testImplementation(project(":backfila-embedded"))
+  testImplementation(project(":client-misk-testing"))
 }
 
 val jar by tasks.getting(Jar::class) {

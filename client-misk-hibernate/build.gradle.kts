@@ -11,10 +11,8 @@ dependencies {
   implementation(Dependencies.loggingApi)
   implementation(Dependencies.wireMoshiAdapter)
 
-  api(project(":client-misk"))
   implementation(project(":client-base"))
-  testImplementation(project(":backfila-embedded"))
-  testImplementation(project(":client-misk-testing"))
+  api(project(":client-misk"))
 
   implementation(Dependencies.misk)
   implementation(Dependencies.miskActions)
@@ -28,6 +26,9 @@ dependencies {
   testImplementation(Dependencies.kotlinTest)
   testImplementation(Dependencies.junitEngine)
   testImplementation(Dependencies.okHttp)
+
+  testImplementation(project(":backfila-embedded"))
+  testImplementation(project(":client-misk-testing"))
 }
 
 val jar by tasks.getting(Jar::class) {
