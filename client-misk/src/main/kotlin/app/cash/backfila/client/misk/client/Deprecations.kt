@@ -6,14 +6,14 @@ import app.cash.backfila.client.config.BackfilaClientConfig
 // TODO(mikepaw) Remove once the separation between the client and misk is stable.
 
 @Deprecated(
-  "Use BackfillaClientConfig in the client module instead.",
+  "Use BackfilaClientConfig in the client module instead.",
   replaceWith = ReplaceWith(
-    expression = "BackfillaClientConfig",
+    expression = "BackfilaClientConfig",
     imports = ["app.cash.backfila.client.config.BackfilaClientConfig"]
   ),
   level = DeprecationLevel.ERROR
 )
-typealias BackfillaClientConfig = BackfilaClientConfig
+typealias BackfilaClientConfig = BackfilaClientConfig
 
 @Deprecated(
   "Use BackfilaMiskClientModule instead.",
