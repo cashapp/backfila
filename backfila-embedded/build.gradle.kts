@@ -7,6 +7,7 @@ dependencies {
   implementation(Dependencies.kotlinStdLib)
   implementation(Dependencies.retrofit)
   implementation(Dependencies.retrofitMock)
+  implementation(Dependencies.miskInject)
 
   api(project(":client"))
   implementation(project(":client-base"))

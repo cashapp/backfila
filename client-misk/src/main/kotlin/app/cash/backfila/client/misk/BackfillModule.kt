@@ -29,6 +29,7 @@ import kotlin.reflect.KClass
  *       [EmbeddedBackfilaModule] (testing and development)
  *       or [BackfilaClientModule] (staging and production).
  */
+// TODO(keefer+mikepaw): Move this into backfila-client and add a new MiskBackfillModule.
 class BackfillModule @JvmOverloads constructor(
   private val config: BackfilaClientConfig,
   private val loggingSetupProvider: KClass<out BackfilaClientLoggingSetupProvider> =
