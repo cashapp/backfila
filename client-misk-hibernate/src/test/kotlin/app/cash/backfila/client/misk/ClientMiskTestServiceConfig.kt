@@ -2,7 +2,7 @@ package app.cash.backfila.client.misk
 
 import app.cash.backfila.client.BackfillConfig
 import app.cash.backfila.client.NoParameters
-import app.cash.backfila.client.config.BackfilaClientConfig
+import app.cash.backfila.client.BackfilaClientConfig
 import app.cash.backfila.client.misk.client.BackfilaMiskClientModule
 import app.cash.backfila.client.misk.hibernate.HibernateBackfill
 import app.cash.backfila.client.misk.hibernate.HibernateBackfillModule
