@@ -19,7 +19,7 @@ dependencies {
   implementation(Dependencies.loggingApi)
 
   api(project(":client"))
-  implementation(project(":client-base"))
+  api(project(":client-base"))
 
   implementation(Dependencies.misk)
   implementation(Dependencies.miskActions)
