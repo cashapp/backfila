@@ -1,7 +1,7 @@
 package app.cash.backfila.client.misk.backend
 
 import app.cash.backfila.client.misk.BackfillModule
-import app.cash.backfila.client.config.BackfilaClientConfig
+import app.cash.backfila.client.BackfilaClientConfig
 import app.cash.backfila.embedded.EmbeddedBackfilaModule
 import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule

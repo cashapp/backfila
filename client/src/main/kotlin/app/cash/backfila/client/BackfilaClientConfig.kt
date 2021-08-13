@@ -1,4 +1,4 @@
-package app.cash.backfila.client.config
+package app.cash.backfila.client
 
 /**
  * Configures connectivity to the Backfila service.
