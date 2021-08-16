@@ -1,15 +1,14 @@
 package app.cash.backfila.client.misk.static
 
-import app.cash.backfila.client.misk.BackfillConfig
-import app.cash.backfila.client.misk.embedded.Backfila
-import app.cash.backfila.client.misk.embedded.createDryRun
-import app.cash.backfila.client.misk.embedded.createWetRun
+import app.cash.backfila.client.BackfillConfig
+import app.cash.backfila.embedded.Backfila
+import app.cash.backfila.embedded.createDryRun
+import app.cash.backfila.embedded.createWetRun
 import com.squareup.wire.internal.newMutableList
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.SoftAssertions
 import org.junit.jupiter.api.Test
 import javax.inject.Inject

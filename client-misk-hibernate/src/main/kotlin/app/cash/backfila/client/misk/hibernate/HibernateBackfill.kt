@@ -1,7 +1,7 @@
 package app.cash.backfila.client.misk.hibernate
 
-import app.cash.backfila.client.misk.Backfill
-import app.cash.backfila.client.misk.BackfillConfig
+import app.cash.backfila.client.Backfill
+import app.cash.backfila.client.BackfillConfig
 import com.squareup.moshi.Types
 import java.lang.reflect.ParameterizedType
 import kotlin.reflect.KClass

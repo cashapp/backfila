@@ -1,7 +1,7 @@
 package app.cash.backfila.client.misk.dynamodb
 
 import app.cash.backfila.client.misk.BackfillModule
-import app.cash.backfila.client.misk.client.BackfilaClientConfig
+import app.cash.backfila.client.BackfilaClientConfig
 import misk.dynamodb.DynamoDbService
 import misk.inject.KAbstractModule
 import misk.inject.toKey

@@ -1,6 +1,6 @@
 package app.cash.backfila.client.misk.testing
 
-import app.cash.backfila.client.misk.internal.PartitionCursor
+import app.cash.backfila.embedded.internal.PartitionCursor
 import org.assertj.core.api.AbstractAssert
 
 class PartitionCursorAssert(

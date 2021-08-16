@@ -1,11 +1,11 @@
 package app.cash.backfila.client.misk.jooq.internal
 
-import app.cash.backfila.client.misk.Description
+import app.cash.backfila.client.Description
 import app.cash.backfila.client.misk.jooq.ForBackfila
 import app.cash.backfila.client.misk.jooq.JooqBackfill
-import app.cash.backfila.client.misk.spi.BackfilaParametersOperator
-import app.cash.backfila.client.misk.spi.BackfillBackend
-import app.cash.backfila.client.misk.spi.BackfillRegistration
+import app.cash.backfila.client.spi.BackfilaParametersOperator
+import app.cash.backfila.client.spi.BackfillBackend
+import app.cash.backfila.client.spi.BackfillRegistration
 import com.google.inject.Inject
 import com.google.inject.Injector
 import com.google.inject.Singleton

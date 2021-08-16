@@ -86,7 +86,7 @@ class GetBackfillStatusAction @Inject constructor(
         run.service.registry_name,
         run.registered_backfill.name,
         run.state,
-        run.parameters()?.mapValues { (k, v) -> v.utf8() },
+        run.parameters()?.mapValues { (_, v) -> v.utf8() },
         run.batch_size,
         run.scan_size,
         run.dry_run,

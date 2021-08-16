@@ -1,12 +1,16 @@
 package app.cash.backfila.client.misk.internal
 
+import app.cash.backfila.client.internal.BackfillOperatorFactory
 import app.cash.backfila.client.misk.client.BackfilaClientLoggingSetupProvider
+import app.cash.backfila.client.spi.BackfillOperator
+import app.cash.backfila.client.UnknownBackfillException
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
 import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
 import app.cash.backfila.protos.clientservice.RunBatchRequest
 import app.cash.backfila.protos.clientservice.RunBatchResponse
+import misk.exceptions.BadRequestException
 import javax.inject.Inject
 import misk.security.authz.Authenticated
 import misk.web.AvailableWhenDegraded
@@ -34,7 +38,7 @@ internal class PrepareBackfillAction @Inject constructor(
     return loggingSetupProvider.withBackfillRunLogging(request.backfill_name, request.backfill_id) {
       logger.info { "Preparing backfill `${request.backfill_name}::${request.backfill_id}`" }
 
-      val operator = operatorFactory.create(request.backfill_name, request.backfill_id)
+      val operator = operatorFactory.getBackfillOperator(request.backfill_name, request.backfill_id)
       return@withBackfillRunLogging operator.prepareBackfill(request)
     }
   }
@@ -64,7 +68,7 @@ internal class GetNextBatchRangeAction @Inject constructor(
           "::${request.backfill_id}`. Previous end: `${request.previous_end_key}`"
       }
 
-      val operator = operatorFactory.create(request.backfill_name, request.backfill_id)
+      val operator = operatorFactory.getBackfillOperator(request.backfill_name, request.backfill_id)
 
       val nextBatchRange = operator.getNextBatchRange(request)
       logger.info {
@@ -102,7 +106,7 @@ internal class RunBatchAction @Inject constructor(
           "[${request.batch_range.start.utf8()}, ${request.batch_range.end.utf8()}]"
       }
 
-      val operator = operatorFactory.create(request.backfill_name, request.backfill_id)
+      val operator = operatorFactory.getBackfillOperator(request.backfill_name, request.backfill_id)
       try {
         return@withBackfillPartitionLogging operator.runBatch(request)
       } catch (exception: Exception) {
@@ -116,4 +120,16 @@ internal class RunBatchAction @Inject constructor(
   companion object {
     val logger = getLogger<RunBatchAction>()
   }
+}
+
+private fun BackfillOperatorFactory.getBackfillOperator(
+  backfillName: String,
+  backfillId: String
+): BackfillOperator {
+  val operator = try {
+    this.create(backfillName, backfillId)
+  } catch (ex: UnknownBackfillException) {
+    throw BadRequestException(cause = ex)
+  }
+  return operator
 }

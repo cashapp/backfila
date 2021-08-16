@@ -1,6 +1,5 @@
+
 import nu.studer.gradle.jooq.JooqEdition
-import org.jetbrains.kotlin.backend.common.push
-import org.jooq.meta.jaxb.ForcedType
 
 buildscript {
   dependencies {
@@ -29,7 +28,7 @@ dependencies {
   implementation(Dependencies.wireMoshiAdapter)
 
   api(project(":client-misk"))
-  testApi(project(":client-misk-testing"))
+  implementation(project(":client-base"))
 
   implementation(Dependencies.misk)
   implementation(Dependencies.miskJdbc)
@@ -45,6 +44,9 @@ dependencies {
   testImplementation(Dependencies.junitParams)
   testImplementation(Dependencies.okHttp)
   testImplementation(Dependencies.mysql)
+
+  testImplementation(project(":backfila-embedded"))
+  testImplementation(project(":client-misk-testing"))
 
   jooqGenerator(Dependencies.mysql)
 }

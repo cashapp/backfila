@@ -1,9 +1,9 @@
 package app.cash.backfila.client.misk
 
-import app.cash.backfila.client.misk.client.BackfilaClientConfig
+import app.cash.backfila.client.BackfilaClientConfig
 import app.cash.backfila.client.misk.client.BackfilaClientLoggingSetupProvider
 import app.cash.backfila.client.misk.client.BackfilaClientNoLoggingSetupProvider
-import app.cash.backfila.client.misk.embedded.EmbeddedBackfilaModule
+import app.cash.backfila.embedded.EmbeddedBackfilaModule
 import app.cash.backfila.client.misk.hibernate.ChickenToBeefBackfill
 import app.cash.backfila.client.misk.hibernate.HibernateBackfillModule.Companion.create
 import app.cash.backfila.client.misk.hibernate.RecordNoParametersConfigValuesBackfill

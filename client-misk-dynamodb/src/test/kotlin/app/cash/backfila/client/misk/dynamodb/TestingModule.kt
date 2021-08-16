@@ -2,7 +2,7 @@ package app.cash.backfila.client.misk
 
 import app.cash.backfila.client.misk.dynamodb.BackfillsModule
 import app.cash.backfila.client.misk.dynamodb.TrackItem
-import app.cash.backfila.client.misk.embedded.EmbeddedBackfilaModule
+import app.cash.backfila.embedded.EmbeddedBackfilaModule
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
 import com.google.inject.Provides

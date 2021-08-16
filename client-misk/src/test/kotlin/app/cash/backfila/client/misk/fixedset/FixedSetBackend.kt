@@ -1,11 +1,11 @@
 package app.cash.backfila.client.misk.fixedset
 
-import app.cash.backfila.client.misk.Description
+import app.cash.backfila.client.Description
 import app.cash.backfila.client.misk.ForBackfila
-import app.cash.backfila.client.misk.spi.BackfilaParametersOperator
-import app.cash.backfila.client.misk.spi.BackfillBackend
-import app.cash.backfila.client.misk.spi.BackfillOperator
-import app.cash.backfila.client.misk.spi.BackfillRegistration
+import app.cash.backfila.client.spi.BackfilaParametersOperator
+import app.cash.backfila.client.spi.BackfillBackend
+import app.cash.backfila.client.spi.BackfillOperator
+import app.cash.backfila.client.spi.BackfillRegistration
 import com.google.inject.Injector
 import com.google.inject.TypeLiteral
 import com.squareup.moshi.Types
@@ -13,6 +13,7 @@ import java.lang.reflect.ParameterizedType
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
+import kotlin.reflect.full.findAnnotation
 
 @Singleton
 class FixedSetBackend @Inject constructor(
@@ -54,7 +55,7 @@ class FixedSetBackend @Inject constructor(
     return backfills.map {
       BackfillRegistration(
         name = it.key,
-        description = (it.value.annotations.find { it is Description } as? Description)?.text,
+        description = it.value.findAnnotation<Description>()?.text,
         parametersClass = parametersClass(it.value as KClass<FixedSetBackfill<Any>>)
       )
     }.toSet()

@@ -1,4 +1,6 @@
+include("backfila-embedded")
 include("client")
+include("client-base")
 include("client-misk")
 include("client-misk-dynamodb")
 include("client-misk-hibernate")

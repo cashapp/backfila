@@ -1,6 +1,6 @@
 package app.cash.backfila.client.misk.config
 
-import app.cash.backfila.client.misk.Backfill
+import app.cash.backfila.client.Backfill
 
 interface IdRecorder<K, Param> : Backfill {
   val idsRanDry: List<K>

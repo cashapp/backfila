@@ -113,7 +113,7 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
   ) : this() {
     this.service_id = service_id
     this.registered_backfill_id = registered_backfill_id
-    this.parameter_map = parameter_map.mapValues { (k, v) -> v.base64() }
+    this.parameter_map = parameter_map.mapValues { (_, v) -> v.base64() }
     this.state = state
     this.created_by_user = created_by_user
     this.scan_size = scan_size
