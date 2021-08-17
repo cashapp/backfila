@@ -22,7 +22,7 @@ typealias Backfill = Backfill
 @Deprecated(
   "Use BackfillConfig in the client module instead.",
   replaceWith = ReplaceWith(
-    expression = "BackfillConfig",
+    expression = "BackfillConfig<Param>",
     imports = ["app.cash.backfila.client.BackfillConfig"]
   ),
   level = DeprecationLevel.ERROR

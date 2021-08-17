@@ -27,7 +27,7 @@ class Backfila
 @Deprecated(
   "Use BackfilaRun in the backfila-embedded module instead.",
   replaceWith = ReplaceWith(
-    expression = "BackfillRun",
+    expression = "BackfillRun<B>",
     imports = ["app.cash.backfila.embedded.BackfillRun"]
   ),
   level = DeprecationLevel.WARNING
