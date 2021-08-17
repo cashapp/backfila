@@ -22,7 +22,7 @@ dependencies {
   api(project(":client"))
   implementation(project(":client-base"))
   // TODO: should not depend on misk
-  implementation(project(":client-misk"))
+  api(project(":client-misk"))
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.awsDynamodb)
