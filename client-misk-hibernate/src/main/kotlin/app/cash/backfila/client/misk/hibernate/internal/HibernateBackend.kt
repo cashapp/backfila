@@ -1,6 +1,8 @@
 package app.cash.backfila.client.misk.hibernate.internal
 
 import app.cash.backfila.client.Description
+import app.cash.backfila.client.DeleteBy
+import app.cash.backfila.client.parseDeleteByDate
 import app.cash.backfila.client.misk.hibernate.ForBackfila
 import app.cash.backfila.client.misk.hibernate.HibernateBackfill
 import app.cash.backfila.client.misk.hibernate.PkeySqlAdapter
@@ -62,7 +64,8 @@ class HibernateBackend @Inject constructor(
       BackfillRegistration(
         name = it.key,
         description = it.value.findAnnotation<Description>()?.text,
-        parametersClass = parametersClass(it.value as KClass<HibernateBackfill<*, *, Any>>)
+        parametersClass = parametersClass(it.value as KClass<HibernateBackfill<*, *, Any>>),
+        deleteBy = it.value.findAnnotation<DeleteBy>()?.parseDeleteByDate(),
       )
     }.toSet()
   }

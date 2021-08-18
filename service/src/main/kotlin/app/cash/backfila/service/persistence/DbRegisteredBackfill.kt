@@ -66,13 +66,22 @@ class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimestampedE
   @Column
   var requires_approval: Boolean = false
 
+  /**
+   * Notes when this backfill should no longer be useful and the code should be deleted. This is
+   * used to power removal reminders. It guarantees that reminders will not occur until after this
+   * date. This defaults to as soon as possible if it is missing.
+   */
+  @Column
+  var delete_by: Instant? = null
+
   constructor(
     service_id: Id<DbService>,
     name: String,
     parameter_names: List<String>,
     type_provided: String?,
     type_consumed: String?,
-    requires_approval: Boolean
+    requires_approval: Boolean,
+    delete_by: Instant?
   ) : this() {
     this.service_id = service_id
     this.name = name
@@ -83,6 +92,7 @@ class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimestampedE
     this.type_consumed = type_consumed
     this.active = true
     this.requires_approval = requires_approval
+    this.delete_by = delete_by
   }
 
   /** True if the variables configured by the client service are equal to what is stored. */
@@ -91,6 +101,7 @@ class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimestampedE
     if (type_provided != other.type_provided) return false
     if (type_consumed != other.type_consumed) return false
     if (requires_approval != other.requires_approval) return false
+    if (delete_by != other.delete_by) return false
 
     return true
   }

@@ -54,6 +54,7 @@ internal class BackfilaStartupConfigurator @Inject internal constructor(
             .name(registration.name)
             .description(registration.description)
             .parameters(parameters)
+            .delete_by(registration.deleteBy?.toEpochMilli())
             .build()
         }
       )

@@ -53,7 +53,7 @@ class CreateAndStartBackfillActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "ChickenSandwich", "Description", listOf(), null,
-                null, false
+                null, false, null
               )
             )
           )

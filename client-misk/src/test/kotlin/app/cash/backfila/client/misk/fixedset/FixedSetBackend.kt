@@ -1,6 +1,8 @@
 package app.cash.backfila.client.misk.fixedset
 
 import app.cash.backfila.client.Description
+import app.cash.backfila.client.DeleteBy
+import app.cash.backfila.client.parseDeleteByDate
 import app.cash.backfila.client.misk.ForBackfila
 import app.cash.backfila.client.spi.BackfilaParametersOperator
 import app.cash.backfila.client.spi.BackfillBackend
@@ -56,7 +58,8 @@ class FixedSetBackend @Inject constructor(
       BackfillRegistration(
         name = it.key,
         description = it.value.findAnnotation<Description>()?.text,
-        parametersClass = parametersClass(it.value as KClass<FixedSetBackfill<Any>>)
+        parametersClass = parametersClass(it.value as KClass<FixedSetBackfill<Any>>),
+        deleteBy = it.value.findAnnotation<DeleteBy>()?.parseDeleteByDate(),
       )
     }.toSet()
   }
