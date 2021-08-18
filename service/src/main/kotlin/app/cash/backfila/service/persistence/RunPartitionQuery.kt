@@ -14,8 +14,8 @@ interface RunPartitionQuery : Query<DbRunPartition> {
   @Constraint("backfill_run_id", Operator.IN)
   fun backfillRunIdIn(backfillRunIds: Collection<Id<DbBackfillRun>>): RunPartitionQuery
 
-  @Constraint("run_state")
-  fun runState(runState: BackfillState): RunPartitionQuery
+  @Constraint("partition_state")
+  fun partitionState(runState: BackfillPartitionState): RunPartitionQuery
 
   @Constraint("lease_expires_at", Operator.LT)
   fun leaseExpiresAtBefore(time: Instant): RunPartitionQuery

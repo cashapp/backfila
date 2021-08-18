@@ -9,6 +9,7 @@ import app.cash.backfila.protos.clientservice.RunBatchResponse
 import app.cash.backfila.service.BackfilaMetrics
 import app.cash.backfila.service.SlackHelper
 import app.cash.backfila.service.persistence.BackfilaDb
+import app.cash.backfila.service.persistence.BackfillPartitionState
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.DbBackfillRun
 import app.cash.backfila.service.persistence.DbEventLog
@@ -169,7 +170,7 @@ class BackfillRunner private constructor(
       batchAwaiter.updateProgress(dbRunPartition)
 
       // Now that state is stored, check if we should exit.
-      if (dbRunPartition.run_state != BackfillState.RUNNING) {
+      if (dbRunPartition.partition_state != BackfillPartitionState.RUNNING) {
         logger.info { "Backfill is no longer in RUNNING state, stopping runner ${logLabel()}" }
         running = false
         return@transaction

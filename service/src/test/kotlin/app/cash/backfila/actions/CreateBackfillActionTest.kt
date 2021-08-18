@@ -11,6 +11,7 @@ import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
 import app.cash.backfila.protos.service.ConfigureServiceRequest
 import app.cash.backfila.protos.service.CreateBackfillRequest
 import app.cash.backfila.service.persistence.BackfilaDb
+import app.cash.backfila.service.persistence.BackfillPartitionState
 import app.cash.backfila.service.persistence.BackfillRunQuery
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.RunPartitionQuery
@@ -132,10 +133,10 @@ class CreateBackfillActionTest {
         assertThat(partitions).hasSize(2)
         assertThat(partitions[0].partition_name).isEqualTo("-80")
         assertThat(partitions[0].lease_token).isNull()
-        assertThat(partitions[0].run_state).isEqualTo(BackfillState.PAUSED)
+        assertThat(partitions[0].partition_state).isEqualTo(BackfillPartitionState.PAUSED)
         assertThat(partitions[1].partition_name).isEqualTo("80-")
         assertThat(partitions[1].lease_token).isNull()
-        assertThat(partitions[1].run_state).isEqualTo(BackfillState.PAUSED)
+        assertThat(partitions[1].partition_state).isEqualTo(BackfillPartitionState.PAUSED)
       }
     }
   }

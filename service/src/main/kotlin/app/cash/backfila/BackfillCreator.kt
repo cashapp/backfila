@@ -6,6 +6,7 @@ import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
 import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
 import app.cash.backfila.protos.service.CreateBackfillRequest
 import app.cash.backfila.service.persistence.BackfilaDb
+import app.cash.backfila.service.persistence.BackfillPartitionState
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.DbBackfillRun
 import app.cash.backfila.service.persistence.DbRegisteredBackfill
@@ -84,12 +85,13 @@ class BackfillCreator @Inject constructor(
       )
       session.save(backfillRun)
 
+      check(backfillRun.state == BackfillState.PAUSED)
       for (partition in partitions) {
         val dbRunPartition = DbRunPartition(
           backfillRun.id,
           partition.partition_name,
           partition.backfill_range ?: KeyRange.Builder().build(),
-          backfillRun.state,
+          BackfillPartitionState.PAUSED,
           partition.estimated_record_count
         )
         session.save(dbRunPartition)
@@ -125,21 +127,7 @@ class BackfillCreator @Inject constructor(
       logger.info(e) { "PrepareBackfill on `$service` failed" }
       throw BadRequestException("PrepareBackfill on `$service` failed: ${e.message}", e)
     }
-
-    val partitions = prepareBackfillResponse.partitions
-    if (partitions.isEmpty()) {
-      throw BadRequestException("PrepareBackfill returned no partitions")
-    }
-    if (partitions.any { it.partition_name == null }) {
-      throw BadRequestException("PrepareBackfill returned unnamed partitions")
-    }
-    if (partitions.distinctBy { it.partition_name }.size != partitions.size) {
-      throw BadRequestException(
-        "PrepareBackfill did not return distinct partition names:" +
-          " ${partitions.map { it.partition_name }}"
-      )
-    }
-
+    prepareBackfillResponse.validate()
     return prepareBackfillResponse
   }
 
@@ -181,5 +169,21 @@ class BackfillCreator @Inject constructor(
 
   companion object {
     private val logger = getLogger<BackfillCreator>()
+
+    fun PrepareBackfillResponse.validate() {
+      val partitions = this.partitions
+      if (partitions.isEmpty()) {
+        throw BadRequestException("PrepareBackfill returned no partitions")
+      }
+      if (partitions.any { it.partition_name == null }) {
+        throw BadRequestException("PrepareBackfill returned unnamed partitions")
+      }
+      if (partitions.distinctBy { it.partition_name }.size != partitions.size) {
+        throw BadRequestException(
+          "PrepareBackfill did not return distinct partition names:" +
+            " ${partitions.map { it.partition_name }}"
+        )
+      }
+    }
   }
 }

@@ -1,11 +1,13 @@
 package app.cash.backfila.dashboard
 
+import app.cash.backfila.BackfillCreator.Companion.validate
 import app.cash.backfila.client.ConnectorProvider
 import app.cash.backfila.protos.clientservice.KeyRange
 import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
 import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillState
+import app.cash.backfila.service.persistence.BackfillState.Companion.getPartitionState
 import app.cash.backfila.service.persistence.DbBackfillRun
 import app.cash.backfila.service.persistence.DbRegisteredBackfill
 import app.cash.backfila.service.persistence.DbRunPartition
@@ -138,13 +140,14 @@ class CloneBackfillAction @Inject constructor(
       )
       session.save(backfillRun)
 
+      check(backfillRun.state == BackfillState.PAUSED)
       if (request.range_clone_type == RangeCloneType.NEW) {
         for (partition in partitions) {
           val dbRunPartition = DbRunPartition(
             backfillRun.id,
             partition.partition_name,
             partition.backfill_range ?: KeyRange.Builder().build(),
-            backfillRun.state,
+            backfillRun.state.getPartitionState(),
             partition.estimated_record_count
           )
           session.save(dbRunPartition)
@@ -161,12 +164,13 @@ class CloneBackfillAction @Inject constructor(
           )
         }
 
+        check(backfillRun.state == BackfillState.PAUSED)
         for (sourcePartition in sourcePartitions) {
           val dbRunPartition = DbRunPartition(
             backfillRun.id,
             sourcePartition.partition_name,
             sourcePartition.backfillRange(),
-            backfillRun.state,
+            backfillRun.state.getPartitionState(),
             sourcePartition.estimated_record_count
           )
           // Copy the cursor if continuing, otherwise just leave blank to start from beginning.
@@ -203,19 +207,7 @@ class CloneBackfillAction @Inject constructor(
       logger.info(e) { "PrepareBackfill on `${dbData.serviceName}` failed" }
       throw BadRequestException("PrepareBackfill on `${dbData.serviceName}` failed: ${e.message}", e)
     }
-    val partitions = prepareBackfillResponse.partitions
-    if (partitions.isEmpty()) {
-      throw BadRequestException("PrepareBackfill returned no partitions")
-    }
-    if (partitions.any { it.partition_name == null }) {
-      throw BadRequestException("PrepareBackfill returned unnamed partitions")
-    }
-    if (partitions.distinctBy { it.partition_name }.size != partitions.size) {
-      throw BadRequestException(
-        "PrepareBackfill did not return distinct partition names:" +
-          " ${partitions.map { it.partition_name }}"
-      )
-    }
+    prepareBackfillResponse.validate()
     return prepareBackfillResponse
   }
 

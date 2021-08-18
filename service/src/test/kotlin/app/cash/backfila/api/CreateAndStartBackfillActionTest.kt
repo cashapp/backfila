@@ -8,6 +8,7 @@ import app.cash.backfila.protos.service.ConfigureServiceRequest
 import app.cash.backfila.protos.service.CreateAndStartBackfillRequest
 import app.cash.backfila.protos.service.CreateBackfillRequest
 import app.cash.backfila.service.persistence.BackfilaDb
+import app.cash.backfila.service.persistence.BackfillPartitionState
 import app.cash.backfila.service.persistence.BackfillState
 import com.google.inject.Module
 import javax.inject.Inject
@@ -76,9 +77,9 @@ class CreateAndStartBackfillActionTest {
       assertThat(status.state).isEqualTo(BackfillState.RUNNING)
       assertThat(status.created_by_user).isEqualTo("deep-fryer")
       assertThat(status.partitions[0].name).isEqualTo("-80")
-      assertThat(status.partitions[0].state).isEqualTo(BackfillState.RUNNING)
+      assertThat(status.partitions[0].state).isEqualTo(BackfillPartitionState.RUNNING)
       assertThat(status.partitions[1].name).isEqualTo("80-")
-      assertThat(status.partitions[1].state).isEqualTo(BackfillState.RUNNING)
+      assertThat(status.partitions[1].state).isEqualTo(BackfillPartitionState.RUNNING)
     }
   }
 }
