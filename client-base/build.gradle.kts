@@ -1,6 +1,7 @@
 apply(plugin = "kotlin")
 
 dependencies {
+  implementation(Dependencies.apacheCommonsLang3)
   implementation(Dependencies.guava)
   implementation(Dependencies.moshiCore)
   implementation(Dependencies.moshiKotlin)

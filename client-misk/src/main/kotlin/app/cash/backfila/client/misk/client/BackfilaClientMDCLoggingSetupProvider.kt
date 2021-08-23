@@ -1,24 +1,9 @@
 package app.cash.backfila.client.misk.client
 
+import app.cash.backfila.client.BackfilaClientLoggingSetupProvider
 import javax.inject.Inject
 import org.slf4j.MDC
 import wisp.logging.getLogger
-
-interface BackfilaClientLoggingSetupProvider {
-  fun <T> withBackfillRunLogging(backfillName: String, backfillId: String, wrapped: () -> T): T
-  fun <T> withBackfillPartitionLogging(backfillName: String, backfillId: String, partitionName: String, wrapped: () -> T): T
-}
-
-class BackfilaClientNoLoggingSetupProvider
-@Inject constructor() : BackfilaClientLoggingSetupProvider {
-  override fun <T> withBackfillRunLogging(backfillName: String, backfillId: String, wrapped: () -> T): T {
-    return wrapped.invoke()
-  }
-
-  override fun <T> withBackfillPartitionLogging(backfillName: String, backfillId: String, partitionName: String, wrapped: () -> T): T {
-    return wrapped.invoke()
-  }
-}
 
 class BackfilaClientMDCLoggingSetupProvider
 @Inject constructor() : BackfilaClientLoggingSetupProvider {

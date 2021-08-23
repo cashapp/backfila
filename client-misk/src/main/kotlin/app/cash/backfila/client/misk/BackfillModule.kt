@@ -6,8 +6,8 @@ import app.cash.backfila.client.BackfilaClientConfig
 import app.cash.backfila.client.internal.BackfilaClient
 import app.cash.backfila.client.internal.EmptyBackend
 import app.cash.backfila.client.internal.RealBackfilaClient
-import app.cash.backfila.client.misk.client.BackfilaClientLoggingSetupProvider
-import app.cash.backfila.client.misk.client.BackfilaClientNoLoggingSetupProvider
+import app.cash.backfila.client.BackfilaClientLoggingSetupProvider
+import app.cash.backfila.client.BackfilaClientNoLoggingSetupProvider
 import app.cash.backfila.client.misk.internal.BackfilaStartupConfigurator
 import app.cash.backfila.client.spi.BackfillBackend
 import com.google.common.util.concurrent.Service
