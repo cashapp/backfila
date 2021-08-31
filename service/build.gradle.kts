@@ -37,6 +37,7 @@ dependencies {
   implementation(Dependencies.metricsParent)
   implementation(Dependencies.misk)
   implementation(Dependencies.miskActions)
+  implementation(Dependencies.miskAdmin)
   implementation(Dependencies.miskCore)
   implementation(Dependencies.miskHibernate)
   implementation(Dependencies.miskInject)

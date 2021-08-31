@@ -34,6 +34,7 @@ object Dependencies {
   val metricsParent = "io.dropwizard.metrics:metrics-parent:4.0.2"
   val misk = "com.squareup.misk:misk:${Versions.misk}"
   val miskActions = "com.squareup.misk:misk-actions:${Versions.misk}"
+  val miskAdmin = "com.squareup.misk:misk-admin:${Versions.misk}"
   val miskAwsDynamodb = "com.squareup.misk:misk-aws-dynamodb:${Versions.misk}"
   val miskAwsDynamodbTesting = "com.squareup.misk:misk-aws-dynamodb-testing:${Versions.misk}"
   val miskCore = "com.squareup.misk:misk-core:${Versions.misk}"
@@ -79,6 +80,6 @@ object Versions {
   val jooqGenPlugin = "5.2"
   val jooq = "3.14.8"
   val kotlin = "1.4.30"
-  val misk = "0.19.0"
+  val misk = "0.20.0"
   val wire = "3.6.0"
 }
