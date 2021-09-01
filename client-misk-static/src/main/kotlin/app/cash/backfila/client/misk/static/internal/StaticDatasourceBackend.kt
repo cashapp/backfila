@@ -3,7 +3,7 @@ package app.cash.backfila.client.misk.static.internal
 import app.cash.backfila.client.Description
 import app.cash.backfila.client.DeleteBy
 import app.cash.backfila.client.parseDeleteByDate
-import app.cash.backfila.client.misk.static.ForBackfila
+import app.cash.backfila.client.misk.static.ForStaticBackend
 import app.cash.backfila.client.spi.BackfilaParametersOperator
 import app.cash.backfila.client.spi.BackfillBackend
 import app.cash.backfila.client.spi.BackfillOperator
@@ -21,7 +21,7 @@ import kotlin.reflect.full.findAnnotation
 @Singleton
 class StaticDatasourceBackend @Inject constructor(
   private val injector: Injector,
-  @ForBackfila private val backfills: MutableMap<String, KClass<out StaticDatasourceBackfill<*, *>>>
+  @ForStaticBackend private val backfills: MutableMap<String, KClass<out StaticDatasourceBackfill<*, *>>>
 ) : BackfillBackend {
 
   /** Creates Backfill instances. Each backfill ID gets a new Backfill instance. */

@@ -4,7 +4,7 @@ import app.cash.backfila.client.Description
 import app.cash.backfila.client.DeleteBy
 import app.cash.backfila.client.parseDeleteByDate
 import app.cash.backfila.client.misk.dynamodb.DynamoDbBackfill
-import app.cash.backfila.client.misk.dynamodb.ForBackfila
+import app.cash.backfila.client.misk.dynamodb.ForDynamoDbBackend
 import app.cash.backfila.client.spi.BackfilaParametersOperator
 import app.cash.backfila.client.spi.BackfillBackend
 import app.cash.backfila.client.spi.BackfillOperator
@@ -22,7 +22,7 @@ import kotlin.reflect.full.findAnnotation
 @Singleton
 class DynamoDbBackend @Inject constructor(
   private val injector: Injector,
-  @ForBackfila private val backfills: MutableMap<String, KClass<out DynamoDbBackfill<*, *>>>,
+  @ForDynamoDbBackend private val backfills: MutableMap<String, KClass<out DynamoDbBackfill<*, *>>>,
   val dynamoDb: DynamoDBMapper,
   val keyRangeCodec: DynamoDbKeyRangeCodec
 ) : BackfillBackend {

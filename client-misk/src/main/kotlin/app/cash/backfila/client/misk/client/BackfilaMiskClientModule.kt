@@ -1,8 +1,8 @@
 package app.cash.backfila.client.misk.client
 
 import app.cash.backfila.client.BackfilaApi
-import app.cash.backfila.client.misk.BackfillModule
-import app.cash.backfila.client.misk.ForBackfila
+import app.cash.backfila.client.misk.MiskBackfillModule
+import app.cash.backfila.client.ForBackfila
 import app.cash.backfila.client.misk.internal.GetNextBatchRangeAction
 import app.cash.backfila.client.misk.internal.PrepareBackfillAction
 import app.cash.backfila.client.misk.internal.RunBatchAction
@@ -16,7 +16,7 @@ import retrofit2.converter.wire.WireConverterFactory
 
 /**
  * Use this to connect to a real Backfila service in staging or production. You will also need to
- * install a [BackfillModule].
+ * install a [MiskBackfillModule].
  */
 class BackfilaMiskClientModule : KAbstractModule() {
   override fun configure() {

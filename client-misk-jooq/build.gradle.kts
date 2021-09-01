@@ -27,8 +27,11 @@ dependencies {
   implementation(Dependencies.loggingApi)
   implementation(Dependencies.wireMoshiAdapter)
 
-  api(project(":client-misk"))
+  api(project(":client"))
+  // We do not want to leak client-base implementation details to customers.
   implementation(project(":client-base"))
+  // TODO: should not depend on misk. We should try to separate out the misk DB stuff.
+  api(project(":client-misk"))
 
   implementation(Dependencies.misk)
   implementation(Dependencies.miskJdbc)
@@ -46,7 +49,7 @@ dependencies {
   testImplementation(Dependencies.mysql)
 
   testImplementation(project(":backfila-embedded"))
-  testImplementation(project(":client-misk-testing"))
+  testImplementation(project(":client-testing"))
 
   jooqGenerator(Dependencies.mysql)
 }

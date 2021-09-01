@@ -5,8 +5,8 @@ import javax.inject.Inject
 import org.slf4j.MDC
 import wisp.logging.getLogger
 
-class BackfilaClientMDCLoggingSetupProvider
-@Inject constructor() : BackfilaClientLoggingSetupProvider {
+class BackfilaClientMDCLoggingSetupProvider @Inject constructor() :
+  BackfilaClientLoggingSetupProvider {
 
   override fun <T> withBackfillRunLogging(backfillName: String, backfillId: String, wrapped: () -> T): T {
     try {
