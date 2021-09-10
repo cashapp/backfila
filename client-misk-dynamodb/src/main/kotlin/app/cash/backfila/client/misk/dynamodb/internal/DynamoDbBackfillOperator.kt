@@ -53,8 +53,8 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
         Integer.bitCount(partitionCount) == 1 &&
         Integer.bitCount(segmentCount) == 1
     ) {
-      "partitionCount and segmentCount must be positive powers of 2, and partitionCount must be" +
-        " greater than segmentCount (partitionCount=$partitionCount, segmentCount=$segmentCount)"
+      "partitionCount and segmentCount must be positive powers of 2, and segmentCount must be " +
+        "greater than partitionCount (partitionCount=$partitionCount, segmentCount=$segmentCount)"
     }
     val segmentsPerPartition = segmentCount / partitionCount
 
