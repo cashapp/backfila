@@ -15,6 +15,9 @@ class StaticDatasourceBackfillModule<T : StaticDatasourceBackfill<*, *>> private
 ) : KAbstractModule() {
   override fun configure() {
     install(StaticDatasourceBackfillBackendModule)
+    // Ensures that the backfill class has an @Inject annotation and
+    // that its dependencies are satisfied
+    binder().getProvider(backfillClass.java)
     mapBinder(binder()).addBinding(backfillClass.jvmName).toInstance(backfillClass)
   }
 

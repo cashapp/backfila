@@ -20,6 +20,9 @@ class DynamoDbBackfillModule<T : DynamoDbBackfill<*, *>> private constructor(
 ) : KAbstractModule() {
   override fun configure() {
     install(DynamoDbBackfillBackendModule)
+    // Ensures that the backfill class has an @Inject annotation and
+    // that its dependencies are satisfied
+    binder().getProvider(backfillClass.java)
     mapBinder(binder()).addBinding(backfillClass.jvmName).toInstance(backfillClass)
   }
 
