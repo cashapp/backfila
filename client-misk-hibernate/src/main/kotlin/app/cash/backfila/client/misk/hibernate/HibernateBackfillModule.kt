@@ -19,8 +19,8 @@ class HibernateBackfillModule<T : HibernateBackfill<*, *, *>> private constructo
 ) : KAbstractModule() {
   override fun configure() {
     install(HibernateBackfillBackendModule)
-    // Ensures that the backfill class has an @Inject annotation and
-    // that its dependencies are satisfied
+    // Ensures that the backfill class is injectable. If you are failing this check you probably
+    // want to add an @Inject annotation to your class or check that all of your dependencies are provided.
     binder().getProvider(backfillClass.java)
     mapBinder(binder()).addBinding(backfillClass.jvmName).toInstance(backfillClass)
   }
