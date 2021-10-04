@@ -74,7 +74,7 @@ class DynamoDbKeyRangeCodec @Inject constructor(
     val tag = buffer.readUtf8(2)
     require(tag == VERSION) {
       "Encountered an incorrect version $tag instead of $VERSION . Make sure any deploys have " +
-          "completed and re-create the backfill."
+        "completed and re-create the backfill."
     }
     require(buffer.readUtf8(1) == ":")
     val offset = buffer.readUtf8(10).toInt()

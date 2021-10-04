@@ -13,6 +13,7 @@ import app.cash.backfila.protos.clientservice.RunBatchResponse
 import com.google.common.base.Stopwatch
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
+import software.amazon.awssdk.services.dynamodb.model.BillingMode
 import software.amazon.awssdk.services.dynamodb.model.ScanRequest
 import java.time.Duration
 
@@ -29,33 +30,33 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
       parametersOperator.constructBackfillConfig(request.parameters, request.dry_run)
     backfill.validate(config)
 
-//    if (backfill.mustHaveProvisionedBillingMode()) {
-//      val tableMapper = dynamoDbEnhancedClient.newTableMapper<I, Any, Any>(backfill.itemType.java)
-//      val tableDescription = dynamoDbTable.tableSchema().tableMetadata().
-//      describeTable()
-//      // It's odd but a null billingModeSummary implies "PROVISIONED"
-//      require(
-//        tableDescription.billingModeSummary == null ||
-//            tableDescription.billingModeSummary.billingMode == "PROVISIONED",
-//        {
-//          "Trying to prepare a backfill on a Dynamo table named ${tableDescription.tableName} " +
-//              "with a billing mode that is not PROVISIONED, it is " +
-//              "${tableDescription.billingModeSummary.billingMode}. This can get very expensive. " +
-//              "Please provision your dynamo capacity for this table and try again."
-//        }
-//      )
-//    }
+    if (backfill.mustHaveProvisionedBillingMode()) {
+      var tableResponse = dynamoDbClient.describeTable {
+        it.tableName(backfill.dynamoDbTable.tableName())
+      }
+      var billingModeSummary = tableResponse.table().billingModeSummary()
+      // It's odd but a null billingModeSummary implies "PROVISIONED"
+      require(
+        billingModeSummary == null ||
+          billingModeSummary.billingMode() == BillingMode.PROVISIONED
+      ) {
+        "Trying to prepare a backfill on a Dynamo table named ${backfill.dynamoDbTable.tableName()} " +
+          "with a billing mode that is not PROVISIONED, it is " +
+          "${backfill.dynamoDbTable.tableName()}. This can get very expensive. " +
+          "Please provision your dynamo capacity for this table and try again."
+      }
+    }
 
     // TODO(mikepaw): dynamically select the segment count by probing DynamoDB.
     val segmentCount = backfill.fixedSegmentCount(config) ?: 2048
     val partitionCount = backfill.partitionCount(config)
     require(
       partitionCount in 1..segmentCount &&
-          Integer.bitCount(partitionCount) == 1 &&
-          Integer.bitCount(segmentCount) == 1
+        Integer.bitCount(partitionCount) == 1 &&
+        Integer.bitCount(segmentCount) == 1
     ) {
       "partitionCount and segmentCount must be positive powers of 2, and segmentCount must be " +
-          "greater than partitionCount (partitionCount=$partitionCount, segmentCount=$segmentCount)"
+        "greater than partitionCount (partitionCount=$partitionCount, segmentCount=$segmentCount)"
     }
     val segmentsPerPartition = segmentCount / partitionCount
 

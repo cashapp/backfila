@@ -15,7 +15,7 @@ import software.amazon.awssdk.services.dynamodb.model.WriteRequest
 abstract class UpdateInPlaceDynamoDbBackfill<I : Any, P : Any>(
   val dynamoDbClient: DynamoDbClient,
 
-  ) : DynamoDbBackfill<I, P>() {
+) : DynamoDbBackfill<I, P>() {
   override fun runBatch(items: List<I>, config: BackfillConfig<P>) {
     val itemsToSave = mutableListOf<I>()
     for (item in items) {

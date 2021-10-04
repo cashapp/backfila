@@ -3,7 +3,6 @@ package app.cash.backfila.client.misk.dynamodbv2
 import app.cash.backfila.client.BackfillConfig
 import app.cash.backfila.client.NoParameters
 import app.cash.backfila.client.misk.TestingModule
-import app.cash.backfila.client.misk.dynamodbv2.UpdateInPlaceDynamoDbBackfill
 import app.cash.backfila.embedded.Backfila
 import app.cash.backfila.embedded.createWetRun
 import misk.testing.MiskTest
