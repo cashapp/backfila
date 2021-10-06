@@ -25,8 +25,12 @@ class StaticDatasourceBackfillOperator<I : Any, P : Any>(
       parametersOperator.constructBackfillConfig(request.parameters, request.dry_run)
     backfill.validate(config)
 
-    val start = request.range?.start?.utf8()?.toInt() ?: 0
-    val end = request.range?.end?.utf8()?.toInt() ?: backfill.staticDatasource.size
+    val start = request.range?.start?.utf8()?.let {
+      it.toIntOrNull() ?: error("Start of range must be a number")
+    } ?: 0
+    val end = request.range?.end?.utf8()?.let {
+      it.toIntOrNull() ?: error("End of range must be a number")
+    } ?: backfill.staticDatasource.size
 
     // Sanity check that this backfill will actually process something
     require(start >= 0 && end >= 0) {

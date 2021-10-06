@@ -113,7 +113,7 @@ class StaticKotlinValBackfillTest {
 
       this.assertThatCode {
         backfila.createWetRun<SaucesBackfill>(rangeStart = "5", rangeEnd = "2")
-      }.hasMessageContaining("Start must be less than end")
+      }.hasMessageContaining("Start must be less than or equal to end")
 
       this.assertThatCode {
         backfila.createWetRun<SaucesBackfill>(rangeStart = "20", rangeEnd = "30")

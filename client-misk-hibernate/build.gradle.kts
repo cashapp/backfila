@@ -24,6 +24,7 @@ dependencies {
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.miskTesting)
   testImplementation(Dependencies.miskHibernateTesting)
+  testImplementation(project(":client-misk"))
   testImplementation(Dependencies.kotlinTest)
   testImplementation(Dependencies.junitEngine)
   testImplementation(Dependencies.okHttp)

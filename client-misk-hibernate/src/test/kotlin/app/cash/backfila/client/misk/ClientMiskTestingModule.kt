@@ -54,7 +54,7 @@ internal class ClientMiskTestingModule(
     install(MiskTestingServiceModule())
     install(EmbeddedBackfilaModule())
     install(
-      RealBackfillModule(
+      MiskBackfillModule(
         BackfilaClientConfig(
           url = "test.url", slack_channel = "#test"
         )

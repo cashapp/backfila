@@ -62,7 +62,7 @@ typealias BackfilaManagementClient = BackfilaManagementClient
 @Deprecated(
   "Use MiskBackfillModule instead.",
   replaceWith = ReplaceWith(
-    expression = "BackfillModule",
+    expression = "MiskBackfillModule",
     imports = ["app.cash.backfila.client.misk.MiskBackfillModule"]
   ),
   level = DeprecationLevel.ERROR
