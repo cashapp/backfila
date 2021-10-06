@@ -1,8 +1,8 @@
-package app.cash.backfila.client.misk.static.internal
+package app.cash.backfila.client.static.internal
 
 import app.cash.backfila.client.spi.BackfilaParametersOperator
 import app.cash.backfila.client.spi.BackfillOperator
-import app.cash.backfila.client.misk.static.StaticDatasourceBackfill
+import app.cash.backfila.client.static.StaticDatasourceBackfill
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.KeyRange
@@ -12,8 +12,6 @@ import app.cash.backfila.protos.clientservice.RunBatchRequest
 import app.cash.backfila.protos.clientservice.RunBatchResponse
 import com.google.common.base.Preconditions.checkArgument
 import okio.ByteString.Companion.encodeUtf8
-import java.lang.NullPointerException
-import misk.exceptions.BadRequestException
 
 class StaticDatasourceBackfillOperator<I : Any, P : Any>(
   override val backfill: StaticDatasourceBackfill<I, P>,
@@ -27,29 +25,18 @@ class StaticDatasourceBackfillOperator<I : Any, P : Any>(
       parametersOperator.constructBackfillConfig(request.parameters, request.dry_run)
     backfill.validate(config)
 
-    val start: Int
-    val end: Int
-    try {
-      start = request.range?.start?.utf8()?.toInt() ?: 0
-    } catch (e: NumberFormatException) {
-      throw BadRequestException("Start of range must be a number", e)
-    }
-
-    try {
-      end = request.range?.end?.utf8()?.toInt() ?: backfill.staticDatasource.size
-    } catch (e: NumberFormatException) {
-      throw BadRequestException("End of range must be a number", e)
-    }
+    val start = request.range?.start?.utf8()?.toInt() ?: 0
+    val end = request.range?.end?.utf8()?.toInt() ?: backfill.staticDatasource.size
 
     // Sanity check that this backfill will actually process something
-    if (start < 0 || end < 0) {
-      throw BadRequestException("Start and end must be positive integers, start: $start end: $end")
+    require(start >= 0 && end >= 0) {
+      "Start and end must be positive integers, start: $start end: $end"
     }
-    if (start > end) {
-      throw BadRequestException("Start must be less than end, start: $start end: $end")
+    require(start <= end) {
+      "Start must be less than or equal to end, start: $start end: $end"
     }
-    if (start > backfill.staticDatasource.size) {
-      throw BadRequestException("Start is greater than the static datasource size, start: $start size: ${backfill.staticDatasource.size}")
+    require(start <= backfill.staticDatasource.size) {
+      "Start is greater than the static datasource size, start: $start size: ${backfill.staticDatasource.size}"
     }
 
     val onlyPartition = PrepareBackfillResponse.Partition.Builder()
@@ -74,12 +61,7 @@ class StaticDatasourceBackfillOperator<I : Any, P : Any>(
 
     val backfillRange = request.backfill_range.decode()
 
-    val batchingStart: Int
-    try {
-      batchingStart = request.previous_end_key?.utf8()?.toInt() ?: backfillRange.start
-    } catch (e: NumberFormatException) {
-      throw BadRequestException("previous_end_key must be a number", e)
-    }
+    val batchingStart = request.previous_end_key?.utf8()?.toInt() ?: backfillRange.start
 
     val batches = mutableListOf<GetNextBatchRangeResponse.Batch>()
     for (batchStart in batchingStart until minOf(batchingStart + scanSize, backfillRange.end) step batchSize) {
@@ -119,23 +101,8 @@ class StaticDatasourceBackfillOperator<I : Any, P : Any>(
     val end: Int
   )
   private fun KeyRange.decode(): DecodedRange {
-    val start: Int
-    try {
-      start = this.start.utf8().toInt()
-    } catch (e: NumberFormatException) {
-      throw BadRequestException("Start of range must be a number", e)
-    } catch (e: NullPointerException) {
-      throw BadRequestException("Start of range must not be null", e)
-    }
-
-    val end: Int
-    try {
-      end = this.end.utf8().toInt()
-    } catch (e: NumberFormatException) {
-      throw BadRequestException("End of range must be a number", e)
-    } catch (e: NullPointerException) {
-      throw BadRequestException("End of range must not be null", e)
-    }
+    val start = this.start.utf8().toInt()
+    val end = this.end.utf8().toInt()
     return DecodedRange(start, end)
   }
 

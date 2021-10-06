@@ -1,22 +1,23 @@
 package app.cash.backfila.client.misk.jooq
 
-import app.cash.backfila.client.misk.MiskBackfillModule
+import app.cash.backfila.client.RealBackfillModule
 import app.cash.backfila.client.misk.jooq.internal.JooqBackend
 import app.cash.backfila.client.spi.BackfillBackend
+import com.google.inject.AbstractModule
 import com.google.inject.Binder
 import com.google.inject.TypeLiteral
 import com.google.inject.multibindings.MapBinder
-import misk.inject.KAbstractModule
+import com.google.inject.multibindings.Multibinder
 import javax.inject.Qualifier
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
 
 /**
- * Installs the [BackfillBackend] for Hibernate backfills. See the java doc for [MiskBackfillModule].
+ * Installs the [BackfillBackend] for Hibernate backfills. See the java doc for [RealBackfillModule].
  */
 class JooqBackfillModule<T : JooqBackfill<*, *>> private constructor(
   private val backfillClass: KClass<T>
-) : KAbstractModule() {
+) : AbstractModule() {
   override fun configure() {
     install(JooqBackfillBackendModule)
     // Ensures that the backfill class is injectable. If you are failing this check you probably
@@ -35,9 +36,13 @@ class JooqBackfillModule<T : JooqBackfill<*, *>> private constructor(
   }
 }
 
-private object JooqBackfillBackendModule : KAbstractModule() {
+/**
+ * This is a kotlin object so these dependencies are only installed once.
+ */
+private object JooqBackfillBackendModule : AbstractModule() {
   override fun configure() {
-    multibind<BackfillBackend>().to<JooqBackend>()
+    Multibinder.newSetBinder(binder(), BackfillBackend::class.java).addBinding()
+      .to(JooqBackend::class.java)
   }
 }
 

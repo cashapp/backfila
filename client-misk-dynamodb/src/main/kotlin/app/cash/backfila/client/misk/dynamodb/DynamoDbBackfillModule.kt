@@ -3,21 +3,22 @@ package app.cash.backfila.client.misk.dynamodb
 import app.cash.backfila.client.misk.dynamodb.internal.AwsAttributeValueAdapter
 import app.cash.backfila.client.misk.dynamodb.internal.DynamoDbBackend
 import app.cash.backfila.client.spi.BackfillBackend
+import com.google.inject.AbstractModule
 import com.google.inject.Binder
 import com.google.inject.Provides
 import com.google.inject.Singleton
 import com.google.inject.TypeLiteral
 import com.google.inject.multibindings.MapBinder
+import com.google.inject.multibindings.Multibinder
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
-import misk.inject.KAbstractModule
 import javax.inject.Qualifier
 
 class DynamoDbBackfillModule<T : DynamoDbBackfill<*, *>> private constructor(
   private val backfillClass: KClass<T>
-) : KAbstractModule() {
+) : AbstractModule() {
   override fun configure() {
     install(DynamoDbBackfillBackendModule)
     // Ensures that the backfill class is injectable. If you are failing this check you probably
@@ -36,9 +37,13 @@ class DynamoDbBackfillModule<T : DynamoDbBackfill<*, *>> private constructor(
   }
 }
 
-private object DynamoDbBackfillBackendModule : KAbstractModule() {
+/**
+ * This is a kotlin object so these dependencies are only installed once.
+ */
+private object DynamoDbBackfillBackendModule : AbstractModule() {
   override fun configure() {
-    multibind<BackfillBackend>().to<DynamoDbBackend>()
+    Multibinder.newSetBinder(binder(), BackfillBackend::class.java).addBinding()
+      .to(DynamoDbBackend::class.java)
   }
 
   /** The DynamoDb Backend needs a modified Moshi */

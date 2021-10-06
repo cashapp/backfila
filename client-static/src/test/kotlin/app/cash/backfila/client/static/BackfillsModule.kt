@@ -1,7 +1,7 @@
-package app.cash.backfila.client.misk.static
+package app.cash.backfila.client.static
 
-import app.cash.backfila.client.misk.MiskBackfillModule
 import app.cash.backfila.client.BackfilaClientConfig
+import app.cash.backfila.client.misk.MiskBackfillModule
 import misk.inject.KAbstractModule
 
 /**

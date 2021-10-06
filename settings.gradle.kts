@@ -6,6 +6,7 @@ include("client-misk-dynamodb")
 include("client-misk-hibernate")
 include("client-misk-jooq")
 include("client-misk-static")
+include("client-static")
 include("client-testing")
 include("service")
 

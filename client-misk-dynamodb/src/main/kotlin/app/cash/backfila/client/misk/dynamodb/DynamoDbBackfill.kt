@@ -4,10 +4,10 @@ import app.cash.backfila.client.Backfill
 import app.cash.backfila.client.BackfillConfig
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.amazonaws.services.dynamodbv2.model.ScanRequest
+import com.google.inject.TypeLiteral
 import com.squareup.moshi.Types
 import java.lang.reflect.ParameterizedType
 import kotlin.reflect.KClass
-import misk.inject.typeLiteral
 
 abstract class DynamoDbBackfill<I : Any, P : Any> : Backfill {
   val itemType: KClass<I>
@@ -18,7 +18,7 @@ abstract class DynamoDbBackfill<I : Any, P : Any> : Backfill {
    */
   init {
     // Like MyBackfill.
-    val thisType = this::class.typeLiteral()
+    val thisType = TypeLiteral.get(this::class.java)
 
     // Like Backfill<MyItem, Parameters>.
     val supertype = thisType.getSupertype(

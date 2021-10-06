@@ -27,21 +27,13 @@ dependencies {
   implementation(Dependencies.loggingApi)
   implementation(Dependencies.wireMoshiAdapter)
 
+  jooqGenerator(Dependencies.mysql)
+
   api(project(":client"))
   // We do not want to leak client-base implementation details to customers.
   implementation(project(":client-base"))
-  // TODO: should not depend on misk. We should try to separate out the misk DB stuff.
-  api(project(":client-misk"))
 
-  implementation(Dependencies.misk)
-  implementation(Dependencies.miskJdbc)
-  implementation(Dependencies.miskActions)
-  implementation(Dependencies.miskCore)
-  implementation(Dependencies.miskInject)
-
-  testImplementation(Dependencies.miskJdbcTesting)
   testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.miskTesting)
   testImplementation(Dependencies.kotlinTest)
   testImplementation(Dependencies.junitEngine)
   testImplementation(Dependencies.junitParams)
@@ -51,7 +43,19 @@ dependencies {
   testImplementation(project(":backfila-embedded"))
   testImplementation(project(":client-testing"))
 
-  jooqGenerator(Dependencies.mysql)
+  // ****************************************
+  // For TESTING purposes only. We only want Misk for easy testing.
+  // DO NOT turn these into regular dependencies.
+  // ****************************************
+  testImplementation(Dependencies.misk)
+  testImplementation(Dependencies.miskJdbc)
+  testImplementation(Dependencies.miskActions)
+  testImplementation(Dependencies.miskCore)
+  testImplementation(Dependencies.miskInject)
+  testImplementation(Dependencies.miskJdbcTesting)
+  testImplementation(Dependencies.miskTesting)
+  testImplementation(project(":client-misk"))
+
 }
 
 val jar by tasks.getting(Jar::class) {

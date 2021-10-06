@@ -1,27 +1,24 @@
 apply(plugin = "kotlin")
 
 dependencies {
-  implementation(Dependencies.awsDynamodb)
-  implementation(Dependencies.kotlinStdLib)
   implementation(Dependencies.guava)
-  implementation(Dependencies.guice)
   implementation(Dependencies.moshiCore)
   implementation(Dependencies.moshiKotlin)
+  implementation(Dependencies.wireRuntime)
+  implementation(Dependencies.guice)
   implementation(Dependencies.okHttp)
-  implementation(Dependencies.okio)
   implementation(Dependencies.retrofit)
   implementation(Dependencies.retrofitMock)
   implementation(Dependencies.retrofitMoshi)
   implementation(Dependencies.retrofitWire)
+  implementation(Dependencies.okio)
+  implementation(Dependencies.kotlinStdLib)
   implementation(Dependencies.wireMoshiAdapter)
-  implementation(Dependencies.wireRuntime)
 
   api(project(":client"))
   // We do not want to leak client-base implementation details to customers.
   implementation(project(":client-base"))
-
   testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.awsDynamodb)
   testImplementation(Dependencies.junitEngine)
   testImplementation(Dependencies.kotlinTest)
 
@@ -33,15 +30,14 @@ dependencies {
   // DO NOT turn these into regular dependencies.
   // ****************************************
   testImplementation(Dependencies.misk)
-  testImplementation(Dependencies.miskAwsDynamodb)
-  testImplementation(Dependencies.miskAwsDynamodbTesting)
+  testImplementation(Dependencies.miskActions)
   testImplementation(Dependencies.miskInject)
   testImplementation(Dependencies.miskTesting)
   testImplementation(project(":client-misk"))
 }
 
 val jar by tasks.getting(Jar::class) {
-  baseName = "backfila-misk-client-dynamodb"
+  baseName = "backfila-client-static"
 }
 
 afterEvaluate {

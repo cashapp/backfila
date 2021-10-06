@@ -1,11 +1,11 @@
-package app.cash.backfila.client.misk.static
+package app.cash.backfila.client.static
 
 import app.cash.backfila.client.Backfill
 import app.cash.backfila.client.BackfillConfig
+import com.google.inject.TypeLiteral
 import com.squareup.moshi.Types
 import java.lang.reflect.ParameterizedType
 import kotlin.reflect.KClass
-import misk.inject.typeLiteral
 
 abstract class StaticDatasourceBackfill<I : Any, P : Any> : Backfill {
   val itemType: KClass<I>
@@ -16,7 +16,7 @@ abstract class StaticDatasourceBackfill<I : Any, P : Any> : Backfill {
    */
   init {
     // Like MyBackfill.
-    val thisType = this::class.typeLiteral()
+    val thisType = TypeLiteral.get(this::class.java)
 
     // Like Backfill<MyItem, Parameters>.
     val supertype = thisType.getSupertype(

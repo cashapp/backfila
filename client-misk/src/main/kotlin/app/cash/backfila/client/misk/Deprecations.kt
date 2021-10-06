@@ -60,11 +60,11 @@ typealias NoParameters = NoParameters
 typealias BackfilaManagementClient = BackfilaManagementClient
 
 @Deprecated(
-    "Use MiskBackfillModule instead.",
-    replaceWith = ReplaceWith(
-        expression = "BackfillModule",
-        imports = ["app.cash.backfila.client.misk.MiskBackfillModule"]
-    ),
-    level = DeprecationLevel.ERROR
+  "Use MiskBackfillModule instead.",
+  replaceWith = ReplaceWith(
+    expression = "BackfillModule",
+    imports = ["app.cash.backfila.client.misk.MiskBackfillModule"]
+  ),
+  level = DeprecationLevel.ERROR
 )
 typealias BackfillModule = MiskBackfillModule

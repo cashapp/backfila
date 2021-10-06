@@ -1,18 +1,22 @@
-package app.cash.backfila.client.misk.static
+package app.cash.backfila.client.static
 
 import app.cash.backfila.client.spi.BackfillBackend
-import app.cash.backfila.client.misk.static.internal.StaticDatasourceBackend
+import app.cash.backfila.client.static.internal.StaticDatasourceBackend
+import com.google.inject.AbstractModule
 import com.google.inject.Binder
 import com.google.inject.TypeLiteral
 import com.google.inject.multibindings.MapBinder
+import com.google.inject.multibindings.Multibinder
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
-import misk.inject.KAbstractModule
 import javax.inject.Qualifier
 
+/**
+ * Installs the [BackfillBackend] for Static Datasource backfills. See the java doc for [RealBackfillModule].
+ */
 class StaticDatasourceBackfillModule<T : StaticDatasourceBackfill<*, *>> private constructor(
   private val backfillClass: KClass<T>
-) : KAbstractModule() {
+) : AbstractModule() {
   override fun configure() {
     install(StaticDatasourceBackfillBackendModule)
     // Ensures that the backfill class is injectable. If you are failing this check you probably
@@ -31,9 +35,13 @@ class StaticDatasourceBackfillModule<T : StaticDatasourceBackfill<*, *>> private
   }
 }
 
-private object StaticDatasourceBackfillBackendModule : KAbstractModule() {
+/**
+ * This is a kotlin object so these dependencies are only installed once.
+ */
+private object StaticDatasourceBackfillBackendModule : AbstractModule() {
   override fun configure() {
-    multibind<BackfillBackend>().to<StaticDatasourceBackend>()
+    Multibinder.newSetBinder(binder(), BackfillBackend::class.java).addBinding()
+      .to(StaticDatasourceBackend::class.java)
   }
 }
 
