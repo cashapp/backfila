@@ -11,7 +11,10 @@ dependencies {
   implementation(Dependencies.loggingApi)
   implementation(Dependencies.wireMoshiAdapter)
 
+  api(project(":client"))
+  // We do not want to leak client-base implementation details to customers.
   implementation(project(":client-base"))
+  // TODO: should not depend on misk. We should try to separate out the misk DB stuff.
   api(project(":client-misk"))
 
   implementation(Dependencies.misk)
@@ -28,7 +31,7 @@ dependencies {
   testImplementation(Dependencies.okHttp)
 
   testImplementation(project(":backfila-embedded"))
-  testImplementation(project(":client-misk-testing"))
+  testImplementation(project(":client-testing"))
 }
 
 val jar by tasks.getting(Jar::class) {

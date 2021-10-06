@@ -25,7 +25,7 @@ class DummyBackfill : HibernateBackfill<DbMenu, Id<DbMenu>, NoParameters>() {
 
 fun main(args: Array<String>) {
   MiskApplication(
-    BackfillModule(
+    MiskBackfillModule(
       BackfilaClientConfig(
         url = "#test", slack_channel = "#test"
       )

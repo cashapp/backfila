@@ -1,6 +1,6 @@
 package app.cash.backfila.client.misk.config
 
-import app.cash.backfila.client.misk.BackfillModule
+import app.cash.backfila.client.misk.MiskBackfillModule
 import app.cash.backfila.client.BackfilaClientConfig
 import app.cash.backfila.client.BackfilaClientLoggingSetupProvider
 import app.cash.backfila.client.BackfilaClientNoLoggingSetupProvider
@@ -76,7 +76,7 @@ class ClientJooqTestingModule : KAbstractModule() {
     // `EmbeddedBackfilaModule` for tests
     install(EmbeddedBackfilaModule())
     install(
-      BackfillModule(
+      MiskBackfillModule(
         BackfilaClientConfig(
           url = "test.url", slack_channel = "#test"
         )

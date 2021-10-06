@@ -20,6 +20,7 @@ dependencies {
   implementation(Dependencies.wireRuntime)
 
   api(project(":client"))
+  // We do not want to leak client-base implementation details to customers.
   implementation(project(":client-base"))
   // TODO: should not depend on misk
   api(project(":client-misk"))
@@ -32,7 +33,7 @@ dependencies {
   testImplementation(Dependencies.miskTesting)
 
   testImplementation(project(":backfila-embedded"))
-  testImplementation(project(":client-misk-testing"))
+  testImplementation(project(":client-testing"))
 }
 
 val jar by tasks.getting(Jar::class) {

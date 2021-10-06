@@ -6,7 +6,7 @@ include("client-misk-dynamodb")
 include("client-misk-hibernate")
 include("client-misk-jooq")
 include("client-misk-static")
-include("client-misk-testing")
+include("client-testing")
 include("service")
 
 val localSettings = file("local.settings.gradle")

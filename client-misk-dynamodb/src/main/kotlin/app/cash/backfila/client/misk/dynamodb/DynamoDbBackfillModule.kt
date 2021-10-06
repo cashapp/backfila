@@ -4,7 +4,6 @@ import app.cash.backfila.client.misk.dynamodb.internal.AwsAttributeValueAdapter
 import app.cash.backfila.client.misk.dynamodb.internal.DynamoDbBackend
 import app.cash.backfila.client.spi.BackfillBackend
 import com.google.inject.Binder
-import com.google.inject.BindingAnnotation
 import com.google.inject.Provides
 import com.google.inject.Singleton
 import com.google.inject.TypeLiteral
@@ -14,6 +13,7 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
 import misk.inject.KAbstractModule
+import javax.inject.Qualifier
 
 class DynamoDbBackfillModule<T : DynamoDbBackfill<*, *>> private constructor(
   private val backfillClass: KClass<T>
@@ -41,8 +41,9 @@ private object DynamoDbBackfillBackendModule : KAbstractModule() {
     multibind<BackfillBackend>().to<DynamoDbBackend>()
   }
 
-  @Provides @Singleton @ForBackfila
-  fun provideMoshi(): Moshi {
+  /** The DynamoDb Backend needs a modified Moshi */
+  @Provides @Singleton @ForDynamoDbBackend
+  fun provideDynamoMoshi(): Moshi {
     return Moshi.Builder()
       .add(AwsAttributeValueAdapter)
       .add(KotlinJsonAdapterFactory()) // Must be last.
@@ -54,8 +55,8 @@ private fun mapBinder(binder: Binder) = MapBinder.newMapBinder(
   binder,
   object : TypeLiteral<String>() {},
   object : TypeLiteral<KClass<out DynamoDbBackfill<*, *>>>() {},
-  ForBackfila::class.java
+  ForDynamoDbBackend::class.java
 )
 
-@BindingAnnotation
-internal annotation class ForBackfila
+/** Annotation for specifying dependencies specifically for this Backend. */
+@Qualifier annotation class ForDynamoDbBackend

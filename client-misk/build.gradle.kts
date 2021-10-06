@@ -19,6 +19,7 @@ dependencies {
   implementation(Dependencies.loggingApi)
 
   api(project(":client"))
+  // We do not want to leak client-base implementation details to customers.
   implementation(project(":client-base"))
 
   implementation(Dependencies.misk)
@@ -32,7 +33,7 @@ dependencies {
   testImplementation(Dependencies.junitEngine)
 
   testImplementation(project(":backfila-embedded"))
-  testImplementation(project(":client-misk-testing"))
+  testImplementation(project(":client-testing"))
 }
 
 val jar by tasks.getting(Jar::class) {

@@ -17,11 +17,29 @@ dependencies {
   implementation(Dependencies.wireMoshiAdapter)
   implementation(Dependencies.wispLogging)
 
-  api(project(":client"))
+  // "client" is an implementation not an api dependency because client implementations MUST
+  // expose "client" as an explicit api dependency so that customers of that client have access to
+  // the correct classes.
+  //
+  // These base classes should be an implementation for the client implementations as well making
+  // base classes accessible to the client implementations but not the client customers.
+  implementation(project(":client"))
 
   testImplementation(Dependencies.junitEngine)
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.kotlinTest)
+  testImplementation(project(":backfila-embedded"))
+
+  // ****************************************
+  // For TESTING purposes only. We only want Misk for easy testing.
+  // DO NOT turn these into regular dependencies.
+  // ****************************************
+  /* TEST ONLY */ testImplementation(Dependencies.misk)
+  /* TEST ONLY */ testImplementation(Dependencies.miskTesting)
+  /* TEST ONLY */ testImplementation(project(":client-misk"))
+  // ****************************************
+  // Can I make it any more obvious?
+  // ****************************************
 }
 
 val jar by tasks.getting(Jar::class) {

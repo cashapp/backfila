@@ -1,6 +1,6 @@
 package app.cash.backfila.client.misk.dynamodb.internal
 
-import app.cash.backfila.client.misk.dynamodb.ForBackfila
+import app.cash.backfila.client.misk.dynamodb.ForDynamoDbBackend
 import app.cash.backfila.protos.clientservice.KeyRange
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.google.inject.util.Types
@@ -39,7 +39,7 @@ internal data class DynamoDbKeyRange(
  */
 @Singleton
 class DynamoDbKeyRangeCodec @Inject constructor(
-  @ForBackfila moshi: Moshi
+  @ForDynamoDbBackend moshi: Moshi
 ) {
   private val adapter = moshi.adapter<Map<String, AttributeValue>>(
     Types.newParameterizedType(Map::class.java, String::class.java, AttributeValue::class.java)

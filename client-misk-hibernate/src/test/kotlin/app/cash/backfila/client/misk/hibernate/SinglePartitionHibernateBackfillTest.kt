@@ -6,7 +6,7 @@ import app.cash.backfila.embedded.Backfila
 import app.cash.backfila.embedded.BackfillRun
 import app.cash.backfila.embedded.createDryRun
 import app.cash.backfila.embedded.createWetRun
-import app.cash.backfila.client.misk.testing.assertThat
+import app.cash.backfila.client.testing.assertThat
 import javax.inject.Inject
 import misk.hibernate.Id
 import misk.hibernate.Session

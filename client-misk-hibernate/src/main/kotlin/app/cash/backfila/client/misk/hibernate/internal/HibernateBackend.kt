@@ -2,8 +2,8 @@ package app.cash.backfila.client.misk.hibernate.internal
 
 import app.cash.backfila.client.Description
 import app.cash.backfila.client.DeleteBy
+import app.cash.backfila.client.misk.hibernate.ForHibernateBackend
 import app.cash.backfila.client.parseDeleteByDate
-import app.cash.backfila.client.misk.hibernate.ForBackfila
 import app.cash.backfila.client.misk.hibernate.HibernateBackfill
 import app.cash.backfila.client.misk.hibernate.PkeySqlAdapter
 import app.cash.backfila.client.spi.BackfilaParametersOperator
@@ -25,7 +25,7 @@ import kotlin.reflect.full.findAnnotation
 @Singleton
 class HibernateBackend @Inject constructor(
   private val injector: Injector,
-  @ForBackfila private val backfills: MutableMap<String, KClass<out HibernateBackfill<*, *, *>>>,
+  @ForHibernateBackend private val backfills: MutableMap<String, KClass<out HibernateBackfill<*, *, *>>>,
   internal var pkeySqlAdapter: PkeySqlAdapter,
   internal var queryFactory: Query.Factory
 ) : BackfillBackend {
