@@ -5,6 +5,8 @@ dependencies {
   implementation(Dependencies.guice)
   implementation(Dependencies.kotlinReflection)
   implementation(Dependencies.kotlinStdLib)
+  implementation(Dependencies.moshiCore)
+  implementation(Dependencies.moshiKotlin)
   implementation(Dependencies.retrofit)
   implementation(Dependencies.retrofitMock)
 

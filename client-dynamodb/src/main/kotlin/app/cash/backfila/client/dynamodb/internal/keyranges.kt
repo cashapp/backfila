@@ -139,16 +139,16 @@ class DynamoDbKeyRangeCodec @Inject constructor(
 object AwsAttributeValueAdapter {
   @ToJson internal fun toJson(attributeValue: AttributeValue): DynamoDbKeyRangeCodec.AttributeValueJson {
     return DynamoDbKeyRangeCodec.AttributeValueJson(
-        attributeValue.s,
-        attributeValue.n,
-        attributeValue.b?.toByteString(),
-        attributeValue.ss,
-        attributeValue.ns,
-        attributeValue.bs?.map { it.toByteString() },
-        attributeValue.m?.mapValues { toJson(it.value) },
-        attributeValue.l?.map { toJson(it) },
-        attributeValue.getNULL(),
-        attributeValue.bool
+      attributeValue.s,
+      attributeValue.n,
+      attributeValue.b?.toByteString(),
+      attributeValue.ss,
+      attributeValue.ns,
+      attributeValue.bs?.map { it.toByteString() },
+      attributeValue.m?.mapValues { toJson(it.value) },
+      attributeValue.l?.map { toJson(it) },
+      attributeValue.getNULL(),
+      attributeValue.bool
     )
   }
 

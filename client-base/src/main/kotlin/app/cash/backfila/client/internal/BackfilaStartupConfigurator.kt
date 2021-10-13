@@ -1,14 +1,10 @@
 package app.cash.backfila.client.internal
 
-import app.cash.backfila.client.Connectors
-import app.cash.backfila.client.HttpConnectorData
-import app.cash.backfila.client.ForBackfila
 import app.cash.backfila.client.BackfilaClientConfig
 import app.cash.backfila.client.spi.BackfilaParametersOperator.Companion.backfilaParametersFromClass
 import app.cash.backfila.client.spi.BackfillBackend
 import app.cash.backfila.client.spi.BackfillRegistration
 import app.cash.backfila.protos.service.ConfigureServiceRequest
-import com.squareup.moshi.Moshi
 import javax.inject.Inject
 import javax.inject.Singleton
 import wisp.logging.getLogger
@@ -21,14 +17,10 @@ import wisp.logging.getLogger
 class BackfilaStartupConfigurator @Inject constructor(
   private val config: BackfilaClientConfig,
   private val backfilaClient: BackfilaClient,
-  @ForBackfila private val moshi: Moshi,
-  private val backends: Set<BackfillBackend>
+  private val backends: Set<BackfillBackend>,
 ) {
   fun sendBackfillMetadataToBackfila() {
     logger.info { "Backfila configurator starting" }
-
-    val connectorDataAdapter = moshi.adapter(HttpConnectorData::class.java)
-    val httpConnectorData = HttpConnectorData(url = config.url)
 
     // Build a list of registered Backfills from the different client backend implementations.
     val registrations = mutableSetOf<BackfillRegistration>()
@@ -55,8 +47,8 @@ class BackfilaStartupConfigurator @Inject constructor(
             .build()
         }
       )
-      .connector_type(Connectors.HTTP)
-      .connector_extra_data(connectorDataAdapter.toJson(httpConnectorData))
+      .connector_type(config.connector_type)
+      .connector_extra_data(config.connector_extra_data)
       .slack_channel(config.slack_channel)
       .build()
 

@@ -1,6 +1,6 @@
 package app.cash.backfila.client.backend
 
-import app.cash.backfila.client.BackfilaClientConfig
+import app.cash.backfila.client.BackfilaHttpClientConfig
 import app.cash.backfila.client.misk.MiskBackfillModule
 import app.cash.backfila.embedded.EmbeddedBackfilaModule
 import misk.MiskTestingServiceModule
@@ -17,7 +17,7 @@ class NoBackfillsModule : KAbstractModule() {
     // We install the common backfila code but not any particular backend
     install(
       MiskBackfillModule(
-        BackfilaClientConfig(
+        BackfilaHttpClientConfig(
           url = "test.url", slack_channel = "#test"
         )
       )

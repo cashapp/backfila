@@ -5,11 +5,7 @@ import app.cash.backfila.client.internal.EmptyBackend
 import app.cash.backfila.client.internal.RealBackfilaClient
 import app.cash.backfila.client.spi.BackfillBackend
 import com.google.inject.AbstractModule
-import com.google.inject.Provides
 import com.google.inject.multibindings.Multibinder
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import javax.inject.Singleton
 import kotlin.reflect.KClass
 
 class RealBackfillModule @JvmOverloads constructor(
@@ -28,8 +24,4 @@ class RealBackfillModule @JvmOverloads constructor(
     Multibinder.newSetBinder(binder(), BackfillBackend::class.java).addBinding()
       .to(EmptyBackend::class.java)
   }
-
-  @Singleton @Provides @ForBackfila fun provideMoshi(): Moshi = Moshi.Builder()
-    .add(KotlinJsonAdapterFactory()) // Added last for lowest precedence.
-    .build()
 }

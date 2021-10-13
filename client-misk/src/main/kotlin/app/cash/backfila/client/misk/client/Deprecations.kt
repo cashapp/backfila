@@ -1,19 +1,19 @@
 package app.cash.backfila.client.misk.client
 
-import app.cash.backfila.client.BackfilaClientConfig
+import app.cash.backfila.client.BackfilaHttpClientConfig
 
 // This is for backwards compatibility
 // TODO(mikepaw) Remove once the separation between the client and misk is stable.
 
 @Deprecated(
-  "Use BackfilaClientConfig in the client module instead.",
+  "Use BackfilaHttpClientConfig in the client module instead.",
   replaceWith = ReplaceWith(
-    expression = "BackfilaClientConfig",
-    imports = ["app.cash.backfila.client.BackfilaClientConfig"]
+    expression = "BackfilaHttpClientConfig",
+    imports = ["app.cash.backfila.client.BackfilaHttpClientConfig"]
   ),
   level = DeprecationLevel.ERROR
 )
-typealias BackfilaClientConfig = BackfilaClientConfig
+typealias BackfilaClientConfig = BackfilaHttpClientConfig
 
 @Deprecated(
   "Use BackfilaMiskClientModule instead.",
