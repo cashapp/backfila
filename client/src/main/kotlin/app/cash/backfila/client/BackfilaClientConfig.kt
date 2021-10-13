@@ -1,11 +1,19 @@
 package app.cash.backfila.client
 
 /**
- * Configures connectivity to the Backfila service.
+ * Configures connectivity from Backfila to your service.
  */
 data class BackfilaClientConfig(
-  /** The URL of your service so backfila can call into it. */
-  val url: String,
 
-  val slack_channel: String?
+  val slack_channel: String?,
+
+  /**
+   * Connector information so Backfila knows how to call your service.
+   */
+  val connector_type: String,
+
+  /**
+   * Connector information so Backfila knows how to call your service.
+   */
+  val connector_extra_data: String,
 )

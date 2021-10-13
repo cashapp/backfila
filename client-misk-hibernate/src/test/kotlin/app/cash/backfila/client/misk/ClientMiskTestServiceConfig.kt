@@ -2,7 +2,7 @@ package app.cash.backfila.client.misk
 
 import app.cash.backfila.client.BackfillConfig
 import app.cash.backfila.client.NoParameters
-import app.cash.backfila.client.BackfilaClientConfig
+import app.cash.backfila.client.BackfilaHttpClientConfig
 import app.cash.backfila.client.misk.hibernate.HibernateBackfill
 import app.cash.backfila.client.misk.hibernate.HibernateBackfillModule
 import app.cash.backfila.client.misk.hibernate.SinglePartitionHibernateTestBackfill
@@ -25,7 +25,7 @@ class DummyBackfill : HibernateBackfill<DbMenu, Id<DbMenu>, NoParameters>() {
 fun main(args: Array<String>) {
   MiskApplication(
     MiskBackfillModule(
-      BackfilaClientConfig(
+      BackfilaHttpClientConfig(
         url = "#test", slack_channel = "#test"
       )
     ),

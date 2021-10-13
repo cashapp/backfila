@@ -1,8 +1,8 @@
 package app.cash.backfila.client.misk
 
-import app.cash.backfila.client.BackfilaClientConfig
 import app.cash.backfila.client.BackfilaClientLoggingSetupProvider
 import app.cash.backfila.client.BackfilaClientNoLoggingSetupProvider
+import app.cash.backfila.client.BackfilaHttpClientConfig
 import app.cash.backfila.client.RealBackfillModule
 import app.cash.backfila.client.misk.internal.BackfilaStartupService
 import com.google.common.util.concurrent.Service
@@ -21,13 +21,13 @@ import kotlin.reflect.KClass
  *       or [BackfilaClientModule] (staging and production).
  */
 class MiskBackfillModule @JvmOverloads constructor(
-  private val config: BackfilaClientConfig,
+  private val config: BackfilaHttpClientConfig,
   private val loggingSetupProvider: KClass<out BackfilaClientLoggingSetupProvider> =
     BackfilaClientNoLoggingSetupProvider::class,
   private val dependsOn: List<Key<out Service>> = listOf()
 ) : KAbstractModule() {
   override fun configure() {
-    install(RealBackfillModule(config, loggingSetupProvider))
+    install(RealBackfillModule(config.toBackfilaClientConfig(), loggingSetupProvider))
 
     install(
       ServiceModule(

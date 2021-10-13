@@ -3,6 +3,8 @@ package app.cash.backfila.client.internal
 import app.cash.backfila.client.BackfilaApi
 import app.cash.backfila.client.Backfill
 import app.cash.backfila.client.Connectors
+import app.cash.backfila.client.EnvoyConnectorData
+import app.cash.backfila.client.HttpConnectorData
 import app.cash.backfila.embedded.Backfila
 import app.cash.backfila.embedded.BackfillRun
 import app.cash.backfila.embedded.internal.EmbeddedBackfillRun
@@ -12,6 +14,8 @@ import app.cash.backfila.protos.service.ConfigureServiceRequest
 import app.cash.backfila.protos.service.ConfigureServiceResponse
 import app.cash.backfila.protos.service.CreateAndStartBackfillRequest
 import app.cash.backfila.protos.service.CreateAndStartBackfillResponse
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -38,7 +42,23 @@ internal class EmbeddedBackfila @Inject internal constructor(
 
   override fun configureService(request: ConfigureServiceRequest): Call<ConfigureServiceResponse> {
     check(serviceData == null) { "Should only be configuring a single backfila service." }
-    check(request.connector_type == Connectors.HTTP) { "Misk client only supports HTTP." }
+    // Creating a local moshi to do the quick config conversion.
+    val moshi = Moshi.Builder()
+      .add(KotlinJsonAdapterFactory())
+      .build()
+    when (request.connector_type) {
+      Connectors.HTTP -> {
+        val connectorDataAdapter = moshi.adapter(HttpConnectorData::class.java)
+        val httpData = connectorDataAdapter.fromJson(request.connector_extra_data)
+        checkNotNull(httpData) { "Must provide HTTP connector data for HTTP connector type." }
+      }
+      Connectors.ENVOY -> {
+        val connectorDataAdapter = moshi.adapter(EnvoyConnectorData::class.java)
+        val envoyData = connectorDataAdapter.fromJson(request.connector_extra_data)
+        checkNotNull(envoyData) { "Must provide Envoy connector data for Envoy connector type." }
+      }
+      else -> error("Backfila only supports HTTP and Envoy currently.")
+    }
     serviceData = request
     return Calls.response(ConfigureServiceResponse())
   }

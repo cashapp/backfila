@@ -1,7 +1,7 @@
 package app.cash.backfila.client.dynamodb
 
 import app.cash.backfila.client.misk.MiskBackfillModule
-import app.cash.backfila.client.BackfilaClientConfig
+import app.cash.backfila.client.BackfilaHttpClientConfig
 import misk.dynamodb.DynamoDbService
 import misk.inject.KAbstractModule
 import misk.inject.toKey
@@ -14,7 +14,7 @@ class BackfillsModule : KAbstractModule() {
     val dependsOn = listOf(DynamoDbService::class.toKey())
     install(
       MiskBackfillModule(
-        BackfilaClientConfig(
+        BackfilaHttpClientConfig(
           url = "test.url", slack_channel = "#test"
         ),
         dependsOn = dependsOn

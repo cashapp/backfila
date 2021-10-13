@@ -7,12 +7,12 @@ import app.cash.backfila.client.static.StaticDatasourceBackfill as RealStaticDat
  * client-misk-static is going away! Add backfila's client-static as a dependency instead.
  */
 @Deprecated(
-    "Use StaticDatasourceBackfill from the client-static module instead.",
-    replaceWith = ReplaceWith(
-        expression = "StaticDatasourceBackfill<I, P>",
-        imports = ["app.cash.backfila.client.static.StaticDatasourceBackfill"]
-    ),
-    level = DeprecationLevel.WARNING
+  "Use StaticDatasourceBackfill from the client-static module instead.",
+  replaceWith = ReplaceWith(
+    expression = "StaticDatasourceBackfill<I, P>",
+    imports = ["app.cash.backfila.client.static.StaticDatasourceBackfill"]
+  ),
+  level = DeprecationLevel.WARNING
 )
 typealias StaticDatasourceBackfill<I, P> = RealStaticDataSourceBackfill<I, P>
 
@@ -20,11 +20,11 @@ typealias StaticDatasourceBackfill<I, P> = RealStaticDataSourceBackfill<I, P>
  * client-misk-static is going away! Add backfila's client-static as a dependency instead.
  */
 @Deprecated(
-    "Use StaticDatasourceBackfillModule from the client-static module instead.",
-    replaceWith = ReplaceWith(
-        expression = "StaticDatasourceBackfillModule<T>",
-        imports = ["app.cash.backfila.client.static.StaticDatasourceBackfillModule"]
-    ),
-    level = DeprecationLevel.WARNING
+  "Use StaticDatasourceBackfillModule from the client-static module instead.",
+  replaceWith = ReplaceWith(
+    expression = "StaticDatasourceBackfillModule<T>",
+    imports = ["app.cash.backfila.client.static.StaticDatasourceBackfillModule"]
+  ),
+  level = DeprecationLevel.WARNING
 )
 typealias StaticDatasourceBackfillModule<T> = RealStaticDatasourceBackfillModule<T>

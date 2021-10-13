@@ -1,6 +1,6 @@
 package app.cash.backfila.client.static
 
-import app.cash.backfila.client.BackfilaClientConfig
+import app.cash.backfila.client.BackfilaHttpClientConfig
 import app.cash.backfila.client.misk.MiskBackfillModule
 import misk.inject.KAbstractModule
 
@@ -11,7 +11,7 @@ class BackfillsModule : KAbstractModule() {
   override fun configure() {
     install(
       MiskBackfillModule(
-        BackfilaClientConfig(
+        BackfilaHttpClientConfig(
           url = "test.url", slack_channel = "#test"
         )
       )

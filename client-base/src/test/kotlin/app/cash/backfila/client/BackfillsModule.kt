@@ -8,7 +8,7 @@ class BackfillsModule : KAbstractModule() {
   override fun configure() {
     install(
       MiskBackfillModule(
-        BackfilaClientConfig(
+        BackfilaHttpClientConfig(
           url = "test.url", slack_channel = "#test"
         )
       )

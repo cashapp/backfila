@@ -8,12 +8,12 @@ import app.cash.backfila.client.dynamodb.UpdateInPlaceDynamoDbBackfill as RealUp
  * client-misk-dynamodb is going away! Add backfila's client-dynamodb as a dependency instead.
  */
 @Deprecated(
-    "Use DynamoDbBackfill from the client-dynamodb module instead.",
-    replaceWith = ReplaceWith(
-        expression = "DynamoDbBackfill<I, P>",
-        imports = ["app.cash.backfila.client.dynamodb.DynamoDbBackfill"]
-    ),
-    level = DeprecationLevel.WARNING
+  "Use DynamoDbBackfill from the client-dynamodb module instead.",
+  replaceWith = ReplaceWith(
+    expression = "DynamoDbBackfill<I, P>",
+    imports = ["app.cash.backfila.client.dynamodb.DynamoDbBackfill"]
+  ),
+  level = DeprecationLevel.WARNING
 )
 typealias DynamoDbBackfill<I, P> = RealDynamoDbBackfill<I, P>
 
@@ -21,12 +21,12 @@ typealias DynamoDbBackfill<I, P> = RealDynamoDbBackfill<I, P>
  * client-misk-dynamodb is going away! Add backfila's client-dynamodb as a dependency instead.
  */
 @Deprecated(
-    "Use DynamoDbBackfillModule from the client-dynamodb module instead.",
-    replaceWith = ReplaceWith(
-        expression = "DynamoDbBackfillModule<T>",
-        imports = ["app.cash.backfila.client.static.DynamoDbBackfillModule"]
-    ),
-    level = DeprecationLevel.WARNING
+  "Use DynamoDbBackfillModule from the client-dynamodb module instead.",
+  replaceWith = ReplaceWith(
+    expression = "DynamoDbBackfillModule<T>",
+    imports = ["app.cash.backfila.client.static.DynamoDbBackfillModule"]
+  ),
+  level = DeprecationLevel.WARNING
 )
 typealias DynamoDbBackfillModule<T> = RealDynamoDbBackfillModule<T>
 
@@ -34,11 +34,11 @@ typealias DynamoDbBackfillModule<T> = RealDynamoDbBackfillModule<T>
  * client-misk-dynamodb is going away! Add backfila's client-dynamodb as a dependency instead.
  */
 @Deprecated(
-    "Use UpdateInPlaceDynamoDbBackfill from the client-dynamodb module instead.",
-    replaceWith = ReplaceWith(
-        expression = "UpdateInPlaceDynamoDbBackfill<T>",
-        imports = ["app.cash.backfila.client.static.DynamoDbBackfillModule"]
-    ),
-    level = DeprecationLevel.WARNING
+  "Use UpdateInPlaceDynamoDbBackfill from the client-dynamodb module instead.",
+  replaceWith = ReplaceWith(
+    expression = "UpdateInPlaceDynamoDbBackfill<T>",
+    imports = ["app.cash.backfila.client.static.DynamoDbBackfillModule"]
+  ),
+  level = DeprecationLevel.WARNING
 )
 typealias UpdateInPlaceDynamoDbBackfill<I, P> = RealUpdateInPlaceDynamoDbBackfill<I, P>
