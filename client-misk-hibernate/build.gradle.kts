@@ -14,8 +14,6 @@ dependencies {
   api(project(":client"))
   // We do not want to leak client-base implementation details to customers.
   implementation(project(":client-base"))
-  // TODO: should not depend on misk. We should try to separate out the misk DB stuff.
-  api(project(":client-misk"))
 
   implementation(Dependencies.misk)
   implementation(Dependencies.miskActions)
@@ -26,6 +24,7 @@ dependencies {
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.miskTesting)
   testImplementation(Dependencies.miskHibernateTesting)
+  testImplementation(project(":client-misk"))
   testImplementation(Dependencies.kotlinTest)
   testImplementation(Dependencies.junitEngine)
   testImplementation(Dependencies.okHttp)

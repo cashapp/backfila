@@ -1,39 +1,9 @@
 apply(plugin = "kotlin")
 
 dependencies {
-  implementation(Dependencies.awsDynamodb)
   implementation(Dependencies.kotlinStdLib)
-  implementation(Dependencies.guava)
-  implementation(Dependencies.guice)
-  implementation(Dependencies.misk)
-  implementation(Dependencies.miskAwsDynamodb)
-  implementation(Dependencies.miskInject)
-  implementation(Dependencies.moshiCore)
-  implementation(Dependencies.moshiKotlin)
-  implementation(Dependencies.okHttp)
-  implementation(Dependencies.okio)
-  implementation(Dependencies.retrofit)
-  implementation(Dependencies.retrofitMock)
-  implementation(Dependencies.retrofitMoshi)
-  implementation(Dependencies.retrofitWire)
-  implementation(Dependencies.wireMoshiAdapter)
-  implementation(Dependencies.wireRuntime)
 
-  api(project(":client"))
-  // We do not want to leak client-base implementation details to customers.
-  implementation(project(":client-base"))
-  // TODO: should not depend on misk
-  api(project(":client-misk"))
-
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.awsDynamodb)
-  testImplementation(Dependencies.junitEngine)
-  testImplementation(Dependencies.kotlinTest)
-  testImplementation(Dependencies.miskAwsDynamodbTesting)
-  testImplementation(Dependencies.miskTesting)
-
-  testImplementation(project(":backfila-embedded"))
-  testImplementation(project(":client-testing"))
+  api(project(":client-dynamodb"))
 }
 
 val jar by tasks.getting(Jar::class) {

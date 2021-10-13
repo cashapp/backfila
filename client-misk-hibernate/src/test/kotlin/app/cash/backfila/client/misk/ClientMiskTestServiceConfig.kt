@@ -3,7 +3,6 @@ package app.cash.backfila.client.misk
 import app.cash.backfila.client.BackfillConfig
 import app.cash.backfila.client.NoParameters
 import app.cash.backfila.client.BackfilaClientConfig
-import app.cash.backfila.client.misk.client.BackfilaMiskClientModule
 import app.cash.backfila.client.misk.hibernate.HibernateBackfill
 import app.cash.backfila.client.misk.hibernate.HibernateBackfillModule
 import app.cash.backfila.client.misk.hibernate.SinglePartitionHibernateTestBackfill
@@ -35,7 +34,6 @@ fun main(args: Array<String>) {
         install(HibernateBackfillModule.create<SinglePartitionHibernateTestBackfill>())
       }
     },
-    BackfilaMiskClientModule(),
     HttpClientsConfigModule(
       HttpClientsConfig(
         endpoints = mapOf(
