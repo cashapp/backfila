@@ -85,6 +85,12 @@ abstract class JooqBackfill<K, Param : Any> : Backfill {
    */
   abstract fun backfill(backfillBatch: BackfillBatch<K, Param>)
 
+  /**
+   * Hook that gives you a place to finalize the backfill.
+   * This is called when the backfill is complete or errored, errors are ignored
+   */
+  open fun finalizeBackfill() {}
+
   fun toByteString(key: K): ByteString {
     return keySerializer.toByteString(key)
   }

@@ -5,6 +5,8 @@ import app.cash.backfila.client.BackfilaClientServiceClientProvider
 import app.cash.backfila.client.BackfilaDefaultEndpointConfigModule
 import app.cash.backfila.client.ForConnectors
 import app.cash.backfila.dashboard.ViewLogsUrlProvider
+import app.cash.backfila.protos.clientservice.FinalizeBackfillRequest
+import app.cash.backfila.protos.clientservice.FinalizeBackfillResponse
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.KeyRange
@@ -79,6 +81,10 @@ fun main(args: Array<String>) {
                 }
 
                 override suspend fun runBatch(request: RunBatchRequest): RunBatchResponse {
+                  TODO("Not yet implemented")
+                }
+
+                override suspend fun finalizeBacfkill(request: FinalizeBackfillRequest): FinalizeBackfillResponse {
                   TODO("Not yet implemented")
                 }
               }

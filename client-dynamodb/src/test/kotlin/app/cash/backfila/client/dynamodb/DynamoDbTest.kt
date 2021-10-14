@@ -12,6 +12,7 @@ import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.jupiter.api.Test
+import wisp.logging.LogCollector
 
 @MiskTest(startService = true)
 class DynamoDbBackfillTest {
@@ -22,6 +23,7 @@ class DynamoDbBackfillTest {
   @Inject lateinit var dynamoDb: DynamoDBMapper
   @Inject lateinit var backfila: Backfila
   @Inject lateinit var testData: DynamoMusicTableTestData
+  @Inject lateinit var logCollector: LogCollector
 
   @Test
   fun `happy path`() {
@@ -37,6 +39,7 @@ class DynamoDbBackfillTest {
 
     val updatedTrackItem = dynamoDb.load(trackItem)!!
     assertThat(updatedTrackItem.track_title).isEqualTo("Thriller (EXPLICIT)")
+    assertThat(run.backfill.finalized).isTrue()
   }
 
   @Test
@@ -54,6 +57,9 @@ class DynamoDbBackfillTest {
     dynamoDb: DynamoDBMapper
   ) : UpdateInPlaceDynamoDbBackfill<TrackItem, MakeTracksExplicitBackfill.ExplicitParameters>(dynamoDb) {
 
+    var finalized = false
+      private set
+
     override fun runOne(item: TrackItem, config: BackfillConfig<ExplicitParameters>): Boolean {
       val trackTitle = item.track_title ?: return false
       if (trackTitle.endsWith(" (EXPLICIT)")) return false // Idempotent retry?
@@ -70,5 +76,10 @@ class DynamoDbBackfillTest {
     )
 
     override fun fixedSegmentCount(config: BackfillConfig<ExplicitParameters>): Int? = 16
+
+    override fun finalize() {
+      require(!finalized) { "multiple finalize calls" }
+      finalized = true
+    }
   }
 }

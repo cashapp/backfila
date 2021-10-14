@@ -67,6 +67,10 @@ internal class EmbeddedBackfillRun<B : Backfill>(
     }
   }
 
+  override fun finalizeBackfill() {
+    operator.finalizeBackfill()
+  }
+
   override fun precomputeScan(): GetNextBatchRangeResponse {
     val notDone = precomputeProgress.filterNot { it.value.done }
     check(notDone.isNotEmpty()) { "Nothing left to precompute" }

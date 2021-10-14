@@ -3,6 +3,7 @@ package app.cash.backfila.client.spi
 import app.cash.backfila.client.BackfilaClientLoggingSetupProvider
 import app.cash.backfila.client.UnknownBackfillException
 import app.cash.backfila.client.internal.BackfillOperatorFactory
+import app.cash.backfila.protos.clientservice.FinalizeBackfillRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
@@ -79,6 +80,16 @@ class BackfilaClientServiceHandler @Inject constructor(
           .exception_stack_trace(ExceptionUtils.getStackTrace(exception))
           .build()
       }
+    }
+  }
+
+  @Throws(UnknownBackfillException::class)
+  fun finalizeBackfill(request: FinalizeBackfillRequest) {
+    loggingSetupProvider.withBackfillRunLogging(request.backfill_name, request.backfill_id) {
+      logger.info { "Finalizing backfill `${request.backfill_name}::${request.backfill_id}`" }
+
+      val operator = operatorFactory.create(request.backfill_name, request.backfill_id)
+      return@withBackfillRunLogging operator.finalizeBackfill()
     }
   }
 

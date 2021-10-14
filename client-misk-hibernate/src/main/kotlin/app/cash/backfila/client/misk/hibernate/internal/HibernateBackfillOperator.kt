@@ -315,6 +315,10 @@ internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : An
     return RunBatchResponse.Builder().build()
   }
 
+  override fun finalizeBackfill() {
+    backfill.finalizeBackfill()
+  }
+
   private fun HibernateBackfill<*, *, *>.getPrimaryKeyPath(queryRoot: Root<*>): Path<Number> {
     val fields = primaryKeyHibernateName().split('.')
     var path = queryRoot as Path<Number>

@@ -110,6 +110,10 @@ class JooqBackfillOperator<K, Param : Any> internal constructor(
     return RunBatchResponse.Builder().build()
   }
 
+  override fun finalizeBackfill() {
+    backfill.finalizeBackfill()
+  }
+
   private fun computeOverallRange(
     partitionName: String,
     request: PrepareBackfillRequest

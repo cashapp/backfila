@@ -133,6 +133,14 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
       .build()
   }
 
+  override fun finalizeBackfill() {
+    try {
+      backfill.finalize()
+    } catch (t: Throwable) {
+      // Ignore errors from finalize
+    }
+  }
+
   private fun Map<String, AttributeValue>.toKeyRange(originalRange: DynamoDbKeyRange): KeyRange {
     require(originalRange.start + 1 == originalRange.end)
     return keyRangeCodec.encodeKeyRange(originalRange.start, originalRange.end, originalRange.count, this)

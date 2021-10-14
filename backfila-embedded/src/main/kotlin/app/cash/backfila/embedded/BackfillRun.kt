@@ -32,9 +32,13 @@ interface BackfillRun<B : Backfill> {
 
   /** Prepares, scans and runs the whole backfill. */
   fun execute() {
-    precomputeRemaining()
-    scanRemaining()
-    runAllScanned()
+    try {
+      precomputeRemaining()
+      scanRemaining()
+      runAllScanned()
+    } finally {
+      finalizeBackfill()
+    }
     check(complete()) { "$this failed to run everything. Probably a bug." }
   }
 
@@ -60,6 +64,9 @@ interface BackfillRun<B : Backfill> {
 
   /** Runs all the batches that are scanned and ready to run. */
   fun runAllScanned()
+
+  /** Finalizes the Backfill */
+  fun finalizeBackfill()
 
   fun complete(): Boolean
 }

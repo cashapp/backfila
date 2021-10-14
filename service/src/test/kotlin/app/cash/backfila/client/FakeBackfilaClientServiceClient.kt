@@ -1,5 +1,7 @@
 package app.cash.backfila.client
 
+import app.cash.backfila.protos.clientservice.FinalizeBackfillRequest
+import app.cash.backfila.protos.clientservice.FinalizeBackfillResponse
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.KeyRange
@@ -91,4 +93,7 @@ class FakeBackfilaClientServiceClient @Inject constructor() : BackfilaClientServ
     runBatchRequests.send(request)
     return runBatchResponses.receive().getOrThrow()
   }
+
+  override suspend fun finalizeBacfkill(request: FinalizeBackfillRequest) =
+    FinalizeBackfillResponse()
 }

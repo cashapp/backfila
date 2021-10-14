@@ -43,6 +43,12 @@ abstract class DynamoDbBackfill<I : Any, P : Any> : Backfill {
   abstract fun runBatch(items: List<I>, config: BackfillConfig<P>)
 
   /**
+   * Called after all batches have been processed or error
+   * Override in a backfill to handle finalization and cleanup
+   */
+  open fun finalize() {}
+
+  /**
    * Override this to force Backfila to run this number of batches in total, divided among the
    * partitions.
    *

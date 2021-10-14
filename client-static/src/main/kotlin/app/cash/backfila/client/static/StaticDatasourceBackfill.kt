@@ -50,6 +50,12 @@ abstract class StaticDatasourceBackfill<I : Any, P : Any> : Backfill {
   }
 
   /**
+   * Hook that gives you a place to finalize the backfill.
+   * This is called when the backfill is complete or errored, errors are ignored
+   */
+  open fun finalizeBackfill() {}
+
+  /**
    * This invokes the static list of items that the backfill will iterate over.
    */
   abstract val staticDatasource: List<I>

@@ -100,6 +100,10 @@ class StaticDatasourceBackfillOperator<I : Any, P : Any>(
       .build()
   }
 
+  override fun finalizeBackfill() {
+    backfill.finalizeBackfill()
+  }
+
   data class DecodedRange(
     val start: Int,
     val end: Int

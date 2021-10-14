@@ -1,5 +1,7 @@
 package app.cash.backfila.client
 
+import app.cash.backfila.protos.clientservice.FinalizeBackfillRequest
+import app.cash.backfila.protos.clientservice.FinalizeBackfillResponse
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
@@ -24,6 +26,10 @@ internal class EnvoyClientServiceClient internal constructor(
 
   override suspend fun runBatch(request: RunBatchRequest): RunBatchResponse {
     return api.runBatch(request)
+  }
+
+  override suspend fun finalizeBacfkill(request: FinalizeBackfillRequest): FinalizeBackfillResponse {
+    return api.finalizeBackfill(request)
   }
 
   private fun <T> Response<T>.getOrThrow(): T {

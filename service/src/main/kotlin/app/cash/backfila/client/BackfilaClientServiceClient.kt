@@ -1,5 +1,7 @@
 package app.cash.backfila.client
 
+import app.cash.backfila.protos.clientservice.FinalizeBackfillRequest
+import app.cash.backfila.protos.clientservice.FinalizeBackfillResponse
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
@@ -13,4 +15,6 @@ interface BackfilaClientServiceClient {
   suspend fun getNextBatchRange(request: GetNextBatchRangeRequest): GetNextBatchRangeResponse
 
   suspend fun runBatch(request: RunBatchRequest): RunBatchResponse
+
+  suspend fun finalizeBacfkill(request: FinalizeBackfillRequest): FinalizeBackfillResponse
 }

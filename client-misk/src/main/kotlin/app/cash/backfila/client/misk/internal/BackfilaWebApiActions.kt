@@ -2,6 +2,8 @@ package app.cash.backfila.client.misk.internal
 
 import app.cash.backfila.client.UnknownBackfillException
 import app.cash.backfila.client.spi.BackfilaClientServiceHandler
+import app.cash.backfila.protos.clientservice.FinalizeBackfillRequest
+import app.cash.backfila.protos.clientservice.FinalizeBackfillResponse
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
@@ -55,6 +57,21 @@ internal class RunBatchAction @Inject constructor(
   @AvailableWhenDegraded
   fun runBatch(@RequestBody request: RunBatchRequest): RunBatchResponse =
     wrapExceptions { clientServiceHandler.runBatch(request) }
+}
+
+internal class FinalizeBackfillAction @Inject constructor(
+  private val clientServiceHandler: BackfilaClientServiceHandler,
+) : WebAction {
+  @Post("/backfila/finalize-backfill")
+  @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
+  @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)
+  @Authenticated(services = ["backfila"])
+  @LogRequestResponse(bodySampling = 1.0, errorBodySampling = 1.0)
+  @AvailableWhenDegraded
+  fun finalizeBackfill(@RequestBody request: FinalizeBackfillRequest): FinalizeBackfillResponse {
+    wrapExceptions { clientServiceHandler.finalizeBackfill(request) }
+    return FinalizeBackfillResponse()
+  }
 }
 
 private fun <R> wrapExceptions(

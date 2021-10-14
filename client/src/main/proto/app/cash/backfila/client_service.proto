@@ -131,3 +131,14 @@ message PipelinedData {
 message PipelinedRecord {
   optional bytes data = 1;
 }
+
+message FinalizeBackfillRequest {
+  // A unique identifier for this backfill run.
+  // Can be used as a caching key since backfill metadata is immutable after creation.
+  optional string backfill_id = 1;
+
+  optional string backfill_name = 2;
+}
+
+message FinalizeBackfillResponse {
+}

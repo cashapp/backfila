@@ -82,4 +82,10 @@ abstract class HibernateBackfill<E : DbEntity<E>, Pkey : Any, Param : Any> : Bac
    */
   open fun runOne(pkey: Pkey, config: BackfillConfig<Param>) {
   }
+
+  /**
+   * Hook that gives you a place to finalize the backfill.
+   * This is called when the backfill is complete or errored, errors are ignored
+   */
+  open fun finalizeBackfill() {}
 }

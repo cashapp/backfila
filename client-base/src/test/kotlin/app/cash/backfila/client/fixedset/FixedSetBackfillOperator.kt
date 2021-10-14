@@ -77,6 +77,10 @@ class FixedSetBackfillOperator<Param : Any>(
     return RunBatchResponse.Builder().build() // Return empty 200
   }
 
+  override fun finalizeBackfill() {
+    backfill.finalizeBackfill()
+  }
+
   private fun makeKeyRange(
     start: Int,
     end: Int
