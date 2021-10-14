@@ -2,6 +2,7 @@ package app.cash.backfila.service.runner
 
 import app.cash.backfila.client.BackfilaClientServiceClient
 import app.cash.backfila.client.ConnectorProvider
+import app.cash.backfila.protos.clientservice.FinalizeBackfillRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.PipelinedData
 import app.cash.backfila.protos.clientservice.RunBatchRequest
@@ -99,7 +100,12 @@ class BackfillRunner private constructor(
   fun run() {
     factory.loggingSetupProvider.withLogging(backfillName, backfillRunId, partitionName) {
       runBlocking(MDCContext()) {
-        start(this)
+        try {
+          start(this)
+        } finally {
+          logger.info { "Runner finalizing backfill: ${logLabel()}" }
+          finalize()
+        }
       }
       logger.info { "Runner cleaning up lease: ${logLabel()}" }
       clearLease()
@@ -374,6 +380,15 @@ class BackfillRunner private constructor(
         }
       }
     }
+  }
+
+  private suspend fun finalize() {
+    client.finalizeBacfkill(
+      FinalizeBackfillRequest(
+        metadata.backfillRunId.toString(),
+        backfillName,
+      )
+    )
   }
 
   fun logLabel() = "$backfillName::$backfillRunId::$partitionName::$partitionId"
