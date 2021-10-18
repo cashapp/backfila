@@ -57,7 +57,7 @@ interface EnvoyClientServiceApi {
   )
   fun finalizeBackfill(
     @Body request: FinalizeBackfillRequest
-  ): FinalizeBackfillResponse
+  ): Call<FinalizeBackfillResponse>
 
   companion object {
     private const val BASE_PATH = "/services/squareup.backfila.clientservice.BackfilaClientService"

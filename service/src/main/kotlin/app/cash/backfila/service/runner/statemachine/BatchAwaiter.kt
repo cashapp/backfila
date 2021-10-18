@@ -190,7 +190,16 @@ class BatchAwaiter(
         session,
         backfillRunner.factory.queryFactory
       )
-      if (partitions.all { it.run_state == BackfillState.COMPLETE }) {
+      partitions.all { it.run_state == BackfillState.COMPLETE }
+    }
+
+    if (runComplete) {
+      // Finalize the backfill before marking it complete
+      logger.info { "Finalizing backfill ${backfillRunner.backfillName}" }
+      backfillRunner.finalize()
+
+      backfillRunner.factory.transacter.transaction { session ->
+        val dbRunPartition = session.load(backfillRunner.partitionId)
         dbRunPartition.backfill_run.complete()
         logger.info { "Backfill ${backfillRunner.backfillName} completed" }
 
@@ -201,13 +210,8 @@ class BatchAwaiter(
             message = "backfill completed"
           )
         )
-
-        return@transaction true
       }
-      false
-    }
 
-    if (runComplete) {
       backfillRunner.factory.slackHelper.runCompleted(backfillRunner.backfillRunId)
     }
   }

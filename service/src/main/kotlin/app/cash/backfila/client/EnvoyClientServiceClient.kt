@@ -28,8 +28,8 @@ internal class EnvoyClientServiceClient internal constructor(
     return api.runBatch(request)
   }
 
-  override suspend fun finalizeBacfkill(request: FinalizeBackfillRequest): FinalizeBackfillResponse {
-    return api.finalizeBackfill(request)
+  override fun finalizeBacfkill(request: FinalizeBackfillRequest): FinalizeBackfillResponse {
+    return api.finalizeBackfill(request).execute().getOrThrow()
   }
 
   private fun <T> Response<T>.getOrThrow(): T {

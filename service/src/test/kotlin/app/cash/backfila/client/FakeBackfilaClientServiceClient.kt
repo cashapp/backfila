@@ -94,6 +94,6 @@ class FakeBackfilaClientServiceClient @Inject constructor() : BackfilaClientServ
     return runBatchResponses.receive().getOrThrow()
   }
 
-  override suspend fun finalizeBacfkill(request: FinalizeBackfillRequest) =
+  override fun finalizeBacfkill(request: FinalizeBackfillRequest) =
     FinalizeBackfillResponse()
 }

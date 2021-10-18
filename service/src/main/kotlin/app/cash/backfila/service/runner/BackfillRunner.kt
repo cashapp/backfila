@@ -100,12 +100,7 @@ class BackfillRunner private constructor(
   fun run() {
     factory.loggingSetupProvider.withLogging(backfillName, backfillRunId, partitionName) {
       runBlocking(MDCContext()) {
-        try {
-          start(this)
-        } finally {
-          logger.info { "Runner finalizing backfill: ${logLabel()}" }
-          finalize()
-        }
+        start(this)
       }
       logger.info { "Runner cleaning up lease: ${logLabel()}" }
       clearLease()
@@ -382,7 +377,7 @@ class BackfillRunner private constructor(
     }
   }
 
-  private suspend fun finalize() {
+  fun finalize() {
     client.finalizeBacfkill(
       FinalizeBackfillRequest(
         metadata.backfillRunId.toString(),
