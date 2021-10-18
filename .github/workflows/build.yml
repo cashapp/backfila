@@ -31,9 +31,9 @@ jobs:
       - name: Set gradle version
         run: sed --in-place -e "s/-SNAPSHOT/-$(date +%Y%m%d.%H%M)-$(git rev-parse --short HEAD)/" gradle.properties
 
-      - name: Publish packages
-        run: ./gradlew uploadArchives
+      - name: Publish the artifacts
+        run: ./gradlew publishAllPublicationsToMavenCentralRepository
         env:
-          ORG_GRADLE_PROJECT_SONATYPE_NEXUS_USERNAME: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
-          ORG_GRADLE_PROJECT_SONATYPE_NEXUS_PASSWORD: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
           ORG_GRADLE_PROJECT_signingKey: ${{ secrets.ARTIFACT_SIGNING_PRIVATE_KEY }}
