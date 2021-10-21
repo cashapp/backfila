@@ -27,12 +27,20 @@ class FakeBackfilaClientServiceClient @Inject constructor() : BackfilaClientServ
   /** Send responses or exceptions here to return them to the runner. */
   val runBatchResponses = Channel<Result<RunBatchResponse>>()
 
+  val finalizeRequests = Channel<FinalizeBackfillRequest>()
+  /** Send responses or exceptions here to return them to the runner. */
+  val finalizeResponses = Channel<Result<FinalizeBackfillResponse>>()
+
   fun dontBlockGetNextBatch() {
     getNextBatchRangeRequests.close()
   }
 
   fun dontBlockRunBatch() {
     runBatchRequests.close()
+  }
+
+  fun dontBlockFinalize() {
+    finalizeRequests.close()
   }
 
   override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
@@ -94,6 +102,11 @@ class FakeBackfilaClientServiceClient @Inject constructor() : BackfilaClientServ
     return runBatchResponses.receive().getOrThrow()
   }
 
-  override fun finalizeBacfkill(request: FinalizeBackfillRequest) =
-    FinalizeBackfillResponse()
+  override suspend fun finalizeBackfill(request: FinalizeBackfillRequest): FinalizeBackfillResponse {
+    if (finalizeRequests.isClosedForSend) {
+      return FinalizeBackfillResponse()
+    }
+    finalizeRequests.send(request)
+    return finalizeResponses.receive().getOrThrow()
+  }
 }

@@ -55,9 +55,9 @@ interface HttpClientServiceApi {
       "Content-Type: application/x-protobuf"
     ]
   )
-  fun finalizeBackfill(
+  suspend fun finalizeBackfill(
     @Body request: FinalizeBackfillRequest
-  ): Call<FinalizeBackfillResponse>
+  ): FinalizeBackfillResponse
 
   companion object {
     private const val BASE_PATH = "backfila"

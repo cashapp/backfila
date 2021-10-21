@@ -84,7 +84,7 @@ fun main(args: Array<String>) {
                   TODO("Not yet implemented")
                 }
 
-                override fun finalizeBacfkill(request: FinalizeBackfillRequest): FinalizeBackfillResponse {
+                override suspend fun finalizeBackfill(request: FinalizeBackfillRequest): FinalizeBackfillResponse {
                   TODO("Not yet implemented")
                 }
               }

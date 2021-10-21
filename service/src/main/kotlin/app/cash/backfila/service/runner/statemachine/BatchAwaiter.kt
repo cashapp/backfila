@@ -6,18 +6,21 @@ import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.DbEventLog
 import app.cash.backfila.service.persistence.DbRunPartition
 import app.cash.backfila.service.runner.BackfillRunner
-import java.time.Duration
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import misk.hibernate.load
 import okio.ByteString
+import retrofit2.HttpException
 import wisp.logging.getLogger
+import java.time.Duration
 
 /**
  * Receives RunBatch RPC futures from the BatchRunner and handles the results, potentially
@@ -168,51 +171,66 @@ class BatchAwaiter(
     return backfillRunner.runBatchAsync(this, batch)
   }
 
-  private fun completePartition() {
-    val runComplete = backfillRunner.factory.transacter.transaction { session ->
-      val dbRunPartition = session.load(backfillRunner.partitionId)
-      dbRunPartition.run_state = BackfillState.COMPLETE
-      updateProgress(dbRunPartition)
+  private suspend fun completePartition() {
+    val runComplete = withContext(Dispatchers.IO) {
+      backfillRunner.factory.transacter.transaction { session ->
+        val dbRunPartition = session.load(backfillRunner.partitionId)
+        dbRunPartition.run_state = BackfillState.COMPLETE
+        updateProgress(dbRunPartition)
 
-      session.save(
-        DbEventLog(
-          backfillRunner.backfillRunId,
-          partition_id = dbRunPartition.id,
-          type = DbEventLog.Type.STATE_CHANGE,
-          message = "partition completed"
+        session.save(
+          DbEventLog(
+            backfillRunner.backfillRunId,
+            partition_id = dbRunPartition.id,
+            type = DbEventLog.Type.STATE_CHANGE,
+            message = "partition completed"
+          )
         )
-      )
 
-      // If all states are COMPLETE the whole backfill will be completed.
-      // If multiple partitions finish at the same time they will retry due to the hibernate
-      // version mismatch on the DbBackfillRun.
-      val partitions = dbRunPartition.backfill_run.partitions(
-        session,
-        backfillRunner.factory.queryFactory
-      )
-      partitions.all { it.run_state == BackfillState.COMPLETE }
+        // If all states are COMPLETE the whole backfill will be completed.
+        // If multiple partitions finish at the same time they will retry due to the hibernate
+        // version mismatch on the DbBackfillRun.
+        val partitions = dbRunPartition.backfill_run.partitions(
+          session,
+          backfillRunner.factory.queryFactory
+        )
+        partitions.all { it.run_state == BackfillState.COMPLETE }
+      }
     }
 
     if (runComplete) {
       // Finalize the backfill before marking it complete
       logger.info { "Finalizing backfill ${backfillRunner.backfillName}" }
-      backfillRunner.finalize()
-
-      backfillRunner.factory.transacter.transaction { session ->
-        val dbRunPartition = session.load(backfillRunner.partitionId)
-        dbRunPartition.backfill_run.complete()
-        logger.info { "Backfill ${backfillRunner.backfillName} completed" }
-
-        session.save(
-          DbEventLog(
-            backfillRunner.backfillRunId,
-            type = DbEventLog.Type.STATE_CHANGE,
-            message = "backfill completed"
-          )
-        )
+      try {
+        backfillRunner.finalize()
+      } catch (e: Throwable) {
+        when (e) {
+          is HttpException ->
+            when (e.code()) {
+              404 -> logger.info { "No finalization endpoint found for ${backfillRunner.backfillName}, skipping" }
+              else -> throw FinalizeException(e)
+            }
+          else -> throw FinalizeException(e)
+        }
       }
 
-      backfillRunner.factory.slackHelper.runCompleted(backfillRunner.backfillRunId)
+      withContext(Dispatchers.IO) {
+        backfillRunner.factory.transacter.transaction { session ->
+          val dbRunPartition = session.load(backfillRunner.partitionId)
+          dbRunPartition.backfill_run.complete()
+          logger.info { "Backfill ${backfillRunner.backfillName} completed" }
+
+          session.save(
+            DbEventLog(
+              backfillRunner.backfillRunId,
+              type = DbEventLog.Type.STATE_CHANGE,
+              message = "backfill completed"
+            )
+          )
+        }
+
+        backfillRunner.factory.slackHelper.runCompleted(backfillRunner.backfillRunId)
+      }
     }
   }
 

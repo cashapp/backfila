@@ -13,6 +13,7 @@ import app.cash.backfila.dashboard.StopBackfillRequest
 import app.cash.backfila.dashboard.UpdateBackfillAction
 import app.cash.backfila.dashboard.UpdateBackfillRequest
 import app.cash.backfila.fakeCaller
+import app.cash.backfila.protos.clientservice.FinalizeBackfillResponse
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.KeyRange
 import app.cash.backfila.protos.clientservice.RunBatchResponse
@@ -23,10 +24,10 @@ import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.runner.BackfillRunner
 import app.cash.backfila.service.runner.EXTEND_LEASE_PERIOD
+import app.cash.backfila.service.runner.statemachine.FinalizeException
 import app.cash.backfila.service.scheduler.LeaseHunter
 import com.google.inject.Module
-import java.util.concurrent.TimeUnit
-import javax.inject.Inject
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import misk.hibernate.Transacter
@@ -35,9 +36,16 @@ import misk.scope.ActionScope
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClock
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.ResponseBody.Companion.toResponseBody
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import retrofit2.HttpException
+import retrofit2.Response
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
 @MiskTest(startService = true)
 class BackfillRunnerTest {
@@ -108,8 +116,12 @@ class BackfillRunnerTest {
 
   // An important use case is serial / single thread backfills.
   // Make sure we only invoke one and wait for it.
-  @Test fun onlyOneParallelRpc() {
-    fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
+  @Test
+  fun onlyOneParallelRpc() {
+    with(fakeBackfilaClientServiceClient) {
+      dontBlockGetNextBatch()
+      dontBlockFinalize()
+    }
     val runner = startBackfill(numThreads = 1)
 
     runBlockingTestCancellable {
@@ -131,8 +143,13 @@ class BackfillRunnerTest {
     }
   }
 
-  @Test fun parametersAreSupplied() {
-    fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
+  @Test
+  fun parametersAreSupplied() {
+    with(fakeBackfilaClientServiceClient) {
+      dontBlockGetNextBatch()
+      dontBlockFinalize()
+    }
+
     val runner = startBackfill(numThreads = 1)
 
     runBlockingTestCancellable {
@@ -143,8 +160,13 @@ class BackfillRunnerTest {
     }
   }
 
-  @Test fun `batch size is supplied`() {
-    fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
+  @Test
+  fun `batch size is supplied`() {
+    with(fakeBackfilaClientServiceClient) {
+      dontBlockGetNextBatch()
+      dontBlockFinalize()
+    }
+
     val runner = startBackfill(numThreads = 1)
     scope.fakeCaller(user = "molly") {
       updateBackfillAction.update(
@@ -162,8 +184,12 @@ class BackfillRunnerTest {
     }
   }
 
-  @Test fun parallelCallsLimited() {
-    fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
+  @Test
+  fun parallelCallsLimited() {
+    with(fakeBackfilaClientServiceClient) {
+      dontBlockGetNextBatch()
+      dontBlockFinalize()
+    }
     val runner = startBackfill(numThreads = 3)
 
     runBlockingTestCancellable {
@@ -192,7 +218,10 @@ class BackfillRunnerTest {
 
   // Make sure we are truly concurrent, i.e. we can process a RunBatch response even if
   // GetNextBatch is awaiting.
-  @Test fun processRunBatchWhileGetNextBatchWaiting() {
+  @Test
+  fun processRunBatchWhileGetNextBatchWaiting() {
+    fakeBackfilaClientServiceClient.dontBlockFinalize()
+
     val runner = startBackfill(numThreads = 1)
 
     // Disable precomputing to avoid making interfering calls to GetNextBatch
@@ -232,7 +261,10 @@ class BackfillRunnerTest {
   }
 
   // The cursor for GetNextBatch should be ahead of the DB cursor.
-  @Test fun getNextBatchCursorSeparateFromDb() {
+  @Test
+  fun getNextBatchCursorSeparateFromDb() {
+    fakeBackfilaClientServiceClient.dontBlockFinalize()
+
     val runner = startBackfill(numThreads = 1)
 
     // Disable precomputing to avoid making interfering calls to GetNextBatch
@@ -315,8 +347,12 @@ class BackfillRunnerTest {
     }
   }
 
-  @Test fun stopThroughApi() {
-    fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
+  @Test
+  fun stopThroughApi() {
+    with(fakeBackfilaClientServiceClient) {
+      dontBlockGetNextBatch()
+      dontBlockFinalize()
+    }
     val runner = startBackfill(numThreads = 1)
 
     runBlockingTestCancellable {
@@ -346,8 +382,12 @@ class BackfillRunnerTest {
   }
 
   // Batches are processed in order even when one fails
-  @Test fun failedBatchRetriedAfterBackoff() {
-    fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
+  @Test
+  fun failedBatchRetriedAfterBackoff() {
+    with(fakeBackfilaClientServiceClient) {
+      dontBlockGetNextBatch()
+      dontBlockFinalize()
+    }
     val runner = startBackfill(numThreads = 2)
 
     runBlockingTestCancellable {
@@ -390,8 +430,12 @@ class BackfillRunnerTest {
     }
   }
 
-  @Test fun retriesExhaustedPausesBackfill() {
-    fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
+  @Test
+  fun retriesExhaustedPausesBackfill() {
+    with(fakeBackfilaClientServiceClient) {
+      dontBlockGetNextBatch()
+      dontBlockFinalize()
+    }
     val runner = startBackfill(numThreads = 1)
 
     runBlockingTestCancellable {
@@ -431,8 +475,12 @@ class BackfillRunnerTest {
     )
   }
 
-  @Test fun `fails batch when stack trace is returned`() {
-    fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
+  @Test
+  fun `fails batch when stack trace is returned`() {
+    with(fakeBackfilaClientServiceClient) {
+      dontBlockGetNextBatch()
+      dontBlockFinalize()
+    }
     val runner = startBackfill(numThreads = 2)
 
     runBlockingTestCancellable {
@@ -484,7 +532,9 @@ class BackfillRunnerTest {
     assertThat(status.event_logs[0].extra_data).isEqualTo("fake stacktrace")
   }
 
-  @Test fun skipEmptyBatches() {
+  @Test
+  fun skipEmptyBatches() {
+    fakeBackfilaClientServiceClient.dontBlockFinalize()
     val runner = startBackfill(numThreads = 1)
 
     // Disable precomputing to avoid making interfering calls to GetNextBatch
@@ -515,8 +565,12 @@ class BackfillRunnerTest {
     }
   }
 
-  @Test fun backoffRequestedByClient() {
-    fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
+  @Test
+  fun backoffRequestedByClient() {
+    with(fakeBackfilaClientServiceClient) {
+      dontBlockGetNextBatch()
+      dontBlockFinalize()
+    }
     val runner = startBackfill(numThreads = 1)
 
     runBlockingTestCancellable {
@@ -548,8 +602,12 @@ class BackfillRunnerTest {
     }
   }
 
-  @Test fun backoffOnSuccessfulRequests() {
-    fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
+  @Test
+  fun backoffOnSuccessfulRequests() {
+    with(fakeBackfilaClientServiceClient) {
+      dontBlockGetNextBatch()
+      dontBlockFinalize()
+    }
     val runner = startBackfill(numThreads = 1, extraSleepMs = 1000L)
 
     runBlockingTestCancellable {
@@ -578,8 +636,12 @@ class BackfillRunnerTest {
     }
   }
 
-  @Test fun numThreadsIncreased() {
-    fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
+  @Test
+  fun numThreadsIncreased() {
+    with(fakeBackfilaClientServiceClient) {
+      dontBlockGetNextBatch()
+      dontBlockFinalize()
+    }
     val runner = startBackfill(numThreads = 3)
 
     runBlockingTestCancellable {
@@ -621,8 +683,12 @@ class BackfillRunnerTest {
     }
   }
 
-  @Test fun `returning remaining batch range makes followup runbatch`() {
-    fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
+  @Test
+  fun `returning remaining batch range makes followup runbatch`() {
+    with(fakeBackfilaClientServiceClient) {
+      dontBlockGetNextBatch()
+      dontBlockFinalize()
+    }
     val runner = startBackfill(numThreads = 1)
 
     runBlockingTestCancellable {
@@ -701,9 +767,13 @@ class BackfillRunnerTest {
     }
   }
 
-  @Test fun `remaining batch range reduces parallelism`() {
+  @Test
+  fun `remaining batch range reduces parallelism`() {
     // This is desired behaviour so backfila quickly backs off when encountering the unexpected.
-    fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
+    with(fakeBackfilaClientServiceClient) {
+      dontBlockGetNextBatch()
+      dontBlockFinalize()
+    }
     val runner = startBackfill(numThreads = 3)
 
     runBlockingTestCancellable {
@@ -776,6 +846,91 @@ class BackfillRunnerTest {
       assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNull()
       runner.stop()
     }
+  }
+
+  @Test
+  fun `finalize error is ignored if endpoint does not exist`() {
+    with(fakeBackfilaClientServiceClient) {
+      dontBlockGetNextBatch()
+      dontBlockRunBatch()
+    }
+    var runner = startBackfill()
+
+    runBlockingTestCancellable {
+      launch(CoroutineName("fake finalizer")) {
+        val finalizeRequest = fakeBackfilaClientServiceClient.finalizeRequests.receive()
+        assertThat(finalizeRequest.backfill_id).isEqualTo(runner.backfillRunId.id.toString())
+        assertThat(finalizeRequest.backfill_name).isEqualTo(runner.backfillName)
+
+        fakeBackfilaClientServiceClient.finalizeResponses.send(
+          Result.failure(object : HttpException(
+            Response.error<FinalizeBackfillResponse>(
+              404, "Doesn't exist".toResponseBody("text/plain".toMediaType())
+            )
+          ) {
+            })
+        )
+      }
+
+      launch(CoroutineName("backfill runner")) {
+        runner.start(this)
+        leaseHunter.hunt()
+          .single()
+          .start(this)
+
+        runner.stop()
+      }
+    }
+    val status = getBackfillStatusAction.status(runner.backfillRunId.id)
+    // All partitions complete.
+    assertThat(status.state).isEqualTo(BackfillState.COMPLETE)
+    val partition = status.partitions.find { it.id == runner.partitionId.id }!!
+    assertThat(partition.state).isEqualTo(BackfillState.COMPLETE)
+    assertThat(status.event_logs[0].message).isEqualTo("backfill completed")
+  }
+
+  @Test
+  fun `finalize error prevents backfill from completing`() {
+    with(fakeBackfilaClientServiceClient) {
+      dontBlockGetNextBatch()
+      dontBlockRunBatch()
+    }
+    var runner = startBackfill()
+
+    val err = assertThrows<FinalizeException> {
+      runBlockingTestCancellable {
+        launch(CoroutineName("fake finalizer")) {
+          val finalizeRequest = fakeBackfilaClientServiceClient.finalizeRequests.receive()
+          assertThat(finalizeRequest.backfill_id).isEqualTo(runner.backfillRunId.id.toString())
+          assertThat(finalizeRequest.backfill_name).isEqualTo(runner.backfillName)
+
+          fakeBackfilaClientServiceClient.finalizeResponses.send(
+            Result.failure(
+              HttpException(
+                Response.error<FinalizeBackfillResponse>(
+                  500, "something didn't work".toResponseBody("text/plain".toMediaType())
+                )
+              )
+            )
+          )
+        }
+
+        launch(CoroutineName("backfill runner")) {
+          runner.start(this)
+          leaseHunter.hunt().single().start(this)
+        }
+
+        runner.stop()
+      }
+    }
+    assertThat(err.cause).isInstanceOf(HttpException::class.java)
+
+    val status = getBackfillStatusAction.status(runner.backfillRunId.id)
+    // All partitions complete.
+    assertThat(status.state).isEqualTo(BackfillState.RUNNING)
+    val partition = status.partitions.find { it.id == runner.partitionId.id }!!
+    assertThat(partition.state).isEqualTo(BackfillState.COMPLETE)
+    assertThat(status.event_logs[0].message).isEqualTo("partition completed")
   }
 
   private fun getSinglePartitionCursor(runner: BackfillRunner): Long? {
