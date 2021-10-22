@@ -10,12 +10,10 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import misk.hibernate.load
 import okio.ByteString
 import retrofit2.HttpException
@@ -172,30 +170,36 @@ class BatchAwaiter(
   }
 
   private suspend fun completePartition() {
-    val runComplete = withContext(Dispatchers.IO) {
-      backfillRunner.factory.transacter.transaction { session ->
-        val dbRunPartition = session.load(backfillRunner.partitionId)
-        dbRunPartition.run_state = BackfillState.COMPLETE
-        updateProgress(dbRunPartition)
+    val runComplete = backfillRunner.factory.transacter.transaction { session ->
+      val dbRunPartition = session.load(backfillRunner.partitionId)
+      updateProgress(dbRunPartition)
 
-        session.save(
-          DbEventLog(
-            backfillRunner.backfillRunId,
-            partition_id = dbRunPartition.id,
-            type = DbEventLog.Type.STATE_CHANGE,
-            message = "partition completed"
-          )
+      session.save(
+        DbEventLog(
+          backfillRunner.backfillRunId,
+          partition_id = dbRunPartition.id,
+          type = DbEventLog.Type.STATE_CHANGE,
+          message = "partition completed"
         )
+      )
 
-        // If all states are COMPLETE the whole backfill will be completed.
-        // If multiple partitions finish at the same time they will retry due to the hibernate
-        // version mismatch on the DbBackfillRun.
-        val partitions = dbRunPartition.backfill_run.partitions(
-          session,
-          backfillRunner.factory.queryFactory
-        )
-        partitions.all { it.run_state == BackfillState.COMPLETE }
-      }
+      // If all states are COMPLETE, for every other partition, the whole backfill will be completed.
+      // In this case, don't mark the partition as complete until after the finalize call. This
+      // will ensure that the BackfillRunner is not marked as NOT running can cancel this coroutine.
+      // If multiple partitions finish at the same time they will retry due to the hibernate
+      // version mismatch on the DbBackfillRun.
+      val partitions = dbRunPartition.backfill_run.partitions(
+        session,
+        backfillRunner.factory.queryFactory
+      )
+      partitions
+        .filterNot { it.id == backfillRunner.partitionId }
+        .all { it.run_state == BackfillState.COMPLETE }
+        .also { runComplete ->
+          if (!runComplete) {
+            dbRunPartition.run_state = BackfillState.COMPLETE
+          }
+        }
     }
 
     if (runComplete) {
@@ -214,23 +218,21 @@ class BatchAwaiter(
         }
       }
 
-      withContext(Dispatchers.IO) {
-        backfillRunner.factory.transacter.transaction { session ->
-          val dbRunPartition = session.load(backfillRunner.partitionId)
-          dbRunPartition.backfill_run.complete()
-          logger.info { "Backfill ${backfillRunner.backfillName} completed" }
+      backfillRunner.factory.transacter.transaction { session ->
+        val dbRunPartition = session.load(backfillRunner.partitionId)
+        dbRunPartition.run_state = BackfillState.COMPLETE
+        dbRunPartition.backfill_run.complete()
+        logger.info { "Backfill ${backfillRunner.backfillName} completed" }
 
-          session.save(
-            DbEventLog(
-              backfillRunner.backfillRunId,
-              type = DbEventLog.Type.STATE_CHANGE,
-              message = "backfill completed"
-            )
+        session.save(
+          DbEventLog(
+            backfillRunner.backfillRunId,
+            type = DbEventLog.Type.STATE_CHANGE,
+            message = "backfill completed"
           )
-        }
-
-        backfillRunner.factory.slackHelper.runCompleted(backfillRunner.backfillRunId)
+        )
       }
+      backfillRunner.factory.slackHelper.runCompleted(backfillRunner.backfillRunId)
     }
   }
 

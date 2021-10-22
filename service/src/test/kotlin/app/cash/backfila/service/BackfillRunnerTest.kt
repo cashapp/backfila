@@ -66,8 +66,11 @@ class BackfillRunnerTest {
   @Inject lateinit var updateBackfillAction: UpdateBackfillAction
 
   @Test fun happyCompleteRun() {
-    fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
-    fakeBackfilaClientServiceClient.dontBlockRunBatch()
+    with(fakeBackfilaClientServiceClient) {
+      dontBlockGetNextBatch()
+      dontBlockRunBatch()
+      dontBlockFinalize()
+    }
 
     var runner = startBackfill()
 
@@ -97,6 +100,8 @@ class BackfillRunnerTest {
     runBlockingTestCancellable {
       runner.start(this)
     }
+
+    runner.stop()
 
     status = getBackfillStatusAction.status(runner.backfillRunId.id)
     // All partitions complete.
@@ -857,7 +862,7 @@ class BackfillRunnerTest {
     var runner = startBackfill()
 
     runBlockingTestCancellable {
-      launch(CoroutineName("fake finalizer")) {
+      val fakeFinalizer = launch(CoroutineName("fakeFinalizer")) {
         val finalizeRequest = fakeBackfilaClientServiceClient.finalizeRequests.receive()
         assertThat(finalizeRequest.backfill_id).isEqualTo(runner.backfillRunId.id.toString())
         assertThat(finalizeRequest.backfill_name).isEqualTo(runner.backfillName)
@@ -872,15 +877,14 @@ class BackfillRunnerTest {
         )
       }
 
-      launch(CoroutineName("backfill runner")) {
-        runner.start(this)
-        leaseHunter.hunt()
-          .single()
-          .start(this)
+      runner.start(this)
+      leaseHunter.hunt()
+        .single()
+        .start(this)
 
-        runner.stop()
-      }
+      fakeFinalizer.join()
     }
+    runner.stop()
     val status = getBackfillStatusAction.status(runner.backfillRunId.id)
     // All partitions complete.
     assertThat(status.state).isEqualTo(BackfillState.COMPLETE)
@@ -899,7 +903,7 @@ class BackfillRunnerTest {
 
     val err = assertThrows<FinalizeException> {
       runBlockingTestCancellable {
-        launch(CoroutineName("fake finalizer")) {
+        val fakeFinalizer = launch(CoroutineName("fakeFinalizer")) {
           val finalizeRequest = fakeBackfilaClientServiceClient.finalizeRequests.receive()
           assertThat(finalizeRequest.backfill_id).isEqualTo(runner.backfillRunId.id.toString())
           assertThat(finalizeRequest.backfill_name).isEqualTo(runner.backfillName)
@@ -914,15 +918,13 @@ class BackfillRunnerTest {
             )
           )
         }
-
-        launch(CoroutineName("backfill runner")) {
-          runner.start(this)
-          leaseHunter.hunt().single().start(this)
-        }
-
-        runner.stop()
+        runner.start(this)
+        leaseHunter.hunt().single().start(this)
+        fakeFinalizer.join()
       }
     }
+
+    runner.stop()
     assertThat(err.cause).isInstanceOf(HttpException::class.java)
 
     val status = getBackfillStatusAction.status(runner.backfillRunId.id)
