@@ -55,7 +55,7 @@ subprojects {
   configure<SpotlessExtension> {
     kotlin {
       target("**/*.kt")
-      ktlint(Dependencies.ktlintVersion).userData(
+      ktlint(Versions.ktlint).userData(
               mapOf(
                       "indent_size" to "2",
                       "continuation_indent_size" to "4",
