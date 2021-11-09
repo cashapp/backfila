@@ -4,7 +4,7 @@
   "license": "SEE LICENSE IN https://github.com/cashapp/misk-web",
   "main": "src/index.tsx",
   "scripts": {
-    "build": "npm run-script lib && npm run-script test ",
+    "build": "npm run-script prebuild && npm run-script lib && npm run-script test ",
     "ci-build": "npm install && npm run-script clean && npm run-script prebuild && cross-env NODE_ENV=production npm run-script lib && npm run-script test ",
     "dev-build": "npm run-script dev-lib ",
     "clean": "rm -rf demo lib",
@@ -12,18 +12,19 @@
     "lib": "cross-env NODE_ENV=production webpack",
     "dev-lib": "cross-env NODE_ENV=development webpack",
     "lint": "prettier --write --config package.json \".{/src/**/,/}*.{md,css,scss,less,json,js,jsx,ts,tsx}\"",
-    "prebuild": "npm run-script lint",
+    "prebuild": "miskweb prebuild && npm run-script lint",
     "reinstall": "rm -rf node_modules && npm run-script install",
     "start": "npm run-script prebuild && cross-env NODE_ENV=development webpack-dev-server",
     "test": "jest --passWithNoTests --maxWorkers=2",
     "zip": "tar --exclude='.gitignore' --exclude='.old_build_files' --exclude='package.json' --exclude='package-lock.json' --exclude='prettier.config.js' --exclude='tsconfig.json' --exclude='tslint.json' --exclude='webpack.config.js' --exclude='yarn.lock' --exclude='demo' --exclude='lib' --exclude='.DS_Store' --exclude='*.log' --exclude='node_modules' --exclude='app.tgz' -czvf app.tgz ./"
   },
   "dependencies": {
+    "@emotion/react": "^11.5.0",
     "@misk/common": "0.1.27-26",
     "@misk/core": "0.1.27-26",
     "@misk/simpleredux": "0.1.27-26",
-    "react-timeago": "4.4.0",
-    "@types/react-timeago": "4.1.1"
+    "@types/react-timeago": "4.1.1",
+    "react-timeago": "4.4.0"
   },
   "devDependencies": {
     "@misk/dev": "0.1.27-26",

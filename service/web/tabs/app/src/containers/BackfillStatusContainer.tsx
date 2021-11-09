@@ -41,11 +41,14 @@ function ComputedCount(props: IComputedCountProps) {
         className={Classes.TOOLTIP_INDICATOR}
         content="Total record count is still being computed"
       >
-        <span>at&nbsp;least&nbsp;{props.computed_matching_record_count}</span>
+        <span>
+          at&nbsp;least&nbsp;
+          {props.computed_matching_record_count.toLocaleString()}
+        </span>
       </Tooltip>
     )
   }
-  return <span>{props.computed_matching_record_count}</span>
+  return <span>{props.computed_matching_record_count.toLocaleString()}</span>
 }
 
 function prettyEta(durationSeconds: number) {
@@ -292,7 +295,8 @@ class BackfillStatusContainer extends React.Component<
             </HTMLTable>
           </div>
           <div>
-            Total backfilled records: {total_backfilled_matching_record_count}
+            Total backfilled records:{" "}
+            {total_backfilled_matching_record_count.toLocaleString()}
           </div>
           <div>
             Total records to run:{" "}
@@ -317,7 +321,11 @@ class BackfillStatusContainer extends React.Component<
             />
           </div>
           <H3>Partitions</H3>
-          <HTMLTable bordered={true} striped={true} style={{ width: "100%" }}>
+          <HTMLTable
+            bordered={true}
+            striped={true}
+            style={{ width: "100%", fontFamily: "monospace" }}
+          >
             <thead>
               <tr>
                 <th>Name</th>
@@ -342,7 +350,7 @@ class BackfillStatusContainer extends React.Component<
                     {partition.pkey_start}&nbsp;to&nbsp;{partition.pkey_end}
                   </td>
                   <td style={{ textAlign: "right" }}>
-                    {partition.backfilled_matching_record_count}
+                    {partition.backfilled_matching_record_count.toLocaleString()}
                   </td>
                   <td style={{ textAlign: "right" }}>
                     <ComputedCount
@@ -375,7 +383,10 @@ class BackfillStatusContainer extends React.Component<
                   </td>
                   <td>
                     {partition.matching_records_per_minute && (
-                      <span>{partition.matching_records_per_minute} #/m</span>
+                      <span>
+                        {partition.matching_records_per_minute.toLocaleString()}{" "}
+                        #/m
+                      </span>
                     )}
                   </td>
                   <td>
@@ -422,7 +433,11 @@ class BackfillStatusContainer extends React.Component<
             </div>
           </Dialog>
           <H3>Event log (last 50)</H3>
-          <HTMLTable bordered={true} striped={true} style={{ width: "100%" }}>
+          <HTMLTable
+            bordered={true}
+            striped={true}
+            style={{ width: "100%", fontFamily: "monospace" }}
+          >
             <thead>
               <tr>
                 <th>Time</th>
@@ -435,8 +450,25 @@ class BackfillStatusContainer extends React.Component<
             <tbody>
               {status.event_logs.map((event_log: any) => (
                 <tr>
-                  <td style={{ paddingTop: 0, paddingBottom: 0 }}>
-                    {event_log.occurred_at}
+                  <td
+                    style={{
+                      paddingTop: 0,
+                      paddingBottom: 0,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {new Date(event_log.occurred_at)
+                      .toLocaleString("en-CA", {
+                        timeZoneName: "short",
+                        year: "numeric",
+                        month: "numeric",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit"
+                      })
+                      .replace(",", "")
+                      .replace(".m.", "m")}
                   </td>
                   <td style={{ paddingTop: 0, paddingBottom: 0 }}>
                     {event_log.user}
