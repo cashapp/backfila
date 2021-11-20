@@ -10,12 +10,10 @@ sourceSets {
 }
 
 dependencies {
-  implementation(Dependencies.guava)
   implementation(Dependencies.moshiCore)
   implementation(Dependencies.moshiKotlin)
   implementation(Dependencies.wireRuntime)
   implementation(Dependencies.guice)
-  implementation(Dependencies.okHttp)
   implementation(Dependencies.retrofit)
   implementation(Dependencies.retrofitMoshi)
   implementation(Dependencies.retrofitWire)

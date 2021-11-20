@@ -7,7 +7,6 @@ dependencies {
   implementation(Dependencies.moshiKotlin)
   implementation(Dependencies.wireRuntime)
   implementation(Dependencies.guice)
-  implementation(Dependencies.okHttp)
   implementation(Dependencies.retrofit)
   implementation(Dependencies.retrofitMock)
   implementation(Dependencies.retrofitMoshi)
