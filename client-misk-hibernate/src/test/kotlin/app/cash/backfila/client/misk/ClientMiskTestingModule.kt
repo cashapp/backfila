@@ -3,11 +3,12 @@ package app.cash.backfila.client.misk
 import app.cash.backfila.client.BackfilaClientLoggingSetupProvider
 import app.cash.backfila.client.BackfilaClientNoLoggingSetupProvider
 import app.cash.backfila.client.BackfilaHttpClientConfig
-import app.cash.backfila.embedded.EmbeddedBackfilaModule
 import app.cash.backfila.client.misk.hibernate.ChickenToBeefBackfill
-import app.cash.backfila.client.misk.hibernate.HibernateBackfillModule.Companion.create
+import app.cash.backfila.client.misk.hibernate.HibernateBackfillModule
 import app.cash.backfila.client.misk.hibernate.RecordNoParametersConfigValuesBackfill
 import app.cash.backfila.client.misk.hibernate.SinglePartitionHibernateTestBackfill
+import app.cash.backfila.client.misk.hibernate.StringKeyBackfill
+import app.cash.backfila.embedded.EmbeddedBackfilaModule
 import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
 import misk.hibernate.HibernateEntityModule
@@ -63,8 +64,9 @@ internal class ClientMiskTestingModule(
     bind(BackfilaClientLoggingSetupProvider::class.java)
       .to(BackfilaClientNoLoggingSetupProvider::class.java)
 
-    install(create<SinglePartitionHibernateTestBackfill>())
-    install(create<ChickenToBeefBackfill>())
-    install(create<RecordNoParametersConfigValuesBackfill>())
+    install(HibernateBackfillModule.create<SinglePartitionHibernateTestBackfill>())
+    install(HibernateBackfillModule.create<ChickenToBeefBackfill>())
+    install(HibernateBackfillModule.create<RecordNoParametersConfigValuesBackfill>())
+    install(HibernateBackfillModule.create<StringKeyBackfill>())
   }
 }

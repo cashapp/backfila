@@ -8,10 +8,10 @@ import com.google.inject.Binder
 import com.google.inject.TypeLiteral
 import com.google.inject.multibindings.MapBinder
 import com.google.inject.multibindings.Multibinder
+import javax.inject.Qualifier
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
 import misk.inject.KAbstractModule
-import javax.inject.Qualifier
 
 /**
  * Installs the [BackfillBackend] for Hibernate backfills. See the java doc for [RealBackfillModule].
@@ -44,6 +44,10 @@ private object HibernateBackfillBackendModule : AbstractModule() {
   override fun configure() {
     Multibinder.newSetBinder(binder(), BackfillBackend::class.java).addBinding()
       .to(HibernateBackend::class.java)
+
+    // Bind default primary key adapters
+    install(PrimaryKeyCursorAdapterModule.create(IdPrimaryKeyCursorAdapter))
+    install(PrimaryKeyCursorAdapterModule.create(StringPrimaryKeyCursorAdapter))
   }
 }
 

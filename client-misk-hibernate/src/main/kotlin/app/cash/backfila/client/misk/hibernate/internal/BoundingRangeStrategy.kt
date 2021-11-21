@@ -2,7 +2,6 @@ package app.cash.backfila.client.misk.hibernate.internal
 
 import app.cash.backfila.client.misk.hibernate.HibernateBackfill
 import app.cash.backfila.client.misk.hibernate.PartitionProvider
-import app.cash.backfila.protos.clientservice.KeyRange
 import com.google.common.collect.Ordering
 import javax.persistence.Table
 import kotlin.streams.toList
@@ -12,7 +11,7 @@ import misk.hibernate.Transacter
 import misk.hibernate.shards
 import misk.hibernate.transaction
 import misk.vitess.Keyspace
-import okio.ByteString
+import org.hibernate.internal.SessionImpl
 
 interface BoundingRangeStrategy<E : DbEntity<E>, Pkey : Any> {
   /**
@@ -23,46 +22,65 @@ interface BoundingRangeStrategy<E : DbEntity<E>, Pkey : Any> {
   fun computeBoundingRangeMax(
     backfill: HibernateBackfill<E, Pkey, *>,
     partitionName: String,
-    previousEndKey: ByteString?,
-    backfillRange: KeyRange,
+    previousEndKey: Pkey?,
+    backfillRangeStart: Pkey,
+    backfillRangeEnd: Pkey,
     scanSize: Long?
   ): Pkey?
 }
 
-class UnshardedHibernateBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any> (
+class UnshardedHibernateBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any>(
   private val partitionProvider: PartitionProvider
 ) : BoundingRangeStrategy<E, Pkey> {
   override fun computeBoundingRangeMax(
     backfill: HibernateBackfill<E, Pkey, *>,
     partitionName: String,
-    previousEndKey: ByteString?,
-    backfillRange: KeyRange,
+    previousEndKey: Pkey?,
+    backfillRangeStart: Pkey,
+    backfillRangeEnd: Pkey,
     scanSize: Long?
   ): Pkey? {
     return partitionProvider.transaction(partitionName) { session ->
-      selectMaxBound(backfill, session, schemaAndTable(backfill), previousEndKey, backfillRange, scanSize)
+      selectMaxBound(
+        backfill,
+        session,
+        schemaAndTable(backfill),
+        previousEndKey,
+        backfillRangeStart,
+        backfillRangeEnd,
+        scanSize,
+      )
     }
   }
 }
 
-class VitessShardedBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any> (
+class VitessShardedBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any>(
   private val partitionProvider: PartitionProvider
 ) : BoundingRangeStrategy<E, Pkey> {
   override fun computeBoundingRangeMax(
     backfill: HibernateBackfill<E, Pkey, *>,
     partitionName: String,
-    previousEndKey: ByteString?,
-    backfillRange: KeyRange,
+    previousEndKey: Pkey?,
+    backfillRangeStart: Pkey,
+    backfillRangeEnd: Pkey,
     scanSize: Long?
   ): Pkey? {
     return partitionProvider.transaction(partitionName) { session ->
       // We don't provide a schema when pinned to a shard.
-      selectMaxBound(backfill, session, onlyTable(backfill), previousEndKey, backfillRange, scanSize)
+      selectMaxBound(
+        backfill,
+        session,
+        onlyTable(backfill),
+        previousEndKey,
+        backfillRangeStart,
+        backfillRangeEnd,
+        scanSize,
+      )
     }
   }
 }
 
-class VitessSingleCursorBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any> (
+class VitessSingleCursorBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any>(
   private val transacter: Transacter,
   private val keyspace: Keyspace
 ) : BoundingRangeStrategy<E, Pkey> {
@@ -81,15 +99,23 @@ class VitessSingleCursorBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any> (
   override fun computeBoundingRangeMax(
     backfill: HibernateBackfill<E, Pkey, *>,
     partitionName: String,
-    previousEndKey: ByteString?,
-    backfillRange: KeyRange,
+    previousEndKey: Pkey?,
+    backfillRangeStart: Pkey,
+    backfillRangeEnd: Pkey,
     scanSize: Long?
   ): Pkey? {
     return transacter.shards(keyspace).parallelStream().map {
-      transacter.transaction(it) {
+      transacter.transaction(it) { session ->
         // We don't provide a schema when pinned to a shard.
-        session ->
-        selectMaxBound(backfill, session, onlyTable(backfill), previousEndKey, backfillRange, scanSize)
+        selectMaxBound(
+          backfill,
+          session,
+          onlyTable(backfill),
+          previousEndKey,
+          backfillRangeStart,
+          backfillRangeEnd,
+          scanSize,
+        )
       }
     }.toList()
       .filterNotNull()
@@ -104,29 +130,52 @@ private fun <E : DbEntity<E>, Pkey : Any> selectMaxBound(
   backfill: HibernateBackfill<E, Pkey, *>,
   session: Session,
   schemaAndTable: String,
-  previousEndKey: ByteString?,
-  backfillRange: KeyRange,
-  scanSize: Long?
+  previousEndKey: Pkey?,
+  backfillRangeStart: Pkey,
+  backfillRangeEnd: Pkey,
+  scanSize: Long?,
 ): Pkey? {
   // Hibernate doesn't support subqueries in FROM, and we don't want to read in 100k+ records,
   // so we use raw SQL here.
   val pkeyName = backfill.primaryKeyName()
+  val params = mutableListOf<Pkey>()
   var where = when {
-    previousEndKey != null -> "WHERE $pkeyName > ${previousEndKey.utf8()}"
-    else -> "WHERE $pkeyName >= ${backfillRange.start.utf8()}"
+    previousEndKey != null -> {
+      params.add(previousEndKey)
+      "WHERE $pkeyName > ?"
+    }
+    else -> {
+      params.add(backfillRangeStart)
+      "WHERE $pkeyName >= ?"
+    }
   }
-  where += " AND $pkeyName <= ${backfillRange.end.utf8()}"
+  params.add(backfillRangeEnd)
+  where += " AND $pkeyName <= ?"
+
   val sql = """
-        |SELECT MAX(s.$pkeyName) FROM
+        |SELECT MAX(s.$pkeyName) as result FROM
         | (SELECT DISTINCT $pkeyName FROM $schemaAndTable
         | $where
         | ORDER BY $pkeyName
         | LIMIT $scanSize) s
         """.trimMargin()
-  val max = session.hibernateSession.createNativeQuery(sql).uniqueResult()
+
+  val max = session.useConnection { connection ->
+    connection.prepareStatement(sql).use { ps ->
+      val pkeyType = session.hibernateSession.typeHelper.basic(backfill.pkeyClass.java)!!
+
+      params.forEachIndexed { index, pkey ->
+        pkeyType.nullSafeSet(ps, pkey, index + 1, session.hibernateSession as SessionImpl)
+      }
+
+      val rs = ps.executeQuery()
+      rs.next()
+      pkeyType.nullSafeGet(rs, "result", session.hibernateSession as SessionImpl, null)
+    }
+  }
 
   @Suppress("UNCHECKED_CAST") // Return type from the query should always match.
-  return max as Pkey? // I think we are always getting a Pkey here so the cast should be safe.
+  return max as Pkey?
 }
 
 private fun <E : DbEntity<E>, Pkey : Any> schemaAndTable(backfill: HibernateBackfill<E, Pkey, *>): String {
