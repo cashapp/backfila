@@ -45,8 +45,9 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
       )
     }
 
-    // TODO(mikepaw): dynamically select the segment count by probing DynamoDB.
-    val segmentCount = backfill.fixedSegmentCount(config) ?: 2048
+    // The maximum number of segments is 1,000,000 so we are currently setting it to the largest power 
+    // of 2 less than this value.
+    val segmentCount = backfill.fixedSegmentCount(config) ?: 524288
     val partitionCount = backfill.partitionCount(config)
     require(
       partitionCount in 1..segmentCount &&
