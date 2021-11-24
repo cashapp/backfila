@@ -7,7 +7,6 @@ dependencies {
   implementation(Dependencies.guice)
   implementation(Dependencies.moshiCore)
   implementation(Dependencies.moshiKotlin)
-  implementation(Dependencies.okHttp)
   implementation(Dependencies.okio)
   implementation(Dependencies.retrofit)
   implementation(Dependencies.retrofitMock)

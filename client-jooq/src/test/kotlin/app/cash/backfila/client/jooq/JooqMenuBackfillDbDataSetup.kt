@@ -1,8 +1,7 @@
 package app.cash.backfila.client.jooq
 
-import app.cash.backfila.client.jooq.gen.tables.references.MENU
 import app.cash.backfila.client.jooq.config.JooqTransacter
-import okhttp3.internal.toImmutableList
+import app.cash.backfila.client.jooq.gen.tables.references.MENU
 
 object JooqMenuBackfillDbDataSetup {
 
@@ -58,7 +57,7 @@ object JooqMenuBackfillDbDataSetup {
             expected.add(this)
           }
       }
-      expected.toImmutableList()
+      expected
     }
   }
 }
