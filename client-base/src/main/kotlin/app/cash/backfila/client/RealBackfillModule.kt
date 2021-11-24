@@ -8,11 +8,23 @@ import com.google.inject.AbstractModule
 import com.google.inject.multibindings.Multibinder
 import kotlin.reflect.KClass
 
-class RealBackfillModule @JvmOverloads constructor(
+class RealBackfillModule(
   private val config: BackfilaClientConfig,
   private val loggingSetupProvider: KClass<out BackfilaClientLoggingSetupProvider> =
     BackfilaClientNoLoggingSetupProvider::class,
 ) : AbstractModule() {
+
+  /**
+   * This constructor is used for java land.
+   */
+  @Suppress("unused")
+  @JvmOverloads
+  constructor(
+    config: BackfilaClientConfig,
+    loggingSetupProvider: Class<out BackfilaClientLoggingSetupProvider> =
+        BackfilaClientNoLoggingSetupProvider::class.java
+  ) : this(config, loggingSetupProvider.kotlin)
+
   override fun configure() {
     bind(BackfilaClientConfig::class.java).toInstance(config)
 
