@@ -1,9 +1,9 @@
 package app.cash.backfila.client.misk.hibernate.internal
 
 import app.cash.backfila.client.NoParameters
-import app.cash.backfila.client.misk.hibernate.HibernateBackfill
-import app.cash.backfila.client.misk.hibernate.PkeySqlAdapter
 import app.cash.backfila.client.internal.BackfillOperatorFactory
+import app.cash.backfila.client.misk.hibernate.HibernateBackfill
+import app.cash.backfila.client.misk.hibernate.PrimaryKeyCursorMapper
 import app.cash.backfila.client.spi.BackfilaParametersOperator
 import app.cash.backfila.client.spi.BackfillOperator
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
@@ -18,19 +18,15 @@ import app.cash.backfila.protos.clientservice.RunBatchResponse
 import com.google.common.base.Preconditions.checkArgument
 import com.google.common.base.Stopwatch
 import com.google.common.collect.ImmutableList
-import java.util.ArrayList
 import java.util.concurrent.TimeUnit
 import javax.persistence.criteria.Path
 import javax.persistence.criteria.Root
 import misk.exceptions.BadRequestException
 import misk.hibernate.DbEntity
-import misk.hibernate.Id
 import misk.hibernate.Operator.GE
 import misk.hibernate.Operator.GT
 import misk.hibernate.Operator.LE
 import misk.hibernate.Query
-import okio.ByteString
-import okio.ByteString.Companion.encodeUtf8
 import wisp.logging.getLogger
 
 /**
@@ -49,31 +45,26 @@ internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : An
 ) : BackfillOperator {
   private val partitionProvider = backfill.partitionProvider()
   private val boundingRangeStrategy = partitionProvider.boundingRangeStrategy<E, Pkey>()
-  private var pkeySqlAdapter: PkeySqlAdapter = backend.pkeySqlAdapter
+  private var primaryKeyCursorMapper: PrimaryKeyCursorMapper = backend.primaryKeyCursorMapper
   internal var queryFactory: Query.Factory = backend.queryFactory
 
   override fun name() = backfill.javaClass.toString()
 
-  private fun pkeyFromString(string: String): Pkey =
-    pkeySqlAdapter.pkeyFromString(backfill.pkeyClass.java, string)
-
-  // TODO this should be handled by a subtype that is tailored to integer primary keys
   private fun validateRange(range: KeyRange?) {
-    if (range == null) return
-    try {
-      if (range.start != null) {
-        range.start.utf8().toLong()
-      }
-    } catch (e: NumberFormatException) {
-      throw BadRequestException("Start of range must be a number", e)
+    if (range == null) {
+      return
     }
 
-    try {
-      if (range.end != null) {
-        range.end.utf8().toLong()
+    if (range.start != null) {
+      primaryKeyCursorMapper.fromByteString(backfill.pkeyClass.java, range.start).onFailure { ex ->
+        throw BadRequestException("Start of requested range is invalid", ex)
       }
-    } catch (e: NumberFormatException) {
-      throw BadRequestException("End of range must be a number", e)
+    }
+
+    if (range.end != null) {
+      primaryKeyCursorMapper.fromByteString(backfill.pkeyClass.java, range.end).onFailure { ex ->
+        throw BadRequestException("End of requested range is invalid", ex)
+      }
     }
   }
 
@@ -111,15 +102,16 @@ internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : An
           )
         }!!
 
-      val min = minmax[0]
-      val max = minmax[1]
+      val min = minmax[0] as Pkey?
+      val max = minmax[1] as Pkey?
       if (min == null) {
         // Empty table, no work to do for this partition.
         KeyRange.Builder().build()
       } else {
+        checkNotNull(max) { "Table max was null but min wasn't, this shouldn't happen" }
         KeyRange.Builder()
-          .start(requestedRange?.start ?: min.toString().encodeUtf8())
-          .end(requestedRange?.end ?: max.toString().encodeUtf8())
+          .start(requestedRange?.start ?: primaryKeyCursorMapper.toByteString(min))
+          .end(requestedRange?.end ?: primaryKeyCursorMapper.toByteString(max))
           .build()
       }
     }
@@ -175,16 +167,19 @@ internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : An
     private val precomputing: Boolean = request.precomputing == true
 
     // Initialized from the request and gets updated as batches are returned.
-    private var previousEndKey: ByteString? = request.previous_end_key
-
+    private var previousEndKey: Pkey? = request.previous_end_key?.let {
+      primaryKeyCursorMapper.fromByteString(backfill.pkeyClass.java, it).getOrThrow()
+    }
     private var boundingMax: Pkey? = null
 
     private fun addBoundingMin(query: Query<E>) {
       if (previousEndKey != null) {
-        val previousEndPkey = pkeyFromString(previousEndKey!!.utf8())
-        query.dynamicAddConstraint(backfill.primaryKeyHibernateName(), GT, previousEndPkey)
+        query.dynamicAddConstraint(backfill.primaryKeyHibernateName(), GT, previousEndKey)
       } else {
-        val startPkey = pkeyFromString(backfillRange.start.utf8())
+        val startPkey = primaryKeyCursorMapper.fromByteString(
+          backfill.pkeyClass.java,
+          backfillRange.start!!,
+        ).getOrThrow()
         query.dynamicAddConstraint(backfill.primaryKeyHibernateName(), GE, startPkey)
       }
     }
@@ -196,8 +191,12 @@ internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : An
         val stopwatch = Stopwatch.createStarted()
         boundingMax = boundingRangeStrategy
           .computeBoundingRangeMax(
-            backfill, partitionName, previousEndKey, backfillRange,
-            scanSize
+            backfill,
+            partitionName,
+            previousEndKey,
+            primaryKeyCursorMapper.fromByteString(backfill.pkeyClass.java, backfillRange.start).getOrThrow(),
+            primaryKeyCursorMapper.fromByteString(backfill.pkeyClass.java, backfillRange.end).getOrThrow(),
+            scanSize,
           )
         if (boundingMax == null) {
           logger.info("Bounding range returned no records, done computing batches")
@@ -232,8 +231,7 @@ internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : An
           }.dynamicUniqueResult(session, listOf(pkeyProperty))
 
           @Suppress("UNCHECKED_CAST") // Return type from the query should always match.
-          batchEndPkey =
-            stringBatchEndPkeyRow?.single() as Pkey? // I think we are always getting a Pkey here so the cast should be safe.
+          batchEndPkey = stringBatchEndPkeyRow?.single() as Pkey?
         }
 
         val matchingCount: Long?
@@ -264,7 +262,8 @@ internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : An
             criteriaBuilder.count(queryRoot)
           )
         }!!
-        val start = result[0].toString()
+        @Suppress("UNCHECKED_CAST") // Return type from the query should always match.
+        val start = result[0] as Pkey
         val scannedCount = result[1] as Long
 
         TxResult(
@@ -272,8 +271,8 @@ internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : An
           Batch.Builder()
             .batch_range(
               KeyRange.Builder()
-                .start(start.encodeUtf8())
-                .end(end.toString().encodeUtf8())
+                .start(primaryKeyCursorMapper.toByteString(start))
+                .end(primaryKeyCursorMapper.toByteString(end))
                 .build()
             )
             .scanned_record_count(scannedCount)
@@ -286,7 +285,7 @@ internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : An
         // batches are requested.
         boundingMax = null
       }
-      previousEndKey = txResult.batch.batch_range.end
+      previousEndKey = txResult.end
       return txResult.batch
     }
   }
@@ -297,12 +296,12 @@ internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : An
     )
 
     val pkeys = partitionProvider.transaction(request.partition_name) { session ->
-      val minId = Id<E>(request.batch_range.start.utf8().toLong())
-      val maxId = Id<E>(request.batch_range.end.utf8().toLong())
+      val min = primaryKeyCursorMapper.fromByteString(backfill.pkeyClass.java, request.batch_range.start).getOrThrow()
+      val max = primaryKeyCursorMapper.fromByteString(backfill.pkeyClass.java, request.batch_range.end).getOrThrow()
       val pkeyProperty = backfill.primaryKeyHibernateName()
       val idList = backfill.backfillCriteria(config).apply {
-        dynamicAddConstraint(pkeyProperty, GE, minId)
-        dynamicAddConstraint(pkeyProperty, LE, maxId)
+        dynamicAddConstraint(pkeyProperty, GE, min)
+        dynamicAddConstraint(pkeyProperty, LE, max)
         dynamicAddOrder(pkeyProperty, true)
       }.dynamicList(session, listOf(pkeyProperty))
 

@@ -1,11 +1,11 @@
 package app.cash.backfila.client.misk.hibernate.internal
 
-import app.cash.backfila.client.Description
 import app.cash.backfila.client.DeleteBy
+import app.cash.backfila.client.Description
 import app.cash.backfila.client.misk.hibernate.ForHibernateBackend
-import app.cash.backfila.client.parseDeleteByDate
 import app.cash.backfila.client.misk.hibernate.HibernateBackfill
-import app.cash.backfila.client.misk.hibernate.PkeySqlAdapter
+import app.cash.backfila.client.misk.hibernate.PrimaryKeyCursorMapper
+import app.cash.backfila.client.parseDeleteByDate
 import app.cash.backfila.client.spi.BackfilaParametersOperator
 import app.cash.backfila.client.spi.BackfillBackend
 import app.cash.backfila.client.spi.BackfillOperator
@@ -17,27 +17,22 @@ import java.lang.reflect.ParameterizedType
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
+import kotlin.reflect.full.findAnnotation
 import misk.hibernate.DbEntity
 import misk.hibernate.Id
 import misk.hibernate.Query
-import kotlin.reflect.full.findAnnotation
 
 @Singleton
-class HibernateBackend @Inject constructor(
+internal class HibernateBackend @Inject constructor(
   private val injector: Injector,
   @ForHibernateBackend private val backfills: MutableMap<String, KClass<out HibernateBackfill<*, *, *>>>,
-  internal var pkeySqlAdapter: PkeySqlAdapter,
-  internal var queryFactory: Query.Factory
+  internal var primaryKeyCursorMapper: PrimaryKeyCursorMapper,
+  internal var queryFactory: Query.Factory,
 ) : BackfillBackend {
 
-  /** Creates Backfill instances. Each backfill ID gets a new Backfill instance. */
-  private fun getBackfill(name: String, backfillId: String): HibernateBackfill<*, *, *>? {
-    val backfillClass = backfills[name]
-    return if (backfillClass != null) {
-      injector.getInstance(backfillClass.java) as HibernateBackfill<*, *, *>
-    } else {
-      null
-    }
+  private fun getBackfill(name: String): HibernateBackfill<*, *, *>? {
+    val backfillClass = backfills[name] ?: return null
+    return injector.getInstance(backfillClass.java) as HibernateBackfill<*, *, *>
   }
 
   private fun <E : DbEntity<E>, Pkey : Any, Param : Any> createHibernateOperator(
@@ -45,18 +40,14 @@ class HibernateBackend @Inject constructor(
   ) = HibernateBackfillOperator(
     backfill,
     BackfilaParametersOperator(parametersClass(backfill::class)),
-    this
+    this,
   )
 
   override fun create(backfillName: String, backfillId: String): BackfillOperator? {
-    val backfill = getBackfill(backfillName, backfillId)
+    val backfill = getBackfill(backfillName) ?: return null
 
-    if (backfill != null) {
-      @Suppress("UNCHECKED_CAST") // We don't know the types statically, so fake them.
-      return createHibernateOperator(backfill as HibernateBackfill<DbPlaceholder, Any, Any>)
-    }
-
-    return null
+    @Suppress("UNCHECKED_CAST") // We don't know the types statically, so fake them.
+    return createHibernateOperator(backfill as HibernateBackfill<DbPlaceholder, Any, Any>)
   }
 
   override fun backfills(): Set<BackfillRegistration> {
