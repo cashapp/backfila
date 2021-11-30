@@ -194,8 +194,8 @@ internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : An
             backfill,
             partitionName,
             previousEndKey,
-            backfillRange.start.let { primaryKeyCursorMapper.fromByteString(backfill.pkeyClass.java, it).getOrThrow() },
-            backfillRange.end.let { primaryKeyCursorMapper.fromByteString(backfill.pkeyClass.java, it).getOrThrow() },
+            primaryKeyCursorMapper.fromByteString(backfill.pkeyClass.java, backfillRange.start).getOrThrow(),
+            primaryKeyCursorMapper.fromByteString(backfill.pkeyClass.java, backfillRange.end).getOrThrow(),
             scanSize,
           )
         if (boundingMax == null) {
