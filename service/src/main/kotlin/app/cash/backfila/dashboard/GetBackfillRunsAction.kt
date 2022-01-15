@@ -5,13 +5,12 @@ import app.cash.backfila.service.persistence.BackfillRunQuery
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.DbBackfillRun
 import app.cash.backfila.service.persistence.DbRegisteredBackfill
-import app.cash.backfila.service.persistence.DbRunPartition
 import app.cash.backfila.service.persistence.RegisteredBackfillQuery
-import app.cash.backfila.service.persistence.RunPartitionQuery
 import app.cash.backfila.service.persistence.ServiceQuery
 import java.time.Instant
 import javax.inject.Inject
 import misk.exceptions.BadRequestException
+import misk.hibernate.Id
 import misk.hibernate.Query
 import misk.hibernate.Session
 import misk.hibernate.Transacter
@@ -27,7 +26,6 @@ import misk.web.QueryParam
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
-import wisp.logging.getLogger
 
 data class UiBackfillRun(
   val id: String,
@@ -70,14 +68,14 @@ class GetBackfillRunsAction @Inject constructor(
         .orderByIdDesc()
         .list(session)
 
-      val runningPartitions = partitions(session, runningBackfills)
+      val runningPartitionSummaries = partitionSummary(session, runningBackfills)
       val runningRegisteredBackfills = registeredBackfills(session, runningBackfills)
       val runningUiBackfills = runningBackfills
         .map {
           dbToUi(
             session,
             it,
-            runningPartitions.getValue(it.id),
+            runningPartitionSummaries.getValue(it.id),
             runningRegisteredBackfills.getValue(it.registered_backfill_id)
           )
         }
@@ -93,13 +91,13 @@ class GetBackfillRunsAction @Inject constructor(
         .nextPage(session) ?: Page.empty()
 
       val pausedRegisteredBackfills = registeredBackfills(session, pausedBackfills)
-      val pausedPartitions = partitions(session, pausedBackfills)
+      val pausedPartitionSummaries = partitionSummary(session, pausedBackfills)
       val pausedUiBackfills = pausedBackfills
         .map {
           dbToUi(
             session,
             it,
-            pausedPartitions.getValue(it.id),
+            pausedPartitionSummaries.getValue(it.id),
             pausedRegisteredBackfills.getValue(it.registered_backfill_id)
           )
         }
@@ -120,27 +118,42 @@ class GetBackfillRunsAction @Inject constructor(
     .list(session)
     .associateBy { it.id }
 
-  private fun partitions(
+  private data class PartitionSummary(
+    val precomputingDone: Boolean,
+    val totalComputedMatchingRecordCount: Long,
+    val totalBackfilledMatchingRecordCount: Long,
+  )
+
+  private fun partitionSummary(
     session: Session,
-    pausedBackfills: List<DbBackfillRun>
-  ) = queryFactory.newQuery<RunPartitionQuery>()
-    .backfillRunIdIn(pausedBackfills.map { it.id })
-    .list(session)
-    .groupBy { it.backfill_run_id }
+    runs: List<DbBackfillRun>,
+  ): Map<Id<DbBackfillRun>, PartitionSummary> {
+    val list = session.hibernateSession.createQuery("""
+        select backfill_run_id,
+          sum(precomputing_done) = sum(1),
+          sum(computed_matching_record_count),
+          sum(backfilled_matching_record_count)
+        from DbRunPartition
+        where backfill_run_id in (:ids)
+        group by backfill_run_id
+        """
+    ).setParameter("ids", runs.map { it.id })
+      .list() as List<Array<Any>>
+    return list.associateBy { it[0] as Id<DbBackfillRun> }.mapValues {
+      PartitionSummary(
+        it.value[1] as Boolean,
+        it.value[2] as Long,
+        it.value[3] as Long,
+      )
+    }
+  }
 
   private fun dbToUi(
     @Suppress("UNUSED_PARAMETER") session: Session,
     run: DbBackfillRun,
-    partitions: List<DbRunPartition>,
-    registeredBackfill: DbRegisteredBackfill
+    partitionSummary: PartitionSummary,
+    registeredBackfill: DbRegisteredBackfill,
   ): UiBackfillRun {
-    val precomputingDone = partitions.all { it.precomputing_done }
-    val computedMatchingRecordCount = partitions
-      .map { it.computed_matching_record_count }
-      .sum()
-    val backfilledMatchingRecordCount = partitions
-      .map { it.backfilled_matching_record_count }
-      .sum()
     return UiBackfillRun(
       run.id.toString(),
       registeredBackfill.name,
@@ -149,13 +162,9 @@ class GetBackfillRunsAction @Inject constructor(
       run.created_at,
       run.created_by_user,
       run.updated_at,
-      precomputingDone,
-      computedMatchingRecordCount,
-      backfilledMatchingRecordCount
+      partitionSummary.precomputingDone,
+      partitionSummary.totalComputedMatchingRecordCount,
+      partitionSummary.totalBackfilledMatchingRecordCount
     )
-  }
-
-  companion object {
-    private val logger = getLogger<GetBackfillRunsAction>()
   }
 }
