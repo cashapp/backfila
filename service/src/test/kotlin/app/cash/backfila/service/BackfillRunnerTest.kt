@@ -5,6 +5,7 @@ import app.cash.backfila.api.ConfigureServiceAction
 import app.cash.backfila.client.Connectors.ENVOY
 import app.cash.backfila.client.FakeBackfilaClientServiceClient
 import app.cash.backfila.dashboard.CreateBackfillAction
+import app.cash.backfila.dashboard.GetBackfillRunsAction
 import app.cash.backfila.dashboard.GetBackfillStatusAction
 import app.cash.backfila.dashboard.StartBackfillAction
 import app.cash.backfila.dashboard.StartBackfillRequest
@@ -47,6 +48,7 @@ class BackfillRunnerTest {
 
   @Inject lateinit var configureServiceAction: ConfigureServiceAction
   @Inject lateinit var createBackfillAction: CreateBackfillAction
+  @Inject lateinit var getBackfillRunsAction: GetBackfillRunsAction
   @Inject lateinit var getBackfillStatusAction: GetBackfillStatusAction
   @Inject lateinit var startBackfillAction: StartBackfillAction
   @Inject lateinit var stopBackfillAction: StopBackfillAction
@@ -80,6 +82,16 @@ class BackfillRunnerTest {
     // Not all partitions complete.
     assertThat(status.state).isEqualTo(BackfillState.RUNNING)
 
+    with(getBackfillRunsAction.backfillRuns("deep-fryer")) {
+      assertThat(running_backfills).hasSize(1)
+      assertThat(paused_backfills).hasSize(0)
+      val run = running_backfills.single()
+      assertThat(run.backfilled_matching_record_count).isEqualTo(1001)
+      assertThat(run.computed_matching_record_count).isEqualTo(1001)
+      assertThat(run.precomputing_done).isEqualTo(false)
+      assertThat(run.state).isEqualTo(BackfillState.RUNNING)
+    }
+
     runner = leaseHunter.hunt().single()
 
     partition = status.partitions.find { it.id == runner.partitionId.id }!!
@@ -104,6 +116,16 @@ class BackfillRunnerTest {
     assertThat(partition.backfilled_matching_record_count).isEqualTo(1001)
 
     assertThat(status.event_logs[0].message).isEqualTo("backfill completed")
+
+    with(getBackfillRunsAction.backfillRuns("deep-fryer")) {
+      assertThat(running_backfills).hasSize(0)
+      assertThat(paused_backfills).hasSize(1)
+      val run = paused_backfills.single()
+      assertThat(run.backfilled_matching_record_count).isEqualTo(2002)
+      assertThat(run.computed_matching_record_count).isEqualTo(2002)
+      assertThat(run.precomputing_done).isEqualTo(true)
+      assertThat(run.state).isEqualTo(BackfillState.COMPLETE)
+    }
   }
 
   // An important use case is serial / single thread backfills.
@@ -175,6 +197,16 @@ class BackfillRunnerTest {
       assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
       assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNull()
 
+      with(getBackfillRunsAction.backfillRuns("deep-fryer")) {
+        assertThat(running_backfills).hasSize(1)
+        assertThat(paused_backfills).hasSize(0)
+        val run = running_backfills.single()
+        assertThat(run.backfilled_matching_record_count).isEqualTo(0)
+        assertThat(run.computed_matching_record_count).isEqualTo(1001)
+        assertThat(run.precomputing_done).isEqualTo(false)
+        assertThat(run.state).isEqualTo(BackfillState.RUNNING)
+      }
+
       // After one rpc completes, another one is enqueued.
       fakeBackfilaClientServiceClient.runBatchResponses.send(
         Result.success(RunBatchResponse.Builder().build())
@@ -187,6 +219,16 @@ class BackfillRunnerTest {
       val partition = session.load(runner.partitionId)
       assertThat(partition.pkey_cursor).isEqualTo("99".encodeUtf8())
       assertThat(partition.run_state).isEqualTo(BackfillState.RUNNING)
+    }
+
+    with(getBackfillRunsAction.backfillRuns("deep-fryer")) {
+      assertThat(running_backfills).hasSize(1)
+      assertThat(paused_backfills).hasSize(0)
+      val run = running_backfills.single()
+      assertThat(run.backfilled_matching_record_count).isEqualTo(100)
+      assertThat(run.computed_matching_record_count).isEqualTo(1001)
+      assertThat(run.precomputing_done).isEqualTo(false)
+      assertThat(run.state).isEqualTo(BackfillState.RUNNING)
     }
   }
 
