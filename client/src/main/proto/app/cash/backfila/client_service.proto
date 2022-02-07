@@ -131,3 +131,22 @@ message PipelinedData {
 message PipelinedRecord {
   optional bytes data = 1;
 }
+
+message FinalizeBackfillRequest {
+  optional string backfill_id = 1;
+  optional string backfill_name = 2;
+  map<string, bytes> parameters = 3;
+  optional bool dry_run = 4;
+  // Indicates what caused the backfill to finalize.
+  optional FinalizeState finalize_state = 5;
+
+  enum FinalizeState {
+    // The backfill completed normally.
+    COMPLETED = 1;
+    // The backfill was failed permanently by a user.
+    FAILED = 2;
+  }
+}
+
+message FinalizeBackfillResponse {
+}
