@@ -3,16 +3,17 @@ package app.cash.backfila.client.spi
 import app.cash.backfila.client.BackfilaClientLoggingSetupProvider
 import app.cash.backfila.client.UnknownBackfillException
 import app.cash.backfila.client.internal.BackfillOperatorFactory
+import app.cash.backfila.protos.clientservice.FinalizeBackfillRequest
+import app.cash.backfila.protos.clientservice.FinalizeBackfillResponse
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
 import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
 import app.cash.backfila.protos.clientservice.RunBatchRequest
 import app.cash.backfila.protos.clientservice.RunBatchResponse
+import javax.inject.Inject
 import org.apache.commons.lang3.exception.ExceptionUtils
 import wisp.logging.getLogger
-import javax.inject.Inject
-import kotlin.jvm.Throws
 
 /**
  * The various Backfila ClientService implementations invoke this from their service handlers to get
@@ -79,6 +80,16 @@ class BackfilaClientServiceHandler @Inject constructor(
           .exception_stack_trace(ExceptionUtils.getStackTrace(exception))
           .build()
       }
+    }
+  }
+
+  @Throws(UnknownBackfillException::class)
+  fun finalizeBackfill(request: FinalizeBackfillRequest): FinalizeBackfillResponse {
+    return loggingSetupProvider.withBackfillRunLogging(request.backfill_name, request.backfill_id) {
+      logger.info { "Finalizing backfill `${request.backfill_name}::${request.backfill_id}`" }
+
+      // This is a stub for now
+      return@withBackfillRunLogging FinalizeBackfillResponse()
     }
   }
 
