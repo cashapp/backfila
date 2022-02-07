@@ -1,8 +1,9 @@
 package app.cash.backfila.client.misk.client
 
 import app.cash.backfila.client.BackfilaApi
-import app.cash.backfila.client.misk.MiskBackfillModule
 import app.cash.backfila.client.ForBackfila
+import app.cash.backfila.client.misk.MiskBackfillModule
+import app.cash.backfila.client.misk.internal.FinalizeBackfillAction
 import app.cash.backfila.client.misk.internal.GetNextBatchRangeAction
 import app.cash.backfila.client.misk.internal.PrepareBackfillAction
 import app.cash.backfila.client.misk.internal.RunBatchAction
@@ -33,6 +34,7 @@ class BackfilaMiskClientModule : KAbstractModule() {
     install(WebActionModule.create<PrepareBackfillAction>())
     install(WebActionModule.create<GetNextBatchRangeAction>())
     install(WebActionModule.create<RunBatchAction>())
+    install(WebActionModule.create<FinalizeBackfillAction>())
   }
 
   @Provides @ForBackfila internal fun wireRetrofitBuilder() =
