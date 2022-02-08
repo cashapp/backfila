@@ -1,14 +1,17 @@
+plugins {
+  id("com.github.johnrengelman.shadow") version "7.1.2"
+}
+
 apply(plugin = "kotlin")
-apply(plugin = "com.github.johnrengelman.shadow")
 apply(plugin = "com.diffplug.spotless")
 
 sourceSets {
   val main by getting {
     resources.srcDir(listOf(
-            "web/tabs/app/lib"
+      "web/tabs/app/lib"
     ))
     resources.srcDir(listOf(
-            "web/static/"
+      "web/static/"
     ))
     resources.exclude("**/node_modules")
   }

@@ -7,7 +7,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 buildscript {
   repositories {
     mavenCentral()
-    jcenter()
   }
 
   dependencies {
@@ -15,7 +14,6 @@ buildscript {
     classpath(Dependencies.kotlinAllOpenPlugin)
     classpath(Dependencies.dokkaGradlePlugin)
     classpath(Dependencies.mavenPublishGradlePlugin)
-    classpath(Dependencies.shadowJarPlugin)
     classpath(Dependencies.spotlessPlugin)
     classpath(Dependencies.wireGradlePlugin)
   }
