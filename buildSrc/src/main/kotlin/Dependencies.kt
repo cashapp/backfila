@@ -60,7 +60,6 @@ object Dependencies {
   val retrofitMock = "com.squareup.retrofit2:retrofit-mock:2.9.0"
   val retrofitMoshi = "com.squareup.retrofit2:converter-moshi:2.9.0"
   val retrofitWire = "com.squareup.retrofit2:converter-wire:2.9.0"
-  val shadowJarPlugin = "com.github.jengelman.gradle.plugins:shadow:6.1.0"
   val slf4jApi = "org.slf4j:slf4j-api:1.7.28"
   val spotlessPlugin = "com.diffplug.spotless:spotless-plugin-gradle:5.9.0"
   val tracingJaeger = "io.jaegertracing:jaeger-core:1.1.0"
