@@ -1,8 +1,8 @@
 package app.cash.backfila.embedded.internal
 
 import app.cash.backfila.client.Backfill
-import app.cash.backfila.embedded.BackfillRun
 import app.cash.backfila.client.spi.BackfillOperator
+import app.cash.backfila.embedded.BackfillRun
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.KeyRange
@@ -23,13 +23,13 @@ import okio.ByteString.Companion.encodeUtf8
 internal class EmbeddedBackfillRun<B : Backfill>(
   private val operator: BackfillOperator,
   override val dryRun: Boolean,
-  override val parameters: Map<String, ByteString>,
+  override val parameters: MutableMap<String, ByteString>,
   override val rangeStart: String?,
   override val rangeEnd: String?,
 
   override var batchSize: Long = 100L,
   override var scanSize: Long = 10_000L,
-  override var computeCountLimit: Long = 1L
+  override var computeCountLimit: Long = 1L,
 ) : BackfillRun<B> {
   override val backfill: B
     // This api on the operator returns the same backfill it was initialized with.
@@ -59,6 +59,7 @@ internal class EmbeddedBackfillRun<B : Backfill>(
         .dry_run(dryRun)
         .build()
     )
+    parameters += prepareBackfillResponse.parameters
     precomputeProgress = prepareBackfillResponse.partitions.associate {
       it.partition_name to MutablePartitionCursor(it.partition_name, it.backfill_range)
     }
@@ -194,7 +195,7 @@ internal class EmbeddedBackfillRun<B : Backfill>(
 
 private class MutablePartitionCursor(
   val partitionName: String,
-  val keyRange: KeyRange
+  val keyRange: KeyRange,
 ) {
   var previousEndKey: ByteString? = null
   var done: Boolean = false
@@ -209,7 +210,7 @@ data class PartitionCursor(
   val partitionName: String,
   val keyRange: KeyRange,
   val previousEndKey: ByteString?,
-  val done: Boolean
+  val done: Boolean,
 ) {
   fun utf8RangeStart() = keyRange.start?.utf8()
   fun utf8RangeEnd() = keyRange.end?.utf8()
@@ -220,7 +221,7 @@ data class BatchSnapshot(
   val partitionName: String,
   val batchRange: KeyRange,
   val scannedRecordCount: Long,
-  val matchingRecordCount: Long
+  val matchingRecordCount: Long,
 ) {
   fun utf8RangeStart() = batchRange.start.utf8()
   fun utf8RangeEnd() = batchRange.end.utf8()

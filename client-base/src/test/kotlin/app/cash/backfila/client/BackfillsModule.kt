@@ -16,5 +16,6 @@ class BackfillsModule : KAbstractModule() {
     install(FixedSetBackfillModule.create<FixedSetTest.ToUpperCaseBackfill>())
     install(FixedSetBackfillModule.create<DeleteBackfillByTest.TenYearBackfill>())
     install(FixedSetBackfillModule.create<DeleteBackfillByTest.DeprecatedBackfill>())
+    install(FixedSetBackfillModule.create<PrepareWithParametersTest.PrepareWithParametersBackfill>())
   }
 }
