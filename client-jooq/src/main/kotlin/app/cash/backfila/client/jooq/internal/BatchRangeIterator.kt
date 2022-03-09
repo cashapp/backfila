@@ -39,7 +39,8 @@ class BatchRangeIterator<K, Param : Any>(
     val keyValues = selectKeyValues(keyRange)
     val start = keyRange.determineStart(keyValues)
     val end = keyRange.determineEnd(keyValues)
-    val scannedCount = determineScannedCount(keyRange, end)
+    val scannedCount =
+        if (jooqBackfill.calculateScanCount) { determineScannedCount(keyRange, end) } else { 0 }
     if (scannedCount == 0) return endOfData()
     nextKeyRange = keyRange.nextRangeFor(end)
     return GetNextBatchRangeResponse.Batch.Builder()

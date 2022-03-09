@@ -42,6 +42,13 @@ abstract class JooqBackfill<K, Param : Any> : Backfill {
   }
 
   /**
+   * Field to set to false if you don't want to do scan calculations. This will improve performance
+   * when you have an efficient filterCondition. Otherwise, counting large gaps in records to
+   * process can take a long time to count.
+   */
+  open val calculateScanCount = true
+
+  /**
    * List of fields that uniquely identifies keys to backfill.
    *
    * Note: this could be a list of a single field when you aren't using a real compound key.
