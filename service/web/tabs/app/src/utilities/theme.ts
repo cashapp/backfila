@@ -14,10 +14,10 @@ const environmentColorLookup: IEnvironmentToColorLookup = {
   PRODUCTION: color.red,
 }
 
-export const backfilaRed = "#db2636"
+export const cashGreen = "#00D633"
 
 export const backfilaTheme: ITheme = {
   ...defaultTheme,
   environmentToColor: environmentToColor(environmentColorLookup),
-  navbarBackground: backfilaRed,
+  navbarBackground: cashGreen,
 }
