@@ -2,6 +2,8 @@
 
 Backfila is a service that manages backfill state, calling into other services to do batched work.
 
+Note: some instructions here are out of date
+
 ## Building
 Build backfila:
 

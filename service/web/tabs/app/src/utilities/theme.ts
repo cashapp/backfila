@@ -10,14 +10,15 @@ const environmentColorLookup: IEnvironmentToColorLookup = {
   default: color.cadet,
   DEVELOPMENT: color.platinum,
   TESTING: color.purple,
-  STAGING: color.yellow,
+  STAGING: color.green,
   PRODUCTION: color.red,
 }
 
-export const cashGreen = "#00D633"
+export const backfilaRed = "#dd4837"
 
 export const backfilaTheme: ITheme = {
   ...defaultTheme,
   environmentToColor: environmentToColor(environmentColorLookup),
-  navbarBackground: cashGreen,
+  navbarBackground: backfilaRed,
+  navbarText: color.white
 }
