@@ -2,5 +2,5 @@
 import { css, jsx } from "@emotion/core"
 
 export default () => (
-  <img css={css(`max-height: 32px;`)} src={"/app/img/backfila-white.png"} />
+    <div css={css(`max-height: 32px;`)}>🅱️ Backfila</div>
 )
