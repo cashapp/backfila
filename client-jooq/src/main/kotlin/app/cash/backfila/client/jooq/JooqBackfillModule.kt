@@ -33,6 +33,11 @@ class JooqBackfillModule<T : JooqBackfill<*, *>> private constructor(
     fun <T : JooqBackfill<*, *>> create(backfillClass: KClass<T>): JooqBackfillModule<T> {
       return JooqBackfillModule(backfillClass)
     }
+
+    @JvmStatic
+    fun <T : JooqBackfill<*, *>> create(backfillClass: Class<T>): JooqBackfillModule<T> {
+      return JooqBackfillModule(backfillClass.kotlin)
+    }
   }
 }
 

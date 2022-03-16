@@ -34,6 +34,11 @@ class DynamoDbBackfillModule<T : DynamoDbBackfill<*, *>> private constructor(
     fun <T : DynamoDbBackfill<*, *>> create(backfillClass: KClass<T>): DynamoDbBackfillModule<T> {
       return DynamoDbBackfillModule(backfillClass)
     }
+
+    @JvmStatic
+    fun <T : DynamoDbBackfill<*, *>> create(backfillClass: Class<T>): DynamoDbBackfillModule<T> {
+      return DynamoDbBackfillModule(backfillClass.kotlin)
+    }
   }
 }
 

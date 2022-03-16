@@ -1,4 +1,5 @@
 apply(plugin = "kotlin")
+apply(plugin = "java")
 
 dependencies {
   implementation(Dependencies.apacheCommonsLang3)

@@ -34,6 +34,11 @@ class HibernateBackfillModule<T : HibernateBackfill<*, *, *>> private constructo
     fun <T : HibernateBackfill<*, *, *>> create(backfillClass: KClass<T>): HibernateBackfillModule<T> {
       return HibernateBackfillModule(backfillClass)
     }
+
+    @JvmStatic
+    fun <T : HibernateBackfill<*, *, *>> create(backfillClass: Class<T>): HibernateBackfillModule<T> {
+      return HibernateBackfillModule(backfillClass.kotlin)
+    }
   }
 }
 

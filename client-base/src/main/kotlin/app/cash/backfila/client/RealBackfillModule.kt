@@ -22,7 +22,7 @@ class RealBackfillModule(
   constructor(
     config: BackfilaClientConfig,
     loggingSetupProvider: Class<out BackfilaClientLoggingSetupProvider> =
-        BackfilaClientNoLoggingSetupProvider::class.java
+      BackfilaClientNoLoggingSetupProvider::class.java
   ) : this(config, loggingSetupProvider.kotlin)
 
   override fun configure() {

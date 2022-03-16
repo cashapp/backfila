@@ -7,8 +7,9 @@ import kotlin.reflect.KClass
 import okio.ByteString
 
 /**
- * Programmatic access to backfila runs. This is useful in tests and development; in production use
- * the Backfila dashboard UI.
+ * Programmatic access to backfila UI features. This is useful in tests and development; in
+ * production use the Backfila dashboard UI.
+ * Java customers should use [JavaBackfila].
  */
 interface Backfila {
   fun <Type : Backfill> createDryRun(
@@ -34,12 +35,26 @@ inline fun <reified Type : Backfill> Backfila.createDryRun(
   rangeStart: String? = null,
   rangeEnd: String? = null
 ): BackfillRun<Type> {
+  return createDryRun(Type::class, parameters, parameterData, rangeStart, rangeEnd)
+}
+
+fun <Type : Backfill> Backfila.createDryRun(
+  backfill: KClass<Type>,
+  parameters: Any?,
+  parameterData: Map<String, ByteString>,
+  rangeStart: String?,
+  rangeEnd: String?
+): BackfillRun<Type> {
   check(parameterData.isEmpty() || parameters == null) {
     "Only one of parameters and parameterData can be set"
   }
   val parameterBytes =
-    if (parameters != null) { parametersToBytes(parameters) } else { parameterData }
-  return createDryRun(Type::class, parameterBytes, rangeStart, rangeEnd)
+    if (parameters != null) {
+      parametersToBytes(parameters)
+    } else {
+      parameterData
+    }
+  return createDryRun(backfill, parameterBytes, rangeStart, rangeEnd)
 }
 
 inline fun <reified Type : Backfill> Backfila.createWetRun(
@@ -48,10 +63,24 @@ inline fun <reified Type : Backfill> Backfila.createWetRun(
   rangeStart: String? = null,
   rangeEnd: String? = null
 ): BackfillRun<Type> {
+  return createWetRun(Type::class, parameters, parameterData, rangeStart, rangeEnd)
+}
+
+fun <Type : Backfill> Backfila.createWetRun(
+  backfill: KClass<Type>,
+  parameters: Any?,
+  parameterData: Map<String, ByteString>,
+  rangeStart: String?,
+  rangeEnd: String?
+): BackfillRun<Type> {
   check(parameterData.isEmpty() || parameters == null) {
     "Only one of parameters and parameterData can be set"
   }
   val parameterBytes =
-    if (parameters != null) { parametersToBytes(parameters) } else { parameterData }
-  return createWetRun(Type::class, parameterBytes, rangeStart, rangeEnd)
+    if (parameters != null) {
+      parametersToBytes(parameters)
+    } else {
+      parameterData
+    }
+  return createWetRun(backfill, parameterBytes, rangeStart, rangeEnd)
 }
