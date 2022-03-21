@@ -14,5 +14,5 @@ export {
   EditableField,
   HomeLinkLogo,
   ServicesListComponent,
-  StartStopButton,
+  StartStopButton
 }

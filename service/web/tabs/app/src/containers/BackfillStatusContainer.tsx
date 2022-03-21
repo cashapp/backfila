@@ -5,7 +5,7 @@ import {
   IDispatchProps,
   IState,
   mapDispatchToProps,
-  mapStateToProps,
+  mapStateToProps
 } from "../ducks"
 import {
   AnchorButton,
@@ -16,14 +16,14 @@ import {
   H3,
   HTMLTable,
   Tooltip,
-  Spinner,
+  Spinner
 } from "@blueprintjs/core"
 import { simpleSelectorGet } from "@misk/simpleredux"
 import { Link } from "react-router-dom"
 import {
   BackfillProgressBar,
   StartStopButton,
-  EditableField,
+  EditableField
 } from "../components"
 import { LayoutContainer } from "../containers"
 
@@ -115,7 +115,7 @@ class BackfillStatusContainer extends React.Component<
   render() {
     let result = simpleSelectorGet(this.props.simpleNetwork, [
       this.backfillStatusTag,
-      "data",
+      "data"
     ])
     if (result) {
       this.status = result
@@ -454,7 +454,7 @@ class BackfillStatusContainer extends React.Component<
                     style={{
                       paddingTop: 0,
                       paddingBottom: 0,
-                      whiteSpace: "nowrap",
+                      whiteSpace: "nowrap"
                     }}
                   >
                     {new Date(event_log.occurred_at)
@@ -487,7 +487,7 @@ class BackfillStatusContainer extends React.Component<
                             this.setState({
                               event_data: event_log.extra_data,
                               event_title:
-                                event_log.occurred_at + " " + event_log.message,
+                                event_log.occurred_at + " " + event_log.message
                             })
                           }
                         >

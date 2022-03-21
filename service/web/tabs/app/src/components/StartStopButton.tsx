@@ -6,7 +6,7 @@ import {
   IDispatchProps,
   IState,
   mapDispatchToProps,
-  mapStateToProps,
+  mapStateToProps
 } from "../ducks"
 
 export interface IStartStopButtonProps {
@@ -26,7 +26,7 @@ class StartStopButton extends React.Component<
   private id: string = this.props.id
 
   public state: IStartStopButtonState = {
-    loading: false,
+    loading: false
   }
 
   startstop(startorstop: String) {
@@ -41,7 +41,7 @@ class StartStopButton extends React.Component<
       .catch(error => {
         Toaster.create().show({
           intent: Intent.DANGER,
-          message: `Error: ${error.response.data}`,
+          message: `Error: ${error.response.data}`
         })
       })
       .finally(() => this.setState({ loading: false }))

@@ -3,7 +3,7 @@ import {
   color,
   environmentToColor,
   IEnvironmentToColorLookup,
-  ITheme,
+  ITheme
 } from "@misk/core"
 
 const environmentColorLookup: IEnvironmentToColorLookup = {
@@ -11,7 +11,7 @@ const environmentColorLookup: IEnvironmentToColorLookup = {
   DEVELOPMENT: color.platinum,
   TESTING: color.purple,
   STAGING: color.green,
-  PRODUCTION: color.red,
+  PRODUCTION: color.red
 }
 
 export const backfilaRed = "#dd4837"

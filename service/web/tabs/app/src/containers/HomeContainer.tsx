@@ -6,7 +6,7 @@ import {
   IDispatchProps,
   IState,
   mapDispatchToProps,
-  mapStateToProps,
+  mapStateToProps
 } from "src/ducks"
 import { LayoutContainer } from "."
 

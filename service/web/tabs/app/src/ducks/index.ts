@@ -12,12 +12,12 @@ import {
   SimpleReduxSaga,
   simpleRootSelector,
   watchSimpleFormSagas,
-  watchSimpleNetworkSagas,
+  watchSimpleNetworkSagas
 } from "@misk/simpleredux"
 import {
   connectRouter,
   LocationChangeAction,
-  RouterState,
+  RouterState
 } from "connected-react-router"
 import { History } from "history"
 import { AnyAction, combineReducers, Reducer } from "redux"
@@ -28,7 +28,7 @@ import {
   IDispatchHome,
   IHomeImmutableState,
   IHomeState,
-  watchHomeSagas,
+  watchHomeSagas
 } from "./home"
 
 export * from "./home"
@@ -54,7 +54,7 @@ export interface IDispatchProps
 export const rootDispatcher: IDispatchProps = {
   ...dispatchSimpleForm,
   ...dispatchSimpleNetwork,
-  ...dispatchHome,
+  ...dispatchHome
 }
 
 /**
@@ -70,7 +70,7 @@ export const rootSelectors = (state: IState) => ({
   simpleNetwork: simpleRootSelector<IState, ISimpleNetworkImmutableState>(
     "simpleNetwork",
     state
-  ),
+  )
 })
 
 /**
@@ -81,7 +81,7 @@ export const rootReducer = (history: History): Reducer<any, AnyAction> =>
     home: HomeReducer,
     router: connectRouter(history),
     simpleForm: SimpleFormReducer,
-    simpleNetwork: SimpleNetworkReducer,
+    simpleNetwork: SimpleNetworkReducer
   })
 
 /**
@@ -91,7 +91,7 @@ export function* rootSaga(): SimpleReduxSaga {
   yield all([
     fork(watchHomeSagas),
     fork(watchSimpleFormSagas),
-    fork(watchSimpleNetworkSagas),
+    fork(watchSimpleNetworkSagas)
   ])
 }
 
@@ -101,5 +101,5 @@ export function* rootSaga(): SimpleReduxSaga {
 export const mapStateToProps = (state: IState) => rootSelectors(state)
 
 export const mapDispatchToProps: IDispatchProps = {
-  ...rootDispatcher,
+  ...rootDispatcher
 }

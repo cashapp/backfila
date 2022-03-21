@@ -7,7 +7,7 @@ import {
   HomeContainer,
   ServiceContainer,
   ServiceRunsContainer,
-  LayoutContainer,
+  LayoutContainer
 } from "../containers"
 
 const routes = (

@@ -3,7 +3,7 @@ import {
   defaultRootState,
   IAction,
   IRootState,
-  SimpleReduxSaga,
+  SimpleReduxSaga
 } from "@misk/simpleredux"
 import axios from "axios"
 import { Map } from "immutable"
@@ -17,7 +17,7 @@ import { all, call, put, takeLatest } from "redux-saga/effects"
 export enum HOME {
   DINOSAUR = "HOME_DINOSAUR",
   SUCCESS = "HOME_SUCCESS",
-  FAILURE = "HOME_FAILURE",
+  FAILURE = "HOME_FAILURE"
 }
 
 /**
@@ -47,21 +47,21 @@ export const dispatchHome: IDispatchHome = {
     createAction<HOME.DINOSAUR, IHomePayload>(HOME.DINOSAUR, {
       error: null,
       loading: true,
-      success: false,
+      success: false
     }),
   homeFailure: (error: any) =>
     createAction<HOME.FAILURE, IHomePayload>(HOME.FAILURE, {
       ...error,
       loading: false,
-      success: false,
+      success: false
     }),
   homeSuccess: (data: any) =>
     createAction<HOME.SUCCESS, IHomePayload>(HOME.SUCCESS, {
       ...data,
       error: null,
       loading: false,
-      success: true,
-    }),
+      success: true
+    })
 }
 
 /**
