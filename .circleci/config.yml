@@ -82,7 +82,7 @@ jobs:
           path: ~/test-results
   node:
     docker:
-      - image: circleci/node:12
+      - image: circleci/node:16
     steps:
       - checkout
       - run: sudo npm install -g @misk/cli && miskweb ci-build -e
