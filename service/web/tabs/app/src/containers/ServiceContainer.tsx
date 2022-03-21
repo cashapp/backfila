@@ -4,7 +4,7 @@ import {
   IDispatchProps,
   IState,
   mapDispatchToProps,
-  mapStateToProps,
+  mapStateToProps
 } from "../ducks"
 import { H2, H3, Intent, AnchorButton, Spinner } from "@blueprintjs/core"
 import { BackfillRunsTable } from "../components"
@@ -29,7 +29,7 @@ class ServiceContainer extends React.Component<
   render() {
     let result = simpleSelectorGet(this.props.simpleNetwork, [
       this.backfillRunsTag,
-      "data",
+      "data"
     ])
     if (!this.service || !result) {
       return (

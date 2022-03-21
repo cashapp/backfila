@@ -128,7 +128,8 @@ class GetBackfillRunsAction @Inject constructor(
     session: Session,
     runs: List<DbBackfillRun>,
   ): Map<Id<DbBackfillRun>, PartitionSummary> {
-    val list = session.hibernateSession.createQuery("""
+    val list = session.hibernateSession.createQuery(
+      """
         select backfill_run_id,
           sum(precomputing_done) = sum(1),
           sum(computed_matching_record_count),

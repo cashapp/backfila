@@ -5,7 +5,7 @@ import {
   AnchorButton,
   InputGroup,
   Toaster,
-  Intent,
+  Intent
 } from "@blueprintjs/core"
 import { FlexContainer } from "@misk/core"
 import { FormEvent } from "react"
@@ -35,7 +35,7 @@ export default class StartStopButton extends React.Component<
   public state: IEditableFieldState = {
     loading: false,
     editing: false,
-    editingValue: null,
+    editingValue: null
   }
 
   update() {
@@ -47,7 +47,7 @@ export default class StartStopButton extends React.Component<
       .then(response => {
         this.setState({
           loading: false,
-          editing: false,
+          editing: false
         })
         if (this.props.onUpdate) {
           this.props.onUpdate()
@@ -55,11 +55,11 @@ export default class StartStopButton extends React.Component<
       })
       .catch(error => {
         this.setState({
-          loading: false,
+          loading: false
         })
         Toaster.create().show({
           intent: Intent.DANGER,
-          message: `Error: ${error.response.data}`,
+          message: `Error: ${error.response.data}`
         })
       })
   }
@@ -75,7 +75,7 @@ export default class StartStopButton extends React.Component<
               minorStepSize={1}
               onValueChange={(valueAsNumber: number) =>
                 this.setState({
-                  editingValue: Math.max(valueAsNumber, this.props.minValue),
+                  editingValue: Math.max(valueAsNumber, this.props.minValue)
                 })
               }
               value={this.state.editingValue}
@@ -87,7 +87,7 @@ export default class StartStopButton extends React.Component<
               placeholder={this.props.placeholder}
               onChange={(event: FormEvent<HTMLElement>) => {
                 this.setState({
-                  editingValue: (event.target as any).value,
+                  editingValue: (event.target as any).value
                 })
               }}
               defaultValue={this.state.editingValue}
@@ -117,7 +117,7 @@ export default class StartStopButton extends React.Component<
             onClick={() =>
               this.setState({
                 editing: true,
-                editingValue: this.props.value,
+                editingValue: this.props.value
               })
             }
           />

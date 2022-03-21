@@ -5,7 +5,7 @@ import {
   IDispatchProps,
   IState,
   mapDispatchToProps,
-  mapStateToProps,
+  mapStateToProps
 } from "../ducks"
 import {
   H1,
@@ -19,7 +19,7 @@ import {
   H5,
   Tooltip,
   Classes,
-  Spinner,
+  Spinner
 } from "@blueprintjs/core"
 import { simpleSelectorGet } from "@misk/simpleredux"
 import { BackfillSelector } from "../components"
@@ -69,14 +69,14 @@ class CreateFormContainer extends React.Component<
       pkey_range_end: null,
       backoff_schedule: null,
       extra_sleep_ms: 0,
-      parameters: {},
+      parameters: {}
     })
   }
 
   render() {
     let registeredBackfills = simpleSelectorGet(this.props.simpleNetwork, [
       this.registeredBackfills,
-      "data",
+      "data"
     ])
 
     if (!registeredBackfills || !this.state) {
@@ -104,7 +104,7 @@ class CreateFormContainer extends React.Component<
                 onValueChange={backfill =>
                   this.setState({
                     backfill: backfill,
-                    parameters: {},
+                    parameters: {}
                   })
                 }
               />
@@ -123,7 +123,7 @@ class CreateFormContainer extends React.Component<
                   placeholder="Start"
                   onChange={(event: FormEvent<HTMLElement>) => {
                     this.setState({
-                      pkey_range_start: (event.target as any).value,
+                      pkey_range_start: (event.target as any).value
                     })
                   }}
                 />
@@ -132,7 +132,7 @@ class CreateFormContainer extends React.Component<
                   placeholder="End"
                   onChange={(event: FormEvent<HTMLElement>) => {
                     this.setState({
-                      pkey_range_end: (event.target as any).value,
+                      pkey_range_end: (event.target as any).value
                     })
                   }}
                 />
@@ -214,7 +214,7 @@ class CreateFormContainer extends React.Component<
                   placeholder="5000,15000,30000"
                   onChange={(event: FormEvent<HTMLElement>) => {
                     this.setState({
-                      backoff_schedule: (event.target as any).value,
+                      backoff_schedule: (event.target as any).value
                     })
                   }}
                 />
@@ -260,7 +260,7 @@ class CreateFormContainer extends React.Component<
                       this.state.backoff_schedule
                     ),
                     extra_sleep_ms: this.state.extra_sleep_ms,
-                    parameter_map: this.state.parameters,
+                    parameter_map: this.state.parameters
                   })
                     .then(response => {
                       let id = response.data.backfill_run_id
@@ -271,7 +271,7 @@ class CreateFormContainer extends React.Component<
                       console.log(error)
                       this.setState({
                         loading: false,
-                        errorText: error.response.data,
+                        errorText: error.response.data
                       })
                     })
                 }}

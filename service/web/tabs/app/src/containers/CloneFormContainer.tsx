@@ -5,7 +5,7 @@ import {
   IDispatchProps,
   IState,
   mapDispatchToProps,
-  mapStateToProps,
+  mapStateToProps
 } from "../ducks"
 import {
   H1,
@@ -21,7 +21,7 @@ import {
   Classes,
   Spinner,
   Radio,
-  RadioGroup,
+  RadioGroup
 } from "@blueprintjs/core"
 import { FlexContainer } from "@misk/core"
 import { Link } from "react-router-dom"
@@ -74,12 +74,12 @@ class CloneFormContainer extends React.Component<
       pkey_range_end: null,
       backoff_schedule: null,
       extra_sleep_ms: 0,
-      parameters: {},
+      parameters: {}
     })
     Axios.get(`/backfills/${this.id}/status`)
       .then(response => {
         let params: any = {}
-        Object.keys(response.data.parameters).map(function (key, index) {
+        Object.keys(response.data.parameters).map(function(key, index) {
           let value = response.data.parameters[key]
           params[key] = new Buffer(value).toString("base64")
         })
@@ -93,7 +93,7 @@ class CloneFormContainer extends React.Component<
           num_threads: response.data.num_threads,
           backoff_schedule: response.data.backoff_schedule,
           extra_sleep_ms: response.data.extra_sleep_ms,
-          parameters: params,
+          parameters: params
         })
         this.requestRegisteredBackfills(
           response.data.service_name,
@@ -114,7 +114,7 @@ class CloneFormContainer extends React.Component<
         if (selected) {
           this.setState({
             backfills: response.data.backfills,
-            backfill: selected,
+            backfill: selected
           })
         } else {
           this.setState({ errorText: "Backfill doesn't exist" })
@@ -162,7 +162,7 @@ class CloneFormContainer extends React.Component<
                 label="Range treatment"
                 onChange={(event: FormEvent<HTMLElement>) =>
                   this.setState({
-                    range_clone_type: (event.target as any).value,
+                    range_clone_type: (event.target as any).value
                   })
                 }
                 selectedValue={this.state.range_clone_type}
@@ -185,7 +185,7 @@ class CloneFormContainer extends React.Component<
                     placeholder="Start"
                     onChange={(event: FormEvent<HTMLElement>) => {
                       this.setState({
-                        pkey_range_start: (event.target as any).value,
+                        pkey_range_start: (event.target as any).value
                       })
                     }}
                   />
@@ -194,7 +194,7 @@ class CloneFormContainer extends React.Component<
                     placeholder="End"
                     onChange={(event: FormEvent<HTMLElement>) => {
                       this.setState({
-                        pkey_range_end: (event.target as any).value,
+                        pkey_range_end: (event.target as any).value
                       })
                     }}
                   />
@@ -278,7 +278,7 @@ class CloneFormContainer extends React.Component<
                   value={this.state.backoff_schedule}
                   onChange={(event: FormEvent<HTMLElement>) => {
                     this.setState({
-                      backoff_schedule: (event.target as any).value,
+                      backoff_schedule: (event.target as any).value
                     })
                   }}
                 />
@@ -327,7 +327,7 @@ class CloneFormContainer extends React.Component<
                       this.state.backoff_schedule
                     ),
                     extra_sleep_ms: this.state.extra_sleep_ms,
-                    parameter_map: this.state.parameters,
+                    parameter_map: this.state.parameters
                   })
                     .then(response => {
                       let id = response.data.id
@@ -338,7 +338,7 @@ class CloneFormContainer extends React.Component<
                       console.log(error)
                       this.setState({
                         loading: false,
-                        errorText: error.response.data,
+                        errorText: error.response.data
                       })
                     })
                 }}

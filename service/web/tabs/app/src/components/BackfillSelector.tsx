@@ -17,7 +17,9 @@ export interface IBackfillSelectorProps {
   onValueChange?(value: IBackfill): void
 }
 
-export default class BackfillSelector extends React.PureComponent<IBackfillSelectorProps> {
+export default class BackfillSelector extends React.PureComponent<
+  IBackfillSelectorProps
+> {
   public render() {
     return (
       <div style={{ width: "100%" }}>
