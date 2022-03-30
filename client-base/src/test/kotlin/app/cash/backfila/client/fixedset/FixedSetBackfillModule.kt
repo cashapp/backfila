@@ -24,6 +24,11 @@ class FixedSetBackfillModule<T : FixedSetBackfill<*>> private constructor(
     fun <T : FixedSetBackfill<*>> create(backfillClass: KClass<T>): FixedSetBackfillModule<T> {
       return FixedSetBackfillModule(backfillClass)
     }
+
+    @JvmStatic
+    fun <T : FixedSetBackfill<*>> create(backfillClass: Class<T>): FixedSetBackfillModule<T> {
+      return FixedSetBackfillModule(backfillClass.kotlin)
+    }
   }
 }
 

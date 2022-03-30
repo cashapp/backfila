@@ -32,6 +32,11 @@ class StaticDatasourceBackfillModule<T : StaticDatasourceBackfill<*, *>> private
     fun <T : StaticDatasourceBackfill<*, *>> create(backfillClass: KClass<T>): StaticDatasourceBackfillModule<T> {
       return StaticDatasourceBackfillModule(backfillClass)
     }
+
+    @JvmStatic
+    fun <T : StaticDatasourceBackfill<*, *>> create(backfillClass: Class<T>): StaticDatasourceBackfillModule<T> {
+      return StaticDatasourceBackfillModule(backfillClass.kotlin)
+    }
   }
 }
 
