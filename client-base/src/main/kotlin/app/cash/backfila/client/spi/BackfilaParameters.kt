@@ -1,5 +1,7 @@
 package app.cash.backfila.client.spi
 
+import app.cash.backfila.client.BackfilaDefault
+import app.cash.backfila.client.BackfilaRequired
 import app.cash.backfila.client.BackfillConfig
 import app.cash.backfila.client.Description
 import app.cash.backfila.protos.service.Parameter
@@ -10,6 +12,8 @@ import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.jvmErasure
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
+import java.lang.reflect.InvocationTargetException
+import kotlin.reflect.KFunction
 import kotlin.reflect.full.findAnnotation
 
 fun parametersToBytes(parameters: Any): Map<String, ByteString> {
@@ -27,20 +31,43 @@ class BackfilaParametersOperator<T : Any>(
   val parametersClass: KClass<T>
 ) {
   /** Constructor parameters used as defaults when missing to create a new T. */
-  private val constructorParameters: List<KParameter> = parametersClass.primaryConstructor!!.parameters
+  private val constructor: KFunction<T> = fetchConstructor(parametersClass)
 
   fun constructBackfillConfig(
     parameters: MutableMap<String, ByteString>,
     dryRun: Boolean
   ): BackfillConfig<T> {
     val map = mutableMapOf<KParameter, Any>()
-    for (parameter in constructorParameters) {
+    for (parameter in constructor.parameters) {
       if (parameters.containsKey(parameter.name)) {
         val value = parameters[parameter.name]!!
         map[parameter] = TYPE_CONVERTERS[parameter.type.jvmErasure]!!.invoke(value)
+      } else {
+        val requiredAnnotation = parameter.findAnnotation<BackfilaRequired>()
+        if (requiredAnnotation != null) {
+          require(parameters.containsKey(requiredAnnotation.name)) {
+            "Parameter data class has a required member ${requiredAnnotation.name} with no provided value."
+          }
+          val value = parameters[requiredAnnotation.name]!!
+          map[parameter] = TYPE_CONVERTERS[parameter.type.jvmErasure]!!.invoke(value)
+        }
+        val defaultAnnotation = parameter.findAnnotation<BackfilaDefault>()
+        if (defaultAnnotation != null) {
+          if (parameters.containsKey(defaultAnnotation.name)) {
+            val value = parameters[defaultAnnotation.name]!!
+            map[parameter] = TYPE_CONVERTERS[parameter.type.jvmErasure]!!.invoke(value)
+          } else {
+            val defaultValue = defaultAnnotation.value
+            map[parameter] = TYPE_CONVERTERS[parameter.type.jvmErasure]!!.invoke(defaultValue.encodeUtf8())
+          }
+        }
       }
     }
-    val instance = parametersClass.primaryConstructor!!.callBy(map)
+    val instance = try {
+      constructor.callBy(map)
+    } catch (e: InvocationTargetException) {
+      throw IllegalArgumentException("Failed to create Parameter object $parametersClass", e.cause)
+    }
     return BackfillConfig(instance, dryRun)
   }
 
@@ -52,20 +79,33 @@ class BackfilaParametersOperator<T : Any>(
       Boolean::class to { value: ByteString -> value.utf8().toBoolean() }
     )
 
-    inline fun <reified P : Any> backfilaParametersFromClass(parametersClass: KClass<P>): List<Parameter> {
+    fun <P : Any> backfilaParametersFromClass(parametersClass: KClass<P>): List<Parameter> {
       // Validate that we can handle the parameters if they are specified.
-      for (parameter in parametersClass.primaryConstructor!!.parameters) {
+      for (parameter in fetchConstructor(parametersClass).parameters) {
         check(parameter.type.jvmErasure in TYPE_CONVERTERS.keys) {
           "Parameter data class has member $parameter with unhandled type ${parameter.type.jvmErasure}"
         }
       }
       return parametersClass.primaryConstructor?.parameters?.map {
         val description = it.findAnnotation<Description>()?.text
+        // For Java we use BackfilaDefault since the name is arg0... otherwise.
+        val defaultAnnotation = it.findAnnotation<BackfilaDefault>()
+        val name = defaultAnnotation?.name ?: it.name
         Parameter.Builder()
-          .name(it.name)
+          .name(name)
           .description(description)
           .build()
       } ?: emptyList()
+    }
+
+    private fun <P : Any> fetchConstructor(parametersClass: KClass<P>): KFunction<P> {
+      if (parametersClass.primaryConstructor != null) {
+        return parametersClass.primaryConstructor!!
+      }
+      check(parametersClass.constructors.size == 1) {
+        "Only one constructor is allowed for java parameter classes."
+      }
+      return parametersClass.constructors.single()
     }
   }
 }

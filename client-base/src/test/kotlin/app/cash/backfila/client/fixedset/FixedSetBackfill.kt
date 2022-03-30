@@ -9,5 +9,5 @@ abstract class FixedSetBackfill<Param : Any> : Backfill {
     return ValidateResult(backfillConfig.parameters)
   }
 
-  abstract fun runOne(row: FixedSetRow)
+  abstract fun runOne(row: FixedSetRow, backfillConfig: BackfillConfig<Param>)
 }

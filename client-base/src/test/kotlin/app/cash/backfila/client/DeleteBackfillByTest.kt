@@ -25,13 +25,13 @@ class DeleteBackfillByTest {
 
   @DeleteBy("2031-01-02")
   class TenYearBackfill @Inject constructor() : FixedSetBackfill<NoParameters>() {
-    override fun runOne(row: FixedSetRow) {
+    override fun runOne(row: FixedSetRow, backfillConfig: BackfillConfig<NoParameters>) {
       // We won't be running this one
     }
   }
 
   class DeprecatedBackfill @Inject constructor() : FixedSetBackfill<NoParameters>() {
-    override fun runOne(row: FixedSetRow) {
+    override fun runOne(row: FixedSetRow, backfillConfig: BackfillConfig<NoParameters>) {
       // We won't be running this one
     }
   }

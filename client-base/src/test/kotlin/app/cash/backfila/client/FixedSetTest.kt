@@ -24,7 +24,7 @@ class FixedSetTest {
 
   class ToUpperCaseBackfill @Inject constructor() : FixedSetBackfill<NoParameters>() {
     val runOrder = mutableListOf<String>()
-    override fun runOne(row: FixedSetRow) {
+    override fun runOne(row: FixedSetRow, backfillConfig: BackfillConfig<NoParameters>) {
       runOrder += row.value
       row.value = row.value.toUpperCase(Locale.ROOT)
     }
