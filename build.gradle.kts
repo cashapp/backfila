@@ -30,14 +30,14 @@ subprojects {
 
   val compileKotlin by tasks.getting(KotlinCompile::class) {
     kotlinOptions {
-      jvmTarget = JavaVersion.VERSION_1_8.toString()
+      jvmTarget = JavaVersion.VERSION_11.toString()
     }
     dependsOn("spotlessKotlinApply")
   }
 
   val compileTestKotlin by tasks.getting(KotlinCompile::class) {
     kotlinOptions {
-      jvmTarget = JavaVersion.VERSION_1_8.toString()
+      jvmTarget = JavaVersion.VERSION_11.toString()
     }
   }
 

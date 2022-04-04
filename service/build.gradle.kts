@@ -20,7 +20,6 @@ dependencies {
   implementation(Dependencies.apacheCommonsLang3)
   implementation(Dependencies.guava)
   implementation(Dependencies.guice)
-  implementation(Dependencies.guiceMultibindings)
   implementation(Dependencies.jacksonDatabind)
   implementation(Dependencies.jacksonDataformatYaml)
   implementation(Dependencies.jacksonJsr310)
