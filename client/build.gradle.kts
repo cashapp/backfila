@@ -1,3 +1,5 @@
+import com.vanniktech.maven.publish.tasks.SourcesJar
+
 plugins {
   id("com.squareup.wire")
 }
@@ -40,3 +42,10 @@ if (rootProject.file("hooks.gradle").exists()) {
 }
 
 apply(from = "$rootDir/gradle-mvn-publish.gradle")
+
+// Prevent proto source files from conflicting
+afterEvaluate {
+  tasks.withType<SourcesJar>().configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+  }
+}

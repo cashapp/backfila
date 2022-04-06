@@ -30,7 +30,7 @@ object Dependencies {
   val kotlinxCoroutinesLogging = "org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:${Versions.kotlinCoroutines}"
   val kotlinxCoroutinesTest = "org.jetbrains.kotlinx:kotlinx-coroutines-test:${Versions.kotlinCoroutines}"
   val loggingApi = "io.github.microutils:kotlin-logging:1.7.9"
-  val mavenPublishGradlePlugin = "com.vanniktech:gradle-maven-publish-plugin:0.17.0"
+  val mavenPublishGradlePlugin = "com.vanniktech:gradle-maven-publish-plugin:0.19.0"
   val metricsCore = "io.dropwizard.metrics:metrics-core:4.0.2"
   val metricsParent = "io.dropwizard.metrics:metrics-parent:4.0.2"
   val misk = "com.squareup.misk:misk:${Versions.misk}"
