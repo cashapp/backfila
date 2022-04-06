@@ -1,18 +1,18 @@
 package app.cash.backfila.client
 
-import app.cash.backfila.embedded.Backfila
 import app.cash.backfila.client.fixedset.FixedSetBackfill
 import app.cash.backfila.client.fixedset.FixedSetDatastore
 import app.cash.backfila.client.fixedset.FixedSetRow
+import app.cash.backfila.embedded.Backfila
 import com.google.inject.Module
+import java.time.LocalDate
+import java.time.ZoneOffset.UTC
 import javax.inject.Inject
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.ZoneOffset.UTC
 
 @MiskTest(startService = true)
 class DeleteBackfillByTest {
@@ -28,19 +28,11 @@ class DeleteBackfillByTest {
     override fun runOne(row: FixedSetRow) {
       // We won't be running this one
     }
-
-    override fun checkBackfillConfig(backfillConfig: BackfillConfig<NoParameters>) {
-      // No parameters to check
-    }
   }
 
   class DeprecatedBackfill @Inject constructor() : FixedSetBackfill<NoParameters>() {
     override fun runOne(row: FixedSetRow) {
       // We won't be running this one
-    }
-
-    override fun checkBackfillConfig(backfillConfig: BackfillConfig<NoParameters>) {
-      // No parameters to check
     }
   }
 

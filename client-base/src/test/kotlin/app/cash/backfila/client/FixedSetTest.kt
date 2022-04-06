@@ -1,10 +1,10 @@
 package app.cash.backfila.client
 
-import app.cash.backfila.embedded.Backfila
-import app.cash.backfila.embedded.createWetRun
 import app.cash.backfila.client.fixedset.FixedSetBackfill
 import app.cash.backfila.client.fixedset.FixedSetDatastore
 import app.cash.backfila.client.fixedset.FixedSetRow
+import app.cash.backfila.embedded.Backfila
+import app.cash.backfila.embedded.createWetRun
 import com.google.inject.Module
 import java.util.Locale
 import javax.inject.Inject
@@ -27,10 +27,6 @@ class FixedSetTest {
     override fun runOne(row: FixedSetRow) {
       runOrder += row.value
       row.value = row.value.toUpperCase(Locale.ROOT)
-    }
-
-    override fun checkBackfillConfig(backfillConfig: BackfillConfig<NoParameters>) {
-      // No parameters to check
     }
   }
 

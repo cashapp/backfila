@@ -2,6 +2,7 @@ package app.cash.backfila.client.fixedset
 
 import app.cash.backfila.client.spi.BackfilaParametersOperator
 import app.cash.backfila.client.spi.BackfillOperator
+import app.cash.backfila.client.spi.parametersToBytes
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.KeyRange
@@ -19,8 +20,10 @@ class FixedSetBackfillOperator<Param : Any>(
   override fun name() = backfill.javaClass.toString()
 
   override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
-    backfill.checkBackfillConfig(
-      parametersOperator.constructBackfillConfig(request.parameters, request.dry_run)
+    val backfillConfig = parametersOperator.constructBackfillConfig(request.parameters, request.dry_run)
+
+    val validateResult = backfill.checkBackfillConfig(
+      backfillConfig
     )
 
     val partitions = mutableListOf<PrepareBackfillResponse.Partition>()
@@ -36,6 +39,11 @@ class FixedSetBackfillOperator<Param : Any>(
 
     return PrepareBackfillResponse.Builder()
       .partitions(partitions)
+      .apply {
+        if (backfillConfig.parameters != validateResult.parameters) {
+          parameters(parametersToBytes(validateResult.parameters))
+        }
+      }
       .build()
   }
 
