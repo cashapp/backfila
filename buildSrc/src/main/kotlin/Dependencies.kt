@@ -85,6 +85,6 @@ object Versions {
   val kotlin = "1.5.31"
   val kotlinCoroutines = "1.5.2"
   val ktlint = "0.40.0"
-  val misk = "0.23.0"
+  val misk = "0.24.0"
   val wire = "3.6.0"
 }
