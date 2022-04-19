@@ -29,9 +29,9 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
       parametersOperator.constructBackfillConfig(request.parameters, request.dry_run)
     backfill.validate(config)
 
+    val tableMapper = dynamoDb.newTableMapper<I, Any, Any>(backfill.itemType.java)
+    val tableDescription = tableMapper.describeTable()
     if (backfill.mustHaveProvisionedBillingMode()) {
-      val tableMapper = dynamoDb.newTableMapper<I, Any, Any>(backfill.itemType.java)
-      val tableDescription = tableMapper.describeTable()
       // It's odd but a null billingModeSummary implies "PROVISIONED"
       require(
         tableDescription.billingModeSummary == null ||
@@ -45,10 +45,10 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
       )
     }
 
-    // The maximum number of segments is 1,000,000 so we are currently setting it to the largest power 
-    // of 2 less than this value.
-    val segmentCount = backfill.fixedSegmentCount(config) ?: 524288
     val partitionCount = backfill.partitionCount(config)
+    val desiredSegmentCount = (tableDescription.itemCount / 100L).coerceIn(partitionCount.toLong(), 524288L)
+    val defaultSegmentCount = desiredSegmentCount.takeHighestOneBit().toInt() // closest power of 2
+    val segmentCount = backfill.fixedSegmentCount(config) ?: defaultSegmentCount
     require(
       partitionCount in 1..segmentCount &&
         Integer.bitCount(partitionCount) == 1 &&
