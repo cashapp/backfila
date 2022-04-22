@@ -30,11 +30,11 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
       parametersOperator.constructBackfillConfig(request.parameters, request.dry_run)
     backfill.validate(config)
 
+    var table = dynamoDbClient.describeTable {
+      it.tableName(backfill.dynamoDbTable.tableName())
+    }.table()
     if (backfill.mustHaveProvisionedBillingMode()) {
-      var tableResponse = dynamoDbClient.describeTable {
-        it.tableName(backfill.dynamoDbTable.tableName())
-      }
-      var billingModeSummary = tableResponse.table().billingModeSummary()
+      var billingModeSummary = table.billingModeSummary()
       // It's odd but a null billingModeSummary implies "PROVISIONED"
       require(
         billingModeSummary == null ||
@@ -46,12 +46,11 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
           "Please provision your dynamo capacity for this table and try again."
       }
     }
-
-    // TODO(mikepaw): dynamically select the segment count by probing DynamoDB.
-    // The maximum number of segments is 1,000,000 so we are currently setting it to the largest power 
-    // of 2 less than this value.
-    val segmentCount = backfill.fixedSegmentCount(config) ?: 524288
     val partitionCount = backfill.partitionCount(config)
+    // We will assume the batch size is the default of 100. We are aiming for a batch per segment.
+    val desiredSegmentCount = (table.itemCount() / 100L).coerceIn(partitionCount.toLong(), 524288L)
+    val defaultSegmentCount = desiredSegmentCount.takeHighestOneBit().toInt() // closest power of 2
+    val segmentCount = backfill.fixedSegmentCount(config) ?: defaultSegmentCount
     require(
       partitionCount in 1..segmentCount &&
         Integer.bitCount(partitionCount) == 1 &&
