@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   compile_and_cache_java:
     machine:
-      image: circleci/classic:latest
+      image: ubuntu-2004:202201-02
     environment:
       ENVIRONMENT: TESTING
       JVM_OPTS: -Xmx1024M
@@ -30,7 +30,7 @@ jobs:
           key: v1-master-compile-{{ .BuildNum }}
   java:
     machine:
-      image: circleci/classic:latest
+      image: ubuntu-2004:202201-02
     parallelism: 1
     environment:
       ENVIRONMENT: TESTING
