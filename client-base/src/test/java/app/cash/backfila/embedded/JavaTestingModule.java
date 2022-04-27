@@ -23,7 +23,7 @@ public class JavaTestingModule extends AbstractModule {
             new BackfilaHttpClientConfig("test.url", "#test")
         )
     );
-    install(FixedSetBackfillModule.create(JavaToUpperCaseTestBackfill.class));
+    install(FixedSetBackfillModule.create(JavaChangeCaseTestBackfill.class));
 
     install(new EmbeddedBackfilaModule());
   }

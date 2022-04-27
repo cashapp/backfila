@@ -41,7 +41,7 @@ class PrepareWithParametersTest {
       )
     }
 
-    override fun runOne(row: FixedSetRow) {
+    override fun runOne(row: FixedSetRow, backfillConfig: BackfillConfig<PrepareParameters>) {
     }
   }
 

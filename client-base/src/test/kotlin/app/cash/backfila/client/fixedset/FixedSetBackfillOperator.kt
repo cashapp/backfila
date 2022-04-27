@@ -72,14 +72,16 @@ class FixedSetBackfillOperator<Param : Any>(
   }
 
   override fun runBatch(request: RunBatchRequest): RunBatchResponse {
-    backfill.checkBackfillConfig(
+    val backfillConfig =
       parametersOperator.constructBackfillConfig(request.parameters, request.dry_run)
+    backfill.checkBackfillConfig(
+      backfillConfig
     )
     val partition = datastore.dataByInstance[request.partition_name]!!
     val start = request.batch_range.start.utf8().toInt()
     val end = request.batch_range.end.utf8().toInt()
     for (i in start..end) {
-      backfill.runOne(partition[i])
+      backfill.runOne(partition[i], backfillConfig)
     }
 
     return RunBatchResponse.Builder().build() // Return empty 200
