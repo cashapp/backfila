@@ -6,13 +6,23 @@ import app.cash.backfila.client.internal.RealBackfilaClient
 import app.cash.backfila.client.spi.BackfillBackend
 import com.google.inject.AbstractModule
 import com.google.inject.multibindings.Multibinder
+import javax.inject.Provider
 import kotlin.reflect.KClass
 
 class RealBackfillModule(
-  private val config: BackfilaClientConfig,
+  private val configProvider: Provider<BackfilaClientConfig>,
   private val loggingSetupProvider: KClass<out BackfilaClientLoggingSetupProvider> =
     BackfilaClientNoLoggingSetupProvider::class,
 ) : AbstractModule() {
+
+  /**
+   * This constructor is used for providing the config as an instance.
+   */
+  constructor(
+    config: BackfilaClientConfig,
+    loggingSetupProvider: KClass<out BackfilaClientLoggingSetupProvider> =
+        BackfilaClientNoLoggingSetupProvider::class
+  ) : this( Provider { config }, loggingSetupProvider)
 
   /**
    * This constructor is used for java land.
@@ -20,13 +30,13 @@ class RealBackfillModule(
   @Suppress("unused")
   @JvmOverloads
   constructor(
-    config: BackfilaClientConfig,
+    configProvider: Provider<BackfilaClientConfig>,
     loggingSetupProvider: Class<out BackfilaClientLoggingSetupProvider> =
       BackfilaClientNoLoggingSetupProvider::class.java
-  ) : this(config, loggingSetupProvider.kotlin)
+  ) : this(configProvider, loggingSetupProvider.kotlin)
 
   override fun configure() {
-    bind(BackfilaClientConfig::class.java).toInstance(config)
+    bind(BackfilaClientConfig::class.java).toProvider(configProvider)
 
     bind(BackfilaClient::class.java).to(RealBackfilaClient::class.java)
     bind(BackfilaManagementClient::class.java).to(RealBackfilaManagementClient::class.java)
