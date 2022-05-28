@@ -590,7 +590,7 @@ class BackfillRunnerTest {
     }
   }
 
-  @Test fun backoffOnSuccessfulRequests() {
+  @Test fun `extra sleep`() {
     fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
     val runner = startBackfill(numThreads = 1, extraSleepMs = 1000L)
 
@@ -617,6 +617,74 @@ class BackfillRunnerTest {
       val partition = session.load(runner.partitionId)
       assertThat(partition.pkey_cursor).isEqualTo("199".encodeUtf8())
       assertThat(partition.run_state).isEqualTo(BackfillState.RUNNING)
+    }
+  }
+
+  @Test fun `extra sleep with 2 threads only sleeps once`() {
+    fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
+    val runner = startBackfill(numThreads = 2, extraSleepMs = 1000L)
+
+    runBlockingTestCancellable {
+      launch { runner.start(this) }
+
+      fakeBackfilaClientServiceClient.runBatchRequests.receive()
+      fakeBackfilaClientServiceClient.runBatchRequests.receive()
+      fakeBackfilaClientServiceClient.runBatchResponses.send(
+        Result.success(RunBatchResponse.Builder().build())
+      )
+      fakeBackfilaClientServiceClient.runBatchResponses.send(
+        Result.success(RunBatchResponse.Builder().build())
+      )
+
+      delay(500)
+      // Nothing sent yet - the backoff is 1000ms
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNull()
+      delay(500)
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNotNull()
+      fakeBackfilaClientServiceClient.runBatchResponses.send(
+        Result.success(RunBatchResponse.Builder().build())
+      )
+      runner.stop()
+    }
+    // Cursor updated
+    transacter.transaction { session ->
+      val partition = session.load(runner.partitionId)
+      assertThat(partition.pkey_cursor).isEqualTo("299".encodeUtf8())
+      assertThat(partition.run_state).isEqualTo(BackfillState.RUNNING)
+    }
+  }
+
+  @Test fun `extra sleep is skipped for empty batches`() {
+    val runner = startBackfill(numThreads = 1, extraSleepMs = 1000L)
+
+    // Disable precomputing to avoid making interfering calls to GetNextBatch
+    transacter.transaction { session ->
+      val partition = session.load(runner.partitionId)
+      partition.precomputing_done = true
+    }
+
+    runBlockingTestCancellable {
+      launch { runner.start(this) }
+
+      assertThat(fakeBackfilaClientServiceClient.getNextBatchRangeRequests.receive()).isNotNull()
+      fakeBackfilaClientServiceClient.getNextBatchRangeResponses.send(
+        Result.success(
+          nextBatchResponse(start = "0", end = "99", scannedCount = 100, matchingCount = 0)
+        )
+      )
+      assertThat(fakeBackfilaClientServiceClient.getNextBatchRangeRequests.receive()).isNotNull()
+      fakeBackfilaClientServiceClient.getNextBatchRangeResponses.send(
+        Result.success(
+          nextBatchResponse(start = "100", end = "199", scannedCount = 100, matchingCount = 1)
+        )
+      )
+
+      // The first batch has no matching records, so no delay is added.
+      // The second batch, with nonzero matching count, gets run immediately.
+      val runBatchRequest = fakeBackfilaClientServiceClient.runBatchRequests.poll()
+      assertThat(runBatchRequest).isNotNull()
+      assertThat(runBatchRequest!!.batch_range).isEqualTo(KeyRange("100".encodeUtf8(), "199".encodeUtf8()))
+      runner.stop()
     }
   }
 
