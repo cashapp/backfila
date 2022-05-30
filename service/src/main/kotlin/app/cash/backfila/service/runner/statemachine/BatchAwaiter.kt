@@ -67,9 +67,9 @@ class BatchAwaiter(
           }
 
           if (!backfillRunner.runBatchBackoff.backingOff()) {
-            if (response.backoff_ms ?: 0 > 0) {
+            if ((response.backoff_ms ?: 0) > 0) {
               backfillRunner.runBatchBackoff.addMillis(response.backoff_ms)
-            } else if (backfillRunner.metadata.extraSleepMs > 0) {
+            } else if (backfillRunner.metadata.extraSleepMs > 0 && initialBatch.matching_record_count != 0L) {
               backfillRunner.runBatchBackoff.addMillis(backfillRunner.metadata.extraSleepMs)
             }
           }
