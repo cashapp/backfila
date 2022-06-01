@@ -25,7 +25,12 @@ class BatchRunner(
   private val numThreads: Int
 ) {
   private val runChannel = VariableCapacityChannel<AwaitingRun>(
-    capacity(numThreads)
+    capacity(numThreads),
+    queueSizeChangeListener = { queueSize ->
+      backfillRunner.factory.metrics.batchRunsInProgress
+        .labels(*backfillRunner.metricLabels)
+        .set(queueSize.toDouble())
+    }
   )
 
   /**
@@ -74,6 +79,11 @@ class BatchRunner(
         runChannel.upstream().close()
         break
       }
+
+      backfillRunner.factory.metrics.blockedOnComputingNextBatchDuration.record(
+        stopwatch.elapsed().toMillis().toDouble(),
+        *backfillRunner.metricLabels
+      )
       if (stopwatch.elapsed() > Duration.ofMillis(500)) {
         logger.info {
           "Runner stalled ${stopwatch.elapsed()} ms waiting for batch from " +

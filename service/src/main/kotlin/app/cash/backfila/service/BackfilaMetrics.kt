@@ -79,6 +79,27 @@ class BackfilaMetrics @Inject internal constructor(metrics: Metrics) {
     labelNames = perBackfillLabelNames
   )
 
+  val bufferedBatchesReadyToRun = metrics.gauge(
+    name = "buffered_batches_ready_to_run",
+    help = "The number of batches computed that are ready to be run. If this reaches 0 while the backfill is" +
+      " running, there is probably a performance bottleneck in batch computing.",
+    labelNames = perBackfillLabelNames
+  )
+
+  val blockedOnComputingNextBatchDuration = metrics.histogram(
+    name = "blocked_on_computing_next_batch_duration",
+    help = "How long the BatchRunner was blocked waiting on the BatchQueuer to compute more batches to run." +
+      " If this is greater than 0 there is probably a performance bottleneck in batch computing.",
+    labelNames = perBackfillLabelNames
+  )
+
+  val batchRunsInProgress = metrics.gauge(
+    name = "batch_runs_in_progress",
+    help = "The number of batches that are currently running, that is, " +
+      "we asked the client to start running the batch and it has not finished.",
+    labelNames = perBackfillLabelNames
+  )
+
   companion object {
     private val perBackfillLabelNames = listOf(
       "backfill_service",

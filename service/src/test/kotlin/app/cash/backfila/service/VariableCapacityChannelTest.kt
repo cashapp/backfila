@@ -1,6 +1,7 @@
 package app.cash.backfila.service
 
 import app.cash.backfila.service.runner.statemachine.VariableCapacityChannel
+import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
@@ -196,6 +197,42 @@ class VariableCapacityChannelTest {
           fail("channel not canceled")
         } catch (e: CancellationException) {
         }
+      }
+    }
+  }
+
+  @Test
+  fun `listener is called`() {
+    val size = AtomicInteger()
+    runBlockingTest {
+      val variableCapacityChannel = VariableCapacityChannel<String>(
+        capacity = 3,
+        queueSizeChangeListener = size::set,
+      )
+      val upstream = variableCapacityChannel.upstream()
+      launch {
+        val receiveChannel = variableCapacityChannel.proxy(this)
+        assertThat(size.get()).isEqualTo(0)
+
+        upstream.offer("test")
+        assertThat(size.get()).isEqualTo(1)
+
+        upstream.offer("test")
+        assertThat(size.get()).isEqualTo(2)
+
+        upstream.offer("test")
+        assertThat(size.get()).isEqualTo(3)
+
+        receiveChannel.poll()
+        assertThat(size.get()).isEqualTo(2)
+
+        receiveChannel.poll()
+        assertThat(size.get()).isEqualTo(1)
+
+        receiveChannel.poll()
+        assertThat(size.get()).isEqualTo(0)
+
+        upstream.close()
       }
     }
   }
