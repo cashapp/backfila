@@ -6,6 +6,7 @@ import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.PipelinedData
 import app.cash.backfila.protos.clientservice.RunBatchRequest
 import app.cash.backfila.protos.clientservice.RunBatchResponse
+import app.cash.backfila.service.BackfilaConfig
 import app.cash.backfila.service.BackfilaMetrics
 import app.cash.backfila.service.SlackHelper
 import app.cash.backfila.service.persistence.BackfilaDb
@@ -410,6 +411,7 @@ class BackfillRunner private constructor(
     val slackHelper: SlackHelper,
     val loggingSetupProvider: BackfillRunnerLoggingSetupProvider,
     val metrics: BackfilaMetrics,
+    val backfilaConfig: BackfilaConfig,
   ) {
     fun create(
       @Suppress("UNUSED_PARAMETER") session: Session,

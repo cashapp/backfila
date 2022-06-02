@@ -22,12 +22,18 @@ class BatchQueuer(
   numThreads: Int
 ) {
   private val nextBatchChannel = VariableCapacityChannel<Batch>(
-    capacity(numThreads)
+    capacity(numThreads),
+    queueSizeChangeListener = { queueSize ->
+      backfillRunner.factory.metrics.bufferedBatchesReadyToRun
+        .labels(*backfillRunner.metricLabels)
+        .set(queueSize.toDouble())
+    }
   )
 
   fun nextBatchChannel(): ReceiveChannel<Batch> = nextBatchChannel.downstream()
 
-  private fun capacity(numThreads: Int) = numThreads * 2
+  private fun capacity(numThreads: Int) =
+    numThreads * backfillRunner.factory.backfilaConfig.batch_queue_thread_multiplier
 
   fun run(coroutineScope: CoroutineScope) = coroutineScope.launch(CoroutineName("BatchQueuer")) {
     nextBatchChannel.proxy(coroutineScope)
@@ -60,8 +66,11 @@ class BatchQueuer(
       }
 
       try {
+        // The client is expected to compute as many batches as possible up to computeCountLimit
+        // and within computeTimeLimitMs. It may exceed the time limit when computing its last returned batch.
         val computeTimeLimitMs = 5_000L // half of HTTP timeout
         val computeCountLimit = nextBatchChannel.capacity
+          .coerceAtLeast(backfillRunner.factory.backfilaConfig.minimum_batches_per_get_next_batch_call)
 
         stopwatch.reset()
         stopwatch.start()

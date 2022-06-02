@@ -11,7 +11,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.select
 
 class VariableCapacityChannel<T>(
-  capacity: Int
+  capacity: Int,
+  private val queueSizeChangeListener: (Int) -> Unit = {},
 ) {
   /**
    * Can be changed at any time. However, if the buffer is full (i.e. upstream is blocked on send()),
@@ -48,6 +49,7 @@ class VariableCapacityChannel<T>(
             if (buffer.size > 0) {
               downstream.onSend(buffer.first()) {
                 buffer.removeFirst()
+                queueSizeChangeListener.invoke(buffer.size)
               }
             }
             if (buffer.size < capacity) {
@@ -55,10 +57,12 @@ class VariableCapacityChannel<T>(
                 val value = it.getOrNull()
                 if (value != null) {
                   buffer += value
+                  queueSizeChangeListener.invoke(buffer.size)
                 } else {
                   // Sender closed. Finish sending buffered items then close and exit.
                   while (buffer.size > 0) {
                     downstream.send(buffer.removeFirst())
+                    queueSizeChangeListener.invoke(buffer.size)
                   }
                   // If the sender cancelled, the exception propogates it to the receiver.
                   // Otherwise this closes cleanly.
