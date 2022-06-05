@@ -14,6 +14,7 @@ import com.google.inject.Module
 import com.squareup.moshi.JsonEncodingException
 import java.time.Clock
 import java.time.Instant
+import java.time.temporal.ChronoUnit.DAYS
 import javax.inject.Inject
 import misk.hibernate.Query
 import misk.hibernate.Transacter
@@ -24,7 +25,6 @@ import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
-import java.time.temporal.ChronoUnit.DAYS
 
 @MiskTest(startService = true)
 class ConfigureServiceActionTest {
@@ -32,12 +32,19 @@ class ConfigureServiceActionTest {
   @MiskTestModule
   val module: Module = BackfilaTestingModule()
 
-  @Inject lateinit var clock: Clock
-  @Inject lateinit var configureServiceAction: ConfigureServiceAction
-  @Inject lateinit var getRegisteredBackfillsAction: GetRegisteredBackfillsAction
-  @Inject @BackfilaDb lateinit var transacter: Transacter
-  @Inject lateinit var queryFactory: Query.Factory
-  @Inject lateinit var scope: ActionScope
+  @Inject
+  lateinit var clock: Clock
+  @Inject
+  lateinit var configureServiceAction: ConfigureServiceAction
+  @Inject
+  lateinit var getRegisteredBackfillsAction: GetRegisteredBackfillsAction
+  @Inject
+  @BackfilaDb
+  lateinit var transacter: Transacter
+  @Inject
+  lateinit var queryFactory: Query.Factory
+  @Inject
+  lateinit var scope: ActionScope
 
   @Test
   fun changeServiceConnector() {
@@ -267,15 +274,15 @@ class ConfigureServiceActionTest {
       assertThat(backfills).containsOnly(
         Backfill(
           "xyz", clock.instant(), type_provided = null, type_consumed = null,
-          parameter_names = null, requires_approval = false, delete_by = null
+          parameters = listOf(), requires_approval = false, delete_by = null
         ),
         Backfill(
           "xyz", clock.instant(), type_provided = null, type_consumed = null,
-          parameter_names = null, requires_approval = true, delete_by = null
+          parameters = listOf(), requires_approval = true, delete_by = null
         ),
         Backfill(
           "xyz", null, type_provided = null, type_consumed = null,
-          parameter_names = null, requires_approval = false, delete_by = null
+          parameters = listOf(), requires_approval = false, delete_by = null
         )
       )
     }
@@ -334,15 +341,15 @@ class ConfigureServiceActionTest {
       assertThat(backfills).containsOnly(
         Backfill(
           "xyz", clock.instant(), type_provided = null, type_consumed = null,
-          parameter_names = null, requires_approval = false, delete_by = null
+          parameters = listOf(), requires_approval = false, delete_by = null
         ),
         Backfill(
           "xyz", clock.instant(), type_provided = null, type_consumed = null,
-          parameter_names = null, requires_approval = false, delete_by = clock.instant().plus(1L, DAYS)
+          parameters = listOf(), requires_approval = false, delete_by = clock.instant().plus(1L, DAYS)
         ),
         Backfill(
           "xyz", null, type_provided = null, type_consumed = null,
-          parameter_names = null, requires_approval = false, delete_by = null
+          parameters = listOf(), requires_approval = false, delete_by = null
         )
       )
     }
@@ -378,16 +385,204 @@ class ConfigureServiceActionTest {
           .connector_type(ENVOY)
           .build()
       )
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "xyz", "Description",
+                listOf(
+                  Parameter.Builder().name("abc").build(),
+                  Parameter.Builder().name("def").build(),
+                ),
+                null, null, false, null
+              )
+            )
+          )
+          .connector_type(ENVOY)
+          .build()
+      )
+      // Repeat the final one twice, no changes shouldn't create a new backfill.
+      repeat(2) {
+        configureServiceAction.configureService(
+          ConfigureServiceRequest.Builder()
+            .backfills(
+              listOf(
+                ConfigureServiceRequest.BackfillData(
+                  "xyz", "Description",
+                  listOf(
+                    Parameter.Builder().name("def").build(),
+                    Parameter.Builder().name("xyz").build(),
+                  ),
+                  null, null, false, null
+                )
+              )
+            )
+            .connector_type(ENVOY)
+            .build()
+        )
+      }
       val backfills = backfills("deep-fryer")
       assertThat(backfills).containsOnly(
         Backfill(
           "xyz", clock.instant(), type_provided = null, type_consumed = null,
-          parameter_names = null, requires_approval = false, delete_by = null
+          parameters = listOf(), requires_approval = false, delete_by = null
+        ),
+        Backfill(
+          "xyz", clock.instant(), type_provided = null, type_consumed = null,
+          parameters = listOf(
+            Parameter.Builder().name("abc").required(false).build()
+          ),
+          requires_approval = false, delete_by = null
+        ),
+        Backfill(
+          "xyz", clock.instant(), type_provided = null, type_consumed = null,
+          parameters = listOf(
+            Parameter.Builder().name("abc").required(false).build(),
+            Parameter.Builder().name("def").required(false).build(),
+          ),
+          requires_approval = false, delete_by = null
         ),
         Backfill(
           "xyz", null, type_provided = null, type_consumed = null,
-          parameter_names = "abc", requires_approval = false, delete_by = null
+          parameters = listOf(
+            Parameter.Builder().name("def").required(false).build(),
+            Parameter.Builder().name("xyz").required(false).build(),
+          ),
+          requires_approval = false, delete_by = null
         )
+      )
+    }
+  }
+
+  @Test
+  fun `change param description`() {
+    scope.fakeCaller(service = "deep-fryer") {
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "xyz", "Description",
+                listOf(Parameter.Builder().name("abc").build()),
+                null, null, false, null
+              )
+            )
+          )
+          .connector_type(ENVOY)
+          .build()
+      )
+      // Add description
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "xyz", "Description",
+                listOf(Parameter.Builder().name("abc").description("desc").build()),
+                null, null, false, null
+              )
+            )
+          )
+          .connector_type(ENVOY)
+          .build()
+      )
+      // Change description
+      // Repeat the final one twice, no changes shouldn't create a new backfill.
+      repeat(2) {
+        configureServiceAction.configureService(
+          ConfigureServiceRequest.Builder()
+            .backfills(
+              listOf(
+                ConfigureServiceRequest.BackfillData(
+                  "xyz", "Description",
+                  listOf(Parameter.Builder().name("abc").description("new desc").build()),
+                  null, null, false, null
+                )
+              )
+            )
+            .connector_type(ENVOY)
+            .build()
+        )
+      }
+      val backfills = backfills("deep-fryer")
+      assertThat(backfills).containsOnly(
+        Backfill(
+          "xyz", clock.instant(), type_provided = null, type_consumed = null,
+          parameters = listOf(
+            Parameter.Builder().name("abc").required(false).build(),
+          ),
+          requires_approval = false, delete_by = null
+        ),
+        Backfill(
+          "xyz", clock.instant(), type_provided = null, type_consumed = null,
+          parameters = listOf(
+            Parameter.Builder().name("abc").required(false).description("desc").build(),
+          ),
+          requires_approval = false, delete_by = null
+        ),
+        Backfill(
+          "xyz", null, type_provided = null, type_consumed = null,
+          parameters = listOf(
+            Parameter.Builder().name("abc").required(false).description("new desc").build(),
+          ),
+          requires_approval = false, delete_by = null
+        ),
+      )
+    }
+  }
+
+  @Test
+  fun `change param required`() {
+    scope.fakeCaller(service = "deep-fryer") {
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "xyz", "Description",
+                listOf(Parameter.Builder().name("abc").required(false).build()),
+                null, null, false, null
+              )
+            )
+          )
+          .connector_type(ENVOY)
+          .build()
+      )
+      // Make required
+      // Repeat the final one twice, no changes shouldn't create a new backfill.
+      repeat(2) {
+        configureServiceAction.configureService(
+          ConfigureServiceRequest.Builder()
+            .backfills(
+              listOf(
+                ConfigureServiceRequest.BackfillData(
+                  "xyz", "Description",
+                  listOf(Parameter.Builder().name("abc").required(true).build()),
+                  null, null, false, null
+                )
+              )
+            )
+            .connector_type(ENVOY)
+            .build()
+        )
+      }
+      val backfills = backfills("deep-fryer")
+      assertThat(backfills).containsOnly(
+        Backfill(
+          "xyz", clock.instant(), type_provided = null, type_consumed = null,
+          parameters = listOf(
+            Parameter.Builder().name("abc").required(false).build()
+          ),
+          requires_approval = false, delete_by = null
+        ),
+        Backfill(
+          "xyz", null, type_provided = null, type_consumed = null,
+          parameters = listOf(
+            Parameter.Builder().name("abc").required(true).build()
+          ),
+          requires_approval = false, delete_by = null
+        ),
       )
     }
   }
@@ -425,11 +620,11 @@ class ConfigureServiceActionTest {
       assertThat(backfills).containsOnly(
         Backfill(
           "xyz", clock.instant(), type_provided = "String", type_consumed = null,
-          parameter_names = null, requires_approval = false, delete_by = null
+          parameters = listOf(), requires_approval = false, delete_by = null
         ),
         Backfill(
           "xyz", null, type_provided = "Int", type_consumed = null,
-          parameter_names = null, requires_approval = false, delete_by = null
+          parameters = listOf(), requires_approval = false, delete_by = null
         )
       )
     }
@@ -468,11 +663,11 @@ class ConfigureServiceActionTest {
       assertThat(backfills).containsOnly(
         Backfill(
           "xyz", clock.instant(), type_provided = null, type_consumed = "String",
-          parameter_names = null, requires_approval = false, delete_by = null
+          parameters = listOf(), requires_approval = false, delete_by = null
         ),
         Backfill(
           "xyz", null, type_provided = null, type_consumed = "Int",
-          parameter_names = null, requires_approval = false, delete_by = null
+          parameters = listOf(), requires_approval = false, delete_by = null
         )
       )
     }
@@ -511,7 +706,7 @@ class ConfigureServiceActionTest {
       assertThat(backfills).containsOnly(
         Backfill(
           "xyz", deleted_in_service_at = null, type_provided = null,
-          type_consumed = "String", parameter_names = null, requires_approval = false, delete_by = null
+          type_consumed = "String", parameters = listOf(), requires_approval = false, delete_by = null
         )
       )
     }
@@ -562,7 +757,7 @@ class ConfigureServiceActionTest {
     val deleted_in_service_at: Instant?,
     val type_provided: String?,
     val type_consumed: String?,
-    val parameter_names: String?,
+    val parameters: List<Parameter>,
     val requires_approval: Boolean,
     val delete_by: Instant?
   )
@@ -576,12 +771,13 @@ class ConfigureServiceActionTest {
         .serviceId(dbService.id)
         .list(session)
         .map {
+          assertThat(it.parameterNames()).isEqualTo(it.parameters.map { it.name })
           Backfill(
             it.name,
             it.deleted_in_service_at,
             it.type_provided,
             it.type_consumed,
-            it.parameter_names,
+            it.parameters.map { p -> Parameter(p.name, p.description, p.required) },
             it.requires_approval,
             it.delete_by
           )

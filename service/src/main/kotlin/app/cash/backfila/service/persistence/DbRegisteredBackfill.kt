@@ -1,5 +1,6 @@
 package app.cash.backfila.service.persistence
 
+import app.cash.backfila.protos.service.Parameter
 import java.time.Clock
 import java.time.Instant
 import javax.persistence.Column
@@ -8,6 +9,8 @@ import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
+import javax.persistence.OneToMany
+import javax.persistence.OrderBy
 import javax.persistence.Table
 import misk.hibernate.DbTimestampedEntity
 import misk.hibernate.DbUnsharded
@@ -54,8 +57,13 @@ class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimestampedE
   override lateinit var updated_at: Instant
 
   // TODO(mgersh): this might want to be its own table
+  @Deprecated("to be replaced with parameters")
   @Column(columnDefinition = "mediumtext")
   var parameter_names: String? = null
+
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "registered_backfill")
+  @OrderBy("id")
+  var parameters = mutableSetOf<DbRegisteredParameter>()
 
   @Column
   var type_provided: String? = null
@@ -77,7 +85,7 @@ class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimestampedE
   constructor(
     service_id: Id<DbService>,
     name: String,
-    parameter_names: List<String>,
+    parameters: List<Parameter>,
     type_provided: String?,
     type_consumed: String?,
     requires_approval: Boolean,
@@ -85,14 +93,25 @@ class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimestampedE
   ) : this() {
     this.service_id = service_id
     this.name = name
-    if (!parameter_names.isEmpty()) {
-      this.parameter_names = parameter_names.joinToString(",")
+    if (parameters.isNotEmpty()) {
+      this.parameter_names = parameters.joinToString(",") { it.name }
     }
     this.type_provided = type_provided
     this.type_consumed = type_consumed
     this.active = true
     this.requires_approval = requires_approval
     this.delete_by = delete_by
+
+    parameters.forEach {
+      this.parameters.add(
+        DbRegisteredParameter(
+          this,
+          it.name,
+          it.description,
+          it.required ?: false,
+        )
+      )
+    }
   }
 
   /** True if the variables configured by the client service are equal to what is stored. */
@@ -103,6 +122,10 @@ class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimestampedE
     if (requires_approval != other.requires_approval) return false
     if (delete_by != other.delete_by) return false
 
+    val ourParams = parameters.map { Parameter(it.name, it.description, it.required) }
+    val otherParams = other.parameters.map { Parameter(it.name, it.description, it.required) }
+    if (ourParams != otherParams) return false
+
     return true
   }
 
@@ -111,5 +134,6 @@ class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimestampedE
     this.deleted_in_service_at = clock.instant()
   }
 
-  fun parameterNames() = parameter_names?.split(",")
+  // TODO(mgersh): after backfilling the parameters table, drop parameter_names and start returning description as well
+  fun parameterNames() = parameter_names?.split(",") ?: listOf()
 }

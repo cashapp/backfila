@@ -10,6 +10,7 @@ message Parameter {
   optional string name = 1;
   // Description to show in the UI.
   optional string description = 2;
+  optional bool required = 3;
 }
 
 message ConfigureServiceRequest {
