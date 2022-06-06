@@ -904,7 +904,7 @@ class BackfillRunnerTest {
               ConfigureServiceRequest.BackfillData(
                 "ChickenSandwich",
                 "Description",
-                listOf(Parameter("cheese", "cheddar or american")),
+                listOf(Parameter.Builder().name("cheese").description("cheddar or american").build()),
                 null,
                 null,
                 false,

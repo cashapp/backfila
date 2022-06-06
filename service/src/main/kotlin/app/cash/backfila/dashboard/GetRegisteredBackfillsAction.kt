@@ -18,7 +18,7 @@ import wisp.logging.getLogger
 
 data class RegisteredBackfill(
   val name: String,
-  val parameterNames: List<String>?
+  val parameterNames: List<String>,
 )
 data class GetRegisteredBackfillsResponse(val backfills: List<RegisteredBackfill>)
 

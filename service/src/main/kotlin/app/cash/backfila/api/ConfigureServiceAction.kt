@@ -9,6 +9,7 @@ import app.cash.backfila.service.persistence.DbService
 import app.cash.backfila.service.persistence.RegisteredBackfillQuery
 import app.cash.backfila.service.persistence.ServiceQuery
 import java.time.Clock
+import java.time.Instant
 import javax.inject.Inject
 import misk.MiskCaller
 import misk.hibernate.Query
@@ -23,7 +24,6 @@ import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import wisp.logging.getLogger
-import java.time.Instant
 
 class ConfigureServiceAction @Inject constructor(
   private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
@@ -77,7 +77,7 @@ class ConfigureServiceAction @Inject constructor(
         val newBackfill = DbRegisteredBackfill(
           dbService.id,
           backfill.name,
-          backfill.parameters.map { it.name },
+          backfill.parameters,
           backfill.type_provided,
           backfill.type_consumed,
           backfill.requires_approval == true,
@@ -101,6 +101,7 @@ class ConfigureServiceAction @Inject constructor(
         }
         if (save) {
           session.save(newBackfill)
+          newBackfill.parameters.forEach { session.save(it) }
         }
       }
 
