@@ -9,6 +9,7 @@ include("client-misk-hibernate")
 include("client-static")
 include("client-testing")
 include("service")
+include("service-self-backfill")
 
 // These are going to be deleted as they are replaced by miskless versions.
 include("client-misk-dynamodb")
