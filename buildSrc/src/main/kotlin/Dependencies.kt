@@ -72,10 +72,10 @@ object Dependencies {
   val wireMoshiAdapter = "com.squareup.wire:wire-moshi-adapter:${Versions.wire}"
   val wireRuntime = "com.squareup.wire:wire-runtime:${Versions.wire}"
   val wireSchema = "com.squareup.wire:wire-schema:${Versions.wire}"
-  val wispClient = "com.squareup.misk:wisp-client:${Versions.misk}"
-  val wispConfig = "com.squareup.misk:wisp-config:${Versions.misk}"
-  val wispDeployment = "com.squareup.misk:wisp-deployment:${Versions.misk}"
-  val wispLogging = "com.squareup.misk:wisp-logging:${Versions.misk}"
+  val wispClient = "app.cash.wisp:wisp-client:${Versions.wisp}"
+  val wispConfig = "app.cash.wisp:wisp-config:${Versions.wisp}"
+  val wispDeployment = "app.cash.wisp:wisp-deployment:${Versions.wisp}"
+  val wispLogging = "app.cash.wisp:wisp-logging:${Versions.wisp}"
 }
 
 object Versions {
@@ -87,4 +87,5 @@ object Versions {
   val ktlint = "0.40.0"
   val misk = "0.24.0"
   val wire = "3.6.0"
+  val wisp = "1.0.0"
 }
