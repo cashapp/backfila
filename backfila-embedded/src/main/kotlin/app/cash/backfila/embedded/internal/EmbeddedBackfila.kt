@@ -133,4 +133,7 @@ internal class EmbeddedBackfila @Inject internal constructor(
       rangeEnd = rangeEnd
     )
   }
+
+  override val throwOnStartup: Boolean
+    get() = true
 }

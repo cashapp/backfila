@@ -44,4 +44,7 @@ interface BackfilaApi {
   fun checkBackfillStatus(
     @Body request: CheckBackfillStatusRequest
   ): Call<CheckBackfillStatusResponse>
+  
+  val throwOnStartup: Boolean
+    get() = false
 }
