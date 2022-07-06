@@ -86,7 +86,7 @@ class BackfilaParametersOperator<T : Any>(
           "Parameter data class has member $parameter with unhandled type ${parameter.type.jvmErasure}"
         }
       }
-      return parametersClass.primaryConstructor?.parameters?.map {
+      return fetchConstructor(parametersClass).parameters.map {
         val description = it.findAnnotation<Description>()?.text
         // For Java we use BackfilaDefault since the name is arg0... otherwise.
         val defaultAnnotation = it.findAnnotation<BackfilaDefault>()
@@ -95,7 +95,7 @@ class BackfilaParametersOperator<T : Any>(
           .name(name)
           .description(description)
           .build()
-      } ?: emptyList()
+      }
     }
 
     private fun <P : Any> fetchConstructor(parametersClass: KClass<P>): KFunction<P> {
