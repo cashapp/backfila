@@ -51,4 +51,7 @@ class RealBackfilaClient @Inject internal constructor(
       throw UncheckedIOException(e)
     }
   }
+
+  override val throwOnStartup: Boolean
+    get() = backfilaApi.throwOnStartup
 }

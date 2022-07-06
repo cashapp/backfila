@@ -61,7 +61,11 @@ class BackfilaStartupConfigurator @Inject constructor(
           "Updated backfila with ${registrations.size} backfills."
       }
     } catch (e: Exception) {
-      logger.error(e) { "Exception making startup call to configure backfila, skipped!" }
+      if (backfilaClient.throwOnStartup) {
+        throw e
+      } else {
+        logger.error(e) { "Exception making startup call to configure backfila, skipped!" }
+      }
     }
   }
 
