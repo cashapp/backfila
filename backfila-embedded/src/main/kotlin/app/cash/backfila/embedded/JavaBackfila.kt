@@ -47,4 +47,6 @@ class JavaBackfila @Inject constructor(private val backfila: Backfila) {
   ): BackfillRun<Type> {
     return backfila.createWetRun(backfill.kotlin, null, parameterData, rangeStart, rangeEnd)
   }
+
+  val configureServiceData = backfila.configureServiceData
 }

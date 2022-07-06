@@ -2,6 +2,7 @@ package app.cash.backfila.embedded;
 
 import app.cash.backfila.client.BackfilaDefault;
 import app.cash.backfila.client.BackfilaRequired;
+import app.cash.backfila.client.Description;
 
 public class CaseParameters {
   public final boolean toUpper;
@@ -10,6 +11,7 @@ public class CaseParameters {
   public final boolean testBool;
 
   public CaseParameters(
+      @Description(text = "Whether to change case to upper case or lower case.")
       @BackfilaDefault(name = "casing", value = "upper") String casing,
       @BackfilaDefault(name = "testLong", value = "123") long testLong,
       @BackfilaDefault(name = "testInt", value = "789") int testInt,

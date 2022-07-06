@@ -21,8 +21,8 @@ class RealBackfillModule(
   constructor(
     config: BackfilaClientConfig,
     loggingSetupProvider: KClass<out BackfilaClientLoggingSetupProvider> =
-        BackfilaClientNoLoggingSetupProvider::class
-  ) : this( Provider { config }, loggingSetupProvider)
+      BackfilaClientNoLoggingSetupProvider::class
+  ) : this(Provider { config }, loggingSetupProvider)
 
   /**
    * This constructor is used for java land.
