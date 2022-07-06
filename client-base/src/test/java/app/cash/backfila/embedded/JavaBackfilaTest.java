@@ -1,6 +1,7 @@
 package app.cash.backfila.embedded;
 
 import app.cash.backfila.client.fixedset.FixedSetDatastore;
+import app.cash.backfila.protos.service.Parameter;
 import java.util.Map;
 import javax.inject.Inject;
 import misk.testing.MiskTest;
@@ -24,6 +25,11 @@ class JavaBackfilaTest {
 
   @Test
   void happyDefaults() {
+    var backfillData = backfila.getConfigureServiceData().backfills
+        .stream().filter(it -> it.name.equals(JavaChangeCaseTestBackfill.class.getCanonicalName())).findFirst();
+    var toUpperParameter = backfillData.get().parameters.stream().filter(it -> it.name.equals("casing")).findFirst();
+    assertThat(toUpperParameter.get().description).isEqualTo("Whether to change case to upper case or lower case.");
+
     datastore.put("instance", "a", "B", "c");
 
     var backfillRun = backfila.createWetRun(JavaChangeCaseTestBackfill.class,
