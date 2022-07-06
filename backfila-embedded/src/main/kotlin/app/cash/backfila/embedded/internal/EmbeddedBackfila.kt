@@ -54,8 +54,8 @@ internal class EmbeddedBackfila @Inject internal constructor(
       }
       Connectors.ENVOY -> {
         val connectorDataAdapter = moshi.adapter(EnvoyConnectorData::class.java)
-        val envoyData = connectorDataAdapter.fromJson(request.connector_extra_data)
-        checkNotNull(envoyData) { "Must provide Envoy connector data for Envoy connector type." }
+        // The data can be null, however, we still check that it parses without an error.
+        connectorDataAdapter.fromJson(request.connector_extra_data)
       }
       else -> error("Backfila only supports HTTP and Envoy currently.")
     }
