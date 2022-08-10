@@ -45,7 +45,7 @@ class SpannerBackfillOperator<Param : Any> internal constructor(
   }
 
   override fun getNextBatchRange(request: GetNextBatchRangeRequest): GetNextBatchRangeResponse {
-    // Establish a range to scane - either we want to start at the first key,
+    // Establish a range to scan - either we want to start at the first key,
     // or start from (and exclude) the last key that was scanned.
     val range = if (request.previous_end_key == null) {
       KeySet.all()
