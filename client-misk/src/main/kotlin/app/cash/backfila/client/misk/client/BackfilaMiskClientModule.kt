@@ -2,6 +2,7 @@ package app.cash.backfila.client.misk.client
 
 import app.cash.backfila.client.BackfilaApi
 import app.cash.backfila.client.ForBackfila
+import app.cash.backfila.client.OnStartup
 import app.cash.backfila.client.misk.MiskBackfillModule
 import app.cash.backfila.client.misk.internal.FinalizeBackfillAction
 import app.cash.backfila.client.misk.internal.GetNextBatchRangeAction
@@ -30,6 +31,7 @@ class BackfilaMiskClientModule : KAbstractModule() {
         )
       )
     )
+    bind(OnStartup::class.java).toInstance(OnStartup.CONTINUE_ON_STARTUP)
 
     install(WebActionModule.create<PrepareBackfillAction>())
     install(WebActionModule.create<GetNextBatchRangeAction>())
