@@ -1,6 +1,7 @@
 package app.cash.backfila.client.internal
 
 import app.cash.backfila.client.BackfilaApi
+import app.cash.backfila.client.OnStartup
 import app.cash.backfila.protos.service.CheckBackfillStatusRequest
 import app.cash.backfila.protos.service.CheckBackfillStatusResponse
 import app.cash.backfila.protos.service.ConfigureServiceRequest
@@ -14,7 +15,8 @@ import javax.inject.Singleton
 
 @Singleton
 class RealBackfilaClient @Inject internal constructor(
-  private val backfilaApi: BackfilaApi
+  private val backfilaApi: BackfilaApi,
+  private val onStartup: OnStartup,
 ) : BackfilaClient {
   override fun configureService(request: ConfigureServiceRequest): ConfigureServiceResponse {
     try {
@@ -53,5 +55,5 @@ class RealBackfilaClient @Inject internal constructor(
   }
 
   override val throwOnStartup: Boolean
-    get() = backfilaApi.throwOnStartup
+    get() = onStartup == OnStartup.THROW_ON_STARTUP
 }
