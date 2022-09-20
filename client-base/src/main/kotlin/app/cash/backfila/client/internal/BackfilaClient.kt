@@ -13,6 +13,4 @@ interface BackfilaClient {
   fun createAndStartBackfill(request: CreateAndStartBackfillRequest): CreateAndStartBackfillResponse
 
   fun checkBackfillStatus(request: CheckBackfillStatusRequest): CheckBackfillStatusResponse
-
-  val throwOnStartup: Boolean
 }

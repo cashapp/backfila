@@ -36,7 +36,4 @@ internal class LocalBackfilaClient @Inject constructor(
     // We don't need this
     TODO("Not yet implemented")
   }
-
-  override val throwOnStartup: Boolean
-    get() = true
 }
