@@ -29,7 +29,7 @@ class LeaseHunter @Inject constructor(
         .runState(BackfillState.RUNNING)
         .leaseExpiresAtBefore(clock.instant())
         .apply {
-          maxRows = RUN_PARTITION_BATCH_SIZE
+          maxRows = RUN_PARTITION_QUERY_LIMIT
         }
         .list(session)
 
@@ -57,6 +57,6 @@ class LeaseHunter @Inject constructor(
 
   companion object {
     val LEASE_DURATION: Duration = Duration.ofMinutes(5)
-    const val RUN_PARTITION_BATCH_SIZE = 100
+    const val RUN_PARTITION_QUERY_LIMIT = 10_000
   }
 }
