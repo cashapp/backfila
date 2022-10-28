@@ -28,6 +28,9 @@ class LeaseHunter @Inject constructor(
       val unleasedPartitions = queryFactory.newQuery<RunPartitionQuery>()
         .runState(BackfillState.RUNNING)
         .leaseExpiresAtBefore(clock.instant())
+        .apply {
+          maxRows = RUN_PARTITION_BATCH_SIZE
+        }
         .list(session)
 
       if (unleasedPartitions.isEmpty()) {
@@ -54,5 +57,6 @@ class LeaseHunter @Inject constructor(
 
   companion object {
     val LEASE_DURATION: Duration = Duration.ofMinutes(5)
+    const val RUN_PARTITION_BATCH_SIZE = 100
   }
 }
