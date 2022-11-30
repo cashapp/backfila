@@ -55,12 +55,19 @@ subprojects {
   configure<SpotlessExtension> {
     kotlin {
       target("**/*.kt")
-      ktlint(Versions.ktlint).userData(
-              mapOf(
-                      "indent_size" to "2",
-                      "continuation_indent_size" to "4",
-                      "disabled_rules" to "import-ordering"
-              ))
+      ktlint(Versions.ktlint).editorConfigOverride(
+          mapOf(
+              "indent_size" to "2",
+              "continuation_indent_size" to "4",
+              "trailing_comma_on_call_site" to "true",
+              "trailing_comma_on_declaration_site" to "true",
+              "ij_kotlin_allow_trailing_comma" to "true",
+              "ij_kotlin_allow_trailing_comma_on_declaration_site" to "true",
+              "ij_kotlin_allow_trailing_comma_on_call_site" to "true",
+              "ij_kotlin_imports_layout" to "*",
+              "ktlint_disabled_rules" to "argument-list-wrapping",
+          )
+      )
     }
   }
 

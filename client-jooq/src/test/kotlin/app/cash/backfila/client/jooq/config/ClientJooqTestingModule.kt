@@ -111,7 +111,7 @@ class ClientJooqTestingModule : KAbstractModule() {
           configuration().connectionProvider(),
           false
         )
-      ).set(JooqSQLLogger())
+      ).set(JooqSqlLogger())
     }
   }
 }
