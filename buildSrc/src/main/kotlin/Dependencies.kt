@@ -4,6 +4,7 @@ object Dependencies {
   val aws2Dynamodb = "software.amazon.awssdk:dynamodb:2.17.267"
   val aws2DynamodbEnhanced = "software.amazon.awssdk:dynamodb-enhanced:2.17.267"
   val awsDynamodb = "com.amazonaws:aws-java-sdk-dynamodb:1.11.960"
+  val awsS3 = "com.amazonaws:aws-java-sdk-s3:1.12.231"
   val dokkaGradlePlugin = "org.jetbrains.dokka:dokka-gradle-plugin:1.5.0"
   val flywayGradleBuildscriptDep = "gradle.plugin.com.boxfuse.client:flyway-release:5.0.2"
   val guava = "com.google.guava:guava:31.1-jre"
