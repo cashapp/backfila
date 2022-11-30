@@ -16,37 +16,37 @@ interface BackfilaApi {
   @Headers(
     value = [
       "Accept: application/x-protobuf",
-      "Content-Type: application/x-protobuf"
-    ]
+      "Content-Type: application/x-protobuf",
+    ],
   )
   fun configureService(
-    @Body request: ConfigureServiceRequest
+    @Body request: ConfigureServiceRequest,
   ): Call<ConfigureServiceResponse>
 
   @POST("/create-and-start-backfill")
   @Headers(
     value = [
       "Accept: application/x-protobuf",
-      "Content-Type: application/x-protobuf"
-    ]
+      "Content-Type: application/x-protobuf",
+    ],
   )
   fun createAndStartbackfill(
-    @Body request: CreateAndStartBackfillRequest
+    @Body request: CreateAndStartBackfillRequest,
   ): Call<CreateAndStartBackfillResponse>
 
   @POST("/check-backfill-status")
   @Headers(
     value = [
       "Accept: application/x-protobuf",
-      "Content-Type: application/x-protobuf"
-    ]
+      "Content-Type: application/x-protobuf",
+    ],
   )
   fun checkBackfillStatus(
-    @Body request: CheckBackfillStatusRequest
+    @Body request: CheckBackfillStatusRequest,
   ): Call<CheckBackfillStatusResponse>
 }
 
 enum class OnStartup {
   THROW_ON_STARTUP,
-  CONTINUE_ON_STARTUP
+  CONTINUE_ON_STARTUP,
 }

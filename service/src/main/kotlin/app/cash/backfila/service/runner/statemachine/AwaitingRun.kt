@@ -8,5 +8,5 @@ import kotlinx.coroutines.Deferred
 data class AwaitingRun(
   val batch: GetNextBatchRangeResponse.Batch,
   val runBatchRpc: Deferred<RunBatchResponse>,
-  val startedAt: Instant
+  val startedAt: Instant,
 )

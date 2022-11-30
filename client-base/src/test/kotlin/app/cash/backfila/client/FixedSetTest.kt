@@ -20,6 +20,7 @@ class FixedSetTest {
   val module: Module = TestingModule()
 
   @Inject lateinit var backfila: Backfila
+
   @Inject lateinit var datastore: FixedSetDatastore
 
   class ToUpperCaseBackfill @Inject constructor() : FixedSetBackfill<NoParameters>() {

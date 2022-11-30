@@ -2,12 +2,12 @@ package app.cash.backfila.client.dynamodbv2
 
 import app.cash.backfila.client.Backfill
 import app.cash.backfila.client.BackfillConfig
-import com.squareup.moshi.Types
 import com.google.inject.TypeLiteral
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue
+import com.squareup.moshi.Types
 import java.lang.reflect.ParameterizedType
 import kotlin.reflect.KClass
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 
 abstract class DynamoDbBackfill<I : Any, P : Any> : Backfill {
   val itemType: KClass<I>
@@ -28,7 +28,7 @@ abstract class DynamoDbBackfill<I : Any, P : Any> : Backfill {
 
     // Like Backfill<MyItem, Parameters>.
     val supertype = thisType.getSupertype(
-      DynamoDbBackfill::class.java
+      DynamoDbBackfill::class.java,
     ).type as ParameterizedType
 
     // Like MyItem.

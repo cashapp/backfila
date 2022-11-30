@@ -21,6 +21,7 @@ class DeleteBackfillByTest {
   val module: Module = TestingModule()
 
   @Inject lateinit var backfila: Backfila
+
   @Inject lateinit var datastore: FixedSetDatastore
 
   @DeleteBy("2031-01-02")

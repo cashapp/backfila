@@ -1,10 +1,11 @@
 package app.cash.backfila.client.dynamodbv2
 
 import app.cash.backfila.client.BackfillConfig
-import app.cash.backfila.client.misk.TestingModule
 import app.cash.backfila.client.dynamodbv2.DynamoDbSegmentingTest.SegmentingBackfill.SegmentingParameters
+import app.cash.backfila.client.misk.TestingModule
 import app.cash.backfila.embedded.Backfila
 import app.cash.backfila.embedded.createWetRun
+import javax.inject.Inject
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -14,7 +15,6 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import javax.inject.Inject
 
 @MiskTest(startService = true)
 class DynamoDbSegmentingTest {
@@ -34,7 +34,7 @@ class DynamoDbSegmentingTest {
 
     assertThrows<IllegalArgumentException> {
       backfila.createWetRun<SegmentingBackfill>(
-        parameters = SegmentingParameters(2, 4)
+        parameters = SegmentingParameters(2, 4),
       )
     }
   }
@@ -45,25 +45,25 @@ class DynamoDbSegmentingTest {
 
     assertThrows<IllegalArgumentException> {
       backfila.createWetRun<SegmentingBackfill>(
-        parameters = SegmentingParameters(0, 4)
+        parameters = SegmentingParameters(0, 4),
       )
     }
 
     assertThrows<IllegalArgumentException> {
       backfila.createWetRun<SegmentingBackfill>(
-        parameters = SegmentingParameters(2, 0)
+        parameters = SegmentingParameters(2, 0),
       )
     }
 
     assertThrows<IllegalArgumentException> {
       backfila.createWetRun<SegmentingBackfill>(
-        parameters = SegmentingParameters(2, -1)
+        parameters = SegmentingParameters(2, -1),
       )
     }
 
     assertThrows<IllegalArgumentException> {
       backfila.createWetRun<SegmentingBackfill>(
-        parameters = SegmentingParameters(0, 0)
+        parameters = SegmentingParameters(0, 0),
       )
     }
   }
@@ -73,7 +73,7 @@ class DynamoDbSegmentingTest {
     testData.addThriller()
 
     val run = backfila.createWetRun<SegmentingBackfill>(
-      parameters = SegmentingParameters(2, 2)
+      parameters = SegmentingParameters(2, 2),
     )
     run.execute()
     assertThat(run.backfill.updateCounter).isEqualTo(9)
@@ -84,7 +84,7 @@ class DynamoDbSegmentingTest {
     testData.addLinkinPark()
 
     val run = backfila.createWetRun<SegmentingBackfill>(
-      parameters = SegmentingParameters(8, 2)
+      parameters = SegmentingParameters(8, 2),
     )
 
     assertThat(run.prepareBackfillResponse.partitions).hasSize(2)
@@ -99,7 +99,7 @@ class DynamoDbSegmentingTest {
 
   class SegmentingBackfill @Inject private constructor(
     dynamoDb: DynamoDbClient,
-    val dynamoDbEnhancedClient: DynamoDbEnhancedClient
+    val dynamoDbEnhancedClient: DynamoDbEnhancedClient,
   ) : UpdateInPlaceDynamoDbBackfill<TrackItem, SegmentingParameters>(dynamoDb) {
     var updateCounter: Int = 0
 
@@ -113,7 +113,7 @@ class DynamoDbSegmentingTest {
 
     data class SegmentingParameters(
       val segmentCount: Int = 4,
-      val partitionCount: Int = 2
+      val partitionCount: Int = 2,
     )
 
     override fun fixedSegmentCount(config: BackfillConfig<SegmentingParameters>): Int? =
@@ -125,7 +125,7 @@ class DynamoDbSegmentingTest {
     override fun dynamoDbTable(): DynamoDbTable<TrackItem> {
       return dynamoDbEnhancedClient.table(
         TrackItem.TABLE_NAME,
-        TableSchema.fromClass(TrackItem::class.java)
+        TableSchema.fromClass(TrackItem::class.java),
       )
     }
   }

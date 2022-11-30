@@ -53,12 +53,12 @@ class CreateAndStartBackfillActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "ChickenSandwich", "Description", listOf(), null,
-                null, false, null
-              )
-            )
+                null, false, null,
+              ),
+            ),
           )
           .connector_type(Connectors.ENVOY)
-          .build()
+          .build(),
       )
     }
     scope.fakeCaller(service = "deep-fryer") {
@@ -67,9 +67,9 @@ class CreateAndStartBackfillActionTest {
           .create_request(
             CreateBackfillRequest.Builder()
               .backfill_name("ChickenSandwich")
-              .build()
+              .build(),
           )
-          .build()
+          .build(),
       )
 
       val status = getBackfillStatusAction.status(response.backfill_run_id)

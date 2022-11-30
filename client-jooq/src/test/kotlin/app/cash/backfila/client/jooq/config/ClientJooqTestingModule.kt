@@ -3,9 +3,11 @@ package app.cash.backfila.client.jooq.config
 import app.cash.backfila.client.BackfilaClientLoggingSetupProvider
 import app.cash.backfila.client.BackfilaClientNoLoggingSetupProvider
 import app.cash.backfila.client.BackfilaHttpClientConfig
+import app.cash.backfila.client.jooq.JooqBackfillModule
 import app.cash.backfila.client.misk.MiskBackfillModule
 import app.cash.backfila.embedded.EmbeddedBackfilaModule
-import app.cash.backfila.client.jooq.JooqBackfillModule
+import javax.inject.Provider
+import javax.inject.Qualifier
 import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
@@ -28,8 +30,6 @@ import org.jooq.conf.Settings
 import org.jooq.impl.DSL
 import org.jooq.impl.DefaultTransactionProvider
 import org.jooq.tools.JooqLogger
-import javax.inject.Provider
-import javax.inject.Qualifier
 
 class ClientJooqTestingModule : KAbstractModule() {
   override fun configure() {
@@ -40,7 +40,7 @@ class ClientJooqTestingModule : KAbstractModule() {
       username = "root",
       password = "",
       database = "backfila_client_jooq_testing",
-      migrations_resource = "classpath:/db-migrations"
+      migrations_resource = "classpath:/db-migrations",
     )
     install(
       JdbcModule(
@@ -48,17 +48,17 @@ class ClientJooqTestingModule : KAbstractModule() {
         datasourceConfig,
         null,
         null,
-        RealDatabasePool
-      )
+        RealDatabasePool,
+      ),
     )
     val transacterKey = JooqTransacter::class.toKey(JooqDBIdentifier::class)
     val dataSourceServiceProvider = getProvider(keyOf<DataSourceService>(JooqDBIdentifier::class))
     bind(transacterKey).toProvider(
       Provider {
         JooqTransacter(
-          dslContext = dslContext(dataSourceServiceProvider.get(), datasourceConfig)
+          dslContext = dslContext(dataSourceServiceProvider.get(), datasourceConfig),
         )
-      }
+      },
     ).asSingleton()
     install(JdbcTestingModule(JooqDBIdentifier::class))
     install(LogCollectorModule())
@@ -78,9 +78,9 @@ class ClientJooqTestingModule : KAbstractModule() {
     install(
       MiskBackfillModule(
         BackfilaHttpClientConfig(
-          url = "test.url", slack_channel = "#test"
-        )
-      )
+          url = "test.url", slack_channel = "#test",
+        ),
+      ),
     )
     // Use `BackfilaClientMDCLoggingSetupProvider` for production and
     // `BackfilaClientNoLoggingSetupProvider` for tests
@@ -94,7 +94,7 @@ class ClientJooqTestingModule : KAbstractModule() {
 
   private fun dslContext(
     dataSourceService: DataSourceService,
-    datasourceConfig: DataSourceConfig
+    datasourceConfig: DataSourceConfig,
   ): DSLContext {
     val settings = Settings()
       .withExecuteWithOptimisticLocking(true)
@@ -102,15 +102,15 @@ class ClientJooqTestingModule : KAbstractModule() {
         RenderMapping().withSchemata(
           MappedSchema()
             .withInput("jooq")
-            .withOutput(datasourceConfig.database)
-        )
+            .withOutput(datasourceConfig.database),
+        ),
       )
     return DSL.using(dataSourceService.get(), SQLDialect.MYSQL, settings).apply {
       configuration().set(
         DefaultTransactionProvider(
           configuration().connectionProvider(),
-          false
-        )
+          false,
+        ),
       ).set(JooqSqlLogger())
     }
   }

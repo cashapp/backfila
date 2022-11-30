@@ -15,7 +15,7 @@ import okio.ByteString.Companion.encodeUtf8
 
 class StaticDatasourceBackfillOperator<I : Any, P : Any>(
   override val backfill: StaticDatasourceBackfill<I, P>,
-  val parametersOperator: BackfilaParametersOperator<P>
+  val parametersOperator: BackfilaParametersOperator<P>,
 ) : BackfillOperator {
 
   override fun name(): String = backfill.javaClass.toString()
@@ -49,7 +49,7 @@ class StaticDatasourceBackfillOperator<I : Any, P : Any>(
         KeyRange.Builder()
           .start(start.toString().encodeUtf8())
           .end(end.toString().encodeUtf8())
-          .build()
+          .build(),
       )
       .build()
 
@@ -75,7 +75,7 @@ class StaticDatasourceBackfillOperator<I : Any, P : Any>(
           KeyRange.Builder()
             .start(batchStart.toString().encodeUtf8())
             .end(batchEnd.toString().encodeUtf8())
-            .build()
+            .build(),
         )
         .matching_record_count((batchEnd - batchStart).toLong())
         .scanned_record_count((batchEnd - batchStart).toLong())
@@ -102,7 +102,7 @@ class StaticDatasourceBackfillOperator<I : Any, P : Any>(
 
   data class DecodedRange(
     val start: Int,
-    val end: Int
+    val end: Int,
   )
   private fun KeyRange.decode(): DecodedRange {
     val start = this.start.utf8().toInt()

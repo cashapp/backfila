@@ -11,12 +11,11 @@ class JooqSqlLogger : DefaultExecuteListener() {
    * Hook into the query execution lifecycle before executing queries
    */
   override fun executeStart(ctx: ExecuteContext) {
-
     // Create a new DSLContext for logging rendering purposes
     // This DSLContext doesn't need a connection, only the SQLDialect...
     val create = DSL.using(
       ctx.dialect(), // ... and the flag for pretty-printing
-      Settings().withRenderFormatted(true)
+      Settings().withRenderFormatted(true),
     )
 
     // If we're executing a query

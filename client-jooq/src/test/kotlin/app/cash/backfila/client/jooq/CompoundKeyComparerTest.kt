@@ -16,12 +16,12 @@ class CompoundKeyComparerTest {
     val sqlCondition = compare(
       { obj: CompoundKeyComparer<*>, compoundKeyValue: Record? ->
         obj.gt(
-          compoundKeyValue!!
+          compoundKeyValue!!,
         )
       },
       newRecord(
-        WIDGETS.NAME, "w1"
-      )
+        WIDGETS.NAME, "w1",
+      ),
     )
     assertThat(sqlCondition).isEqualTo("${WIDGETS.NAME} > 'w1'")
   }
@@ -31,16 +31,16 @@ class CompoundKeyComparerTest {
     val sqlCondition = compare(
       { obj: CompoundKeyComparer<*>, compoundKeyValue: Record? ->
         obj.gt(
-          compoundKeyValue!!
+          compoundKeyValue!!,
         )
       },
       newRecord(
         WIDGETS.NAME, "w1",
-        WIDGETS.CREATED_AT_MS, 10L
-      )
+        WIDGETS.CREATED_AT_MS, 10L,
+      ),
     )
     assertThat(sqlCondition).isEqualTo(
-      "(${WIDGETS.NAME} > 'w1' OR (${WIDGETS.NAME} = 'w1' AND ${WIDGETS.CREATED_AT_MS} > 10))"
+      "(${WIDGETS.NAME} > 'w1' OR (${WIDGETS.NAME} = 'w1' AND ${WIDGETS.CREATED_AT_MS} > 10))",
     )
   }
 
@@ -49,19 +49,19 @@ class CompoundKeyComparerTest {
     val sqlCondition = compare(
       { obj: CompoundKeyComparer<*>, compoundKeyValue: Record? ->
         obj.gt(
-          compoundKeyValue!!
+          compoundKeyValue!!,
         )
       },
       newRecord(
         WIDGETS.MANUFACTURER_TOKEN, "m1",
         WIDGETS.NAME, "w1",
-        WIDGETS.CREATED_AT_MS, 10L
-      )
+        WIDGETS.CREATED_AT_MS, 10L,
+      ),
     )
     assertThat(sqlCondition).isEqualTo(
       "(${WIDGETS.MANUFACTURER_TOKEN} > 'm1' OR " +
         "(${WIDGETS.MANUFACTURER_TOKEN} = 'm1' AND ${WIDGETS.NAME} > 'w1') OR " +
-        "(${WIDGETS.MANUFACTURER_TOKEN} = 'm1' AND ${WIDGETS.NAME} = 'w1' AND ${WIDGETS.CREATED_AT_MS} > 10))"
+        "(${WIDGETS.MANUFACTURER_TOKEN} = 'm1' AND ${WIDGETS.NAME} = 'w1' AND ${WIDGETS.CREATED_AT_MS} > 10))",
     )
   }
 
@@ -70,12 +70,12 @@ class CompoundKeyComparerTest {
     val sqlCondition = compare(
       { obj: CompoundKeyComparer<*>, compoundKeyValue: Record? ->
         obj.gte(
-          compoundKeyValue!!
+          compoundKeyValue!!,
         )
       },
       newRecord(
-        WIDGETS.NAME, "w1"
-      )
+        WIDGETS.NAME, "w1",
+      ),
     )
     assertThat(sqlCondition).isEqualTo(
       "${WIDGETS.NAME} >= 'w1'",
@@ -87,13 +87,13 @@ class CompoundKeyComparerTest {
     val sqlCondition = compare(
       { obj: CompoundKeyComparer<*>, compoundKeyValue: Record? ->
         obj.gte(
-          compoundKeyValue!!
+          compoundKeyValue!!,
         )
       },
       newRecord(
         WIDGETS.NAME, "w1",
-        WIDGETS.CREATED_AT_MS, 10L
-      )
+        WIDGETS.CREATED_AT_MS, 10L,
+      ),
     )
     assertThat(sqlCondition).isEqualTo(
       "(${WIDGETS.NAME} > 'w1' OR (${WIDGETS.NAME} = 'w1' AND ${WIDGETS.CREATED_AT_MS} >= 10))",
@@ -105,14 +105,14 @@ class CompoundKeyComparerTest {
     val sqlCondition = compare(
       { obj: CompoundKeyComparer<*>, compoundKeyValue: Record? ->
         obj.gte(
-          compoundKeyValue!!
+          compoundKeyValue!!,
         )
       },
       newRecord(
         WIDGETS.MANUFACTURER_TOKEN, "m1",
         WIDGETS.NAME, "w1",
-        WIDGETS.CREATED_AT_MS, 10L
-      )
+        WIDGETS.CREATED_AT_MS, 10L,
+      ),
     )
     assertThat(sqlCondition).isEqualTo(
       "(${WIDGETS.MANUFACTURER_TOKEN} > 'm1' OR " +
@@ -126,12 +126,12 @@ class CompoundKeyComparerTest {
     val sqlCondition = compare(
       { obj: CompoundKeyComparer<*>, compoundKeyValue: Record? ->
         obj.lt(
-          compoundKeyValue!!
+          compoundKeyValue!!,
         )
       },
       newRecord(
-        WIDGETS.NAME, "w1"
-      )
+        WIDGETS.NAME, "w1",
+      ),
     )
     assertThat(sqlCondition).isEqualTo(
       "${WIDGETS.NAME} < 'w1'",
@@ -143,13 +143,13 @@ class CompoundKeyComparerTest {
     val sqlCondition = compare(
       { obj: CompoundKeyComparer<*>, compoundKeyValue: Record? ->
         obj.lt(
-          compoundKeyValue!!
+          compoundKeyValue!!,
         )
       },
       newRecord(
         WIDGETS.NAME, "w1",
-        WIDGETS.CREATED_AT_MS, 10L
-      )
+        WIDGETS.CREATED_AT_MS, 10L,
+      ),
     )
     assertThat(sqlCondition).isEqualTo(
       "(${WIDGETS.NAME} < 'w1' OR (${WIDGETS.NAME} = 'w1' AND ${WIDGETS.CREATED_AT_MS} < 10))",
@@ -161,14 +161,14 @@ class CompoundKeyComparerTest {
     val sqlCondition = compare(
       { obj: CompoundKeyComparer<*>, compoundKeyValue: Record? ->
         obj.lt(
-          compoundKeyValue!!
+          compoundKeyValue!!,
         )
       },
       newRecord(
         WIDGETS.MANUFACTURER_TOKEN, "m1",
         WIDGETS.NAME, "w1",
-        WIDGETS.CREATED_AT_MS, 10L
-      )
+        WIDGETS.CREATED_AT_MS, 10L,
+      ),
     )
     assertThat(sqlCondition).isEqualTo(
       "(${WIDGETS.MANUFACTURER_TOKEN} < 'm1' OR " +
@@ -182,12 +182,12 @@ class CompoundKeyComparerTest {
     val sqlCondition = compare(
       { obj: CompoundKeyComparer<*>, compoundKeyValue: Record? ->
         obj.lte(
-          compoundKeyValue!!
+          compoundKeyValue!!,
         )
       },
       newRecord(
-        WIDGETS.NAME, "w1"
-      )
+        WIDGETS.NAME, "w1",
+      ),
     )
     assertThat(sqlCondition).isEqualTo(
       "${WIDGETS.NAME} <= 'w1'",
@@ -199,13 +199,13 @@ class CompoundKeyComparerTest {
     val sqlCondition = compare(
       { obj: CompoundKeyComparer<*>, compoundKeyValue: Record? ->
         obj.lte(
-          compoundKeyValue!!
+          compoundKeyValue!!,
         )
       },
       newRecord(
         WIDGETS.NAME, "w1",
-        WIDGETS.CREATED_AT_MS, 10L
-      )
+        WIDGETS.CREATED_AT_MS, 10L,
+      ),
     )
     assertThat(sqlCondition).isEqualTo(
       "(${WIDGETS.NAME} < 'w1' OR (${WIDGETS.NAME} = 'w1' AND ${WIDGETS.CREATED_AT_MS} <= 10))",
@@ -217,14 +217,14 @@ class CompoundKeyComparerTest {
     val sqlCondition = compare(
       { obj: CompoundKeyComparer<*>, compoundKeyValue: Record? ->
         obj.lte(
-          compoundKeyValue!!
+          compoundKeyValue!!,
         )
       },
       newRecord(
         WIDGETS.MANUFACTURER_TOKEN, "m1",
         WIDGETS.NAME, "w1",
-        WIDGETS.CREATED_AT_MS, 10L
-      )
+        WIDGETS.CREATED_AT_MS, 10L,
+      ),
     )
     assertThat(sqlCondition).isEqualTo(
       "(${WIDGETS.MANUFACTURER_TOKEN} < 'm1' OR " +
@@ -242,7 +242,7 @@ class CompoundKeyComparerTest {
     field1: Field<F1>,
     value1: F1,
     field2: Field<F2>,
-    value2: F2
+    value2: F2,
   ): Record {
     return recordFactory.newRecord(field1, field2)
       .with(field1, value1)
@@ -255,7 +255,7 @@ class CompoundKeyComparerTest {
     field2: Field<F2>,
     value2: F2,
     field3: Field<F3>,
-    value3: F3
+    value3: F3,
   ): Record {
     return recordFactory.newRecord(field1, field2, field3)
       .with(field1, value1)
@@ -267,7 +267,7 @@ class CompoundKeyComparerTest {
     private val recordFactory = DefaultDSLContext(SQLDialect.MYSQL)
     private fun compare(
       compareLambda: (compoundKeyComparer: CompoundKeyComparer<*>, record: Record) -> Condition,
-      record: Record
+      record: Record,
     ): String {
       val comparer: CompoundKeyComparer<*> =
         CompoundKeyComparer<Any?>(ImmutableList.copyOf(record.fields()))

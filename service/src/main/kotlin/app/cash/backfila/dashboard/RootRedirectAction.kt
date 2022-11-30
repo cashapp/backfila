@@ -16,7 +16,7 @@ class RootRedirectAction : WebAction {
     return Response(
       body = "go to /app/".toResponseBody(),
       statusCode = HttpURLConnection.HTTP_MOVED_TEMP,
-      headers = Headers.headersOf("Location", "/app/")
+      headers = Headers.headersOf("Location", "/app/"),
     )
   }
 }

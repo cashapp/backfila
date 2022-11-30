@@ -26,7 +26,7 @@ import wisp.logging.getLogger
 class BatchAwaiter(
   private val backfillRunner: BackfillRunner,
   private val receiveChannel: ReceiveChannel<AwaitingRun>,
-  private val rpcBackpressureChannel: ReceiveChannel<Unit>
+  private val rpcBackpressureChannel: ReceiveChannel<Unit>,
 ) {
   private val scannedRateCounter = RateCounter(backfillRunner.factory.clock)
   private val matchingRateCounter = RateCounter(backfillRunner.factory.clock)
@@ -39,7 +39,7 @@ class BatchAwaiter(
 
   // TODO on shutdown can this wait for all rpcs to finish, with a ~5s time bound?
   fun run(
-    scope: CoroutineScope
+    scope: CoroutineScope,
   ) = scope.launch(CoroutineName("BatchAwaiter")) {
     logger.info { "BatchAwaiter started ${backfillRunner.logLabel()}" }
     main@ while (true) {
@@ -133,7 +133,7 @@ class BatchAwaiter(
             e,
             "running batch [${remainingBatch.batch_range.start.utf8()}, " +
               "${remainingBatch.batch_range.end.utf8()}]",
-            Duration.between(callStartedAt, backfillRunner.factory.clock.instant())
+            Duration.between(callStartedAt, backfillRunner.factory.clock.instant()),
           )
 
           backoffAndSendRunBatchAsync(remainingBatch) {
@@ -154,7 +154,7 @@ class BatchAwaiter(
 
   private suspend fun CoroutineScope.backoffAndSendRunBatchAsync(
     batch: GetNextBatchRangeResponse.Batch,
-    onRunMsg: () -> Any?
+    onRunMsg: () -> Any?,
   ): Deferred<RunBatchResponse> {
     // After backing off then run the request.
     if (backfillRunner.globalBackoff.backingOff()) {
@@ -179,8 +179,8 @@ class BatchAwaiter(
           backfillRunner.backfillRunId,
           partition_id = dbRunPartition.id,
           type = DbEventLog.Type.STATE_CHANGE,
-          message = "partition completed"
-        )
+          message = "partition completed",
+        ),
       )
 
       // If all states are COMPLETE the whole backfill will be completed.
@@ -188,7 +188,7 @@ class BatchAwaiter(
       // version mismatch on the DbBackfillRun.
       val partitions = dbRunPartition.backfill_run.partitions(
         session,
-        backfillRunner.factory.queryFactory
+        backfillRunner.factory.queryFactory,
       )
       if (partitions.all { it.run_state == BackfillState.COMPLETE }) {
         dbRunPartition.backfill_run.complete()
@@ -198,8 +198,8 @@ class BatchAwaiter(
           DbEventLog(
             backfillRunner.backfillRunId,
             type = DbEventLog.Type.STATE_CHANGE,
-            message = "backfill completed"
-          )
+            message = "backfill completed",
+          ),
         )
 
         return@transaction true

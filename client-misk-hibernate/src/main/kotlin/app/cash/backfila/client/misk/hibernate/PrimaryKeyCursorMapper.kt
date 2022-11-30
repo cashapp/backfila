@@ -19,7 +19,7 @@ internal class PrimaryKeyCursorMapper @Inject constructor(
   private fun <PK : Any> adapter(type: Class<out PK>): PrimaryKeyCursorAdapter<PK> {
     val adapter = primaryKeyAdapters[type] ?: throw IllegalArgumentException(
       "Unregistered backfill primary key type: $type." +
-        " Bind a [PrimaryKeyCursorAdapterModule<PKEY>] or use a different type as your primary key."
+        " Bind a [PrimaryKeyCursorAdapterModule<PKEY>] or use a different type as your primary key.",
     )
 
     @Suppress("UNCHECKED_CAST") // We use runtime checks to guarantee casts are safe.

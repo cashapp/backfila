@@ -19,7 +19,7 @@ import wisp.logging.getLogger
 class BackfillStateToggler @Inject constructor(
   @BackfilaDb private val transacter: Transacter,
   private val queryFactory: Query.Factory,
-  private val slackHelper: SlackHelper
+  private val slackHelper: SlackHelper,
 ) {
   fun toggleRunningState(id: Long, caller: MiskCaller, desiredState: BackfillState) {
     val requiredCurrentState = when (desiredState) {
@@ -41,7 +41,7 @@ class BackfillStateToggler @Inject constructor(
             "in state ${run.state}, requires $requiredCurrentState"
         }
         throw BadRequestException(
-          "backfill $id isn't $requiredCurrentState, can't move to state $desiredState"
+          "backfill $id isn't $requiredCurrentState, can't move to state $desiredState",
         )
       }
       run.setState(session, queryFactory, desiredState)
@@ -53,8 +53,8 @@ class BackfillStateToggler @Inject constructor(
           partition_id = null,
           user = caller.principal,
           type = DbEventLog.Type.STATE_CHANGE,
-          message = "backfill $startedOrStopped"
-        )
+          message = "backfill $startedOrStopped",
+        ),
       )
     }
 

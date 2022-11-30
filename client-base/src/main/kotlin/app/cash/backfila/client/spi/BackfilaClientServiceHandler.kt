@@ -23,7 +23,7 @@ import wisp.logging.getLogger
  */
 class BackfilaClientServiceHandler @Inject constructor(
   private val operatorFactory: BackfillOperatorFactory,
-  private val loggingSetupProvider: BackfilaClientLoggingSetupProvider
+  private val loggingSetupProvider: BackfilaClientLoggingSetupProvider,
 ) {
   @Throws(UnknownBackfillException::class)
   fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
@@ -40,7 +40,7 @@ class BackfilaClientServiceHandler @Inject constructor(
     return loggingSetupProvider.withBackfillPartitionLogging(
       request.backfill_name,
       request.backfill_id,
-      request.partition_name
+      request.partition_name,
     ) {
       logger.info {
         "Computing batch for backfill `${request.backfill_name}::${request.partition_name}" +
@@ -64,7 +64,7 @@ class BackfilaClientServiceHandler @Inject constructor(
     return loggingSetupProvider.withBackfillPartitionLogging(
       request.backfill_name,
       request.backfill_id,
-      request.partition_name
+      request.partition_name,
     ) {
       logger.info {
         "Running backfila batch " +

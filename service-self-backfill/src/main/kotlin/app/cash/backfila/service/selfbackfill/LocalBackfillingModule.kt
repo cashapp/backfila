@@ -20,15 +20,15 @@ class LocalBackfillingModule : KAbstractModule() {
   override fun configure() {
     install(
       ServiceModule<BackfilaStartupService>()
-        .dependsOn<SchemaMigratorService>(BackfilaDb::class)
+        .dependsOn<SchemaMigratorService>(BackfilaDb::class),
     )
 
     bind(BackfilaClientConfig::class.java).toInstance(
       BackfilaClientConfig(
         slack_channel = null,
         connector_type = LOCAL,
-        connector_extra_data = ""
-      )
+        connector_extra_data = "",
+      ),
     )
 
     newMapBinder<String, BackfilaClientServiceClientProvider>(ForConnectors::class)

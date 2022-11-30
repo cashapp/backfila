@@ -1,10 +1,10 @@
 package app.cash.backfila.client.jooq.internal
 
-import app.cash.backfila.client.Description
 import app.cash.backfila.client.DeleteBy
-import app.cash.backfila.client.parseDeleteByDate
+import app.cash.backfila.client.Description
 import app.cash.backfila.client.jooq.ForJooqBackend
 import app.cash.backfila.client.jooq.JooqBackfill
+import app.cash.backfila.client.parseDeleteByDate
 import app.cash.backfila.client.spi.BackfilaParametersOperator
 import app.cash.backfila.client.spi.BackfillBackend
 import app.cash.backfila.client.spi.BackfillRegistration
@@ -20,7 +20,7 @@ import kotlin.reflect.full.findAnnotation
 @Singleton
 class JooqBackend @Inject constructor(
   private val injector: Injector,
-  @ForJooqBackend private val backfills: MutableMap<String, KClass<out JooqBackfill<*, *>>>
+  @ForJooqBackend private val backfills: MutableMap<String, KClass<out JooqBackfill<*, *>>>,
 ) : BackfillBackend {
 
   override fun create(backfillName: String, backfillId: String): JooqBackfillOperator<*, out Any>? {
@@ -42,7 +42,7 @@ class JooqBackend @Inject constructor(
   }
 
   private fun <K : Any, Param : Any> createJooqOperator(
-    backfill: JooqBackfill<K, Param>
+    backfill: JooqBackfill<K, Param>,
   ) = JooqBackfillOperator(
     backfill,
     BackfilaParametersOperator(parametersClass(backfill::class)),

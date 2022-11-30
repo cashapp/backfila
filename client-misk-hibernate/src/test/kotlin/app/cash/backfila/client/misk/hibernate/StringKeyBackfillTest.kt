@@ -26,6 +26,7 @@ class StringKeyBackfillTest {
   @Inject
   @ClientMiskService
   lateinit var transacter: Transacter
+
   @Inject
   lateinit var backfila: Backfila
 
@@ -59,7 +60,7 @@ class StringKeyBackfillTest {
 
 class StringKeyBackfill @Inject constructor(
   @ClientMiskService private val transacter: Transacter,
-  private val queryFactory: Query.Factory
+  private val queryFactory: Query.Factory,
 ) : HibernateBackfill<DbMenu, String, NoParameters>() {
   val keyLog = mutableListOf<String>()
 

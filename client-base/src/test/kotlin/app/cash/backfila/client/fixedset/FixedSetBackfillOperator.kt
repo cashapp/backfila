@@ -15,7 +15,7 @@ import okio.ByteString.Companion.encodeUtf8
 class FixedSetBackfillOperator<Param : Any>(
   override val backfill: FixedSetBackfill<Param>,
   private val datastore: FixedSetDatastore,
-  private val parametersOperator: BackfilaParametersOperator<Param>
+  private val parametersOperator: BackfilaParametersOperator<Param>,
 ) : BackfillOperator {
   override fun name() = backfill.javaClass.toString()
 
@@ -23,7 +23,7 @@ class FixedSetBackfillOperator<Param : Any>(
     val backfillConfig = parametersOperator.constructBackfillConfig(request.parameters, request.dry_run)
 
     val validateResult = backfill.checkBackfillConfig(
-      backfillConfig
+      backfillConfig,
     )
 
     val partitions = mutableListOf<PrepareBackfillResponse.Partition>()
@@ -33,7 +33,7 @@ class FixedSetBackfillOperator<Param : Any>(
         PrepareBackfillResponse.Partition.Builder()
           .partition_name(fixedPartition.key)
           .backfill_range(makeKeyRange(0, fixedPartition.value.size - 1))
-          .build()
+          .build(),
       )
     }
 
@@ -49,7 +49,7 @@ class FixedSetBackfillOperator<Param : Any>(
 
   override fun getNextBatchRange(request: GetNextBatchRangeRequest): GetNextBatchRangeResponse {
     backfill.checkBackfillConfig(
-      parametersOperator.constructBackfillConfig(request.parameters, request.dry_run)
+      parametersOperator.constructBackfillConfig(request.parameters, request.dry_run),
     )
 
     val partition = datastore.dataByInstance[request.partition_name] ?: error("Invalid partition name")
@@ -75,7 +75,7 @@ class FixedSetBackfillOperator<Param : Any>(
     val backfillConfig =
       parametersOperator.constructBackfillConfig(request.parameters, request.dry_run)
     backfill.checkBackfillConfig(
-      backfillConfig
+      backfillConfig,
     )
     val partition = datastore.dataByInstance[request.partition_name]!!
     val start = request.batch_range.start.utf8().toInt()
@@ -89,7 +89,7 @@ class FixedSetBackfillOperator<Param : Any>(
 
   private fun makeKeyRange(
     start: Int,
-    end: Int
+    end: Int,
   ): KeyRange? {
     return KeyRange.Builder()
       .start(start.toString().encodeUtf8())

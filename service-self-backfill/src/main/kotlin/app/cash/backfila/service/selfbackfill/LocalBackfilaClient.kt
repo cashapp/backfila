@@ -15,13 +15,13 @@ import misk.scope.ActionScope
 
 internal class LocalBackfilaClient @Inject constructor(
   private val configureServiceAction: ConfigureServiceAction,
-  private val actionScope: ActionScope
+  private val actionScope: ActionScope,
 ) : BackfilaClient {
   override fun configureService(request: ConfigureServiceRequest): ConfigureServiceResponse {
     actionScope.enter(
       mapOf(
-        keyOf<MiskCaller>() to MiskCaller(service = "backfila")
-      )
+        keyOf<MiskCaller>() to MiskCaller(service = "backfila"),
+      ),
     ).use {
       return configureServiceAction.configureService(request)
     }

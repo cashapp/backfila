@@ -17,7 +17,8 @@ class DbMenu() : DbUnsharded<DbMenu> {
   @GeneratedValue
   override lateinit var id: Id<DbMenu>
 
-  @Column(nullable = false) lateinit var name: String
+  @Column(nullable = false)
+  lateinit var name: String
 
   constructor(name: String) : this() {
     this.name = name

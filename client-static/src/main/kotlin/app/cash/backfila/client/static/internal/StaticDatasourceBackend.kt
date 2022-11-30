@@ -1,13 +1,13 @@
 package app.cash.backfila.client.static.internal
 
-import app.cash.backfila.client.Description
 import app.cash.backfila.client.DeleteBy
+import app.cash.backfila.client.Description
 import app.cash.backfila.client.parseDeleteByDate
-import app.cash.backfila.client.static.ForStaticBackend
 import app.cash.backfila.client.spi.BackfilaParametersOperator
 import app.cash.backfila.client.spi.BackfillBackend
 import app.cash.backfila.client.spi.BackfillOperator
 import app.cash.backfila.client.spi.BackfillRegistration
+import app.cash.backfila.client.static.ForStaticBackend
 import app.cash.backfila.client.static.StaticDatasourceBackfill
 import com.google.inject.Injector
 import com.google.inject.TypeLiteral
@@ -21,7 +21,7 @@ import kotlin.reflect.full.findAnnotation
 @Singleton
 class StaticDatasourceBackend @Inject constructor(
   private val injector: Injector,
-  @ForStaticBackend private val backfills: MutableMap<String, KClass<out StaticDatasourceBackfill<*, *>>>
+  @ForStaticBackend private val backfills: MutableMap<String, KClass<out StaticDatasourceBackfill<*, *>>>,
 ) : BackfillBackend {
 
   /** Creates Backfill instances. Each backfill ID gets a new Backfill instance. */
@@ -35,10 +35,10 @@ class StaticDatasourceBackend @Inject constructor(
   }
 
   private fun <E : Any, Param : Any> createStaticDatasourceOperator(
-    backfill: StaticDatasourceBackfill<E, Param>
+    backfill: StaticDatasourceBackfill<E, Param>,
   ) = StaticDatasourceBackfillOperator(
     backfill,
-    BackfilaParametersOperator(parametersClass(backfill::class))
+    BackfilaParametersOperator(parametersClass(backfill::class)),
   )
 
   override fun create(backfillName: String, backfillId: String): BackfillOperator? {

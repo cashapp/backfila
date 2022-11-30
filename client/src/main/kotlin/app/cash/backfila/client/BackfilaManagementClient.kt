@@ -13,6 +13,6 @@ interface BackfilaManagementClient {
     batch_size: Long? = null,
     scan_size: Long? = null,
     pkey_range_start: ByteString? = null,
-    pkey_range_end: ByteString? = null
+    pkey_range_end: ByteString? = null,
   )
 }

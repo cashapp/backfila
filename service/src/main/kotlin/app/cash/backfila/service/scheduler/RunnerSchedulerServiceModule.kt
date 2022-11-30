@@ -9,7 +9,7 @@ class RunnerSchedulerServiceModule : KAbstractModule() {
   override fun configure() {
     install(
       ServiceModule<RunnerSchedulerService>()
-        .dependsOn<SchemaMigratorService>(BackfilaDb::class)
+        .dependsOn<SchemaMigratorService>(BackfilaDb::class),
     )
   }
 }

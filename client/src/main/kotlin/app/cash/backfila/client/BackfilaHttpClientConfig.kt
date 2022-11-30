@@ -24,7 +24,7 @@ data class BackfilaHttpClientConfig(
     return BackfilaClientConfig(
       slack_channel,
       connector_type = Connectors.HTTP,
-      connector_extra_data = connectorDataAdapter.toJson(httpConnectorData)
+      connector_extra_data = connectorDataAdapter.toJson(httpConnectorData),
     )
   }
 }

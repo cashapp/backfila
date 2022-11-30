@@ -1,8 +1,8 @@
 package app.cash.backfila.embedded
 
 import app.cash.backfila.client.Backfill
-import okio.ByteString
 import javax.inject.Inject
+import okio.ByteString
 
 /**
  * Programmatic access to backfila runs for Java. This represents the customer's use of the Backfila
@@ -26,7 +26,7 @@ class JavaBackfila @Inject constructor(private val backfila: Backfila) {
     backfill: Class<Type>,
     parameterData: Map<String, ByteString>,
     rangeStart: String? = null,
-    rangeEnd: String? = null
+    rangeEnd: String? = null,
   ): BackfillRun<Type> {
     return backfila.createDryRun(backfill.kotlin, null, parameterData, rangeStart, rangeEnd)
   }
@@ -43,7 +43,7 @@ class JavaBackfila @Inject constructor(private val backfila: Backfila) {
     backfill: Class<Type>,
     parameterData: Map<String, ByteString>,
     rangeStart: String? = null,
-    rangeEnd: String? = null
+    rangeEnd: String? = null,
   ): BackfillRun<Type> {
     return backfila.createWetRun(backfill.kotlin, null, parameterData, rangeStart, rangeEnd)
   }

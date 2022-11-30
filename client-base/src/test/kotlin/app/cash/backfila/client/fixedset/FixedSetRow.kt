@@ -7,5 +7,5 @@ package app.cash.backfila.client.fixedset
  */
 data class FixedSetRow(
   val id: Long,
-  var value: String
+  var value: String,
 )

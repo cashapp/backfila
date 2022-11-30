@@ -24,12 +24,12 @@ interface ViewLogsUrlProvider {
 
 class ViewLogsAction @Inject constructor(
   @BackfilaDb private val transacter: Transacter,
-  private val viewLogsUrlProvider: ViewLogsUrlProvider
+  private val viewLogsUrlProvider: ViewLogsUrlProvider,
 ) : WebAction {
   @Get("/backfills/{id}/view-logs")
   @Authenticated
   fun viewLogs(
-    @PathParam id: Long
+    @PathParam id: Long,
   ): Response<ResponseBody> {
     val url = transacter.transaction { session ->
       val backfillRun = session.loadOrNull<DbBackfillRun>(Id(id))
@@ -39,7 +39,7 @@ class ViewLogsAction @Inject constructor(
     return Response(
       body = "go to $url".toResponseBody(),
       statusCode = HttpURLConnection.HTTP_MOVED_TEMP,
-      headers = Headers.headersOf("Location", url)
+      headers = Headers.headersOf("Location", url),
     )
   }
 }

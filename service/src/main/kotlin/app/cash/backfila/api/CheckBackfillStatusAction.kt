@@ -26,7 +26,7 @@ class CheckBackfillStatusAction @Inject constructor(
   // TODO authenticate but any service
   @Unauthenticated
   fun checkBackfillStatus(
-    @RequestBody request: CheckBackfillStatusRequest
+    @RequestBody request: CheckBackfillStatusRequest,
   ): CheckBackfillStatusResponse {
     val response = getBackfillStatusAction.status(request.backfill_run_id)
     return CheckBackfillStatusResponse(toApiStatus(response.state))

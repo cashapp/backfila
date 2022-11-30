@@ -1,7 +1,7 @@
 package app.cash.backfila.client.fixedset
 
-import app.cash.backfila.client.Description
 import app.cash.backfila.client.DeleteBy
+import app.cash.backfila.client.Description
 import app.cash.backfila.client.parseDeleteByDate
 import app.cash.backfila.client.spi.BackfilaParametersOperator
 import app.cash.backfila.client.spi.BackfillBackend
@@ -20,7 +20,7 @@ import kotlin.reflect.full.findAnnotation
 class FixedSetBackend @Inject constructor(
   private val injector: Injector,
   @ForFixedSetBackend private val backfills: MutableMap<String, KClass<out FixedSetBackfill<*>>>,
-  private val datastore: FixedSetDatastore
+  private val datastore: FixedSetDatastore,
 ) : BackfillBackend {
 
   /** Creates Backfill instances. Each backfill ID gets a new Backfill instance. */
@@ -34,11 +34,11 @@ class FixedSetBackend @Inject constructor(
   }
 
   private fun <Param : Any> createOperator(
-    backfill: FixedSetBackfill<Param>
+    backfill: FixedSetBackfill<Param>,
   ) = FixedSetBackfillOperator(
     backfill = backfill,
     datastore = datastore,
-    parametersOperator = BackfilaParametersOperator(parametersClass(backfill::class))
+    parametersOperator = BackfilaParametersOperator(parametersClass(backfill::class)),
   )
 
   override fun create(backfillName: String, backfillId: String): BackfillOperator? {

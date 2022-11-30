@@ -14,7 +14,7 @@ internal class LocalClientServiceClientProvider @Inject internal constructor(
 
   override fun clientFor(
     serviceName: String,
-    connectorExtraData: String?
+    connectorExtraData: String?,
   ): BackfilaClientServiceClient {
     return localClientServiceClient
   }

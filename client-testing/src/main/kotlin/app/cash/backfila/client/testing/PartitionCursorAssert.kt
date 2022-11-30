@@ -4,13 +4,13 @@ import app.cash.backfila.embedded.internal.PartitionCursor
 import org.assertj.core.api.AbstractAssert
 
 class PartitionCursorAssert(
-  private val partitionCursor: PartitionCursor
+  private val partitionCursor: PartitionCursor,
 ) : AbstractAssert<PartitionCursorAssert, PartitionCursor>(partitionCursor, PartitionCursorAssert::class.java) {
   fun isDone(): PartitionCursorAssert {
     if (!partitionCursor.done) {
       failWithMessage(
         "Expected the backfill partition ${partitionCursor.partitionName} " +
-          "to be done but it isn't. Cursor $partitionCursor"
+          "to be done but it isn't. Cursor $partitionCursor",
       )
     }
     return this // Return the current assertion for method chaining.
@@ -20,7 +20,7 @@ class PartitionCursorAssert(
     if (partitionCursor.done) {
       failWithMessage(
         "Expected the backfill partition ${partitionCursor.partitionName} " +
-          "to be not done but it is. Cursor $partitionCursor"
+          "to be not done but it is. Cursor $partitionCursor",
       )
     }
     return this // Return the current assertion for method chaining.

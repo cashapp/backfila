@@ -19,7 +19,7 @@ class StartBackfillResponse
 
 class StartBackfillAction @Inject constructor(
   private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
-  private val backfillStateToggler: BackfillStateToggler
+  private val backfillStateToggler: BackfillStateToggler,
 ) : WebAction {
 
   @Post("/backfills/{id}/start")
@@ -30,7 +30,8 @@ class StartBackfillAction @Inject constructor(
   fun start(
     @PathParam id: Long,
     @Suppress("unused")
-    @RequestBody request: StartBackfillRequest
+    @RequestBody
+    request: StartBackfillRequest,
   ): StartBackfillResponse {
     // TODO check user has permissions for this service with access api
     logger.info { "Start backfill $id by ${caller.get()?.user}" }

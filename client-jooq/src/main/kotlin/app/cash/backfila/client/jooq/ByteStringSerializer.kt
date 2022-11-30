@@ -27,7 +27,7 @@ interface ByteStringSerializer<T> {
    </U> */
   fun <U> composeWith(
     serialize: (serialiseTo: U) -> T,
-    deserialize: (deserialiseFrom: T) -> U
+    deserialize: (deserialiseFrom: T) -> U,
   ): ByteStringSerializer<U> {
     val outerSerializer = this
     return object : ByteStringSerializer<U> {
@@ -47,7 +47,7 @@ interface ByteStringSerializer<T> {
      */
     fun <T> build(
       toByteString: (value: T) -> ByteString,
-      fromByteString: (byteString: ByteString) -> T
+      fromByteString: (byteString: ByteString) -> T,
     ): ByteStringSerializer<T> {
       return object : ByteStringSerializer<T> {
         override fun toByteString(value: T): ByteString {
@@ -68,7 +68,7 @@ interface ByteStringSerializer<T> {
      */
     val forLong = build(
       { id: Long -> id.toString().encodeUtf8() },
-      { byteString: ByteString -> byteString.utf8().toLong() }
+      { byteString: ByteString -> byteString.utf8().toLong() },
     )
 
     /**
@@ -78,7 +78,7 @@ interface ByteStringSerializer<T> {
      */
     val forString = build(
       { value: String -> value.encodeUtf8() },
-      { byteString: ByteString -> byteString.utf8() }
+      { byteString: ByteString -> byteString.utf8() },
     )
 
     /**
@@ -88,7 +88,7 @@ interface ByteStringSerializer<T> {
      */
     val forByteArray = build(
       { value: ByteArray -> value.toByteString() },
-      { byteString: ByteString -> byteString.toByteArray() }
+      { byteString: ByteString -> byteString.toByteArray() },
     )
   }
 }

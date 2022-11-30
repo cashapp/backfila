@@ -19,7 +19,7 @@ class StopBackfillResponse
 
 class StopBackfillAction @Inject constructor(
   private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
-  private val backfillStateToggler: BackfillStateToggler
+  private val backfillStateToggler: BackfillStateToggler,
 ) : WebAction {
 
   @Post("/backfills/{id}/stop")
@@ -30,7 +30,8 @@ class StopBackfillAction @Inject constructor(
   fun stop(
     @PathParam id: Long,
     @Suppress("unused")
-    @RequestBody request: StopBackfillRequest
+    @RequestBody
+    request: StopBackfillRequest,
   ): StopBackfillResponse {
     // TODO check user has permissions for this service with access api
     logger.info { "Stop backfill $id by ${caller.get()?.user}" }

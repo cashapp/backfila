@@ -1,9 +1,9 @@
 package app.cash.backfila.client.jooq.internal
 
-import app.cash.backfila.client.jooq.JooqBackfill
-import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.client.jooq.CompoundKeyComparer
 import app.cash.backfila.client.jooq.CompoundKeyComparisonOperator
+import app.cash.backfila.client.jooq.JooqBackfill
+import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import org.jooq.Condition
 import org.jooq.DSLContext
 import org.jooq.Record
@@ -24,7 +24,7 @@ data class OpenKeyRange<K>(
   /**
    * The overall upper bound of the range.
    */
-  private val upperBound: K
+  private val upperBound: K,
 ) {
 
   fun determineStart(keyValues: List<K>): K =
@@ -42,7 +42,7 @@ data class OpenKeyRange<K>(
       .and(
         jooqBackfill.compareCompoundKey(upperBound) { keyCompare, compoundKeyValue ->
           keyCompare.lte(compoundKeyValue)
-        }
+        },
       )
   }
 
@@ -55,7 +55,7 @@ data class OpenKeyRange<K>(
       .and(
         jooqBackfill.compareCompoundKey(end) { keyCompare, compoundKeyValue ->
           keyCompare.lte(compoundKeyValue)
-        }
+        },
       )
   }
 
@@ -69,7 +69,7 @@ data class OpenKeyRange<K>(
       start = end,
       startComparison = { keyCompare: CompoundKeyComparer<K>, compoundKeyValue: Record ->
         keyCompare.gt(compoundKeyValue)
-      }
+      },
     )
   }
 
@@ -80,7 +80,7 @@ data class OpenKeyRange<K>(
     fun <K> initialRangeFor(
       jooqBackfill: JooqBackfill<K, *>,
       request: GetNextBatchRangeRequest,
-      session: DSLContext
+      session: DSLContext,
     ): OpenKeyRange<K> {
       // If this is the first batch, we want to start with the provided value on the backfila
       // screen. If not, then, we need to start with one after the previous end value
@@ -92,7 +92,7 @@ data class OpenKeyRange<K>(
         } else {
           { keyComparer: CompoundKeyComparer<K>, compoundKeyValue: Record ->
             keyComparer.gt(
-              compoundKeyValue
+              compoundKeyValue,
             )
           }
         }
@@ -108,8 +108,8 @@ data class OpenKeyRange<K>(
         startComparison = startComparison,
         upperBound = computeUpperBound(
           jooqBackfill, request, session,
-          jooqBackfill.compareCompoundKey(start, startComparison)
-        )
+          jooqBackfill.compareCompoundKey(start, startComparison),
+        ),
       )
     }
 
@@ -136,7 +136,7 @@ data class OpenKeyRange<K>(
       jooqBackfill: JooqBackfill<K, *>,
       request: GetNextBatchRangeRequest,
       session: DSLContext,
-      afterPreceedingRowsCondition: Condition
+      afterPreceedingRowsCondition: Condition,
     ): K {
       return if (request.backfill_range != null && request.backfill_range.end != null) {
         jooqBackfill.fromByteString(request.backfill_range.end)
@@ -148,13 +148,13 @@ data class OpenKeyRange<K>(
               .from(jooqBackfill.table)
               .where(afterPreceedingRowsCondition)
               .orderBy(jooqBackfill.sortingByCompoundKeyFields { it.asc() })
-              .limit(request.scan_size)
+              .limit(request.scan_size),
           )
           .orderBy(jooqBackfill.sortingByCompoundKeyFields { it.desc() })
           .limit(1)
           .fetchOne { jooqBackfill.recordToKey(it) }
           ?: throw IllegalStateException(
-            "Expecting a row when calculating the upper bound"
+            "Expecting a row when calculating the upper bound",
           )
       }
     }

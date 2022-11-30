@@ -24,5 +24,5 @@ data class BackfillBatch<K, Param : Any> (
   /**
    * Backfill configuration.
    */
-  val config: BackfillConfig<Param>
+  val config: BackfillConfig<Param>,
 )

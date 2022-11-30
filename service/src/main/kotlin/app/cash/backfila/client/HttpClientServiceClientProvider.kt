@@ -20,7 +20,7 @@ class HttpClientServiceClientProvider @Inject constructor(
   private val httpClientFactory: HttpClientFactory,
   private val httpClientConfigUrlProvider: HttpClientConfigUrlProvider,
   @HttpClientNetworkInterceptor private val networkInterceptors: List<Interceptor>,
-  private val moshi: Moshi
+  private val moshi: Moshi,
 ) : BackfilaClientServiceClientProvider {
   override fun validateExtraData(connectorExtraData: String?) {
     checkNotNull(connectorExtraData, { "Extra data required for HTTP connector" })
@@ -31,7 +31,7 @@ class HttpClientServiceClientProvider @Inject constructor(
 
   override fun clientFor(
     serviceName: String,
-    connectorExtraData: String?
+    connectorExtraData: String?,
   ): BackfilaClientServiceClient {
     val url = URL(adapter().fromJson(connectorExtraData!!)!!.url)
 

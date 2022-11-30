@@ -25,7 +25,7 @@ class DbOrder private constructor() : DbChild<DbRestaurant, DbOrder> {
   @GeneratedValue(generator = "child")
   @GenericGenerator(
     name = "child", strategy = "misk.hibernate.GidGenerator",
-    parameters = [Parameter(name = "rootColumn", value = "restaurant_id")]
+    parameters = [Parameter(name = "rootColumn", value = "restaurant_id")],
   )
   override lateinit var gid: Gid<DbRestaurant, DbOrder>
 

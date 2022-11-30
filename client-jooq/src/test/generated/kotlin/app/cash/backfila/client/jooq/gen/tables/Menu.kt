@@ -6,9 +6,7 @@ package app.cash.backfila.client.jooq.gen.tables
 import app.cash.backfila.client.jooq.gen.Jooq
 import app.cash.backfila.client.jooq.gen.keys.KEY_MENU_PRIMARY
 import app.cash.backfila.client.jooq.gen.tables.records.MenuRecord
-
 import kotlin.collections.List
-
 import org.jooq.Field
 import org.jooq.ForeignKey
 import org.jooq.Identity
@@ -34,7 +32,7 @@ open class Menu(
   child: Table<out Record>?,
   path: ForeignKey<out Record, MenuRecord>?,
   aliased: Table<MenuRecord>?,
-  parameters: Array<Field<*>?>?
+  parameters: Array<Field<*>?>?,
 ) : TableImpl<MenuRecord>(
   alias,
   Jooq.JOOQ,
@@ -43,7 +41,7 @@ open class Menu(
   aliased,
   parameters,
   DSL.comment(""),
-  TableOptions.table()
+  TableOptions.table(),
 ) {
   companion object {
 

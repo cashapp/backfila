@@ -54,7 +54,7 @@ class UnshardedPartitionProvider(private val transacter: Transacter) : Partition
  */
 class VitessShardedPartitionProvider<E : DbEntity<E>, Pkey : Any>(
   private val transacter: Transacter,
-  backfill: HibernateBackfill<E, Pkey, *>
+  backfill: HibernateBackfill<E, Pkey, *>,
 ) : PartitionProvider {
   private val keyspace = Keyspace(backfill.entityClass.java.getAnnotation(Table::class.java).schema)
 
@@ -84,7 +84,7 @@ class VitessShardedPartitionProvider<E : DbEntity<E>, Pkey : Any>(
  */
 class VitessSingleCursorPartitionProvider<E : DbEntity<E>, Pkey : Any>(
   private val transacter: Transacter,
-  backfill: HibernateBackfill<E, Pkey, *>
+  backfill: HibernateBackfill<E, Pkey, *>,
 ) : PartitionProvider {
   private val keyspace = Keyspace(backfill.entityClass.java.getAnnotation(Table::class.java).schema)
 

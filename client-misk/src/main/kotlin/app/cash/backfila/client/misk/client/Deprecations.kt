@@ -9,9 +9,9 @@ import app.cash.backfila.client.BackfilaHttpClientConfig
   "Use BackfilaHttpClientConfig in the client module instead.",
   replaceWith = ReplaceWith(
     expression = "BackfilaHttpClientConfig",
-    imports = ["app.cash.backfila.client.BackfilaHttpClientConfig"]
+    imports = ["app.cash.backfila.client.BackfilaHttpClientConfig"],
   ),
-  level = DeprecationLevel.ERROR
+  level = DeprecationLevel.ERROR,
 )
 typealias BackfilaClientConfig = BackfilaHttpClientConfig
 
@@ -19,8 +19,8 @@ typealias BackfilaClientConfig = BackfilaHttpClientConfig
   "Use BackfilaMiskClientModule instead.",
   replaceWith = ReplaceWith(
     expression = "BackfilaMiskClientModule",
-    imports = ["app.cash.backfila.client.misk.client.BackfilaMiskClientModule"]
+    imports = ["app.cash.backfila.client.misk.client.BackfilaMiskClientModule"],
   ),
-  level = DeprecationLevel.ERROR
+  level = DeprecationLevel.ERROR,
 )
 typealias BackfilaClientModule = BackfilaMiskClientModule

@@ -38,14 +38,14 @@ class SelfBackfillTestingModule : KAbstractModule() {
               type = DataSourceType.MYSQL,
               database = "backfila_selfbackfill_test",
               username = "root",
-              migrations_resource = "classpath:/migrations"
+              migrations_resource = "classpath:/migrations",
             ),
-            reader = null
-          )
-        )
+            reader = null,
+          ),
+        ),
       ),
       web_url_root = "",
-      slack = null
+      slack = null,
     )
     bind<BackfilaConfig>().toInstance(config)
     install(DeploymentModule(TESTING))
@@ -67,15 +67,16 @@ class SelfBackfillTestingModule : KAbstractModule() {
       override fun configureProviders() {
         bindSeedData(MiskCaller::class)
       }
-    })
+    },
+    )
 
     install(EmbeddedBackfilaModule())
     install(
       MiskBackfillModule(
         BackfilaHttpClientConfig(
-          url = "test.url", slack_channel = "#test"
-        )
-      )
+          url = "test.url", slack_channel = "#test",
+        ),
+      ),
     )
 
     bind(BackfilaClientLoggingSetupProvider::class.java)

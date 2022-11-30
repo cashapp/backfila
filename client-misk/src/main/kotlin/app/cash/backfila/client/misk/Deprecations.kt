@@ -13,9 +13,9 @@ import app.cash.backfila.client.NoParameters
   "Use Backfill in the client module instead.",
   replaceWith = ReplaceWith(
     expression = "Backfill",
-    imports = ["app.cash.backfila.client.Backfill"]
+    imports = ["app.cash.backfila.client.Backfill"],
   ),
-  level = DeprecationLevel.ERROR
+  level = DeprecationLevel.ERROR,
 )
 typealias Backfill = Backfill
 
@@ -23,9 +23,9 @@ typealias Backfill = Backfill
   "Use BackfillConfig in the client module instead.",
   replaceWith = ReplaceWith(
     expression = "BackfillConfig<Param>",
-    imports = ["app.cash.backfila.client.BackfillConfig"]
+    imports = ["app.cash.backfila.client.BackfillConfig"],
   ),
-  level = DeprecationLevel.ERROR
+  level = DeprecationLevel.ERROR,
 )
 typealias BackfillConfig<Param> = BackfillConfig<Param>
 
@@ -33,9 +33,9 @@ typealias BackfillConfig<Param> = BackfillConfig<Param>
   "Use Description in the client module instead.",
   replaceWith = ReplaceWith(
     expression = "Description",
-    imports = ["app.cash.backfila.client.Description"]
+    imports = ["app.cash.backfila.client.Description"],
   ),
-  level = DeprecationLevel.ERROR
+  level = DeprecationLevel.ERROR,
 )
 typealias Description = Description
 
@@ -43,9 +43,9 @@ typealias Description = Description
   "Use NoParameters in the client module instead.",
   replaceWith = ReplaceWith(
     expression = "NoParameters",
-    imports = ["app.cash.backfila.client.NoParameters"]
+    imports = ["app.cash.backfila.client.NoParameters"],
   ),
-  level = DeprecationLevel.ERROR
+  level = DeprecationLevel.ERROR,
 )
 typealias NoParameters = NoParameters
 
@@ -53,9 +53,9 @@ typealias NoParameters = NoParameters
   "Use BackfilaManagementClient in the client module instead.",
   replaceWith = ReplaceWith(
     expression = "BackfilaManagementClient",
-    imports = ["app.cash.backfila.client.BackfilaManagementClient"]
+    imports = ["app.cash.backfila.client.BackfilaManagementClient"],
   ),
-  level = DeprecationLevel.ERROR
+  level = DeprecationLevel.ERROR,
 )
 typealias BackfilaManagementClient = BackfilaManagementClient
 
@@ -63,8 +63,8 @@ typealias BackfilaManagementClient = BackfilaManagementClient
   "Use MiskBackfillModule instead.",
   replaceWith = ReplaceWith(
     expression = "MiskBackfillModule",
-    imports = ["app.cash.backfila.client.misk.MiskBackfillModule"]
+    imports = ["app.cash.backfila.client.misk.MiskBackfillModule"],
   ),
-  level = DeprecationLevel.ERROR
+  level = DeprecationLevel.ERROR,
 )
 typealias BackfillModule = MiskBackfillModule

@@ -41,7 +41,7 @@ fun main(args: Array<String>) {
         val webConfig = WebConfig(
           port = 8080,
           idle_timeout = 500000,
-          host = "0.0.0.0"
+          host = "0.0.0.0",
         )
         install(MiskWebModule(webConfig))
         multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
@@ -57,20 +57,20 @@ fun main(args: Array<String>) {
 
             override fun clientFor(
               serviceName: String,
-              connectorExtraData: String?
+              connectorExtraData: String?,
             ): BackfilaClientServiceClient {
               return object : BackfilaClientServiceClient {
                 override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
                   return PrepareBackfillResponse(
                     listOf(
                       PrepareBackfillResponse.Partition(
-                        "-80", KeyRange("0".encodeUtf8(), "1000".encodeUtf8()), null
+                        "-80", KeyRange("0".encodeUtf8(), "1000".encodeUtf8()), null,
                       ),
                       PrepareBackfillResponse.Partition(
-                        "80-", KeyRange("0".encodeUtf8(), "1000".encodeUtf8()), null
-                      )
+                        "80-", KeyRange("0".encodeUtf8(), "1000".encodeUtf8()), null,
+                      ),
                     ),
-                    mapOf()
+                    mapOf(),
                   )
                 }
 
@@ -83,7 +83,8 @@ fun main(args: Array<String>) {
                 }
               }
             }
-          })
+          },
+          )
       }
     },
     DeploymentModule(deployment),
@@ -101,19 +102,19 @@ fun main(args: Array<String>) {
                 migrations_resource = "classpath:/migrations",
                 host = System.getenv("BACKFILA_DB_HOST") ?: "127.0.0.1",
                 port = (System.getenv("BACKFILA_DB_PORT") ?: "3306").toInt(),
-                password = System.getenv("BACKFILA_DB_PASSWORD")
+                password = System.getenv("BACKFILA_DB_PASSWORD"),
               ),
-              reader = null
-            )
-          )
+              reader = null,
+            ),
+          ),
         ),
         web_url_root = "http://localhost:8080/app/",
-        slack = null
-      )
+        slack = null,
+      ),
     ),
     AdminDashboardModule(isDevelopment = true),
     BackfilaDefaultEndpointConfigModule(),
-    MiskRealServiceModule()
+    MiskRealServiceModule(),
   ).run(args)
 }
 

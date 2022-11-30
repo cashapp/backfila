@@ -26,14 +26,14 @@ data class UpdateBackfillRequest(
   val batch_size: Long? = null,
   val num_threads: Int? = null,
   val backoff_schedule: String? = null,
-  val extra_sleep_ms: Long? = null
+  val extra_sleep_ms: Long? = null,
 )
 
 class UpdateBackfillResponse
 
 class UpdateBackfillAction @Inject constructor(
   private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
-  @BackfilaDb private val transacter: Transacter
+  @BackfilaDb private val transacter: Transacter,
 ) : WebAction {
 
   @Post("/backfills/{id}/update")
@@ -43,7 +43,7 @@ class UpdateBackfillAction @Inject constructor(
   @Authenticated(capabilities = ["users"])
   fun update(
     @PathParam id: Long,
-    @RequestBody request: UpdateBackfillRequest
+    @RequestBody request: UpdateBackfillRequest,
   ): UpdateBackfillResponse {
     // TODO check user has permissions for this service with access api
 
@@ -122,8 +122,8 @@ class UpdateBackfillAction @Inject constructor(
           partition_id = null,
           user = caller.get()!!.principal,
           type = DbEventLog.Type.CONFIG_CHANGE,
-          message = "updated settings: " + changesLog.joinToString(", ")
-        )
+          message = "updated settings: " + changesLog.joinToString(", "),
+        ),
       )
     }
 

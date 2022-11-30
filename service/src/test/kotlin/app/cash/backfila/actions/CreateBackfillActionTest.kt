@@ -62,7 +62,7 @@ class CreateBackfillActionTest {
           "deep-fryer",
           CreateBackfillRequest.Builder()
             .backfill_name("abc")
-            .build()
+            .build(),
         )
       }.isInstanceOf(BadRequestException::class.java)
     }
@@ -74,7 +74,7 @@ class CreateBackfillActionTest {
       configureServiceAction.configureService(
         ConfigureServiceRequest.Builder()
           .connector_type(Connectors.ENVOY)
-          .build()
+          .build(),
       )
     }
 
@@ -84,7 +84,7 @@ class CreateBackfillActionTest {
           "deep-fryer",
           CreateBackfillRequest.Builder()
             .backfill_name("abc")
-            .build()
+            .build(),
         )
       }.isInstanceOf(BadRequestException::class.java)
     }
@@ -99,12 +99,12 @@ class CreateBackfillActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "ChickenSandwich", "Description", listOf(), null,
-                null, false, null
-              )
-            )
+                null, false, null,
+              ),
+            ),
           )
           .connector_type(Connectors.ENVOY)
-          .build()
+          .build(),
       )
     }
     scope.fakeCaller(user = "molly") {
@@ -112,7 +112,7 @@ class CreateBackfillActionTest {
         "deep-fryer",
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
-          .build()
+          .build(),
       )
 
       transacter.transaction { session ->
@@ -149,12 +149,12 @@ class CreateBackfillActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "ChickenSandwich", "Description", listOf(), null,
-                null, false, null
-              )
-            )
+                null, false, null,
+              ),
+            ),
           )
           .connector_type(Connectors.ENVOY)
-          .build()
+          .build(),
       )
     }
 
@@ -165,11 +165,11 @@ class CreateBackfillActionTest {
             PrepareBackfillResponse.Partition.Builder()
               .partition_name("only")
               .backfill_range(KeyRange("0".encodeUtf8(), "1000".encodeUtf8()))
-              .build()
-          )
+              .build(),
+          ),
         )
         .parameters(mapOf("idempotence_token" to "filaback".encodeUtf8()))
-        .build()
+        .build(),
     )
 
     scope.fakeCaller(user = "molly") {
@@ -177,14 +177,14 @@ class CreateBackfillActionTest {
         "deep-fryer",
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
-          .build()
+          .build(),
       )
 
       transacter.transaction { session ->
         val run = queryFactory.newQuery<BackfillRunQuery>().uniqueResult(session)
         assertNotNull(run)
         assertThat(run.parameters()).isEqualTo(
-          mapOf("idempotence_token" to "filaback".encodeUtf8())
+          mapOf("idempotence_token" to "filaback".encodeUtf8()),
         )
       }
     }
@@ -199,12 +199,12 @@ class CreateBackfillActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "ChickenSandwich", "Description", listOf(), null,
-                null, false, null
-              )
-            )
+                null, false, null,
+              ),
+            ),
           )
           .connector_type(Connectors.ENVOY)
-          .build()
+          .build(),
       )
     }
 
@@ -215,11 +215,11 @@ class CreateBackfillActionTest {
             PrepareBackfillResponse.Partition.Builder()
               .partition_name("only")
               .backfill_range(KeyRange("0".encodeUtf8(), "1000".encodeUtf8()))
-              .build()
-          )
+              .build(),
+          ),
         )
         .parameters(mapOf("idempotence_token" to "filaback".encodeUtf8()))
-        .build()
+        .build(),
     )
 
     scope.fakeCaller(user = "molly") {
@@ -228,14 +228,14 @@ class CreateBackfillActionTest {
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .parameter_map(mapOf("idempotence_token" to "ketchup".encodeUtf8()))
-          .build()
+          .build(),
       )
 
       transacter.transaction { session ->
         val run = queryFactory.newQuery<BackfillRunQuery>().uniqueResult(session)
         assertNotNull(run)
         assertThat(run.parameters()).isEqualTo(
-          mapOf("idempotence_token" to "filaback".encodeUtf8())
+          mapOf("idempotence_token" to "filaback".encodeUtf8()),
         )
       }
     }

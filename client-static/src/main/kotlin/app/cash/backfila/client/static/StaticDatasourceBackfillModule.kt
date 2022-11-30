@@ -7,15 +7,15 @@ import com.google.inject.Binder
 import com.google.inject.TypeLiteral
 import com.google.inject.multibindings.MapBinder
 import com.google.inject.multibindings.Multibinder
+import javax.inject.Qualifier
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
-import javax.inject.Qualifier
 
 /**
  * Installs the [BackfillBackend] for Static Datasource backfills. See the java doc for [RealBackfillModule].
  */
 class StaticDatasourceBackfillModule<T : StaticDatasourceBackfill<*, *>> private constructor(
-  private val backfillClass: KClass<T>
+  private val backfillClass: KClass<T>,
 ) : AbstractModule() {
   override fun configure() {
     install(StaticDatasourceBackfillBackendModule)
@@ -54,7 +54,7 @@ private fun mapBinder(binder: Binder) = MapBinder.newMapBinder(
   binder,
   object : TypeLiteral<String>() {},
   object : TypeLiteral<KClass<out StaticDatasourceBackfill<*, *>>>() {},
-  ForStaticBackend::class.java
+  ForStaticBackend::class.java,
 )
 
 /** Annotation for specifying dependencies specifically for this Backend. */

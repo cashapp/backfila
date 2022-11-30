@@ -23,6 +23,7 @@ import org.jooq.impl.DefaultDSLContext
 abstract class JooqBackfill<K, Param : Any> : Backfill {
 
   val sqlDialect: SQLDialect = SQLDialect.MYSQL
+
   /**
    * A map of jooq transacters, indexed by shard database name, used to interact with the
    * database(s). For the unsharded case, this will be a map of one entry.
@@ -103,14 +104,14 @@ abstract class JooqBackfill<K, Param : Any> : Backfill {
   fun <T> inTransactionReturning(
     comment: String,
     partitionName: String?,
-    work: (dslContext: DSLContext) -> T
+    work: (dslContext: DSLContext) -> T,
   ): T {
     val transacterBackfill: BackfillJooqTransacter = getTransacter(partitionName)
     return transacterBackfill.transaction(comment, work)
   }
 
   fun sortingByCompoundKeyFields(
-    withSortDirection: (field: Field<*>) -> SortField<*>
+    withSortDirection: (field: Field<*>) -> SortField<*>,
   ): List<SortField<*>> {
     return compoundKeyFields
       .map(withSortDirection)
@@ -118,11 +119,11 @@ abstract class JooqBackfill<K, Param : Any> : Backfill {
 
   fun getUnfilteredBoundaryKeyValue(
     partitionName: String,
-    withSortDirection: (field: Field<*>) -> SortField<*>
+    withSortDirection: (field: Field<*>) -> SortField<*>,
   ): K? {
     return inTransactionReturning(
       "JooqConfig#getUnfilteredBoundaryKeyValue",
-      partitionName
+      partitionName,
     ) { session: DSLContext ->
       session
         .select(compoundKeyFields)
@@ -138,7 +139,7 @@ abstract class JooqBackfill<K, Param : Any> : Backfill {
   fun getTransacter(partitionName: String?): BackfillJooqTransacter {
     return shardedTransacterMap[partitionName]
       ?: throw IllegalStateException(
-        "A JooqTransacter for the following partitionName was not found $partitionName"
+        "A JooqTransacter for the following partitionName was not found $partitionName",
       )
   }
 

@@ -21,12 +21,12 @@ import java.util.concurrent.Executors
 import javax.inject.Qualifier
 import javax.inject.Singleton
 import misk.config.ConfigModule
-import wisp.deployment.Deployment
 import misk.inject.KAbstractModule
 import misk.security.authz.AccessAnnotationEntry
 import misk.slack.SlackModule
 import misk.web.dashboard.AdminDashboardAccess
 import okhttp3.Interceptor
+import wisp.deployment.Deployment
 
 @Qualifier
 annotation class HttpClientNetworkInterceptor
@@ -35,11 +35,11 @@ class BackfilaServiceModule(
   private val deployment: Deployment,
   private val config: BackfilaConfig,
   private val runnerLoggingSetupProvider: Class<out BackfillRunnerLoggingSetupProvider> =
-    BackfillRunnerNoLoggingSetupProvider::class.java
+    BackfillRunnerNoLoggingSetupProvider::class.java,
 ) : KAbstractModule() {
   override fun configure() {
     multibind<AccessAnnotationEntry>().toInstance(
-      AccessAnnotationEntry<AdminDashboardAccess>(capabilities = listOf("backfila--owners"))
+      AccessAnnotationEntry<AdminDashboardAccess>(capabilities = listOf("backfila--owners")),
     )
 
     install(ConfigModule.create("backfila", config))
@@ -76,8 +76,8 @@ class BackfilaServiceModule(
         config.backfill_runner_threads ?: 40,
         ThreadFactoryBuilder()
           .setNameFormat("backfila-runner-%d")
-          .build()
-      )
+          .build(),
+      ),
     )
   }
 }

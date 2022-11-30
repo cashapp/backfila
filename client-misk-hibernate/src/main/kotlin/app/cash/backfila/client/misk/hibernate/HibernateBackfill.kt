@@ -26,7 +26,7 @@ abstract class HibernateBackfill<E : DbEntity<E>, Pkey : Any, Param : Any> : Bac
 
     // Like Backfill<MyEntity, Id<MyEntity>, Parameters>.
     val supertype = thisType.getSupertype(
-      HibernateBackfill::class.java
+      HibernateBackfill::class.java,
     ).type as ParameterizedType
 
     // Like MyEntity.

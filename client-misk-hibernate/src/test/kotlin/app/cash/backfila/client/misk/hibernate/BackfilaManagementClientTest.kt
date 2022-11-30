@@ -2,11 +2,11 @@ package app.cash.backfila.client.misk.hibernate
 
 import app.cash.backfila.client.BackfilaManagementClient
 import app.cash.backfila.client.BackfillConfig
+import app.cash.backfila.client.NoParameters
 import app.cash.backfila.client.misk.ClientMiskService
 import app.cash.backfila.client.misk.ClientMiskTestingModule
 import app.cash.backfila.client.misk.DbMenu
 import app.cash.backfila.client.misk.MenuQuery
-import app.cash.backfila.client.NoParameters
 import com.google.inject.Module
 import javax.inject.Inject
 import misk.hibernate.Id
@@ -24,7 +24,9 @@ class BackfilaManagementClientTest {
   @MiskTestModule
   val module: Module = ClientMiskTestingModule(false)
 
-  @Inject @ClientMiskService lateinit var transacter: Transacter
+  @Inject @ClientMiskService
+  lateinit var transacter: Transacter
+
   @Inject internal lateinit var managementClient: BackfilaManagementClient
 
   @Test
@@ -44,7 +46,7 @@ class BackfilaManagementClientTest {
 
 class ChickenToBeefBackfill @Inject constructor(
   @ClientMiskService private val transacter: Transacter,
-  private val queryFactory: Query.Factory
+  private val queryFactory: Query.Factory,
 ) : HibernateBackfill<DbMenu, Id<DbMenu>, NoParameters>() {
 
   override fun backfillCriteria(config: BackfillConfig<NoParameters>): Query<DbMenu> {

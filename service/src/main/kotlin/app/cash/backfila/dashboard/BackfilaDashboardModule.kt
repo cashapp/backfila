@@ -1,9 +1,9 @@
 package app.cash.backfila.dashboard
 
 import javax.inject.Qualifier
-import wisp.deployment.Deployment
 import misk.inject.KAbstractModule
 import misk.web.dashboard.WebTabResourceModule
+import wisp.deployment.Deployment
 
 class BackfilaDashboardModule(val deployment: Deployment) : KAbstractModule() {
   override fun configure() {
@@ -13,8 +13,8 @@ class BackfilaDashboardModule(val deployment: Deployment) : KAbstractModule() {
         slug = "app",
         web_proxy_url = "http://localhost:4200/",
         url_path_prefix = "/app/",
-        resourcePath = "classpath:/web/app/"
-      )
+        resourcePath = "classpath:/web/app/",
+      ),
     )
   }
 }

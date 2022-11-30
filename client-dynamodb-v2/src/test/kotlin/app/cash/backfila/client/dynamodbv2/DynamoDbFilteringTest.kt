@@ -5,6 +5,7 @@ import app.cash.backfila.client.NoParameters
 import app.cash.backfila.client.misk.TestingModule
 import app.cash.backfila.embedded.Backfila
 import app.cash.backfila.embedded.createWetRun
+import javax.inject.Inject
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -14,7 +15,6 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
-import javax.inject.Inject
 
 @MiskTest(startService = true)
 class DynamoDbFilteringTest {
@@ -73,7 +73,7 @@ class DynamoDbFilteringTest {
     override fun dynamoDbTable(): DynamoDbTable<TrackItem> {
       return dynamoDbEnhancedClient.table(
         TrackItem.TABLE_NAME,
-        TableSchema.fromClass(TrackItem::class.java)
+        TableSchema.fromClass(TrackItem::class.java),
       )
     }
   }
@@ -85,7 +85,7 @@ class DynamoDbFilteringTest {
     override fun dynamoDbTable(): DynamoDbTable<TrackItem> {
       return dynamoDbEnhancedClient.table(
         TrackItem.TABLE_NAME,
-        TableSchema.fromClass(TrackItem::class.java)
+        TableSchema.fromClass(TrackItem::class.java),
       )
     }
 

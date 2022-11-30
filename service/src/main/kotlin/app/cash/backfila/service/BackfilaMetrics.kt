@@ -9,95 +9,95 @@ class BackfilaMetrics @Inject internal constructor(metrics: Metrics) {
   val runBatchDuration = metrics.histogram(
     name = "run_batch_duration",
     help = "duration of calls to runBatch in milliseconds",
-    labelNames = perBackfillLabelNames
+    labelNames = perBackfillLabelNames,
   )
 
   val runBatchSuccesses = metrics.counter(
     name = "run_batch_successes",
     help = "number of successful runBatch calls",
-    labelNames = perBackfillLabelNames
+    labelNames = perBackfillLabelNames,
   )
 
   val runBatchFailures = metrics.counter(
     name = "run_batch_failures",
     help = "number of failed runBatch calls",
-    labelNames = perBackfillLabelNames
+    labelNames = perBackfillLabelNames,
   )
 
   val getNextBatchDuration = metrics.histogram(
     name = "get_next_batch_duration",
     help = "duration of calls to getNextBatch in milliseconds",
-    labelNames = perBackfillLabelNames
+    labelNames = perBackfillLabelNames,
   )
 
   val getNextBatchSuccesses = metrics.counter(
     name = "get_next_batch_successes",
     help = "number of successful getNextBatch calls",
-    labelNames = perBackfillLabelNames
+    labelNames = perBackfillLabelNames,
   )
 
   val getNextBatchFailures = metrics.counter(
     name = "get_next_batch_failures",
     help = "number of failed getNextBatch calls",
-    labelNames = perBackfillLabelNames
+    labelNames = perBackfillLabelNames,
   )
 
   val computedBatchCount = metrics.counter(
     name = "computed_batch_count",
     help = "number of batches computed",
-    labelNames = perBackfillLabelNames
+    labelNames = perBackfillLabelNames,
   )
 
   val computedRecordsScanned = metrics.counter(
     name = "compute_batch_records_scanned",
     help = "number of records computed (total scanned)",
-    labelNames = perBackfillLabelNames
+    labelNames = perBackfillLabelNames,
   )
 
   val computedRecordsMatching = metrics.counter(
     name = "compute_batch_records_matching",
     help = "number of records computed (matching)",
-    labelNames = perBackfillLabelNames
+    labelNames = perBackfillLabelNames,
   )
 
   val runBatchCompletedRecordsScanned = metrics.counter(
     name = "run_batch_completed_records_scanned",
     help = "number of records completed (total scanned)",
-    labelNames = perBackfillLabelNames
+    labelNames = perBackfillLabelNames,
   )
 
   val runBatchCompletedRecordsMatching = metrics.counter(
     name = "run_batch_completed_records_matching",
     help = "number of records completed (matching)",
-    labelNames = perBackfillLabelNames
+    labelNames = perBackfillLabelNames,
   )
 
   val eta = metrics.gauge(
     name = "backfill_eta",
     help = "Estimated remaining time for backfill completion in milliseconds based on the" +
       " records completed in the last minute",
-    labelNames = perBackfillLabelNames
+    labelNames = perBackfillLabelNames,
   )
 
   val bufferedBatchesReadyToRun = metrics.gauge(
     name = "buffered_batches_ready_to_run",
     help = "The number of batches computed that are ready to be run. If this reaches 0 while the backfill is" +
       " running, there is probably a performance bottleneck in batch computing.",
-    labelNames = perBackfillLabelNames
+    labelNames = perBackfillLabelNames,
   )
 
   val blockedOnComputingNextBatchDuration = metrics.histogram(
     name = "blocked_on_computing_next_batch_duration",
     help = "How long the BatchRunner was blocked waiting on the BatchQueuer to compute more batches to run." +
       " If this is greater than 0 there is probably a performance bottleneck in batch computing.",
-    labelNames = perBackfillLabelNames
+    labelNames = perBackfillLabelNames,
   )
 
   val batchRunsInProgress = metrics.gauge(
     name = "batch_runs_in_progress",
     help = "The number of batches that are currently running, that is, " +
       "we asked the client to start running the batch and it has not finished.",
-    labelNames = perBackfillLabelNames
+    labelNames = perBackfillLabelNames,
   )
 
   companion object {

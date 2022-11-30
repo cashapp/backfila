@@ -1,8 +1,8 @@
 package app.cash.backfila.client.jooq
 
 import okio.ByteString
-import org.junit.jupiter.api.Test
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 
 class ByteStringSerializerTest {
   @Test fun forLongCanRoundTripLongValues() {

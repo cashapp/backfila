@@ -16,7 +16,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 abstract class SinglePartitionHibernateBackfillTest {
-  @Inject @ClientMiskService lateinit var transacter: Transacter
+  @Inject @ClientMiskService
+  lateinit var transacter: Transacter
+
   @Inject lateinit var backfila: Backfila
 
   @Test fun emptyTable() {
@@ -64,10 +66,10 @@ abstract class SinglePartitionHibernateBackfillTest {
 
     run.singleScan()
     assertThat(run.batchesToRunSnapshot.single().utf8RangeStart()).isEqualTo(
-      expectedIds[1].toString()
+      expectedIds[1].toString(),
     )
     assertThat(run.partitionProgressSnapshot.values.single().utf8PreviousEndKey()).isEqualTo(
-      expectedIds[10].toString()
+      expectedIds[10].toString(),
     )
 
     run.execute()
@@ -87,7 +89,7 @@ abstract class SinglePartitionHibernateBackfillTest {
 
     run.singleScan()
     assertThat(run.batchesToRunSnapshot.single().utf8RangeStart()).isEqualTo(
-      expectedIds[0].toString()
+      expectedIds[0].toString(),
     )
     assertThat(run.batchesToRunSnapshot.single().matchingRecordCount).isEqualTo(1)
     assertThat(run.batchesToRunSnapshot.single().scannedRecordCount).isEqualTo(1)
@@ -110,10 +112,10 @@ abstract class SinglePartitionHibernateBackfillTest {
 
     run.singleScan()
     assertThat(run.batchesToRunSnapshot.single().utf8RangeStart()).isEqualTo(
-      expectedIds[0].toString()
+      expectedIds[0].toString(),
     )
     assertThat(run.batchesToRunSnapshot.single().utf8RangeEnd()).isEqualTo(
-      expectedIds[9].toString()
+      expectedIds[9].toString(),
     )
     assertThat(run.batchesToRunSnapshot.single().matchingRecordCount).isEqualTo(10)
     assertThat(run.batchesToRunSnapshot.single().scannedRecordCount).isEqualTo(10)
@@ -122,11 +124,11 @@ abstract class SinglePartitionHibernateBackfillTest {
 
     run.singleScan()
     assertThat(run.batchesToRunSnapshot.single().utf8RangeEnd()).isEqualTo(
-      expectedIds[19].toString()
+      expectedIds[19].toString(),
     )
     assertThat(run.batchesToRunSnapshot.single().matchingRecordCount).isEqualTo(10)
     assertThat(run.batchesToRunSnapshot.single().scannedRecordCount).isEqualTo(
-      15
+      15,
     ) // Skipped some `beef`
     run.runBatch()
     assertThat(run).hasNoBatchesToRun()
@@ -265,7 +267,7 @@ abstract class SinglePartitionHibernateBackfillTest {
   @Test fun runOnBeef() {
     createSome()
     val run = backfila.createDryRun<SinglePartitionHibernateTestBackfill>(
-      parameterData = mapOf("type" to "beef".encodeUtf8())
+      parameterData = mapOf("type" to "beef".encodeUtf8()),
     )
       .apply { configureForTest() }
 
@@ -279,7 +281,7 @@ abstract class SinglePartitionHibernateBackfillTest {
   @Test fun runOnFish() {
     createSome()
     val run = backfila.createDryRun<SinglePartitionHibernateTestBackfill>(
-      parameterData = mapOf("type" to "fish".encodeUtf8())
+      parameterData = mapOf("type" to "fish".encodeUtf8()),
     )
       .apply { configureForTest() }
 

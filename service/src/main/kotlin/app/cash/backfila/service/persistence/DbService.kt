@@ -38,7 +38,7 @@ class DbService() : DbUnsharded<DbService>, DbTimestampedEntity {
     registry_name: String,
     connector: String,
     connector_extra_data: String?,
-    slack_channel: String?
+    slack_channel: String?,
   ) : this() {
     this.registry_name = registry_name
     this.connector = connector

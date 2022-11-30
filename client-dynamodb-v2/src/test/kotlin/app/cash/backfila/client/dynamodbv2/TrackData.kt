@@ -1,14 +1,14 @@
 package app.cash.backfila.client.dynamodbv2
 
+import javax.inject.Inject
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema
 import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import javax.inject.Inject
 
 class TrackData @Inject constructor(
-  dynamoDbClient: DynamoDbClient
+  dynamoDbClient: DynamoDbClient,
 ) {
   private val dynamoDbTable: DynamoDbTable<TrackItem>
 
@@ -19,7 +19,7 @@ class TrackData @Inject constructor(
 
     dynamoDbTable = dynamoDbEnhancedClient.table(
       TrackItem.TABLE_NAME,
-      TableSchema.fromClass(TrackItem::class.java)
+      TableSchema.fromClass(TrackItem::class.java),
     )
   }
 
@@ -60,8 +60,8 @@ class TrackData @Inject constructor(
         "She's Out of My Life",
         "I Can't Help It",
         "It's the Falling in Love",
-        "Burn This Disco Out"
-      )
+        "Burn This Disco Out",
+      ),
     )
   }
 
@@ -79,8 +79,8 @@ class TrackData @Inject constructor(
         "Billie Jean",
         "Human Nature",
         "P.Y.T. (Pretty Young Thing)",
-        "The Lady in My Life"
-      )
+        "The Lady in My Life",
+      ),
     )
   }
 
@@ -102,8 +102,8 @@ class TrackData @Inject constructor(
         "Sway",
         "The Way You Look Tonight",
         "Come Fly with Me",
-        "That's All"
-      )
+        "That's All",
+      ),
     )
   }
 
@@ -124,8 +124,8 @@ class TrackData @Inject constructor(
         "A Place for My Head",
         "Forgotten",
         "Cure for the Itch",
-        "Pushing Me Away"
-      )
+        "Pushing Me Away",
+      ),
     )
 
     addAlbum(
@@ -145,8 +145,8 @@ class TrackData @Inject constructor(
         "From the Inside",
         "Nobody's Listening",
         "Session",
-        "Numb"
-      )
+        "Numb",
+      ),
     )
   }
 
@@ -154,7 +154,7 @@ class TrackData @Inject constructor(
     album_token: String,
     album_title: String,
     artist_name: String,
-    tracks: List<String>
+    tracks: List<String>,
   ) {
     // Insert the album info
     val albumItem = TrackItem().apply {

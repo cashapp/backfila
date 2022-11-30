@@ -5,9 +5,7 @@ package app.cash.backfila.client.jooq.gen
 
 import app.cash.backfila.client.jooq.gen.tables.Menu
 import app.cash.backfila.client.jooq.gen.tables.Widgets
-
 import kotlin.collections.List
-
 import org.jooq.Catalog
 import org.jooq.Table
 import org.jooq.impl.SchemaImpl
@@ -39,6 +37,6 @@ open class Jooq : SchemaImpl("jooq", DefaultCatalog.DEFAULT_CATALOG) {
 
   override fun getTables(): List<Table<*>> = listOf(
     Menu.MENU,
-    Widgets.WIDGETS
+    Widgets.WIDGETS,
   )
 }

@@ -4,7 +4,6 @@
 package app.cash.backfila.client.jooq.gen.tables.records
 
 import app.cash.backfila.client.jooq.gen.tables.Menu
-
 import org.jooq.Field
 import org.jooq.Record1
 import org.jooq.Record2

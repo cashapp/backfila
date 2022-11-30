@@ -11,7 +11,7 @@ import kotlinx.coroutines.test.runBlockingTest
  */
 @Suppress("EXPERIMENTAL_API_USAGE")
 internal fun runBlockingTestCancellable(
-  testBody: suspend TestCoroutineScope.() -> Unit
+  testBody: suspend TestCoroutineScope.() -> Unit,
 ) {
   runBlockingTest {
     try {

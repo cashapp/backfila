@@ -15,9 +15,9 @@ import app.cash.backfila.client.jooq.JooqBackfillModule as RealJooqBackfillModul
   "Use BackfillBatch from the client-jooq module instead.",
   replaceWith = ReplaceWith(
     expression = "BackfillBatch<K, Param>",
-    imports = ["app.cash.backfila.client.jooq.BackfillBatch"]
+    imports = ["app.cash.backfila.client.jooq.BackfillBatch"],
   ),
-  level = DeprecationLevel.WARNING
+  level = DeprecationLevel.WARNING,
 )
 typealias BackfillBatch<K, Param> = RealBackfillBatch<K, Param>
 
@@ -28,9 +28,9 @@ typealias BackfillBatch<K, Param> = RealBackfillBatch<K, Param>
   "Use BackfillJooqTransacter from the client-jooq module instead.",
   replaceWith = ReplaceWith(
     expression = "BackfillJooqTransacter",
-    imports = ["app.cash.backfila.client.jooq.BackfillJooqTransacter"]
+    imports = ["app.cash.backfila.client.jooq.BackfillJooqTransacter"],
   ),
-  level = DeprecationLevel.WARNING
+  level = DeprecationLevel.WARNING,
 )
 typealias BackfillJooqTransacter = RealBackfillJooqTransacter
 
@@ -41,9 +41,9 @@ typealias BackfillJooqTransacter = RealBackfillJooqTransacter
   "Use ByteStringSerializer from the client-jooq module instead.",
   replaceWith = ReplaceWith(
     expression = "ByteStringSerializer<T>",
-    imports = ["app.cash.backfila.client.jooq.ByteStringSerializer"]
+    imports = ["app.cash.backfila.client.jooq.ByteStringSerializer"],
   ),
-  level = DeprecationLevel.WARNING
+  level = DeprecationLevel.WARNING,
 )
 typealias ByteStringSerializer<T> = RealByteStringSerializer<T>
 
@@ -54,9 +54,9 @@ typealias ByteStringSerializer<T> = RealByteStringSerializer<T>
   "Use CompoundKeyComparer from the client-jooq module instead.",
   replaceWith = ReplaceWith(
     expression = "CompoundKeyComparer<T>",
-    imports = ["app.cash.backfila.client.jooq.CompoundKeyComparer"]
+    imports = ["app.cash.backfila.client.jooq.CompoundKeyComparer"],
   ),
-  level = DeprecationLevel.WARNING
+  level = DeprecationLevel.WARNING,
 )
 typealias CompoundKeyComparer<T> = RealCompoundKeyComparer<T>
 
@@ -67,9 +67,9 @@ typealias CompoundKeyComparer<T> = RealCompoundKeyComparer<T>
   "Use CompoundKeyComparisonOperator from the client-jooq module instead.",
   replaceWith = ReplaceWith(
     expression = "CompoundKeyComparisonOperator<T>",
-    imports = ["app.cash.backfila.client.jooq.CompoundKeyComparisonOperator"]
+    imports = ["app.cash.backfila.client.jooq.CompoundKeyComparisonOperator"],
   ),
-  level = DeprecationLevel.WARNING
+  level = DeprecationLevel.WARNING,
 )
 typealias CompoundKeyComparisonOperator<T> = RealCompoundKeyComparisonOperator<T>
 
@@ -80,9 +80,9 @@ typealias CompoundKeyComparisonOperator<T> = RealCompoundKeyComparisonOperator<T
   "Use JooqBackfill from the client-jooq module instead.",
   replaceWith = ReplaceWith(
     expression = "JooqBackfill<K, Param>",
-    imports = ["app.cash.backfila.client.jooq.JooqBackfill"]
+    imports = ["app.cash.backfila.client.jooq.JooqBackfill"],
   ),
-  level = DeprecationLevel.WARNING
+  level = DeprecationLevel.WARNING,
 )
 typealias JooqBackfill<K, Param> = RealJooqBackfill<K, Param>
 
@@ -93,8 +93,8 @@ typealias JooqBackfill<K, Param> = RealJooqBackfill<K, Param>
   "Use JooqBackfillModule from the client-jooq module instead.",
   replaceWith = ReplaceWith(
     expression = "JooqBackfillModule<T>",
-    imports = ["app.cash.backfila.client.jooq.JooqBackfillModule"]
+    imports = ["app.cash.backfila.client.jooq.JooqBackfillModule"],
   ),
-  level = DeprecationLevel.WARNING
+  level = DeprecationLevel.WARNING,
 )
 typealias JooqBackfillModule<T> = RealJooqBackfillModule<T>

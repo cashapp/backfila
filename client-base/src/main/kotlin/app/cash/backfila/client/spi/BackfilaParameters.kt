@@ -5,16 +5,16 @@ import app.cash.backfila.client.BackfilaRequired
 import app.cash.backfila.client.BackfillConfig
 import app.cash.backfila.client.Description
 import app.cash.backfila.protos.service.Parameter
+import java.lang.reflect.InvocationTargetException
 import kotlin.reflect.KClass
+import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
+import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.jvmErasure
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
-import java.lang.reflect.InvocationTargetException
-import kotlin.reflect.KFunction
-import kotlin.reflect.full.findAnnotation
 
 fun parametersToBytes(parameters: Any): Map<String, ByteString> {
   val parametersClass = parameters::class
@@ -28,14 +28,14 @@ fun parametersToBytes(parameters: Any): Map<String, ByteString> {
 }
 
 class BackfilaParametersOperator<T : Any>(
-  val parametersClass: KClass<T>
+  val parametersClass: KClass<T>,
 ) {
   /** Constructor parameters used as defaults when missing to create a new T. */
   private val constructor: KFunction<T> = fetchConstructor(parametersClass)
 
   fun constructBackfillConfig(
     parameters: MutableMap<String, ByteString>,
-    dryRun: Boolean
+    dryRun: Boolean,
   ): BackfillConfig<T> {
     val map = mutableMapOf<KParameter, Any>()
     for (parameter in constructor.parameters) {
@@ -76,7 +76,7 @@ class BackfilaParametersOperator<T : Any>(
       String::class to { value: ByteString -> value.utf8() },
       Int::class to { value: ByteString -> value.utf8().toInt() },
       Long::class to { value: ByteString -> value.utf8().toLong() },
-      Boolean::class to { value: ByteString -> value.utf8().toBoolean() }
+      Boolean::class to { value: ByteString -> value.utf8().toBoolean() },
     )
 
     fun <P : Any> backfilaParametersFromClass(parametersClass: KClass<P>): List<Parameter> {

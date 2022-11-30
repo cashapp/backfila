@@ -21,7 +21,7 @@ class VariableCapacityChannelTest {
       val upstream = variableCapacityChannel.upstream()
       launch {
         val receiveChannel = variableCapacityChannel.proxy(this)
-        assertThat(receiveChannel.poll()).isNull()
+        assertThat(receiveChannel.tryReceive().getOrNull()).isNull()
         upstream.close()
       }
     }
@@ -32,14 +32,14 @@ class VariableCapacityChannelTest {
     runBlockingTest {
       val variableCapacityChannel = VariableCapacityChannel<String>(1)
       val upstream = variableCapacityChannel.upstream()
-      assertThat(upstream.offer("test")).isFalse()
+      assertThat(upstream.trySend("test").isSuccess).isFalse()
       assertThat(variableCapacityChannel.queued()).isEqualTo(0)
       launch {
         val receiveChannel = variableCapacityChannel.proxy(this)
-        assertThat(upstream.offer("test")).isTrue()
+        assertThat(upstream.trySend("test").isSuccess).isTrue()
         assertThat(variableCapacityChannel.queued()).isEqualTo(1)
-        assertThat(upstream.offer("test2")).isFalse()
-        assertThat(receiveChannel.poll()).isEqualTo("test")
+        assertThat(upstream.trySend("test2").isSuccess).isFalse()
+        assertThat(receiveChannel.tryReceive().getOrNull()).isEqualTo("test")
         upstream.close()
       }
     }
@@ -52,14 +52,14 @@ class VariableCapacityChannelTest {
       val upstream = variableCapacityChannel.upstream()
       launch {
         val receiveChannel = variableCapacityChannel.proxy(this)
-        assertThat(upstream.offer("test")).isTrue()
+        assertThat(upstream.trySend("test").isSuccess).isTrue()
         assertThat(variableCapacityChannel.queued()).isEqualTo(1)
-        assertThat(upstream.offer("test2")).isFalse()
-        assertThat(receiveChannel.poll()).isEqualTo("test")
+        assertThat(upstream.trySend("test2").isSuccess).isFalse()
+        assertThat(receiveChannel.tryReceive().getOrNull()).isEqualTo("test")
         assertThat(variableCapacityChannel.queued()).isEqualTo(0)
-        assertThat(upstream.offer("test2")).isTrue()
+        assertThat(upstream.trySend("test2").isSuccess).isTrue()
         assertThat(variableCapacityChannel.queued()).isEqualTo(1)
-        assertThat(receiveChannel.poll()).isEqualTo("test2")
+        assertThat(receiveChannel.tryReceive().getOrNull()).isEqualTo("test2")
         assertThat(variableCapacityChannel.queued()).isEqualTo(0)
         upstream.close()
       }
@@ -73,20 +73,20 @@ class VariableCapacityChannelTest {
       val upstream = variableCapacityChannel.upstream()
       launch {
         val receiveChannel = variableCapacityChannel.proxy(this)
-        assertThat(upstream.offer("test")).isTrue()
+        assertThat(upstream.trySend("test").isSuccess).isTrue()
         assertThat(variableCapacityChannel.queued()).isEqualTo(1)
-        assertThat(upstream.offer("test2")).isFalse()
+        assertThat(upstream.trySend("test2").isSuccess).isFalse()
         variableCapacityChannel.capacity = 2
         // Capacity change only takes affect when it is not blocked on sending
-        assertThat(receiveChannel.poll()).isEqualTo("test")
+        assertThat(receiveChannel.tryReceive().getOrNull()).isEqualTo("test")
 
-        assertThat(upstream.offer("test2")).isTrue()
+        assertThat(upstream.trySend("test2").isSuccess).isTrue()
         assertThat(variableCapacityChannel.queued()).isEqualTo(1)
-        assertThat(upstream.offer("test3")).isTrue()
+        assertThat(upstream.trySend("test3").isSuccess).isTrue()
         assertThat(variableCapacityChannel.queued()).isEqualTo(2)
 
-        assertThat(receiveChannel.poll()).isEqualTo("test2")
-        assertThat(receiveChannel.poll()).isEqualTo("test3")
+        assertThat(receiveChannel.tryReceive().getOrNull()).isEqualTo("test2")
+        assertThat(receiveChannel.tryReceive().getOrNull()).isEqualTo("test3")
 
         upstream.close()
       }
@@ -100,24 +100,24 @@ class VariableCapacityChannelTest {
       val upstream = variableCapacityChannel.upstream()
       launch {
         val receiveChannel = variableCapacityChannel.proxy(this)
-        assertThat(upstream.offer("test")).isTrue()
+        assertThat(upstream.trySend("test").isSuccess).isTrue()
         assertThat(variableCapacityChannel.queued()).isEqualTo(1)
-        assertThat(upstream.offer("test2")).isTrue()
+        assertThat(upstream.trySend("test2").isSuccess).isTrue()
         assertThat(variableCapacityChannel.queued()).isEqualTo(2)
-        assertThat(upstream.offer("test3")).isFalse()
+        assertThat(upstream.trySend("test3").isSuccess).isFalse()
 
         variableCapacityChannel.capacity = 1
         // Capacity change only takes affect when it is not blocked on sending
-        assertThat(receiveChannel.poll()).isEqualTo("test")
+        assertThat(receiveChannel.tryReceive().getOrNull()).isEqualTo("test")
         assertThat(variableCapacityChannel.queued()).isEqualTo(1)
         // Still can't send after receiving because capacity was lowered.
-        assertThat(upstream.offer("test3")).isFalse()
+        assertThat(upstream.trySend("test3").isSuccess).isFalse()
 
-        assertThat(receiveChannel.poll()).isEqualTo("test2")
+        assertThat(receiveChannel.tryReceive().getOrNull()).isEqualTo("test2")
         assertThat(variableCapacityChannel.queued()).isEqualTo(0)
-        assertThat(upstream.offer("test3")).isTrue()
+        assertThat(upstream.trySend("test3").isSuccess).isTrue()
 
-        assertThat(receiveChannel.poll()).isEqualTo("test3")
+        assertThat(receiveChannel.tryReceive().getOrNull()).isEqualTo("test3")
 
         upstream.close()
       }
@@ -130,7 +130,7 @@ class VariableCapacityChannelTest {
       val upstream = variableCapacityChannel.upstream()
       launch {
         val receiveChannel = variableCapacityChannel.proxy(this)
-        assertThat(upstream.offer("test")).isTrue()
+        assertThat(upstream.trySend("test").isSuccess).isTrue()
         upstream.close()
 
         assertThat(receiveChannel.receive()).isEqualTo("test")
@@ -150,7 +150,7 @@ class VariableCapacityChannelTest {
       val upstream = variableCapacityChannel.upstream()
       launch {
         val receiveChannel = variableCapacityChannel.proxy(this)
-        assertThat(upstream.offer("test")).isTrue()
+        assertThat(upstream.trySend("test").isSuccess).isTrue()
         upstream.close(CancellationException("cancel"))
 
         assertThat(receiveChannel.receive()).isEqualTo("test")
@@ -170,7 +170,7 @@ class VariableCapacityChannelTest {
       val upstream = variableCapacityChannel.upstream()
       launch {
         val receiveChannel = variableCapacityChannel.proxy(this)
-        assertThat(upstream.offer("test")).isTrue()
+        assertThat(upstream.trySend("test").isSuccess).isTrue()
         receiveChannel.cancel()
 
         try {
@@ -189,7 +189,7 @@ class VariableCapacityChannelTest {
       val upstream = variableCapacityChannel.upstream()
       launch {
         val receiveChannel = variableCapacityChannel.proxy(this)
-        assertThat(upstream.offer("test")).isTrue()
+        assertThat(upstream.trySend("test").isSuccess).isTrue()
         receiveChannel.cancel(CancellationException("cancel"))
 
         try {
@@ -214,22 +214,22 @@ class VariableCapacityChannelTest {
         val receiveChannel = variableCapacityChannel.proxy(this)
         assertThat(size.get()).isEqualTo(0)
 
-        upstream.offer("test")
+        upstream.trySend("test").isSuccess
         assertThat(size.get()).isEqualTo(1)
 
-        upstream.offer("test")
+        upstream.trySend("test").isSuccess
         assertThat(size.get()).isEqualTo(2)
 
-        upstream.offer("test")
+        upstream.trySend("test").isSuccess
         assertThat(size.get()).isEqualTo(3)
 
-        receiveChannel.poll()
+        receiveChannel.tryReceive().getOrNull()
         assertThat(size.get()).isEqualTo(2)
 
-        receiveChannel.poll()
+        receiveChannel.tryReceive().getOrNull()
         assertThat(size.get()).isEqualTo(1)
 
-        receiveChannel.poll()
+        receiveChannel.tryReceive().getOrNull()
         assertThat(size.get()).isEqualTo(0)
 
         upstream.close()

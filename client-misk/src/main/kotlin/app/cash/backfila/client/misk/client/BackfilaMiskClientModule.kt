@@ -27,9 +27,9 @@ class BackfilaMiskClientModule : KAbstractModule() {
         kclass = BackfilaApi::class,
         name = "backfila",
         retrofitBuilderProvider = getProvider(
-          Key.get(Retrofit.Builder::class.java, ForBackfila::class.java)
-        )
-      )
+          Key.get(Retrofit.Builder::class.java, ForBackfila::class.java),
+        ),
+      ),
     )
     bind(OnStartup::class.java).toInstance(OnStartup.CONTINUE_ON_STARTUP)
 
@@ -39,6 +39,7 @@ class BackfilaMiskClientModule : KAbstractModule() {
     install(WebActionModule.create<FinalizeBackfillAction>())
   }
 
-  @Provides @ForBackfila internal fun wireRetrofitBuilder() =
+  @Provides @ForBackfila
+  internal fun wireRetrofitBuilder() =
     Retrofit.Builder().addConverterFactory(WireConverterFactory.create())
 }

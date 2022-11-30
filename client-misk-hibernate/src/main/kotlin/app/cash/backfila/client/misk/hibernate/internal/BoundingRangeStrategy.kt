@@ -25,12 +25,12 @@ interface BoundingRangeStrategy<E : DbEntity<E>, Pkey : Any> {
     previousEndKey: Pkey?,
     backfillRangeStart: Pkey,
     backfillRangeEnd: Pkey,
-    scanSize: Long?
+    scanSize: Long?,
   ): Pkey?
 }
 
 class UnshardedHibernateBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any>(
-  private val partitionProvider: PartitionProvider
+  private val partitionProvider: PartitionProvider,
 ) : BoundingRangeStrategy<E, Pkey> {
   override fun computeBoundingRangeMax(
     backfill: HibernateBackfill<E, Pkey, *>,
@@ -38,7 +38,7 @@ class UnshardedHibernateBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any>(
     previousEndKey: Pkey?,
     backfillRangeStart: Pkey,
     backfillRangeEnd: Pkey,
-    scanSize: Long?
+    scanSize: Long?,
   ): Pkey? {
     return partitionProvider.transaction(partitionName) { session ->
       selectMaxBound(
@@ -55,7 +55,7 @@ class UnshardedHibernateBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any>(
 }
 
 class VitessShardedBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any>(
-  private val partitionProvider: PartitionProvider
+  private val partitionProvider: PartitionProvider,
 ) : BoundingRangeStrategy<E, Pkey> {
   override fun computeBoundingRangeMax(
     backfill: HibernateBackfill<E, Pkey, *>,
@@ -63,7 +63,7 @@ class VitessShardedBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any>(
     previousEndKey: Pkey?,
     backfillRangeStart: Pkey,
     backfillRangeEnd: Pkey,
-    scanSize: Long?
+    scanSize: Long?,
   ): Pkey? {
     return partitionProvider.transaction(partitionName) { session ->
       // We don't provide a schema when pinned to a shard.
@@ -82,7 +82,7 @@ class VitessShardedBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any>(
 
 class VitessSingleCursorBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any>(
   private val transacter: Transacter,
-  private val keyspace: Keyspace
+  private val keyspace: Keyspace,
 ) : BoundingRangeStrategy<E, Pkey> {
 
   /**
@@ -102,7 +102,7 @@ class VitessSingleCursorBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any>(
     previousEndKey: Pkey?,
     backfillRangeStart: Pkey,
     backfillRangeEnd: Pkey,
-    scanSize: Long?
+    scanSize: Long?,
   ): Pkey? {
     return transacter.shards(keyspace).parallelStream().map {
       transacter.transaction(it) { session ->
@@ -158,7 +158,7 @@ private fun <E : DbEntity<E>, Pkey : Any> selectMaxBound(
         | $where
         | ORDER BY $pkeyName
         | LIMIT $scanSize) s
-        """.trimMargin()
+  """.trimMargin()
 
   val max = session.useConnection { connection ->
     connection.prepareStatement(sql).use { ps ->

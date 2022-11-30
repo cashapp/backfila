@@ -36,7 +36,7 @@ internal class HibernateBackend @Inject constructor(
   }
 
   private fun <E : DbEntity<E>, Pkey : Any, Param : Any> createHibernateOperator(
-    backfill: HibernateBackfill<E, Pkey, Param>
+    backfill: HibernateBackfill<E, Pkey, Param>,
   ) = HibernateBackfillOperator(
     backfill,
     BackfilaParametersOperator(parametersClass(backfill::class)),

@@ -1,10 +1,10 @@
 package app.cash.backfila.client.dynamodb.internal
 
-import app.cash.backfila.client.Description
 import app.cash.backfila.client.DeleteBy
-import app.cash.backfila.client.parseDeleteByDate
+import app.cash.backfila.client.Description
 import app.cash.backfila.client.dynamodb.DynamoDbBackfill
 import app.cash.backfila.client.dynamodb.ForDynamoDbBackend
+import app.cash.backfila.client.parseDeleteByDate
 import app.cash.backfila.client.spi.BackfilaParametersOperator
 import app.cash.backfila.client.spi.BackfillBackend
 import app.cash.backfila.client.spi.BackfillOperator
@@ -24,7 +24,7 @@ class DynamoDbBackend @Inject constructor(
   private val injector: Injector,
   @ForDynamoDbBackend private val backfills: MutableMap<String, KClass<out DynamoDbBackfill<*, *>>>,
   val dynamoDb: DynamoDBMapper,
-  val keyRangeCodec: DynamoDbKeyRangeCodec
+  val keyRangeCodec: DynamoDbKeyRangeCodec,
 ) : BackfillBackend {
 
   /** Creates Backfill instances. Each backfill ID gets a new Backfill instance. */
@@ -38,12 +38,12 @@ class DynamoDbBackend @Inject constructor(
   }
 
   private fun <E : Any, Param : Any> createDynamoDbOperator(
-    backfill: DynamoDbBackfill<E, Param>
+    backfill: DynamoDbBackfill<E, Param>,
   ) = DynamoDbBackfillOperator(
     dynamoDb,
     backfill,
     BackfilaParametersOperator(parametersClass(backfill::class)),
-    keyRangeCodec
+    keyRangeCodec,
   )
 
   override fun create(backfillName: String, backfillId: String): BackfillOperator? {

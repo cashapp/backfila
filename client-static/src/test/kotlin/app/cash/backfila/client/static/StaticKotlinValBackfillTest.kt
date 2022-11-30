@@ -5,13 +5,13 @@ import app.cash.backfila.embedded.Backfila
 import app.cash.backfila.embedded.createDryRun
 import app.cash.backfila.embedded.createWetRun
 import com.squareup.wire.internal.newMutableList
+import javax.inject.Inject
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions
 import org.junit.jupiter.api.Test
-import javax.inject.Inject
 
 @MiskTest(startService = true)
 class StaticKotlinValBackfillTest {
@@ -34,7 +34,7 @@ class StaticKotlinValBackfillTest {
   @Test
   fun `marking sauces sweet`() {
     val run = backfila.createWetRun<SaucesBackfill>(
-      parameterData = mapOf("markSweet" to "true".encodeUtf8())
+      parameterData = mapOf("markSweet" to "true".encodeUtf8()),
     )
     run.execute()
 
@@ -46,7 +46,7 @@ class StaticKotlinValBackfillTest {
   @Test
   fun `dry run doesn't backfill`() {
     val run = backfila.createDryRun<SaucesBackfill>(
-      parameterData = mapOf("markSweet" to "true".encodeUtf8())
+      parameterData = mapOf("markSweet" to "true".encodeUtf8()),
     )
     run.execute()
 
@@ -91,7 +91,7 @@ class StaticKotlinValBackfillTest {
     with(SoftAssertions()) {
       this.assertThatCode {
         backfila.createWetRun<SaucesBackfill>(
-          parameterData = mapOf("validate" to "false".encodeUtf8())
+          parameterData = mapOf("validate" to "false".encodeUtf8()),
         )
       }.hasMessageContaining("Validate failed")
 
@@ -139,7 +139,7 @@ class StaticKotlinValBackfillTest {
 
     data class SauceAttributes(
       val markSweet: Boolean = false,
-      val validate: Boolean = true
+      val validate: Boolean = true,
     )
 
     override val staticDatasource: List<String> = (sweetSauces + savourySauces).shuffled()

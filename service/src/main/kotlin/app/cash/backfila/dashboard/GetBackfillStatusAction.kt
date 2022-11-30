@@ -37,7 +37,7 @@ data class UiPartition(
   val backfilled_scanned_record_count: Long,
   val backfilled_matching_record_count: Long,
   val scanned_records_per_minute: Long?,
-  val matching_records_per_minute: Long?
+  val matching_records_per_minute: Long?,
 )
 
 data class UiEventLog(
@@ -46,7 +46,7 @@ data class UiEventLog(
   val user: String?,
   val partition_name: String?,
   val message: String,
-  val extra_data: String?
+  val extra_data: String?,
 )
 
 data class GetBackfillStatusResponse(
@@ -63,12 +63,12 @@ data class GetBackfillStatusResponse(
   val extra_sleep_ms: Long,
   val backoff_schedule: String?,
   val partitions: List<UiPartition>,
-  val event_logs: List<UiEventLog>
+  val event_logs: List<UiEventLog>,
 )
 
 class GetBackfillStatusAction @Inject constructor(
   @BackfilaDb private val transacter: Transacter,
-  private val queryFactory: Query.Factory
+  private val queryFactory: Query.Factory,
 ) : WebAction {
   @Get("/backfills/{id}/status")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
@@ -76,7 +76,7 @@ class GetBackfillStatusAction @Inject constructor(
   // TODO allow any user
   @Authenticated(capabilities = ["users"])
   fun status(
-    @PathParam id: Long
+    @PathParam id: Long,
   ): GetBackfillStatusResponse {
     return transacter.transaction { session ->
       val run = session.loadOrNull<DbBackfillRun>(Id(id))
@@ -96,7 +96,7 @@ class GetBackfillStatusAction @Inject constructor(
         run.extra_sleep_ms,
         run.backoff_schedule,
         partitions.map { dbToUi(it) },
-        events(session, run, partitions)
+        events(session, run, partitions),
       )
     }
   }
@@ -116,13 +116,13 @@ class GetBackfillStatusAction @Inject constructor(
       partition.backfilled_scanned_record_count,
       partition.backfilled_matching_record_count,
       partition.scanned_records_per_minute,
-      partition.matching_records_per_minute
+      partition.matching_records_per_minute,
     )
 
   private fun events(
     session: Session,
     run: DbBackfillRun,
-    partitions: List<DbRunPartition>
+    partitions: List<DbRunPartition>,
   ): List<UiEventLog> {
     val partitionsById = partitions.associateBy { it.id }
     return queryFactory.newQuery<EventLogQuery>()
@@ -137,7 +137,7 @@ class GetBackfillStatusAction @Inject constructor(
           it.user,
           partitionsById[it.partition_id]?.partition_name,
           it.message,
-          it.extra_data
+          it.extra_data,
         )
       }
   }
