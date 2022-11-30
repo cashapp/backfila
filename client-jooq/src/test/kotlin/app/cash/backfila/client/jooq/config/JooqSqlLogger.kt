@@ -6,7 +6,7 @@ import org.jooq.impl.DSL
 import org.jooq.impl.DefaultExecuteListener
 import wisp.logging.getLogger
 
-class JooqSQLLogger : DefaultExecuteListener() {
+class JooqSqlLogger : DefaultExecuteListener() {
   /**
    * Hook into the query execution lifecycle before executing queries
    */
@@ -28,6 +28,6 @@ class JooqSQLLogger : DefaultExecuteListener() {
   }
 
   companion object {
-    val log = getLogger<JooqSQLLogger>()
+    val log = getLogger<JooqSqlLogger>()
   }
 }
