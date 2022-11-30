@@ -57,7 +57,7 @@ internal class EmbeddedBackfillRun<B : Backfill>(
         .range(KeyRange(rangeStart?.encodeUtf8(), rangeEnd?.encodeUtf8()))
         .parameters(parameters)
         .dry_run(dryRun)
-        .build()
+        .build(),
     )
     parameters += prepareBackfillResponse.parameters
     precomputeProgress = prepareBackfillResponse.partitions.associate {
@@ -84,7 +84,7 @@ internal class EmbeddedBackfillRun<B : Backfill>(
           .compute_count_limit(computeCountLimit)
           .precomputing(true)
           .dry_run(dryRun)
-          .build()
+          .build(),
       )
     if (response.batches.isEmpty()) {
       cursor.done = true
@@ -108,7 +108,7 @@ internal class EmbeddedBackfillRun<B : Backfill>(
 
   override fun partitionScan(partitionName: String): GetNextBatchRangeResponse {
     val cursor = scanProgress[partitionName] ?: error(
-      "Partition $partitionName not found. Valid partitions are ${scanProgress.keys}"
+      "Partition $partitionName not found. Valid partitions are ${scanProgress.keys}",
     )
     val response =
       operator.getNextBatchRange(
@@ -121,7 +121,7 @@ internal class EmbeddedBackfillRun<B : Backfill>(
           .scan_size(scanSize)
           .compute_count_limit(computeCountLimit)
           .dry_run(dryRun)
-          .build()
+          .build(),
       )
     when (response.batches.isEmpty()) {
       true -> cursor.done = true
@@ -135,9 +135,9 @@ internal class EmbeddedBackfillRun<B : Backfill>(
             partitionName,
             it.batch_range,
             it.scanned_record_count,
-            it.matching_record_count
+            it.matching_record_count,
           )
-        }
+        },
     )
     return response
   }
@@ -169,7 +169,7 @@ internal class EmbeddedBackfillRun<B : Backfill>(
           .parameters(parameters)
           .dry_run(dryRun)
           .batch_size(batchSize)
-          .build()
+          .build(),
       )
       check(response.exception_stack_trace == null) {
         "RunBatch returned stack trace: ${response.exception_stack_trace}"
@@ -201,7 +201,7 @@ private class MutablePartitionCursor(
   var done: Boolean = false
 
   fun snapshot() = PartitionCursor(
-    partitionName, keyRange, previousEndKey, done
+    partitionName, keyRange, previousEndKey, done,
   )
 }
 

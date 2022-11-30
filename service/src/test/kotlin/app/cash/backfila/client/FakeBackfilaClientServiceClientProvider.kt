@@ -7,7 +7,7 @@ import misk.moshi.adapter
 
 @Singleton
 class FakeBackfilaClientServiceClientProvider @Inject constructor(
-  private val moshi: Moshi
+  private val moshi: Moshi,
 ) : BackfilaClientServiceClientProvider {
   @Inject lateinit var fakeBackfilaClientServiceClient: FakeBackfilaClientServiceClient
 
@@ -17,7 +17,7 @@ class FakeBackfilaClientServiceClientProvider @Inject constructor(
 
   override fun clientFor(
     serviceName: String,
-    connectorExtraData: String?
+    connectorExtraData: String?,
   ): BackfilaClientServiceClient {
     return fakeBackfilaClientServiceClient
   }

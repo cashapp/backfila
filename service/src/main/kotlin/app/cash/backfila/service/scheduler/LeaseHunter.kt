@@ -19,7 +19,7 @@ class LeaseHunter @Inject constructor(
   private val queryFactory: Query.Factory,
   private val clock: Clock,
   private val tokenGenerator: TokenGenerator,
-  private val backfillRunnerFactory: BackfillRunner.Factory
+  private val backfillRunnerFactory: BackfillRunner.Factory,
 ) {
   fun hunt(): Set<BackfillRunner> {
     // Hibernate prevents write races using the version column, ensuring only one transaction
@@ -49,8 +49,8 @@ class LeaseHunter @Inject constructor(
         backfillRunnerFactory.create(
           session,
           partition,
-          leaseToken
-        )
+          leaseToken,
+        ),
       )
     }
   }

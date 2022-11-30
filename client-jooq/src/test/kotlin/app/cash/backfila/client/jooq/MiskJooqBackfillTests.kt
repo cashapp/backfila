@@ -1,12 +1,14 @@
 package app.cash.backfila.client.jooq
 
-import app.cash.backfila.embedded.Backfila
-import app.cash.backfila.embedded.BackfillRun
 import app.cash.backfila.client.jooq.config.ClientJooqTestingModule
+import app.cash.backfila.client.jooq.config.IdRecorder
 import app.cash.backfila.client.jooq.config.JooqDBIdentifier
 import app.cash.backfila.client.jooq.config.JooqMenuTestBackfill
 import app.cash.backfila.client.jooq.config.JooqTransacter
-import app.cash.backfila.client.jooq.config.IdRecorder
+import app.cash.backfila.client.testing.assertThat as testingAssertThat
+import app.cash.backfila.embedded.Backfila
+import app.cash.backfila.embedded.BackfillRun
+import javax.inject.Inject
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.time.FakeClock
@@ -15,8 +17,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
-import javax.inject.Inject
-import app.cash.backfila.client.testing.assertThat as testingAssertThat
 
 /**
  * This test is good in a way that it avoids duplication, but it could get a little complicated to
@@ -88,12 +88,12 @@ class MiskJooqBackfillTests {
   @ParameterizedTest(name = "withStartRange test - {0}")
   @MethodSource("app.cash.backfila.client.jooq.MiskJooqBackfillTestProviders#createSome")
   fun <K : Any, BackfillType : IdRecorder<K, *>> withStartRange(
-    backfillOption: JooqBackfillTestOptions<K, BackfillType>
+    backfillOption: JooqBackfillTestOptions<K, BackfillType>,
   ) {
     val backfillRowKeys = backfillOption.backfillRowKeys(transacter, clock, tokenGenerator)
     val run = backfillOption.createDryRun(
       backfila,
-      rangeStart = backfillRowKeys[1].toString()
+      rangeStart = backfillRowKeys[1].toString(),
     )
       .apply { configureForTest() }
     assertThat(run.rangeStart).isEqualTo(backfillRowKeys[1].toString())
@@ -102,17 +102,17 @@ class MiskJooqBackfillTests {
 
     run.singleScan()
     assertThat(run.batchesToRunSnapshot.single().utf8RangeStart()).isEqualTo(
-      backfillRowKeys[1].toString()
+      backfillRowKeys[1].toString(),
     )
     assertThat(run.partitionProgressSnapshot.values.single().utf8PreviousEndKey()).isEqualTo(
-      backfillRowKeys[10].toString()
+      backfillRowKeys[10].toString(),
     )
 
     run.execute()
     assertThat(run.backfill.idsRanDry).containsExactlyElementsOf(
       backfillRowKeys.slice(
-        1..19
-      )
+        1..19,
+      ),
     )
     assertThat(run.backfill.idsRanWet).isEmpty()
   }
@@ -120,13 +120,13 @@ class MiskJooqBackfillTests {
   @ParameterizedTest(name = "withEndRange test - {0}")
   @MethodSource("app.cash.backfila.client.jooq.MiskJooqBackfillTestProviders#createSome")
   fun <K : Any, BackfillType : IdRecorder<K, *>> withEndRange(
-    backfillOption: JooqBackfillTestOptions<K, BackfillType>
+    backfillOption: JooqBackfillTestOptions<K, BackfillType>,
   ) {
     val backfillRowKeys = backfillOption.backfillRowKeys(transacter, clock, tokenGenerator)
     // End after the 1st id, so only the first id should get backfilled.
     val run = backfillOption.createDryRun(
       backfila,
-      rangeEnd = backfillRowKeys[0].toString()
+      rangeEnd = backfillRowKeys[0].toString(),
     )
       .apply { configureForTest() }
     assertThat(run.rangeEnd).isEqualTo(backfillRowKeys[0].toString())
@@ -135,7 +135,7 @@ class MiskJooqBackfillTests {
 
     run.singleScan()
     assertThat(run.batchesToRunSnapshot.single().utf8RangeStart()).isEqualTo(
-      backfillRowKeys[0].toString()
+      backfillRowKeys[0].toString(),
     )
     assertThat(run.batchesToRunSnapshot.single().matchingRecordCount).isEqualTo(1)
     assertThat(run.batchesToRunSnapshot.single().scannedRecordCount).isEqualTo(1)
@@ -153,7 +153,7 @@ class MiskJooqBackfillTests {
   @ParameterizedTest(name = "twoBatchesOf10ToGet20Records test - {0}")
   @MethodSource("app.cash.backfila.client.jooq.MiskJooqBackfillTestProviders#createSome")
   fun <K : Any, BackfillType : IdRecorder<K, *>> twoBatchesOf10ToGet20Records(
-    backfillOption: JooqBackfillTestOptions<K, BackfillType>
+    backfillOption: JooqBackfillTestOptions<K, BackfillType>,
   ) {
     val backfillRowKeys = backfillOption.backfillRowKeys(transacter, clock, tokenGenerator)
     val run = backfillOption.createDryRun(backfila)
@@ -162,10 +162,10 @@ class MiskJooqBackfillTests {
 
     run.singleScan()
     assertThat(run.batchesToRunSnapshot.single().utf8RangeStart()).isEqualTo(
-      backfillRowKeys[0].toString()
+      backfillRowKeys[0].toString(),
     )
     assertThat(run.batchesToRunSnapshot.single().utf8RangeEnd()).isEqualTo(
-      backfillRowKeys[9].toString()
+      backfillRowKeys[9].toString(),
     )
     assertThat(run.batchesToRunSnapshot.single().matchingRecordCount).isEqualTo(10)
     assertThat(run.batchesToRunSnapshot.single().scannedRecordCount).isEqualTo(10)
@@ -174,11 +174,11 @@ class MiskJooqBackfillTests {
 
     run.singleScan()
     assertThat(run.batchesToRunSnapshot.single().utf8RangeEnd()).isEqualTo(
-      backfillRowKeys[19].toString()
+      backfillRowKeys[19].toString(),
     )
     assertThat(run.batchesToRunSnapshot.single().matchingRecordCount).isEqualTo(10)
     assertThat(run.batchesToRunSnapshot.single().scannedRecordCount).isEqualTo(
-      15
+      15,
     ) // Skipped 5 records in between
     run.runBatch()
     testingAssertThat(run).hasNoBatchesToRun()
@@ -194,7 +194,7 @@ class MiskJooqBackfillTests {
   @ParameterizedTest(name = "precomputingIgnoresBatchSize test - {0}")
   @MethodSource("app.cash.backfila.client.jooq.MiskJooqBackfillTestProviders#createSome")
   fun <K : Any, BackfillType : IdRecorder<K, *>> precomputingIgnoresBatchSize(
-    backfillOption: JooqBackfillTestOptions<K, BackfillType>
+    backfillOption: JooqBackfillTestOptions<K, BackfillType>,
   ) {
     val backfillRowKeys = backfillOption.backfillRowKeys(transacter, clock, tokenGenerator)
     val run = backfillOption.createDryRun(backfila)
@@ -239,7 +239,7 @@ class MiskJooqBackfillTests {
   @ParameterizedTest(name = "multipleBatches test - {0}")
   @MethodSource("app.cash.backfila.client.jooq.MiskJooqBackfillTestProviders#createSome")
   fun <K : Any, BackfillType : IdRecorder<K, *>> multipleBatches(
-    backfillOption: JooqBackfillTestOptions<K, BackfillType>
+    backfillOption: JooqBackfillTestOptions<K, BackfillType>,
   ) {
     backfillOption.backfillRowKeys(transacter, clock, tokenGenerator)
     val run1 = backfillOption.createDryRun(backfila)
@@ -263,7 +263,7 @@ class MiskJooqBackfillTests {
   @ParameterizedTest(name = "multipleScans test - {0}")
   @MethodSource("app.cash.backfila.client.jooq.MiskJooqBackfillTestProviders#createSome")
   fun <K : Any, BackfillType : IdRecorder<K, *>> multipleScans(
-    backfillOption: JooqBackfillTestOptions<K, BackfillType>
+    backfillOption: JooqBackfillTestOptions<K, BackfillType>,
   ) {
     backfillOption.backfillRowKeys(transacter, clock, tokenGenerator)
     val run1 = backfillOption.createDryRun(backfila)
@@ -292,7 +292,7 @@ class MiskJooqBackfillTests {
   @ParameterizedTest(name = "lessThanRequestedBatches test - {0}")
   @MethodSource("app.cash.backfila.client.jooq.MiskJooqBackfillTestProviders#createSome")
   fun <K : Any, BackfillType : IdRecorder<K, *>> lessThanRequestedBatches(
-    backfillOption: JooqBackfillTestOptions<K, BackfillType>
+    backfillOption: JooqBackfillTestOptions<K, BackfillType>,
   ) {
     backfillOption.backfillRowKeys(transacter, clock, tokenGenerator)
     val run = backfillOption.createDryRun(backfila)
@@ -308,7 +308,7 @@ class MiskJooqBackfillTests {
   @ParameterizedTest(name = "wetAndDryRunProcessSameElements test - {0}")
   @MethodSource("app.cash.backfila.client.jooq.MiskJooqBackfillTestProviders#createSome")
   fun <K : Any, BackfillType : IdRecorder<K, *>> wetAndDryRunProcessSameElements(
-    backfillOption: JooqBackfillTestOptions<K, BackfillType>
+    backfillOption: JooqBackfillTestOptions<K, BackfillType>,
   ) {
     backfillOption.backfillRowKeys(transacter, clock, tokenGenerator)
     val dryRun = backfillOption.createDryRun(backfila)

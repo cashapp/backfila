@@ -1,7 +1,7 @@
 package app.cash.backfila.client.dynamodb
 
-import app.cash.backfila.client.misk.MiskBackfillModule
 import app.cash.backfila.client.BackfilaHttpClientConfig
+import app.cash.backfila.client.misk.MiskBackfillModule
 import misk.dynamodb.DynamoDbService
 import misk.inject.KAbstractModule
 import misk.inject.toKey
@@ -15,10 +15,10 @@ class BackfillsModule : KAbstractModule() {
     install(
       MiskBackfillModule(
         BackfilaHttpClientConfig(
-          url = "test.url", slack_channel = "#test"
+          url = "test.url", slack_channel = "#test",
         ),
-        dependsOn = dependsOn
-      )
+        dependsOn = dependsOn,
+      ),
     )
     install(DynamoDbBackfillModule.create<DynamoDbBackfillTest.MakeTracksExplicitBackfill>())
     install(DynamoDbBackfillModule.create<DynamoDbFilteringTest.FilteredMakeTracksExplicitBackfill>())

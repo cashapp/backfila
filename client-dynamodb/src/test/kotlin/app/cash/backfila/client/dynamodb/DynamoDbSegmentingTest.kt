@@ -1,8 +1,8 @@
 package app.cash.backfila.client.dynamodb
 
 import app.cash.backfila.client.BackfillConfig
-import app.cash.backfila.client.misk.TestingModule
 import app.cash.backfila.client.dynamodb.DynamoDbSegmentingTest.SegmentingBackfill.SegmentingParameters
+import app.cash.backfila.client.misk.TestingModule
 import app.cash.backfila.embedded.Backfila
 import app.cash.backfila.embedded.createWetRun
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
@@ -20,6 +20,7 @@ class DynamoDbSegmentingTest {
   val module = TestingModule()
 
   @Inject lateinit var backfila: Backfila
+
   @Inject lateinit var testData: DynamoMusicTableTestData
 
   @Test
@@ -28,7 +29,7 @@ class DynamoDbSegmentingTest {
 
     assertThrows<IllegalArgumentException> {
       backfila.createWetRun<SegmentingBackfill>(
-        parameters = SegmentingParameters(2, 4)
+        parameters = SegmentingParameters(2, 4),
       )
     }
   }
@@ -39,25 +40,25 @@ class DynamoDbSegmentingTest {
 
     assertThrows<IllegalArgumentException> {
       backfila.createWetRun<SegmentingBackfill>(
-        parameters = SegmentingParameters(0, 4)
+        parameters = SegmentingParameters(0, 4),
       )
     }
 
     assertThrows<IllegalArgumentException> {
       backfila.createWetRun<SegmentingBackfill>(
-        parameters = SegmentingParameters(2, 0)
+        parameters = SegmentingParameters(2, 0),
       )
     }
 
     assertThrows<IllegalArgumentException> {
       backfila.createWetRun<SegmentingBackfill>(
-        parameters = SegmentingParameters(2, -1)
+        parameters = SegmentingParameters(2, -1),
       )
     }
 
     assertThrows<IllegalArgumentException> {
       backfila.createWetRun<SegmentingBackfill>(
-        parameters = SegmentingParameters(0, 0)
+        parameters = SegmentingParameters(0, 0),
       )
     }
   }
@@ -67,7 +68,7 @@ class DynamoDbSegmentingTest {
     testData.addThriller()
 
     val run = backfila.createWetRun<SegmentingBackfill>(
-      parameters = SegmentingParameters(2, 2)
+      parameters = SegmentingParameters(2, 2),
     )
     run.execute()
     assertThat(run.backfill.updateCounter).isEqualTo(9)
@@ -78,7 +79,7 @@ class DynamoDbSegmentingTest {
     testData.addLinkinPark()
 
     val run = backfila.createWetRun<SegmentingBackfill>(
-      parameters = SegmentingParameters(8, 2)
+      parameters = SegmentingParameters(8, 2),
     )
 
     assertThat(run.prepareBackfillResponse.partitions).hasSize(2)
@@ -90,7 +91,7 @@ class DynamoDbSegmentingTest {
   }
 
   class SegmentingBackfill @Inject constructor(
-    dynamoDb: DynamoDBMapper
+    dynamoDb: DynamoDBMapper,
   ) : UpdateInPlaceDynamoDbBackfill<TrackItem, SegmentingParameters>(dynamoDb) {
     var updateCounter: Int = 0
 
@@ -104,7 +105,7 @@ class DynamoDbSegmentingTest {
 
     data class SegmentingParameters(
       val segmentCount: Int = 4,
-      val partitionCount: Int = 2
+      val partitionCount: Int = 2,
     )
 
     override fun fixedSegmentCount(config: BackfillConfig<SegmentingParameters>): Int? = config.parameters.segmentCount

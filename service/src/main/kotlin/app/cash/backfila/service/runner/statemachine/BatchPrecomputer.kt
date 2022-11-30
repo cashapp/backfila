@@ -16,7 +16,7 @@ import okio.ByteString
 import wisp.logging.getLogger
 
 class BatchPrecomputer(
-  private val backfillRunner: BackfillRunner
+  private val backfillRunner: BackfillRunner,
 ) {
   private var pkeyCursor: ByteString? = backfillRunner.metadata.precomputingPkeyCursor
   private var computedScannedRecordCount: Long = backfillRunner.metadata.computedScannedRecordCount
@@ -62,8 +62,8 @@ class BatchPrecomputer(
             computeTimeLimitMs,
             computeCountLimit,
             metadata.dryRun,
-            true
-          )
+            true,
+          ),
         )
 
         backfillRunner.onRpcSuccess()
@@ -79,8 +79,8 @@ class BatchPrecomputer(
                 backfillRunner.backfillRunId,
                 partition_id = backfillRunner.partitionId,
                 type = DbEventLog.Type.STATE_CHANGE,
-                message = "precomputing complete"
-              )
+                message = "precomputing complete",
+              ),
             )
           }
           logger.info { "Precomputing completed for ${backfillRunner.logLabel()}" }

@@ -1,8 +1,8 @@
 package app.cash.backfila.client.misk
 
+import app.cash.backfila.client.BackfilaHttpClientConfig
 import app.cash.backfila.client.BackfillConfig
 import app.cash.backfila.client.NoParameters
-import app.cash.backfila.client.BackfilaHttpClientConfig
 import app.cash.backfila.client.misk.hibernate.HibernateBackfill
 import app.cash.backfila.client.misk.hibernate.HibernateBackfillModule
 import app.cash.backfila.client.misk.hibernate.SinglePartitionHibernateTestBackfill
@@ -26,8 +26,8 @@ fun main(args: Array<String>) {
   MiskApplication(
     MiskBackfillModule(
       BackfilaHttpClientConfig(
-        url = "#test", slack_channel = "#test"
-      )
+        url = "#test", slack_channel = "#test",
+      ),
     ),
     object : KAbstractModule() {
       override fun configure() {
@@ -37,10 +37,10 @@ fun main(args: Array<String>) {
     HttpClientsConfigModule(
       HttpClientsConfig(
         endpoints = mapOf(
-          "backfila" to HttpClientEndpointConfig(url = "http://localhost:8080")
-        )
-      )
+          "backfila" to HttpClientEndpointConfig(url = "http://localhost:8080"),
+        ),
+      ),
     ),
-    MiskRealServiceModule()
+    MiskRealServiceModule(),
   ).run(args)
 }

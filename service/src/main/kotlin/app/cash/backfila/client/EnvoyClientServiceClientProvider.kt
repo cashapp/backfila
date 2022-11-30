@@ -17,7 +17,7 @@ import wisp.client.HttpClientEnvoyConfig
 class EnvoyClientServiceClientProvider @Inject constructor(
   private val httpClientsConfig: HttpClientsConfig,
   private val httpClientFactory: HttpClientFactory,
-  private val moshi: Moshi
+  private val moshi: Moshi,
 ) : BackfilaClientServiceClientProvider {
   @com.google.inject.Inject(optional = true)
   lateinit var envoyClientEndpointProvider: EnvoyClientEndpointProvider
@@ -28,14 +28,14 @@ class EnvoyClientServiceClientProvider @Inject constructor(
 
   override fun clientFor(
     serviceName: String,
-    connectorExtraData: String?
+    connectorExtraData: String?,
   ): BackfilaClientServiceClient {
     // If clusterType is specified use it for env, otherwise use null to default to current env.
     val env = connectorExtraData?.let { adapter().fromJson(connectorExtraData)?.clusterType }
 
     val envoyConfig = HttpClientEnvoyConfig(
       app = serviceName,
-      env = env
+      env = env,
     )
     val baseUrl = URL(envoyClientEndpointProvider.url(envoyConfig))
     val httpClientEndpointConfig = httpClientsConfig[baseUrl]

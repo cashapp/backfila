@@ -18,7 +18,7 @@ class DbEventLog() : DbUnsharded<DbEventLog>, DbTimestampedEntity {
   enum class Type {
     STATE_CHANGE,
     CONFIG_CHANGE,
-    ERROR
+    ERROR,
   }
 
   @javax.persistence.Id
@@ -41,7 +41,8 @@ class DbEventLog() : DbUnsharded<DbEventLog>, DbTimestampedEntity {
   @Column
   var user: String? = null
 
-  @Column @Enumerated(EnumType.STRING)
+  @Column
+  @Enumerated(EnumType.STRING)
   lateinit var type: Type
 
   @Column(nullable = false)
@@ -56,7 +57,7 @@ class DbEventLog() : DbUnsharded<DbEventLog>, DbTimestampedEntity {
     user: String? = null,
     type: Type,
     message: String,
-    extra_data: String? = null
+    extra_data: String? = null,
   ) : this() {
     this.backfill_run_id = backfill_run_id
     this.partition_id = partition_id

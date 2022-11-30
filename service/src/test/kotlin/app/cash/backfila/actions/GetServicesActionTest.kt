@@ -26,12 +26,16 @@ class GetServicesActionTest {
 
   @Inject
   lateinit var configureServiceAction: ConfigureServiceAction
+
   @Inject
   lateinit var getServicesAction: GetServicesAction
+
   @Inject
   lateinit var scope: ActionScope
+
   @Inject
   lateinit var createBackfillAction: CreateBackfillAction
+
   @Inject
   lateinit var startBackfillAction: StartBackfillAction
 
@@ -46,13 +50,13 @@ class GetServicesActionTest {
   fun oneService() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(
-        ConfigureServiceRequest.Builder().connector_type(Connectors.ENVOY).build()
+        ConfigureServiceRequest.Builder().connector_type(Connectors.ENVOY).build(),
       )
     }
 
     scope.fakeCaller(user = "molly") {
       assertThat(getServicesAction.services().services).containsOnly(
-        GetServicesAction.UiService("deep-fryer", 0)
+        GetServicesAction.UiService("deep-fryer", 0),
       )
     }
   }
@@ -66,16 +70,16 @@ class GetServicesActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData.Builder()
                 .name("ChickenSandwich")
-                .build()
-            )
+                .build(),
+            ),
           )
           .connector_type(Connectors.ENVOY)
-          .build()
+          .build(),
       )
     }
     scope.fakeCaller(service = "freezer") {
       configureServiceAction.configureService(
-        ConfigureServiceRequest.Builder().connector_type(Connectors.ENVOY).build()
+        ConfigureServiceRequest.Builder().connector_type(Connectors.ENVOY).build(),
       )
     }
     scope.fakeCaller(user = "molly") {
@@ -83,7 +87,7 @@ class GetServicesActionTest {
         "deep-fryer",
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
-          .build()
+          .build(),
       )
       val id = response.backfill_run_id
       startBackfillAction.start(id, StartBackfillRequest())
@@ -91,7 +95,7 @@ class GetServicesActionTest {
     scope.fakeCaller(user = "molly") {
       assertThat(getServicesAction.services().services).containsOnly(
         GetServicesAction.UiService("deep-fryer", 1),
-        GetServicesAction.UiService("freezer", 0)
+        GetServicesAction.UiService("freezer", 0),
       )
     }
   }

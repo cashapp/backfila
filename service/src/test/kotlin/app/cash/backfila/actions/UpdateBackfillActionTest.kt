@@ -50,12 +50,12 @@ class UpdateBackfillActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "ChickenSandwich", "Description", listOf(), null,
-                null, false, null
-              )
-            )
+                null, false, null,
+              ),
+            ),
           )
           .connector_type(Connectors.ENVOY)
-          .build()
+          .build(),
       )
     }
     scope.fakeCaller(user = "molly") {
@@ -63,7 +63,7 @@ class UpdateBackfillActionTest {
         "deep-fryer",
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
-          .build()
+          .build(),
       )
 
       val id = response.backfill_run_id
@@ -104,12 +104,12 @@ class UpdateBackfillActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "ChickenSandwich", "Description", listOf(), null,
-                null, false, null
-              )
-            )
+                null, false, null,
+              ),
+            ),
           )
           .connector_type(Connectors.ENVOY)
-          .build()
+          .build(),
       )
     }
     scope.fakeCaller(user = "molly") {
@@ -117,7 +117,7 @@ class UpdateBackfillActionTest {
         "deep-fryer",
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
-          .build()
+          .build(),
       )
 
       val id = response.backfill_run_id
@@ -143,12 +143,12 @@ class UpdateBackfillActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "ChickenSandwich", "Description", listOf(), null,
-                null, false, null
-              )
-            )
+                null, false, null,
+              ),
+            ),
           )
           .connector_type(Connectors.ENVOY)
-          .build()
+          .build(),
       )
     }
     scope.fakeCaller(user = "molly") {
@@ -156,7 +156,7 @@ class UpdateBackfillActionTest {
         "deep-fryer",
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
-          .build()
+          .build(),
       )
 
       val id = response.backfill_run_id

@@ -4,6 +4,7 @@ import app.cash.backfila.client.dynamodbv2.BackfillsModule
 import app.cash.backfila.client.dynamodbv2.TrackItem
 import app.cash.backfila.embedded.EmbeddedBackfilaModule
 import com.google.inject.Provides
+import javax.inject.Singleton
 import misk.MiskTestingServiceModule
 import misk.aws2.dynamodb.testing.DynamoDbTable
 import misk.aws2.dynamodb.testing.InProcessDynamoDbModule
@@ -13,7 +14,6 @@ import misk.logging.LogCollectorModule
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import javax.inject.Singleton
 
 /**
  * Simulates a specific service implementation module

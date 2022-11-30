@@ -1,11 +1,11 @@
 package app.cash.backfila.client.misk.hibernate
 
 import app.cash.backfila.client.BackfillConfig
+import app.cash.backfila.client.NoParameters
 import app.cash.backfila.client.misk.ClientMiskService
 import app.cash.backfila.client.misk.ClientMiskTestingModule
 import app.cash.backfila.client.misk.DbMenu
 import app.cash.backfila.client.misk.MenuQuery
-import app.cash.backfila.client.NoParameters
 import app.cash.backfila.embedded.Backfila
 import app.cash.backfila.embedded.createDryRun
 import com.google.inject.Module
@@ -24,7 +24,9 @@ class NoParametersTest {
   @MiskTestModule
   val module: Module = ClientMiskTestingModule(false)
 
-  @Inject @ClientMiskService lateinit var transacter: Transacter
+  @Inject @ClientMiskService
+  lateinit var transacter: Transacter
+
   @Inject lateinit var backfila: Backfila
 
   @Test
@@ -42,7 +44,7 @@ class NoParametersTest {
 
 class RecordNoParametersConfigValuesBackfill @Inject constructor(
   @ClientMiskService private val transacter: Transacter,
-  private val queryFactory: Query.Factory
+  private val queryFactory: Query.Factory,
 ) : HibernateBackfill<DbMenu, Id<DbMenu>, NoParameters>() {
   val configLog = mutableListOf<BackfillConfig<NoParameters>>()
 

@@ -10,8 +10,8 @@ class BackfilaPersistenceModule(private val config: BackfilaConfig) : KAbstractM
     install(
       HibernateModule(
         BackfilaDb::class,
-        config.data_source_clusters.values.single().writer
-      )
+        config.data_source_clusters.values.single().writer,
+      ),
     )
     install(object : HibernateEntityModule(BackfilaDb::class) {
       override fun configureHibernate() {
@@ -22,6 +22,7 @@ class BackfilaPersistenceModule(private val config: BackfilaConfig) : KAbstractM
         addEntities(DbEventLog::class)
         addEntities(DbRegisteredParameter::class)
       }
-    })
+    },
+    )
   }
 }

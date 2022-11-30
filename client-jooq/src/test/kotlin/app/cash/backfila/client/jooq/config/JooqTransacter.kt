@@ -6,19 +6,19 @@ import org.jooq.impl.DSL
 import wisp.logging.getLogger
 
 class JooqTransacter(
-  private val dslContext: DSLContext
+  private val dslContext: DSLContext,
 ) : BackfillJooqTransacter {
 
   override fun <RETURN_TYPE> transaction(
     comment: String,
-    callback: (ctx: DSLContext) -> RETURN_TYPE
+    callback: (ctx: DSLContext) -> RETURN_TYPE,
   ): RETURN_TYPE {
     log.info { "Executing $comment" }
     return createDSLContextAndCallback(callback)
   }
 
   private fun <RETURN_TYPE> createDSLContextAndCallback(
-    callback: (dslContext: DSLContext) -> RETURN_TYPE
+    callback: (dslContext: DSLContext) -> RETURN_TYPE,
   ): RETURN_TYPE {
     return dslContext.transactionResult { configuration ->
       callback(DSL.using(configuration))

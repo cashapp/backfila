@@ -12,12 +12,12 @@ import app.cash.backfila.client.spi.BackfillRegistration
 import com.google.inject.Injector
 import com.google.inject.TypeLiteral
 import com.squareup.moshi.Types
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import java.lang.reflect.ParameterizedType
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 
 @Singleton
 class DynamoDbBackend @Inject constructor(
@@ -38,12 +38,12 @@ class DynamoDbBackend @Inject constructor(
   }
 
   private fun <E : Any, Param : Any> createDynamoDbOperator(
-    backfill: DynamoDbBackfill<E, Param>
+    backfill: DynamoDbBackfill<E, Param>,
   ) = DynamoDbBackfillOperator(
     dynamoDbClient,
     backfill,
     BackfilaParametersOperator(parametersClass(backfill::class)),
-    keyRangeCodec
+    keyRangeCodec,
   )
 
   override fun create(backfillName: String, backfillId: String): BackfillOperator? {

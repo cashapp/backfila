@@ -56,10 +56,12 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
   @Column
   override lateinit var updated_at: Instant
 
-  @Column(nullable = false) @Version
+  @Column(nullable = false)
+  @Version
   var version: Long = 0
 
-  @Column(nullable = false) @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  @Enumerated(EnumType.STRING)
   lateinit var state: BackfillState
     protected set
 
@@ -81,7 +83,8 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
   var num_threads: Int = 0
 
   // TODO(mgersh): denormalize into a 1,n table
-  @JsonColumn @Column(columnDefinition = "mediumtext")
+  @JsonColumn
+  @Column(columnDefinition = "mediumtext")
   var parameter_map: Map<String, String>? = null
 
   @Column(nullable = false)
@@ -109,7 +112,7 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
     num_threads: Int,
     backoff_schedule: String?,
     dry_run: Boolean,
-    extra_sleep_ms: Long
+    extra_sleep_ms: Long,
   ) : this() {
     this.service_id = service_id
     this.registered_backfill_id = registered_backfill_id
@@ -137,7 +140,7 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
     val query = session.hibernateSession.createQuery(
       "update DbRunPartition " +
         "set run_state = :newState, version = version + 1 " +
-        "where backfill_run_id = :runId and run_state <> :completed"
+        "where backfill_run_id = :runId and run_state <> :completed",
     )
     query.setParameter("runId", id)
     query.setParameter("newState", state)

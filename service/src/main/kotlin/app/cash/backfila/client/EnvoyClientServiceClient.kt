@@ -10,7 +10,7 @@ import retrofit2.HttpException
 import retrofit2.Response
 
 internal class EnvoyClientServiceClient internal constructor(
-  private val api: EnvoyClientServiceApi
+  private val api: EnvoyClientServiceApi,
 ) : BackfilaClientServiceClient {
 
   override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
@@ -19,8 +19,8 @@ internal class EnvoyClientServiceClient internal constructor(
 
   override suspend fun getNextBatchRange(request: GetNextBatchRangeRequest):
     GetNextBatchRangeResponse {
-      return api.getNextBatchRange(request)
-    }
+    return api.getNextBatchRange(request)
+  }
 
   override suspend fun runBatch(request: RunBatchRequest): RunBatchResponse {
     return api.runBatch(request)

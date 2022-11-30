@@ -24,12 +24,12 @@ import wisp.logging.getLogger
 class BackfillCreator @Inject constructor(
   @BackfilaDb private val transacter: Transacter,
   private val queryFactory: Query.Factory,
-  private val connectorProvider: ConnectorProvider
+  private val connectorProvider: ConnectorProvider,
 ) {
   fun create(
     author: String,
     service: String,
-    request: CreateBackfillRequest
+    request: CreateBackfillRequest,
   ): Id<DbBackfillRun> {
     logger.info { "Create backfill for `$service` by `$author`" }
 
@@ -59,7 +59,7 @@ class BackfillCreator @Inject constructor(
         dbService.id,
         dbService.connector,
         dbService.connector_extra_data,
-        registeredBackfill.id
+        registeredBackfill.id,
       )
     }
 
@@ -80,7 +80,7 @@ class BackfillCreator @Inject constructor(
         num_threads,
         request.backoff_schedule,
         dry_run,
-        extra_sleep_ms
+        extra_sleep_ms,
       )
       session.save(backfillRun)
 
@@ -90,7 +90,7 @@ class BackfillCreator @Inject constructor(
           partition.partition_name,
           partition.backfill_range ?: KeyRange.Builder().build(),
           backfillRun.state,
-          partition.estimated_record_count
+          partition.estimated_record_count,
         )
         session.save(dbRunPartition)
       }
@@ -103,7 +103,7 @@ class BackfillCreator @Inject constructor(
     dbData: DbData,
     service: String,
     request: CreateBackfillRequest,
-    dry_run: Boolean
+    dry_run: Boolean,
   ): PrepareBackfillResponse {
     val client = connectorProvider.clientProvider(dbData.connectorType)
       .clientFor(service, dbData.connectorExtraData)
@@ -115,11 +115,11 @@ class BackfillCreator @Inject constructor(
           request.backfill_name,
           KeyRange(
             request.pkey_range_start,
-            request.pkey_range_end
+            request.pkey_range_end,
           ),
           request.parameter_map,
-          dry_run
-        )
+          dry_run,
+        ),
       )
     } catch (e: Exception) {
       logger.info(e) { "PrepareBackfill on `$service` failed" }
@@ -136,7 +136,7 @@ class BackfillCreator @Inject constructor(
     if (partitions.distinctBy { it.partition_name }.size != partitions.size) {
       throw BadRequestException(
         "PrepareBackfill did not return distinct partition names:" +
-          " ${partitions.map { it.partition_name }}"
+          " ${partitions.map { it.partition_name }}",
       )
     }
 
@@ -148,7 +148,7 @@ class BackfillCreator @Inject constructor(
     num_threads: Int,
     scan_size: Long,
     batch_size: Long,
-    extra_sleep_ms: Long
+    extra_sleep_ms: Long,
   ) {
     if (num_threads < 1) {
       throw BadRequestException("num_threads must be >= 1")
@@ -176,7 +176,7 @@ class BackfillCreator @Inject constructor(
     val serviceId: Id<DbService>,
     val connectorType: String,
     val connectorExtraData: String?,
-    val registeredBackfillId: Id<DbRegisteredBackfill>
+    val registeredBackfillId: Id<DbRegisteredBackfill>,
   )
 
   companion object {

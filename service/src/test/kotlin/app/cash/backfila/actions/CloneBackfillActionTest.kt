@@ -76,14 +76,14 @@ class CloneBackfillActionTest {
                   listOf(
                     Parameter.Builder()
                       .name("param1")
-                      .build()
-                  )
+                      .build(),
+                  ),
                 )
-                .build()
-            )
+                .build(),
+            ),
           )
           .connector_type(Connectors.ENVOY)
-          .build()
+          .build(),
       )
     }
   }
@@ -102,7 +102,7 @@ class CloneBackfillActionTest {
           .dry_run(true)
           .extra_sleep_ms(10)
           .parameter_map(mapOf("param1" to "val1".encodeUtf8()))
-          .build()
+          .build(),
       )
 
       val cloneResponse = cloneBackfillAction.create(
@@ -115,8 +115,8 @@ class CloneBackfillActionTest {
           dry_run = false,
           extra_sleep_ms = 15,
           parameter_map = mapOf("param1" to "val2".encodeUtf8()),
-          range_clone_type = RangeCloneType.RESTART
-        )
+          range_clone_type = RangeCloneType.RESTART,
+        ),
       )
 
       val status = getBackfillStatusAction.status(cloneResponse.id)
@@ -141,17 +141,17 @@ class CloneBackfillActionTest {
               PrepareBackfillResponse.Partition.Builder()
                 .partition_name("only")
                 .backfill_range(KeyRange("0".encodeUtf8(), "1000".encodeUtf8()))
-                .build()
-            )
+                .build(),
+            ),
           )
-          .build()
+          .build(),
       )
 
       val response = createBackfillAction.create(
         "deep-fryer",
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
-          .build()
+          .build(),
       )
 
       // Simulate progress
@@ -169,17 +169,17 @@ class CloneBackfillActionTest {
               PrepareBackfillResponse.Partition.Builder()
                 .partition_name("only")
                 .backfill_range(KeyRange("2000".encodeUtf8(), "3000".encodeUtf8()))
-                .build()
-            )
+                .build(),
+            ),
           )
-          .build()
+          .build(),
       )
 
       val cloneResponse = cloneBackfillAction.create(
         response.backfill_run_id,
         CloneBackfillRequest(
-          range_clone_type = RangeCloneType.NEW
-        )
+          range_clone_type = RangeCloneType.NEW,
+        ),
       )
 
       val status = getBackfillStatusAction.status(cloneResponse.id)
@@ -201,17 +201,17 @@ class CloneBackfillActionTest {
               PrepareBackfillResponse.Partition.Builder()
                 .partition_name("only")
                 .backfill_range(KeyRange("0".encodeUtf8(), "1000".encodeUtf8()))
-                .build()
-            )
+                .build(),
+            ),
           )
-          .build()
+          .build(),
       )
 
       val response = createBackfillAction.create(
         "deep-fryer",
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
-          .build()
+          .build(),
       )
 
       // Simulate progress
@@ -229,17 +229,17 @@ class CloneBackfillActionTest {
               PrepareBackfillResponse.Partition.Builder()
                 .partition_name("only")
                 .backfill_range(KeyRange("2000".encodeUtf8(), "3000".encodeUtf8()))
-                .build()
-            )
+                .build(),
+            ),
           )
-          .build()
+          .build(),
       )
 
       val cloneResponse = cloneBackfillAction.create(
         response.backfill_run_id,
         CloneBackfillRequest(
-          range_clone_type = RangeCloneType.CONTINUE
-        )
+          range_clone_type = RangeCloneType.CONTINUE,
+        ),
       )
 
       val status = getBackfillStatusAction.status(cloneResponse.id)
@@ -261,17 +261,17 @@ class CloneBackfillActionTest {
               PrepareBackfillResponse.Partition.Builder()
                 .partition_name("only")
                 .backfill_range(KeyRange("0".encodeUtf8(), "1000".encodeUtf8()))
-                .build()
-            )
+                .build(),
+            ),
           )
-          .build()
+          .build(),
       )
 
       val response = createBackfillAction.create(
         "deep-fryer",
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
-          .build()
+          .build(),
       )
 
       // Simulate progress
@@ -289,17 +289,17 @@ class CloneBackfillActionTest {
               PrepareBackfillResponse.Partition.Builder()
                 .partition_name("only")
                 .backfill_range(KeyRange("2000".encodeUtf8(), "3000".encodeUtf8()))
-                .build()
-            )
+                .build(),
+            ),
           )
-          .build()
+          .build(),
       )
 
       val cloneResponse = cloneBackfillAction.create(
         response.backfill_run_id,
         CloneBackfillRequest(
-          range_clone_type = RangeCloneType.RESTART
-        )
+          range_clone_type = RangeCloneType.RESTART,
+        ),
       )
 
       val status = getBackfillStatusAction.status(cloneResponse.id)
@@ -321,17 +321,17 @@ class CloneBackfillActionTest {
               PrepareBackfillResponse.Partition.Builder()
                 .partition_name("only")
                 .backfill_range(KeyRange("0".encodeUtf8(), "1000".encodeUtf8()))
-                .build()
-            )
+                .build(),
+            ),
           )
-          .build()
+          .build(),
       )
 
       val response = createBackfillAction.create(
         "deep-fryer",
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
-          .build()
+          .build(),
       )
 
       // Simulate progress
@@ -349,18 +349,18 @@ class CloneBackfillActionTest {
               PrepareBackfillResponse.Partition.Builder()
                 .partition_name("different-name")
                 .backfill_range(KeyRange("2000".encodeUtf8(), "3000".encodeUtf8()))
-                .build()
-            )
+                .build(),
+            ),
           )
-          .build()
+          .build(),
       )
 
       assertThatThrownBy {
         cloneBackfillAction.create(
           response.backfill_run_id,
           CloneBackfillRequest(
-            range_clone_type = RangeCloneType.RESTART
-          )
+            range_clone_type = RangeCloneType.RESTART,
+          ),
         )
       }.hasMessageContaining("partitions don't match")
     }
@@ -376,17 +376,17 @@ class CloneBackfillActionTest {
               PrepareBackfillResponse.Partition.Builder()
                 .partition_name("only")
                 .backfill_range(KeyRange("0".encodeUtf8(), "1000".encodeUtf8()))
-                .build()
-            )
+                .build(),
+            ),
           )
-          .build()
+          .build(),
       )
 
       val response = createBackfillAction.create(
         "deep-fryer",
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
-          .build()
+          .build(),
       )
 
       // Simulate progress
@@ -404,17 +404,17 @@ class CloneBackfillActionTest {
               PrepareBackfillResponse.Partition.Builder()
                 .partition_name("different-name")
                 .backfill_range(KeyRange("2000".encodeUtf8(), "3000".encodeUtf8()))
-                .build()
-            )
+                .build(),
+            ),
           )
-          .build()
+          .build(),
       )
 
       val cloneResponse = cloneBackfillAction.create(
         response.backfill_run_id,
         CloneBackfillRequest(
-          range_clone_type = RangeCloneType.NEW
-        )
+          range_clone_type = RangeCloneType.NEW,
+        ),
       )
 
       val status = getBackfillStatusAction.status(cloneResponse.id)

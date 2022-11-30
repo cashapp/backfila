@@ -23,21 +23,22 @@ class PrepareWithParametersTest {
   val module: Module = TestingModule()
 
   @Inject lateinit var backfila: Backfila
+
   @Inject lateinit var datastore: FixedSetDatastore
 
   data class PrepareParameters(
-    val favoriteNumber: Int? = null
+    val favoriteNumber: Int? = null,
   )
 
   class PrepareWithParametersBackfill @Inject constructor() : FixedSetBackfill<PrepareParameters>() {
     override fun checkBackfillConfig(
-      backfillConfig: BackfillConfig<PrepareParameters>
+      backfillConfig: BackfillConfig<PrepareParameters>,
     ): ValidateResult<PrepareParameters> {
       if (backfillConfig.parameters.favoriteNumber != null) {
         return ValidateResult(backfillConfig.parameters)
       }
       return ValidateResult(
-        PrepareParameters(favoriteNumber = 42)
+        PrepareParameters(favoriteNumber = 42),
       )
     }
 
@@ -58,8 +59,8 @@ class PrepareWithParametersTest {
 
     val backfillRun = backfila.createWetRun<PrepareWithParametersBackfill>(
       parameters = PrepareParameters(
-        favoriteNumber = 12
-      )
+        favoriteNumber = 12,
+      ),
     )
     backfillRun.execute()
     assertThat(backfillRun.parameters["favoriteNumber"]).isEqualTo("12".encodeUtf8())

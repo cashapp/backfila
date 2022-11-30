@@ -41,7 +41,7 @@ import wisp.logging.getLogger
 internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : Any> internal constructor(
   override val backfill: HibernateBackfill<E, Pkey, Param>,
   private val parametersOperator: BackfilaParametersOperator<Param>,
-  backend: HibernateBackend
+  backend: HibernateBackend,
 ) : BackfillOperator {
   private val partitionProvider = backfill.partitionProvider()
   private val boundingRangeStrategy = partitionProvider.boundingRangeStrategy<E, Pkey>()
@@ -73,8 +73,8 @@ internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : An
 
     backfill.validate(
       parametersOperator.constructBackfillConfig(
-        request.parameters, request.dry_run
-      )
+        request.parameters, request.dry_run,
+      ),
     )
 
     return PrepareBackfillResponse.Builder()
@@ -84,7 +84,7 @@ internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : An
 
   private fun partitionForShard(
     partitionName: String,
-    requestedRange: KeyRange?
+    requestedRange: KeyRange?,
   ): Partition {
     if (requestedRange?.start != null && requestedRange.end != null) {
       return Partition.Builder()
@@ -98,7 +98,7 @@ internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : An
         .dynamicUniqueResult(session) { criteriaBuilder, queryRoot ->
           criteriaBuilder.tuple(
             criteriaBuilder.min(backfill.getPrimaryKeyPath(queryRoot)),
-            criteriaBuilder.max(backfill.getPrimaryKeyPath(queryRoot))
+            criteriaBuilder.max(backfill.getPrimaryKeyPath(queryRoot)),
           )
         }!!
 
@@ -123,7 +123,7 @@ internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : An
   }
 
   override fun getNextBatchRange(
-    request: GetNextBatchRangeRequest
+    request: GetNextBatchRangeRequest,
   ): GetNextBatchRangeResponse {
     checkArgument(request.compute_count_limit > 0, "batch limit must be > 0")
     if (request.backfill_range.start == null) {
@@ -144,7 +144,7 @@ internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : An
       batches.add(batch)
 
       if (request.compute_time_limit_ms != null && stopwatch.elapsed(
-          TimeUnit.MILLISECONDS
+          TimeUnit.MILLISECONDS,
         ) > request.compute_time_limit_ms
       ) {
         break
@@ -162,7 +162,7 @@ internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : An
     private val scanSize: Long = request.scan_size
     private val backfillRange: KeyRange = request.backfill_range
     private val config = parametersOperator.constructBackfillConfig(
-      request.parameters, request.dry_run
+      request.parameters, request.dry_run,
     )
     private val precomputing: Boolean = request.precomputing == true
 
@@ -204,7 +204,7 @@ internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : An
         }
         logger.info(
           "Computed scan bound for next batch: [$previousEndKey, $boundingMax]. " +
-            "Took $stopwatch"
+            "Took $stopwatch",
         )
       }
 
@@ -259,9 +259,10 @@ internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : An
         }.dynamicUniqueResult(session) { criteriaBuilder, queryRoot ->
           criteriaBuilder.tuple(
             criteriaBuilder.min(backfill.getPrimaryKeyPath(queryRoot)),
-            criteriaBuilder.count(queryRoot)
+            criteriaBuilder.count(queryRoot),
           )
         }!!
+
         @Suppress("UNCHECKED_CAST") // Return type from the query should always match.
         val start = result[0] as Pkey
         val scannedCount = result[1] as Long
@@ -273,11 +274,11 @@ internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : An
               KeyRange.Builder()
                 .start(primaryKeyCursorMapper.toByteString(start))
                 .end(primaryKeyCursorMapper.toByteString(end))
-                .build()
+                .build(),
             )
             .scanned_record_count(scannedCount)
             .matching_record_count(matchingCount ?: 0)
-            .build()
+            .build(),
         )
       }
       if (txResult.end == boundingMax) {
@@ -292,7 +293,7 @@ internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : An
 
   override fun runBatch(request: RunBatchRequest): RunBatchResponse {
     val config = parametersOperator.constructBackfillConfig(
-      request.parameters, request.dry_run
+      request.parameters, request.dry_run,
     )
 
     val pkeys = partitionProvider.transaction(request.partition_name) { session ->

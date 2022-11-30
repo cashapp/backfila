@@ -7,9 +7,7 @@ import app.cash.backfila.client.jooq.gen.Jooq
 import app.cash.backfila.client.jooq.gen.indexes.WIDGETS_MANUFACTURER_CREATED_AT
 import app.cash.backfila.client.jooq.gen.keys.KEY_WIDGETS_PRIMARY
 import app.cash.backfila.client.jooq.gen.tables.records.WidgetsRecord
-
 import kotlin.collections.List
-
 import org.jooq.Field
 import org.jooq.ForeignKey
 import org.jooq.Index
@@ -35,7 +33,7 @@ open class Widgets(
   child: Table<out Record>?,
   path: ForeignKey<out Record, WidgetsRecord>?,
   aliased: Table<WidgetsRecord>?,
-  parameters: Array<Field<*>?>?
+  parameters: Array<Field<*>?>?,
 ) : TableImpl<WidgetsRecord>(
   alias,
   Jooq.JOOQ,
@@ -44,7 +42,7 @@ open class Widgets(
   aliased,
   parameters,
   DSL.comment(""),
-  TableOptions.table()
+  TableOptions.table(),
 ) {
   companion object {
 

@@ -121,7 +121,7 @@ class DbRunPartition() : DbUnsharded<DbRunPartition>, DbTimestampedEntity {
     partition_name: String,
     backfill_range: KeyRange,
     run_state: BackfillState,
-    estimated_record_count: Long?
+    estimated_record_count: Long?,
   ) : this() {
     this.backfill_run_id = backfill_run_id
     this.partition_name = partition_name

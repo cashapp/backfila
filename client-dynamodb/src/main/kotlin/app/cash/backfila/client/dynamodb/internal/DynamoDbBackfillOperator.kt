@@ -20,7 +20,7 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
   val dynamoDb: DynamoDBMapper,
   override val backfill: DynamoDbBackfill<I, P>,
   val parametersOperator: BackfilaParametersOperator<P>,
-  val keyRangeCodec: DynamoDbKeyRangeCodec
+  val keyRangeCodec: DynamoDbKeyRangeCodec,
 ) : BackfillOperator {
   override fun name(): String = backfill.javaClass.toString()
 
@@ -41,7 +41,7 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
             "with a billing mode that is not PROVISIONED, it is " +
             "${tableDescription.billingModeSummary.billingMode}. This can get very expensive. " +
             "Please provision your dynamo capacity for this table and try again."
-        }
+        },
       )
     }
 
@@ -52,7 +52,7 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
     require(
       partitionCount in 1..segmentCount &&
         Integer.bitCount(partitionCount) == 1 &&
-        Integer.bitCount(segmentCount) == 1
+        Integer.bitCount(segmentCount) == 1,
     ) {
       "partitionCount and segmentCount must be positive powers of 2, and segmentCount must be " +
         "greater than partitionCount (partitionCount=$partitionCount, segmentCount=$segmentCount)"

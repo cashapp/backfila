@@ -1,8 +1,8 @@
 package app.cash.backfila.client.jooq
 
-import app.cash.backfila.client.jooq.gen.tables.references.WIDGETS
 import app.cash.backfila.client.jooq.config.CompoundKey
 import app.cash.backfila.client.jooq.config.JooqTransacter
+import app.cash.backfila.client.jooq.gen.tables.references.WIDGETS
 import misk.time.FakeClock
 import misk.tokens.TokenGenerator
 
@@ -11,7 +11,7 @@ object WidgetCompoundKeyBackfillDbDataSetup {
   fun createNoMatching(
     transacter: JooqTransacter,
     clock: FakeClock,
-    tokenGenerator: TokenGenerator
+    tokenGenerator: TokenGenerator,
   ): List<CompoundKey> {
     transacter.transaction("WidgetCompoundKeyBackfillDbDataSetup#createNoMatching") { session ->
       (0..4).mapIndexed { index, _ ->
@@ -32,7 +32,7 @@ object WidgetCompoundKeyBackfillDbDataSetup {
   fun createSome(
     transacter: JooqTransacter,
     clock: FakeClock,
-    tokenGenerator: TokenGenerator
+    tokenGenerator: TokenGenerator,
   ): List<CompoundKey> {
     return transacter.transaction("WidgetCompoundKeyBackfillDbDataSetup#createSome") { session ->
       val expected = mutableListOf<CompoundKey>()

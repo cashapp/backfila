@@ -34,15 +34,20 @@ class ConfigureServiceActionTest {
 
   @Inject
   lateinit var clock: Clock
+
   @Inject
   lateinit var configureServiceAction: ConfigureServiceAction
+
   @Inject
   lateinit var getRegisteredBackfillsAction: GetRegisteredBackfillsAction
+
   @Inject
   @BackfilaDb
   lateinit var transacter: Transacter
+
   @Inject
   lateinit var queryFactory: Query.Factory
+
   @Inject
   lateinit var scope: ActionScope
 
@@ -53,7 +58,7 @@ class ConfigureServiceActionTest {
         ConfigureServiceRequest.Builder()
           .connector_type(ENVOY)
           .connector_extra_data("{\"clusterType\":\"production\"}")
-          .build()
+          .build(),
       )
       assertThat(backfillNames("deep-fryer")).isEmpty()
 
@@ -69,7 +74,7 @@ class ConfigureServiceActionTest {
         ConfigureServiceRequest.Builder()
           .connector_type(HTTP)
           .connector_extra_data("{\"clusterType\":\"staging\"}")
-          .build()
+          .build(),
       )
       assertThat(backfillNames("deep-fryer")).isEmpty()
 
@@ -89,7 +94,7 @@ class ConfigureServiceActionTest {
       configureServiceAction.configureService(
         ConfigureServiceRequest.Builder()
           .connector_type(ENVOY)
-          .build()
+          .build(),
       )
       assertThat(backfillNames("deep-fryer")).isEmpty()
 
@@ -99,12 +104,12 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, null,
-                null, null
-              )
-            )
+                null, null,
+              ),
+            ),
           )
           .connector_type(ENVOY)
-          .build()
+          .build(),
       )
       assertThat(backfillNames("deep-fryer")).containsOnly("xyz")
       assertThat(deletedBackfillNames("deep-fryer")).isEmpty()
@@ -115,12 +120,12 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "zzz", "Description", listOf(), null, null,
-                false, null
-              )
-            )
+                false, null,
+              ),
+            ),
           )
           .connector_type(ENVOY)
-          .build()
+          .build(),
       )
       assertThat(backfillNames("deep-fryer")).containsOnly("zzz")
       assertThat(deletedBackfillNames("deep-fryer")).containsOnly("xyz")
@@ -136,16 +141,16 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, null,
-                false, null
+                false, null,
               ),
               ConfigureServiceRequest.BackfillData(
                 "zzz", "Description", listOf(), null, null,
-                false, null
-              )
-            )
+                false, null,
+              ),
+            ),
           )
           .connector_type(ENVOY)
-          .build()
+          .build(),
       )
       assertThat(backfillNames("deep-fryer")).containsOnly("xyz", "zzz")
       assertThat(deletedBackfillNames("deep-fryer")).isEmpty()
@@ -156,12 +161,12 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "zzz", "Description", listOf(), null, null,
-                false, null
-              )
-            )
+                false, null,
+              ),
+            ),
           )
           .connector_type(ENVOY)
-          .build()
+          .build(),
       )
       assertThat(backfillNames("deep-fryer")).containsOnly("zzz")
       assertThat(deletedBackfillNames("deep-fryer")).containsOnly("xyz")
@@ -174,7 +179,7 @@ class ConfigureServiceActionTest {
       configureServiceAction.configureService(
         ConfigureServiceRequest.Builder()
           .connector_type(ENVOY)
-          .build()
+          .build(),
       )
       assertThat(backfillNames("deep-fryer")).isEmpty()
 
@@ -184,12 +189,12 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, null,
-                false, null
-              )
-            )
+                false, null,
+              ),
+            ),
           )
           .connector_type(ENVOY)
-          .build()
+          .build(),
       )
       assertThat(backfillNames("deep-fryer")).containsOnly("xyz")
       assertThat(deletedBackfillNames("deep-fryer")).isEmpty()
@@ -197,7 +202,7 @@ class ConfigureServiceActionTest {
       configureServiceAction.configureService(
         ConfigureServiceRequest.Builder()
           .connector_type(ENVOY)
-          .build()
+          .build(),
       )
       assertThat(backfillNames("deep-fryer")).isEmpty()
       assertThat(deletedBackfillNames("deep-fryer")).containsOnly("xyz")
@@ -208,12 +213,12 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, null,
-                false, null
-              )
-            )
+                false, null,
+              ),
+            ),
           )
           .connector_type(ENVOY)
-          .build()
+          .build(),
       )
       // The reintroduced backfill is created, and the old one kept around.
       assertThat(backfillNames("deep-fryer")).containsOnly("xyz")
@@ -231,12 +236,12 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, null,
-                false, null
-              )
-            )
+                false, null,
+              ),
+            ),
           )
           .connector_type(ENVOY)
-          .build()
+          .build(),
       )
       assertThat(backfillNames("deep-fryer")).containsOnly("xyz")
       assertThat(deletedBackfillNames("deep-fryer")).isEmpty()
@@ -247,12 +252,12 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, null,
-                true, null
-              )
-            )
+                true, null,
+              ),
+            ),
           )
           .connector_type(ENVOY)
-          .build()
+          .build(),
       )
       assertThat(backfillNames("deep-fryer")).containsOnly("xyz")
       assertThat(deletedBackfillNames("deep-fryer")).containsOnly("xyz")
@@ -263,27 +268,27 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, null,
-                false, null
-              )
-            )
+                false, null,
+              ),
+            ),
           )
           .connector_type(ENVOY)
-          .build()
+          .build(),
       )
       val backfills = backfills("deep-fryer")
       assertThat(backfills).containsOnly(
         Backfill(
           "xyz", clock.instant(), type_provided = null, type_consumed = null,
-          parameters = listOf(), requires_approval = false, delete_by = null
+          parameters = listOf(), requires_approval = false, delete_by = null,
         ),
         Backfill(
           "xyz", clock.instant(), type_provided = null, type_consumed = null,
-          parameters = listOf(), requires_approval = true, delete_by = null
+          parameters = listOf(), requires_approval = true, delete_by = null,
         ),
         Backfill(
           "xyz", null, type_provided = null, type_consumed = null,
-          parameters = listOf(), requires_approval = false, delete_by = null
-        )
+          parameters = listOf(), requires_approval = false, delete_by = null,
+        ),
       )
     }
   }
@@ -298,12 +303,12 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, null,
-                false, null
-              )
-            )
+                false, null,
+              ),
+            ),
           )
           .connector_type(ENVOY)
-          .build()
+          .build(),
       )
       assertThat(backfillNames("deep-fryer")).containsOnly("xyz")
       assertThat(deletedBackfillNames("deep-fryer")).isEmpty()
@@ -314,12 +319,12 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, null,
-                false, clock.instant().plus(1L, DAYS).toEpochMilli()
-              )
-            )
+                false, clock.instant().plus(1L, DAYS).toEpochMilli(),
+              ),
+            ),
           )
           .connector_type(ENVOY)
-          .build()
+          .build(),
       )
       assertThat(backfillNames("deep-fryer")).containsOnly("xyz")
       assertThat(deletedBackfillNames("deep-fryer")).containsOnly("xyz")
@@ -330,27 +335,27 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, null,
-                false, null
-              )
-            )
+                false, null,
+              ),
+            ),
           )
           .connector_type(ENVOY)
-          .build()
+          .build(),
       )
       val backfills = backfills("deep-fryer")
       assertThat(backfills).containsOnly(
         Backfill(
           "xyz", clock.instant(), type_provided = null, type_consumed = null,
-          parameters = listOf(), requires_approval = false, delete_by = null
+          parameters = listOf(), requires_approval = false, delete_by = null,
         ),
         Backfill(
           "xyz", clock.instant(), type_provided = null, type_consumed = null,
-          parameters = listOf(), requires_approval = false, delete_by = clock.instant().plus(1L, DAYS)
+          parameters = listOf(), requires_approval = false, delete_by = clock.instant().plus(1L, DAYS),
         ),
         Backfill(
           "xyz", null, type_provided = null, type_consumed = null,
-          parameters = listOf(), requires_approval = false, delete_by = null
-        )
+          parameters = listOf(), requires_approval = false, delete_by = null,
+        ),
       )
     }
   }
@@ -364,12 +369,12 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, null,
-                false, null
-              )
-            )
+                false, null,
+              ),
+            ),
           )
           .connector_type(ENVOY)
-          .build()
+          .build(),
       )
       configureServiceAction.configureService(
         ConfigureServiceRequest.Builder()
@@ -378,12 +383,12 @@ class ConfigureServiceActionTest {
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description",
                 listOf(Parameter.Builder().name("abc").build()),
-                null, null, false, null
-              )
-            )
+                null, null, false, null,
+              ),
+            ),
           )
           .connector_type(ENVOY)
-          .build()
+          .build(),
       )
       configureServiceAction.configureService(
         ConfigureServiceRequest.Builder()
@@ -395,12 +400,12 @@ class ConfigureServiceActionTest {
                   Parameter.Builder().name("abc").build(),
                   Parameter.Builder().name("def").build(),
                 ),
-                null, null, false, null
-              )
-            )
+                null, null, false, null,
+              ),
+            ),
           )
           .connector_type(ENVOY)
-          .build()
+          .build(),
       )
       // Repeat the final one twice, no changes shouldn't create a new backfill.
       repeat(2) {
@@ -414,26 +419,26 @@ class ConfigureServiceActionTest {
                     Parameter.Builder().name("def").build(),
                     Parameter.Builder().name("xyz").build(),
                   ),
-                  null, null, false, null
-                )
-              )
+                  null, null, false, null,
+                ),
+              ),
             )
             .connector_type(ENVOY)
-            .build()
+            .build(),
         )
       }
       val backfills = backfills("deep-fryer")
       assertThat(backfills).containsOnly(
         Backfill(
           "xyz", clock.instant(), type_provided = null, type_consumed = null,
-          parameters = listOf(), requires_approval = false, delete_by = null
+          parameters = listOf(), requires_approval = false, delete_by = null,
         ),
         Backfill(
           "xyz", clock.instant(), type_provided = null, type_consumed = null,
           parameters = listOf(
-            Parameter.Builder().name("abc").required(false).build()
+            Parameter.Builder().name("abc").required(false).build(),
           ),
-          requires_approval = false, delete_by = null
+          requires_approval = false, delete_by = null,
         ),
         Backfill(
           "xyz", clock.instant(), type_provided = null, type_consumed = null,
@@ -441,7 +446,7 @@ class ConfigureServiceActionTest {
             Parameter.Builder().name("abc").required(false).build(),
             Parameter.Builder().name("def").required(false).build(),
           ),
-          requires_approval = false, delete_by = null
+          requires_approval = false, delete_by = null,
         ),
         Backfill(
           "xyz", null, type_provided = null, type_consumed = null,
@@ -449,8 +454,8 @@ class ConfigureServiceActionTest {
             Parameter.Builder().name("def").required(false).build(),
             Parameter.Builder().name("xyz").required(false).build(),
           ),
-          requires_approval = false, delete_by = null
-        )
+          requires_approval = false, delete_by = null,
+        ),
       )
     }
   }
@@ -465,12 +470,12 @@ class ConfigureServiceActionTest {
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description",
                 listOf(Parameter.Builder().name("abc").build()),
-                null, null, false, null
-              )
-            )
+                null, null, false, null,
+              ),
+            ),
           )
           .connector_type(ENVOY)
-          .build()
+          .build(),
       )
       // Add description
       configureServiceAction.configureService(
@@ -480,12 +485,12 @@ class ConfigureServiceActionTest {
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description",
                 listOf(Parameter.Builder().name("abc").description("desc").build()),
-                null, null, false, null
-              )
-            )
+                null, null, false, null,
+              ),
+            ),
           )
           .connector_type(ENVOY)
-          .build()
+          .build(),
       )
       // Change description
       // Repeat the final one twice, no changes shouldn't create a new backfill.
@@ -497,12 +502,12 @@ class ConfigureServiceActionTest {
                 ConfigureServiceRequest.BackfillData(
                   "xyz", "Description",
                   listOf(Parameter.Builder().name("abc").description("new desc").build()),
-                  null, null, false, null
-                )
-              )
+                  null, null, false, null,
+                ),
+              ),
             )
             .connector_type(ENVOY)
-            .build()
+            .build(),
         )
       }
       val backfills = backfills("deep-fryer")
@@ -512,21 +517,21 @@ class ConfigureServiceActionTest {
           parameters = listOf(
             Parameter.Builder().name("abc").required(false).build(),
           ),
-          requires_approval = false, delete_by = null
+          requires_approval = false, delete_by = null,
         ),
         Backfill(
           "xyz", clock.instant(), type_provided = null, type_consumed = null,
           parameters = listOf(
             Parameter.Builder().name("abc").required(false).description("desc").build(),
           ),
-          requires_approval = false, delete_by = null
+          requires_approval = false, delete_by = null,
         ),
         Backfill(
           "xyz", null, type_provided = null, type_consumed = null,
           parameters = listOf(
             Parameter.Builder().name("abc").required(false).description("new desc").build(),
           ),
-          requires_approval = false, delete_by = null
+          requires_approval = false, delete_by = null,
         ),
       )
     }
@@ -542,12 +547,12 @@ class ConfigureServiceActionTest {
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description",
                 listOf(Parameter.Builder().name("abc").required(false).build()),
-                null, null, false, null
-              )
-            )
+                null, null, false, null,
+              ),
+            ),
           )
           .connector_type(ENVOY)
-          .build()
+          .build(),
       )
       // Make required
       // Repeat the final one twice, no changes shouldn't create a new backfill.
@@ -559,12 +564,12 @@ class ConfigureServiceActionTest {
                 ConfigureServiceRequest.BackfillData(
                   "xyz", "Description",
                   listOf(Parameter.Builder().name("abc").required(true).build()),
-                  null, null, false, null
-                )
-              )
+                  null, null, false, null,
+                ),
+              ),
             )
             .connector_type(ENVOY)
-            .build()
+            .build(),
         )
       }
       val backfills = backfills("deep-fryer")
@@ -572,16 +577,16 @@ class ConfigureServiceActionTest {
         Backfill(
           "xyz", clock.instant(), type_provided = null, type_consumed = null,
           parameters = listOf(
-            Parameter.Builder().name("abc").required(false).build()
+            Parameter.Builder().name("abc").required(false).build(),
           ),
-          requires_approval = false, delete_by = null
+          requires_approval = false, delete_by = null,
         ),
         Backfill(
           "xyz", null, type_provided = null, type_consumed = null,
           parameters = listOf(
-            Parameter.Builder().name("abc").required(true).build()
+            Parameter.Builder().name("abc").required(true).build(),
           ),
-          requires_approval = false, delete_by = null
+          requires_approval = false, delete_by = null,
         ),
       )
     }
@@ -596,12 +601,12 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), "String", null,
-                false, null
-              )
-            )
+                false, null,
+              ),
+            ),
           )
           .connector_type(ENVOY)
-          .build()
+          .build(),
       )
       configureServiceAction.configureService(
         ConfigureServiceRequest.Builder()
@@ -609,23 +614,23 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), "Int", null,
-                false, null
-              )
-            )
+                false, null,
+              ),
+            ),
           )
           .connector_type(ENVOY)
-          .build()
+          .build(),
       )
       val backfills = backfills("deep-fryer")
       assertThat(backfills).containsOnly(
         Backfill(
           "xyz", clock.instant(), type_provided = "String", type_consumed = null,
-          parameters = listOf(), requires_approval = false, delete_by = null
+          parameters = listOf(), requires_approval = false, delete_by = null,
         ),
         Backfill(
           "xyz", null, type_provided = "Int", type_consumed = null,
-          parameters = listOf(), requires_approval = false, delete_by = null
-        )
+          parameters = listOf(), requires_approval = false, delete_by = null,
+        ),
       )
     }
   }
@@ -639,12 +644,12 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, "String",
-                false, null
-              )
-            )
+                false, null,
+              ),
+            ),
           )
           .connector_type(ENVOY)
-          .build()
+          .build(),
       )
       configureServiceAction.configureService(
         ConfigureServiceRequest.Builder()
@@ -652,23 +657,23 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, "Int",
-                false, null
-              )
-            )
+                false, null,
+              ),
+            ),
           )
           .connector_type(ENVOY)
-          .build()
+          .build(),
       )
       val backfills = backfills("deep-fryer")
       assertThat(backfills).containsOnly(
         Backfill(
           "xyz", clock.instant(), type_provided = null, type_consumed = "String",
-          parameters = listOf(), requires_approval = false, delete_by = null
+          parameters = listOf(), requires_approval = false, delete_by = null,
         ),
         Backfill(
           "xyz", null, type_provided = null, type_consumed = "Int",
-          parameters = listOf(), requires_approval = false, delete_by = null
-        )
+          parameters = listOf(), requires_approval = false, delete_by = null,
+        ),
       )
     }
   }
@@ -682,12 +687,12 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, "String",
-                false, null
-              )
-            )
+                false, null,
+              ),
+            ),
           )
           .connector_type(ENVOY)
-          .build()
+          .build(),
       )
       configureServiceAction.configureService(
         ConfigureServiceRequest.Builder()
@@ -695,19 +700,19 @@ class ConfigureServiceActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "xyz", "Description", listOf(), null, "String",
-                false, null
-              )
-            )
+                false, null,
+              ),
+            ),
           )
           .connector_type(ENVOY)
-          .build()
+          .build(),
       )
       val backfills = backfills("deep-fryer")
       assertThat(backfills).containsOnly(
         Backfill(
           "xyz", deleted_in_service_at = null, type_provided = null,
-          type_consumed = "String", parameters = listOf(), requires_approval = false, delete_by = null
-        )
+          type_consumed = "String", parameters = listOf(), requires_approval = false, delete_by = null,
+        ),
       )
     }
   }
@@ -722,13 +727,13 @@ class ConfigureServiceActionTest {
               listOf(
                 ConfigureServiceRequest.BackfillData(
                   "xyz", "Description", listOf(), null, "String",
-                  false, null
-                )
-              )
+                  false, null,
+                ),
+              ),
             )
             .connector_type(ENVOY)
             .connector_extra_data("poop")
-            .build()
+            .build(),
         )
       }.isInstanceOf(JsonEncodingException::class.java)
     }
@@ -759,7 +764,7 @@ class ConfigureServiceActionTest {
     val type_consumed: String?,
     val parameters: List<Parameter>,
     val requires_approval: Boolean,
-    val delete_by: Instant?
+    val delete_by: Instant?,
   )
 
   private fun backfills(serviceName: String): List<Backfill> {
@@ -779,7 +784,7 @@ class ConfigureServiceActionTest {
             it.type_consumed,
             it.parameters.map { p -> Parameter(p.name, p.description, p.required) },
             it.requires_approval,
-            it.delete_by
+            it.delete_by,
           )
         }
     }

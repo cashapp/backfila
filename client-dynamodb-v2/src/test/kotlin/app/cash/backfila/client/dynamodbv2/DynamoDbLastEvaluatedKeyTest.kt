@@ -4,6 +4,7 @@ import app.cash.backfila.client.BackfillConfig
 import app.cash.backfila.client.misk.TestingModule
 import app.cash.backfila.embedded.Backfila
 import app.cash.backfila.embedded.createWetRun
+import javax.inject.Inject
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -12,7 +13,6 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import javax.inject.Inject
 
 @MiskTest(startService = true)
 class DynamoDbLastEvaluatedKeyTest {
@@ -34,8 +34,8 @@ class DynamoDbLastEvaluatedKeyTest {
     val run = backfila.createWetRun<PausingBackfill>(
       parameters = PausingBackfill.Parameters(
         segmentCount = 1, partitionCount = 1,
-        pauseMilliseconds = 500L, requireMaxBatchSize = 5
-      )
+        pauseMilliseconds = 500L, requireMaxBatchSize = 5,
+      ),
     )
     run.batchSize = 5
     run.execute()
@@ -52,8 +52,8 @@ class DynamoDbLastEvaluatedKeyTest {
     val run = backfila.createWetRun<PausingBackfill>(
       parameters = PausingBackfill.Parameters(
         segmentCount = 4, partitionCount = 2,
-        pauseMilliseconds = 1000L, requireMaxBatchSize = 5
-      )
+        pauseMilliseconds = 1000L, requireMaxBatchSize = 5,
+      ),
     )
     run.batchSize = 5
     run.execute()
@@ -70,7 +70,7 @@ class DynamoDbLastEvaluatedKeyTest {
     override fun dynamoDbTable(): DynamoDbTable<TrackItem> {
       return dynamoDbEnhancedClient.table(
         TrackItem.TABLE_NAME,
-        TableSchema.fromClass(TrackItem::class.java)
+        TableSchema.fromClass(TrackItem::class.java),
       )
     }
 
@@ -91,7 +91,7 @@ class DynamoDbLastEvaluatedKeyTest {
       val segmentCount: Int = 4,
       val partitionCount: Int = 2,
       val pauseMilliseconds: Long = 1000L,
-      val requireMaxBatchSize: Long = 100L
+      val requireMaxBatchSize: Long = 100L,
     )
 
     override fun fixedSegmentCount(config: BackfillConfig<Parameters>): Int? =

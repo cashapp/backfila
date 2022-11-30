@@ -1,16 +1,16 @@
 package app.cash.backfila.client.jooq
 
 import app.cash.backfila.client.Backfill
-import app.cash.backfila.embedded.Backfila
-import app.cash.backfila.embedded.BackfillRun
 import app.cash.backfila.client.jooq.config.JooqMenuTestBackfill
 import app.cash.backfila.client.jooq.config.JooqTransacter
 import app.cash.backfila.client.jooq.config.JooqWidgetCompoundKeyBackfill
+import app.cash.backfila.embedded.Backfila
+import app.cash.backfila.embedded.BackfillRun
+import java.util.stream.Stream
+import kotlin.reflect.KClass
 import misk.time.FakeClock
 import misk.tokens.TokenGenerator
 import okio.ByteString
-import java.util.stream.Stream
-import kotlin.reflect.KClass
 
 object MiskJooqBackfillTestProviders {
 
@@ -21,14 +21,14 @@ object MiskJooqBackfillTestProviders {
         backfillClass = JooqMenuTestBackfill::class,
         backfillRowKeys = { _, _, _ ->
           emptyList()
-        }
+        },
       ),
       JooqBackfillTestOptions(
         backfillClass = JooqWidgetCompoundKeyBackfill::class,
         backfillRowKeys = { _, _, _ ->
           emptyList()
-        }
-      )
+        },
+      ),
     )
   }
 
@@ -39,7 +39,7 @@ object MiskJooqBackfillTestProviders {
         backfillClass = JooqMenuTestBackfill::class,
         backfillRowKeys = { transacter, _, _ ->
           JooqMenuBackfillDbDataSetup.createNoMatching(transacter)
-        }
+        },
       ),
       JooqBackfillTestOptions(
         backfillClass = JooqWidgetCompoundKeyBackfill::class,
@@ -47,10 +47,10 @@ object MiskJooqBackfillTestProviders {
           WidgetCompoundKeyBackfillDbDataSetup.createNoMatching(
             transacter,
             clock,
-            tokenGenerator
+            tokenGenerator,
           )
-        }
-      )
+        },
+      ),
     )
   }
 
@@ -61,7 +61,7 @@ object MiskJooqBackfillTestProviders {
         backfillClass = JooqMenuTestBackfill::class,
         backfillRowKeys = { transacter, _, _ ->
           JooqMenuBackfillDbDataSetup.createSome(transacter)
-        }
+        },
       ),
       JooqBackfillTestOptions(
         backfillClass = JooqWidgetCompoundKeyBackfill::class,
@@ -69,10 +69,10 @@ object MiskJooqBackfillTestProviders {
           WidgetCompoundKeyBackfillDbDataSetup.createSome(
             transacter,
             clock,
-            tokenGenerator
+            tokenGenerator,
           )
-        }
-      )
+        },
+      ),
     )
   }
 }
@@ -82,15 +82,15 @@ data class JooqBackfillTestOptions<K : Any, BackfillType : Backfill>(
   val backfillRowKeys: (
     transacter: JooqTransacter,
     clock: FakeClock,
-    tokenGenerator: TokenGenerator
+    tokenGenerator: TokenGenerator,
   ) -> List<K>,
   val description: String = "",
-  val parameterData: Map<String, ByteString> = mapOf()
+  val parameterData: Map<String, ByteString> = mapOf(),
 ) {
   fun createDryRun(
     backfila: Backfila,
     rangeStart: String? = null,
-    rangeEnd: String? = null
+    rangeEnd: String? = null,
   ): BackfillRun<BackfillType> {
     return backfila.createDryRun(backfillClass, parameterData, rangeStart, rangeEnd)
   }
@@ -98,7 +98,7 @@ data class JooqBackfillTestOptions<K : Any, BackfillType : Backfill>(
   fun createWetRun(
     backfila: Backfila,
     rangeStart: String? = null,
-    rangeEnd: String? = null
+    rangeEnd: String? = null,
   ): BackfillRun<BackfillType> {
     return backfila.createWetRun(backfillClass, parameterData, rangeStart, rangeEnd)
   }

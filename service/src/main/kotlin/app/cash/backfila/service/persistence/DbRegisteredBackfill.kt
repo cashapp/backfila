@@ -89,7 +89,7 @@ class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimestampedE
     type_provided: String?,
     type_consumed: String?,
     requires_approval: Boolean,
-    delete_by: Instant?
+    delete_by: Instant?,
   ) : this() {
     this.service_id = service_id
     this.name = name
@@ -109,7 +109,7 @@ class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimestampedE
           it.name,
           it.description,
           it.required ?: false,
-        )
+        ),
       )
     }
   }

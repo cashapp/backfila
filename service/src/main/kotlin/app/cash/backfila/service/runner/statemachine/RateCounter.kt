@@ -9,7 +9,7 @@ import kotlin.math.max
  */
 class RateCounter(
   private val clock: Clock,
-  private val lookbackSeconds: Long = 60L
+  private val lookbackSeconds: Long = 60L,
 ) {
   data class Entry(val time: Long, var count: Long)
 

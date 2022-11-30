@@ -26,10 +26,15 @@ class LeaseHunterTest {
   val module: Module = BackfilaTestingModule()
 
   @Inject lateinit var configureServiceAction: ConfigureServiceAction
+
   @Inject lateinit var createBackfillAction: CreateBackfillAction
+
   @Inject lateinit var startBackfillAction: StartBackfillAction
+
   @Inject lateinit var scope: ActionScope
+
   @Inject lateinit var leaseHunter: LeaseHunter
+
   @Inject lateinit var clock: FakeClock
 
   @Test
@@ -46,12 +51,12 @@ class LeaseHunterTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "ChickenSandwich", "Description", listOf(), null,
-                null, false, null
-              )
-            )
+                null, false, null,
+              ),
+            ),
           )
           .connector_type(ENVOY)
-          .build()
+          .build(),
       )
     }
     scope.fakeCaller(user = "molly") {
@@ -59,7 +64,7 @@ class LeaseHunterTest {
         "deep-fryer",
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
-          .build()
+          .build(),
       )
     }
     assertThat(leaseHunter.hunt()).isEmpty()
@@ -74,12 +79,12 @@ class LeaseHunterTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "ChickenSandwich", "Description", listOf(), null,
-                null, false, null
-              )
-            )
+                null, false, null,
+              ),
+            ),
           )
           .connector_type(ENVOY)
-          .build()
+          .build(),
       )
     }
     scope.fakeCaller(user = "molly") {
@@ -87,7 +92,7 @@ class LeaseHunterTest {
         "deep-fryer",
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
-          .build()
+          .build(),
       )
 
       val id = response.backfill_run_id
@@ -115,12 +120,12 @@ class LeaseHunterTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "ChickenSandwich", "Description", listOf(), null,
-                null, false, null
-              )
-            )
+                null, false, null,
+              ),
+            ),
           )
           .connector_type(ENVOY)
-          .build()
+          .build(),
       )
     }
     scope.fakeCaller(user = "molly") {
@@ -128,7 +133,7 @@ class LeaseHunterTest {
         "deep-fryer",
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
-          .build()
+          .build(),
       )
 
       val id = response.backfill_run_id

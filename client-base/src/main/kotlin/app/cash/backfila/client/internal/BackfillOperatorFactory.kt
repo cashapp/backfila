@@ -8,15 +8,15 @@ import com.google.common.cache.CacheBuilder
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
-import wisp.logging.getLogger
 import kotlin.jvm.Throws
+import wisp.logging.getLogger
 
 /**
  * Creates BackfillOperators using the registered Backends.
  */
 @Singleton
 class BackfillOperatorFactory @Inject constructor(
-  private val backends: Set<BackfillBackend>
+  private val backends: Set<BackfillBackend>,
 ) {
   /**
    * Caches backfill instances by backfill id, which comes from backfila. We might have multiple

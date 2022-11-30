@@ -10,7 +10,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
  * retried so implementations must be idempotent.
  */
 abstract class UpdateInPlaceDynamoDbBackfill<I : Any, P : Any>(
-  val dynamoDb: DynamoDBMapper
+  val dynamoDb: DynamoDBMapper,
 ) : DynamoDbBackfill<I, P>() {
   override fun runBatch(items: List<I>, config: BackfillConfig<P>) {
     val itemsToSave = mutableListOf<I>()

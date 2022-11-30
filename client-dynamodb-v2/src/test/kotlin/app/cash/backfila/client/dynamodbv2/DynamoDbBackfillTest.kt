@@ -4,6 +4,7 @@ import app.cash.backfila.client.BackfillConfig
 import app.cash.backfila.client.misk.TestingModule
 import app.cash.backfila.embedded.Backfila
 import app.cash.backfila.embedded.createWetRun
+import javax.inject.Inject
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okio.ByteString.Companion.encodeUtf8
@@ -14,7 +15,6 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import javax.inject.Inject
 
 @MiskTest(startService = true)
 class DynamoDbBackfillTest {
@@ -24,8 +24,10 @@ class DynamoDbBackfillTest {
 
   @Inject
   lateinit var dynamoDb: DynamoDbTable<TrackItem>
+
   @Inject
   lateinit var backfila: Backfila
+
   @Inject
   lateinit var testData: TrackData
 
@@ -51,7 +53,7 @@ class DynamoDbBackfillTest {
 
     assertThatCode {
       backfila.createWetRun<MakeTracksExplicitBackfill>(
-        parameterData = mapOf("validate" to "false".encodeUtf8())
+        parameterData = mapOf("validate" to "false".encodeUtf8()),
       )
     }.hasMessageContaining("Validate failed")
   }
@@ -74,14 +76,14 @@ class DynamoDbBackfillTest {
     }
 
     data class ExplicitParameters(
-      val validate: Boolean = true
+      val validate: Boolean = true,
     )
 
     override fun fixedSegmentCount(config: BackfillConfig<ExplicitParameters>): Int? = 16
     override fun dynamoDbTable(): DynamoDbTable<TrackItem> {
       return dynamoDbEnhancedClient.table(
         TrackItem.TABLE_NAME,
-        TableSchema.fromClass(TrackItem::class.java)
+        TableSchema.fromClass(TrackItem::class.java),
       )
     }
   }

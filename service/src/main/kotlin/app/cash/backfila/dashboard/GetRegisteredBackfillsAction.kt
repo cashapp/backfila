@@ -24,13 +24,13 @@ data class GetRegisteredBackfillsResponse(val backfills: List<RegisteredBackfill
 
 class GetRegisteredBackfillsAction @Inject constructor(
   @BackfilaDb private val transacter: Transacter,
-  private val queryFactory: Query.Factory
+  private val queryFactory: Query.Factory,
 ) : WebAction {
   @Get("/services/{service}/registered-backfills")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Authenticated
   fun backfills(
-    @PathParam service: String
+    @PathParam service: String,
   ): GetRegisteredBackfillsResponse {
     val backfills = transacter.transaction { session ->
       val dbService = queryFactory.newQuery<ServiceQuery>()
@@ -44,7 +44,7 @@ class GetRegisteredBackfillsAction @Inject constructor(
       backfills.map {
         RegisteredBackfill(
           it.name,
-          it.parameterNames()
+          it.parameterNames(),
         )
       }
     }

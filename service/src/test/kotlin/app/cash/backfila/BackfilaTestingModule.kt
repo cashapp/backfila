@@ -40,14 +40,14 @@ internal class BackfilaTestingModule : KAbstractModule() {
               type = DataSourceType.MYSQL,
               database = "backfila_test",
               username = "root",
-              migrations_resource = "classpath:/migrations"
+              migrations_resource = "classpath:/migrations",
             ),
-            reader = null
-          )
-        )
+            reader = null,
+          ),
+        ),
       ),
       web_url_root = "",
-      slack = null
+      slack = null,
     )
     bind<BackfilaConfig>().toInstance(config)
     install(DeploymentModule(wisp.deployment.TESTING))
@@ -69,7 +69,8 @@ internal class BackfilaTestingModule : KAbstractModule() {
       override fun configureProviders() {
         bindSeedData(MiskCaller::class)
       }
-    })
+    },
+    )
 
     newMapBinder<String, BackfilaClientServiceClientProvider>(ForConnectors::class)
       .addBinding(Connectors.HTTP)
@@ -86,8 +87,8 @@ internal class BackfilaTestingModule : KAbstractModule() {
       Executors.newCachedThreadPool(
         ThreadFactoryBuilder()
           .setNameFormat("backfila-runner-%d")
-          .build()
-      )
+          .build(),
+      ),
     )
   }
 }

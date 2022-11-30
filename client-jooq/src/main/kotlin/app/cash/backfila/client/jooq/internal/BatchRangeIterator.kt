@@ -6,9 +6,9 @@ import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import com.google.common.base.Stopwatch
 import com.google.common.collect.AbstractIterator
-import org.jooq.DSLContext
 import java.lang.IllegalStateException
 import java.util.concurrent.TimeUnit
+import org.jooq.DSLContext
 
 /**
  * Helper class that helps us iterate over batch ranges.
@@ -17,7 +17,7 @@ class BatchRangeIterator<K, Param : Any>(
   private val jooqBackfill: JooqBackfill<K, Param>,
   private val session: DSLContext,
   private val request: GetNextBatchRangeRequest,
-  private val config: BackfillConfig<Param>
+  private val config: BackfillConfig<Param>,
 ) : AbstractIterator<GetNextBatchRangeResponse.Batch>() {
 
   private val timeElapsed: () -> Boolean

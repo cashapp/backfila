@@ -23,6 +23,7 @@ class DynamoDbBillingModeTest {
   val module = TestingModule()
 
   @Inject lateinit var backfila: Backfila
+
   @Inject lateinit var db: AmazonDynamoDB
 
   @Test
@@ -36,8 +37,8 @@ class DynamoDbBillingModeTest {
         .withBillingMode(BillingMode.PAY_PER_REQUEST).withProvisionedThroughput(
           ProvisionedThroughput()
             .withReadCapacityUnits(2)
-            .withWriteCapacityUnits(2)
-        )
+            .withWriteCapacityUnits(2),
+        ),
     )
     assertThatCode {
       backfila.createWetRun<EmptyTrackBackfill>()
@@ -49,8 +50,8 @@ class DynamoDbBillingModeTest {
         .withBillingMode(BillingMode.PROVISIONED).withProvisionedThroughput(
           ProvisionedThroughput()
             .withReadCapacityUnits(2)
-            .withWriteCapacityUnits(2)
-        )
+            .withWriteCapacityUnits(2),
+        ),
     )
     backfila.createWetRun<EmptyTrackBackfill>()
   }
@@ -63,8 +64,8 @@ class DynamoDbBillingModeTest {
         .withBillingMode(BillingMode.PAY_PER_REQUEST).withProvisionedThroughput(
           ProvisionedThroughput()
             .withReadCapacityUnits(2)
-            .withWriteCapacityUnits(2)
-        )
+            .withWriteCapacityUnits(2),
+        ),
     )
     backfila.createWetRun<ReallyExpensiveBackfill>()
 
@@ -74,14 +75,14 @@ class DynamoDbBillingModeTest {
         .withBillingMode(BillingMode.PROVISIONED).withProvisionedThroughput(
           ProvisionedThroughput()
             .withReadCapacityUnits(2)
-            .withWriteCapacityUnits(2)
-        )
+            .withWriteCapacityUnits(2),
+        ),
     )
     backfila.createWetRun<ReallyExpensiveBackfill>()
   }
 
   open class EmptyTrackBackfill @Inject constructor(
-    dynamoDb: DynamoDBMapper
+    dynamoDb: DynamoDBMapper,
   ) : UpdateInPlaceDynamoDbBackfill<TrackItem, NoParameters>(dynamoDb) {
 
     override fun runOne(item: TrackItem, config: BackfillConfig<NoParameters>): Boolean {
@@ -90,7 +91,7 @@ class DynamoDbBillingModeTest {
   }
 
   open class ReallyExpensiveBackfill @Inject constructor(
-    dynamoDb: DynamoDBMapper
+    dynamoDb: DynamoDBMapper,
   ) : UpdateInPlaceDynamoDbBackfill<TrackItem, NoParameters>(dynamoDb) {
 
     // No really this should only be done as a last resort...

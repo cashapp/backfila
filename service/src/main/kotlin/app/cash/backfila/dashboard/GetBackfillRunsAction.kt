@@ -37,25 +37,25 @@ data class UiBackfillRun(
   val last_active_at: Instant,
   val precomputing_done: Boolean,
   val computed_matching_record_count: Long,
-  val backfilled_matching_record_count: Long
+  val backfilled_matching_record_count: Long,
 )
 
 data class GetBackfillRunsResponse(
   val running_backfills: List<UiBackfillRun>,
   val paused_backfills: List<UiBackfillRun>,
-  val next_pagination_token: String?
+  val next_pagination_token: String?,
 )
 
 class GetBackfillRunsAction @Inject constructor(
   @BackfilaDb private val transacter: Transacter,
-  private val queryFactory: Query.Factory
+  private val queryFactory: Query.Factory,
 ) : WebAction {
   @Get("/services/{service}/backfill-runs")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Authenticated
   fun backfillRuns(
     @PathParam service: String,
-    @QueryParam pagination_token: String? = null
+    @QueryParam pagination_token: String? = null,
   ): GetBackfillRunsResponse {
     return transacter.transaction { session ->
       val dbService = queryFactory.newQuery<ServiceQuery>()
@@ -76,7 +76,7 @@ class GetBackfillRunsAction @Inject constructor(
             session,
             it,
             runningPartitionSummaries.getValue(it.id),
-            runningRegisteredBackfills.getValue(it.registered_backfill_id)
+            runningRegisteredBackfills.getValue(it.registered_backfill_id),
           )
         }
 
@@ -86,7 +86,7 @@ class GetBackfillRunsAction @Inject constructor(
         .newPager(
           idDescPaginator(),
           initialOffset = pagination_token?.let { Offset(it) },
-          pageSize = 20
+          pageSize = 20,
         )
         .nextPage(session) ?: Page.empty()
 
@@ -98,21 +98,21 @@ class GetBackfillRunsAction @Inject constructor(
             session,
             it,
             pausedPartitionSummaries.getValue(it.id),
-            pausedRegisteredBackfills.getValue(it.registered_backfill_id)
+            pausedRegisteredBackfills.getValue(it.registered_backfill_id),
           )
         }
 
       GetBackfillRunsResponse(
         runningUiBackfills,
         pausedUiBackfills,
-        next_pagination_token = nextOffset?.offset
+        next_pagination_token = nextOffset?.offset,
       )
     }
   }
 
   private fun registeredBackfills(
     session: Session,
-    runs: List<DbBackfillRun>
+    runs: List<DbBackfillRun>,
   ) = queryFactory.newQuery<RegisteredBackfillQuery>()
     .idIn(runs.map { it.registered_backfill_id }.toSet())
     .list(session)
@@ -137,7 +137,7 @@ class GetBackfillRunsAction @Inject constructor(
         from DbRunPartition
         where backfill_run_id in (:ids)
         group by backfill_run_id
-        """
+        """,
     ).setParameter("ids", runs.map { it.id })
       .list() as List<Array<Any>>
     return list.associateBy { it[0] as Id<DbBackfillRun> }.mapValues {
@@ -165,7 +165,7 @@ class GetBackfillRunsAction @Inject constructor(
       run.updated_at,
       partitionSummary.precomputingDone,
       partitionSummary.totalComputedMatchingRecordCount,
-      partitionSummary.totalBackfilledMatchingRecordCount
+      partitionSummary.totalBackfilledMatchingRecordCount,
     )
   }
 }

@@ -30,7 +30,7 @@ class ConfigureServiceAction @Inject constructor(
   @BackfilaDb private val transacter: Transacter,
   private val queryFactory: Query.Factory,
   private val clock: Clock,
-  private val connectorProvider: ConnectorProvider
+  private val connectorProvider: ConnectorProvider,
 ) : WebAction {
   @Post("/configure_service")
   @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
@@ -55,7 +55,7 @@ class ConfigureServiceAction @Inject constructor(
           service,
           request.connector_type,
           request.connector_extra_data,
-          request.slack_channel
+          request.slack_channel,
         )
         session.save(dbService)
       } else {

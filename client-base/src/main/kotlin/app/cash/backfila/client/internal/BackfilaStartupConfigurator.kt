@@ -45,7 +45,7 @@ class BackfilaStartupConfigurator @Inject constructor(
             .parameters(parameters)
             .delete_by(registration.deleteBy?.toEpochMilli())
             .build()
-        }
+        },
       )
       .connector_type(config.connector_type)
       .connector_extra_data(config.connector_extra_data)

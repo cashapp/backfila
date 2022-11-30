@@ -4,7 +4,6 @@
 package app.cash.backfila.client.jooq.gen
 
 import kotlin.collections.List
-
 import org.jooq.Schema
 import org.jooq.impl.CatalogImpl
 
@@ -27,6 +26,6 @@ open class DefaultCatalog : CatalogImpl("") {
   val JOOQ get() = Jooq.JOOQ
 
   override fun getSchemas(): List<Schema> = listOf(
-    Jooq.JOOQ
+    Jooq.JOOQ,
   )
 }

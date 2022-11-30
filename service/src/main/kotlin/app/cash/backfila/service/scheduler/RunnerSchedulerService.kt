@@ -20,7 +20,7 @@ import wisp.logging.getLogger
 @Singleton
 class RunnerSchedulerService @Inject constructor(
   @ForBackfilaScheduler private val runnerExecutorService: ListeningExecutorService,
-  private val leaseHunter: LeaseHunter
+  private val leaseHunter: LeaseHunter,
 ) : AbstractExecutionThreadService() {
   /**
    * List of runners maintained so we can tell them to shut down.

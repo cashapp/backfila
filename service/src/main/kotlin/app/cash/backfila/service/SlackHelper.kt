@@ -2,18 +2,18 @@ package app.cash.backfila.service
 
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.DbBackfillRun
+import javax.inject.Inject
 import misk.hibernate.Id
 import misk.hibernate.Transacter
 import misk.hibernate.load
 import misk.slack.SlackClient
 import wisp.deployment.Deployment
-import javax.inject.Inject
 
 class SlackHelper @Inject constructor(
   @BackfilaDb private val transacter: Transacter,
   private val slackClient: SlackClient,
   private val backfilaConfig: BackfilaConfig,
-  private val deployment: Deployment
+  private val deployment: Deployment,
 ) {
   fun runStarted(id: Id<DbBackfillRun>, user: String) {
     val (message, channel) = transacter.transaction { session ->

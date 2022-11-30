@@ -20,6 +20,7 @@ class DynamoDbFilteringTest {
   val module = TestingModule()
 
   @Inject lateinit var backfila: Backfila
+
   @Inject lateinit var testData: DynamoMusicTableTestData
 
   @Test
@@ -43,7 +44,7 @@ class DynamoDbFilteringTest {
   }
 
   open class FilteredMakeTracksExplicitBackfill @Inject constructor(
-    dynamoDb: DynamoDBMapper
+    dynamoDb: DynamoDBMapper,
   ) : UpdateInPlaceDynamoDbBackfill<TrackItem, NoParameters>(dynamoDb) {
     var nonTrackCount: Int = 0
 
@@ -66,7 +67,7 @@ class DynamoDbFilteringTest {
   }
 
   class DynamoFilterMakeTracksExplicitBackfill @Inject constructor(
-    dynamoDb: DynamoDBMapper
+    dynamoDb: DynamoDBMapper,
   ) : FilteredMakeTracksExplicitBackfill(dynamoDb) {
 
     override fun filterExpression(config: BackfillConfig<NoParameters>): String? =

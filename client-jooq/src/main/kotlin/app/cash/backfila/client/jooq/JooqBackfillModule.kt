@@ -16,7 +16,7 @@ import kotlin.reflect.jvm.jvmName
  * Installs the [BackfillBackend] for Hibernate backfills. See the java doc for [RealBackfillModule].
  */
 class JooqBackfillModule<T : JooqBackfill<*, *>> private constructor(
-  private val backfillClass: KClass<T>
+  private val backfillClass: KClass<T>,
 ) : AbstractModule() {
   override fun configure() {
     install(JooqBackfillBackendModule)
@@ -55,7 +55,7 @@ private fun mapBinder(binder: Binder) = MapBinder.newMapBinder(
   binder,
   object : TypeLiteral<String>() {},
   object : TypeLiteral<KClass<out JooqBackfill<*, *>>>() {},
-  ForJooqBackend::class.java
+  ForJooqBackend::class.java,
 )
 
 /** Annotation for specifying dependencies specifically for this Backend. */

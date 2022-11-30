@@ -22,7 +22,7 @@ import wisp.logging.getLogger
 class BatchRunner(
   private val backfillRunner: BackfillRunner,
   private val nextBatchChannel: ReceiveChannel<Batch>,
-  private val numThreads: Int
+  private val numThreads: Int,
 ) {
   private val runChannel = VariableCapacityChannel<AwaitingRun>(
     capacity(numThreads),
@@ -30,7 +30,7 @@ class BatchRunner(
       backfillRunner.factory.metrics.batchRunsInProgress
         .labels(*backfillRunner.metricLabels)
         .set(queueSize.toDouble())
-    }
+    },
   )
 
   /**
@@ -38,7 +38,7 @@ class BatchRunner(
    * a Deferred RPC is read, not when the RPC completes, which would cause an extra RPC to be open.
    */
   private val rpcBackpressureChannel = VariableCapacityChannel<Unit>(
-    capacity(numThreads)
+    capacity(numThreads),
   )
 
   fun runChannel(): ReceiveChannel<AwaitingRun> = runChannel.downstream()
@@ -82,7 +82,7 @@ class BatchRunner(
 
       backfillRunner.factory.metrics.blockedOnComputingNextBatchDuration.record(
         stopwatch.elapsed().toMillis().toDouble(),
-        *backfillRunner.metricLabels
+        *backfillRunner.metricLabels,
       )
       if (stopwatch.elapsed() > Duration.ofMillis(500)) {
         logger.info {
@@ -115,8 +115,8 @@ class BatchRunner(
         AwaitingRun(
           batch,
           run,
-          backfillRunner.factory.clock.instant()
-        )
+          backfillRunner.factory.clock.instant(),
+        ),
       )
       rpcBackpressureChannel.upstream().send(Unit)
     }

@@ -18,6 +18,7 @@ class DynamoDbLastEvaluatedKeyTest {
   val module = TestingModule()
 
   @Inject lateinit var backfila: Backfila
+
   @Inject lateinit var testData: DynamoMusicTableTestData
 
   @Test
@@ -28,8 +29,8 @@ class DynamoDbLastEvaluatedKeyTest {
     val run = backfila.createWetRun<PausingBackfill>(
       parameters = PausingBackfill.Parameters(
         segmentCount = 1, partitionCount = 1,
-        pauseMilliseconds = 500L, requireMaxBatchSize = 5
-      )
+        pauseMilliseconds = 500L, requireMaxBatchSize = 5,
+      ),
     )
     run.batchSize = 5
     run.execute()
@@ -46,8 +47,8 @@ class DynamoDbLastEvaluatedKeyTest {
     val run = backfila.createWetRun<PausingBackfill>(
       parameters = PausingBackfill.Parameters(
         segmentCount = 4, partitionCount = 2,
-        pauseMilliseconds = 1000L, requireMaxBatchSize = 5
-      )
+        pauseMilliseconds = 1000L, requireMaxBatchSize = 5,
+      ),
     )
     run.batchSize = 5
     run.execute()
@@ -57,7 +58,7 @@ class DynamoDbLastEvaluatedKeyTest {
   }
 
   class PausingBackfill @Inject constructor(
-    dynamoDb: DynamoDBMapper
+    dynamoDb: DynamoDBMapper,
   ) : UpdateInPlaceDynamoDbBackfill<TrackItem, PausingBackfill.Parameters>(dynamoDb) {
 
     override fun runBatch(items: List<TrackItem>, config: BackfillConfig<Parameters>) {
@@ -77,7 +78,7 @@ class DynamoDbLastEvaluatedKeyTest {
       val segmentCount: Int = 4,
       val partitionCount: Int = 2,
       val pauseMilliseconds: Long = 1000L,
-      val requireMaxBatchSize: Long = 100L
+      val requireMaxBatchSize: Long = 100L,
     )
 
     override fun fixedSegmentCount(config: BackfillConfig<Parameters>): Int? = config.parameters.segmentCount

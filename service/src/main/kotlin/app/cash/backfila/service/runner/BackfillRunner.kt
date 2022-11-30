@@ -60,7 +60,7 @@ class BackfillRunner private constructor(
   val partitionName: String,
   val backfillRunId: Id<DbBackfillRun>,
   val partitionId: Id<DbRunPartition>,
-  private val leaseToken: String
+  private val leaseToken: String,
 ) {
   /** Metadata about the backfill from the database. Refreshed regularly. */
   lateinit var metadata: BackfillMetaData
@@ -70,7 +70,7 @@ class BackfillRunner private constructor(
     serviceName,
     backfillName,
     backfillRunId.toString(),
-    partitionName
+    partitionName,
   )
 
   /**
@@ -119,12 +119,12 @@ class BackfillRunner private constructor(
     val batchRunner = BatchRunner(
       this,
       batchQueuer.nextBatchChannel(),
-      metadata.numThreads
+      metadata.numThreads,
     )
     batchAwaiter = BatchAwaiter(
       this,
       batchRunner.runChannel(),
-      batchRunner.rpcBackpressureChannel()
+      batchRunner.rpcBackpressureChannel(),
     )
 
     // All our tasks run on this thread.
@@ -159,7 +159,7 @@ class BackfillRunner private constructor(
       if (dbRunPartition.lease_token != leaseToken) {
         throw IllegalStateException(
           "Backfill partition $partitionId has been stolen! " +
-            "our token: $leaseToken, new token: ${dbRunPartition.lease_token}"
+            "our token: $leaseToken, new token: ${dbRunPartition.lease_token}",
         )
       }
 
@@ -213,7 +213,7 @@ class BackfillRunner private constructor(
     data class DbData(
       val serviceName: String,
       val connector: String,
-      val connectorExtraData: String?
+      val connectorExtraData: String?,
     )
 
     val dbData = factory.transacter.transaction { session ->
@@ -228,7 +228,7 @@ class BackfillRunner private constructor(
   fun runBatchAsync(
     scope: CoroutineScope,
     batch: GetNextBatchRangeResponse.Batch,
-    pipelinedData: PipelinedData? = null
+    pipelinedData: PipelinedData? = null,
   ): Deferred<RunBatchResponse> {
     // Supervisor here allows us to handle the exception, rather than failing the job.
     return scope.async(SupervisorJob() + CoroutineName("RunBatch RPC")) {
@@ -243,13 +243,13 @@ class BackfillRunner private constructor(
           metadata.parameters,
           metadata.dryRun,
           pipelinedData,
-          metadata.batchSize
-        )
+          metadata.batchSize,
+        ),
       )
 
       factory.metrics.runBatchDuration.record(
         stopwatch.elapsed().toMillis().toDouble(),
-        *metricLabels
+        *metricLabels,
       )
       response
     }
@@ -262,7 +262,7 @@ class BackfillRunner private constructor(
   suspend fun onRpcFailure(
     exception: Exception,
     action: String,
-    elapsed: Duration
+    elapsed: Duration,
   ) {
     // If there is an intermittent server issue, all the current batches will likely fail.
     // So to consider those as only one failure, only increment failure count if the backoff
@@ -303,7 +303,7 @@ class BackfillRunner private constructor(
       if (dbRunPartition.backfill_run.state == BackfillState.RUNNING) {
         dbRunPartition.backfill_run.setState(
           session, factory.queryFactory,
-          BackfillState.PAUSED
+          BackfillState.PAUSED,
         )
         return@transaction true
       }
@@ -328,7 +328,7 @@ class BackfillRunner private constructor(
     action: String,
     elapsed: Duration,
     backoffMs: Long?,
-    paused: Boolean
+    paused: Boolean,
   ) {
     val elapsedMs = elapsed.toMillis()
 
@@ -347,8 +347,8 @@ class BackfillRunner private constructor(
               partition_id = partitionId,
               type = DbEventLog.Type.ERROR,
               message = "error $action, client exception after ${elapsedMs}ms. $endMessage",
-              extra_data = exception.stackTrace
-            )
+              extra_data = exception.stackTrace,
+            ),
           )
         }
         is SocketTimeoutException -> {
@@ -358,8 +358,8 @@ class BackfillRunner private constructor(
               partition_id = partitionId,
               type = DbEventLog.Type.ERROR,
               message = "error $action, timeout after ${elapsedMs}ms. $endMessage",
-              extra_data = ExceptionUtils.getStackTrace(exception)
-            )
+              extra_data = ExceptionUtils.getStackTrace(exception),
+            ),
           )
         }
         else -> {
@@ -369,8 +369,8 @@ class BackfillRunner private constructor(
               partition_id = partitionId,
               type = DbEventLog.Type.ERROR,
               message = "error $action, RPC error after ${elapsedMs}ms. $endMessage",
-              extra_data = ExceptionUtils.getStackTrace(exception)
-            )
+              extra_data = ExceptionUtils.getStackTrace(exception),
+            ),
           )
         }
       }
@@ -416,7 +416,7 @@ class BackfillRunner private constructor(
     fun create(
       @Suppress("UNUSED_PARAMETER") session: Session,
       dbRunPartition: DbRunPartition,
-      leaseToken: String
+      leaseToken: String,
     ): BackfillRunner {
       return BackfillRunner(
         this,
@@ -425,7 +425,7 @@ class BackfillRunner private constructor(
         dbRunPartition.partition_name,
         dbRunPartition.backfill_run_id,
         dbRunPartition.id,
-        leaseToken
+        leaseToken,
       )
     }
   }

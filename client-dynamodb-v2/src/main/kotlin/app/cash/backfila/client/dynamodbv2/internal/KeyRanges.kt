@@ -6,13 +6,13 @@ import com.google.inject.util.Types
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.ToJson
+import javax.inject.Inject
+import javax.inject.Singleton
 import okio.Buffer
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import software.amazon.awssdk.core.SdkBytes
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * With DynamoDB each run selects the number of segments so we need begin, end, and count to
@@ -22,7 +22,7 @@ internal data class DynamoDbKeyRange(
   val start: Int,
   val end: Int,
   val count: Int,
-  val lastEvaluatedKey: Map<String, AttributeValue>? = null
+  val lastEvaluatedKey: Map<String, AttributeValue>? = null,
 ) {
   init {
     // Only allow lastEvaluatedKey to be non-null if the range includes a single segment.
@@ -40,10 +40,10 @@ internal data class DynamoDbKeyRange(
  */
 @Singleton
 class DynamoDbKeyRangeCodec @Inject constructor(
-  @ForDynamoDbBackend moshi: Moshi
+  @ForDynamoDbBackend moshi: Moshi,
 ) {
   private val adapter = moshi.adapter<Map<String, AttributeValue>>(
-    Types.newParameterizedType(Map::class.java, String::class.java, AttributeValue::class.java)
+    Types.newParameterizedType(Map::class.java, String::class.java, AttributeValue::class.java),
   )
 
   companion object {
@@ -65,7 +65,7 @@ class DynamoDbKeyRangeCodec @Inject constructor(
       startSegment.offset,
       endSegment.offset,
       startSegment.count,
-      startSegment.lastEvaluatedKey
+      startSegment.lastEvaluatedKey,
     )
   }
 
@@ -93,7 +93,7 @@ class DynamoDbKeyRangeCodec @Inject constructor(
     start: Int,
     end: Int,
     count: Int,
-    lastEvaluatedKey: Map<String, AttributeValue>? = null
+    lastEvaluatedKey: Map<String, AttributeValue>? = null,
   ): KeyRange {
     return KeyRange.Builder()
       .start(encodeSegment(start, count, lastEvaluatedKey))
@@ -104,7 +104,7 @@ class DynamoDbKeyRangeCodec @Inject constructor(
   private fun encodeSegment(
     offset: Int,
     count: Int,
-    lastEvaluatedKey: Map<String, AttributeValue>? = null
+    lastEvaluatedKey: Map<String, AttributeValue>? = null,
   ): ByteString {
     require(offset in 0..count)
     val stringOffset = INT_FORMAT.format(offset)
@@ -120,7 +120,7 @@ class DynamoDbKeyRangeCodec @Inject constructor(
   internal data class SegmentData(
     val offset: Int,
     val count: Int,
-    val lastEvaluatedKey: Map<String, AttributeValue>?
+    val lastEvaluatedKey: Map<String, AttributeValue>?,
   )
 
   internal data class AttributeValueJson(
@@ -133,7 +133,7 @@ class DynamoDbKeyRangeCodec @Inject constructor(
     val m: Map<String, AttributeValueJson>? = null,
     val l: List<AttributeValueJson>? = null,
     val nULLValue: Boolean? = null,
-    val bOOL: Boolean? = null
+    val bOOL: Boolean? = null,
   )
 }
 
@@ -150,7 +150,7 @@ object AwsAttributeValueAdapter {
       attributeValue.m()?.mapValues { toJson(it.value) },
       attributeValue.l()?.map { toJson(it) },
       attributeValue.nul(),
-      attributeValue.bool()
+      attributeValue.bool(),
     )
   }
 

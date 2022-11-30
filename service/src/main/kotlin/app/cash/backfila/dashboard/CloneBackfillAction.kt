@@ -34,7 +34,7 @@ import wisp.logging.getLogger
 enum class RangeCloneType {
   RESTART,
   CONTINUE,
-  NEW
+  NEW,
 }
 
 data class CloneBackfillRequest(
@@ -50,18 +50,18 @@ data class CloneBackfillRequest(
   val dry_run: Boolean = true,
   val backoff_schedule: String? = null,
   // Sleep that is added after every successful RunBatch.
-  val extra_sleep_ms: Long = 0
+  val extra_sleep_ms: Long = 0,
 )
 
 data class CloneBackfillResponse(
-  val id: Long
+  val id: Long,
 )
 
 class CloneBackfillAction @Inject constructor(
   private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
   @BackfilaDb private val transacter: Transacter,
   private val queryFactory: Query.Factory,
-  private val connectorProvider: ConnectorProvider
+  private val connectorProvider: ConnectorProvider,
 ) : WebAction {
 
   fun validate(request: CloneBackfillRequest) {
@@ -94,7 +94,7 @@ class CloneBackfillAction @Inject constructor(
   @Authenticated(capabilities = ["users"])
   fun create(
     @PathParam id: Long,
-    @RequestBody request: CloneBackfillRequest
+    @RequestBody request: CloneBackfillRequest,
   ): CloneBackfillResponse {
     // TODO check user has permissions for this service with access api
 
@@ -112,7 +112,7 @@ class CloneBackfillAction @Inject constructor(
         dbService.connector,
         dbService.connector_extra_data,
         sourceBackfill.registered_backfill_id,
-        sourceBackfill.registered_backfill.name
+        sourceBackfill.registered_backfill.name,
       )
     }
 
@@ -134,7 +134,7 @@ class CloneBackfillAction @Inject constructor(
         request.num_threads,
         request.backoff_schedule,
         request.dry_run,
-        request.extra_sleep_ms
+        request.extra_sleep_ms,
       )
       session.save(backfillRun)
 
@@ -145,7 +145,7 @@ class CloneBackfillAction @Inject constructor(
             partition.partition_name,
             partition.backfill_range ?: KeyRange.Builder().build(),
             backfillRun.state,
-            partition.estimated_record_count
+            partition.estimated_record_count,
           )
           session.save(dbRunPartition)
         }
@@ -157,7 +157,7 @@ class CloneBackfillAction @Inject constructor(
         if (partitions.map { it.partition_name }.toSet() != sourcePartitions.map { it.partition_name }.toSet()) {
           throw BadRequestException(
             "Can't clone backfill ranges from `$id`, newly computed partitions don't match." +
-              " Clone with a new range instead."
+              " Clone with a new range instead.",
           )
         }
 
@@ -167,7 +167,7 @@ class CloneBackfillAction @Inject constructor(
             sourcePartition.partition_name,
             sourcePartition.backfillRange(),
             backfillRun.state,
-            sourcePartition.estimated_record_count
+            sourcePartition.estimated_record_count,
           )
           // Copy the cursor if continuing, otherwise just leave blank to start from beginning.
           if (request.range_clone_type == RangeCloneType.CONTINUE) {
@@ -193,11 +193,11 @@ class CloneBackfillAction @Inject constructor(
           dbData.backfillName,
           KeyRange(
             request.pkey_range_start?.encodeUtf8(),
-            request.pkey_range_end?.encodeUtf8()
+            request.pkey_range_end?.encodeUtf8(),
           ),
           request.parameter_map,
-          request.dry_run
-        )
+          request.dry_run,
+        ),
       )
     } catch (e: Exception) {
       logger.info(e) { "PrepareBackfill on `${dbData.serviceName}` failed" }
@@ -213,7 +213,7 @@ class CloneBackfillAction @Inject constructor(
     if (partitions.distinctBy { it.partition_name }.size != partitions.size) {
       throw BadRequestException(
         "PrepareBackfill did not return distinct partition names:" +
-          " ${partitions.map { it.partition_name }}"
+          " ${partitions.map { it.partition_name }}",
       )
     }
     return prepareBackfillResponse
@@ -225,7 +225,7 @@ class CloneBackfillAction @Inject constructor(
     val connectorType: String,
     val connectorExtraData: String?,
     val registeredBackfillId: Id<DbRegisteredBackfill>,
-    val backfillName: String
+    val backfillName: String,
   )
 
   companion object {

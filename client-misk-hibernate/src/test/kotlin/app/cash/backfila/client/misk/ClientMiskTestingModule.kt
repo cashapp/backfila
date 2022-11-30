@@ -20,7 +20,7 @@ import misk.jdbc.JdbcTestingModule
 import misk.logging.LogCollectorModule
 
 internal class ClientMiskTestingModule(
-  private val useVitess: Boolean
+  private val useVitess: Boolean,
 ) : KAbstractModule() {
   override fun configure() {
     val dataSourceConfig = when {
@@ -28,13 +28,13 @@ internal class ClientMiskTestingModule(
         type = DataSourceType.VITESS_MYSQL,
         username = "root",
         migrations_resource = "classpath:/schema",
-        vitess_schema_resource_root = "classpath:/schema"
+        vitess_schema_resource_root = "classpath:/schema",
       )
       else -> DataSourceConfig(
         type = DataSourceType.MYSQL,
         database = "backfila_clientmiskservice_test",
         username = "root",
-        migrations_resource = "classpath:/schema"
+        migrations_resource = "classpath:/schema",
       )
     }
     install(HibernateModule(ClientMiskService::class, dataSourceConfig))
@@ -43,10 +43,11 @@ internal class ClientMiskTestingModule(
         addEntities(
           DbMenu::class,
           DbOrder::class,
-          DbRestaurant::class
+          DbRestaurant::class,
         )
       }
-    })
+    },
+    )
     install(JdbcTestingModule(ClientMiskService::class))
 
     install(DeploymentModule(wisp.deployment.TESTING))
@@ -56,9 +57,9 @@ internal class ClientMiskTestingModule(
     install(
       MiskBackfillModule(
         BackfilaHttpClientConfig(
-          url = "test.url", slack_channel = "#test"
-        )
-      )
+          url = "test.url", slack_channel = "#test",
+        ),
+      ),
     )
 
     bind(BackfilaClientLoggingSetupProvider::class.java)

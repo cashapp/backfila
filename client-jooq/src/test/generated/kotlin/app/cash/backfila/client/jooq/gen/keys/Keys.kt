@@ -7,7 +7,6 @@ import app.cash.backfila.client.jooq.gen.tables.Menu
 import app.cash.backfila.client.jooq.gen.tables.Widgets
 import app.cash.backfila.client.jooq.gen.tables.records.MenuRecord
 import app.cash.backfila.client.jooq.gen.tables.records.WidgetsRecord
-
 import org.jooq.UniqueKey
 import org.jooq.impl.DSL
 import org.jooq.impl.Internal
@@ -19,14 +18,14 @@ import org.jooq.impl.Internal
 val KEY_MENU_PRIMARY: UniqueKey<MenuRecord> = Internal.createUniqueKey(
   Menu.MENU, DSL.name("KEY_menu_PRIMARY"),
   arrayOf(
-    Menu.MENU.ID
+    Menu.MENU.ID,
   ),
-  true
+  true,
 )
 val KEY_WIDGETS_PRIMARY: UniqueKey<WidgetsRecord> = Internal.createUniqueKey(
   Widgets.WIDGETS, DSL.name("KEY_widgets_PRIMARY"),
   arrayOf(
-    Widgets.WIDGETS.WIDGET_TOKEN
+    Widgets.WIDGETS.WIDGET_TOKEN,
   ),
-  true
+  true,
 )

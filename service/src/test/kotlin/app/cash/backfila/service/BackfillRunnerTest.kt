@@ -47,16 +47,28 @@ class BackfillRunnerTest {
   val module: Module = BackfilaTestingModule()
 
   @Inject lateinit var configureServiceAction: ConfigureServiceAction
+
   @Inject lateinit var createBackfillAction: CreateBackfillAction
+
   @Inject lateinit var getBackfillRunsAction: GetBackfillRunsAction
+
   @Inject lateinit var getBackfillStatusAction: GetBackfillStatusAction
+
   @Inject lateinit var startBackfillAction: StartBackfillAction
+
   @Inject lateinit var stopBackfillAction: StopBackfillAction
+
   @Inject lateinit var scope: ActionScope
+
   @Inject lateinit var fakeClock: FakeClock
+
   @Inject lateinit var leaseHunter: LeaseHunter
-  @Inject @BackfilaDb lateinit var transacter: Transacter
+
+  @Inject @BackfilaDb
+  lateinit var transacter: Transacter
+
   @Inject lateinit var fakeBackfilaClientServiceClient: FakeBackfilaClientServiceClient
+
   @Inject lateinit var updateBackfillAction: UpdateBackfillAction
 
   @Test fun happyCompleteRun() {
@@ -139,14 +151,14 @@ class BackfillRunnerTest {
 
       // We should only get numthreads=1 calls in parallel, then it must wait for more room.
       assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
-      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNull()
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNull()
 
       // After one rpc completes, another one is enqueued.
       fakeBackfilaClientServiceClient.runBatchResponses.send(
-        Result.success(RunBatchResponse.Builder().build())
+        Result.success(RunBatchResponse.Builder().build()),
       )
       assertThat(
-        fakeBackfilaClientServiceClient.runBatchRequests.receive()
+        fakeBackfilaClientServiceClient.runBatchRequests.receive(),
       ).isNotNull()
 
       runner.stop()
@@ -171,7 +183,7 @@ class BackfillRunnerTest {
     scope.fakeCaller(user = "molly") {
       updateBackfillAction.update(
         runner.backfillRunId.id,
-        UpdateBackfillRequest(batch_size = 10)
+        UpdateBackfillRequest(batch_size = 10),
       )
     }
 
@@ -195,7 +207,7 @@ class BackfillRunnerTest {
       assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
       assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
       assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
-      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNull()
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNull()
 
       with(getBackfillRunsAction.backfillRuns("deep-fryer")) {
         assertThat(running_backfills).hasSize(1)
@@ -209,7 +221,7 @@ class BackfillRunnerTest {
 
       // After one rpc completes, another one is enqueued.
       fakeBackfilaClientServiceClient.runBatchResponses.send(
-        Result.success(RunBatchResponse.Builder().build())
+        Result.success(RunBatchResponse.Builder().build()),
       )
       assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
       runner.stop()
@@ -249,8 +261,8 @@ class BackfillRunnerTest {
       assertThat(fakeBackfilaClientServiceClient.getNextBatchRangeRequests.receive()).isNotNull()
       fakeBackfilaClientServiceClient.getNextBatchRangeResponses.send(
         Result.success(
-          nextBatchResponse(start = "0", end = "99", scannedCount = 100, matchingCount = 100)
-        )
+          nextBatchResponse(start = "0", end = "99", scannedCount = 100, matchingCount = 100),
+        ),
       )
       assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
 
@@ -259,7 +271,7 @@ class BackfillRunnerTest {
 
       // Complete the RunBatch
       fakeBackfilaClientServiceClient.runBatchResponses.send(
-        Result.success(RunBatchResponse.Builder().build())
+        Result.success(RunBatchResponse.Builder().build()),
       )
 
       runner.stop()
@@ -288,47 +300,49 @@ class BackfillRunnerTest {
 
       // Process 4 getNextBatchRangeRequests
       assertThat(
-        fakeBackfilaClientServiceClient.getNextBatchRangeRequests.receive().previous_end_key
+        fakeBackfilaClientServiceClient.getNextBatchRangeRequests.receive().previous_end_key,
       ).isNull()
       fakeBackfilaClientServiceClient.getNextBatchRangeResponses.send(
         Result.success(
-          nextBatchResponse(start = "0", end = "99", scannedCount = 100, matchingCount = 100)
-        )
+          nextBatchResponse(start = "0", end = "99", scannedCount = 100, matchingCount = 100),
+        ),
       )
 
       assertThat(
-        fakeBackfilaClientServiceClient.getNextBatchRangeRequests.receive().previous_end_key
+        fakeBackfilaClientServiceClient.getNextBatchRangeRequests.receive().previous_end_key,
       ).isEqualTo("99".encodeUtf8())
       fakeBackfilaClientServiceClient.getNextBatchRangeResponses.send(
         Result.success(
-          nextBatchResponse(start = "100", end = "199", scannedCount = 100, matchingCount = 100)
-        )
+          nextBatchResponse(start = "100", end = "199", scannedCount = 100, matchingCount = 100),
+        ),
       )
       assertThat(
-        fakeBackfilaClientServiceClient.getNextBatchRangeRequests.receive().previous_end_key
+        fakeBackfilaClientServiceClient.getNextBatchRangeRequests.receive().previous_end_key,
       ).isEqualTo("199".encodeUtf8())
       fakeBackfilaClientServiceClient.getNextBatchRangeResponses.send(
         Result.success(
-          nextBatchResponse(start = "200", end = "299", scannedCount = 100, matchingCount = 100)
-        )
+          nextBatchResponse(start = "200", end = "299", scannedCount = 100, matchingCount = 100),
+        ),
       )
       assertThat(
-        fakeBackfilaClientServiceClient.getNextBatchRangeRequests.receive().previous_end_key
+        fakeBackfilaClientServiceClient.getNextBatchRangeRequests.receive().previous_end_key,
       ).isEqualTo("299".encodeUtf8())
       fakeBackfilaClientServiceClient.getNextBatchRangeResponses.send(
         Result.success(
-          nextBatchResponse(start = "300", end = "399", scannedCount = 100, matchingCount = 100)
-        )
+          nextBatchResponse(start = "300", end = "399", scannedCount = 100, matchingCount = 100),
+        ),
       )
       // Check that the channel where we sent the responses is empty.
-      assertThat(fakeBackfilaClientServiceClient.getNextBatchRangeResponses.poll()).isNull()
+      assertThat(
+        fakeBackfilaClientServiceClient.getNextBatchRangeResponses.tryReceive().getOrNull(),
+      ).isNull()
       // We will no longer get getNextBatchRequests until some batches are run.
-      assertThat(fakeBackfilaClientServiceClient.getNextBatchRangeRequests.poll()).isNull()
+      assertThat(fakeBackfilaClientServiceClient.getNextBatchRangeRequests.tryReceive().getOrNull()).isNull()
 
       // Run a RunBatch
       assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
       fakeBackfilaClientServiceClient.runBatchResponses.send(
-        Result.success(RunBatchResponse.Builder().build())
+        Result.success(RunBatchResponse.Builder().build()),
       )
 
       // We should immediately get another RunBatch to run.
@@ -346,12 +360,12 @@ class BackfillRunnerTest {
       // After the RunBatch completed, a getNextBatch request is buffered.
       // The next batch request should start higher than the pkey cursor in db
       assertThat(
-        fakeBackfilaClientServiceClient.getNextBatchRangeRequests.receive().previous_end_key
+        fakeBackfilaClientServiceClient.getNextBatchRangeRequests.receive().previous_end_key,
       ).isEqualTo("399".encodeUtf8())
 
       // Complete the RunBatch
       fakeBackfilaClientServiceClient.runBatchResponses.send(
-        Result.success(RunBatchResponse.Builder().build())
+        Result.success(RunBatchResponse.Builder().build()),
       )
       runner.stop()
     }
@@ -373,9 +387,9 @@ class BackfillRunnerTest {
       // Give enough time for the once-per-second check to cancel the jobs.
       delay(EXTEND_LEASE_PERIOD.toMillis())
 
-      fakeBackfilaClientServiceClient.runBatchResponses.offer(
-        Result.success(RunBatchResponse.Builder().build())
-      )
+      fakeBackfilaClientServiceClient.runBatchResponses.trySend(
+        Result.success(RunBatchResponse.Builder().build()),
+      ).isSuccess
     }
 
     // RunBatch was not awaited.
@@ -399,15 +413,15 @@ class BackfillRunnerTest {
       fakeBackfilaClientServiceClient.runBatchRequests.receive()
 
       fakeBackfilaClientServiceClient.runBatchResponses.send(
-        Result.failure(RuntimeException("fake rpc failed"))
+        Result.failure(RuntimeException("fake rpc failed")),
       )
       fakeBackfilaClientServiceClient.runBatchResponses.send(
-        Result.success(RunBatchResponse.Builder().build())
+        Result.success(RunBatchResponse.Builder().build()),
       )
 
       delay(500)
       // Nothing sent yet - the backoff is 1000ms
-      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNull()
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNull()
       delay(500)
       val retry = fakeBackfilaClientServiceClient.runBatchRequests.receive()
       assertThat(retry.batch_range).isEqualTo(firstRequest.batch_range)
@@ -420,7 +434,7 @@ class BackfillRunnerTest {
       }
 
       fakeBackfilaClientServiceClient.runBatchResponses.send(
-        Result.success(RunBatchResponse.Builder().build())
+        Result.success(RunBatchResponse.Builder().build()),
       )
       runner.stop()
     }
@@ -442,19 +456,19 @@ class BackfillRunnerTest {
       val firstRequest = fakeBackfilaClientServiceClient.runBatchRequests.receive()
 
       fakeBackfilaClientServiceClient.runBatchResponses.send(
-        Result.failure(RuntimeException("fake rpc failed"))
+        Result.failure(RuntimeException("fake rpc failed")),
       )
 
       delay(500)
       // Nothing sent yet - the backoff is 1000ms
-      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNull()
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNull()
       fakeClock.add(1000, TimeUnit.MILLISECONDS)
       delay(500)
       val retry = fakeBackfilaClientServiceClient.runBatchRequests.receive()
       assertThat(retry.batch_range).isEqualTo(firstRequest.batch_range)
 
       fakeBackfilaClientServiceClient.runBatchResponses.send(
-        Result.failure(RuntimeException("fake rpc failed"))
+        Result.failure(RuntimeException("fake rpc failed")),
       )
       runner.stop()
     }
@@ -466,10 +480,10 @@ class BackfillRunnerTest {
     assertThat(partition.state).isEqualTo(BackfillState.PAUSED)
 
     assertThat(status.event_logs[0].message).isEqualTo(
-      "error running batch [0, 99], RPC error after 0ms. paused backfill due to 2 consecutive errors"
+      "error running batch [0, 99], RPC error after 0ms. paused backfill due to 2 consecutive errors",
     )
     assertThat(status.event_logs[1].message).isEqualTo(
-      "error running batch [0, 99], RPC error after 0ms. backing off for 1000ms"
+      "error running batch [0, 99], RPC error after 0ms. backing off for 1000ms",
     )
   }
 
@@ -487,16 +501,16 @@ class BackfillRunnerTest {
         Result.success(
           RunBatchResponse.Builder()
             .exception_stack_trace("fake stacktrace")
-            .build()
-        )
+            .build(),
+        ),
       )
       fakeBackfilaClientServiceClient.runBatchResponses.send(
-        Result.success(RunBatchResponse.Builder().build())
+        Result.success(RunBatchResponse.Builder().build()),
       )
 
       delay(500)
       // Nothing sent yet - the backoff is 1000ms
-      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNull()
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNull()
       delay(500)
       val retry = fakeBackfilaClientServiceClient.runBatchRequests.receive()
       assertThat(retry.batch_range).isEqualTo(firstRequest.batch_range)
@@ -509,7 +523,7 @@ class BackfillRunnerTest {
       }
 
       fakeBackfilaClientServiceClient.runBatchResponses.send(
-        Result.success(RunBatchResponse.Builder().build())
+        Result.success(RunBatchResponse.Builder().build()),
       )
       delay(EXTEND_LEASE_PERIOD.toMillis())
       runner.stop()
@@ -521,7 +535,7 @@ class BackfillRunnerTest {
     assertThat(partition.state).isEqualTo(BackfillState.RUNNING)
 
     assertThat(status.event_logs[0].message).isEqualTo(
-      "error running batch [0, 99], client exception after 0ms. backing off for 1000ms"
+      "error running batch [0, 99], client exception after 0ms. backing off for 1000ms",
     )
     assertThat(status.event_logs[0].extra_data).isEqualTo("fake stacktrace")
   }
@@ -541,11 +555,11 @@ class BackfillRunnerTest {
       assertThat(fakeBackfilaClientServiceClient.getNextBatchRangeRequests.receive()).isNotNull()
       fakeBackfilaClientServiceClient.getNextBatchRangeResponses.send(
         Result.success(
-          nextBatchResponse(start = "0", end = "99", scannedCount = 100, matchingCount = 0)
-        )
+          nextBatchResponse(start = "0", end = "99", scannedCount = 100, matchingCount = 0),
+        ),
       )
 
-      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNull()
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNull()
       runner.stop()
     }
 
@@ -568,17 +582,17 @@ class BackfillRunnerTest {
       fakeBackfilaClientServiceClient.runBatchResponses.send(
         Result.success(
           RunBatchResponse.Builder()
-            .backoff_ms(1_000L).build()
-        )
+            .backoff_ms(1_000L).build(),
+        ),
       )
 
       delay(500)
       // Nothing sent yet - the backoff is 1000ms
-      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNull()
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNull()
       delay(500)
-      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNotNull()
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNotNull()
       fakeBackfilaClientServiceClient.runBatchResponses.send(
-        Result.success(RunBatchResponse.Builder().build())
+        Result.success(RunBatchResponse.Builder().build()),
       )
       runner.stop()
     }
@@ -599,16 +613,16 @@ class BackfillRunnerTest {
 
       fakeBackfilaClientServiceClient.runBatchRequests.receive()
       fakeBackfilaClientServiceClient.runBatchResponses.send(
-        Result.success(RunBatchResponse.Builder().build())
+        Result.success(RunBatchResponse.Builder().build()),
       )
 
       delay(500)
       // Nothing sent yet - the backoff is 1000ms
-      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNull()
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNull()
       delay(500)
-      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNotNull()
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNotNull()
       fakeBackfilaClientServiceClient.runBatchResponses.send(
-        Result.success(RunBatchResponse.Builder().build())
+        Result.success(RunBatchResponse.Builder().build()),
       )
       runner.stop()
     }
@@ -630,19 +644,19 @@ class BackfillRunnerTest {
       fakeBackfilaClientServiceClient.runBatchRequests.receive()
       fakeBackfilaClientServiceClient.runBatchRequests.receive()
       fakeBackfilaClientServiceClient.runBatchResponses.send(
-        Result.success(RunBatchResponse.Builder().build())
+        Result.success(RunBatchResponse.Builder().build()),
       )
       fakeBackfilaClientServiceClient.runBatchResponses.send(
-        Result.success(RunBatchResponse.Builder().build())
+        Result.success(RunBatchResponse.Builder().build()),
       )
 
       delay(500)
       // Nothing sent yet - the backoff is 1000ms
-      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNull()
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNull()
       delay(500)
-      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNotNull()
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNotNull()
       fakeBackfilaClientServiceClient.runBatchResponses.send(
-        Result.success(RunBatchResponse.Builder().build())
+        Result.success(RunBatchResponse.Builder().build()),
       )
       runner.stop()
     }
@@ -669,21 +683,24 @@ class BackfillRunnerTest {
       assertThat(fakeBackfilaClientServiceClient.getNextBatchRangeRequests.receive()).isNotNull()
       fakeBackfilaClientServiceClient.getNextBatchRangeResponses.send(
         Result.success(
-          nextBatchResponse(start = "0", end = "99", scannedCount = 100, matchingCount = 0)
-        )
+          nextBatchResponse(start = "0", end = "99", scannedCount = 100, matchingCount = 0),
+        ),
       )
       assertThat(fakeBackfilaClientServiceClient.getNextBatchRangeRequests.receive()).isNotNull()
       fakeBackfilaClientServiceClient.getNextBatchRangeResponses.send(
         Result.success(
-          nextBatchResponse(start = "100", end = "199", scannedCount = 100, matchingCount = 1)
-        )
+          nextBatchResponse(start = "100", end = "199", scannedCount = 100, matchingCount = 1),
+        ),
       )
 
       // The first batch has no matching records, so no delay is added.
       // The second batch, with nonzero matching count, gets run immediately.
-      val runBatchRequest = fakeBackfilaClientServiceClient.runBatchRequests.poll()
+      val runBatchRequest =
+        fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()
       assertThat(runBatchRequest).isNotNull()
-      assertThat(runBatchRequest!!.batch_range).isEqualTo(KeyRange("100".encodeUtf8(), "199".encodeUtf8()))
+      assertThat(runBatchRequest!!.batch_range).isEqualTo(
+        KeyRange("100".encodeUtf8(), "199".encodeUtf8()),
+      )
       runner.stop()
     }
   }
@@ -696,15 +713,15 @@ class BackfillRunnerTest {
       launch { runner.start(this) }
 
       // We should only get numthreads=3 calls in parallel, then it must wait for more room.
-      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNotNull()
-      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNotNull()
-      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNotNull()
-      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNull()
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNotNull()
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNotNull()
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNotNull()
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNull()
 
       scope.fakeCaller(user = "molly") {
         updateBackfillAction.update(
           runner.backfillRunId.id,
-          UpdateBackfillRequest(num_threads = 4)
+          UpdateBackfillRequest(num_threads = 4),
         )
       }
       // Wait for leasing task to reload metadata.
@@ -712,15 +729,15 @@ class BackfillRunnerTest {
 
       // It takes 2 rpcs for the channels to resize, then another 3 are enqueued.
       fakeBackfilaClientServiceClient.runBatchResponses.send(
-        Result.success(RunBatchResponse.Builder().build())
+        Result.success(RunBatchResponse.Builder().build()),
       )
       fakeBackfilaClientServiceClient.runBatchResponses.send(
-        Result.success(RunBatchResponse.Builder().build())
+        Result.success(RunBatchResponse.Builder().build()),
       )
-      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNotNull()
-      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNotNull()
-      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNotNull()
-      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNull()
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNotNull()
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNotNull()
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNotNull()
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNull()
       runner.stop()
     }
 
@@ -746,7 +763,7 @@ class BackfillRunnerTest {
         .start(newStart.toString().encodeUtf8())
         .build()
       fakeBackfilaClientServiceClient.runBatchResponses.send(
-        Result.success(RunBatchResponse.Builder().remaining_batch_range(remainingRange).build())
+        Result.success(RunBatchResponse.Builder().remaining_batch_range(remainingRange).build()),
       )
 
       // Follow up request is sent immediately
@@ -762,7 +779,7 @@ class BackfillRunnerTest {
         .end(newEnd.toString().encodeUtf8())
         .build()
       fakeBackfilaClientServiceClient.runBatchResponses.send(
-        Result.success(RunBatchResponse.Builder().remaining_batch_range(remainingRange).build())
+        Result.success(RunBatchResponse.Builder().remaining_batch_range(remainingRange).build()),
       )
 
       // Follow up request is sent immediately
@@ -780,8 +797,8 @@ class BackfillRunnerTest {
         Result.success(
           RunBatchResponse.Builder()
             .exception_stack_trace("It Failed")
-            .build()
-        )
+            .build(),
+        ),
       )
 
       // Retry request is sent after the error backoff
@@ -796,7 +813,7 @@ class BackfillRunnerTest {
 
       // Batch is done
       fakeBackfilaClientServiceClient.runBatchResponses.send(
-        Result.success(RunBatchResponse.Builder().build())
+        Result.success(RunBatchResponse.Builder().build()),
       )
 
       // Cursor is updated once the batch succeeds
@@ -824,13 +841,13 @@ class BackfillRunnerTest {
       val initialRequest = fakeBackfilaClientServiceClient.runBatchRequests.receive()
       assertThat(initialRequest).isNotNull()
       assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
-      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNull()
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNull()
       // Nothing has completed so the cursor has not been set yet
       assertThat(getSinglePartitionCursor(runner)).isNull()
 
       // The second request sends a partial result and the rest return normally
       fakeBackfilaClientServiceClient.runBatchResponses.send(
-        Result.success(RunBatchResponse.Builder().build())
+        Result.success(RunBatchResponse.Builder().build()),
       )
 
       delay(EXTEND_LEASE_PERIOD.toMillis())
@@ -843,13 +860,13 @@ class BackfillRunnerTest {
         .start(newStart.toString().encodeUtf8())
         .build()
       fakeBackfilaClientServiceClient.runBatchResponses.send(
-        Result.success(RunBatchResponse.Builder().remaining_batch_range(remainingRange).build())
+        Result.success(RunBatchResponse.Builder().remaining_batch_range(remainingRange).build()),
       )
 
       delay(EXTEND_LEASE_PERIOD.toMillis())
       assertThat(getSinglePartitionCursor(runner)).isEqualTo(firstBatchCursor) // cursor is unchanged
       fakeBackfilaClientServiceClient.runBatchResponses.send(
-        Result.success(RunBatchResponse.Builder().build())
+        Result.success(RunBatchResponse.Builder().build()),
       )
 
       delay(EXTEND_LEASE_PERIOD.toMillis())
@@ -862,16 +879,16 @@ class BackfillRunnerTest {
       val followupRequest = fakeBackfilaClientServiceClient.runBatchRequests.receive()
       assertThat(remainingRange).isEqualTo(followupRequest.batch_range)
 
-      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNull()
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNull()
 
       // complete the two stuck requests currently being processed
       fakeBackfilaClientServiceClient.runBatchResponses.send(
-        Result.success(RunBatchResponse.Builder().build())
+        Result.success(RunBatchResponse.Builder().build()),
       )
       delay(EXTEND_LEASE_PERIOD.toMillis())
       assertThat(getSinglePartitionCursor(runner)).isEqualTo(firstBatchCursor) // cursor is still unchanged
       fakeBackfilaClientServiceClient.runBatchResponses.send(
-        Result.success(RunBatchResponse.Builder().build())
+        Result.success(RunBatchResponse.Builder().build()),
       )
       delay(EXTEND_LEASE_PERIOD.toMillis())
       val cursor = getSinglePartitionCursor(runner)
@@ -883,7 +900,7 @@ class BackfillRunnerTest {
       assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull
       assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull
 
-      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.poll()).isNull()
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNull()
       runner.stop()
     }
   }
@@ -908,12 +925,12 @@ class BackfillRunnerTest {
                 null,
                 null,
                 false,
-                null
-              )
-            )
+                null,
+              ),
+            ),
           )
           .connector_type(ENVOY)
-          .build()
+          .build(),
       )
     }
     scope.fakeCaller(user = "molly") {
@@ -925,7 +942,7 @@ class BackfillRunnerTest {
           .backoff_schedule("1000")
           .extra_sleep_ms(extraSleepMs)
           .parameter_map(mapOf("cheese" to "cheddar".encodeUtf8()))
-          .build()
+          .build(),
       )
       val id = response.backfill_run_id
       startBackfillAction.start(id, StartBackfillRequest())
@@ -938,14 +955,14 @@ class BackfillRunnerTest {
     start: String,
     end: String,
     scannedCount: Long,
-    matchingCount: Long
+    matchingCount: Long,
   ) = GetNextBatchRangeResponse(
     listOf(
       GetNextBatchRangeResponse.Batch(
         KeyRange(start.encodeUtf8(), end.encodeUtf8()),
         scannedCount,
-        matchingCount
-      )
-    )
+        matchingCount,
+      ),
+    ),
   )
 }

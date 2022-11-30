@@ -18,7 +18,7 @@ import wisp.logging.getLogger
 
 internal class BackfillRegisteredParameters @Inject constructor(
   @BackfilaDb private val transacter: Transacter,
-  private val queryFactory: Query.Factory
+  private val queryFactory: Query.Factory,
 ) : HibernateBackfill<DbRegisteredBackfill, Id<DbRegisteredBackfill>, NoParameters>() {
 
   override fun runOne(id: Id<DbRegisteredBackfill>, config: BackfillConfig<NoParameters>) {

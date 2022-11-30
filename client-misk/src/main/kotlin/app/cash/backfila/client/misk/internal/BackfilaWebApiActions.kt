@@ -73,7 +73,7 @@ internal class FinalizeBackfillAction @Inject constructor(
 }
 
 private fun <R> wrapExceptions(
-  handler: () -> R
+  handler: () -> R,
 ): R {
   try {
     return handler.invoke()

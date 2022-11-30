@@ -5,6 +5,7 @@ import app.cash.backfila.client.NoParameters
 import app.cash.backfila.client.misk.TestingModule
 import app.cash.backfila.embedded.Backfila
 import app.cash.backfila.embedded.createWetRun
+import javax.inject.Inject
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThatCode
@@ -16,7 +17,6 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.BillingMode
 import software.amazon.awssdk.services.dynamodb.model.ProvisionedThroughput
 import software.amazon.awssdk.services.dynamodb.model.UpdateTableRequest
-import javax.inject.Inject
 
 @MiskTest(startService = true)
 class DynamoDbBillingModeTest {
@@ -26,6 +26,7 @@ class DynamoDbBillingModeTest {
 
   @Inject
   lateinit var backfila: Backfila
+
   @Inject
   lateinit var db: DynamoDbClient
 
@@ -43,8 +44,8 @@ class DynamoDbBillingModeTest {
           ProvisionedThroughput.builder()
             .readCapacityUnits(2)
             .writeCapacityUnits(2)
-            .build()
-        ).build()
+            .build(),
+        ).build(),
     )
     assertThatCode {
       backfila.createWetRun<EmptyTrackBackfill>()
@@ -59,8 +60,8 @@ class DynamoDbBillingModeTest {
           ProvisionedThroughput.builder()
             .readCapacityUnits(2)
             .writeCapacityUnits(2)
-            .build()
-        ).build()
+            .build(),
+        ).build(),
     )
     backfila.createWetRun<EmptyTrackBackfill>()
   }
@@ -76,8 +77,8 @@ class DynamoDbBillingModeTest {
           ProvisionedThroughput.builder()
             .readCapacityUnits(2)
             .writeCapacityUnits(2)
-            .build()
-        ).build()
+            .build(),
+        ).build(),
     )
     backfila.createWetRun<ReallyExpensiveBackfill>()
 
@@ -90,8 +91,8 @@ class DynamoDbBillingModeTest {
           ProvisionedThroughput.builder()
             .readCapacityUnits(2)
             .writeCapacityUnits(2)
-            .build()
-        ).build()
+            .build(),
+        ).build(),
     )
     backfila.createWetRun<ReallyExpensiveBackfill>()
   }
@@ -108,7 +109,7 @@ class DynamoDbBillingModeTest {
     override fun dynamoDbTable(): DynamoDbTable<TrackItem> {
       return dynamoDbEnhancedClient.table(
         TrackItem.TABLE_NAME,
-        TableSchema.fromClass(TrackItem::class.java)
+        TableSchema.fromClass(TrackItem::class.java),
       )
     }
   }
@@ -128,7 +129,7 @@ class DynamoDbBillingModeTest {
     override fun dynamoDbTable(): DynamoDbTable<TrackItem> {
       return dynamoDbEnhancedClient.table(
         TrackItem.TABLE_NAME,
-        TableSchema.fromClass(TrackItem::class.java)
+        TableSchema.fromClass(TrackItem::class.java),
       )
     }
   }

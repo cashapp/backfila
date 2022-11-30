@@ -5,7 +5,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression
 import javax.inject.Inject
 
 class DynamoMusicTableTestData @Inject constructor(
-  var dynamoDb: DynamoDBMapper
+  var dynamoDb: DynamoDBMapper,
 ) {
 
   fun getTracksDump(): List<TrackItem> {
@@ -45,8 +45,8 @@ class DynamoMusicTableTestData @Inject constructor(
         "She's Out of My Life",
         "I Can't Help It",
         "It's the Falling in Love",
-        "Burn This Disco Out"
-      )
+        "Burn This Disco Out",
+      ),
     )
   }
 
@@ -64,8 +64,8 @@ class DynamoMusicTableTestData @Inject constructor(
         "Billie Jean",
         "Human Nature",
         "P.Y.T. (Pretty Young Thing)",
-        "The Lady in My Life"
-      )
+        "The Lady in My Life",
+      ),
     )
   }
 
@@ -87,8 +87,8 @@ class DynamoMusicTableTestData @Inject constructor(
         "Sway",
         "The Way You Look Tonight",
         "Come Fly with Me",
-        "That's All"
-      )
+        "That's All",
+      ),
     )
   }
 
@@ -109,8 +109,8 @@ class DynamoMusicTableTestData @Inject constructor(
         "A Place for My Head",
         "Forgotten",
         "Cure for the Itch",
-        "Pushing Me Away"
-      )
+        "Pushing Me Away",
+      ),
     )
 
     addAlbum(
@@ -130,8 +130,8 @@ class DynamoMusicTableTestData @Inject constructor(
         "From the Inside",
         "Nobody's Listening",
         "Session",
-        "Numb"
-      )
+        "Numb",
+      ),
     )
   }
 
@@ -139,7 +139,7 @@ class DynamoMusicTableTestData @Inject constructor(
     album_token: String,
     album_title: String,
     artist_name: String,
-    tracks: List<String>
+    tracks: List<String>,
   ) {
     // Insert the album info
     val albumItem = TrackItem().apply {

@@ -11,11 +11,11 @@ import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
 import app.cash.backfila.protos.clientservice.RunBatchRequest
 import app.cash.backfila.protos.clientservice.RunBatchResponse
 import com.google.common.base.Stopwatch
+import java.time.Duration
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import software.amazon.awssdk.services.dynamodb.model.BillingMode
 import software.amazon.awssdk.services.dynamodb.model.ScanRequest
-import java.time.Duration
 
 class DynamoDbBackfillOperator<I : Any, P : Any>(
   private val dynamoDbClient: DynamoDbClient,
@@ -38,7 +38,7 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
       // It's odd but a null billingModeSummary implies "PROVISIONED"
       require(
         billingModeSummary == null ||
-          billingModeSummary.billingMode() == BillingMode.PROVISIONED
+          billingModeSummary.billingMode() == BillingMode.PROVISIONED,
       ) {
         "Trying to prepare a backfill on a Dynamo table named ${backfill.dynamoDbTable.tableName()} " +
           "with a billing mode that is not PROVISIONED, it is " +
@@ -54,7 +54,7 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
     require(
       partitionCount in 1..segmentCount &&
         Integer.bitCount(partitionCount) == 1 &&
-        Integer.bitCount(segmentCount) == 1
+        Integer.bitCount(segmentCount) == 1,
     ) {
       "partitionCount and segmentCount must be positive powers of 2, and segmentCount must be " +
         "greater than partitionCount (partitionCount=$partitionCount, segmentCount=$segmentCount)"
@@ -71,8 +71,8 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
           keyRangeCodec.encodeKeyRange(
             segmentStartInclusive,
             segmentEndExclusive,
-            segmentCount
-          )
+            segmentCount,
+          ),
         )
         .build()
     }
@@ -141,7 +141,7 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
         result.items().map {
           backfill.dynamoDbTable.tableSchema().mapToItem(it)
         },
-        config
+        config,
       )
       lastEvaluatedKey = result.lastEvaluatedKey()
       if (stopwatch.elapsed() > Duration.ofMillis(1_000L)) {
@@ -166,7 +166,7 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
       originalRange.start,
       originalRange.end,
       originalRange.count,
-      this
+      this,
     )
   }
 }

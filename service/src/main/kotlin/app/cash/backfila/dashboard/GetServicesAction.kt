@@ -20,16 +20,16 @@ import wisp.logging.getLogger
 class GetServicesAction @Inject constructor(
   private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
   @BackfilaDb private val transacter: Transacter,
-  private val queryFactory: Query.Factory
+  private val queryFactory: Query.Factory,
 ) : WebAction {
 
   data class UiService(
     val name: String,
-    val running_backfills: Int
+    val running_backfills: Int,
   )
 
   data class GetServicesResponse(
-    val services: List<UiService>
+    val services: List<UiService>,
   )
 
   @Get("/services")
@@ -50,7 +50,7 @@ class GetServicesAction @Inject constructor(
       services.map {
         UiService(
           name = it.registry_name,
-          running_backfills = runningByService[it.id]?.size ?: 0
+          running_backfills = runningByService[it.id]?.size ?: 0,
         )
       }
     }

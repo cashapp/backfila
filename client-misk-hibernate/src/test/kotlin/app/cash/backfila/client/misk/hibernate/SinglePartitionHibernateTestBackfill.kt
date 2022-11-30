@@ -1,9 +1,9 @@
 package app.cash.backfila.client.misk.hibernate
 
 import app.cash.backfila.client.BackfillConfig
+import app.cash.backfila.client.Description
 import app.cash.backfila.client.misk.ClientMiskService
 import app.cash.backfila.client.misk.DbMenu
-import app.cash.backfila.client.Description
 import app.cash.backfila.client.misk.MenuQuery
 import javax.inject.Inject
 import misk.hibernate.Id
@@ -13,7 +13,7 @@ import misk.hibernate.Transacter
 @Description("So we can backfill menus.")
 class SinglePartitionHibernateTestBackfill @Inject constructor(
   @ClientMiskService private val transacter: Transacter,
-  private val queryFactory: Query.Factory
+  private val queryFactory: Query.Factory,
 ) : HibernateBackfill<DbMenu, Id<DbMenu>, SandwichParameters>() {
   val idsRanDry = mutableListOf<Id<DbMenu>>()
   val idsRanWet = mutableListOf<Id<DbMenu>>()
@@ -37,5 +37,5 @@ class SinglePartitionHibernateTestBackfill @Inject constructor(
 }
 data class SandwichParameters(
   @Description("The type of sandwich to backfill. e.g. chicken, beef")
-  val type: String = "chicken"
+  val type: String = "chicken",
 )

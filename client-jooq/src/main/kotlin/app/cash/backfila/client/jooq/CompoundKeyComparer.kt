@@ -28,7 +28,7 @@ class CompoundKeyComparer<T>(private val compoundKeyFields: List<Field<*>>) {
    */
   fun gt(compoundKeyValue: Record): Condition {
     return buildCondition(
-      compoundKeyValue
+      compoundKeyValue,
     ) { obj: Field<T>, value: T -> obj.greaterThan(value) }
   }
 
@@ -53,7 +53,7 @@ class CompoundKeyComparer<T>(private val compoundKeyFields: List<Field<*>>) {
     return buildCondition(
       compoundKeyValue,
       { obj: Field<T>, value: T -> obj.greaterThan(value) },
-      { obj: Field<T>, value: T -> obj.greaterOrEqual(value) }
+      { obj: Field<T>, value: T -> obj.greaterOrEqual(value) },
     )
   }
 
@@ -76,7 +76,7 @@ class CompoundKeyComparer<T>(private val compoundKeyFields: List<Field<*>>) {
    */
   fun lt(compoundKeyValue: Record): Condition {
     return buildCondition(
-      compoundKeyValue
+      compoundKeyValue,
     ) { obj: Field<T>, value: T -> obj.lessThan(value) }
   }
 
@@ -99,13 +99,13 @@ class CompoundKeyComparer<T>(private val compoundKeyFields: List<Field<*>>) {
     return buildCondition(
       compoundKeyValue,
       { obj: Field<T>, value: T -> obj.lessThan(value) },
-      { obj: Field<T>, value: T -> obj.lessOrEqual(value) }
+      { obj: Field<T>, value: T -> obj.lessOrEqual(value) },
     )
   }
 
   private fun buildCondition(
     compoundKeyValue: Record,
-    comparison: (field: Field<T>, value: T) -> Condition
+    comparison: (field: Field<T>, value: T) -> Condition,
   ): Condition {
     return buildCondition(compoundKeyValue, comparison, comparison)
   }
@@ -113,7 +113,7 @@ class CompoundKeyComparer<T>(private val compoundKeyFields: List<Field<*>>) {
   private fun buildCondition(
     compoundKeyValue: Record,
     mainComparison: (field: Field<T>, value: T) -> Condition,
-    lastFieldComparison: (field: Field<T>, value: T) -> Condition
+    lastFieldComparison: (field: Field<T>, value: T) -> Condition,
   ): Condition {
     var overallCondition: Condition? = null
     var priorFieldsEqualCondition: Condition? = null
@@ -125,12 +125,12 @@ class CompoundKeyComparer<T>(private val compoundKeyFields: List<Field<*>>) {
         and(
           priorFieldsEqualCondition,
           @Suppress("UNCHECKED_CAST")
-          comparison(field as Field<T>, compoundKeyValue.get(field))
-        )
+          comparison(field as Field<T>, compoundKeyValue.get(field)),
+        ),
       )
       priorFieldsEqualCondition = and(
         priorFieldsEqualCondition,
-        field.eq(compoundKeyValue.get(field))
+        field.eq(compoundKeyValue.get(field)),
       )
     }
     return overallCondition ?: throw IllegalStateException("overall condition cannot be null")

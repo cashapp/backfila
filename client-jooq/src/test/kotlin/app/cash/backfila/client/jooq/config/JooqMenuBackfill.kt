@@ -7,16 +7,16 @@ import app.cash.backfila.client.jooq.BackfillJooqTransacter
 import app.cash.backfila.client.jooq.ByteStringSerializer
 import app.cash.backfila.client.jooq.JooqBackfill
 import app.cash.backfila.client.jooq.gen.tables.references.MENU
+import javax.inject.Inject
 import org.jooq.Condition
 import org.jooq.DSLContext
 import org.jooq.Field
 import org.jooq.TableLike
 import wisp.logging.getLogger
-import javax.inject.Inject
 
 @Description("So we can backfill menus.")
 class JooqMenuTestBackfill @Inject constructor(
-  @JooqDBIdentifier private val jooqTransacter: JooqTransacter
+  @JooqDBIdentifier private val jooqTransacter: JooqTransacter,
 ) : JooqBackfill<Long, SandwichParameters>(), IdRecorder<Long, SandwichParameters> {
   override val idsRanDry = mutableListOf<Long>()
   override val idsRanWet = mutableListOf<Long>()
@@ -58,5 +58,5 @@ class JooqMenuTestBackfill @Inject constructor(
 
 data class SandwichParameters(
   @Description("The type of sandwich to backfill. e.g. chicken, beef")
-  val type: String = "chicken"
+  val type: String = "chicken",
 )

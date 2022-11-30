@@ -4,7 +4,6 @@
 package app.cash.backfila.client.jooq.gen.indexes
 
 import app.cash.backfila.client.jooq.gen.tables.Widgets
-
 import org.jooq.Index
 import org.jooq.impl.DSL
 import org.jooq.impl.Internal
@@ -16,7 +15,7 @@ import org.jooq.impl.Internal
 val WIDGETS_MANUFACTURER_CREATED_AT: Index = Internal.createIndex(
   DSL.name("manufacturer_created_at"), Widgets.WIDGETS,
   arrayOf(
-    Widgets.WIDGETS.MANUFACTURER_TOKEN, Widgets.WIDGETS.CREATED_AT_MS
+    Widgets.WIDGETS.MANUFACTURER_TOKEN, Widgets.WIDGETS.CREATED_AT_MS,
   ),
-  false
+  false,
 )

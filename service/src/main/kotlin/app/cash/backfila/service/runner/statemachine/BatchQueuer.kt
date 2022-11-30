@@ -19,7 +19,7 @@ import wisp.logging.getLogger
  */
 class BatchQueuer(
   private val backfillRunner: BackfillRunner,
-  numThreads: Int
+  numThreads: Int,
 ) {
   private val nextBatchChannel = VariableCapacityChannel<Batch>(
     capacity(numThreads),
@@ -27,7 +27,7 @@ class BatchQueuer(
       backfillRunner.factory.metrics.bufferedBatchesReadyToRun
         .labels(*backfillRunner.metricLabels)
         .set(queueSize.toDouble())
-    }
+    },
   )
 
   fun nextBatchChannel(): ReceiveChannel<Batch> = nextBatchChannel.downstream()
@@ -88,15 +88,15 @@ class BatchQueuer(
             computeTimeLimitMs,
             computeCountLimit.toLong(),
             metadata.dryRun,
-            false
-          )
+            false,
+          ),
         )
 
         backfillRunner.factory.metrics.getNextBatchSuccesses
           .labels(*backfillRunner.metricLabels).inc()
         backfillRunner.factory.metrics.getNextBatchDuration.record(
           stopwatch.elapsed().toMillis().toDouble(),
-          *backfillRunner.metricLabels
+          *backfillRunner.metricLabels,
         )
         backfillRunner.factory.metrics.computedBatchCount
           .labels(*backfillRunner.metricLabels).inc(response.batches.size.toDouble())
@@ -127,7 +127,7 @@ class BatchQueuer(
           .labels(*backfillRunner.metricLabels).inc()
         backfillRunner.factory.metrics.getNextBatchDuration.record(
           stopwatch.elapsed().toMillis().toDouble(),
-          *backfillRunner.metricLabels
+          *backfillRunner.metricLabels,
         )
         backfillRunner.onRpcFailure(e, "computing batch", stopwatch.elapsed())
       }

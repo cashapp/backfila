@@ -32,7 +32,7 @@ import retrofit2.mock.Calls
  */
 @Singleton
 internal class EmbeddedBackfila @Inject internal constructor(
-  private val operatorFactory: BackfillOperatorFactory
+  private val operatorFactory: BackfillOperatorFactory,
 ) : Backfila, BackfilaApi {
   private var serviceData: ConfigureServiceRequest? = null
   private var backfillIdGenerator = AtomicInteger(10)
@@ -64,7 +64,7 @@ internal class EmbeddedBackfila @Inject internal constructor(
   }
 
   override fun createAndStartbackfill(
-    request: CreateAndStartBackfillRequest
+    request: CreateAndStartBackfillRequest,
   ): Call<CreateAndStartBackfillResponse> {
     checkNotNull(serviceData) { "Must register the service before creating a backfill" }
 
@@ -81,7 +81,7 @@ internal class EmbeddedBackfila @Inject internal constructor(
       dryRun = createRequest.dry_run,
       parameters = createRequest.parameter_map.toMutableMap(),
       rangeStart = createRequest.pkey_range_start?.utf8(),
-      rangeEnd = createRequest.pkey_range_end?.utf8()
+      rangeEnd = createRequest.pkey_range_end?.utf8(),
     )
 
     run.execute()
@@ -99,14 +99,14 @@ internal class EmbeddedBackfila @Inject internal constructor(
     backfill: KClass<Type>,
     parameters: Map<String, ByteString>,
     rangeStart: String?,
-    rangeEnd: String?
+    rangeEnd: String?,
   ) = createBackfill(backfill, true, parameters, rangeStart, rangeEnd)
 
   override fun <Type : Backfill> createWetRun(
     backfillType: KClass<Type>,
     parameters: Map<String, ByteString>,
     rangeStart: String?,
-    rangeEnd: String?
+    rangeEnd: String?,
   ) = createBackfill(backfillType, false, parameters, rangeStart, rangeEnd)
 
   private fun <Type : Backfill> createBackfill(
@@ -114,7 +114,7 @@ internal class EmbeddedBackfila @Inject internal constructor(
     dryRun: Boolean,
     parameters: Map<String, ByteString>,
     rangeStart: String?,
-    rangeEnd: String?
+    rangeEnd: String?,
   ): BackfillRun<Type> {
     checkNotNull(serviceData) { "Must register the service before creating a backfill" }
     check(serviceData!!.backfills.map { it.name }.contains(backfillType.jvmName)) {
@@ -130,7 +130,7 @@ internal class EmbeddedBackfila @Inject internal constructor(
       dryRun = dryRun,
       parameters = parameters.toMutableMap(),
       rangeStart = rangeStart,
-      rangeEnd = rangeEnd
+      rangeEnd = rangeEnd,
     )
   }
 }

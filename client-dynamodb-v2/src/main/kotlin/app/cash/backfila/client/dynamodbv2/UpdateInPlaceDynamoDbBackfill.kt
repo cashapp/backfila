@@ -31,11 +31,11 @@ abstract class UpdateInPlaceDynamoDbBackfill<I : Any, P : Any>(
             dynamoDbTable.tableName() to itemsToSave.map {
               WriteRequest.builder().putRequest(
                 PutRequest.builder().item(
-                  dynamoDbTable.tableSchema().itemToMap(it, false)
-                ).build()
+                  dynamoDbTable.tableSchema().itemToMap(it, false),
+                ).build(),
               ).build()
-            }
-          )
+            },
+          ),
         ).build()
       val failedBatch = dynamoDbClient.batchWriteItem(batchRequest)
       require(!failedBatch.hasUnprocessedItems() || !failedBatch.unprocessedItems().isNotEmpty()) {

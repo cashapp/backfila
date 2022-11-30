@@ -16,14 +16,14 @@ interface Backfila {
     backfill: KClass<Type>,
     parameters: Map<String, ByteString>,
     rangeStart: String?,
-    rangeEnd: String?
+    rangeEnd: String?,
   ): BackfillRun<Type>
 
   fun <Type : Backfill> createWetRun(
     backfillType: KClass<Type>,
     parameters: Map<String, ByteString>,
     rangeStart: String?,
-    rangeEnd: String?
+    rangeEnd: String?,
   ): BackfillRun<Type>
 
   val configureServiceData: ConfigureServiceRequest?
@@ -33,7 +33,7 @@ inline fun <reified Type : Backfill> Backfila.createDryRun(
   parameters: Any? = null,
   parameterData: Map<String, ByteString> = mapOf(),
   rangeStart: String? = null,
-  rangeEnd: String? = null
+  rangeEnd: String? = null,
 ): BackfillRun<Type> {
   return createDryRun(Type::class, parameters, parameterData, rangeStart, rangeEnd)
 }
@@ -43,7 +43,7 @@ fun <Type : Backfill> Backfila.createDryRun(
   parameters: Any?,
   parameterData: Map<String, ByteString>,
   rangeStart: String?,
-  rangeEnd: String?
+  rangeEnd: String?,
 ): BackfillRun<Type> {
   check(parameterData.isEmpty() || parameters == null) {
     "Only one of parameters and parameterData can be set"
@@ -61,7 +61,7 @@ inline fun <reified Type : Backfill> Backfila.createWetRun(
   parameters: Any? = null,
   parameterData: Map<String, ByteString> = mapOf(),
   rangeStart: String? = null,
-  rangeEnd: String? = null
+  rangeEnd: String? = null,
 ): BackfillRun<Type> {
   return createWetRun(Type::class, parameters, parameterData, rangeStart, rangeEnd)
 }
@@ -71,7 +71,7 @@ fun <Type : Backfill> Backfila.createWetRun(
   parameters: Any?,
   parameterData: Map<String, ByteString>,
   rangeStart: String?,
-  rangeEnd: String?
+  rangeEnd: String?,
 ): BackfillRun<Type> {
   check(parameterData.isEmpty() || parameters == null) {
     "Only one of parameters and parameterData can be set"

@@ -14,9 +14,9 @@ import okio.ByteString
   "Use Backfila in the backfila-embedded module instead.",
   replaceWith = ReplaceWith(
     expression = "Backfila",
-    imports = ["app.cash.backfila.embedded.Backfila"]
+    imports = ["app.cash.backfila.embedded.Backfila"],
   ),
-  level = DeprecationLevel.WARNING
+  level = DeprecationLevel.WARNING,
 )
 class Backfila
 
@@ -28,9 +28,9 @@ class Backfila
   "Use BackfilaRun in the backfila-embedded module instead.",
   replaceWith = ReplaceWith(
     expression = "BackfillRun<B>",
-    imports = ["app.cash.backfila.embedded.BackfillRun"]
+    imports = ["app.cash.backfila.embedded.BackfillRun"],
   ),
-  level = DeprecationLevel.WARNING
+  level = DeprecationLevel.WARNING,
 )
 interface BackfillRun<B : Backfill>
 
@@ -42,9 +42,9 @@ interface BackfillRun<B : Backfill>
   "Use EmbeddedBackfilaModule in the backfila-embedded module instead.",
   replaceWith = ReplaceWith(
     expression = "EmbeddedBackfilaModule",
-    imports = ["app.cash.backfila.embedded.EmbeddedBackfilaModule"]
+    imports = ["app.cash.backfila.embedded.EmbeddedBackfilaModule"],
   ),
-  level = DeprecationLevel.ERROR
+  level = DeprecationLevel.ERROR,
 )
 class EmbeddedBackfilaModule
 
@@ -56,15 +56,15 @@ class EmbeddedBackfilaModule
   "Use createDryRun in the backfila-embedded module instead.",
   replaceWith = ReplaceWith(
     expression = "createDryRun",
-    imports = ["app.cash.backfila.embedded.createDryRun"]
+    imports = ["app.cash.backfila.embedded.createDryRun"],
   ),
-  level = DeprecationLevel.ERROR
+  level = DeprecationLevel.ERROR,
 )
 inline fun <reified Type : Backfill> Backfila.createDryRun(
   parameters: Any? = null,
   parameterData: Map<String, ByteString> = mapOf(),
   rangeStart: String? = null,
-  rangeEnd: String? = null
+  rangeEnd: String? = null,
 ): BackfillRun<Type> = error("deprecated!")
 
 /**
@@ -75,13 +75,13 @@ inline fun <reified Type : Backfill> Backfila.createDryRun(
   "Use createWetRun in the backfila-embedded module instead.",
   replaceWith = ReplaceWith(
     expression = "createWetRun",
-    imports = ["app.cash.backfila.embedded.createWetRun"]
+    imports = ["app.cash.backfila.embedded.createWetRun"],
   ),
-  level = DeprecationLevel.ERROR
+  level = DeprecationLevel.ERROR,
 )
 inline fun <reified Type : Backfill> Backfila.createWetRun(
   parameters: Any? = null,
   parameterData: Map<String, ByteString> = mapOf(),
   rangeStart: String? = null,
-  rangeEnd: String? = null
+  rangeEnd: String? = null,
 ): BackfillRun<Type> = error("deprecated!")

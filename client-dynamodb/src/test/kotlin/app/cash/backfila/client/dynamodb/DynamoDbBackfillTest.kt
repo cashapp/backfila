@@ -20,7 +20,9 @@ class DynamoDbBackfillTest {
   val module = TestingModule()
 
   @Inject lateinit var dynamoDb: DynamoDBMapper
+
   @Inject lateinit var backfila: Backfila
+
   @Inject lateinit var testData: DynamoMusicTableTestData
 
   @Test
@@ -45,13 +47,13 @@ class DynamoDbBackfillTest {
 
     assertThatCode {
       backfila.createWetRun<MakeTracksExplicitBackfill>(
-        parameterData = mapOf("validate" to "false".encodeUtf8())
+        parameterData = mapOf("validate" to "false".encodeUtf8()),
       )
     }.hasMessageContaining("Validate failed")
   }
 
   class MakeTracksExplicitBackfill @Inject constructor(
-    dynamoDb: DynamoDBMapper
+    dynamoDb: DynamoDBMapper,
   ) : UpdateInPlaceDynamoDbBackfill<TrackItem, MakeTracksExplicitBackfill.ExplicitParameters>(dynamoDb) {
 
     override fun runOne(item: TrackItem, config: BackfillConfig<ExplicitParameters>): Boolean {
@@ -66,7 +68,7 @@ class DynamoDbBackfillTest {
     }
 
     data class ExplicitParameters(
-      val validate: Boolean = true
+      val validate: Boolean = true,
     )
 
     override fun fixedSegmentCount(config: BackfillConfig<ExplicitParameters>): Int? = 16

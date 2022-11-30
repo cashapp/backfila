@@ -17,7 +17,7 @@ import misk.inject.KAbstractModule
  * Installs the [BackfillBackend] for Hibernate backfills. See the java doc for [RealBackfillModule].
  */
 class HibernateBackfillModule<T : HibernateBackfill<*, *, *>> private constructor(
-  private val backfillClass: KClass<T>
+  private val backfillClass: KClass<T>,
 ) : KAbstractModule() {
   override fun configure() {
     install(HibernateBackfillBackendModule)
@@ -60,7 +60,7 @@ private fun mapBinder(binder: Binder) = MapBinder.newMapBinder(
   binder,
   object : TypeLiteral<String>() {},
   object : TypeLiteral<KClass<out HibernateBackfill<*, *, *>>>() {},
-  ForHibernateBackend::class.java
+  ForHibernateBackend::class.java,
 )
 
 /** Annotation for specifying dependencies specifically for this Backend. */

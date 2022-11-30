@@ -19,7 +19,7 @@ import misk.web.mediatype.MediaTypes
 class CreateAndStartBackfillAction @Inject constructor(
   private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
   private val backfillCreator: BackfillCreator,
-  private val backfillStateToggler: BackfillStateToggler
+  private val backfillStateToggler: BackfillStateToggler,
 ) : WebAction {
   @Post("/create-and-start-backfill")
   @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
@@ -27,7 +27,7 @@ class CreateAndStartBackfillAction @Inject constructor(
   // TODO authenticate but any service
   @Unauthenticated
   fun createAndStartBackfill(
-    @RequestBody request: CreateAndStartBackfillRequest
+    @RequestBody request: CreateAndStartBackfillRequest,
   ): CreateAndStartBackfillResponse {
     val caller = caller.get()!!
     val service = caller.service!!

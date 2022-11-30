@@ -16,7 +16,8 @@ class DbRestaurant private constructor() : DbRoot<DbRestaurant> {
   @GeneratedValue
   override lateinit var id: Id<DbRestaurant>
 
-  @Column(nullable = false) lateinit var name: String
+  @Column(nullable = false)
+  lateinit var name: String
 
   constructor(name: String) : this() {
     this.name = name

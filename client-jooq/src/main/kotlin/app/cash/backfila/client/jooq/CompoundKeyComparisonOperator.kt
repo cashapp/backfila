@@ -10,5 +10,5 @@ import org.jooq.Record
  */
 typealias CompoundKeyComparisonOperator<T> = (
   comparer: CompoundKeyComparer<T>,
-  record: Record
+  record: Record,
 ) -> Condition
