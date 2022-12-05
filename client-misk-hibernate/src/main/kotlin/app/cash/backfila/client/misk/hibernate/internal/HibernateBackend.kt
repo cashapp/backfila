@@ -43,7 +43,7 @@ internal class HibernateBackend @Inject constructor(
     this,
   )
 
-  override fun create(backfillName: String, backfillId: String): BackfillOperator? {
+  override fun create(backfillName: String): BackfillOperator? {
     val backfill = getBackfill(backfillName) ?: return null
 
     @Suppress("UNCHECKED_CAST") // We don't know the types statically, so fake them.

@@ -30,15 +30,20 @@ class BackfillOperatorFactory @Inject constructor(
   @Throws(UnknownBackfillException::class)
   fun create(backfillName: String, backfillId: String): BackfillOperator {
     return instanceCache.get(backfillId) {
-      for (backend in backends) {
-        val backfillOperator = backend.create(backfillName, backfillId)
-        if (backfillOperator != null) {
-          return@get backfillOperator
-        }
-      }
-      logger.warn("Unknown backfill $backfillName, was it deleted while running?")
-      throw UnknownBackfillException("Unknown backfill $backfillName")
+      create(backfillName)
     }
+  }
+
+  @Throws(UnknownBackfillException::class)
+  fun create(backfillName: String): BackfillOperator {
+    for (backend in backends) {
+      val backfillOperator = backend.create(backfillName)
+      if (backfillOperator != null) {
+        return backfillOperator
+      }
+    }
+    logger.warn("Unknown backfill $backfillName, was it deleted while running?")
+    throw UnknownBackfillException("Unknown backfill $backfillName")
   }
 
   companion object {

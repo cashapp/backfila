@@ -23,7 +23,7 @@ class JooqBackend @Inject constructor(
   @ForJooqBackend private val backfills: MutableMap<String, KClass<out JooqBackfill<*, *>>>,
 ) : BackfillBackend {
 
-  override fun create(backfillName: String, backfillId: String): JooqBackfillOperator<*, out Any>? {
+  override fun create(backfillName: String): JooqBackfillOperator<*, out Any>? {
     return getBackfill(backfillName)?.let {
       @Suppress("UNCHECKED_CAST")
       createJooqOperator(it as JooqBackfill<Any, Any>)

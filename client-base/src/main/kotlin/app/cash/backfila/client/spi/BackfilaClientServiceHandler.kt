@@ -27,10 +27,10 @@ class BackfilaClientServiceHandler @Inject constructor(
 ) {
   @Throws(UnknownBackfillException::class)
   fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
-    return loggingSetupProvider.withBackfillRunLogging(request.backfill_name, request.backfill_id) {
-      logger.info { "Preparing backfill `${request.backfill_name}::${request.backfill_id}`" }
+    return loggingSetupProvider.withBackfillRunLogging(request.backfill_name, backfillId = null) {
+      logger.info { "Preparing backfill `${request.backfill_name}`" }
 
-      val operator = operatorFactory.create(request.backfill_name, request.backfill_id)
+      val operator = operatorFactory.create(request.backfill_name)
       return@withBackfillRunLogging operator.prepareBackfill(request)
     }
   }
