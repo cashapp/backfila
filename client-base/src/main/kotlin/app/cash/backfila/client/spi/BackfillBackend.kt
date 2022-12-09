@@ -5,6 +5,6 @@ package app.cash.backfila.client.spi
  * that actually run the backfill.
  */
 interface BackfillBackend {
-  fun create(backfillName: String, backfillId: String): BackfillOperator?
+  fun create(backfillName: String): BackfillOperator?
   fun backfills(): Set<BackfillRegistration>
 }

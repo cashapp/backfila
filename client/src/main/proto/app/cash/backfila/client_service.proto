@@ -15,9 +15,10 @@ message KeyRange {
 }
 
 message PrepareBackfillRequest {
-  // A unique identifier for this backfill run.
-  // Can be used as a caching key since backfill metadata is immutable after creation.
-  optional string backfill_id = 1;
+  // The id of the registered backfill.
+  // Deprecated and will be removed as it is confused with the backfill_id in later requests,
+  // which is only generated after preparing.
+  optional string backfill_id = 1 [deprecated = true];
 
   optional string backfill_name = 2;
 

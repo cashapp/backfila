@@ -41,7 +41,7 @@ class FixedSetBackend @Inject constructor(
     parametersOperator = BackfilaParametersOperator(parametersClass(backfill::class)),
   )
 
-  override fun create(backfillName: String, backfillId: String): BackfillOperator? {
+  override fun create(backfillName: String): BackfillOperator? {
     val backfill = getBackfill(backfillName)
 
     if (backfill != null) {

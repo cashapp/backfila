@@ -46,7 +46,7 @@ class DynamoDbBackend @Inject constructor(
     keyRangeCodec,
   )
 
-  override fun create(backfillName: String, backfillId: String): BackfillOperator? {
+  override fun create(backfillName: String): BackfillOperator? {
     val backfill = getBackfill(backfillName)
 
     if (backfill != null) {

@@ -8,10 +8,12 @@ import wisp.logging.getLogger
 class BackfilaClientMDCLoggingSetupProvider @Inject constructor() :
   BackfilaClientLoggingSetupProvider {
 
-  override fun <T> withBackfillRunLogging(backfillName: String, backfillId: String, wrapped: () -> T): T {
+  override fun <T> withBackfillRunLogging(backfillName: String, backfillId: String?, wrapped: () -> T): T {
     try {
       MDC.put(MDC_BACKFILL_NAME, backfillName)
-      MDC.put(MDC_BACKFILL_ID, backfillId)
+      backfillId?.let {
+        MDC.put(MDC_BACKFILL_ID, it)
+      }
     } catch (e: Exception) {
       logger.debug("Exception setting log context context", e)
     }

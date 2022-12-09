@@ -12,7 +12,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class EmptyBackend @Inject constructor() : BackfillBackend {
-  override fun create(backfillName: String, backfillId: String): BackfillOperator? {
+  override fun create(backfillName: String): BackfillOperator? {
     // Registers no backfills so it never creates an implementation.
     return null
   }
