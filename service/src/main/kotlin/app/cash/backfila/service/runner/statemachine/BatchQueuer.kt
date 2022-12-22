@@ -94,18 +94,16 @@ class BatchQueuer(
 
         backfillRunner.factory.metrics.getNextBatchSuccesses
           .labels(*backfillRunner.metricLabels).inc()
-        backfillRunner.factory.metrics.getNextBatchDuration.record(
-          stopwatch.elapsed().toMillis().toDouble(),
-          *backfillRunner.metricLabels,
-        )
+        backfillRunner.factory.metrics.getNextBatchDuration.labels(*backfillRunner.metricLabels)
+          .observe(stopwatch.elapsed().toMillis().toDouble())
         backfillRunner.factory.metrics.computedBatchCount
           .labels(*backfillRunner.metricLabels).inc(response.batches.size.toDouble())
         backfillRunner.factory.metrics.computedRecordsMatching
           .labels(*backfillRunner.metricLabels)
-          .inc(response.batches.sumByDouble { it.matching_record_count.toDouble() })
+          .inc(response.batches.sumOf { it.matching_record_count.toDouble() })
         backfillRunner.factory.metrics.computedRecordsScanned
           .labels(*backfillRunner.metricLabels)
-          .inc(response.batches.sumByDouble { it.scanned_record_count.toDouble() })
+          .inc(response.batches.sumOf { it.scanned_record_count.toDouble() })
         backfillRunner.onRpcSuccess()
 
         if (response.batches.isEmpty()) {
@@ -125,10 +123,8 @@ class BatchQueuer(
         logger.info(e) { "Rpc failure when computing next batch for ${backfillRunner.logLabel()}" }
         backfillRunner.factory.metrics.getNextBatchFailures
           .labels(*backfillRunner.metricLabels).inc()
-        backfillRunner.factory.metrics.getNextBatchDuration.record(
-          stopwatch.elapsed().toMillis().toDouble(),
-          *backfillRunner.metricLabels,
-        )
+        backfillRunner.factory.metrics.getNextBatchDuration.labels(*backfillRunner.metricLabels)
+          .observe(stopwatch.elapsed().toMillis().toDouble())
         backfillRunner.onRpcFailure(e, "computing batch", stopwatch.elapsed())
       }
     }

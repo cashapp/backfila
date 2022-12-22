@@ -247,10 +247,8 @@ class BackfillRunner private constructor(
         ),
       )
 
-      factory.metrics.runBatchDuration.record(
-        stopwatch.elapsed().toMillis().toDouble(),
-        *metricLabels,
-      )
+      factory.metrics.runBatchDuration.labels(*metricLabels)
+        .observe(stopwatch.elapsed().toMillis().toDouble())
       response
     }
   }

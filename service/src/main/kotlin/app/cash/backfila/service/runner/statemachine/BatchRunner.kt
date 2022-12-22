@@ -80,10 +80,9 @@ class BatchRunner(
         break
       }
 
-      backfillRunner.factory.metrics.blockedOnComputingNextBatchDuration.record(
-        stopwatch.elapsed().toMillis().toDouble(),
-        *backfillRunner.metricLabels,
-      )
+      backfillRunner.factory.metrics.blockedOnComputingNextBatchDuration
+        .labels(*backfillRunner.metricLabels)
+        .observe(stopwatch.elapsed().toMillis().toDouble())
       if (stopwatch.elapsed() > Duration.ofMillis(500)) {
         logger.info {
           "Runner stalled ${stopwatch.elapsed()} ms waiting for batch from " +
