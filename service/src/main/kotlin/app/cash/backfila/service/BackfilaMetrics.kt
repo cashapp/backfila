@@ -2,7 +2,7 @@ package app.cash.backfila.service
 
 import javax.inject.Inject
 import javax.inject.Singleton
-import misk.metrics.Metrics
+import misk.metrics.v2.Metrics
 
 @Singleton
 class BackfilaMetrics @Inject internal constructor(metrics: Metrics) {
