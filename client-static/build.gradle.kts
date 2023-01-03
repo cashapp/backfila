@@ -12,6 +12,7 @@ dependencies {
   implementation(Dependencies.retrofitMoshi)
   implementation(Dependencies.retrofitWire)
   implementation(Dependencies.okio)
+  implementation(Dependencies.kotlinReflection)
   implementation(Dependencies.kotlinStdLib)
   implementation(Dependencies.wireMoshiAdapter)
 

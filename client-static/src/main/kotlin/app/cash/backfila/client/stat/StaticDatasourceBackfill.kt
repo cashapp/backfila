@@ -1,4 +1,4 @@
-package app.cash.backfila.client.static
+package app.cash.backfila.client.stat
 
 import app.cash.backfila.client.Backfill
 import app.cash.backfila.client.BackfillConfig

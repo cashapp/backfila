@@ -2,6 +2,10 @@
 import nu.studer.gradle.jooq.JooqEdition
 
 buildscript {
+  repositories {
+    mavenCentral()
+    gradlePluginPortal()
+  }
   dependencies {
     classpath(Dependencies.flywayGradleBuildscriptDep)
     classpath(Dependencies.mysql)
@@ -23,6 +27,7 @@ dependencies {
   implementation(Dependencies.guice)
   implementation(Dependencies.okio)
   implementation(Dependencies.jooq)
+  implementation(Dependencies.kotlinReflection)
   implementation(Dependencies.kotlinStdLib)
   implementation(Dependencies.loggingApi)
   implementation(Dependencies.wireMoshiAdapter)

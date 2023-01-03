@@ -1,4 +1,4 @@
-package app.cash.backfila.client.static
+package app.cash.backfila.client.stat
 
 import app.cash.backfila.client.BackfillConfig
 import app.cash.backfila.embedded.Backfila
@@ -9,7 +9,7 @@ import javax.inject.Inject
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okio.ByteString.Companion.encodeUtf8
-import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions
 import org.assertj.core.api.SoftAssertions
 import org.junit.jupiter.api.Test
 
@@ -26,9 +26,9 @@ class StaticKotlinValBackfillTest {
     val run = backfila.createWetRun<SaucesBackfill>()
     run.execute()
 
-    assertThat(run.backfill.backfilledSauces.size).isEqualTo(sweetSauces.size + savourySauces.size)
-    assertThat(run.backfill.backfilledSauces).containsAll(savourySauces)
-    assertThat(run.backfill.backfilledSauces).containsAll(sweetSauces)
+    Assertions.assertThat(run.backfill.backfilledSauces.size).isEqualTo(sweetSauces.size + savourySauces.size)
+    Assertions.assertThat(run.backfill.backfilledSauces).containsAll(savourySauces)
+    Assertions.assertThat(run.backfill.backfilledSauces).containsAll(sweetSauces)
   }
 
   @Test
@@ -38,9 +38,9 @@ class StaticKotlinValBackfillTest {
     )
     run.execute()
 
-    assertThat(run.backfill.backfilledSauces.size).isEqualTo(sweetSauces.size + savourySauces.size)
-    assertThat(run.backfill.backfilledSauces).containsAll(savourySauces)
-    assertThat(run.backfill.backfilledSauces).containsAll(sweetSauces.map { it.markSweet() })
+    Assertions.assertThat(run.backfill.backfilledSauces.size).isEqualTo(sweetSauces.size + savourySauces.size)
+    Assertions.assertThat(run.backfill.backfilledSauces).containsAll(savourySauces)
+    Assertions.assertThat(run.backfill.backfilledSauces).containsAll(sweetSauces.map { it.markSweet() })
   }
 
   @Test
@@ -50,7 +50,7 @@ class StaticKotlinValBackfillTest {
     )
     run.execute()
 
-    assertThat(run.backfill.backfilledSauces.size).isEqualTo(0)
+    Assertions.assertThat(run.backfill.backfilledSauces.size).isEqualTo(0)
   }
 
   @Test
@@ -59,7 +59,7 @@ class StaticKotlinValBackfillTest {
     run.batchSize = 5
     run.scanRemaining()
     run.runBatch()
-    assertThat(run.backfill.backfilledSauces.size).isEqualTo(5)
+    Assertions.assertThat(run.backfill.backfilledSauces.size).isEqualTo(5)
   }
 
   @Test
@@ -67,7 +67,7 @@ class StaticKotlinValBackfillTest {
     val run = backfila.createWetRun<SaucesBackfill>(rangeStart = "2", rangeEnd = "8")
     run.batchSize = 3
     run.execute()
-    assertThat(run.backfill.backfilledSauces.size).isEqualTo(6)
+    Assertions.assertThat(run.backfill.backfilledSauces.size).isEqualTo(6)
   }
 
   @Test
@@ -75,7 +75,7 @@ class StaticKotlinValBackfillTest {
     val run = backfila.createWetRun<SaucesBackfill>(rangeStart = "3")
     run.batchSize = 3
     run.execute()
-    assertThat(run.backfill.backfilledSauces.size).isEqualTo(7)
+    Assertions.assertThat(run.backfill.backfilledSauces.size).isEqualTo(7)
   }
 
   @Test
@@ -83,7 +83,7 @@ class StaticKotlinValBackfillTest {
     val run = backfila.createWetRun<SaucesBackfill>(rangeEnd = "8")
     run.batchSize = 3
     run.execute()
-    assertThat(run.backfill.backfilledSauces.size).isEqualTo(8)
+    Assertions.assertThat(run.backfill.backfilledSauces.size).isEqualTo(8)
   }
 
   @Test

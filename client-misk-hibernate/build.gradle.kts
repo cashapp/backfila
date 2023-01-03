@@ -7,6 +7,7 @@ dependencies {
   implementation(Dependencies.wireRuntime)
   implementation(Dependencies.guice)
   implementation(Dependencies.okio)
+  implementation(Dependencies.kotlinReflection)
   implementation(Dependencies.kotlinStdLib)
   implementation(Dependencies.loggingApi)
   implementation(Dependencies.wireMoshiAdapter)

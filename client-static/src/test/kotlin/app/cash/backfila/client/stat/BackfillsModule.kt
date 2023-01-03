@@ -1,4 +1,4 @@
-package app.cash.backfila.client.static
+package app.cash.backfila.client.stat
 
 import app.cash.backfila.client.BackfilaHttpClientConfig
 import app.cash.backfila.client.misk.MiskBackfillModule

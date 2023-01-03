@@ -3,6 +3,7 @@ apply(plugin = "kotlin")
 dependencies {
   implementation(Dependencies.aws2Dynamodb)
   implementation(Dependencies.aws2DynamodbEnhanced)
+  implementation(Dependencies.kotlinReflection)
   implementation(Dependencies.kotlinStdLib)
   implementation(Dependencies.guava)
   implementation(Dependencies.guice)
