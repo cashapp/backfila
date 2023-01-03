@@ -27,6 +27,7 @@ dependencies {
 
   testImplementation(Dependencies.junitEngine)
   testImplementation(Dependencies.assertj)
+  testImplementation(Dependencies.kotlinReflection)
   testImplementation(Dependencies.kotlinTest)
   testImplementation(project(":backfila-embedded"))
 

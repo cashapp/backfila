@@ -1,8 +1,8 @@
-package app.cash.backfila.client.static.internal
+package app.cash.backfila.client.stat.internal
 
 import app.cash.backfila.client.spi.BackfilaParametersOperator
 import app.cash.backfila.client.spi.BackfillOperator
-import app.cash.backfila.client.static.StaticDatasourceBackfill
+import app.cash.backfila.client.stat.StaticDatasourceBackfill
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.KeyRange

@@ -1,4 +1,4 @@
-package app.cash.backfila.client.static.internal
+package app.cash.backfila.client.stat.internal
 
 import app.cash.backfila.client.DeleteBy
 import app.cash.backfila.client.Description
@@ -7,8 +7,8 @@ import app.cash.backfila.client.spi.BackfilaParametersOperator
 import app.cash.backfila.client.spi.BackfillBackend
 import app.cash.backfila.client.spi.BackfillOperator
 import app.cash.backfila.client.spi.BackfillRegistration
-import app.cash.backfila.client.static.ForStaticBackend
-import app.cash.backfila.client.static.StaticDatasourceBackfill
+import app.cash.backfila.client.stat.ForStaticBackend
+import app.cash.backfila.client.stat.StaticDatasourceBackfill
 import com.google.inject.Injector
 import com.google.inject.TypeLiteral
 import com.squareup.moshi.Types

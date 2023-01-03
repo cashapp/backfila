@@ -1,7 +1,7 @@
-package app.cash.backfila.client.static
+package app.cash.backfila.client.stat
 
 import app.cash.backfila.client.spi.BackfillBackend
-import app.cash.backfila.client.static.internal.StaticDatasourceBackend
+import app.cash.backfila.client.stat.internal.StaticDatasourceBackend
 import com.google.inject.AbstractModule
 import com.google.inject.Binder
 import com.google.inject.TypeLiteral
