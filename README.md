@@ -11,8 +11,7 @@ Note: some instructions here are out of date
 Install [Hermit shell hooks](https://cashapp.github.io/hermit/usage/shell/?h=shell) or run the following manually.
 
 ```
-cd backfila
-. ./bin/activate-hermit
+$ . ./bin/activate-hermit
 ```
 
 ## Building
