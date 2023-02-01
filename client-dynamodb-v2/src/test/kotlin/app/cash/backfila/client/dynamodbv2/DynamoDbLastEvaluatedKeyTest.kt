@@ -1,6 +1,7 @@
 package app.cash.backfila.client.dynamodbv2
 
 import app.cash.backfila.client.BackfillConfig
+import app.cash.backfila.client.PrepareBackfillConfig
 import app.cash.backfila.client.misk.TestingModule
 import app.cash.backfila.embedded.Backfila
 import app.cash.backfila.embedded.createWetRun
@@ -94,10 +95,10 @@ class DynamoDbLastEvaluatedKeyTest {
       val requireMaxBatchSize: Long = 100L,
     )
 
-    override fun fixedSegmentCount(config: BackfillConfig<Parameters>): Int? =
+    override fun fixedSegmentCount(config: PrepareBackfillConfig<Parameters>): Int? =
       config.parameters.segmentCount
 
-    override fun partitionCount(config: BackfillConfig<Parameters>): Int =
+    override fun partitionCount(config: PrepareBackfillConfig<Parameters>): Int =
       config.parameters.partitionCount
   }
 }

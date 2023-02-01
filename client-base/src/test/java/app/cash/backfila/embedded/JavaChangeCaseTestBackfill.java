@@ -24,9 +24,9 @@ class JavaChangeCaseTestBackfill extends FixedSetBackfill<CaseParameters> {
   }
 
   @NotNull @Override
-  public ValidateResult<CaseParameters> checkBackfillConfig(@NotNull BackfillConfig<CaseParameters> backfillConfig) {
-    seenParameters = backfillConfig.getParameters();
-    return super.checkBackfillConfig(backfillConfig);
+  public ValidateResult<CaseParameters> checkParameters(@NotNull CaseParameters parameters) {
+    seenParameters = parameters;
+    return super.checkParameters(parameters);
   }
 
   @Override public void runOne(@NotNull FixedSetRow row,

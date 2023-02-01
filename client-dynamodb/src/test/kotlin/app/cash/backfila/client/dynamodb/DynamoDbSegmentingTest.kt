@@ -1,6 +1,7 @@
 package app.cash.backfila.client.dynamodb
 
 import app.cash.backfila.client.BackfillConfig
+import app.cash.backfila.client.PrepareBackfillConfig
 import app.cash.backfila.client.dynamodb.DynamoDbSegmentingTest.SegmentingBackfill.SegmentingParameters
 import app.cash.backfila.client.misk.TestingModule
 import app.cash.backfila.embedded.Backfila
@@ -108,8 +109,8 @@ class DynamoDbSegmentingTest {
       val partitionCount: Int = 2,
     )
 
-    override fun fixedSegmentCount(config: BackfillConfig<SegmentingParameters>): Int? = config.parameters.segmentCount
+    override fun fixedSegmentCount(config: PrepareBackfillConfig<SegmentingParameters>): Int? = config.parameters.segmentCount
 
-    override fun partitionCount(config: BackfillConfig<SegmentingParameters>): Int = config.parameters.partitionCount
+    override fun partitionCount(config: PrepareBackfillConfig<SegmentingParameters>): Int = config.parameters.partitionCount
   }
 }

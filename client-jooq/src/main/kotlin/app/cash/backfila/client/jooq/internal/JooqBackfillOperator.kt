@@ -29,11 +29,7 @@ class JooqBackfillOperator<K, Param : Any> internal constructor(
   override fun name(): String = backfill.javaClass.name
 
   override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
-    backfill.prepareAndValidateBackfill(
-      parametersOperator.constructBackfillConfig(
-        request.parameters, request.dry_run,
-      ),
-    )
+    backfill.prepareAndValidateBackfill(parametersOperator.constructBackfillConfig(request))
 
     val partitions = backfill.shardedTransacterMap.keys.map { partitionName ->
       Partition.Builder()
@@ -55,9 +51,7 @@ class JooqBackfillOperator<K, Param : Any> internal constructor(
         .batches(emptyList())
         .build()
     }
-    val config = parametersOperator.constructBackfillConfig(
-      request.parameters, request.dry_run,
-    )
+    val config = parametersOperator.constructBackfillConfig(request)
 
     return backfill.inTransactionReturning(
       "${name()}#JooqBackfillOperator#getNextBatchRange",
@@ -74,9 +68,7 @@ class JooqBackfillOperator<K, Param : Any> internal constructor(
   }
 
   override fun runBatch(request: RunBatchRequest): RunBatchResponse {
-    val config = parametersOperator.constructBackfillConfig(
-      request.parameters, request.dry_run,
-    )
+    val config = parametersOperator.constructBackfillConfig(request)
 
     val keysInRange = backfill.inTransactionReturning(
       "${name()}#JooqBackfillOperator#runBatch", request.partition_name,

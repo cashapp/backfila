@@ -2,6 +2,7 @@ package app.cash.backfila.client.misk.hibernate
 
 import app.cash.backfila.client.Backfill
 import app.cash.backfila.client.BackfillConfig
+import app.cash.backfila.client.PrepareBackfillConfig
 import com.squareup.moshi.Types
 import java.lang.reflect.ParameterizedType
 import kotlin.reflect.KClass
@@ -66,7 +67,7 @@ abstract class HibernateBackfill<E : DbEntity<E>, Pkey : Any, Param : Any> : Bac
    * Override this and throw an exception to prevent the backfill from being created.
    * This is also a good place to do any prep work before batches are run.
    */
-  open fun validate(config: BackfillConfig<Param>) {}
+  open fun validate(config: PrepareBackfillConfig<Param>) {}
 
   /**
    * Called for each batch of matching records.

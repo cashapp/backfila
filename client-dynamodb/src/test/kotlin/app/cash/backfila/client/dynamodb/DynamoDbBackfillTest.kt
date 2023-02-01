@@ -1,6 +1,7 @@
 package app.cash.backfila.client.dynamodb
 
 import app.cash.backfila.client.BackfillConfig
+import app.cash.backfila.client.PrepareBackfillConfig
 import app.cash.backfila.client.misk.TestingModule
 import app.cash.backfila.embedded.Backfila
 import app.cash.backfila.embedded.createWetRun
@@ -63,7 +64,7 @@ class DynamoDbBackfillTest {
       return true
     }
 
-    override fun validate(config: BackfillConfig<ExplicitParameters>) {
+    override fun validate(config: PrepareBackfillConfig<ExplicitParameters>) {
       check(config.parameters.validate) { "Validate failed" }
     }
 
@@ -71,6 +72,6 @@ class DynamoDbBackfillTest {
       val validate: Boolean = true,
     )
 
-    override fun fixedSegmentCount(config: BackfillConfig<ExplicitParameters>): Int? = 16
+    override fun fixedSegmentCount(config: PrepareBackfillConfig<ExplicitParameters>): Int? = 16
   }
 }

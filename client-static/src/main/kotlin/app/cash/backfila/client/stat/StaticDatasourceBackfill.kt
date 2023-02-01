@@ -2,6 +2,7 @@ package app.cash.backfila.client.stat
 
 import app.cash.backfila.client.Backfill
 import app.cash.backfila.client.BackfillConfig
+import app.cash.backfila.client.PrepareBackfillConfig
 import com.google.inject.TypeLiteral
 import com.squareup.moshi.Types
 import java.lang.reflect.ParameterizedType
@@ -32,7 +33,7 @@ abstract class StaticDatasourceBackfill<I : Any, P : Any> : Backfill {
    * Override this and throw an exception to prevent the backfill from being created.
    * This is also a good place to do any prep work before batches are run.
    */
-  open fun validate(config: BackfillConfig<P>) {}
+  open fun validate(config: PrepareBackfillConfig<P>) {}
 
   /**
    * Called for each batch of matching records.

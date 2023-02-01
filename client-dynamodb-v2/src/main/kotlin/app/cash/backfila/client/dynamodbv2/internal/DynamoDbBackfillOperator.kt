@@ -26,8 +26,7 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
   override fun name(): String = backfill.javaClass.toString()
 
   override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
-    val config =
-      parametersOperator.constructBackfillConfig(request.parameters, request.dry_run)
+    val config = parametersOperator.constructBackfillConfig(request)
     backfill.validate(config)
 
     var table = dynamoDbClient.describeTable {
@@ -112,8 +111,7 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
     val keyRange = keyRangeCodec.decodeKeyRange(request.batch_range)
     require(keyRange.end == keyRange.start + 1)
 
-    val config =
-      parametersOperator.constructBackfillConfig(request.parameters, request.dry_run)
+    val config = parametersOperator.constructBackfillConfig(request)
 
     var lastEvaluatedKey: Map<String, AttributeValue>? = keyRange.lastEvaluatedKey
 

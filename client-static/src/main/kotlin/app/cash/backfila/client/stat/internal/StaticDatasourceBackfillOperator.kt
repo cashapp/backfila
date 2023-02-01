@@ -21,8 +21,7 @@ class StaticDatasourceBackfillOperator<I : Any, P : Any>(
   override fun name(): String = backfill.javaClass.toString()
 
   override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
-    val config =
-      parametersOperator.constructBackfillConfig(request.parameters, request.dry_run)
+    val config = parametersOperator.constructBackfillConfig(request)
     backfill.validate(config)
 
     val start = request.range?.start?.utf8()?.let {
@@ -90,7 +89,7 @@ class StaticDatasourceBackfillOperator<I : Any, P : Any>(
   override fun runBatch(request: RunBatchRequest): RunBatchResponse {
     checkArgument(request.partition_name == PARTITION, "Attempting to get batch for unknown partition ${request.partition_name}")
     val batchRange = request.batch_range.decode()
-    val config = parametersOperator.constructBackfillConfig(request.parameters, request.dry_run)
+    val config = parametersOperator.constructBackfillConfig(request)
 
     val batch = backfill.staticDatasource.subList(batchRange.start, batchRange.end)
 

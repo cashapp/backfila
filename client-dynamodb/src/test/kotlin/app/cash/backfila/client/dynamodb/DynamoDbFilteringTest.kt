@@ -2,6 +2,7 @@ package app.cash.backfila.client.dynamodb
 
 import app.cash.backfila.client.BackfillConfig
 import app.cash.backfila.client.NoParameters
+import app.cash.backfila.client.PrepareBackfillConfig
 import app.cash.backfila.client.misk.TestingModule
 import app.cash.backfila.embedded.Backfila
 import app.cash.backfila.embedded.createWetRun
@@ -63,7 +64,7 @@ class DynamoDbFilteringTest {
       const val TRACK_SORT_START = "TRACK_"
     }
 
-    override fun fixedSegmentCount(config: BackfillConfig<NoParameters>): Int? = 16
+    override fun fixedSegmentCount(config: PrepareBackfillConfig<NoParameters>): Int? = 16
   }
 
   class DynamoFilterMakeTracksExplicitBackfill @Inject constructor(

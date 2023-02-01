@@ -1,6 +1,7 @@
 package app.cash.backfila.client.stat
 
 import app.cash.backfila.client.BackfillConfig
+import app.cash.backfila.client.PrepareBackfillConfig
 import app.cash.backfila.embedded.Backfila
 import app.cash.backfila.embedded.createDryRun
 import app.cash.backfila.embedded.createWetRun
@@ -133,7 +134,7 @@ class StaticKotlinValBackfillTest {
       }
     }
 
-    override fun validate(config: BackfillConfig<SauceAttributes>) {
+    override fun validate(config: PrepareBackfillConfig<SauceAttributes>) {
       check(config.parameters.validate) { "Validate failed" }
     }
 
