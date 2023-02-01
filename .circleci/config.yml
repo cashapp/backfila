@@ -11,17 +11,12 @@ jobs:
     steps:
       - checkout
       - run:
-          name: "Download and extract OpenJDK 11"
-          command: |
-            mkdir -p ~/openjdk-11 && cd ~/openjdk-11 && curl -sSL https://download.oracle.com/java/GA/jdk11/9/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz | tar -xz --strip-components 1
-            echo '
-              export PATH="$JAVA_HOME/bin:$PATH"
-              export JAVA_HOME="$HOME/openjdk-11"
-            ' >> $BASH_ENV
+          name: Hermit
+          command: ./bin/hermit env -r >> $BASH_ENV
       - run:
           name: "Compile"
           command: |
-            ./gradlew testClasses --parallel --build-cache
+            gradle testClasses --parallel --build-cache
       - save_cache:
           paths:
             - ~/.gradle/caches
@@ -46,13 +41,8 @@ jobs:
             - v1-{{ .Branch }}-{{ .Environment.CIRCLE_JOB }}
             - v1-master-compile
       - run:
-          name: "Download and extract OpenJDK 11"
-          command: |
-            mkdir -p ~/openjdk-11 && cd ~/openjdk-11 && curl -sSL https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz | tar -xz --strip-components 1
-            echo '
-              export PATH="$JAVA_HOME/bin:$PATH"
-              export JAVA_HOME="$HOME/openjdk-11"
-            ' >> $BASH_ENV
+          name: Hermit
+          command: ./bin/hermit env -r >> $BASH_ENV
       - run:
           name: "Dump environment variables"
           command: env
@@ -64,7 +54,7 @@ jobs:
           command: docker run -d -p 3306:3306 --name mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=1 mysql:5.7 --sql-mode=""
       - run:
           name: "Build and test"
-          command: ./gradlew build check -i --parallel --build-cache
+          command: gradle build check -i --parallel --build-cache
       - run:
           name: Collect test results
           command: |

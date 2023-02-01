@@ -4,11 +4,22 @@ Backfila is a service that manages backfill state, calling into other services t
 
 Note: some instructions here are out of date
 
+## Hermit
+
+[Hermit](https://cashapp.github.io/hermit/) is used to manage build dependencies like local Java and Gradle versions.
+
+Install [Hermit shell hooks](https://cashapp.github.io/hermit/usage/shell/?h=shell) or run the following manually.
+
+```
+cd backfila
+. ./bin/activate-hermit
+```
+
 ## Building
 Build backfila:
 
 ```
-$ ./gradlew clean shadowJar
+$ gradle clean shadowJar
 ```
 
 ## Run the Service
