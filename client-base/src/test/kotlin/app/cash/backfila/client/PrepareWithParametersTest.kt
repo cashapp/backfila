@@ -31,11 +31,11 @@ class PrepareWithParametersTest {
   )
 
   class PrepareWithParametersBackfill @Inject constructor() : FixedSetBackfill<PrepareParameters>() {
-    override fun checkBackfillConfig(
-      backfillConfig: BackfillConfig<PrepareParameters>,
+    override fun checkParameters(
+      parameters: PrepareParameters,
     ): ValidateResult<PrepareParameters> {
-      if (backfillConfig.parameters.favoriteNumber != null) {
-        return ValidateResult(backfillConfig.parameters)
+      if (parameters.favoriteNumber != null) {
+        return ValidateResult(parameters)
       }
       return ValidateResult(
         PrepareParameters(favoriteNumber = 42),

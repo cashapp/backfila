@@ -4,6 +4,10 @@ import app.cash.backfila.client.BackfilaDefault
 import app.cash.backfila.client.BackfilaRequired
 import app.cash.backfila.client.BackfillConfig
 import app.cash.backfila.client.Description
+import app.cash.backfila.client.PrepareBackfillConfig
+import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
+import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
+import app.cash.backfila.protos.clientservice.RunBatchRequest
 import app.cash.backfila.protos.service.Parameter
 import java.lang.reflect.InvocationTargetException
 import kotlin.reflect.KClass
@@ -33,10 +37,27 @@ class BackfilaParametersOperator<T : Any>(
   /** Constructor parameters used as defaults when missing to create a new T. */
   private val constructor: KFunction<T> = fetchConstructor(parametersClass)
 
-  fun constructBackfillConfig(
+  fun constructBackfillConfig(request: PrepareBackfillRequest): PrepareBackfillConfig<T> =
+    PrepareBackfillConfig(
+      constructParameters(request.parameters),
+      request.dry_run,
+    )
+
+  fun constructBackfillConfig(request: GetNextBatchRangeRequest): BackfillConfig<T> = BackfillConfig(
+    constructParameters(request.parameters),
+    request.partition_name,
+    request.dry_run,
+  )
+
+  fun constructBackfillConfig(request: RunBatchRequest): BackfillConfig<T> = BackfillConfig(
+    constructParameters(request.parameters),
+    request.partition_name,
+    request.dry_run,
+  )
+
+  private fun constructParameters(
     parameters: MutableMap<String, ByteString>,
-    dryRun: Boolean,
-  ): BackfillConfig<T> {
+  ): T {
     val map = mutableMapOf<KParameter, Any>()
     for (parameter in constructor.parameters) {
       if (parameters.containsKey(parameter.name)) {
@@ -63,12 +84,11 @@ class BackfilaParametersOperator<T : Any>(
         }
       }
     }
-    val instance = try {
-      constructor.callBy(map)
+    try {
+      return constructor.callBy(map)
     } catch (e: InvocationTargetException) {
       throw IllegalArgumentException("Failed to create Parameter object $parametersClass", e.cause)
     }
-    return BackfillConfig(instance, dryRun)
   }
 
   companion object {

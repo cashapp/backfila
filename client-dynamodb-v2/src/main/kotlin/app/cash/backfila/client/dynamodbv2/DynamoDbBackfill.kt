@@ -2,6 +2,7 @@ package app.cash.backfila.client.dynamodbv2
 
 import app.cash.backfila.client.Backfill
 import app.cash.backfila.client.BackfillConfig
+import app.cash.backfila.client.PrepareBackfillConfig
 import com.google.inject.TypeLiteral
 import com.squareup.moshi.Types
 import java.lang.reflect.ParameterizedType
@@ -45,7 +46,7 @@ abstract class DynamoDbBackfill<I : Any, P : Any> : Backfill {
    * Override this and throw an exception to prevent the backfill from being created.
    * This is also a good place to do any prep work before batches are run.
    */
-  open fun validate(config: BackfillConfig<P>) {}
+  open fun validate(config: PrepareBackfillConfig<P>) {}
 
   /**
    * Called for each batch of matching records.
@@ -61,7 +62,7 @@ abstract class DynamoDbBackfill<I : Any, P : Any> : Backfill {
    * count to fit the requested batch size. Override this if the guess is bad, such as when your
    * data is not uniformly distributed.
    */
-  open fun fixedSegmentCount(config: BackfillConfig<P>): Int? = null
+  open fun fixedSegmentCount(config: PrepareBackfillConfig<P>): Int? = null
 
   /**
    * The number of independent workers to perform the backfill. When the Backfill is executing, each
@@ -69,7 +70,7 @@ abstract class DynamoDbBackfill<I : Any, P : Any> : Backfill {
    * overhead in Backfila; set a higher number for more concurrency. The default of 8 means that
    * the Backfill will run at least 8 batches concurrently.
    */
-  open fun partitionCount(config: BackfillConfig<P>): Int = 8
+  open fun partitionCount(config: PrepareBackfillConfig<P>): Int = 8
 
   /**
    * It is rather easy to run a backfill against a dynamo instance that is configured expensively.

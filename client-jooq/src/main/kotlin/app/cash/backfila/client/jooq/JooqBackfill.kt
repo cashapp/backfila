@@ -2,6 +2,7 @@ package app.cash.backfila.client.jooq
 
 import app.cash.backfila.client.Backfill
 import app.cash.backfila.client.BackfillConfig
+import app.cash.backfila.client.PrepareBackfillConfig
 import app.cash.backfila.protos.clientservice.KeyRange
 import okio.ByteString
 import org.jooq.Condition
@@ -76,7 +77,7 @@ abstract class JooqBackfill<K, Param : Any> : Backfill {
    * Hook that gives you a place to prepare or validate the backfill. Throw an exception from your
    * consumer to indicate the backfill is invalid.
    */
-  open fun prepareAndValidateBackfill(config: BackfillConfig<Param>) {}
+  open fun prepareAndValidateBackfill(config: PrepareBackfillConfig<Param>) {}
 
   /**
    * Function that performs the work of the backfill by applying some side effect to the given

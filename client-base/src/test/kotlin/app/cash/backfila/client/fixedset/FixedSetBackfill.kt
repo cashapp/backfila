@@ -5,8 +5,8 @@ import app.cash.backfila.client.BackfillConfig
 import app.cash.backfila.client.ValidateResult
 
 abstract class FixedSetBackfill<Param : Any> : Backfill {
-  open fun checkBackfillConfig(backfillConfig: BackfillConfig<Param>): ValidateResult<Param> {
-    return ValidateResult(backfillConfig.parameters)
+  open fun checkParameters(parameters: Param): ValidateResult<Param> {
+    return ValidateResult(parameters)
   }
 
   abstract fun runOne(row: FixedSetRow, backfillConfig: BackfillConfig<Param>)

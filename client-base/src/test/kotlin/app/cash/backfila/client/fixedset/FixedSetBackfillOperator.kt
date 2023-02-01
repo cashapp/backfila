@@ -20,11 +20,9 @@ class FixedSetBackfillOperator<Param : Any>(
   override fun name() = backfill.javaClass.toString()
 
   override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
-    val backfillConfig = parametersOperator.constructBackfillConfig(request.parameters, request.dry_run)
+    val backfillConfig = parametersOperator.constructBackfillConfig(request)
 
-    val validateResult = backfill.checkBackfillConfig(
-      backfillConfig,
-    )
+    val validateResult = backfill.checkParameters(backfillConfig.parameters)
 
     val partitions = mutableListOf<PrepareBackfillResponse.Partition>()
 
@@ -48,9 +46,7 @@ class FixedSetBackfillOperator<Param : Any>(
   }
 
   override fun getNextBatchRange(request: GetNextBatchRangeRequest): GetNextBatchRangeResponse {
-    backfill.checkBackfillConfig(
-      parametersOperator.constructBackfillConfig(request.parameters, request.dry_run),
-    )
+    backfill.checkParameters(parametersOperator.constructBackfillConfig(request).parameters)
 
     val partition = datastore.dataByInstance[request.partition_name] ?: error("Invalid partition name")
     val previousEndKey: Int = request.previous_end_key?.utf8()?.toInt() ?: -1
@@ -72,11 +68,8 @@ class FixedSetBackfillOperator<Param : Any>(
   }
 
   override fun runBatch(request: RunBatchRequest): RunBatchResponse {
-    val backfillConfig =
-      parametersOperator.constructBackfillConfig(request.parameters, request.dry_run)
-    backfill.checkBackfillConfig(
-      backfillConfig,
-    )
+    val backfillConfig = parametersOperator.constructBackfillConfig(request)
+    backfill.checkParameters(backfillConfig.parameters)
     val partition = datastore.dataByInstance[request.partition_name]!!
     val start = request.batch_range.start.utf8().toInt()
     val end = request.batch_range.end.utf8().toInt()

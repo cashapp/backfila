@@ -71,11 +71,7 @@ internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : An
   override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
     validateRange(request.range)
 
-    backfill.validate(
-      parametersOperator.constructBackfillConfig(
-        request.parameters, request.dry_run,
-      ),
-    )
+    backfill.validate(parametersOperator.constructBackfillConfig(request))
 
     return PrepareBackfillResponse.Builder()
       .partitions(partitionProvider.names(request).map { partitionForShard(it, request.range) })
@@ -161,9 +157,7 @@ internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : An
     private val batchSize: Long = request.batch_size
     private val scanSize: Long = request.scan_size
     private val backfillRange: KeyRange = request.backfill_range
-    private val config = parametersOperator.constructBackfillConfig(
-      request.parameters, request.dry_run,
-    )
+    private val config = parametersOperator.constructBackfillConfig(request)
     private val precomputing: Boolean = request.precomputing == true
 
     // Initialized from the request and gets updated as batches are returned.
@@ -292,9 +286,7 @@ internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : An
   }
 
   override fun runBatch(request: RunBatchRequest): RunBatchResponse {
-    val config = parametersOperator.constructBackfillConfig(
-      request.parameters, request.dry_run,
-    )
+    val config = parametersOperator.constructBackfillConfig(request)
 
     val pkeys = partitionProvider.transaction(request.partition_name) { session ->
       val min = primaryKeyCursorMapper.fromByteString(backfill.pkeyClass.java, request.batch_range.start).getOrThrow()
