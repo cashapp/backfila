@@ -1,0 +1,76 @@
+name: Test
+
+on:
+  pull_request:
+    paths-ignore:
+      - "docs/**"
+      - "*.md"
+  push:
+    branches:
+      - master
+
+env:
+  ENVIRONMENT: TESTING
+  JVM_OPTS: -Xmx1024M
+  GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=3 -Xmx4096m -Dorg.gradle.configureondemand=true -Dkotlin.incremental=false -Dorg.gradle.jvmargs="-Xmx4096m -XX:MaxPermSize=2048m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8"
+  TERM: dumb
+
+jobs:
+  js:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        cmd:
+          - npm install -g @misk/cli && miskweb ci-build -e
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
+
+      - name: Test
+        run: ${{ matrix.cmd }}
+
+  jvm:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        cmd:
+          - gradle build check -i --parallel --build-cache
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
+
+      - name: Start MySQL
+        # There's a race condition here, where it's possible that MySQL hasn't finished starting
+        # up before we try to connect to it. But Kotlin builds are so damn slow it'll never
+        # happen in practice.
+        run: docker run -d -p 3306:3306 --name mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=1 mysql:5.7 --sql-mode=""
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle
+
+      - name: Test
+        run: ${{ matrix.cmd }}
+
+      - name: Publish Test Report
+        if: ${{ always() }}
+        uses: mikepenz/action-junit-report@v3
+        with:
+          check_name: Test Report - ${{ matrix.cmd }}
+          report_paths: '**/build/test-results/test/TEST-*.xml'
+          github_token: ${{ secrets.GITHUB_TOKEN }}

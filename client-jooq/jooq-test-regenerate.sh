@@ -28,6 +28,6 @@ docker run --rm \
 echo "waiting for mysql to start up"
 waitContainer backfila-jooq-codegen
 
-./gradlew -p client-jooq generateJooq
+gradle -p client-jooq generateJooq
 
 docker stop backfila-jooq-codegen

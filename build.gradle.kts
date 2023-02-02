@@ -115,3 +115,8 @@ subprojects {
     }
   }
 }
+
+// Disable the Gradle wrapper if Gradle is managed by Hermit
+tasks.named<Wrapper>("wrapper") {
+  enabled = false
+}
