@@ -41,7 +41,7 @@ abstract class DynamoDbBackfill<I : Any, P : Any> : Backfill {
    * Called for each batch of matching records.
    * Override in a backfill to process all records in a batch.
    */
-  abstract fun runBatch(items: List<I>, config: BackfillConfig<P>)
+  abstract fun runBatch(items: List<@JvmSuppressWildcards I>, config: BackfillConfig<P>)
 
   /**
    * Override this to force Backfila to run this number of batches in total, divided among the

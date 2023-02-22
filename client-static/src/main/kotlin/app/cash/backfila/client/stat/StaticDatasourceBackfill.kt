@@ -39,7 +39,7 @@ abstract class StaticDatasourceBackfill<I : Any, P : Any> : Backfill {
    * Called for each batch of matching records.
    * Override in a backfill to process all records in a batch.
    */
-  open fun runBatch(items: List<I>, config: BackfillConfig<P>) {
+  open fun runBatch(items: List<@JvmSuppressWildcards I>, config: BackfillConfig<P>) {
     items.forEach { runOne(it, config) }
   }
 

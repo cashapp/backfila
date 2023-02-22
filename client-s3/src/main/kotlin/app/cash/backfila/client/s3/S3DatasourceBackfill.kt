@@ -17,7 +17,7 @@ abstract class S3DatasourceBackfill<R : Any, P : Any> : Backfill {
    * Called for each batch of records.
    * Override in a backfill to process all records in a batch.
    */
-  open fun runBatch(records: List<R>, config: BackfillConfig<P>) {
+  open fun runBatch(records: List<@JvmSuppressWildcards R>, config: BackfillConfig<P>) {
     records.forEach { runOne(it, config) }
   }
 
