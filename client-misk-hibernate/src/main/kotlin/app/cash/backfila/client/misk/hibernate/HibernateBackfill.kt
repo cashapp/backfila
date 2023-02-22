@@ -73,7 +73,7 @@ abstract class HibernateBackfill<E : DbEntity<E>, Pkey : Any, Param : Any> : Bac
    * Called for each batch of matching records.
    * Override in a backfill to process all records in a batch.
    */
-  open fun runBatch(pkeys: List<Pkey>, config: BackfillConfig<Param>) {
+  open fun runBatch(pkeys: List<@JvmSuppressWildcards Pkey>, config: BackfillConfig<Param>) {
     pkeys.forEach { runOne(it, config) }
   }
 
