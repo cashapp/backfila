@@ -35,7 +35,7 @@ dependencies {
 }
 
 val jar by tasks.getting(Jar::class) {
-  baseName = "backfila-client-misk-hibernate"
+  archiveBaseName.set("backfila-client-misk-hibernate")
 }
 
 if (rootProject.file("hooks.gradle").exists()) {

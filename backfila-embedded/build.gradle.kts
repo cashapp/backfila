@@ -19,7 +19,7 @@ dependencies {
 }
 
 val jar by tasks.getting(Jar::class) {
-  baseName = "backfila-embedded"
+  archiveBaseName.set("backfila-embedded")
 }
 
 if (rootProject.file("hooks.gradle").exists()) {

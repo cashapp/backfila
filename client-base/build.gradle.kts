@@ -44,7 +44,7 @@ dependencies {
 }
 
 val jar by tasks.getting(Jar::class) {
-  baseName = "client-base"
+  archiveBaseName.set("client-base")
 }
 
 if (rootProject.file("hooks.gradle").exists()) {

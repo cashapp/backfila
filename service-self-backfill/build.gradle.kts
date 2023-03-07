@@ -70,7 +70,7 @@ dependencies {
 }
 
 val jar by tasks.getting(Jar::class) {
-  baseName = "backfila-service-self-backfill"
+  archiveBaseName.set("backfila-service-self-backfill")
 }
 
 if (rootProject.file("hooks.gradle").exists()) {
