@@ -38,7 +38,7 @@ dependencies {
 }
 
 val jar by tasks.getting(Jar::class) {
-  baseName = "backfila-client-static"
+  archiveBaseName.set("backfila-client-static")
 }
 
 if (rootProject.file("hooks.gradle").exists()) {

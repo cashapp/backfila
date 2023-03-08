@@ -41,7 +41,7 @@ dependencies {
 }
 
 val jar by tasks.getting(Jar::class) {
-  baseName = "backfila-client-dynamodb"
+  archiveBaseName.set("backfila-client-dynamodb")
 }
 
 if (rootProject.file("hooks.gradle").exists()) {

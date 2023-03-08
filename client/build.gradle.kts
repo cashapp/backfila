@@ -25,7 +25,7 @@ dependencies {
 }
 
 val jar by tasks.getting(Jar::class) {
-  baseName = "backfila-client"
+  archiveBaseName.set("backfila-client")
 }
 
 wire {

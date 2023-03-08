@@ -81,7 +81,7 @@ val jar by tasks.getting(Jar::class) {
     attributes("Main-Class" to "app.cash.backfila.service.BackfilaDevelopmentServiceKt")
   }
   isZip64 = true
-  classifier = "unshaded"
+  archiveClassifier.set("unshaded")
 }
 
 val shadowJar by tasks.getting(com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar::class) {
@@ -91,7 +91,7 @@ val shadowJar by tasks.getting(com.github.jengelman.gradle.plugins.shadow.tasks.
 
   mergeServiceFiles()
   isZip64 = true
-  classifier = "shaded"
+  archiveClassifier.set("shaded")
 }
 
 if (rootProject.file("hooks.gradle").exists()) {

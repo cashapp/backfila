@@ -7,7 +7,7 @@ dependencies {
 }
 
 val jar by tasks.getting(Jar::class) {
-  baseName = "backfila-client-misk-jooq"
+  archiveBaseName.set("backfila-client-misk-jooq")
 }
 if (rootProject.file("hooks.gradle").exists()) {
   apply(from = rootProject.file("hooks.gradle"))
