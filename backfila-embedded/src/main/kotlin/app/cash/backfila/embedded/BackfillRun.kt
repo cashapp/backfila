@@ -16,6 +16,7 @@ interface BackfillRun<B : Backfill> {
   val parameters: Map<String, ByteString>
   val rangeStart: String?
   val rangeEnd: String?
+  val backfillId: String
 
   var batchSize: Long
   var scanSize: Long

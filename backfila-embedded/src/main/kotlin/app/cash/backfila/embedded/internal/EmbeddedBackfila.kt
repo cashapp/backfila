@@ -82,6 +82,7 @@ internal class EmbeddedBackfila @Inject internal constructor(
       parameters = createRequest.parameter_map.toMutableMap(),
       rangeStart = createRequest.pkey_range_start?.utf8(),
       rangeEnd = createRequest.pkey_range_end?.utf8(),
+      backfillId = backfillId.toString(),
     )
 
     run.execute()
@@ -131,6 +132,7 @@ internal class EmbeddedBackfila @Inject internal constructor(
       parameters = parameters.toMutableMap(),
       rangeStart = rangeStart,
       rangeEnd = rangeEnd,
+      backfillId = backfillId,
     )
   }
 }
