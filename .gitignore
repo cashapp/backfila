@@ -14,3 +14,5 @@ docs/releasing.md
 
 # Local gradle includes
 local.settings.gradle
+
+.DS_Store
