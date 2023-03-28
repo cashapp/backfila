@@ -84,7 +84,7 @@ object Dependencies {
 object Versions {
   val flywayDBPlugin = "5.2.4"
   val jooqGenPlugin = "5.2"
-  val jooq = "3.14.9"
+  val jooq = "3.18.1"
   val kotlin = "1.6.20"
   val kotlinCoroutines = "1.6.0"
   val ktlint = "0.47.1"
