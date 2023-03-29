@@ -120,3 +120,12 @@ subprojects {
 tasks.named<Wrapper>("wrapper") {
   enabled = false
 }
+
+configurations.all {
+  resolutionStrategy.eachDependency {
+    if(this.requested.group == "org.antlr" && this.requested.name == "antlr4-runtime") {
+      this.useVersion("4.9.3")
+      this.because("DynamoDBLocal:1.13 wants an older version of antlr and doesn't work with newer versions")
+    }
+  }
+}
