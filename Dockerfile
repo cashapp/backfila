@@ -1,4 +1,4 @@
-FROM gradle:6.7.1-jdk11-openj9 AS build
+FROM gradle:jdk17-jammy AS build
 COPY --chown=gradle:gradle . /home/gradle/src
 WORKDIR /home/gradle/src
 RUN gradle shadowJar --no-daemon
