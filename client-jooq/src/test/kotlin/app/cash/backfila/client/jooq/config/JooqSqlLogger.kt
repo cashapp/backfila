@@ -1,12 +1,12 @@
 package app.cash.backfila.client.jooq.config
 
 import org.jooq.ExecuteContext
+import org.jooq.ExecuteListener
 import org.jooq.conf.Settings
 import org.jooq.impl.DSL
-import org.jooq.impl.DefaultExecuteListener
 import wisp.logging.getLogger
 
-class JooqSqlLogger : DefaultExecuteListener() {
+class JooqSqlLogger : ExecuteListener {
   /**
    * Hook into the query execution lifecycle before executing queries
    */
