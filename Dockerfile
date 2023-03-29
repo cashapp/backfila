@@ -3,7 +3,7 @@ COPY --chown=gradle:gradle . /home/gradle/src
 WORKDIR /home/gradle/src
 RUN gradle shadowJar --no-daemon
 
-FROM openjdk:11
+FROM eclipse-temurin:17.0.6_10-jre-jammy
 RUN mkdir /usr/local/backfila
 COPY --from=build /home/gradle/src/service/build/libs/service-*-SNAPSHOT.jar /usr/local/backfila/service.jar
 
