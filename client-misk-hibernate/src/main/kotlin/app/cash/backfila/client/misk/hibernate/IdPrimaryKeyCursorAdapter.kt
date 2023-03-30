@@ -13,6 +13,11 @@ internal object IdPrimaryKeyCursorAdapter : PrimaryKeyCursorAdapter<Id<*>> {
   override fun fromByteString(byteString: ByteString): Result<Id<*>> {
     val id = byteString.utf8().toLongOrNull()
       ?: return Result.failure(NumberFormatException())
-    return Result.success(Id<DbEntity<*>>(id))
+    return Result.success(Id<DbPlaceholder>(id))
+  }
+
+  /** This placeholder exists so we can create a backfill without a type parameter. */
+  private class DbPlaceholder : DbEntity<DbPlaceholder> {
+    override val id: Id<DbPlaceholder> get() = throw IllegalStateException("unreachable")
   }
 }

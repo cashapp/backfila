@@ -41,6 +41,10 @@ dependencies {
   testImplementation(Dependencies.miskInject)
   testImplementation(Dependencies.miskTesting)
   testImplementation(project(":client-misk"))
+  // Required until DynamoDBLocal is built with antlr >4.11 which wisp-config pulls in
+  testImplementation("org.antlr:antlr4-runtime:4.7.2") {
+    setForce(true)
+  }
 }
 
 val jar by tasks.getting(Jar::class) {
