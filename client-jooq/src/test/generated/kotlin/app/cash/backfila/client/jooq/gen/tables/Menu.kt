@@ -6,14 +6,15 @@ package app.cash.backfila.client.jooq.gen.tables
 import app.cash.backfila.client.jooq.gen.Jooq
 import app.cash.backfila.client.jooq.gen.keys.KEY_MENU_PRIMARY
 import app.cash.backfila.client.jooq.gen.tables.records.MenuRecord
-import kotlin.collections.List
 import org.jooq.Field
 import org.jooq.ForeignKey
 import org.jooq.Identity
 import org.jooq.Name
 import org.jooq.Record
+import org.jooq.Records
 import org.jooq.Row2
 import org.jooq.Schema
+import org.jooq.SelectField
 import org.jooq.Table
 import org.jooq.TableField
 import org.jooq.TableOptions
@@ -48,7 +49,7 @@ open class Menu(
     /**
      * The reference instance of <code>jooq.menu</code>
      */
-    val MENU = Menu()
+    val MENU: Menu = Menu()
   }
 
   /**
@@ -85,12 +86,12 @@ open class Menu(
   constructor() : this(DSL.name("menu"), null)
 
   constructor(child: Table<out Record>, key: ForeignKey<out Record, MenuRecord>) : this(Internal.createPathAlias(child, key), child, key, MENU, null)
-  override fun getSchema(): Schema = Jooq.JOOQ
+  override fun getSchema(): Schema? = if (aliased()) null else Jooq.JOOQ
   override fun getIdentity(): Identity<MenuRecord, Long?> = super.getIdentity() as Identity<MenuRecord, Long?>
   override fun getPrimaryKey(): UniqueKey<MenuRecord> = KEY_MENU_PRIMARY
-  override fun getKeys(): List<UniqueKey<MenuRecord>> = listOf(KEY_MENU_PRIMARY)
   override fun `as`(alias: String): Menu = Menu(DSL.name(alias), this)
   override fun `as`(alias: Name): Menu = Menu(alias, this)
+  override fun `as`(alias: Table<*>): Menu = Menu(alias.getQualifiedName(), this)
 
   /**
    * Rename this table
@@ -102,8 +103,24 @@ open class Menu(
    */
   override fun rename(name: Name): Menu = Menu(name, null)
 
+  /**
+   * Rename this table
+   */
+  override fun rename(name: Table<*>): Menu = Menu(name.getQualifiedName(), null)
+
   // -------------------------------------------------------------------------
   // Row2 type methods
   // -------------------------------------------------------------------------
   override fun fieldsRow(): Row2<Long?, String?> = super.fieldsRow() as Row2<Long?, String?>
+
+  /**
+   * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
+   */
+  fun <U> mapping(from: (Long?, String?) -> U): SelectField<U> = convertFrom(Records.mapping(from))
+
+  /**
+   * Convenience mapping calling {@link SelectField#convertFrom(Class,
+   * Function)}.
+   */
+  fun <U> mapping(toType: Class<U>, from: (Long?, String?) -> U): SelectField<U> = convertFrom(toType, Records.mapping(from))
 }

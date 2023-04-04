@@ -12,10 +12,4 @@ import org.jooq.impl.Internal
 // INDEX definitions
 // -------------------------------------------------------------------------
 
-val WIDGETS_MANUFACTURER_CREATED_AT: Index = Internal.createIndex(
-  DSL.name("manufacturer_created_at"), Widgets.WIDGETS,
-  arrayOf(
-    Widgets.WIDGETS.MANUFACTURER_TOKEN, Widgets.WIDGETS.CREATED_AT_MS,
-  ),
-  false,
-)
+val WIDGETS_MANUFACTURER_CREATED_AT: Index = Internal.createIndex(DSL.name("manufacturer_created_at"), Widgets.WIDGETS, arrayOf(Widgets.WIDGETS.MANUFACTURER_TOKEN, Widgets.WIDGETS.CREATED_AT_MS), false)

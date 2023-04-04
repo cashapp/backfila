@@ -6,7 +6,6 @@ object Dependencies {
   val awsDynamodb = "com.amazonaws:aws-java-sdk-dynamodb:1.11.960"
   val awsS3 = "com.amazonaws:aws-java-sdk-s3:1.12.231"
   val dokkaGradlePlugin = "org.jetbrains.dokka:dokka-gradle-plugin:1.5.0"
-  val flywayGradleBuildscriptDep = "gradle.plugin.com.boxfuse.client:flyway-release:5.0.2"
   val guava = "com.google.guava:guava:31.1-jre"
   val guice = "com.google.inject:guice:5.1.0"
   val jCommander = "com.beust:jcommander:1.72"
@@ -82,8 +81,8 @@ object Dependencies {
 }
 
 object Versions {
-  val flywayDBPlugin = "5.2.4"
-  val jooqGenPlugin = "5.2"
+  val flywayDBPlugin = "7.15.0"
+  val jooqGenPlugin = "8.1"
   val jooq = "3.18.1"
   val kotlin = "1.7.0"
   val kotlinCoroutines = "1.6.3"

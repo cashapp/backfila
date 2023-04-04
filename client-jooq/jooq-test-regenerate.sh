@@ -19,6 +19,7 @@ function waitContainer {
 echo "starting mysql in docker"
 docker run --rm \
   --name backfila-jooq-codegen \
+  --platform linux/x86_64 \
   -e MYSQL_DATABASE=backfila-jooq-codegen \
   -e MYSQL_ROOT_HOST=% \
   -e MYSQL_ROOT_PASSWORD=root \

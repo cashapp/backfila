@@ -1,5 +1,6 @@
 
 import nu.studer.gradle.jooq.JooqEdition
+import nu.studer.gradle.jooq.JooqGenerate
 
 buildscript {
   repositories {
@@ -7,7 +8,6 @@ buildscript {
     gradlePluginPortal()
   }
   dependencies {
-    classpath(Dependencies.flywayGradleBuildscriptDep)
     classpath(Dependencies.mysql)
   }
 }
@@ -119,8 +119,13 @@ jooq {
   }
 }
 
-val generateJooq by project.tasks
-generateJooq.dependsOn("flywayMigrate")
-
 sourceSets.getByName("test").java.srcDirs
   .add(File("${project.projectDir}/src/test/generated/kotlin"))
+
+tasks {
+  withType<JooqGenerate> {
+    dependsOn(flywayMigrate)
+  }
+}
+
+tasks.named<nu.studer.gradle.jooq.JooqGenerate>("generateJooq") { allInputsDeclared.set(true) }
