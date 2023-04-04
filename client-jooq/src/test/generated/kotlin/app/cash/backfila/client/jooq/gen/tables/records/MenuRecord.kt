@@ -16,13 +16,13 @@ import org.jooq.impl.UpdatableRecordImpl
 @Suppress("UNCHECKED_CAST")
 open class MenuRecord() : UpdatableRecordImpl<MenuRecord>(Menu.MENU), Record2<Long?, String?> {
 
-  var id: Long?
-    set(value) = set(0, value)
-    get() = get(0) as Long?
+  open var id: Long?
+    set(value): Unit = set(0, value)
+    get(): Long? = get(0) as Long?
 
-  var name: String?
-    set(value) = set(1, value)
-    get() = get(1) as String?
+  open var name: String?
+    set(value): Unit = set(1, value)
+    get(): String? = get(1) as String?
 
   // -------------------------------------------------------------------------
   // Primary key information
@@ -44,12 +44,12 @@ open class MenuRecord() : UpdatableRecordImpl<MenuRecord>(Menu.MENU), Record2<Lo
   override fun value2(): String? = name
 
   override fun value1(value: Long?): MenuRecord {
-    this.id = value
+    set(0, value)
     return this
   }
 
   override fun value2(value: String?): MenuRecord {
-    this.name = value
+    set(1, value)
     return this
   }
 
@@ -65,5 +65,6 @@ open class MenuRecord() : UpdatableRecordImpl<MenuRecord>(Menu.MENU), Record2<Lo
   constructor(id: Long? = null, name: String? = null) : this() {
     this.id = id
     this.name = name
+    resetChangedOnNotNull()
   }
 }

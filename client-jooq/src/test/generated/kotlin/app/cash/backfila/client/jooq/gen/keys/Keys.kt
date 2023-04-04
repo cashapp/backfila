@@ -15,17 +15,5 @@ import org.jooq.impl.Internal
 // UNIQUE and PRIMARY KEY definitions
 // -------------------------------------------------------------------------
 
-val KEY_MENU_PRIMARY: UniqueKey<MenuRecord> = Internal.createUniqueKey(
-  Menu.MENU, DSL.name("KEY_menu_PRIMARY"),
-  arrayOf(
-    Menu.MENU.ID,
-  ),
-  true,
-)
-val KEY_WIDGETS_PRIMARY: UniqueKey<WidgetsRecord> = Internal.createUniqueKey(
-  Widgets.WIDGETS, DSL.name("KEY_widgets_PRIMARY"),
-  arrayOf(
-    Widgets.WIDGETS.WIDGET_TOKEN,
-  ),
-  true,
-)
+val KEY_MENU_PRIMARY: UniqueKey<MenuRecord> = Internal.createUniqueKey(Menu.MENU, DSL.name("KEY_menu_PRIMARY"), arrayOf(Menu.MENU.ID), true)
+val KEY_WIDGETS_PRIMARY: UniqueKey<WidgetsRecord> = Internal.createUniqueKey(Widgets.WIDGETS, DSL.name("KEY_widgets_PRIMARY"), arrayOf(Widgets.WIDGETS.WIDGET_TOKEN), true)

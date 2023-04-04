@@ -13,8 +13,10 @@ import org.jooq.ForeignKey
 import org.jooq.Index
 import org.jooq.Name
 import org.jooq.Record
+import org.jooq.Records
 import org.jooq.Row4
 import org.jooq.Schema
+import org.jooq.SelectField
 import org.jooq.Table
 import org.jooq.TableField
 import org.jooq.TableOptions
@@ -49,7 +51,7 @@ open class Widgets(
     /**
      * The reference instance of <code>jooq.widgets</code>
      */
-    val WIDGETS = Widgets()
+    val WIDGETS: Widgets = Widgets()
   }
 
   /**
@@ -96,12 +98,12 @@ open class Widgets(
   constructor() : this(DSL.name("widgets"), null)
 
   constructor(child: Table<out Record>, key: ForeignKey<out Record, WidgetsRecord>) : this(Internal.createPathAlias(child, key), child, key, WIDGETS, null)
-  override fun getSchema(): Schema = Jooq.JOOQ
+  override fun getSchema(): Schema? = if (aliased()) null else Jooq.JOOQ
   override fun getIndexes(): List<Index> = listOf(WIDGETS_MANUFACTURER_CREATED_AT)
   override fun getPrimaryKey(): UniqueKey<WidgetsRecord> = KEY_WIDGETS_PRIMARY
-  override fun getKeys(): List<UniqueKey<WidgetsRecord>> = listOf(KEY_WIDGETS_PRIMARY)
   override fun `as`(alias: String): Widgets = Widgets(DSL.name(alias), this)
   override fun `as`(alias: Name): Widgets = Widgets(alias, this)
+  override fun `as`(alias: Table<*>): Widgets = Widgets(alias.getQualifiedName(), this)
 
   /**
    * Rename this table
@@ -113,8 +115,24 @@ open class Widgets(
    */
   override fun rename(name: Name): Widgets = Widgets(name, null)
 
+  /**
+   * Rename this table
+   */
+  override fun rename(name: Table<*>): Widgets = Widgets(name.getQualifiedName(), null)
+
   // -------------------------------------------------------------------------
   // Row4 type methods
   // -------------------------------------------------------------------------
   override fun fieldsRow(): Row4<ByteArray?, String?, Long?, String?> = super.fieldsRow() as Row4<ByteArray?, String?, Long?, String?>
+
+  /**
+   * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
+   */
+  fun <U> mapping(from: (ByteArray?, String?, Long?, String?) -> U): SelectField<U> = convertFrom(Records.mapping(from))
+
+  /**
+   * Convenience mapping calling {@link SelectField#convertFrom(Class,
+   * Function)}.
+   */
+  fun <U> mapping(toType: Class<U>, from: (ByteArray?, String?, Long?, String?) -> U): SelectField<U> = convertFrom(toType, Records.mapping(from))
 }

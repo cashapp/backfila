@@ -9,9 +9,9 @@ import app.cash.backfila.client.jooq.gen.tables.Widgets
 /**
  * The table <code>jooq.menu</code>.
  */
-val MENU = Menu.MENU
+val MENU: Menu = Menu.MENU
 
 /**
  * The table <code>jooq.widgets</code>.
  */
-val WIDGETS = Widgets.WIDGETS
+val WIDGETS: Widgets = Widgets.WIDGETS

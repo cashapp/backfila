@@ -15,23 +15,23 @@ import org.jooq.impl.SchemaImpl
  */
 @Suppress("UNCHECKED_CAST")
 open class Jooq : SchemaImpl("jooq", DefaultCatalog.DEFAULT_CATALOG) {
-  companion object {
+  public companion object {
 
     /**
      * The reference instance of <code>jooq</code>
      */
-    val JOOQ = Jooq()
+    val JOOQ: Jooq = Jooq()
   }
 
   /**
    * The table <code>jooq.menu</code>.
    */
-  val MENU get() = Menu.MENU
+  val MENU: Menu get() = Menu.MENU
 
   /**
    * The table <code>jooq.widgets</code>.
    */
-  val WIDGETS get() = Widgets.WIDGETS
+  val WIDGETS: Widgets get() = Widgets.WIDGETS
 
   override fun getCatalog(): Catalog = DefaultCatalog.DEFAULT_CATALOG
 
