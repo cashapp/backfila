@@ -76,20 +76,24 @@ class S3DatasourceBackfillOperator<R : Any, P : Any>(
 
     val batchSize = request.batch_size.toInt()
     val previousEndKey = request.previous_end_key?.utf8()?.toLong() ?: 0L
+    val fileSize = s3Service.getFileSize(
+      backfill.getBucket(config),
+      pathPrefix + request.partition_name,
+    )
+
+    if (previousEndKey == fileSize) {
+      // Either the file is empty or we have reached the end of the file.
+      return GetNextBatchRangeResponse.Builder().batches(
+        listOf(),
+      ).build()
+    }
 
     // When precomputing all we are trying to do is figure out how big the file is.
     if (request.precomputing == true) {
-      val fileSize = s3Service.getFileSize(
-        backfill.getBucket(config),
-        pathPrefix + request.partition_name,
-      )
-      val batches = if (previousEndKey == fileSize) {
-        // Either the file is empty or we have reached the end of the file.
-        listOf()
-      } else {
-        require(previousEndKey == 0L) {
-          "The file size changed between batch calculations."
-        }
+      require(previousEndKey == 0L) {
+        "The file size changed between batch calculations."
+      }
+      return GetNextBatchRangeResponse.Builder().batches(
         listOf(
           Batch.Builder()
             .batch_range(
@@ -101,10 +105,7 @@ class S3DatasourceBackfillOperator<R : Any, P : Any>(
             .matching_record_count(fileSize)
             .scanned_record_count(fileSize)
             .build(),
-        )
-      }
-      return GetNextBatchRangeResponse.Builder().batches(
-        batches,
+        ),
       ).build()
     }
 

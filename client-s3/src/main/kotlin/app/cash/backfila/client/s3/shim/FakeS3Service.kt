@@ -44,8 +44,11 @@ class FakeS3Service @Inject constructor() : S3Service {
     .filter { (fileBucket, key) -> fileBucket == bucket && key.startsWith(keyPrefix) }
     .map { it.second }
 
-  override fun getFileStreamStartingAt(bucket: String, key: String, start: Long): BufferedSource =
-    Buffer().write(files[bucket to key]?.substring(start.toInt()) ?: EMPTY)
+  override fun getFileStreamStartingAt(bucket: String, key: String, start: Long): BufferedSource {
+    val remainder = files[bucket to key]?.substring(start.toInt()) ?: EMPTY
+    assert(remainder.size != 0) { "Amazon throws 'The requested range is not satisfiable'" }
+    return Buffer().write(remainder)
+  }
 
   override fun getWithSeek(
     bucket: String,
