@@ -50,6 +50,22 @@ class S3Utf8StringNewlineBackfillTest {
   }
 
   @Test
+  fun `backfilling lunch without empty lines`() {
+    val run = backfila.createWetRun<LunchBackfill>(parameters = RecipeAttributes())
+    run.execute()
+
+    assertThat(run.backfill.backfilledIngredients.size).isEqualTo(5)
+  }
+
+  @Test
+  fun `backfilling dinner with empty lines`() {
+    val run = backfila.createWetRun<DinnerBackfill>(parameters = RecipeAttributes())
+    run.execute()
+
+    assertThat(run.backfill.backfilledIngredients.size).isEqualTo(34)
+  }
+
+  @Test
   fun `validation failures`() {
     // Load too many files
     for (i in 1..101) {
@@ -136,6 +152,8 @@ class S3Utf8StringNewlineBackfillTest {
 
   class DinnerBackfill @Inject constructor() : RecipiesBackfill() {
     override val staticPrefix = "dinner"
+
+    override val recordStrategy: RecordStrategy<String> = Utf8StringNewlineStrategy(ignoreBlankLines = false)
   }
 
   data class RecipeAttributes(
