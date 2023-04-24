@@ -240,4 +240,47 @@ class CreateBackfillActionTest {
       }
     }
   }
+
+  @Test
+  fun `when prepare returns error message it gets propagated to the user`() {
+    scope.fakeCaller(service = "deep-fryer") {
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "ChickenSandwich", "Description", listOf(), null,
+                null, false, null,
+              ),
+            ),
+          )
+          .connector_type(Connectors.ENVOY)
+          .build(),
+      )
+    }
+
+    fakeBackfilaClientServiceClient.prepareBackfillResponses.add(
+      PrepareBackfillResponse.Builder()
+        .error_message("We're out of chicken")
+        .build(),
+    )
+
+    scope.fakeCaller(user = "molly") {
+      assertThatThrownBy {
+        createBackfillAction.create(
+          "deep-fryer",
+          CreateBackfillRequest.Builder()
+            .backfill_name("ChickenSandwich")
+            .parameter_map(mapOf("idempotence_token" to "ketchup".encodeUtf8()))
+            .build(),
+        )
+      }.isInstanceOf(BadRequestException::class.java)
+        .hasMessage("PrepareBackfill on `deep-fryer` failed: We're out of chicken")
+
+      transacter.transaction { session ->
+        val runs = queryFactory.newQuery<BackfillRunQuery>().list(session)
+        assertThat(runs).isEmpty()
+      }
+    }
+  }
 }

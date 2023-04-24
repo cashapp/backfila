@@ -110,20 +110,25 @@ class BackfillCreator @Inject constructor(
 
     val prepareBackfillResponse = try {
       client.prepareBackfill(
-        PrepareBackfillRequest(
-          dbData.registeredBackfillId.toString(),
-          request.backfill_name,
-          KeyRange(
-            request.pkey_range_start,
-            request.pkey_range_end,
-          ),
-          request.parameter_map,
-          dry_run,
-        ),
+        PrepareBackfillRequest.Builder()
+          .backfill_name(request.backfill_name)
+          .range(
+            KeyRange(
+              request.pkey_range_start,
+              request.pkey_range_end,
+            ),
+          )
+          .parameters(request.parameter_map)
+          .dry_run(dry_run)
+          .build(),
       )
     } catch (e: Exception) {
       logger.info(e) { "PrepareBackfill on `$service` failed" }
       throw BadRequestException("PrepareBackfill on `$service` failed: ${e.message}", e)
+    }
+
+    prepareBackfillResponse.error_message?.let {
+      throw BadRequestException("PrepareBackfill on `$service` failed: $it")
     }
 
     val partitions = prepareBackfillResponse.partitions
