@@ -45,6 +45,10 @@ message PrepareBackfillResponse {
   // Parameters created by the client to keep for the life of the backfill.
   // Every backfill call will pass these parameters back, in addition to user provided parameters.
   map<string, bytes> parameters = 2;
+
+  // Error message that will be surfaced to the user.
+  // If this is provided this prepare request is assumed to have failed and no backfill will be created.
+  optional string error_message = 3;
 }
 
 message GetNextBatchRangeRequest {

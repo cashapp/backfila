@@ -61,17 +61,17 @@ fun main(args: Array<String>) {
             ): BackfilaClientServiceClient {
               return object : BackfilaClientServiceClient {
                 override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
-                  return PrepareBackfillResponse(
-                    listOf(
-                      PrepareBackfillResponse.Partition(
-                        "-80", KeyRange("0".encodeUtf8(), "1000".encodeUtf8()), null,
+                  return PrepareBackfillResponse.Builder()
+                    .partitions(
+                      listOf(
+                        PrepareBackfillResponse.Partition(
+                          "-80", KeyRange("0".encodeUtf8(), "1000".encodeUtf8()), null,
+                        ),
+                        PrepareBackfillResponse.Partition(
+                          "80-", KeyRange("0".encodeUtf8(), "1000".encodeUtf8()), null,
+                        ),
                       ),
-                      PrepareBackfillResponse.Partition(
-                        "80-", KeyRange("0".encodeUtf8(), "1000".encodeUtf8()), null,
-                      ),
-                    ),
-                    mapOf(),
-                  )
+                    ).build()
                 }
 
                 override suspend fun getNextBatchRange(request: GetNextBatchRangeRequest): GetNextBatchRangeResponse {
