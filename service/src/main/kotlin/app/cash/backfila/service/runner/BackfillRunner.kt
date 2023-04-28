@@ -274,9 +274,13 @@ class BackfillRunner private constructor(
     failuresSinceSuccess++
     if (failuresSinceSuccess > metadata.backoffSchedule.size) {
       logger.info {
-        "Pausing backfill ${logLabel()} due to too many consecutive failures: $failuresSinceSuccess"
+        "Attempting to pause backfill ${logLabel()} due to too many consecutive failures: $failuresSinceSuccess"
       }
       if (pauseBackfill()) {
+        logger.warn {
+          "Paused backfill ${logLabel()} due to too many consecutive failures: $failuresSinceSuccess"
+        }
+
         factory.slackHelper.runErrored(backfillRunId)
 
         recordErrorEvent(exception, action, elapsed, backoffMs = null, paused = true)
