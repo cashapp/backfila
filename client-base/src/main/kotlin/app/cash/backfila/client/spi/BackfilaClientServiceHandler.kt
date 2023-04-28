@@ -11,6 +11,7 @@ import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
 import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
 import app.cash.backfila.protos.clientservice.RunBatchRequest
 import app.cash.backfila.protos.clientservice.RunBatchResponse
+import com.google.common.base.Stopwatch
 import javax.inject.Inject
 import org.apache.commons.lang3.exception.ExceptionUtils
 import wisp.logging.getLogger
@@ -29,9 +30,13 @@ class BackfilaClientServiceHandler @Inject constructor(
   fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
     return loggingSetupProvider.withBackfillRunLogging(request.backfill_name, backfillId = null) {
       logger.info { "Preparing backfill `${request.backfill_name}`" }
+      val stopwatch = Stopwatch.createStarted()
 
       val operator = operatorFactory.create(request.backfill_name)
-      return@withBackfillRunLogging operator.prepareBackfill(request)
+      val prepareResult = operator.prepareBackfill(request)
+
+      logger.info { "Prepared backfill `${request.backfill_name}` in $stopwatch"  }
+      return@withBackfillRunLogging prepareResult
     }
   }
 
@@ -46,6 +51,7 @@ class BackfilaClientServiceHandler @Inject constructor(
         "Computing batch for backfill `${request.backfill_name}::${request.partition_name}" +
           "::${request.backfill_id}`. Previous end: `${request.previous_end_key}`"
       }
+      val stopwatch = Stopwatch.createStarted()
 
       val operator = operatorFactory.create(request.backfill_name, request.backfill_id)
 
@@ -53,7 +59,7 @@ class BackfilaClientServiceHandler @Inject constructor(
       logger.info {
         "Next batches computed for backfill " +
           "`${request.backfill_name}::${request.partition_name}::${request.backfill_id}`. " +
-          "${nextBatchRange.batches}"
+          "${nextBatchRange.batches} in $stopwatch"
       }
       return@withBackfillPartitionLogging nextBatchRange
     }
@@ -71,10 +77,17 @@ class BackfilaClientServiceHandler @Inject constructor(
           "`${request.backfill_name}::${request.partition_name}::${request.backfill_id}`: " +
           "[${request.batch_range.start.utf8()}, ${request.batch_range.end.utf8()}]"
       }
+      val stopwatch = Stopwatch.createStarted()
 
       val operator = operatorFactory.create(request.backfill_name, request.backfill_id)
       try {
-        return@withBackfillPartitionLogging operator.runBatch(request)
+        val runBatchResult = operator.runBatch(request)
+        logger.info {
+          "Ran backfila batch " +
+              "`${request.backfill_name}::${request.partition_name}::${request.backfill_id}`: " +
+              "[${request.batch_range.start.utf8()}, ${request.batch_range.end.utf8()}] in $stopwatch"
+        }
+        return@withBackfillPartitionLogging runBatchResult
       } catch (exception: Exception) {
         return@withBackfillPartitionLogging RunBatchResponse.Builder()
           .exception_stack_trace(ExceptionUtils.getStackTrace(exception))
