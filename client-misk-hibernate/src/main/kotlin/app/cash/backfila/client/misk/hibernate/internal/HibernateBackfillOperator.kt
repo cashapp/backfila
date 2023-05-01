@@ -89,7 +89,7 @@ internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : An
         .estimated_record_count(null)
         .build()
     }
-    val minMax = boundingRangeStrategy.computeAbsoluteMinMax(backfill, partitionName)
+    val minMax = boundingRangeStrategy.computeAbsoluteRange(backfill, partitionName)
     val keyRange: KeyRange = if (minMax == null) {
       // Empty table, no work to do for this partition.
       KeyRange.Builder().build()

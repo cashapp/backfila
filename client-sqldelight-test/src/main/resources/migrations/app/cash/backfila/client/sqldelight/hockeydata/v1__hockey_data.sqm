@@ -1,0 +1,13 @@
+import app.cash.backfila.client.sqldelight.persistence.PlayerPosition;
+import app.cash.backfila.client.sqldelight.persistence.PlayerShoots;
+
+CREATE TABLE hockeyPlayer (
+  player_number INTEGER PRIMARY KEY NOT NULL,
+  full_name TEXT NOT NULL,
+  position TEXT AS PlayerPosition NOT NULL,
+  shoots TEXT AS PlayerShoots NOT NULL,
+  height TEXT NOT NULL,
+  weight INT NOT NULL,
+  date_of_birth DATE NOT NULL,
+  place_of_birth TEXT NOT NULL
+);

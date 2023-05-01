@@ -1,0 +1,1 @@
+NOTE: SqlDelight tests are in the client-sqldelight-test module instead.

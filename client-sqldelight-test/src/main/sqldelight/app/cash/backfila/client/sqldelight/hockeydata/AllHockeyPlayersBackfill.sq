@@ -1,0 +1,61 @@
+selectAbsoluteRange:
+SELECT min(player_number), max(player_number)
+FROM hockeyPlayer;
+
+selectInitialMaxBound:
+SELECT MAX(player_number) FROM
+ (SELECT DISTINCT player_number FROM hockeyPlayer
+  WHERE player_number >= :backfillRangeStart
+    AND player_number <= :backfillRangeEnd
+  ORDER BY player_number ASC
+  LIMIT :scanSize) AS subquery;
+
+selectNextMaxBound:
+SELECT MAX(player_number) FROM
+ (SELECT DISTINCT player_number FROM hockeyPlayer
+  WHERE player_number > :previousEndKey
+    AND player_number <= :backfillRangeEnd
+  ORDER BY player_number ASC
+  LIMIT :scanSize) AS subquery;
+
+produceInitialBatchFromRange:
+SELECT player_number FROM hockeyPlayer
+WHERE player_number >= :backfillRangeStart
+  AND player_number <= :boundingMax
+ORDER BY player_number ASC
+LIMIT 1
+OFFSET :offset;
+
+produceNextBatchFromRange:
+SELECT player_number FROM hockeyPlayer
+WHERE player_number > :previousEndKey
+  AND player_number <= :boundingMax
+ORDER BY player_number ASC
+LIMIT 1
+OFFSET :offset;
+
+countInitialBatchMatches:
+SELECT COUNT(DISTINCT player_number) FROM hockeyPlayer
+WHERE player_number >= :backfillRangeStart
+  AND player_number <= :boundingMax;
+
+countNextBatchMatches:
+SELECT COUNT(DISTINCT player_number) FROM hockeyPlayer
+WHERE player_number > :previousEndKey
+  AND player_number <= :boundingMax;
+
+getInitialStartKeyAndScanCount:
+SELECT MIN(player_number), COUNT(*) FROM hockeyPlayer
+WHERE player_number >= :backfillRangeStart
+  AND player_number <= :batchEnd;
+
+getNextStartKeyAndScanCount:
+SELECT MIN(player_number), COUNT(*) FROM hockeyPlayer
+WHERE player_number > :previousEndKey
+  AND player_number <= :batchEnd;
+
+getBatch:
+SELECT * FROM hockeyPlayer
+WHERE player_number >= :start
+  AND player_number <= :end
+ORDER BY player_number ASC;
