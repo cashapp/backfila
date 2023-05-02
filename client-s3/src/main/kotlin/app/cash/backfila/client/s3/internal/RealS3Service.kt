@@ -30,14 +30,18 @@ class RealS3Service @Inject constructor(
 
   override fun getFileStreamStartingAt(bucket: String, key: String, start: Long): BufferedSource {
     val s3Object = amazonS3.getObject(GetObjectRequest(bucket, key).withRange(start))
-    return s3Object.objectContent.source().buffer()
+    return s3Object.use {
+      it.objectContent.source().buffer()
+    }
   }
 
   override fun getWithSeek(bucket: String, key: String, seekStart: Long, seekEnd: Long): ByteString {
     val s3Object = amazonS3.getObject(GetObjectRequest(bucket, key).withRange(seekStart, seekEnd))
     return Buffer().run {
-      writeAll(s3Object.objectContent.source())
-      readByteString()
+      s3Object.use {
+        writeAll(it.objectContent.source())
+        readByteString()
+      }
     }
   }
 }
