@@ -147,6 +147,8 @@ class S3DatasourceBackfillOperator<R : Any, P : Any>(
       offset += size
     }
 
+    fileStream.close()
+
     return GetNextBatchRangeResponse.Builder()
       .batches(batches)
       .build()
