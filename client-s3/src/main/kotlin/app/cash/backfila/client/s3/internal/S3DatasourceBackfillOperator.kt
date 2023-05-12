@@ -115,42 +115,44 @@ class S3DatasourceBackfillOperator<R : Any, P : Any>(
       previousEndKey,
     )
 
-    val recordBytes = mutableListOf<Long>()
-    val stopwatch = Stopwatch.createStarted()
-    while (!fileStream.exhausted() && // There is file to stream.
-      recordBytes.size.floorDiv(batchSize) < request.compute_count_limit && // We want more records.
-      (
-        request.compute_time_limit_ms == null || // Either there is no limit or we are withing our timeframe.
-          stopwatch.elapsed(TimeUnit.MILLISECONDS) <= request.compute_time_limit_ms
-        )
-    ) {
-      val peekSource = fileStream.peek()
-      val bytes = backfill.recordStrategy.calculateNextRecordBytes(peekSource)
-      require(bytes > 0) { "Failed to consume any streamed bytes for ${request.partition_name}" }
-      recordBytes += bytes
-      fileStream.skip(bytes)
-    }
+    val result = fileStream.use {
+      val recordBytes = mutableListOf<Long>()
+      val stopwatch = Stopwatch.createStarted()
+      while (!fileStream.exhausted() && // There is file to stream.
+          recordBytes.size.floorDiv(
+              batchSize) < request.compute_count_limit && // We want more records.
+          (
+              request.compute_time_limit_ms == null || // Either there is no limit or we are withing our timeframe.
+                  stopwatch.elapsed(TimeUnit.MILLISECONDS) <= request.compute_time_limit_ms
+              )
+      ) {
+        val peekSource = fileStream.peek()
+        val bytes = backfill.recordStrategy.calculateNextRecordBytes(peekSource)
+        require(bytes > 0) { "Failed to consume any streamed bytes for ${request.partition_name}" }
+        recordBytes += bytes
+        fileStream.skip(bytes)
+      }
 
-    var offset = previousEndKey
-    val batches = mutableListOf<Batch>()
-    recordBytes.chunked(batchSize).map { it.sum() }.forEach { size ->
-      batches += Batch.Builder()
-        .batch_range(
-          KeyRange(
-            (offset).toString().encodeUtf8(),
-            (offset + size).toString().encodeUtf8(),
-          ),
-        )
-        .matching_record_count(size)
-        .scanned_record_count(size)
-        .build()
-      offset += size
+      var offset = previousEndKey
+      val batches = mutableListOf<Batch>()
+      recordBytes.chunked(batchSize).map { it.sum() }.forEach { size ->
+        batches += Batch.Builder()
+            .batch_range(
+                KeyRange(
+                    (offset).toString().encodeUtf8(),
+                    (offset + size).toString().encodeUtf8(),
+                ),
+            )
+            .matching_record_count(size)
+            .scanned_record_count(size)
+            .build()
+        offset += size
+      }
+      batches
     }
-
-    fileStream.close()
 
     return GetNextBatchRangeResponse.Builder()
-      .batches(batches)
+      .batches(result)
       .build()
   }
 
