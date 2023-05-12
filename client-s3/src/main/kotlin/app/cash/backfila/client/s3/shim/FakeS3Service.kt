@@ -44,18 +44,18 @@ class FakeS3Service @Inject constructor() : S3Service {
     .filter { (fileBucket, key) -> fileBucket == bucket && key.startsWith(keyPrefix) }
     .map { it.second }
 
-  override fun getFileStreamStartingAt(bucket: String, key: String, start: Long): BufferedSource {
-    val remainder = files[bucket to key]?.substring(start.toInt()) ?: EMPTY
-    assert(remainder.size != 0) { "Amazon throws 'The requested range is not satisfiable'" }
-    return Buffer().write(remainder)
+  override fun getFileChunkSource(bucket: String, key: String, start: Long, end: Long): BufferedSource {
+    val chunk = files[bucket to key]?.substring(start.toInt(), end.toInt()) ?: EMPTY
+    assert(chunk.size != 0) { "Amazon throws 'The requested range is not satisfiable'" }
+    return Buffer().write(chunk)
   }
 
-  override fun getWithSeek(
+  override fun getFileChunk(
     bucket: String,
     key: String,
-    seekStart: Long,
-    seekEnd: Long,
-  ): ByteString = files[bucket to key]?.substring(seekStart.toInt(), seekEnd.toInt()) ?: EMPTY
+    start: Long,
+    end: Long,
+  ): ByteString = files[bucket to key]?.substring(start.toInt(), end.toInt()) ?: EMPTY
 
   override fun getFileSize(bucket: String, key: String): Long =
     files[bucket to key]?.size?.toLong() ?: 0L

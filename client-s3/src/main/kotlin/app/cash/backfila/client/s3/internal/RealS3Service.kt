@@ -28,13 +28,13 @@ class RealS3Service @Inject constructor(
     return objectMetadata.contentLength
   }
 
-  override fun getFileStreamStartingAt(bucket: String, key: String, start: Long): BufferedSource {
-    val s3Object = amazonS3.getObject(GetObjectRequest(bucket, key).withRange(start))
+  override fun getFileChunkSource(bucket: String, key: String, start: Long, end: Long): BufferedSource {
+    val s3Object = amazonS3.getObject(GetObjectRequest(bucket, key).withRange(start, end))
     return s3Object.objectContent.source().buffer()
   }
 
-  override fun getWithSeek(bucket: String, key: String, seekStart: Long, seekEnd: Long): ByteString {
-    val s3Object = amazonS3.getObject(GetObjectRequest(bucket, key).withRange(seekStart, seekEnd))
+  override fun getFileChunk(bucket: String, key: String, start: Long, end: Long): ByteString {
+    val s3Object = amazonS3.getObject(GetObjectRequest(bucket, key).withRange(start, end))
     return Buffer().run {
       s3Object.use {
         writeAll(it.objectContent.source())

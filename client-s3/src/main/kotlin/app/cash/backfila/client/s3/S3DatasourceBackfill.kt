@@ -4,6 +4,7 @@ import app.cash.backfila.client.Backfill
 import app.cash.backfila.client.BackfillConfig
 import app.cash.backfila.client.PrepareBackfillConfig
 import app.cash.backfila.client.s3.record.RecordStrategy
+import app.cash.backfila.client.s3.scan.DefaultAdaptiveScanByteStrategy
 
 abstract class S3DatasourceBackfill<R : Any, P : Any> : Backfill {
 
@@ -48,4 +49,10 @@ abstract class S3DatasourceBackfill<R : Any, P : Any> : Backfill {
    * Produces records from the S3 file.
    */
   abstract val recordStrategy: RecordStrategy<R>
+
+  /**
+   * The GetNextBatchRange scan chunk size strategy.
+   * initialByteLength defaults to 10MB.
+   */
+  open val scanByteStrategy = DefaultAdaptiveScanByteStrategy(initalByteLength = 10485760L)
 }
