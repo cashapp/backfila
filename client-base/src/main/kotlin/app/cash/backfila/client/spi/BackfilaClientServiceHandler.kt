@@ -31,7 +31,13 @@ class BackfilaClientServiceHandler @Inject constructor(
       logger.info { "Preparing backfill `${request.backfill_name}`" }
 
       val operator = operatorFactory.create(request.backfill_name)
-      return@withBackfillRunLogging operator.prepareBackfill(request)
+      try {
+        return@withBackfillRunLogging operator.prepareBackfill(request)
+      } catch (exception: Exception) {
+        return@withBackfillRunLogging PrepareBackfillResponse.Builder()
+          .error_message(exception.message)
+          .build()
+      }
     }
   }
 
