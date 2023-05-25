@@ -46,12 +46,14 @@ class BackfilaParametersOperator<T : Any>(
   fun constructBackfillConfig(request: GetNextBatchRangeRequest): BackfillConfig<T> = BackfillConfig(
     constructParameters(request.parameters),
     request.partition_name,
+    request.backfill_id,
     request.dry_run,
   )
 
   fun constructBackfillConfig(request: RunBatchRequest): BackfillConfig<T> = BackfillConfig(
     constructParameters(request.parameters),
     request.partition_name,
+    request.backfill_id,
     request.dry_run,
   )
 
