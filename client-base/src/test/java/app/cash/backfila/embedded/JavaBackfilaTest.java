@@ -122,4 +122,15 @@ class JavaBackfilaTest {
     assertThat(backfillRun.getBackfill().runOrder).containsExactly("a", "b", "c", "e", "f");
     assertThat(datastore.valuesToList()).containsExactly("A", "B", "C", "E", "F");
   }
+
+  @Test
+  void backfillIdIsANumber() {
+    datastore.put("instance", "A", "b", "C");
+
+    var backfillRun = backfila.createWetRun(JavaChangeCaseTestBackfill.class,
+        Map.of("required", ByteString.encodeUtf8("isRequired")));
+    backfillRun.execute();
+    String seenBackfillId = backfillRun.getBackfill().seenBackfillId;
+    assertThat(Integer.parseInt(seenBackfillId)).isNotNull();
+  }
 }

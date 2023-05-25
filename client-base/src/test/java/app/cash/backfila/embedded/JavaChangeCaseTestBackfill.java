@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 class JavaChangeCaseTestBackfill extends FixedSetBackfill<CaseParameters> {
   public List<String> runOrder = new ArrayList();
   public CaseParameters seenParameters = null;
+  public String seenBackfillId = null;
 
   @Inject
   public JavaChangeCaseTestBackfill(){
@@ -32,6 +33,7 @@ class JavaChangeCaseTestBackfill extends FixedSetBackfill<CaseParameters> {
   @Override public void runOne(@NotNull FixedSetRow row,
       @NotNull BackfillConfig<CaseParameters> backfillConfig) {
     seenParameters = backfillConfig.getParameters();
+    seenBackfillId = backfillConfig.getBackfillId();
     runOrder.add(row.getValue());
     if (backfillConfig.getParameters().toUpper) {
       row.setValue(row.getValue().toUpperCase(Locale.ROOT));
