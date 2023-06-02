@@ -109,22 +109,22 @@ class S3DatasourceBackfillOperator<R : Any, P : Any>(
       ).build()
     }
 
-    val fileStream = s3Service.getFileStreamStartingAt(
-      backfill.getBucket(config),
-      pathPrefix + request.partition_name,
-      previousEndKey,
+    val bytesToScan = Math.min(previousEndKey + backfill.scanByteStrategy.bytesToScan(), fileSize)
+    val fileStream = s3Service.getFileChunkSource(
+        backfill.getBucket(config),
+        pathPrefix + request.partition_name,
+        previousEndKey,
+        bytesToScan,
     )
 
     val result = fileStream.use {
       val recordBytes = mutableListOf<Long>()
       val stopwatch = Stopwatch.createStarted()
       while (!fileStream.exhausted() && // There is file to stream.
-          recordBytes.size.floorDiv(
-              batchSize) < request.compute_count_limit && // We want more records.
           (
-              request.compute_time_limit_ms == null || // Either there is no limit or we are withing our timeframe.
-                  stopwatch.elapsed(TimeUnit.MILLISECONDS) <= request.compute_time_limit_ms
-              )
+              request.compute_time_limit_ms == null || // Either there is no limit or we are within our timeframe.
+              stopwatch.elapsed(TimeUnit.MILLISECONDS) <= request.compute_time_limit_ms
+          )
       ) {
         val peekSource = fileStream.peek()
         val bytes = backfill.recordStrategy.calculateNextRecordBytes(peekSource)
@@ -148,6 +148,10 @@ class S3DatasourceBackfillOperator<R : Any, P : Any>(
             .build()
         offset += size
       }
+
+      // Provide feedback on how effective the strategy was.
+      backfill.scanByteStrategy.recordResult(request, batches, stopwatch)
+
       batches
     }
 
@@ -162,7 +166,7 @@ class S3DatasourceBackfillOperator<R : Any, P : Any>(
     val batchRange = request.batch_range.decode()
     requireNotNull(batchRange.end) { "Batch was created without a range end." }
 
-    val byteString = s3Service.getWithSeek(
+    val byteString = s3Service.getFileChunk(
       backfill.getBucket(config.prepareConfig()),
       pathPrefix + request.partition_name,
       batchRange.start,

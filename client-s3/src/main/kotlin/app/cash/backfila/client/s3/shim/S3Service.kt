@@ -10,16 +10,19 @@ interface S3Service {
   fun listFiles(bucket: String, pathPrefix: String): List<String>
 
   /**
-   * Starts a streaming the file starting at a certain byte.
-   * start is in bytes.
+   * Starts a streaming the file starting at a certain byte and until a certain byte. This can more
+   * readily stream large portions of the file.
+   *
+   * start and end are in bytes.
    */
-  fun getFileStreamStartingAt(bucket: String, key: String, start: Long): BufferedSource
+  fun getFileChunkSource(bucket: String, key: String, start: Long, end: Long): BufferedSource
 
   /**
-   * Obtains a file slice.
-   * seekStart and seekEnd are in bytes.
+   * Obtains a file chunk ByteString. Use this for chunks that are not too long.
+   *
+   * start and end are in bytes.
    */
-  fun getWithSeek(bucket: String, key: String, seekStart: Long, seekEnd: Long): ByteString
+  fun getFileChunk(bucket: String, key: String, seekStart: Long, seekEnd: Long): ByteString
 
   /**
    * Returns the size in bytes.
