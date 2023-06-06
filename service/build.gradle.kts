@@ -2,6 +2,7 @@ plugins {
   id("com.github.johnrengelman.shadow")
   kotlin("jvm")
   id("com.diffplug.spotless")
+  id("com.vanniktech.maven.publish.base")
 }
 
 sourceSets {
@@ -93,9 +94,3 @@ val shadowJar by tasks.getting(com.github.jengelman.gradle.plugins.shadow.tasks.
   isZip64 = true
   archiveClassifier.set("shaded")
 }
-
-if (rootProject.file("hooks.gradle").exists()) {
-  apply(from = rootProject.file("hooks.gradle"))
-}
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")

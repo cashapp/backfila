@@ -1,4 +1,8 @@
-apply(plugin = "kotlin")
+plugins {
+  kotlin("jvm")
+  `java-library`
+  id("com.vanniktech.maven.publish.base")
+}
 
 dependencies {
   implementation(Dependencies.guava)
@@ -36,13 +40,3 @@ dependencies {
   testImplementation(Dependencies.miskTesting)
   testImplementation(project(":client-misk"))
 }
-
-val jar by tasks.getting(Jar::class) {
-  archiveBaseName.set("backfila-client-static")
-}
-
-if (rootProject.file("hooks.gradle").exists()) {
-  apply(from = rootProject.file("hooks.gradle"))
-}
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")

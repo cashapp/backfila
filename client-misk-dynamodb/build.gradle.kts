@@ -1,17 +1,11 @@
-apply(plugin = "kotlin")
+plugins {
+  kotlin("jvm")
+  `java-library`
+  id("com.vanniktech.maven.publish.base")
+}
 
 dependencies {
   implementation(Dependencies.kotlinStdLib)
 
   api(project(":client-dynamodb"))
 }
-
-val jar by tasks.getting(Jar::class) {
-  archiveBaseName.set("backfila-misk-client-dynamodb")
-}
-
-if (rootProject.file("hooks.gradle").exists()) {
-  apply(from = rootProject.file("hooks.gradle"))
-}
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")

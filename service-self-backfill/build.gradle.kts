@@ -1,7 +1,8 @@
 plugins {
-  id("com.github.johnrengelman.shadow")
   kotlin("jvm")
+  `java-library`
   id("com.diffplug.spotless")
+  id("com.vanniktech.maven.publish.base")
 }
 
 dependencies {
@@ -68,13 +69,3 @@ dependencies {
 
   testImplementation(project(":backfila-embedded"))
 }
-
-val jar by tasks.getting(Jar::class) {
-  archiveBaseName.set("backfila-service-self-backfill")
-}
-
-if (rootProject.file("hooks.gradle").exists()) {
-  apply(from = rootProject.file("hooks.gradle"))
-}
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")

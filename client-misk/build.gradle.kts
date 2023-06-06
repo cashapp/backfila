@@ -1,4 +1,8 @@
-apply(plugin = "kotlin")
+plugins {
+  kotlin("jvm")
+  `java-library`
+  id("com.vanniktech.maven.publish.base")
+}
 
 dependencies {
   implementation(Dependencies.apacheCommonsLang3)
@@ -35,13 +39,3 @@ dependencies {
   testImplementation(project(":backfila-embedded"))
   testImplementation(project(":client-testing"))
 }
-
-val jar by tasks.getting(Jar::class) {
-  archiveBaseName.set("backfila-client-misk")
-}
-
-if (rootProject.file("hooks.gradle").exists()) {
-  apply(from = rootProject.file("hooks.gradle"))
-}
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")

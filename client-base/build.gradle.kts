@@ -1,5 +1,8 @@
-apply(plugin = "kotlin")
-apply(plugin = "java")
+plugins {
+  kotlin("jvm")
+  `java-library`
+  id("com.vanniktech.maven.publish.base")
+}
 
 dependencies {
   implementation(Dependencies.apacheCommonsLang3)
@@ -42,13 +45,3 @@ dependencies {
   // Can I make it any more obvious?
   // ****************************************
 }
-
-val jar by tasks.getting(Jar::class) {
-  archiveBaseName.set("client-base")
-}
-
-if (rootProject.file("hooks.gradle").exists()) {
-  apply(from = rootProject.file("hooks.gradle"))
-}
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")

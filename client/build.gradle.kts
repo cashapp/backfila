@@ -1,9 +1,13 @@
-import com.vanniktech.maven.publish.tasks.SourcesJar
+import com.vanniktech.maven.publish.JavadocJar.Dokka
+import com.vanniktech.maven.publish.KotlinJvm
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
+  kotlin("jvm")
+  `java-library`
   id("com.squareup.wire")
+  id("com.vanniktech.maven.publish.base")
 }
-apply(plugin = "kotlin")
 
 sourceSets {
   val main by getting {
@@ -24,10 +28,6 @@ dependencies {
   implementation(Dependencies.wireMoshiAdapter)
 }
 
-val jar by tasks.getting(Jar::class) {
-  archiveBaseName.set("backfila-client")
-}
-
 wire {
   protoLibrary = true
   sourcePath {
@@ -37,15 +37,16 @@ wire {
   }
 }
 
-if (rootProject.file("hooks.gradle").exists()) {
-  apply(from = rootProject.file("hooks.gradle"))
+tasks.named("kotlinSourcesJar") {
+  dependsOn("generateMainProtos")
 }
 
-apply(from = "$rootDir/gradle-mvn-publish.gradle")
+tasks.named("dokkaGfm") {
+  dependsOn("generateMainProtos")
+}
 
-// Prevent proto source files from conflicting
-afterEvaluate {
-  tasks.withType<SourcesJar>().configureEach {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-  }
+configure<MavenPublishBaseExtension> {
+  configure(
+    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+  )
 }
