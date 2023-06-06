@@ -1,3 +1,7 @@
+import com.vanniktech.maven.publish.JavadocJar.Dokka
+import com.vanniktech.maven.publish.KotlinJvm
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
+
 plugins {
   id("com.github.johnrengelman.shadow")
   kotlin("jvm")
@@ -93,4 +97,10 @@ val shadowJar by tasks.getting(com.github.jengelman.gradle.plugins.shadow.tasks.
   mergeServiceFiles()
   isZip64 = true
   archiveClassifier.set("shaded")
+}
+
+configure<MavenPublishBaseExtension> {
+  configure(
+    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+  )
 }

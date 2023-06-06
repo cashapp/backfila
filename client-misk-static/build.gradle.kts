@@ -1,3 +1,7 @@
+import com.vanniktech.maven.publish.JavadocJar.Dokka
+import com.vanniktech.maven.publish.KotlinJvm
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
+
 plugins {
   kotlin("jvm")
   `java-library`
@@ -7,4 +11,10 @@ dependencies {
   implementation(Dependencies.kotlinStdLib)
 
   api(project(":client-static"))
+}
+
+configure<MavenPublishBaseExtension> {
+  configure(
+    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+  )
 }
