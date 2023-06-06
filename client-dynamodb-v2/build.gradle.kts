@@ -50,7 +50,7 @@ dependencies {
   testImplementation(Dependencies.miskTesting)
   testImplementation(project(":client-misk"))
   // Required until DynamoDBLocal is built with antlr >4.11 which wisp-config pulls in
-  testImplementation("org.antlr:antlr4-runtime:4.7.2") {
+  testImplementation("org.antlr:antlr4-runtime:4.9.3") {
     version {
       strictly("4.9.3")
     }
