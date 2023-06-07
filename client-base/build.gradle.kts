@@ -1,5 +1,12 @@
-apply(plugin = "kotlin")
-apply(plugin = "java")
+import com.vanniktech.maven.publish.JavadocJar.Dokka
+import com.vanniktech.maven.publish.KotlinJvm
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
+
+plugins {
+  kotlin("jvm")
+  `java-library`
+  id("com.vanniktech.maven.publish.base")
+}
 
 dependencies {
   implementation(Dependencies.apacheCommonsLang3)
@@ -43,12 +50,8 @@ dependencies {
   // ****************************************
 }
 
-val jar by tasks.getting(Jar::class) {
-  archiveBaseName.set("client-base")
+configure<MavenPublishBaseExtension> {
+  configure(
+    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+  )
 }
-
-if (rootProject.file("hooks.gradle").exists()) {
-  apply(from = rootProject.file("hooks.gradle"))
-}
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")

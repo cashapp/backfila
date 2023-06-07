@@ -1,4 +1,6 @@
 import com.diffplug.gradle.spotless.SpotlessExtension
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
+import com.vanniktech.maven.publish.SonatypeHost
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.allopen.gradle.AllOpenExtension
@@ -21,23 +23,22 @@ buildscript {
   }
 }
 
+apply(plugin = "com.vanniktech.maven.publish.base")
+
+allprojects {
+  group = project.property("GROUP") as String
+  version = project.findProperty("VERSION_NAME") as? String ?: "0.0-SNAPSHOT"
+}
+
 subprojects {
-  apply(plugin = "java")
-  apply(plugin = "kotlin")
   apply(plugin = "com.diffplug.spotless")
   apply(plugin = "org.jetbrains.dokka")
   apply(plugin = "org.jetbrains.kotlin.plugin.allopen")
 
-  val compileKotlin by tasks.getting(KotlinCompile::class) {
-    kotlinOptions {
-      jvmTarget = JavaVersion.VERSION_11.toString()
-    }
+  tasks.withType<KotlinCompile> {
     dependsOn("spotlessKotlinApply")
-  }
-
-  val compileTestKotlin by tasks.getting(KotlinCompile::class) {
     kotlinOptions {
-      jvmTarget = JavaVersion.VERSION_11.toString()
+      jvmTarget = "11"
     }
   }
 
@@ -116,7 +117,35 @@ subprojects {
   }
 }
 
-// Disable the Gradle wrapper if Gradle is managed by Hermit
-tasks.named<Wrapper>("wrapper") {
-  enabled = false
+
+allprojects {
+  plugins.withId("com.vanniktech.maven.publish.base") {
+    configure<MavenPublishBaseExtension> {
+      publishToMavenCentral(SonatypeHost.DEFAULT, automaticRelease = true)
+      signAllPublications()
+      pom {
+        description.set("Backfila is a service that manages backfill state, calling into other services to do batched work.")
+        name.set(project.name)
+        url.set("https://github.com/cashapp/backfila/")
+        licenses {
+          license {
+            name.set("The Apache Software License, Version 2.0")
+            url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+            distribution.set("repo")
+          }
+        }
+        scm {
+          url.set("https://github.com/cashapp/backfila/")
+          connection.set("scm:git:git://github.com/cashapp/backfila.git")
+          developerConnection.set("scm:git:ssh://git@github.com/cashapp/backfila.git")
+        }
+        developers {
+          developer {
+            id.set("square")
+            name.set("Square, Inc.")
+          }
+        }
+      }
+    }
+  }
 }

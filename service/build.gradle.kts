@@ -1,7 +1,12 @@
+import com.vanniktech.maven.publish.JavadocJar.Dokka
+import com.vanniktech.maven.publish.KotlinJvm
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
+
 plugins {
   id("com.github.johnrengelman.shadow")
   kotlin("jvm")
   id("com.diffplug.spotless")
+  id("com.vanniktech.maven.publish.base")
 }
 
 sourceSets {
@@ -94,8 +99,8 @@ val shadowJar by tasks.getting(com.github.jengelman.gradle.plugins.shadow.tasks.
   archiveClassifier.set("shaded")
 }
 
-if (rootProject.file("hooks.gradle").exists()) {
-  apply(from = rootProject.file("hooks.gradle"))
+configure<MavenPublishBaseExtension> {
+  configure(
+    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+  )
 }
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")

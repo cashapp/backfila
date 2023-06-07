@@ -1,4 +1,6 @@
-
+import com.vanniktech.maven.publish.JavadocJar.Dokka
+import com.vanniktech.maven.publish.KotlinJvm
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import nu.studer.gradle.jooq.JooqEdition
 import nu.studer.gradle.jooq.JooqGenerate
 
@@ -13,11 +15,12 @@ buildscript {
 }
 
 plugins {
+  kotlin("jvm")
+  `java-library`
   id("org.flywaydb.flyway") version Versions.flywayDBPlugin
   id("nu.studer.jooq") version Versions.jooqGenPlugin
+  id("com.vanniktech.maven.publish.base")
 }
-
-apply(plugin = "kotlin")
 
 dependencies {
   implementation(Dependencies.guava)
@@ -62,16 +65,6 @@ dependencies {
   testImplementation(project(":client-misk"))
 
 }
-
-val jar by tasks.getting(Jar::class) {
-  archiveBaseName.set("backfila-client-jooq")
-}
-
-if (rootProject.file("hooks.gradle").exists()) {
-  apply(from = rootProject.file("hooks.gradle"))
-}
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")
 
 flyway {
   url = "jdbc:mysql://localhost:3500/backfila-jooq-codegen"
@@ -128,4 +121,10 @@ tasks {
   }
 }
 
-tasks.named<nu.studer.gradle.jooq.JooqGenerate>("generateJooq") { allInputsDeclared.set(true) }
+tasks.named<JooqGenerate>("generateJooq") { allInputsDeclared.set(true) }
+
+configure<MavenPublishBaseExtension> {
+  configure(
+    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+  )
+}

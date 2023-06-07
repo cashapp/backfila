@@ -21,7 +21,7 @@ object Dependencies {
   val junitEngine = "org.junit.jupiter:junit-jupiter-engine:5.9.1"
   val junitParams = "org.junit.jupiter:junit-jupiter-params:5.9.1"
   val loggingApi = "io.github.microutils:kotlin-logging:2.1.23"
-  val mavenPublishGradlePlugin = "com.vanniktech:gradle-maven-publish-plugin:0.19.0"
+  val mavenPublishGradlePlugin = "com.vanniktech:gradle-maven-publish-plugin:0.25.2"
   val metricsCore = "io.dropwizard.metrics:metrics-core:4.0.2"
   val metricsParent = "io.dropwizard.metrics:metrics-parent:4.0.2"
   val moshiCore = "com.squareup.moshi:moshi:1.13.0"

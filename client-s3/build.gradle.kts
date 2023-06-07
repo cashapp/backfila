@@ -1,4 +1,12 @@
-apply(plugin = "kotlin")
+import com.vanniktech.maven.publish.JavadocJar.Dokka
+import com.vanniktech.maven.publish.KotlinJvm
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
+
+plugins {
+  kotlin("jvm")
+  `java-library`
+  id("com.vanniktech.maven.publish.base")
+}
 
 dependencies {
   implementation(Dependencies.awsS3)
@@ -37,12 +45,8 @@ dependencies {
   testImplementation(project(":client-misk"))
 }
 
-val jar by tasks.getting(Jar::class) {
-  archiveBaseName.set("backfila-client-s3")
+configure<MavenPublishBaseExtension> {
+  configure(
+    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+  )
 }
-
-if (rootProject.file("hooks.gradle").exists()) {
-  apply(from = rootProject.file("hooks.gradle"))
-}
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")

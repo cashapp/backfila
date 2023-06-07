@@ -1,7 +1,12 @@
+import com.vanniktech.maven.publish.JavadocJar.Dokka
+import com.vanniktech.maven.publish.KotlinJvm
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
+
 plugins {
-  id("com.github.johnrengelman.shadow")
   kotlin("jvm")
+  `java-library`
   id("com.diffplug.spotless")
+  id("com.vanniktech.maven.publish.base")
 }
 
 dependencies {
@@ -69,12 +74,8 @@ dependencies {
   testImplementation(project(":backfila-embedded"))
 }
 
-val jar by tasks.getting(Jar::class) {
-  archiveBaseName.set("backfila-service-self-backfill")
+configure<MavenPublishBaseExtension> {
+  configure(
+    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+  )
 }
-
-if (rootProject.file("hooks.gradle").exists()) {
-  apply(from = rootProject.file("hooks.gradle"))
-}
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")

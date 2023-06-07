@@ -119,12 +119,13 @@ class S3DatasourceBackfillOperator<R : Any, P : Any>(
       val recordBytes = mutableListOf<Long>()
       val stopwatch = Stopwatch.createStarted()
       while (!fileStream.exhausted() && // There is file to stream.
-          recordBytes.size.floorDiv(
-              batchSize) < request.compute_count_limit && // We want more records.
-          (
-              request.compute_time_limit_ms == null || // Either there is no limit or we are withing our timeframe.
-                  stopwatch.elapsed(TimeUnit.MILLISECONDS) <= request.compute_time_limit_ms
-              )
+        recordBytes.size.floorDiv(
+            batchSize,
+          ) < request.compute_count_limit && // We want more records.
+        (
+          request.compute_time_limit_ms == null || // Either there is no limit or we are withing our timeframe.
+            stopwatch.elapsed(TimeUnit.MILLISECONDS) <= request.compute_time_limit_ms
+          )
       ) {
         val peekSource = fileStream.peek()
         val bytes = backfill.recordStrategy.calculateNextRecordBytes(peekSource)
@@ -137,15 +138,15 @@ class S3DatasourceBackfillOperator<R : Any, P : Any>(
       val batches = mutableListOf<Batch>()
       recordBytes.chunked(batchSize).map { it.sum() }.forEach { size ->
         batches += Batch.Builder()
-            .batch_range(
-                KeyRange(
-                    (offset).toString().encodeUtf8(),
-                    (offset + size).toString().encodeUtf8(),
-                ),
-            )
-            .matching_record_count(size)
-            .scanned_record_count(size)
-            .build()
+          .batch_range(
+            KeyRange(
+              (offset).toString().encodeUtf8(),
+              (offset + size).toString().encodeUtf8(),
+            ),
+          )
+          .matching_record_count(size)
+          .scanned_record_count(size)
+          .build()
         offset += size
       }
       batches

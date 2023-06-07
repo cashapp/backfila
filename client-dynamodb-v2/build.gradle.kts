@@ -1,4 +1,12 @@
-apply(plugin = "kotlin")
+import com.vanniktech.maven.publish.JavadocJar.Dokka
+import com.vanniktech.maven.publish.KotlinJvm
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
+
+plugins {
+  kotlin("jvm")
+  `java-library`
+  id("com.vanniktech.maven.publish.base")
+}
 
 dependencies {
   implementation(Dependencies.aws2Dynamodb)
@@ -42,17 +50,15 @@ dependencies {
   testImplementation(Dependencies.miskTesting)
   testImplementation(project(":client-misk"))
   // Required until DynamoDBLocal is built with antlr >4.11 which wisp-config pulls in
-  testImplementation("org.antlr:antlr4-runtime:4.7.2") {
-    setForce(true)
+  testImplementation("org.antlr:antlr4-runtime:4.9.3") {
+    version {
+      strictly("4.9.3")
+    }
   }
 }
 
-val jar by tasks.getting(Jar::class) {
-  archiveBaseName.set("backfila-client-dynamodb-v2")
+configure<MavenPublishBaseExtension> {
+  configure(
+    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+  )
 }
-
-if (rootProject.file("hooks.gradle").exists()) {
-  apply(from = rootProject.file("hooks.gradle"))
-}
-
-apply(from = "$rootDir/gradle-mvn-publish.gradle")
