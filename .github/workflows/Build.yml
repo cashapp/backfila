@@ -34,21 +34,18 @@ jobs:
     name: Test JVM
     runs-on: ubuntu-latest
 
-    services:
-      mysql:
-        image: mysql:5.7
-        ports:
-          - 3306:3306
-        env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: 1
-        options: --sql-mode=""
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
       - name: Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
+
+      - name: Start MySQL
+        # There's a race condition here, where it's possible that MySQL hasn't finished starting
+        # up before we try to connect to it. But Kotlin builds are so damn slow it'll never
+        # happen in practice.
+        run: docker run -d -p 3306:3306 --name mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=1 mysql:5.7 --sql-mode=""
 
       - name: Cache Gradle packages
         uses: actions/cache@v1
