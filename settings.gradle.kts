@@ -1,4 +1,5 @@
 include("backfila-embedded")
+include("bom")
 include("client")
 include("client-base")
 include("client-dynamodb")
