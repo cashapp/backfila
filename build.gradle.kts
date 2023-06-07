@@ -91,6 +91,7 @@ subprojects {
   // org.apache.logging.slf4j.Log4jLogger cannot be cast to class ch.qos.logback.classic.Logger
   configurations.all {
     exclude(group = "org.apache.logging.log4j", module = "log4j-slf4j-impl")
+
   }
 
   // Workaround the Gradle bug resolving multiplatform dependencies.
