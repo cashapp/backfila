@@ -41,6 +41,7 @@ jobs:
           - 3306:3306
         env:
           MYSQL_ALLOW_EMPTY_PASSWORD: 1
+        options: --sql-mode=""
 
     steps:
       - name: Checkout
