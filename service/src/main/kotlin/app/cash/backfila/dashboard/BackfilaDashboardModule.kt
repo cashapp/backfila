@@ -2,18 +2,20 @@ package app.cash.backfila.dashboard
 
 import javax.inject.Qualifier
 import misk.inject.KAbstractModule
-import misk.web.dashboard.WebTabResourceModule
+import misk.security.authz.Unauthenticated
+import misk.web.dashboard.DashboardModule
 import wisp.deployment.Deployment
 
 class BackfilaDashboardModule(val deployment: Deployment) : KAbstractModule() {
   override fun configure() {
     install(
-      WebTabResourceModule(
-        deployment = deployment,
+      DashboardModule.createMiskWebTab<BackfilaApp, Unauthenticated>(
+        isDevelopment = deployment.isLocalDevelopment,
         slug = "app",
-        web_proxy_url = "http://localhost:4200/",
-        url_path_prefix = "/app/",
-        resourcePath = "classpath:/web/app/",
+        developmentWebProxyUrl = "http://localhost:4200/",
+        urlPathPrefix = "/app/",
+        resourcePathPrefix = "/app/",
+        menuLabel = "App",
       ),
     )
   }
