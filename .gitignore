@@ -16,3 +16,4 @@ docs/releasing.md
 local.settings.gradle
 
 .DS_Store
+.hermit
