@@ -47,6 +47,7 @@ dependencies {
   testImplementation(Dependencies.junitParams)
   testImplementation(Dependencies.okHttp)
   testImplementation(Dependencies.mysql)
+  testImplementation(Dependencies.wispLogging)
 
   testImplementation(project(":backfila-embedded"))
   testImplementation(project(":client-testing"))

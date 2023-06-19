@@ -87,7 +87,7 @@ object Versions {
   val kotlin = "1.7.0"
   val kotlinCoroutines = "1.6.3"
   val ktlint = "0.47.1"
-  val misk = "0.25.0-20230405.1913-51e097f"
+  val misk = "2023.06.16.113701-e039a80"
   val wire = "4.4.2"
   val wisp = "1.3.8"
 }

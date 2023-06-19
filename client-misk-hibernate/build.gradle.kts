@@ -28,10 +28,12 @@ dependencies {
   implementation(Dependencies.miskActions)
   implementation(Dependencies.miskCore)
   implementation(Dependencies.miskInject)
+  implementation(Dependencies.wispLogging)
   api(Dependencies.miskHibernate)
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.miskTesting)
+  testImplementation(Dependencies.miskJdbcTesting)
   testImplementation(Dependencies.miskHibernateTesting)
   testImplementation(project(":client-misk"))
   testImplementation(Dependencies.kotlinTest)
