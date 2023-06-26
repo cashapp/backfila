@@ -45,8 +45,50 @@ class S3Utf8StringNewlineBackfillTest {
     val run = backfila.createWetRun<BreakfastBackfill>(parameters = RecipeAttributes(ingredientRegex = "egg"))
     run.execute()
 
-    assertThat(run.backfill.backfilledIngredients.map { it.first })
+    assertThat(run.backfill.backfilledIngredients.map { it.first }.distinct())
       .containsExactlyInAnyOrder("main-egg-and-bacon", "main-egg-on-toast")
+  }
+
+  @Test
+  fun `ingredient count for lunch`() {
+    val run = backfila.createWetRun<LunchBackfill>(parameters = RecipeAttributes())
+    run.execute()
+
+    assertThat(run.backfill.backfilledIngredients.map { it.first }.distinct())
+      .containsExactlyInAnyOrder("main-blt")
+
+    // See that we processed two empty lines
+    assertThat(run.backfill.backfilledIngredients.filter { it.second == "" }).size().isEqualTo(2)
+
+    // Now run efficiently aka "without empty ingredient lines"
+    val optimizedRun = backfila.createWetRun<OptimizedLunchBackfill>(parameters = RecipeAttributes())
+    optimizedRun.execute()
+
+    assertThat(optimizedRun.backfill.backfilledIngredients.size).isLessThan(run.backfill.backfilledIngredients.size)
+
+    assertThat(run.backfill.backfilledIngredients.map { it.first }.distinct())
+      .containsExactlyInAnyOrderElementsOf(optimizedRun.backfill.backfilledIngredients.map { it.first }.distinct())
+  }
+
+  @Test
+  fun `ingredient count for dinner`() {
+    val run = backfila.createWetRun<DinnerBackfill>(parameters = RecipeAttributes())
+    run.batchSize = 5 // In batches of 5 make sure we get the ingredients we expect.
+    run.execute()
+
+    assertThat(run.backfill.backfilledIngredients.size).isEqualTo(34)
+
+    // Now run efficiently aka "without empty ingredient lines"
+    val optimizedRun = backfila.createWetRun<OptimizedDinnerBackfill>(parameters = RecipeAttributes())
+    optimizedRun.batchSize = 5 // In batches of 5 make sure we get the ingredients we expect.
+    optimizedRun.execute()
+
+    assertThat(optimizedRun.backfill.backfilledIngredients.size).isLessThan(run.backfill.backfilledIngredients.size)
+
+    assertThat(run.backfill.backfilledIngredients.map { it.first }.distinct())
+      .containsExactlyInAnyOrderElementsOf(optimizedRun.backfill.backfilledIngredients.map { it.first }.distinct())
+    assertThat(run.backfill.backfilledIngredients.map { it.first }.distinct())
+      .containsExactlyInAnyOrder("drinks-strawberry-daquiri", "main-butter-chicken")
   }
 
   @Test
@@ -104,7 +146,8 @@ class S3Utf8StringNewlineBackfillTest {
     val backfilledIngredients = newMutableList<Pair<String, String>>()
 
     override fun runOne(item: String, config: BackfillConfig<RecipeAttributes>) {
-      if (item.contains(config.parameters.ingredientRegex)) {
+      val regex = Regex(config.parameters.ingredientRegex)
+      if (regex.matches(item)) {
         backfilledIngredients.add(config.partitionName to item)
       }
     }
@@ -119,7 +162,7 @@ class S3Utf8StringNewlineBackfillTest {
     override fun getPrefix(config: PrepareBackfillConfig<RecipeAttributes>) =
       staticPrefix + "/" + config.parameters.course
 
-    override val recordStrategy: RecordStrategy<String> = Utf8StringNewlineStrategy()
+    override val recordStrategy: RecordStrategy<String> = Utf8StringNewlineStrategy(ignoreBlankLines = false)
   }
 
   class BreakfastBackfill @Inject constructor() : RecipiesBackfill() {
@@ -138,10 +181,20 @@ class S3Utf8StringNewlineBackfillTest {
     override val staticPrefix = "dinner"
   }
 
+  class OptimizedLunchBackfill @Inject constructor() : RecipiesBackfill() {
+    override val staticPrefix = "lunch"
+    override val recordStrategy: RecordStrategy<String> = Utf8StringNewlineStrategy(ignoreBlankLines = true)
+  }
+
+  class OptimizedDinnerBackfill @Inject constructor() : RecipiesBackfill() {
+    override val staticPrefix = "dinner"
+    override val recordStrategy: RecordStrategy<String> = Utf8StringNewlineStrategy(ignoreBlankLines = true)
+  }
+
   data class RecipeAttributes(
     val cookbook: String = "in-the-kitchen-with-mikepaw",
     val course: String = "",
-    val ingredientRegex: String = "",
+    val ingredientRegex: String = ".*", // Defaults to all ingredients.
     val validate: Boolean = true,
   )
 }

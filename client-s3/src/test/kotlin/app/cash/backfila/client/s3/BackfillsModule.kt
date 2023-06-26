@@ -20,6 +20,8 @@ class BackfillsModule : KAbstractModule() {
     install(S3DatasourceBackfillModule.create<S3Utf8StringNewlineBackfillTest.BrunchBackfill>())
     install(S3DatasourceBackfillModule.create<S3Utf8StringNewlineBackfillTest.LunchBackfill>())
     install(S3DatasourceBackfillModule.create<S3Utf8StringNewlineBackfillTest.DinnerBackfill>())
+    install(S3DatasourceBackfillModule.create<S3Utf8StringNewlineBackfillTest.OptimizedLunchBackfill>())
+    install(S3DatasourceBackfillModule.create<S3Utf8StringNewlineBackfillTest.OptimizedDinnerBackfill>())
 
     install(S3DatasourceBackfillModule.create<RecordStrategyBackfillTest.BrokenBreakfastBackfill>())
   }
