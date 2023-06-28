@@ -1,12 +1,9 @@
 package app.cash.backfila.client
 
-import app.cash.backfila.client.fixedset.FixedSetBackfill
 import app.cash.backfila.client.fixedset.FixedSetDatastore
-import app.cash.backfila.client.fixedset.FixedSetRow
 import app.cash.backfila.embedded.Backfila
 import app.cash.backfila.embedded.createWetRun
 import com.google.inject.Module
-import java.util.Locale
 import javax.inject.Inject
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -22,16 +19,6 @@ class FixedSetTest {
   @Inject lateinit var backfila: Backfila
 
   @Inject lateinit var datastore: FixedSetDatastore
-
-  class ToUpperCaseBackfill @Inject constructor() : FixedSetBackfill<NoParameters>() {
-    val runOrder = mutableListOf<String>()
-    var seenBackfillId: String? = null
-    override fun runOne(row: FixedSetRow, backfillConfig: BackfillConfig<NoParameters>) {
-      seenBackfillId = backfillConfig.backfillId
-      runOrder += row.value
-      row.value = row.value.toUpperCase(Locale.ROOT)
-    }
-  }
 
   @Test fun `happy path`() {
     datastore.put("instance", "a", "b", "c")

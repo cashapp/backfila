@@ -35,7 +35,8 @@ internal class EmbeddedBackfila @Inject internal constructor(
   private val operatorFactory: BackfillOperatorFactory,
 ) : Backfila, BackfilaApi {
   private var serviceData: ConfigureServiceRequest? = null
-  private var backfillIdGenerator = AtomicInteger(10)
+  private var backfillRunIdGenerator = AtomicInteger(10)
+  private var createdBackfillRuns = mutableMapOf<String, BackfillRun<*>>()
 
   override val configureServiceData: ConfigureServiceRequest?
     get() = serviceData
@@ -73,8 +74,8 @@ internal class EmbeddedBackfila @Inject internal constructor(
       "Backfill ${createRequest.backfill_name} was not registered properly"
     }
 
-    val backfillId = backfillIdGenerator.getAndIncrement()
-    val operator = operatorFactory.create(createRequest.backfill_name, backfillId.toString())
+    val backfillRunId = backfillRunIdGenerator.getAndIncrement().toString()
+    val operator = operatorFactory.create(createRequest.backfill_name, backfillRunId)
 
     val run = EmbeddedBackfillRun<Backfill>(
       operator = operator,
@@ -82,18 +83,24 @@ internal class EmbeddedBackfila @Inject internal constructor(
       parameters = createRequest.parameter_map.toMutableMap(),
       rangeStart = createRequest.pkey_range_start?.utf8(),
       rangeEnd = createRequest.pkey_range_end?.utf8(),
-      backfillId = backfillId.toString(),
+      backfillRunId = backfillRunId,
     )
+    createdBackfillRuns[backfillRunId] = run
 
     run.execute()
 
-    return Calls.response(CreateAndStartBackfillResponse(backfillId.toLong()))
+    return Calls.response(CreateAndStartBackfillResponse(backfillRunId.toLong()))
   }
 
   override fun checkBackfillStatus(request: CheckBackfillStatusRequest): Call<CheckBackfillStatusResponse> {
     checkNotNull(request.backfill_run_id)
-    // TODO(hdou): actually check the status
-    return Calls.response(CheckBackfillStatusResponse(CheckBackfillStatusResponse.Status.COMPLETE))
+    val backfillRun = createdBackfillRuns[request.backfill_run_id.toString()] ?: error("No Backfill with id ${request.backfill_run_id} found")
+    // If the backfill isn't complete it is considered running for the purposes of EmbeddedBackfila.
+    return Calls.response(
+      CheckBackfillStatusResponse(
+        if (backfillRun.complete()) CheckBackfillStatusResponse.Status.COMPLETE else CheckBackfillStatusResponse.Status.RUNNING,
+      ),
+    )
   }
 
   override fun <Type : Backfill> createDryRun(
@@ -110,6 +117,15 @@ internal class EmbeddedBackfila @Inject internal constructor(
     rangeEnd: String?,
   ) = createBackfill(backfillType, false, parameters, rangeStart, rangeEnd)
 
+  override fun <Type : Backfill> findExistingRun(backfillType: KClass<Type>, backfillRunId: Long): BackfillRun<Type> {
+    val untypedBackfill = createdBackfillRuns[backfillRunId.toString()] ?: error("No Backfill with id $backfillRunId found")
+    check(untypedBackfill.backfill::class == backfillType) {
+      "Backfill with run id $backfillRunId is not of type $backfillType"
+    }
+    @Suppress("UNCHECKED_CAST") // We don't know the types statically, so fake them.
+    return untypedBackfill as BackfillRun<Type>
+  }
+
   private fun <Type : Backfill> createBackfill(
     backfillType: KClass<Type>,
     dryRun: Boolean,
@@ -122,17 +138,18 @@ internal class EmbeddedBackfila @Inject internal constructor(
       "Backfill ${backfillType.jvmName} was not registered properly"
     }
 
-    val backfillId = backfillIdGenerator.getAndIncrement().toString()
-    val operator = operatorFactory.create(backfillType.jvmName, backfillId)
+    val backfillRunId = backfillRunIdGenerator.getAndIncrement().toString()
+    val operator = operatorFactory.create(backfillType.jvmName, backfillRunId)
 
-    @Suppress("UNCHECKED_CAST") // We don't know the types statically, so fake them.
-    return EmbeddedBackfillRun(
+    val backfillRun = EmbeddedBackfillRun<Type>(
       operator = operator,
       dryRun = dryRun,
       parameters = parameters.toMutableMap(),
       rangeStart = rangeStart,
       rangeEnd = rangeEnd,
-      backfillId = backfillId,
+      backfillRunId = backfillRunId,
     )
+    createdBackfillRuns[backfillRunId] = backfillRun
+    return backfillRun
   }
 }

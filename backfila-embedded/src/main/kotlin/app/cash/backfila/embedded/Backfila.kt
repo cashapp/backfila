@@ -26,6 +26,11 @@ interface Backfila {
     rangeEnd: String?,
   ): BackfillRun<Type>
 
+  fun <Type : Backfill> findExistingRun(
+    backfillType: KClass<Type>,
+    backfillRunId: Long,
+  ): BackfillRun<Type>
+
   val configureServiceData: ConfigureServiceRequest?
 }
 
