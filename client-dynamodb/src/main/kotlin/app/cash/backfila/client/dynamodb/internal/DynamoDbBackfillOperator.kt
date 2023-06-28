@@ -35,13 +35,12 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
       require(
         tableDescription.billingModeSummary == null ||
           tableDescription.billingModeSummary.billingMode == "PROVISIONED",
-        {
-          "Trying to prepare a backfill on a Dynamo table named ${tableDescription.tableName} " +
-            "with a billing mode that is not PROVISIONED, it is " +
-            "${tableDescription.billingModeSummary.billingMode}. This can get very expensive. " +
-            "Please provision your dynamo capacity for this table and try again."
-        },
-      )
+      ) {
+        "Trying to prepare a backfill on a Dynamo table named ${tableDescription.tableName} " +
+          "with a billing mode that is not PROVISIONED, it is " +
+          "${tableDescription.billingModeSummary.billingMode}. This can get very expensive. " +
+          "Please provision your dynamo capacity for this table and try again."
+      }
     }
 
     val partitionCount = backfill.partitionCount(config)
@@ -88,7 +87,8 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
     for (i in start until minOf(start + 1, end)) {
       batches += GetNextBatchRangeResponse.Batch.Builder()
         .batch_range(keyRangeCodec.encodeKeyRange(i, i + 1, count))
-        // TODO(mikepaw) calculate counts accurately when requested.
+        // In order to keep costs down we do not perform any queries here for an accurate count. We
+        // may consider adding that feature at a later date.
         .matching_record_count(1L)
         .scanned_record_count(1L)
         .build()

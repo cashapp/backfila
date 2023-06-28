@@ -17,6 +17,3 @@ either add each file in code or point `FakeS3Service` to a resource path and it 
 under that path. Use `S3CdnModule` in real instances and provide an `AmazonS3` annotated with `@ForS3Backend`.
 
 The code is the source of truth for this client. Keep that in mind. Always refer to the code for implementation details.
-
-(TODO mikepaw jwindover what permissions are needed? also what is the process to uploading these files? 
-We want to optimize for using the AWS console as much as possible.)

@@ -96,7 +96,8 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
     for (i in start until minOf(start + 1, end)) {
       batches += GetNextBatchRangeResponse.Batch.Builder()
         .batch_range(keyRangeCodec.encodeKeyRange(i, i + 1, count))
-        // TODO(mikepaw) calculate counts accurately when requested.
+        // In order to keep costs down we do not perform any queries here for an accurate count. We
+        // may consider adding that feature at a later date.
         .matching_record_count(1L)
         .scanned_record_count(1L)
         .build()
