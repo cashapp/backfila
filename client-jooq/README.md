@@ -10,3 +10,5 @@ db in a docker container and generate jooq classes from there.
 ```
 ./client-jooq/jooq-test-regenerate.sh
 ```
+
+The code is the source of truth for this client. Keep that in mind. Always refer to the code for implementation details.

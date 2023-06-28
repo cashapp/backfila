@@ -2,4 +2,4 @@
 
 Deprecated Jooq backfila client backend implementation for misk apps.
 
-Use client-jooq instead.
+Use `client-jooq` instead.
