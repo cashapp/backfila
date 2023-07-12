@@ -49,6 +49,16 @@ class DynamoDbFilteringTest {
     assertThat(run.backfill.nonTrackCount).isEqualTo(0)
   }
 
+  @Test
+  fun `dynamo filter using attribute names doesn't process the album info rows`() {
+    testData.addAllTheMusic()
+
+    // Dynamo Filter using expression names at run time skips all the album info entries too.
+    val run = backfila.createWetRun<DynamoFilterWithAttributeNameMakeTracksExplicitBackfill>()
+    run.execute()
+    assertThat(run.backfill.nonTrackCount).isEqualTo(0)
+  }
+
   open class FilteredMakeTracksExplicitBackfill @Inject constructor(
     dynamoDb: DynamoDbClient,
     private val dynamoDbEnhancedClient: DynamoDbEnhancedClient,
@@ -95,5 +105,26 @@ class DynamoDbFilteringTest {
 
     override fun expressionAttributeValues(config: BackfillConfig<NoParameters>): Map<String, AttributeValue>? =
       mapOf(":sort_start" to AttributeValue.builder().s(TRACK_SORT_START).build())
+  }
+
+  class DynamoFilterWithAttributeNameMakeTracksExplicitBackfill @Inject constructor(
+    dynamoDb: DynamoDbClient,
+    private val dynamoDbEnhancedClient: DynamoDbEnhancedClient,
+  ) : FilteredMakeTracksExplicitBackfill(dynamoDb, dynamoDbEnhancedClient) {
+    override fun dynamoDbTable(): DynamoDbTable<TrackItem> {
+      return dynamoDbEnhancedClient.table(
+        TrackItem.TABLE_NAME,
+        TableSchema.fromClass(TrackItem::class.java),
+      )
+    }
+
+    override fun filterExpression(config: BackfillConfig<NoParameters>): String? =
+      "begins_with (#sort_key, :sort_start)"
+
+    override fun expressionAttributeValues(config: BackfillConfig<NoParameters>): Map<String, AttributeValue>? =
+      mapOf(":sort_start" to AttributeValue.builder().s(TRACK_SORT_START).build())
+
+    override fun expressionAttributeNames(config: BackfillConfig<NoParameters>): Map<String, String>? =
+      mapOf("#sort_key" to "sort_key")
   }
 }

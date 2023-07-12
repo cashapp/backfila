@@ -118,6 +118,7 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
         }
         this.filterExpression = backfill.filterExpression(config)
         this.expressionAttributeValues = backfill.expressionAttributeValues(config)
+        this.expressionAttributeNames = backfill.expressionAttributeNames(config)
       }
       val result = dynamoDb.scanPage(backfill.itemType.java, scanRequest)
       backfill.runBatch(result.results, config)
