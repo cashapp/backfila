@@ -52,6 +52,11 @@ dependencies {
       strictly("4.9.3")
     }
   }
+
+  // Required for M1 macs
+  if (org.apache.tools.ant.taskdefs.condition.Os.isArch("aarch64")) {
+    testImplementation("io.github.ganadist.sqlite4java:libsqlite4java-osx-aarch64:1.0.392")
+  }
 }
 
 configure<MavenPublishBaseExtension> {

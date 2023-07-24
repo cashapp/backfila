@@ -76,4 +76,7 @@ abstract class DynamoDbBackfill<I : Any, P : Any> : Backfill {
 
   /** See [ScanRequest.setExpressionAttributeNames]. */
   open fun expressionAttributeNames(config: BackfillConfig<P>): Map<String, String>? = null
+
+  /** See [ScanRequest.setIndexName]. */
+  open fun indexName(config: BackfillConfig<P>): String? = null
 }
