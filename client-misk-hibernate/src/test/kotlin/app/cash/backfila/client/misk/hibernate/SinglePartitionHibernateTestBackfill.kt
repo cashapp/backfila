@@ -20,7 +20,7 @@ class SinglePartitionHibernateTestBackfill @Inject constructor(
   val parametersLog = mutableListOf<SandwichParameters>()
 
   override fun backfillCriteria(config: BackfillConfig<SandwichParameters>): Query<DbMenu> {
-    return queryFactory.newQuery(MenuQuery::class).name(config.parameters.type)
+    return queryFactory.newQuery(MenuQuery::class).name(config.parameters.type ?: "beef")
   }
 
   override fun runBatch(pkeys: List<Id<DbMenu>>, config: BackfillConfig<SandwichParameters>) {
@@ -35,7 +35,8 @@ class SinglePartitionHibernateTestBackfill @Inject constructor(
 
   override fun partitionProvider() = UnshardedPartitionProvider(transacter)
 }
+
 data class SandwichParameters(
   @Description("The type of sandwich to backfill. e.g. chicken, beef")
-  val type: String = "chicken",
+  val type: String? = "chicken",
 )
