@@ -28,6 +28,6 @@ class BackfillsModule : KAbstractModule() {
     install(DynamoDbBackfillModule.create<DynamoDbLastEvaluatedKeyTest.PausingBackfill>())
     install(DynamoDbBackfillModule.create<DynamoDbBillingModeTest.EmptyTrackBackfill>())
     install(DynamoDbBackfillModule.create<DynamoDbBillingModeTest.ReallyExpensiveBackfill>())
-    install(DynamoDbBackfillModule.create<DynamoDbIndexTest.MakeTracksExplicitBackfill>())
+    install(DynamoDbBackfillModule.create<DynamoDbIndexTest.MakeTracksAsSinglesBackfill>())
   }
 }

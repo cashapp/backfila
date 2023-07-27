@@ -45,12 +45,12 @@ class DynamoDbIndexTest {
     assertThat(rowsInIndex().size).isEqualTo(1)
     assertThat(testData.getRowsDump().size).isEqualTo(2)
 
-    val run = backfila.createWetRun<MakeTracksExplicitBackfill>()
+    val run = backfila.createWetRun<MakeTracksAsSinglesBackfill>()
     run.execute()
 
     // Only rows from the index were updated.
     assertThat(dynamoDb.load(TrackItem::class.java, "ALBUM_2", "TRACK_03").track_title)
-      .isEqualTo("Thriller (EXPLICIT)")
+      .isEqualTo("Thriller (Single)")
     assertThat(dynamoDb.load(TrackItem::class.java, "ALBUM_3", "TRACK_01").track_title)
       .isEqualTo("Anon")
   }
@@ -63,19 +63,19 @@ class DynamoDbIndexTest {
     return dynamoDb.scan(TrackItem::class.java, scanRequest)
   }
 
-  class MakeTracksExplicitBackfill @Inject constructor(
+  class MakeTracksAsSinglesBackfill @Inject constructor(
     dynamoDb: DynamoDBMapper,
-  ) : UpdateInPlaceDynamoDbBackfill<TrackItem, MakeTracksExplicitBackfill.ExplicitParameters>(dynamoDb) {
+  ) : UpdateInPlaceDynamoDbBackfill<TrackItem, MakeTracksAsSinglesBackfill.SingleParameters>(dynamoDb) {
 
-    override fun runOne(item: TrackItem, config: BackfillConfig<ExplicitParameters>): Boolean {
+    override fun runOne(item: TrackItem, config: BackfillConfig<SingleParameters>): Boolean {
       val trackTitle = item.track_title ?: return false
-      if (trackTitle.endsWith(" (EXPLICIT)")) return false // Idempotent retry?
-      item.track_title = "$trackTitle (EXPLICIT)"
+      if (trackTitle.endsWith(" (Single)")) return false // Idempotent retry?
+      item.track_title = "$trackTitle (Single)"
       return true
     }
 
-    data class ExplicitParameters(val validate: Boolean = true)
+    data class SingleParameters(val validate: Boolean = true)
 
-    override fun indexName(config: BackfillConfig<ExplicitParameters>): String? = "trackTitleIndex"
+    override fun indexName(config: BackfillConfig<SingleParameters>): String? = "trackTitleIndex"
   }
 }
