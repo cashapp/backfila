@@ -5,6 +5,7 @@ import app.cash.backfila.client.BackfilaClientNoLoggingSetupProvider
 import app.cash.backfila.client.BackfilaHttpClientConfig
 import app.cash.backfila.client.misk.hibernate.ChickenToBeefBackfill
 import app.cash.backfila.client.misk.hibernate.HibernateBackfillModule
+import app.cash.backfila.client.misk.hibernate.NullableParameterBackfill
 import app.cash.backfila.client.misk.hibernate.RecordNoParametersConfigValuesBackfill
 import app.cash.backfila.client.misk.hibernate.SinglePartitionHibernateTestBackfill
 import app.cash.backfila.client.misk.hibernate.StringKeyBackfill
@@ -69,5 +70,6 @@ internal class ClientMiskTestingModule(
     install(HibernateBackfillModule.create<ChickenToBeefBackfill>())
     install(HibernateBackfillModule.create<RecordNoParametersConfigValuesBackfill>())
     install(HibernateBackfillModule.create<StringKeyBackfill>())
+    install(HibernateBackfillModule.create<NullableParameterBackfill>())
   }
 }
