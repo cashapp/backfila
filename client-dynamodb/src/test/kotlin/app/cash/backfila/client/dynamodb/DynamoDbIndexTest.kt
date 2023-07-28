@@ -69,7 +69,7 @@ class DynamoDbIndexTest {
 
     override fun runOne(item: TrackItem, config: BackfillConfig<SingleParameters>): Boolean {
       val trackTitle = item.track_title ?: return false
-      if (trackTitle.endsWith(" (Single)")) return false // Idempotent retry?
+      if (trackTitle.endsWith(" (Single)")) return true
       item.track_title = "$trackTitle (Single)"
       return true
     }
