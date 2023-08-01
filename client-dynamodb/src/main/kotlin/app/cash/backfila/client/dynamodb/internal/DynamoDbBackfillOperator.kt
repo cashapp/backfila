@@ -50,7 +50,7 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
         backfill.partitionCount(config) == 1 &&
           backfill.fixedSegmentCount(config) == 1,
       ) {
-        "Query cannot utilise segments so will have to be done in one batch"
+        "Query cannot utilise segments, please run in single batch"
       }
     }
     val partitionCount = backfill.partitionCount(config)

@@ -11,6 +11,7 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import javax.inject.Inject
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -30,7 +31,7 @@ class DynamoDbQueryTest {
   fun `dynamo query process all albums with PK`() {
     testData.addAllTheMusic()
 
-    val run = backfila.createWetRun<DynamoQueryMakeTracksRemixBackfill>()
+    val run = backfila.createWetRun<MakeTracksRemixBackfill>()
     run.batchSize = 10
     run.execute()
 
@@ -48,13 +49,19 @@ class DynamoDbQueryTest {
     dynamoDb.save(trackItem)
     testData.addAllTheMusic()
 
-    val run = backfila.createWetRun<DynamoQueryWithGSIMakeTracksRemixBackfill>()
+    val run = backfila.createWetRun<WithGSIMakeTracksRemixBackfill>()
     run.execute()
     assertThat(run.backfill.tracksEdited).isEqualTo(1)
     assertThat(dynamoDb.load(TrackItem::class.java, "ALBUM_2", "TRACK_03").track_title)
       .isEqualTo("Thriller (REMIX)")
   }
 
+  @Test
+  fun `dynamoDB query with incorrect config fails`() {
+    Assertions.assertThatCode {
+      backfila.createWetRun<WithPartitionSegmentBackfill>()
+    }.hasMessageContaining("Query cannot utilise segments, please run in single batch")
+  }
   open class QueryMakeTracksRemixBackfill @Inject constructor(
     dynamoDb: DynamoDBMapper,
   ) : UpdateInPlaceDynamoDbBackfill<TrackItem, NoParameters>(dynamoDb) {
@@ -77,7 +84,7 @@ class DynamoDbQueryTest {
     override fun partitionCount(config: PrepareBackfillConfig<NoParameters>): Int = 1
   }
 
-  class DynamoQueryMakeTracksRemixBackfill @Inject constructor(
+  class MakeTracksRemixBackfill @Inject constructor(
     dynamoDb: DynamoDBMapper,
   ) : QueryMakeTracksRemixBackfill(dynamoDb) {
     override fun keyConditionExpression(config: BackfillConfig<NoParameters>): String? = "album_token=:val1"
@@ -86,7 +93,7 @@ class DynamoDbQueryTest {
       mapOf(":val1" to AttributeValue("ALBUM_2"))
   }
 
-  class DynamoQueryWithGSIMakeTracksRemixBackfill @Inject constructor(
+  class WithGSIMakeTracksRemixBackfill @Inject constructor(
     dynamoDb: DynamoDBMapper,
   ) : QueryMakeTracksRemixBackfill(dynamoDb) {
 
@@ -98,5 +105,10 @@ class DynamoDbQueryTest {
     override fun indexName(config: BackfillConfig<NoParameters>): String? = "trackTitleIndex"
 
     override fun isConsistentRead(config: BackfillConfig<NoParameters>): Boolean = false
+  }
+  class WithPartitionSegmentBackfill @Inject constructor(
+    dynamoDb: DynamoDBMapper,
+  ) : QueryMakeTracksRemixBackfill(dynamoDb) {
+    override fun fixedSegmentCount(config: PrepareBackfillConfig<NoParameters>): Int? = 16
   }
 }
