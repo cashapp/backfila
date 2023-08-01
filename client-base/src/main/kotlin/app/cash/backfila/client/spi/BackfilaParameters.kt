@@ -26,7 +26,10 @@ fun parametersToBytes(parameters: Any): Map<String, ByteString> {
   val map = mutableMapOf<String, ByteString>()
 
   for (property in parametersClass.memberProperties) {
-    map[property.name] = (property.getter.call(parameters).toString()).encodeUtf8()
+    val value = property.getter.call(parameters)
+    if (value != null) {
+      map[property.name] = value.toString().encodeUtf8()
+    }
   }
   return map
 }
@@ -57,7 +60,7 @@ class BackfilaParametersOperator<T : Any>(
     request.dry_run,
   )
 
-  private fun constructParameters(
+  fun constructParameters(
     parameters: MutableMap<String, ByteString>,
   ): T {
     val map = mutableMapOf<KParameter, Any>()

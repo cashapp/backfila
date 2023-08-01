@@ -292,6 +292,20 @@ abstract class SinglePartitionHibernateBackfillTest {
     assertThat(run.backfill.parametersLog).isEmpty()
   }
 
+  @Test fun nullParameter() {
+    createSome()
+    val run = backfila.createDryRun<SinglePartitionHibernateTestBackfill>(
+      parameters = SandwichParameters(null),
+    )
+      .apply { configureForTest() }
+
+    run.execute()
+    assertThat(run.backfill.idsRanDry).size().isEqualTo(20)
+    assertThat(run.backfill.idsRanWet).isEmpty()
+    // Null parameter used the default
+    assertThat(run.backfill.parametersLog).contains(SandwichParameters("chicken"))
+  }
+
   private fun BackfillRun<*>.configureForTest() {
     this.batchSize = 10L
     this.scanSize = 100L
