@@ -4,6 +4,7 @@ import app.cash.backfila.client.Backfill
 import app.cash.backfila.client.BackfillConfig
 import app.cash.backfila.client.PrepareBackfillConfig
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
+import com.amazonaws.services.dynamodbv2.model.QueryRequest
 import com.amazonaws.services.dynamodbv2.model.ScanRequest
 import com.google.inject.TypeLiteral
 import com.squareup.moshi.Types
@@ -79,4 +80,15 @@ abstract class DynamoDbBackfill<I : Any, P : Any> : Backfill {
 
   /** See [ScanRequest.setIndexName]. */
   open fun indexName(config: BackfillConfig<P>): String? = null
+  /** See [QueryRequest.setKeyConditionExpression]. */
+  open fun keyConditionExpression(config: BackfillConfig<P>): String? = null
+
+  /**
+   * Override this to use DynamoDB Query. If set to true, you must provide a keyConditionExpression on the PK.
+   * Or you must use a GSI with indexName, keyConditionExpression and isConsistentRead = false.
+   */
+  open fun useQueryRequest(config: BackfillConfig<P>): Boolean = false
+
+  /** See [QueryRequest.isConsistentRead]. */
+  open fun isConsistentRead(config: BackfillConfig<P>): Boolean = true
 }
