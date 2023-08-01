@@ -11,6 +11,7 @@ import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
 import app.cash.backfila.protos.clientservice.RunBatchRequest
 import app.cash.backfila.protos.clientservice.RunBatchResponse
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.google.common.base.Stopwatch
@@ -42,7 +43,16 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
           "Please provision your dynamo capacity for this table and try again."
       }
     }
-
+    if (backfill.useQueryRequest()) {
+      // Query doesn't support segments so partitions can only be run once.
+      // Maybe we can find a way to support generic lastEvaluatedKeys if we know the data distribution
+      require(
+        backfill.partitionCount(config) == 1 &&
+          backfill.fixedSegmentCount(config) == 1,
+      ) {
+        "Query cannot utilise segments so will have to be done in one batch"
+      }
+    }
     val partitionCount = backfill.partitionCount(config)
     val desiredSegmentCount = (tableDescription.itemCount / 100L).coerceIn(partitionCount.toLong(), 524288L)
     val defaultSegmentCount = desiredSegmentCount.takeHighestOneBit().toInt() // closest power of 2
@@ -109,6 +119,28 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
 
     val stopwatch = Stopwatch.createStarted()
     do {
+      if (backfill.useQueryRequest()) {
+        val queryRequest = DynamoDBQueryExpression<I>().apply {
+          limit = request.batch_size.toInt()
+          if (lastEvaluatedKey != null) {
+            exclusiveStartKey = lastEvaluatedKey
+          }
+          this.keyConditionExpression = backfill.keyConditionExpression(config)
+          this.expressionAttributeValues = backfill.expressionAttributeValues(config)
+          this.expressionAttributeNames = backfill.expressionAttributeNames(config)
+          this.indexName = backfill.indexName(config)
+          this.isConsistentRead = backfill.isConsistentRead(config)
+        }
+        val result = dynamoDb.queryPage(backfill.itemType.java, queryRequest)
+        backfill.runBatch(result.results, config)
+        lastEvaluatedKey = result.lastEvaluatedKey
+        if (stopwatch.elapsed() > Duration.ofMillis(1_000L)) {
+          break
+        }
+        return RunBatchResponse.Builder()
+          .remaining_batch_range(lastEvaluatedKey?.toKeyRange(keyRange))
+          .build()
+      }
       val scanRequest = DynamoDBScanExpression().apply {
         segment = keyRange.start
         totalSegments = keyRange.count

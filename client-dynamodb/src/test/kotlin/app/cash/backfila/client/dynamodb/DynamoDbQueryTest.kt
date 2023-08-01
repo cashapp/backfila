@@ -2,6 +2,7 @@ package app.cash.backfila.client.dynamodb
 
 import app.cash.backfila.client.BackfillConfig
 import app.cash.backfila.client.NoParameters
+import app.cash.backfila.client.PrepareBackfillConfig
 import app.cash.backfila.client.misk.TestingModule
 import app.cash.backfila.embedded.Backfila
 import app.cash.backfila.embedded.createWetRun
@@ -19,82 +20,83 @@ class DynamoDbQueryTest {
   @MiskTestModule
   val module = TestingModule()
 
+  @Inject lateinit var dynamoDb: DynamoDBMapper
+
   @Inject lateinit var backfila: Backfila
 
   @Inject lateinit var testData: DynamoMusicTableTestData
 
   @Test
-  fun `dynamo filter doesn't process the album info rows`() {
+  fun `dynamo query process all albums with PK`() {
     testData.addAllTheMusic()
 
     val run = backfila.createWetRun<DynamoQueryMakeTracksRemixBackfill>()
-    run.batchSize = 3
+    run.batchSize = 10
     run.execute()
-    val total = run.backfill.total
 
     assertThat(run.backfill.tracksEdited).isEqualTo(9)
   }
 
   @Test
-  fun `dynamo query only updates single album`() {
+  fun `dynamo query only updates single track`() {
+    val trackItem = TrackItem().apply {
+      this.album_token = "ALBUM_2"
+      this.sort_key = "TRACK_03"
+      this.track_title = "Thriller"
+      this.album_title = "MJ"
+    }
+    dynamoDb.save(trackItem)
     testData.addAllTheMusic()
 
-    // Dynamo Filter using expression names at run time skips all the album info entries too.
-    val run = backfila.createWetRun<DynamoFilterWithAttributeNameMakeTracksRemixBackfill>()
+    val run = backfila.createWetRun<DynamoQueryWithGSIMakeTracksRemixBackfill>()
     run.execute()
-    assertThat(run.backfill.tracksEdited).isEqualTo(9)
+    assertThat(run.backfill.tracksEdited).isEqualTo(1)
+    assertThat(dynamoDb.load(TrackItem::class.java, "ALBUM_2", "TRACK_03").track_title)
+      .isEqualTo("Thriller (REMIX)")
   }
 
   open class QueryMakeTracksRemixBackfill @Inject constructor(
     dynamoDb: DynamoDBMapper,
   ) : UpdateInPlaceDynamoDbBackfill<TrackItem, NoParameters>(dynamoDb) {
-    var nonTrackCount: Int = 0
     var tracksEdited: Int = 0
-    var total: Int = 0
     override fun runOne(item: TrackItem, config: BackfillConfig<NoParameters>): Boolean {
-      total++
-      println("${item.album_token} + ${item.sort_key}")
       if (item.sort_key?.startsWith(TRACK_SORT_START) == true) {
         val trackTitle = item.track_title ?: return false
         if (trackTitle.endsWith(" (REMIX)")) return false // Idempotent retry?
         item.track_title = "$trackTitle (REMIX)"
         tracksEdited++
-      } else {
-        nonTrackCount++
       }
       return true
     }
     companion object {
       const val TRACK_SORT_START = "TRACK_"
     }
-    override fun useQueryRequest(config: BackfillConfig<NoParameters>): Boolean {
-      return true
-    }
+
+    override fun useQueryRequest(): Boolean = true
+    override fun fixedSegmentCount(config: PrepareBackfillConfig<NoParameters>): Int? = 1
+    override fun partitionCount(config: PrepareBackfillConfig<NoParameters>): Int = 1
   }
 
   class DynamoQueryMakeTracksRemixBackfill @Inject constructor(
     dynamoDb: DynamoDBMapper,
   ) : QueryMakeTracksRemixBackfill(dynamoDb) {
-    override fun keyConditionExpression(config: BackfillConfig<NoParameters>): String? {
-      return "album_token=:val1"
-    }
+    override fun keyConditionExpression(config: BackfillConfig<NoParameters>): String? = "album_token=:val1"
+
     override fun expressionAttributeValues(config: BackfillConfig<NoParameters>): Map<String, AttributeValue>? =
       mapOf(":val1" to AttributeValue("ALBUM_2"))
   }
 
-  class DynamoFilterWithAttributeNameMakeTracksRemixBackfill @Inject constructor(
+  class DynamoQueryWithGSIMakeTracksRemixBackfill @Inject constructor(
     dynamoDb: DynamoDBMapper,
   ) : QueryMakeTracksRemixBackfill(dynamoDb) {
 
-    override fun keyConditionExpression(config: BackfillConfig<NoParameters>): String? {
-      return "artist_name=:val1"
-    }
+    override fun keyConditionExpression(config: BackfillConfig<NoParameters>): String? = "track_title=:val1"
 
     override fun expressionAttributeValues(config: BackfillConfig<NoParameters>): Map<String, AttributeValue>? =
-      mapOf(":val1" to AttributeValue("Michael Jackson"))
+      mapOf(":val1" to AttributeValue("Thriller"))
 
-    override fun indexName(config: BackfillConfig<NoParameters>): String? {
-      return "artistNameIndex"
-    }
+    override fun indexName(config: BackfillConfig<NoParameters>): String? = "trackTitleIndex"
+
+    override fun isConsistentRead(config: BackfillConfig<NoParameters>): Boolean = false
   }
 }

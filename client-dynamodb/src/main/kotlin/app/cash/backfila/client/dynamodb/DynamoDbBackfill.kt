@@ -21,7 +21,6 @@ abstract class DynamoDbBackfill<I : Any, P : Any> : Backfill {
   init {
     // Like MyBackfill.
     val thisType = TypeLiteral.get(this::class.java)
-
     // Like Backfill<MyItem, Parameters>.
     val supertype = thisType.getSupertype(
       DynamoDbBackfill::class.java,
@@ -63,6 +62,12 @@ abstract class DynamoDbBackfill<I : Any, P : Any> : Backfill {
   open fun partitionCount(config: PrepareBackfillConfig<P>): Int = 8
 
   /**
+   * Override this to use DynamoDB Query. If set to true, you must provide a keyConditionExpression on the PK.
+   * Or you must use a GSI with indexName, keyConditionExpression and isConsistentRead = false.
+   */
+  open fun useQueryRequest(): Boolean = false
+
+  /**
    * It is rather easy to run a backfill against a dynamo instance that is configured expensively.
    * Update dynamo so the billing mode is PROVISIONED rather than PAY_PER_REQUEST as the latter can
    * be very expensive.
@@ -72,22 +77,17 @@ abstract class DynamoDbBackfill<I : Any, P : Any> : Backfill {
   /** See [ScanRequest.setFilterExpression]. */
   open fun filterExpression(config: BackfillConfig<P>): String? = null
 
-  /** See [ScanRequest.setExpressionAttributeValues]. */
+  /** See [ScanRequest.setExpressionAttributeValues] or [QueryRequest.setExpressionAttributeValues]. */
   open fun expressionAttributeValues(config: BackfillConfig<P>): Map<String, AttributeValue>? = null
 
-  /** See [ScanRequest.setExpressionAttributeNames]. */
+  /** See [ScanRequest.setExpressionAttributeNames] or [QueryRequest.setExpressionAttributeNames]. */
   open fun expressionAttributeNames(config: BackfillConfig<P>): Map<String, String>? = null
 
-  /** See [ScanRequest.setIndexName]. */
+  /** See [ScanRequest.setIndexName] or [QueryRequest.setIndexName]. */
   open fun indexName(config: BackfillConfig<P>): String? = null
+
   /** See [QueryRequest.setKeyConditionExpression]. */
   open fun keyConditionExpression(config: BackfillConfig<P>): String? = null
-
-  /**
-   * Override this to use DynamoDB Query. If set to true, you must provide a keyConditionExpression on the PK.
-   * Or you must use a GSI with indexName, keyConditionExpression and isConsistentRead = false.
-   */
-  open fun useQueryRequest(config: BackfillConfig<P>): Boolean = false
 
   /** See [QueryRequest.isConsistentRead]. */
   open fun isConsistentRead(config: BackfillConfig<P>): Boolean = true
