@@ -1,6 +1,7 @@
 package app.cash.backfila
 
 import app.cash.backfila.client.ConnectorProvider
+import app.cash.backfila.client.PerRunOverrideData
 import app.cash.backfila.protos.clientservice.KeyRange
 import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
 import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
@@ -38,6 +39,7 @@ class BackfillCreator @Inject constructor(
     val batch_size = request.batch_size ?: 100L
     val dry_run = request.dry_run ?: true
     val extra_sleep_ms = request.extra_sleep_ms ?: 0
+    val target_cluster_type = request.target_cluster_type ?: null
 
     validate(request, num_threads, scan_size, batch_size, extra_sleep_ms)
 
@@ -81,6 +83,7 @@ class BackfillCreator @Inject constructor(
         request.backoff_schedule,
         dry_run,
         extra_sleep_ms,
+        target_cluster_type,
       )
       session.save(backfillRun)
 
@@ -105,8 +108,9 @@ class BackfillCreator @Inject constructor(
     request: CreateBackfillRequest,
     dry_run: Boolean,
   ): PrepareBackfillResponse {
+    val perBackfillRunConnectorData = PerRunOverrideData(request.target_cluster_type)
     val client = connectorProvider.clientProvider(dbData.connectorType)
-      .clientFor(service, dbData.connectorExtraData)
+      .clientFor(service, dbData.connectorExtraData, perBackfillRunConnectorData)
 
     val prepareBackfillResponse = try {
       client.prepareBackfill(

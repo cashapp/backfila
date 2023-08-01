@@ -111,6 +111,7 @@ class CloneBackfillActionTest {
           batch_size = 123,
           scan_size = 223,
           backoff_schedule = "1000,2000",
+          target_cluster_type = "sandbox",
           num_threads = 5,
           dry_run = false,
           extra_sleep_ms = 15,
@@ -127,6 +128,7 @@ class CloneBackfillActionTest {
       assertThat(status.batch_size).isEqualTo(123)
       assertThat(status.scan_size).isEqualTo(223)
       assertThat(status.backoff_schedule).isEqualTo("1000,2000")
+      assertThat(status.target_cluster_type).isEqualTo("sandbox")
       assertThat(status.extra_sleep_ms).isEqualTo(15)
     }
   }

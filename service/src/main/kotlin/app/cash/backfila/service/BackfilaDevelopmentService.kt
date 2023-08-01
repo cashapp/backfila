@@ -4,6 +4,7 @@ import app.cash.backfila.client.BackfilaClientServiceClient
 import app.cash.backfila.client.BackfilaClientServiceClientProvider
 import app.cash.backfila.client.BackfilaDefaultEndpointConfigModule
 import app.cash.backfila.client.ForConnectors
+import app.cash.backfila.client.PerRunOverrideData
 import app.cash.backfila.dashboard.ViewLogsUrlProvider
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
@@ -58,6 +59,7 @@ fun main(args: Array<String>) {
             override fun clientFor(
               serviceName: String,
               connectorExtraData: String?,
+              perRunOverrideData: PerRunOverrideData?,
             ): BackfilaClientServiceClient {
               return object : BackfilaClientServiceClient {
                 override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {

@@ -25,5 +25,5 @@ class BackfilaDefaultEndpointConfigModule() : KAbstractModule() {
 
 interface BackfilaClientServiceClientProvider {
   fun validateExtraData(connectorExtraData: String?)
-  fun clientFor(serviceName: String, connectorExtraData: String?): BackfilaClientServiceClient
+  fun clientFor(serviceName: String, connectorExtraData: String?, perRunOverrideData: PerRunOverrideData?): BackfilaClientServiceClient
 }

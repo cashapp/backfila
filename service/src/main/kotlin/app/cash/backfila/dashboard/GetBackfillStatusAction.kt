@@ -52,6 +52,7 @@ data class UiEventLog(
 data class GetBackfillStatusResponse(
   val service_name: String,
   val name: String,
+  val connector_type: String,
   val state: BackfillState,
   val parameters: Map<String, String>?,
   val batch_size: Long,
@@ -62,6 +63,7 @@ data class GetBackfillStatusResponse(
   val created_by_user: String?,
   val extra_sleep_ms: Long,
   val backoff_schedule: String?,
+  val target_cluster_type: String?,
   val partitions: List<UiPartition>,
   val event_logs: List<UiEventLog>,
 )
@@ -85,6 +87,7 @@ class GetBackfillStatusAction @Inject constructor(
       GetBackfillStatusResponse(
         run.service.registry_name,
         run.registered_backfill.name,
+        run.service.connector,
         run.state,
         run.parameters()?.mapValues { (_, v) -> v.utf8() },
         run.batch_size,
@@ -95,6 +98,7 @@ class GetBackfillStatusAction @Inject constructor(
         run.created_by_user,
         run.extra_sleep_ms,
         run.backoff_schedule,
+        run.target_cluster_type,
         partitions.map { dbToUi(it) },
         events(session, run, partitions),
       )

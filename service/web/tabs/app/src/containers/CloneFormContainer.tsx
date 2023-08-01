@@ -46,6 +46,7 @@ interface CloneFormState {
   pkey_range_start?: string
   pkey_range_end?: string
   extra_sleep_ms: number
+  target_cluster_type?: string
   backoff_schedule?: string
   parameters: any
 }
@@ -72,6 +73,7 @@ class CloneFormContainer extends React.Component<
       range_clone_type: "RESTART",
       pkey_range_start: null,
       pkey_range_end: null,
+      target_cluster_type: null,
       backoff_schedule: null,
       extra_sleep_ms: 0,
       parameters: {}
@@ -91,6 +93,7 @@ class CloneFormContainer extends React.Component<
           scan_size: response.data.scan_size,
           batch_size: response.data.batch_size,
           num_threads: response.data.num_threads,
+          target_cluster_type: response.data.target_cluster_type,
           backoff_schedule: response.data.backoff_schedule,
           extra_sleep_ms: response.data.extra_sleep_ms,
           parameters: params
@@ -263,6 +266,27 @@ class CloneFormContainer extends React.Component<
                   value={this.state.extra_sleep_ms}
                 />
               </FlexContainer>
+              {this.state.backfill && this.state.backfill.connectorType === 'ENVOY' && (
+                  <FlexContainer>
+                    <H5>
+                      <Tooltip
+                          className={Classes.TOOLTIP_INDICATOR}
+                          content="Target cluster type override. If unset, a default cluster type will be used."
+                      >
+                        Target cluster type override (optional)
+                      </Tooltip>
+                    </H5>
+                    <InputGroup
+                        id="text-input"
+                        placeholder="production"
+                        onChange={(event: FormEvent<HTMLElement>) => {
+                          this.setState({
+                            target_cluster_type: (event.target as any).value
+                          })
+                        }}
+                    />
+                  </FlexContainer>
+              )}
               <FlexContainer>
                 <H5>
                   <Tooltip
@@ -323,6 +347,9 @@ class CloneFormContainer extends React.Component<
                       this.state.pkey_range_start
                     ),
                     pkey_range_end: this.nullIfEmpty(this.state.pkey_range_end),
+                    target_cluster_type: this.nullIfEmpty(
+                      this.state.target_cluster_type
+                    ),
                     backoff_schedule: this.nullIfEmpty(
                       this.state.backoff_schedule
                     ),

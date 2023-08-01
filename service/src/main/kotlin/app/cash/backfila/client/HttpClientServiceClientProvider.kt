@@ -32,6 +32,7 @@ class HttpClientServiceClientProvider @Inject constructor(
   override fun clientFor(
     serviceName: String,
     connectorExtraData: String?,
+    perRunOverrideData: PerRunOverrideData?,
   ): BackfilaClientServiceClient {
     val url = URL(adapter().fromJson(connectorExtraData!!)!!.url)
 

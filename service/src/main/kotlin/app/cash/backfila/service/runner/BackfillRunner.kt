@@ -2,6 +2,7 @@ package app.cash.backfila.service.runner
 
 import app.cash.backfila.client.BackfilaClientServiceClient
 import app.cash.backfila.client.ConnectorProvider
+import app.cash.backfila.client.PerRunOverrideData
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.PipelinedData
 import app.cash.backfila.protos.clientservice.RunBatchRequest
@@ -214,15 +215,23 @@ class BackfillRunner private constructor(
       val serviceName: String,
       val connector: String,
       val connectorExtraData: String?,
+      val targetClusterType: String?,
     )
 
     val dbData = factory.transacter.transaction { session ->
       val dbRunPartition = session.load(partitionId)
       val service = dbRunPartition.backfill_run.registered_backfill.service
-      DbData(service.registry_name, service.connector, service.connector_extra_data)
+      val targetClusterType = dbRunPartition.backfill_run.target_cluster_type
+      DbData(
+        service.registry_name, service.connector,
+        service.connector_extra_data, targetClusterType,
+      )
     }
     return factory.connectorProvider.clientProvider(dbData.connector)
-      .clientFor(dbData.serviceName, dbData.connectorExtraData)
+      .clientFor(
+        dbData.serviceName, dbData.connectorExtraData,
+        PerRunOverrideData(dbData.targetClusterType),
+      )
   }
 
   fun runBatchAsync(

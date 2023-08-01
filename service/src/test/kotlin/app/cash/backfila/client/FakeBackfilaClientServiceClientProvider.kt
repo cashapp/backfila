@@ -18,6 +18,7 @@ class FakeBackfilaClientServiceClientProvider @Inject constructor(
   override fun clientFor(
     serviceName: String,
     connectorExtraData: String?,
+    perRunOverrideData: PerRunOverrideData?,
   ): BackfilaClientServiceClient {
     return fakeBackfilaClientServiceClient
   }

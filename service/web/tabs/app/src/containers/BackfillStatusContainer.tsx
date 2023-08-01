@@ -176,6 +176,12 @@ class BackfillStatusContainer extends React.Component<
                   <td>Dry run</td>
                   <td>{status.dry_run ? "dry run" : "wet run"}</td>
                 </tr>
+                {status.connector_type === 'ENVOY' && (
+                  <tr>
+                    <td>Target cluster type</td>
+                    <td>{status.target_cluster_type ? status.target_cluster_type : ""}</td>
+                  </tr>
+                )}
                 <tr>
                   <td>Threads per partition</td>
                   <td>

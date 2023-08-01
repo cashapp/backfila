@@ -1,5 +1,6 @@
 package app.cash.backfila.client
 
+import app.cash.backfila.client.interceptors.OkHttpGnsLabelInterceptor
 import com.squareup.moshi.Moshi
 import java.net.URL
 import javax.inject.Inject
@@ -29,9 +30,21 @@ class EnvoyClientServiceClientProvider @Inject constructor(
   override fun clientFor(
     serviceName: String,
     connectorExtraData: String?,
+    perBackfillRunOverrideData: PerRunOverrideData?,
   ): BackfilaClientServiceClient {
-    // If clusterType is specified use it for env, otherwise use null to default to current env.
-    val env = connectorExtraData?.let { adapter().fromJson(connectorExtraData)?.clusterType }
+    var env: String? = perBackfillRunOverrideData?.let { perBackfillRunOverrideData.overrideClusterType }
+    var label: String? = null
+    if (connectorExtraData != null) {
+      val extraData = adapter().fromJson(connectorExtraData)
+
+      // First try to read the env from the per-run overrides
+      // If there is no override, try to read the env from the connector extra data.
+      // If there is no env specified, use null to default to current env.
+      env = env ?: extraData?.clusterType
+
+      // If a GNS label is specified use it, otherwise no label is used.
+      label = extraData?.gnsLabel
+    }
 
     val envoyConfig = HttpClientEnvoyConfig(
       app = serviceName,
@@ -39,7 +52,14 @@ class EnvoyClientServiceClientProvider @Inject constructor(
     )
     val baseUrl = URL(envoyClientEndpointProvider.url(envoyConfig))
     val httpClientEndpointConfig = httpClientsConfig[baseUrl]
-    val okHttpClient = httpClientFactory.create(httpClientEndpointConfig)
+
+    var okHttpClient = httpClientFactory.create(httpClientEndpointConfig)
+    if (label != null) {
+      okHttpClient = okHttpClient.newBuilder()
+        .addInterceptor(OkHttpGnsLabelInterceptor(label!!))
+        .build()
+    }
+
     val retrofit = Retrofit.Builder()
       .baseUrl(baseUrl)
       .client(okHttpClient)

@@ -90,6 +90,10 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
   @Column(nullable = false)
   var dry_run: Boolean = false
 
+  /** Target cluster type for envoy connector usage. If unset, a default cluster type will be used. */
+  @Column
+  var target_cluster_type: String? = null
+
   /** Comma separated list of delays for consecutive retries in milliseconds, e.g. 1000,2000 */
   @Column
   var backoff_schedule: String? = null
@@ -113,6 +117,7 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
     backoff_schedule: String?,
     dry_run: Boolean,
     extra_sleep_ms: Long,
+    target_cluster_type: String?,
   ) : this() {
     this.service_id = service_id
     this.registered_backfill_id = registered_backfill_id
@@ -125,6 +130,7 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
     this.backoff_schedule = backoff_schedule
     this.dry_run = dry_run
     this.extra_sleep_ms = extra_sleep_ms
+    this.target_cluster_type = target_cluster_type
   }
 
   fun partitions(session: Session, queryFactory: Query.Factory) =

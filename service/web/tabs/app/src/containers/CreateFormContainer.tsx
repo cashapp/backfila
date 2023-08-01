@@ -41,6 +41,7 @@ interface CreateFormState {
   pkey_range_start?: string
   pkey_range_end?: string
   extra_sleep_ms: number
+  target_cluster_type?: string
   backoff_schedule?: string
   parameters: any
 }
@@ -67,8 +68,9 @@ class CreateFormContainer extends React.Component<
       num_threads: 1,
       pkey_range_start: null,
       pkey_range_end: null,
-      backoff_schedule: null,
       extra_sleep_ms: 0,
+      target_cluster_type: null,
+      backoff_schedule: null,
       parameters: {}
     })
   }
@@ -200,6 +202,27 @@ class CreateFormContainer extends React.Component<
                   value={this.state.extra_sleep_ms}
                 />
               </FlexContainer>
+              {this.state.backfill && this.state.backfill.connectorType === 'ENVOY' && (
+                <FlexContainer>
+                  <H5>
+                    <Tooltip
+                        className={Classes.TOOLTIP_INDICATOR}
+                        content="Target cluster type override. If unset, a default cluster type will be used."
+                    >
+                      Target cluster type override (optional)
+                    </Tooltip>
+                  </H5>
+                  <InputGroup
+                      id="text-input"
+                      placeholder="production"
+                      onChange={(event: FormEvent<HTMLElement>) => {
+                        this.setState({
+                          target_cluster_type: (event.target as any).value
+                        })
+                      }}
+                  />
+                </FlexContainer>
+              )}
               <FlexContainer>
                 <H5>
                   <Tooltip
@@ -255,6 +278,9 @@ class CreateFormContainer extends React.Component<
                     ),
                     pkey_range_end: this.nullIfEmpty(
                       this.base64(this.state.pkey_range_end)
+                    ),
+                    target_cluster_type: this.nullIfEmpty(
+                        this.state.target_cluster_type
                     ),
                     backoff_schedule: this.nullIfEmpty(
                       this.state.backoff_schedule

@@ -19,6 +19,7 @@ import wisp.logging.getLogger
 data class RegisteredBackfill(
   val name: String,
   val parameterNames: List<String>,
+  val connectorType: String,
 )
 data class GetRegisteredBackfillsResponse(val backfills: List<RegisteredBackfill>)
 
@@ -45,6 +46,7 @@ class GetRegisteredBackfillsAction @Inject constructor(
         RegisteredBackfill(
           it.name,
           it.parameterNames(),
+          it.service.connector,
         )
       }
     }

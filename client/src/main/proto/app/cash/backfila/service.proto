@@ -62,11 +62,14 @@ message CreateBackfillRequest {
   optional uint32 num_threads = 4;
   optional bytes pkey_range_start = 5;
   optional bytes pkey_range_end = 6;
+  optional string target_cluster_type = 11; // Only available for ENVOY connector types
   // Parameters that go to the client service.
   map<string, bytes> parameter_map = 7;
   optional bool dry_run = 8;
   optional string backoff_schedule = 9;
   optional uint64 extra_sleep_ms = 10;
+
+  reserved 12; // next id
 }
 
 message CreateBackfillResponse {

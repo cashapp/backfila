@@ -9,6 +9,7 @@ import { ItemPredicate, ItemRenderer, Suggest } from "@blueprintjs/select"
 export interface IBackfill {
   name: string
   parameterNames: string[]
+  connectorType: string
 }
 
 export interface IBackfillSelectorProps {

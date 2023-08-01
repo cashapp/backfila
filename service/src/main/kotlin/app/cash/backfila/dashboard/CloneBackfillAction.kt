@@ -1,6 +1,7 @@
 package app.cash.backfila.dashboard
 
 import app.cash.backfila.client.ConnectorProvider
+import app.cash.backfila.client.PerRunOverrideData
 import app.cash.backfila.protos.clientservice.KeyRange
 import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
 import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
@@ -48,6 +49,7 @@ data class CloneBackfillRequest(
   // Parameters that go to the client service.
   val parameter_map: Map<String, ByteString> = mapOf(),
   val dry_run: Boolean = true,
+  val target_cluster_type: String? = null,
   val backoff_schedule: String? = null,
   // Sleep that is added after every successful RunBatch.
   val extra_sleep_ms: Long = 0,
@@ -135,6 +137,7 @@ class CloneBackfillAction @Inject constructor(
         request.backoff_schedule,
         request.dry_run,
         request.extra_sleep_ms,
+        request.target_cluster_type,
       )
       session.save(backfillRun)
 
@@ -184,8 +187,9 @@ class CloneBackfillAction @Inject constructor(
   }
 
   private fun prepare(dbData: DbData, request: CloneBackfillRequest): PrepareBackfillResponse {
+    val perBackfillRunConnectorData = PerRunOverrideData(request.target_cluster_type)
     val client = connectorProvider.clientProvider(dbData.connectorType)
-      .clientFor(dbData.serviceName, dbData.connectorExtraData)
+      .clientFor(dbData.serviceName, dbData.connectorExtraData, perBackfillRunConnectorData)
     val prepareBackfillResponse = try {
       client.prepareBackfill(
         PrepareBackfillRequest(
