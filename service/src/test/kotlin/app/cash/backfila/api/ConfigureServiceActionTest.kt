@@ -11,6 +11,7 @@ import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.RegisteredBackfillQuery
 import app.cash.backfila.service.persistence.ServiceQuery
 import com.google.inject.Module
+import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.JsonEncodingException
 import java.time.Clock
 import java.time.Instant
@@ -73,7 +74,7 @@ class ConfigureServiceActionTest {
       configureServiceAction.configureService(
         ConfigureServiceRequest.Builder()
           .connector_type(HTTP)
-          .connector_extra_data("{\"clusterType\":\"staging\"}")
+          .connector_extra_data("{\"clusterType\":\"staging\", \"headers\": [{\"name\": \"foo\", \"value\": \"bar\"}]}")
           .build(),
       )
       assertThat(backfillNames("deep-fryer")).isEmpty()
@@ -83,7 +84,7 @@ class ConfigureServiceActionTest {
           .registryName("deep-fryer")
           .uniqueResult(session)!!
         assertThat(dbService.connector).isEqualTo(HTTP)
-        assertThat(dbService.connector_extra_data).isEqualTo("{\"clusterType\":\"staging\"}")
+        assertThat(dbService.connector_extra_data).isEqualTo("{\"clusterType\":\"staging\", \"headers\": [{\"name\": \"foo\", \"value\": \"bar\"}]}")
       }
     }
   }
@@ -736,6 +737,92 @@ class ConfigureServiceActionTest {
             .build(),
         )
       }.isInstanceOf(JsonEncodingException::class.java)
+    }
+
+    scope.fakeCaller(service = "deep-fryer") {
+      assertThatThrownBy {
+        configureServiceAction.configureService(
+          ConfigureServiceRequest.Builder()
+            .backfills(
+              listOf(
+                ConfigureServiceRequest.BackfillData(
+                  "xyz", "Description", listOf(), null, "String",
+                  false, null,
+                ),
+              ),
+            )
+            .connector_type(ENVOY)
+            .connector_extra_data("{\"clusterType\":\"production\", \"headers\": [{\"name\": \"foo\"}]}")
+            .build(),
+        )
+      }.isInstanceOf(JsonDataException::class.java)
+    }
+
+    scope.fakeCaller(service = "deep-fryer") {
+      assertThatThrownBy {
+        configureServiceAction.configureService(
+          ConfigureServiceRequest.Builder()
+            .backfills(
+              listOf(
+                ConfigureServiceRequest.BackfillData(
+                  "xyz", "Description", listOf(), null, "String",
+                  false, null,
+                ),
+              ),
+            )
+            .connector_type(ENVOY)
+            .connector_extra_data("{\"clusterType\":\"production\", \"headers\": [{\"value\": \"bar\"}]}")
+            .build(),
+        )
+      }.isInstanceOf(JsonDataException::class.java)
+    }
+
+    scope.fakeCaller(service = "deep-fryer") {
+      val headers = mutableListOf<String>()
+      for (i in 0..5000) {
+        headers.add("{\"name\": \"$i\", \"value\": \"$i\"}")
+      }
+
+      assertThatThrownBy {
+        configureServiceAction.configureService(
+          ConfigureServiceRequest.Builder()
+            .backfills(
+              listOf(
+                ConfigureServiceRequest.BackfillData(
+                  "xyz", "Description", listOf(), null, "String",
+                  false, null,
+                ),
+              ),
+            )
+            .connector_type(ENVOY)
+            .connector_extra_data("{\"clusterType\":\"production\", \"headers\": [${headers.joinToString()}]}")
+            .build(),
+        )
+      }.isInstanceOf(IllegalStateException::class.java)
+    }
+
+    scope.fakeCaller(service = "deep-fryer") {
+      val headers = mutableListOf<String>()
+      val name = "a".repeat(5000)
+      val value = "b".repeat(5000)
+      headers.add("{\"name\": \"$name\", \"value\": \"$value\"}")
+
+      assertThatThrownBy {
+        configureServiceAction.configureService(
+          ConfigureServiceRequest.Builder()
+            .backfills(
+              listOf(
+                ConfigureServiceRequest.BackfillData(
+                  "xyz", "Description", listOf(), null, "String",
+                  false, null,
+                ),
+              ),
+            )
+            .connector_type(ENVOY)
+            .connector_extra_data("{\"clusterType\":\"production\", \"headers\": [${headers.joinToString()}]}")
+            .build(),
+        )
+      }.isInstanceOf(IllegalStateException::class.java)
     }
   }
 

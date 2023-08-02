@@ -79,6 +79,7 @@ dependencies {
   testImplementation(Dependencies.kotlinxCoroutinesTest)
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.openTracingMock)
+  testImplementation(Dependencies.okHttpMockWebServer)
 }
 
 val jar by tasks.getting(Jar::class) {
