@@ -1,5 +1,7 @@
 package app.cash.backfila.client
 
+import app.cash.backfila.client.interceptors.OkHttpClientSpecifiedHeadersInterceptor
+import app.cash.backfila.client.interceptors.OkHttpClientSpecifiedHeadersInterceptor.Companion.headersSizeWithinLimit
 import com.squareup.moshi.Moshi
 import java.net.URL
 import javax.inject.Inject
@@ -23,15 +25,30 @@ class EnvoyClientServiceClientProvider @Inject constructor(
   lateinit var envoyClientEndpointProvider: EnvoyClientEndpointProvider
 
   override fun validateExtraData(connectorExtraData: String?) {
-    connectorExtraData?.let { adapter().fromJson(connectorExtraData)?.clusterType }
+    connectorExtraData?.let {
+      val fromJson = adapter().fromJson(connectorExtraData)
+      checkNotNull(fromJson, { "Failed to parse HTTP connector extra data JSON" })
+
+      if (!fromJson.headers.isNullOrEmpty()) {
+        check(headersSizeWithinLimit(fromJson.headers)) { "Headers too large" }
+
+        for (header in fromJson.headers) {
+          checkNotNull(header.name, { "Header names must be set" })
+          checkNotNull(header.value, { "Header values must be set" })
+        }
+      }
+    }
   }
 
   override fun clientFor(
     serviceName: String,
     connectorExtraData: String?,
   ): BackfilaClientServiceClient {
+    val extraData = connectorExtraData?.let { adapter().fromJson(connectorExtraData) }
     // If clusterType is specified use it for env, otherwise use null to default to current env.
-    val env = connectorExtraData?.let { adapter().fromJson(connectorExtraData)?.clusterType }
+    var env: String? = extraData?.clusterType
+    // If client-specified HTTP headers are specified, honor them.
+    var headers: List<HttpHeader>? = extraData?.headers
 
     val envoyConfig = HttpClientEnvoyConfig(
       app = serviceName,
@@ -39,7 +56,14 @@ class EnvoyClientServiceClientProvider @Inject constructor(
     )
     val baseUrl = URL(envoyClientEndpointProvider.url(envoyConfig))
     val httpClientEndpointConfig = httpClientsConfig[baseUrl]
-    val okHttpClient = httpClientFactory.create(httpClientEndpointConfig)
+
+    var okHttpClient = httpClientFactory.create(httpClientEndpointConfig)
+    if (!headers.isNullOrEmpty()) {
+      okHttpClient = okHttpClient.newBuilder()
+        .addInterceptor(OkHttpClientSpecifiedHeadersInterceptor(headers))
+        .build()
+    }
+
     val retrofit = Retrofit.Builder()
       .baseUrl(baseUrl)
       .client(okHttpClient)

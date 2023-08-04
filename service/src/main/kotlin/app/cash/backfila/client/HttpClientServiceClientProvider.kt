@@ -1,5 +1,7 @@
 package app.cash.backfila.client
 
+import app.cash.backfila.client.interceptors.OkHttpClientSpecifiedHeadersInterceptor
+import app.cash.backfila.client.interceptors.OkHttpClientSpecifiedHeadersInterceptor.Companion.headersSizeWithinLimit
 import app.cash.backfila.service.HttpClientNetworkInterceptor
 import com.squareup.moshi.Moshi
 import java.net.URL
@@ -27,27 +29,40 @@ class HttpClientServiceClientProvider @Inject constructor(
     val fromJson = adapter().fromJson(connectorExtraData)
     checkNotNull(fromJson, { "Failed to parse HTTP connector extra data JSON" })
     checkNotNull(fromJson.url, { "HTTP connector extra data must contain a URL" })
+
+    if (!fromJson.headers.isNullOrEmpty()) {
+      check(headersSizeWithinLimit(fromJson.headers)) { "Headers too large" }
+
+      for (header in fromJson.headers) {
+        checkNotNull(header.name, { "Header names must be set" })
+        checkNotNull(header.value, { "Header values must be set" })
+      }
+    }
   }
 
   override fun clientFor(
     serviceName: String,
     connectorExtraData: String?,
   ): BackfilaClientServiceClient {
-    val url = URL(adapter().fromJson(connectorExtraData!!)!!.url)
+    val extraData = adapter().fromJson(connectorExtraData!!)
+    val url = URL(extraData!!.url)
+    val headers = extraData!!.headers
 
     val httpClientEndpointConfig = httpClientsConfig[url]
-    val okHttpClient = httpClientFactory.create(httpClientEndpointConfig)
+    val okHttpClientBuilder = httpClientFactory.create(httpClientEndpointConfig)
       .newBuilder()
       .apply {
         networkInterceptors.forEach {
           addNetworkInterceptor(it)
         }
       }
-      .build()
+    if (!headers.isNullOrEmpty()) {
+      okHttpClientBuilder.addInterceptor(OkHttpClientSpecifiedHeadersInterceptor(headers))
+    }
     val baseUrl = httpClientConfigUrlProvider.getUrl(httpClientEndpointConfig)
     val retrofit = Retrofit.Builder()
       .baseUrl(baseUrl)
-      .client(okHttpClient)
+      .client(okHttpClientBuilder.build())
       .addConverterFactory(WireConverterFactory.create())
       .addCallAdapterFactory(GuavaCallAdapterFactory.create())
       .build()
