@@ -7,6 +7,6 @@ object Connectors {
 
 data class HttpHeader(val name: String, val value: String)
 
-data class HttpConnectorData(val url: String, val headers: List<HttpHeader> = listOf())
+data class HttpConnectorData @JvmOverloads constructor(val url: String, val headers: List<HttpHeader> = listOf())
 
-data class EnvoyConnectorData(val clusterType: String, val headers: List<HttpHeader> = listOf())
+data class EnvoyConnectorData @JvmOverloads constructor(val clusterType: String, val headers: List<HttpHeader> = listOf())
