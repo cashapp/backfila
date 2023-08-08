@@ -11,7 +11,6 @@ import { BackfillRunsTable } from "../components"
 import { simpleSelectorGet } from "@misk/simpleredux"
 import { Link } from "react-router-dom"
 import { LayoutContainer } from "."
-import { RESERVED_FLAVOR } from "../utilities";
 
 class ServiceRunsContainer extends React.Component<
   IState & IDispatchProps,
@@ -36,15 +35,9 @@ class ServiceRunsContainer extends React.Component<
 
   sendRequest() {
     const offset = (this.props as any).match.params.offset
-
-    let url = `/services/${this.service}/backfill-runs?pagination_token=${offset}`;
-    if (this.flavor !== RESERVED_FLAVOR) {
-      url += `&flavor=${this.flavor}`
-    }
-
     this.props.simpleNetworkGet(
       this.backfillRunsTag,
-      url
+      `/services/${this.service}/backfill-runs?pagination_token=${offset}&flavor=${this.flavor}`
     )
   }
 

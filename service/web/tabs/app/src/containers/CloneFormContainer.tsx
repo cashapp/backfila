@@ -28,7 +28,6 @@ import { Link } from "react-router-dom"
 import { FormEvent } from "react"
 import { IBackfill } from "../components"
 import { LayoutContainer } from "../containers"
-import { RESERVED_FLAVOR } from "../utilities";
 
 interface CloneFormState {
   loading: boolean
@@ -140,8 +139,8 @@ class CloneFormContainer extends React.Component<
       <LayoutContainer>
         <H1>
           Service:{" "}
-          <Link to={`/app/services/${this.state.statusResponse.service_name}/flavors/${this.state.statusResponse.flavor || RESERVED_FLAVOR}`}>
-            {this.state.statusResponse.service_name} ({this.state.statusResponse.flavor || RESERVED_FLAVOR})
+          <Link to={`/app/services/${this.state.statusResponse.service_name}/flavors/${this.state.statusResponse.flavor}`}>
+            {this.state.statusResponse.service_name} ({this.state.statusResponse.flavor})
           </Link>
         </H1>
         <div style={{ width: "1000px", margin: "auto" }}>

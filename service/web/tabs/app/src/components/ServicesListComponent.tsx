@@ -2,7 +2,6 @@ import { Classes, H1, HTMLTable } from "@blueprintjs/core"
 import { ErrorCalloutComponent } from "@misk/core"
 import * as React from "react"
 import { Link } from "react-router-dom"
-import { RESERVED_FLAVOR } from "../utilities";
 
 export interface IServiceLinkProps {
   name: string
@@ -17,9 +16,8 @@ function ServiceLink(props: IServiceLinkProps) {
       </Link>
     );
   }
-  const flavorName = props.flavors[0] || RESERVED_FLAVOR
   return (
-    <Link to={`/app/services/${props.name}/flavors/${flavorName}`}>
+    <Link to={`/app/services/${props.name}/flavors/${props.flavors[0]}`}>
       {this.props.name}
     </Link>
   );

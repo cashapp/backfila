@@ -1,5 +1,6 @@
 package app.cash.backfila.dashboard
 
+import app.cash.backfila.api.ConfigureServiceAction.Companion.RESERVED_FLAVOR
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.RegisteredBackfillQuery
 import app.cash.backfila.service.persistence.ServiceQuery
@@ -33,10 +34,11 @@ class GetRegisteredBackfillsAction @Inject constructor(
     @PathParam service: String,
     @QueryParam flavor: String? = null,
   ): GetRegisteredBackfillsResponse {
+    val backfilaFlavor = if (flavor == RESERVED_FLAVOR) null else flavor
     val backfills = transacter.transaction { session ->
       val dbService = queryFactory.newQuery<ServiceQuery>()
         .registryName(service)
-        .flavor(flavor)
+        .flavor(backfilaFlavor)
         .uniqueResult(session) ?: throw BadRequestException("`$service`-`$flavor` doesn't exist")
       val backfills = queryFactory.newQuery<RegisteredBackfillQuery>()
         .serviceId(dbService.id)

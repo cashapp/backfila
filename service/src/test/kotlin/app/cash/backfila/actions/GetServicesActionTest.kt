@@ -56,7 +56,7 @@ class GetServicesActionTest {
 
     scope.fakeCaller(user = "molly") {
       assertThat(getServicesAction.services().services).containsOnly(
-        GetServicesAction.UiService("deep-fryer", listOf(null), 0),
+        GetServicesAction.UiService("deep-fryer", listOf("flavorless"), 0),
       )
     }
   }
@@ -101,7 +101,7 @@ class GetServicesActionTest {
 
     scope.fakeCaller(user = "molly") {
       assertThat(getServicesAction.services().services).containsOnly(
-        GetServicesAction.UiService("deep-fryer", listOf(null, "deep-fried"), 1),
+        GetServicesAction.UiService("deep-fryer", listOf("flavorless", "deep-fried"), 1),
       )
     }
   }
@@ -140,8 +140,8 @@ class GetServicesActionTest {
     }
     scope.fakeCaller(user = "molly") {
       assertThat(getServicesAction.services().services).containsOnly(
-        GetServicesAction.UiService("deep-fryer", listOf(null), 1),
-        GetServicesAction.UiService("freezer", listOf(null), 0),
+        GetServicesAction.UiService("deep-fryer", listOf("flavorless"), 1),
+        GetServicesAction.UiService("freezer", listOf("flavorless"), 0),
       )
     }
   }

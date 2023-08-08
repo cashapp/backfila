@@ -78,7 +78,7 @@ class ConfigureServiceAction @Inject constructor(
         .active()
         .list(session)
         .associateBy { it.name }
-      logger.info { "Found ${existingBackfills.size} existing backfills for `$service`-`${request.flavor ?: "flavorless"}`" }
+      logger.info { "Found ${existingBackfills.size} existing backfills for `$service`-`${request.flavor}`" }
 
       for (backfill in request.backfills) {
         val existingBackfill = existingBackfills[backfill.name]

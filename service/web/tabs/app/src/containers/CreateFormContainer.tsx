@@ -28,7 +28,6 @@ import { Link } from "react-router-dom"
 import { FormEvent } from "react"
 import { IBackfill } from "../components"
 import { LayoutContainer } from "../containers"
-import { RESERVED_FLAVOR } from "../utilities";
 
 interface CreateFormState {
   loading: boolean
@@ -55,13 +54,9 @@ class CreateFormContainer extends React.Component<
   private registeredBackfills: string = `${this.service}::BackfillRuns`
 
   componentDidMount() {
-    let url = `/services/${this.service}/registered-backfills`
-    if (this.flavor !== RESERVED_FLAVOR) {
-      url += `?flavor=${this.flavor}`
-    }
     this.props.simpleNetworkGet(
       this.registeredBackfills,
-      url
+      `/services/${this.service}/registered-backfills?flavor=${this.flavor}`
     )
     this.setState({
       loading: false,
@@ -252,11 +247,6 @@ class CreateFormContainer extends React.Component<
               )}
               <Button
                 onClick={() => {
-                  const params = {}
-                  if (this.flavor !== RESERVED_FLAVOR) {
-                    params['flavor'] = this.flavor
-                  }
-
                   Axios.post(`/services/${this.service}/create`, {
                     backfill_name: this.state.backfill.name,
                     dry_run: this.state.dry_run,
@@ -276,7 +266,9 @@ class CreateFormContainer extends React.Component<
                     parameter_map: this.state.parameters
                   },
                   {
-                    params: params
+                    params: {
+                      flavor: this.flavor
+                    }
                   })
                     .then(response => {
                       let id = response.data.backfill_run_id

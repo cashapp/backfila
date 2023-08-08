@@ -52,6 +52,14 @@ class GetServiceFlavorsActionTest {
       configureServiceAction.configureService(
         ConfigureServiceRequest.Builder()
           .flavor("deep-fried")
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "ChickenSandwich", "Description", listOf(), null, "String",
+                false, null,
+              ),
+            ),
+          )
           .connector_type(Connectors.ENVOY)
           .build(),
       )
@@ -59,15 +67,34 @@ class GetServiceFlavorsActionTest {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(
         ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "ChickenSandwich", "Description", listOf(), null, "String",
+                false, null,
+              ),
+            ),
+          )
           .connector_type(Connectors.ENVOY)
           .build(),
       )
     }
+    scope.fakeCaller(user = "molly") {
+      val response = createBackfillAction.create(
+        "deep-fryer",
+        "deep-fried",
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build(),
+      )
+      val id = response.backfill_run_id
+      startBackfillAction.start(id, StartBackfillRequest())
+    }
 
     scope.fakeCaller(user = "molly") {
       Assertions.assertThat(getServiceFlavorsAction.flavors("deep-fryer").flavors).containsOnly(
-        GetServiceFlavorsAction.UiFlavor("deep-fried", 0),
-        GetServiceFlavorsAction.UiFlavor(null, 0),
+        GetServiceFlavorsAction.UiFlavor("deep-fried", 1),
+        GetServiceFlavorsAction.UiFlavor("flavorless", 0),
       )
     }
   }

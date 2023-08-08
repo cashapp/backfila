@@ -1,5 +1,6 @@
 package app.cash.backfila.dashboard
 
+import app.cash.backfila.api.ConfigureServiceAction.Companion.RESERVED_FLAVOR
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillRunQuery
 import app.cash.backfila.service.persistence.BackfillState
@@ -51,7 +52,7 @@ class GetServicesAction @Inject constructor(
       flavorsByService.keys.map { registry_name ->
         UiService(
           name = registry_name,
-          flavors = flavorsByService[registry_name]!!.map { serviceFlavor -> serviceFlavor.flavor },
+          flavors = flavorsByService[registry_name]!!.map { serviceFlavor -> serviceFlavor.flavor ?: RESERVED_FLAVOR },
           running_backfills = flavorsByService[registry_name]!!.sumOf { flavoredService ->
             runningByService[flavoredService.id]?.size ?: 0
           },
