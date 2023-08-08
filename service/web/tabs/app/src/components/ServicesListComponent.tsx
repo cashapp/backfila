@@ -2,6 +2,28 @@ import { Classes, H1, HTMLTable } from "@blueprintjs/core"
 import { ErrorCalloutComponent } from "@misk/core"
 import * as React from "react"
 import { Link } from "react-router-dom"
+import { RESERVED_FLAVOR } from "../utilities";
+
+export interface IServiceLinkProps {
+  name: string
+  flavors: (string | null)[]
+}
+
+function ServiceLink(props: IServiceLinkProps) {
+  if (props.flavors.length > 1) {
+    return (
+      <Link to={`/app/services/${props.name}/flavors/`}>
+        {this.props.name}
+      </Link>
+    );
+  }
+  const flavorName = props.flavors[0] || RESERVED_FLAVOR
+  return (
+    <Link to={`/app/services/${props.name}/flavors/${flavorName}`}>
+      {this.props.name}
+    </Link>
+  );
+}
 
 export interface ITableProps {
   data: any
@@ -23,9 +45,10 @@ export const ServicesListComponent = (props: ITableProps) => {
             {data.map((service: any) => (
               <tr>
                 <td>
-                  <Link to={`/app/services/${service.name}`}>
-                    {service.name}
-                  </Link>
+                  <ServiceLink
+                    name={service.name}
+                    flavors={service.flavors}
+                  />
                 </td>
                 <td>{service.running_backfills} running</td>
               </tr>

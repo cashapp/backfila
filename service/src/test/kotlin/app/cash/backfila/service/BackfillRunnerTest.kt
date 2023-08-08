@@ -936,6 +936,7 @@ class BackfillRunnerTest {
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create(
         "deep-fryer",
+        null,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .num_threads(numThreads)

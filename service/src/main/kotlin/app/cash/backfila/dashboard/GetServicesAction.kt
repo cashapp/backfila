@@ -5,11 +5,9 @@ import app.cash.backfila.service.persistence.BackfillRunQuery
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.ServiceQuery
 import javax.inject.Inject
-import misk.MiskCaller
 import misk.hibernate.Query
 import misk.hibernate.Transacter
 import misk.hibernate.newQuery
-import misk.scope.ActionScoped
 import misk.security.authz.Authenticated
 import misk.web.Get
 import misk.web.ResponseContentType
@@ -18,13 +16,13 @@ import misk.web.mediatype.MediaTypes
 import wisp.logging.getLogger
 
 class GetServicesAction @Inject constructor(
-  private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
   @BackfilaDb private val transacter: Transacter,
   private val queryFactory: Query.Factory,
 ) : WebAction {
 
   data class UiService(
     val name: String,
+    val flavors: List<String?>,
     val running_backfills: Int,
   )
 
@@ -40,17 +38,23 @@ class GetServicesAction @Inject constructor(
     // Then have services/all ? to see all
 
     val services = transacter.transaction { session ->
-      val services = queryFactory.newQuery<ServiceQuery>()
+      val flavorsByService = queryFactory.newQuery<ServiceQuery>()
         .orderByName()
         .list(session)
+        .groupBy { it.registry_name }
+
       val runningByService = queryFactory.newQuery<BackfillRunQuery>()
         .state(BackfillState.RUNNING)
         .list(session)
         .groupBy { it.service_id }
-      services.map {
+
+      flavorsByService.keys.map { registry_name ->
         UiService(
-          name = it.registry_name,
-          running_backfills = runningByService[it.id]?.size ?: 0,
+          name = registry_name,
+          flavors = flavorsByService[registry_name]!!.map { serviceFlavor -> serviceFlavor.flavor },
+          running_backfills = flavorsByService[registry_name]!!.sumOf { flavoredService ->
+            runningByService[flavoredService.id]?.size ?: 0
+          },
         )
       }
     }

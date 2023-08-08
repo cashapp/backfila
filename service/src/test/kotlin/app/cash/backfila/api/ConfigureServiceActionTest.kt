@@ -1,6 +1,7 @@
 package app.cash.backfila.api
 
 import app.cash.backfila.BackfilaTestingModule
+import app.cash.backfila.api.ConfigureServiceAction.Companion.RESERVED_FLAVOR
 import app.cash.backfila.client.Connectors.ENVOY
 import app.cash.backfila.client.Connectors.HTTP
 import app.cash.backfila.dashboard.GetRegisteredBackfillsAction
@@ -171,6 +172,117 @@ class ConfigureServiceActionTest {
       )
       assertThat(backfillNames("deep-fryer")).containsOnly("zzz")
       assertThat(deletedBackfillNames("deep-fryer")).containsOnly("xyz")
+    }
+  }
+
+  @Test
+  fun configureMultipleFlavors() {
+    scope.fakeCaller(service = "deep-fryer") {
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "xyz", "Description", listOf(), null, null,
+                false, null,
+              ),
+              ConfigureServiceRequest.BackfillData(
+                "zzz", "Description", listOf(), null, null,
+                false, null,
+              ),
+            ),
+          )
+          .connector_type(ENVOY)
+          .build(),
+      )
+      assertThat(backfillNames("deep-fryer")).containsOnly("xyz", "zzz")
+      assertThat(deletedBackfillNames("deep-fryer")).isEmpty()
+
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .flavor("deep-fried")
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "zzz", "Description", listOf(), null, null,
+                false, null,
+              ),
+            ),
+          )
+          .connector_type(ENVOY)
+          .build(),
+      )
+
+      assertThat(backfillNames("deep-fryer")).containsExactly("xyz", "zzz")
+      assertThat(deletedBackfillNames("deep-fryer")).isEmpty()
+
+      assertThat(backfillNames("deep-fryer", "deep-fried")).containsExactly("zzz")
+      assertThat(deletedBackfillNames("deep-fryer", "deep-fried")).isEmpty()
+
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "xyz", "Description", listOf(), null, null,
+                false, null,
+              ),
+            ),
+          )
+          .connector_type(ENVOY)
+          .build(),
+      )
+      assertThat(backfillNames("deep-fryer")).containsExactly("xyz")
+      assertThat(deletedBackfillNames("deep-fryer")).containsExactly("zzz")
+
+      assertThat(backfillNames("deep-fryer", "deep-fried")).containsExactly("zzz")
+      assertThat(deletedBackfillNames("deep-fryer", "deep-fried")).isEmpty()
+    }
+  }
+
+  @Test
+  fun configureMultipleFlavors_updateASpecificFlavor() {
+    scope.fakeCaller(service = "deep-fryer") {
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "xyz", "Description", listOf(), null, null,
+                false, null,
+              ),
+              ConfigureServiceRequest.BackfillData(
+                "zzz", "Description", listOf(), null, null,
+                false, null,
+              ),
+            ),
+          )
+          .connector_type(ENVOY)
+          .build(),
+      )
+      assertThat(backfillNames("deep-fryer")).containsOnly("xyz", "zzz")
+      assertThat(deletedBackfillNames("deep-fryer")).isEmpty()
+
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .flavor("deep-fried")
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "zzz", "Description", listOf(), null, null,
+                false, null,
+              ),
+            ),
+          )
+          .connector_type(ENVOY)
+          .build(),
+      )
+
+      assertThat(backfillNames("deep-fryer")).containsExactly("xyz", "zzz")
+      assertThat(deletedBackfillNames("deep-fryer")).isEmpty()
+
+      assertThat(backfillNames("deep-fryer", "deep-fried")).containsExactly("zzz")
+      assertThat(deletedBackfillNames("deep-fryer", "deep-fried")).isEmpty()
     }
   }
 
@@ -719,6 +831,45 @@ class ConfigureServiceActionTest {
   }
 
   @Test
+  fun invalidFlavor() {
+    scope.fakeCaller(service = "deep-fryer") {
+      assertThatThrownBy {
+        configureServiceAction.configureService(
+          ConfigureServiceRequest.Builder()
+            .flavor("      ")
+            .backfills(
+              listOf(
+                ConfigureServiceRequest.BackfillData(
+                  "xyz", "Description", listOf(), null, "String",
+                  false, null,
+                ),
+              ),
+            )
+            .connector_type(ENVOY)
+            .build(),
+        )
+      }.isInstanceOf(IllegalStateException::class.java)
+
+      assertThatThrownBy {
+        configureServiceAction.configureService(
+          ConfigureServiceRequest.Builder()
+            .flavor(RESERVED_FLAVOR)
+            .backfills(
+              listOf(
+                ConfigureServiceRequest.BackfillData(
+                  "xyz", "Description", listOf(), null, "String",
+                  false, null,
+                ),
+              ),
+            )
+            .connector_type(ENVOY)
+            .build(),
+        )
+      }.isInstanceOf(IllegalStateException::class.java)
+    }
+  }
+
+  @Test
   fun invalidConnectorExtraData() {
     scope.fakeCaller(service = "deep-fryer") {
       assertThatThrownBy {
@@ -826,15 +977,16 @@ class ConfigureServiceActionTest {
     }
   }
 
-  private fun backfillNames(serviceName: String): List<String> {
-    return getRegisteredBackfillsAction.backfills(serviceName)
+  private fun backfillNames(serviceName: String, flavor: String? = null): List<String> {
+    return getRegisteredBackfillsAction.backfills(serviceName, flavor)
       .backfills.map { it.name }
   }
 
-  private fun deletedBackfillNames(serviceName: String): List<String> {
+  private fun deletedBackfillNames(serviceName: String, flavor: String? = null): List<String> {
     return transacter.transaction { session ->
       val dbService = queryFactory.newQuery<ServiceQuery>()
         .registryName(serviceName)
+        .flavor(flavor)
         .uniqueResult(session)!!
       queryFactory.newQuery<RegisteredBackfillQuery>()
         .serviceId(dbService.id)

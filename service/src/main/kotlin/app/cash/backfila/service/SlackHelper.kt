@@ -1,5 +1,6 @@
 package app.cash.backfila.service
 
+import app.cash.backfila.api.ConfigureServiceAction.Companion.RESERVED_FLAVOR
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.DbBackfillRun
 import javax.inject.Inject
@@ -52,7 +53,7 @@ class SlackHelper @Inject constructor(
   }
 
   private fun nameAndId(run: DbBackfillRun) =
-    "[${deployment.name}] ${run.service.registry_name} `${run.registered_backfill.name}` " +
+    "[${deployment.name}] ${run.service.registry_name} (${run.service.flavor ?: RESERVED_FLAVOR}) `${run.registered_backfill.name}` " +
       "(${idLink(run.id)})"
 
   private fun dryRunEmoji(run: DbBackfillRun) =

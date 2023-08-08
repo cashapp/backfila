@@ -51,6 +51,7 @@ data class UiEventLog(
 
 data class GetBackfillStatusResponse(
   val service_name: String,
+  val flavor: String?,
   val name: String,
   val state: BackfillState,
   val parameters: Map<String, String>?,
@@ -84,6 +85,7 @@ class GetBackfillStatusAction @Inject constructor(
       val partitions = run.partitions(session, queryFactory)
       GetBackfillStatusResponse(
         run.service.registry_name,
+        run.service.flavor,
         run.registered_backfill.name,
         run.state,
         run.parameters()?.mapValues { (_, v) -> v.utf8() },

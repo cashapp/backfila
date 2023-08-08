@@ -56,11 +56,13 @@ class GetBackfillRunsAction @Inject constructor(
   fun backfillRuns(
     @PathParam service: String,
     @QueryParam pagination_token: String? = null,
+    @QueryParam flavor: String? = null,
   ): GetBackfillRunsResponse {
     return transacter.transaction { session ->
       val dbService = queryFactory.newQuery<ServiceQuery>()
         .registryName(service)
-        .uniqueResult(session) ?: throw BadRequestException("`$service` doesn't exist")
+        .flavor(flavor)
+        .uniqueResult(session) ?: throw BadRequestException("`$service`-`$flavor` doesn't exist")
 
       val runningBackfills = queryFactory.newQuery<BackfillRunQuery>()
         .serviceId(dbService.id)

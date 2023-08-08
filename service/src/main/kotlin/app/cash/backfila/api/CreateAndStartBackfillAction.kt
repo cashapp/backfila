@@ -32,7 +32,7 @@ class CreateAndStartBackfillAction @Inject constructor(
     val caller = caller.get()!!
     val service = caller.service!!
 
-    val id = backfillCreator.create(service, service, request.create_request)
+    val id = backfillCreator.create(service, service, null, request.create_request)
 
     backfillStateToggler.toggleRunningState(id.id, caller, BackfillState.RUNNING)
 

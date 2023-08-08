@@ -29,6 +29,9 @@ class DbService() : DbUnsharded<DbService>, DbTimestampedEntity {
   var slack_channel: String? = null
 
   @Column
+  var flavor: String? = null
+
+  @Column
   override lateinit var created_at: Instant
 
   @Column
@@ -39,10 +42,16 @@ class DbService() : DbUnsharded<DbService>, DbTimestampedEntity {
     connector: String,
     connector_extra_data: String?,
     slack_channel: String?,
+    flavor: String?,
   ) : this() {
     this.registry_name = registry_name
     this.connector = connector
     this.connector_extra_data = connector_extra_data
     this.slack_channel = slack_channel
+    this.flavor = flavor
+  }
+
+  companion object {
+    const val DEFAULT_FLAVOR = "flavorless"
   }
 }

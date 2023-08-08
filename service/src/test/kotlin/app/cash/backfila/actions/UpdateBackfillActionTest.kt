@@ -61,6 +61,7 @@ class UpdateBackfillActionTest {
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create(
         "deep-fryer",
+        null,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
@@ -115,6 +116,7 @@ class UpdateBackfillActionTest {
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create(
         "deep-fryer",
+        null,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
@@ -154,6 +156,7 @@ class UpdateBackfillActionTest {
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create(
         "deep-fryer",
+        null,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),

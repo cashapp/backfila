@@ -9,6 +9,7 @@ import misk.scope.ActionScoped
 import misk.security.authz.Authenticated
 import misk.web.PathParam
 import misk.web.Post
+import misk.web.QueryParam
 import misk.web.RequestBody
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
@@ -27,10 +28,11 @@ class CreateBackfillAction @Inject constructor(
   @Authenticated(capabilities = ["users"])
   fun create(
     @PathParam service: String,
+    @QueryParam flavor: String? = null,
     @RequestBody request: CreateBackfillRequest,
   ): CreateBackfillResponse {
     // TODO check user has permissions for this service with access api
-    val id = backfillCreator.create(caller.get()!!.user!!, service, request)
+    val id = backfillCreator.create(caller.get()!!.user!!, service, flavor, request)
 
     return CreateBackfillResponse(id.id)
   }

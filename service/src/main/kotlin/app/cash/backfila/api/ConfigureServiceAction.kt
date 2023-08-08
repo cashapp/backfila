@@ -42,6 +42,11 @@ class ConfigureServiceAction @Inject constructor(
 
     logger.info { "Configuring service `$service` with ${request.backfills.size} backfills" }
 
+    request.flavor?.let {
+      check(!request.flavor.equals(RESERVED_FLAVOR)) { "Cannot use a reserved flavor name" }
+      check(request.flavor.isNotBlank()) { "Flavor cannot be blank" }
+    }
+
     val clientProvider = connectorProvider.clientProvider(request.connector_type)
     // This tests that the extra data is valid, throwing an exception if invalid.
     clientProvider.validateExtraData(request.connector_extra_data)
@@ -49,6 +54,7 @@ class ConfigureServiceAction @Inject constructor(
     transacter.transaction { session ->
       var dbService = queryFactory.newQuery<ServiceQuery>()
         .registryName(service)
+        .flavor(request.flavor)
         .uniqueResult(session)
       if (dbService == null) {
         dbService = DbService(
@@ -56,12 +62,14 @@ class ConfigureServiceAction @Inject constructor(
           request.connector_type,
           request.connector_extra_data,
           request.slack_channel,
+          request.flavor,
         )
         session.save(dbService)
       } else {
         dbService.connector = request.connector_type
         dbService.connector_extra_data = request.connector_extra_data
         dbService.slack_channel = request.slack_channel
+        dbService.flavor = request.flavor
       }
 
       // Add any missing backfills, update modified ones, and mark missing ones as deleted.
@@ -70,7 +78,7 @@ class ConfigureServiceAction @Inject constructor(
         .active()
         .list(session)
         .associateBy { it.name }
-      logger.info { "Found ${existingBackfills.size} existing backfills for `$service`" }
+      logger.info { "Found ${existingBackfills.size} existing backfills for `$service`-`${request.flavor ?: "flavorless"}`" }
 
       for (backfill in request.backfills) {
         val existingBackfill = existingBackfills[backfill.name]
@@ -120,5 +128,6 @@ class ConfigureServiceAction @Inject constructor(
 
   companion object {
     private val logger = getLogger<ConfigureServiceAction>()
+    const val RESERVED_FLAVOR = "flavorless"
   }
 }

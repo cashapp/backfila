@@ -11,13 +11,15 @@ import { BackfillRunsTable } from "../components"
 import { simpleSelectorGet } from "@misk/simpleredux"
 import { Link } from "react-router-dom"
 import { LayoutContainer } from "."
+import { RESERVED_FLAVOR } from "../utilities";
 
 class ServiceRunsContainer extends React.Component<
   IState & IDispatchProps,
   IState
 > {
   private service: string = (this.props as any).match.params.service
-  private backfillRunsTag: string = `${this.service}::BackfillRuns`
+  private flavor: string = (this.props as any).match.params.flavor
+  private backfillRunsTag: string = `${this.service}::${this.flavor}::BackfillRuns`
 
   componentDidUpdate(prevProps: any) {
     if (
@@ -33,10 +35,16 @@ class ServiceRunsContainer extends React.Component<
   }
 
   sendRequest() {
-    let offset = (this.props as any).match.params.offset
+    const offset = (this.props as any).match.params.offset
+
+    let url = `/services/${this.service}/backfill-runs?pagination_token=${offset}`;
+    if (this.flavor !== RESERVED_FLAVOR) {
+      url += `&flavor=${this.flavor}`
+    }
+
     this.props.simpleNetworkGet(
       this.backfillRunsTag,
-      `/services/${this.service}/backfill-runs?pagination_token=${offset}`
+      url
     )
   }
 
@@ -48,7 +56,7 @@ class ServiceRunsContainer extends React.Component<
     if (!this.service || !result) {
       return (
         <LayoutContainer>
-          <H2>{this.service}</H2>
+          <H2>{this.service} ({this.flavor})</H2>
           <Spinner />
         </LayoutContainer>
       )
@@ -56,14 +64,16 @@ class ServiceRunsContainer extends React.Component<
     return (
       <LayoutContainer>
         <H2>
-          <Link to={`/app/services/${this.service}`}>{this.service}</Link>
+          <Link to={`/app/services/${this.service}/flavors/${this.flavor}`}>
+            {this.service} ({this.flavor})
+          </Link>
         </H2>
         <H3>Paused Backfills</H3>
         <BackfillRunsTable backfillRuns={result.paused_backfills} />
         {result.next_pagination_token && (
           <div style={{ paddingBottom: "100px" }}>
             <Link
-              to={`/app/services/${this.service}/runs/${result.next_pagination_token}`}
+              to={`/app/services/${this.service}/flavors/${this.flavor}/runs/${result.next_pagination_token}`}
             >
               more
             </Link>

@@ -5,6 +5,7 @@ import HomeContainer from "./HomeContainer"
 import { LayoutContainer } from "./LayoutContainer"
 import ServiceContainer from "./ServiceContainer"
 import ServiceRunsContainer from "./ServiceRunsContainer"
+import ServiceFlavorsContainer from "./ServiceFlavorsContainer";
 
 export {
   BackfillStatusContainer,
@@ -13,5 +14,6 @@ export {
   HomeContainer,
   LayoutContainer,
   ServiceContainer,
-  ServiceRunsContainer
+  ServiceRunsContainer,
+  ServiceFlavorsContainer
 }

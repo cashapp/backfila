@@ -29,6 +29,7 @@ class BackfillCreator @Inject constructor(
   fun create(
     author: String,
     service: String,
+    flavor: String?,
     request: CreateBackfillRequest,
   ): Id<DbBackfillRun> {
     logger.info { "Create backfill for `$service` by `$author`" }
@@ -44,7 +45,8 @@ class BackfillCreator @Inject constructor(
     val dbData = transacter.transaction { session ->
       val dbService = queryFactory.newQuery<ServiceQuery>()
         .registryName(service)
-        .uniqueResult(session) ?: throw BadRequestException("`$service` doesn't exist")
+        .flavor(flavor)
+        .uniqueResult(session) ?: throw BadRequestException("`$service`-`$flavor` doesn't exist")
       val registeredBackfill = queryFactory.newQuery<RegisteredBackfillQuery>()
         .serviceId(dbService.id)
         .name(request.backfill_name)

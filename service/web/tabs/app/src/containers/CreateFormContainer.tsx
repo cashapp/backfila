@@ -28,6 +28,7 @@ import { Link } from "react-router-dom"
 import { FormEvent } from "react"
 import { IBackfill } from "../components"
 import { LayoutContainer } from "../containers"
+import { RESERVED_FLAVOR } from "../utilities";
 
 interface CreateFormState {
   loading: boolean
@@ -50,12 +51,17 @@ class CreateFormContainer extends React.Component<
   IState & CreateFormState
 > {
   private service: string = (this.props as any).match.params.service
+  private flavor: string = (this.props as any).match.params.flavor
   private registeredBackfills: string = `${this.service}::BackfillRuns`
 
   componentDidMount() {
+    let url = `/services/${this.service}/registered-backfills`
+    if (this.flavor !== RESERVED_FLAVOR) {
+      url += `?flavor=${this.flavor}`
+    }
     this.props.simpleNetworkGet(
       this.registeredBackfills,
-      `/services/${this.service}/registered-backfills`
+      url
     )
     this.setState({
       loading: false,
@@ -91,7 +97,9 @@ class CreateFormContainer extends React.Component<
       <LayoutContainer>
         <H1>
           Service:{" "}
-          <Link to={`/app/services/${this.service}`}>{this.service}</Link>
+          <Link to={`/app/services/${this.service}/flavors/${this.flavor}`}>
+            {this.service} ({this.flavor})
+          </Link>
         </H1>
         <div style={{ width: "1000px", margin: "auto" }}>
           <H2>Create backfill</H2>
@@ -244,6 +252,11 @@ class CreateFormContainer extends React.Component<
               )}
               <Button
                 onClick={() => {
+                  const params = {}
+                  if (this.flavor !== RESERVED_FLAVOR) {
+                    params['flavor'] = this.flavor
+                  }
+
                   Axios.post(`/services/${this.service}/create`, {
                     backfill_name: this.state.backfill.name,
                     dry_run: this.state.dry_run,
@@ -261,6 +274,9 @@ class CreateFormContainer extends React.Component<
                     ),
                     extra_sleep_ms: this.state.extra_sleep_ms,
                     parameter_map: this.state.parameters
+                  },
+                  {
+                    params: params
                   })
                     .then(response => {
                       let id = response.data.backfill_run_id

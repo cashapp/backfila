@@ -28,6 +28,7 @@ import {
 import { LayoutContainer } from "../containers"
 
 import TimeAgo from "react-timeago"
+import { RESERVED_FLAVOR } from "../utilities";
 
 export interface IComputedCountProps {
   precomputing_done: boolean
@@ -148,8 +149,8 @@ class BackfillStatusContainer extends React.Component<
         <LayoutContainer>
           <H2>
             Backfill #{this.id}: {status.name} in{" "}
-            <Link to={`/app/services/${status.service_name}`}>
-              {status.service_name}
+            <Link to={`/app/services/${status.service_name}/flavors/${status.flavor || RESERVED_FLAVOR}`}>
+              {status.service_name} ({status.flavor || RESERVED_FLAVOR })
             </Link>
           </H2>
           <Link to={`/app/backfills/${this.id}/clone`}>

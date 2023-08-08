@@ -11,10 +11,10 @@ import misk.hibernate.newQuery
 import misk.security.authz.Authenticated
 import misk.web.Get
 import misk.web.PathParam
+import misk.web.QueryParam
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
-import wisp.logging.getLogger
 
 data class RegisteredBackfill(
   val name: String,
@@ -31,11 +31,13 @@ class GetRegisteredBackfillsAction @Inject constructor(
   @Authenticated
   fun backfills(
     @PathParam service: String,
+    @QueryParam flavor: String? = null,
   ): GetRegisteredBackfillsResponse {
     val backfills = transacter.transaction { session ->
       val dbService = queryFactory.newQuery<ServiceQuery>()
         .registryName(service)
-        .uniqueResult(session) ?: throw BadRequestException("`$service` doesn't exist")
+        .flavor(flavor)
+        .uniqueResult(session) ?: throw BadRequestException("`$service`-`$flavor` doesn't exist")
       val backfills = queryFactory.newQuery<RegisteredBackfillQuery>()
         .serviceId(dbService.id)
         .active()
@@ -49,9 +51,5 @@ class GetRegisteredBackfillsAction @Inject constructor(
       }
     }
     return GetRegisteredBackfillsResponse(backfills)
-  }
-
-  companion object {
-    private val logger = getLogger<GetRegisteredBackfillsAction>()
   }
 }

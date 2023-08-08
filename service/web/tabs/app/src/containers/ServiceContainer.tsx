@@ -11,18 +11,24 @@ import { BackfillRunsTable } from "../components"
 import { simpleSelectorGet } from "@misk/simpleredux"
 import { Link } from "react-router-dom"
 import { LayoutContainer } from "."
+import { RESERVED_FLAVOR } from "../utilities";
 
 class ServiceContainer extends React.Component<
   IState & IDispatchProps,
   IState
 > {
   private service: string = (this.props as any).match.params.service
-  private backfillRunsTag: string = `${this.service}::BackfillRuns`
+  private flavor: string = (this.props as any).match.params.flavor
+  private backfillRunsTag: string = `${this.service}::${this.flavor}::BackfillRuns`
 
   componentDidMount() {
+    let url = `/services/${this.service}/backfill-runs`;
+    if (this.flavor !== RESERVED_FLAVOR) {
+      url += `?flavor=${this.flavor}`
+    }
     this.props.simpleNetworkGet(
       this.backfillRunsTag,
-      `/services/${this.service}/backfill-runs`
+      url
     )
   }
 
@@ -34,17 +40,24 @@ class ServiceContainer extends React.Component<
     if (!this.service || !result) {
       return (
         <LayoutContainer>
-          <H2>{this.service}</H2>
+          <H2>{this.service} ({this.flavor})</H2>
           <Spinner />
         </LayoutContainer>
       )
     }
     return (
       <LayoutContainer>
-        <H2>{this.service}</H2>
-        <Link to={`/app/services/${this.service}/create`}>
+        <H2> {this.service} ({this.flavor}) </H2>
+        <H3>
+          <Link to={`/app/services/${this.service}/flavors`}>
+            Other flavors
+          </Link>
+        </H3>
+        <Link to={`/app/services/${this.service}/flavors/${this.flavor}/create`}>
           <AnchorButton text={"Create"} intent={Intent.PRIMARY} />
         </Link>
+        <br />
+        <br />
         <H3>Running Backfills</H3>
         <BackfillRunsTable backfillRuns={result.running_backfills} />
         <H3>Paused Backfills</H3>
@@ -52,7 +65,7 @@ class ServiceContainer extends React.Component<
         {result.next_pagination_token && (
           <div style={{ paddingBottom: "100px" }}>
             <Link
-              to={`/app/services/${this.service}/runs/${result.next_pagination_token}`}
+              to={`/app/services/${this.service}/flavors/${this.flavor}/runs/${result.next_pagination_token}`}
             >
               more
             </Link>
