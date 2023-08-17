@@ -26,7 +26,7 @@ internal class EmbeddedBackfillRun<B : Backfill>(
   override val parameters: MutableMap<String, ByteString>,
   override val rangeStart: String?,
   override val rangeEnd: String?,
-  override val backfillId: String,
+  override val backfillRunId: String,
 
   override var batchSize: Long = 100L,
   override var scanSize: Long = 10_000L,
@@ -76,7 +76,7 @@ internal class EmbeddedBackfillRun<B : Backfill>(
     val response =
       operator.getNextBatchRange(
         GetNextBatchRangeRequest.Builder()
-          .backfill_id(backfillId)
+          .backfill_id(backfillRunId)
           .partition_name(cursor.partitionName)
           .backfill_range(cursor.keyRange)
           .previous_end_key(cursor.previousEndKey)
@@ -115,7 +115,7 @@ internal class EmbeddedBackfillRun<B : Backfill>(
     val response =
       operator.getNextBatchRange(
         GetNextBatchRangeRequest.Builder()
-          .backfill_id(backfillId)
+          .backfill_id(backfillRunId)
           .partition_name(cursor.partitionName)
           .backfill_range(cursor.keyRange)
           .previous_end_key(cursor.previousEndKey)
@@ -167,7 +167,7 @@ internal class EmbeddedBackfillRun<B : Backfill>(
       val remainingBatch = batch.copy(batchRange = remainingRange)
       response = operator.runBatch(
         RunBatchRequest.Builder()
-          .backfill_id(backfillId)
+          .backfill_id(backfillRunId)
           .partition_name(remainingBatch.partitionName)
           .batch_range(remainingBatch.batchRange)
           .parameters(parameters)
