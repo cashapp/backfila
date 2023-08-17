@@ -2,6 +2,7 @@ package app.cash.backfila.actions
 
 import app.cash.backfila.BackfilaTestingModule
 import app.cash.backfila.api.ConfigureServiceAction
+import app.cash.backfila.api.ConfigureServiceAction.Companion.RESERVED_VARIANT
 import app.cash.backfila.client.Connectors
 import app.cash.backfila.dashboard.CreateBackfillAction
 import app.cash.backfila.dashboard.GetServicesAction
@@ -56,13 +57,13 @@ class GetServicesActionTest {
 
     scope.fakeCaller(user = "molly") {
       assertThat(getServicesAction.services().services).containsOnly(
-        GetServicesAction.UiService("deep-fryer", listOf("flavorless"), 0),
+        GetServicesAction.UiService("deep-fryer", setOf(RESERVED_VARIANT), 0),
       )
     }
   }
 
   @Test
-  fun oneService_multipleFlavors() {
+  fun oneService_multipleVariants() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(
         ConfigureServiceRequest.Builder()
@@ -75,7 +76,7 @@ class GetServicesActionTest {
       configureServiceAction.configureService(
         ConfigureServiceRequest.Builder()
           .connector_type(Connectors.ENVOY)
-          .flavor("deep-fried")
+          .variant("deep-fried")
           .backfills(
             listOf(
               ConfigureServiceRequest.BackfillData.Builder()
@@ -101,7 +102,7 @@ class GetServicesActionTest {
 
     scope.fakeCaller(user = "molly") {
       assertThat(getServicesAction.services().services).containsOnly(
-        GetServicesAction.UiService("deep-fryer", listOf("flavorless", "deep-fried"), 1),
+        GetServicesAction.UiService("deep-fryer", setOf(RESERVED_VARIANT, "deep-fried"), 1),
       )
     }
   }
@@ -140,8 +141,8 @@ class GetServicesActionTest {
     }
     scope.fakeCaller(user = "molly") {
       assertThat(getServicesAction.services().services).containsOnly(
-        GetServicesAction.UiService("deep-fryer", listOf("flavorless"), 1),
-        GetServicesAction.UiService("freezer", listOf("flavorless"), 0),
+        GetServicesAction.UiService("deep-fryer", setOf(RESERVED_VARIANT), 1),
+        GetServicesAction.UiService("freezer", setOf(RESERVED_VARIANT), 0),
       )
     }
   }

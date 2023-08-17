@@ -38,6 +38,7 @@ class BackfilaApiTest {
           .backfill_name(ToUpperCaseBackfill::class.java.name)
           .dry_run(false) // wet run
           .build(),
+        null,
       ),
     ).execute()
     val backfillRunId = createResponse.body()!!.backfill_run_id
@@ -86,6 +87,7 @@ class BackfilaApiTest {
           .backfill_name(ToUpperCaseBackfill::class.java.name)
           .dry_run(false) // wet run
           .build(),
+        null,
       ),
     ).execute()
     val backfillRunId = createResponse.body()!!.backfill_run_id

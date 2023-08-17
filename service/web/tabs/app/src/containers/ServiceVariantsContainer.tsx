@@ -8,11 +8,11 @@ import {
     mapStateToProps
 } from "src/ducks"
 import { LayoutContainer } from "."
-import FlavorsListComponent from "../components/FlavorsListComponent";
+import VariantsListComponent from "../components/VariantsListComponent";
 
-class ServiceFlavorsContainer extends React.Component<IState & IDispatchProps, IState> {
+class ServiceVariantsContainer extends React.Component<IState & IDispatchProps, IState> {
     private service: string = (this.props as any).match.params.service
-    private serviceFlavorsTag: string = `${this.service}::Flavors`
+    private serviceVariantsTag: string = `${this.service}::Variants`
 
     componentDidMount() {
         this.sendRequest()
@@ -20,18 +20,18 @@ class ServiceFlavorsContainer extends React.Component<IState & IDispatchProps, I
 
     sendRequest() {
       this.props.simpleNetworkGet(
-        this.serviceFlavorsTag,
-        `/services/${this.service}/flavors`
+        this.serviceVariantsTag,
+        `/services/${this.service}/variants`
       )
     }
 
     render() {
         return (
             <LayoutContainer>
-                <FlavorsListComponent
+                <VariantsListComponent
                     data={simpleSelectorGet(
                         this.props.simpleNetwork,
-                        [this.serviceFlavorsTag, "data", "flavors"],
+                        [this.serviceVariantsTag, "data", "variants"],
                         []
                     )}
                     service={this.service}
@@ -41,4 +41,4 @@ class ServiceFlavorsContainer extends React.Component<IState & IDispatchProps, I
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(ServiceFlavorsContainer)
+export default connect(mapStateToProps, mapDispatchToProps)(ServiceVariantsContainer)

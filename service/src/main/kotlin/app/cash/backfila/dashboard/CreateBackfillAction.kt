@@ -1,7 +1,6 @@
 package app.cash.backfila.dashboard
 
 import app.cash.backfila.BackfillCreator
-import app.cash.backfila.api.ConfigureServiceAction.Companion.RESERVED_FLAVOR
 import app.cash.backfila.protos.service.CreateBackfillRequest
 import app.cash.backfila.protos.service.CreateBackfillResponse
 import javax.inject.Inject
@@ -29,12 +28,11 @@ class CreateBackfillAction @Inject constructor(
   @Authenticated(capabilities = ["users"])
   fun create(
     @PathParam service: String,
-    @QueryParam flavor: String? = null,
+    @QueryParam variant: String? = null,
     @RequestBody request: CreateBackfillRequest,
   ): CreateBackfillResponse {
-    val backfilaFlavor = if (flavor == RESERVED_FLAVOR) null else flavor
     // TODO check user has permissions for this service with access api
-    val id = backfillCreator.create(caller.get()!!.user!!, service, backfilaFlavor, request)
+    val id = backfillCreator.create(caller.get()!!.user!!, service, variant, request)
 
     return CreateBackfillResponse(id.id)
   }

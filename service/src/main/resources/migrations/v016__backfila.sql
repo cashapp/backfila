@@ -1,4 +1,4 @@
 ALTER TABLE services
-  ADD COLUMN flavor VARBINARY(100) NULL DEFAULT NULL,
+  ADD COLUMN variant VARBINARY(100) NULL DEFAULT NULL,
   DROP KEY `unq_registry_name`,
-  ADD UNIQUE KEY `unq_registry_name_flavor` (registry_name, flavor);
+  ADD UNIQUE KEY `unq_registry_name_variant` (registry_name, variant);

@@ -130,6 +130,126 @@ class StartStopBackfillActionTest {
   }
 
   @Test
+  fun `start and stop with variant`() {
+    scope.fakeCaller(service = "deep-fryer") {
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "ChickenSandwich", "Description", listOf(), null,
+                null, false, null,
+              ),
+            ),
+          )
+          .connector_type(Connectors.ENVOY)
+          .build(),
+      )
+
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .variant("deep-fried")
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "ChickenSandwich", "Description", listOf(), null,
+                null, false, null,
+              ),
+            ),
+          )
+          .connector_type(Connectors.ENVOY)
+          .build(),
+      )
+    }
+
+    scope.fakeCaller(user = "molly") {
+      var defaultRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
+      assertThat(defaultRuns.paused_backfills).hasSize(0)
+      assertThat(defaultRuns.running_backfills).hasSize(0)
+
+      var deepFriedRuns = getBackfillRunsAction.backfillRuns("deep-fryer", variant = "deep-fried")
+      assertThat(deepFriedRuns.paused_backfills).hasSize(0)
+      assertThat(deepFriedRuns.running_backfills).hasSize(0)
+
+      val response = createBackfillAction.create(
+        "deep-fryer",
+        null,
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build(),
+      )
+
+      defaultRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
+      assertThat(defaultRuns.paused_backfills).hasSize(1)
+      assertThat(defaultRuns.running_backfills).hasSize(0)
+
+      deepFriedRuns = getBackfillRunsAction.backfillRuns("deep-fryer", variant = "deep-fried")
+      assertThat(deepFriedRuns.paused_backfills).hasSize(0)
+      assertThat(deepFriedRuns.running_backfills).hasSize(0)
+
+      val response2 = createBackfillAction.create(
+        "deep-fryer",
+        "deep-fried",
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build(),
+      )
+
+      defaultRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
+      assertThat(defaultRuns.paused_backfills).hasSize(1)
+      assertThat(defaultRuns.running_backfills).hasSize(0)
+
+      deepFriedRuns = getBackfillRunsAction.backfillRuns("deep-fryer", variant = "deep-fried")
+      assertThat(deepFriedRuns.paused_backfills).hasSize(1)
+      assertThat(deepFriedRuns.running_backfills).hasSize(0)
+
+      val defaultId = response.backfill_run_id
+      assertThat(defaultRuns.paused_backfills[0].id).isEqualTo(defaultId.toString())
+      startBackfillAction.start(defaultId, StartBackfillRequest())
+
+      defaultRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
+      assertThat(defaultRuns.paused_backfills).hasSize(0)
+      assertThat(defaultRuns.running_backfills).hasSize(1)
+
+      deepFriedRuns = getBackfillRunsAction.backfillRuns("deep-fryer", variant = "deep-fried")
+      assertThat(deepFriedRuns.paused_backfills).hasSize(1)
+      assertThat(deepFriedRuns.running_backfills).hasSize(0)
+
+      val deepFriedId = response2.backfill_run_id
+      assertThat(deepFriedRuns.paused_backfills[0].id).isEqualTo(deepFriedId.toString())
+      startBackfillAction.start(deepFriedId, StartBackfillRequest())
+
+      defaultRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
+      assertThat(defaultRuns.paused_backfills).hasSize(0)
+      assertThat(defaultRuns.running_backfills).hasSize(1)
+
+      deepFriedRuns = getBackfillRunsAction.backfillRuns("deep-fryer", variant = "deep-fried")
+      assertThat(deepFriedRuns.paused_backfills).hasSize(0)
+      assertThat(deepFriedRuns.running_backfills).hasSize(1)
+
+      stopBackfillAction.stop(defaultId, StopBackfillRequest())
+
+      defaultRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
+      assertThat(defaultRuns.paused_backfills).hasSize(1)
+      assertThat(defaultRuns.running_backfills).hasSize(0)
+
+      deepFriedRuns = getBackfillRunsAction.backfillRuns("deep-fryer", variant = "deep-fried")
+      assertThat(deepFriedRuns.paused_backfills).hasSize(0)
+      assertThat(deepFriedRuns.running_backfills).hasSize(1)
+
+      stopBackfillAction.stop(deepFriedId, StopBackfillRequest())
+
+      defaultRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
+      assertThat(defaultRuns.paused_backfills).hasSize(1)
+      assertThat(defaultRuns.running_backfills).hasSize(0)
+
+      deepFriedRuns = getBackfillRunsAction.backfillRuns("deep-fryer", variant = "deep-fried")
+      assertThat(deepFriedRuns.paused_backfills).hasSize(1)
+      assertThat(deepFriedRuns.running_backfills).hasSize(0)
+    }
+  }
+
+  @Test
   fun pagination() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(

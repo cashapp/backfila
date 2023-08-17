@@ -17,13 +17,13 @@ class ServiceContainer extends React.Component<
   IState
 > {
   private service: string = (this.props as any).match.params.service
-  private flavor: string = (this.props as any).match.params.flavor
-  private backfillRunsTag: string = `${this.service}::${this.flavor}::BackfillRuns`
+  private variant: string = (this.props as any).match.params.variant
+  private backfillRunsTag: string = `${this.service}::${this.variant}::BackfillRuns`
 
   componentDidMount() {
     this.props.simpleNetworkGet(
       this.backfillRunsTag,
-      `/services/${this.service}/backfill-runs?flavor=${this.flavor}`
+      `/services/${this.service}/backfill-runs?variant=${this.variant}`
     )
   }
 
@@ -35,20 +35,20 @@ class ServiceContainer extends React.Component<
     if (!this.service || !result) {
       return (
         <LayoutContainer>
-          <H2>{this.service} ({this.flavor})</H2>
+          <H2>{this.service} ({this.variant})</H2>
           <Spinner />
         </LayoutContainer>
       )
     }
     return (
       <LayoutContainer>
-        <H2> {this.service} ({this.flavor}) </H2>
+        <H2> {this.service} ({this.variant}) </H2>
         <H3>
-          <Link to={`/app/services/${this.service}/flavors`}>
-            Other flavors
+          <Link to={`/app/services/${this.service}/variants`}>
+            Other variants
           </Link>
         </H3>
-        <Link to={`/app/services/${this.service}/flavors/${this.flavor}/create`}>
+        <Link to={`/app/services/${this.service}/variants/${this.variant}/create`}>
           <AnchorButton text={"Create"} intent={Intent.PRIMARY} />
         </Link>
         <br />
@@ -60,7 +60,7 @@ class ServiceContainer extends React.Component<
         {result.next_pagination_token && (
           <div style={{ paddingBottom: "100px" }}>
             <Link
-              to={`/app/services/${this.service}/flavors/${this.flavor}/runs/${result.next_pagination_token}`}
+              to={`/app/services/${this.service}/variants/${this.variant}/runs/${result.next_pagination_token}`}
             >
               more
             </Link>

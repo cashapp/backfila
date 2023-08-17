@@ -1,6 +1,6 @@
 package app.cash.backfila.dashboard
 
-import app.cash.backfila.api.ConfigureServiceAction.Companion.RESERVED_FLAVOR
+import app.cash.backfila.api.ConfigureServiceAction.Companion.RESERVED_VARIANT
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.DbBackfillRun
@@ -52,7 +52,7 @@ data class UiEventLog(
 
 data class GetBackfillStatusResponse(
   val service_name: String,
-  val flavor: String?,
+  val variant: String?,
   val name: String,
   val state: BackfillState,
   val parameters: Map<String, String>?,
@@ -86,7 +86,7 @@ class GetBackfillStatusAction @Inject constructor(
       val partitions = run.partitions(session, queryFactory)
       GetBackfillStatusResponse(
         run.service.registry_name,
-        run.service.flavor ?: RESERVED_FLAVOR,
+        run.service.variant ?: RESERVED_VARIANT,
         run.registered_backfill.name,
         run.state,
         run.parameters()?.mapValues { (_, v) -> v.utf8() },

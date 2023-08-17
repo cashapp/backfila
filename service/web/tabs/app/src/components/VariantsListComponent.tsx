@@ -3,12 +3,12 @@ import {ErrorCalloutComponent} from "@misk/core"
 import * as React from "react"
 import {Link} from "react-router-dom"
 
-export interface IFlavorTableProps {
+export interface IVariantTableProps {
   data: any
   service: string
 }
 
-export const FlavorsListComponent = (props: IFlavorTableProps) => {
+export const VariantsListComponent = (props: IVariantTableProps) => {
   const {data, service} = props
   if (data) {
     /**
@@ -16,17 +16,17 @@ export const FlavorsListComponent = (props: IFlavorTableProps) => {
      */
     return (
       <div>
-        <H1>{service} flavors</H1>
+        <H1>{service} variants</H1>
         <HTMLTable bordered={true} striped={true}>
           <tbody>
-          {data.map((flavor: any) => (
+          {data.map((variant: any) => (
             <tr>
               <td>
-                <Link to={`/app/services/${props.service}/flavors/${flavor.name}`}>
-                  {flavor.name}
+                <Link to={`/app/services/${props.service}/variants/${variant.name}`}>
+                  {variant.name}
                 </Link>
               </td>
-              <td>{flavor.running_backfills} running</td>
+              <td>{variant.running_backfills} running</td>
             </tr>
           ))}
           </tbody>
@@ -40,7 +40,7 @@ export const FlavorsListComponent = (props: IFlavorTableProps) => {
     const FakeCell = <p className={Classes.SKELETON}>lorem ipsum 1234 5678</p>
     return (
       <div>
-        <H1>Flavors</H1>
+        <H1>Variants</H1>
         <HTMLTable bordered={true} striped={true}>
           <tbody>
           <tr>
@@ -60,4 +60,4 @@ export const FlavorsListComponent = (props: IFlavorTableProps) => {
   }
 }
 
-export default FlavorsListComponent
+export default VariantsListComponent

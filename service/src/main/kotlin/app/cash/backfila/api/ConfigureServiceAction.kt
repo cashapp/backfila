@@ -32,6 +32,8 @@ class ConfigureServiceAction @Inject constructor(
   private val clock: Clock,
   private val connectorProvider: ConnectorProvider,
 ) : WebAction {
+  private val WHITESPACE_REGEX = Regex("\\s")
+
   @Post("/configure_service")
   @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
   @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)
@@ -42,9 +44,9 @@ class ConfigureServiceAction @Inject constructor(
 
     logger.info { "Configuring service `$service` with ${request.backfills.size} backfills" }
 
-    request.flavor?.let {
-      check(!request.flavor.equals(RESERVED_FLAVOR)) { "Cannot use a reserved flavor name" }
-      check(request.flavor.isNotBlank()) { "Flavor cannot be blank" }
+    request.variant?.let {
+      check(!request.variant.equals(RESERVED_VARIANT)) { "Cannot use a reserved variant name" }
+      check(!request.variant.contains(WHITESPACE_REGEX)) { "Variant cannot contain whitespace" }
     }
 
     val clientProvider = connectorProvider.clientProvider(request.connector_type)
@@ -52,24 +54,28 @@ class ConfigureServiceAction @Inject constructor(
     clientProvider.validateExtraData(request.connector_extra_data)
 
     transacter.transaction { session ->
-      var dbService = queryFactory.newQuery<ServiceQuery>()
+      val variantsForService = queryFactory.newQuery<ServiceQuery>()
         .registryName(service)
-        .flavor(request.flavor)
-        .uniqueResult(session)
+        .list(session)
+
+      var dbService = variantsForService.firstOrNull() { it.variant.equals(request.variant) }
+
       if (dbService == null) {
+        check(variantsForService.size <= MAX_VARIANTS) { "Variant limit exceeded" }
+
         dbService = DbService(
           service,
           request.connector_type,
           request.connector_extra_data,
           request.slack_channel,
-          request.flavor,
+          request.variant,
         )
         session.save(dbService)
       } else {
         dbService.connector = request.connector_type
         dbService.connector_extra_data = request.connector_extra_data
         dbService.slack_channel = request.slack_channel
-        dbService.flavor = request.flavor
+        dbService.variant = request.variant
       }
 
       // Add any missing backfills, update modified ones, and mark missing ones as deleted.
@@ -78,7 +84,7 @@ class ConfigureServiceAction @Inject constructor(
         .active()
         .list(session)
         .associateBy { it.name }
-      logger.info { "Found ${existingBackfills.size} existing backfills for `$service`-`${request.flavor}`" }
+      logger.info { "Found ${existingBackfills.size} existing backfills for `$service`-`${request.variant}`" }
 
       for (backfill in request.backfills) {
         val existingBackfill = existingBackfills[backfill.name]
@@ -128,6 +134,7 @@ class ConfigureServiceAction @Inject constructor(
 
   companion object {
     private val logger = getLogger<ConfigureServiceAction>()
-    const val RESERVED_FLAVOR = "flavorless"
+    const val RESERVED_VARIANT = "default"
+    const val MAX_VARIANTS = 10
   }
 }

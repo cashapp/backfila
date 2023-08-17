@@ -17,8 +17,8 @@ class ServiceRunsContainer extends React.Component<
   IState
 > {
   private service: string = (this.props as any).match.params.service
-  private flavor: string = (this.props as any).match.params.flavor
-  private backfillRunsTag: string = `${this.service}::${this.flavor}::BackfillRuns`
+  private variant: string = (this.props as any).match.params.variant
+  private backfillRunsTag: string = `${this.service}::${this.variant}::BackfillRuns`
 
   componentDidUpdate(prevProps: any) {
     if (
@@ -37,7 +37,7 @@ class ServiceRunsContainer extends React.Component<
     const offset = (this.props as any).match.params.offset
     this.props.simpleNetworkGet(
       this.backfillRunsTag,
-      `/services/${this.service}/backfill-runs?pagination_token=${offset}&flavor=${this.flavor}`
+      `/services/${this.service}/backfill-runs?pagination_token=${offset}&variant=${this.variant}`
     )
   }
 
@@ -49,7 +49,7 @@ class ServiceRunsContainer extends React.Component<
     if (!this.service || !result) {
       return (
         <LayoutContainer>
-          <H2>{this.service} ({this.flavor})</H2>
+          <H2>{this.service} ({this.variant})</H2>
           <Spinner />
         </LayoutContainer>
       )
@@ -57,8 +57,8 @@ class ServiceRunsContainer extends React.Component<
     return (
       <LayoutContainer>
         <H2>
-          <Link to={`/app/services/${this.service}/flavors/${this.flavor}`}>
-            {this.service} ({this.flavor})
+          <Link to={`/app/services/${this.service}/variants/${this.variant}`}>
+            {this.service} ({this.variant})
           </Link>
         </H2>
         <H3>Paused Backfills</H3>
@@ -66,7 +66,7 @@ class ServiceRunsContainer extends React.Component<
         {result.next_pagination_token && (
           <div style={{ paddingBottom: "100px" }}>
             <Link
-              to={`/app/services/${this.service}/flavors/${this.flavor}/runs/${result.next_pagination_token}`}
+              to={`/app/services/${this.service}/variants/${this.variant}/runs/${result.next_pagination_token}`}
             >
               more
             </Link>

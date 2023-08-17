@@ -50,13 +50,13 @@ class CreateFormContainer extends React.Component<
   IState & CreateFormState
 > {
   private service: string = (this.props as any).match.params.service
-  private flavor: string = (this.props as any).match.params.flavor
+  private variant: string = (this.props as any).match.params.variant
   private registeredBackfills: string = `${this.service}::BackfillRuns`
 
   componentDidMount() {
     this.props.simpleNetworkGet(
       this.registeredBackfills,
-      `/services/${this.service}/registered-backfills?flavor=${this.flavor}`
+      `/services/${this.service}/registered-backfills?variant=${this.variant}`
     )
     this.setState({
       loading: false,
@@ -92,8 +92,8 @@ class CreateFormContainer extends React.Component<
       <LayoutContainer>
         <H1>
           Service:{" "}
-          <Link to={`/app/services/${this.service}/flavors/${this.flavor}`}>
-            {this.service} ({this.flavor})
+          <Link to={`/app/services/${this.service}/variants/${this.variant}`}>
+            {this.service} ({this.variant})
           </Link>
         </H1>
         <div style={{ width: "1000px", margin: "auto" }}>
@@ -267,7 +267,7 @@ class CreateFormContainer extends React.Component<
                   },
                   {
                     params: {
-                      flavor: this.flavor
+                      variant: this.variant
                     }
                   })
                     .then(response => {

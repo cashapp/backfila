@@ -14,6 +14,7 @@ import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillRunQuery
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.RunPartitionQuery
+import app.cash.backfila.service.persistence.ServiceQuery
 import com.google.inject.Module
 import javax.inject.Inject
 import kotlin.test.assertNotNull
@@ -125,6 +126,127 @@ class CreateBackfillActionTest {
         assertThat(run.created_by_user).isEqualTo("molly")
         assertThat(run.approved_by_user).isNull()
         assertThat(run.approved_at).isNull()
+        assertThat(run.parameters()).isEmpty()
+        assertThat(response.backfill_run_id).isEqualTo(run.id.id)
+
+        val partitions = queryFactory.newQuery<RunPartitionQuery>()
+          .backfillRunId(run.id)
+          .orderByName()
+          .list(session)
+        assertThat(partitions).hasSize(2)
+        assertThat(partitions[0].partition_name).isEqualTo("-80")
+        assertThat(partitions[0].lease_token).isNull()
+        assertThat(partitions[0].run_state).isEqualTo(BackfillState.PAUSED)
+        assertThat(partitions[1].partition_name).isEqualTo("80-")
+        assertThat(partitions[1].lease_token).isNull()
+        assertThat(partitions[1].run_state).isEqualTo(BackfillState.PAUSED)
+      }
+    }
+  }
+
+  @Test
+  fun `created with variant`() {
+    scope.fakeCaller(service = "deep-fryer") {
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "ChickenSandwich", "Description", listOf(), null,
+                null, false, null,
+              ),
+            ),
+          )
+          .connector_type(Connectors.ENVOY)
+          .build(),
+      )
+
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .variant("deep-fried")
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "ChickenSandwich", "Description", listOf(), null,
+                null, false, null,
+              ),
+            ),
+          )
+          .connector_type(Connectors.ENVOY)
+          .build(),
+      )
+    }
+    scope.fakeCaller(user = "molly") {
+      val response = createBackfillAction.create(
+        "deep-fryer",
+        null,
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build(),
+      )
+
+      transacter.transaction { session ->
+        val service = queryFactory.newQuery<ServiceQuery>()
+          .registryName("deep-fryer")
+          .variant(null)
+          .uniqueResult(session)
+
+        val run = service?.let {
+          queryFactory.newQuery<BackfillRunQuery>()
+            .serviceId(it.id)
+            .uniqueResult(session)
+        }
+        assertNotNull(run)
+        assertThat(run.state).isEqualTo(BackfillState.PAUSED)
+        assertThat(run.created_by_user).isEqualTo("molly")
+        assertThat(run.approved_by_user).isNull()
+        assertThat(run.approved_at).isNull()
+        assertThat(run.service.variant).isNull()
+        assertThat(run.parameters()).isEmpty()
+        assertThat(response.backfill_run_id).isEqualTo(run.id.id)
+
+        val partitions = queryFactory.newQuery<RunPartitionQuery>()
+          .backfillRunId(run.id)
+          .orderByName()
+          .list(session)
+        assertThat(partitions).hasSize(2)
+        assertThat(partitions[0].partition_name).isEqualTo("-80")
+        assertThat(partitions[0].lease_token).isNull()
+        assertThat(partitions[0].run_state).isEqualTo(BackfillState.PAUSED)
+        assertThat(partitions[1].partition_name).isEqualTo("80-")
+        assertThat(partitions[1].lease_token).isNull()
+        assertThat(partitions[1].run_state).isEqualTo(BackfillState.PAUSED)
+      }
+    }
+
+    scope.fakeCaller(user = "molly") {
+      val response = createBackfillAction.create(
+        "deep-fryer",
+        "deep-fried",
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build(),
+      )
+
+      transacter.transaction { session ->
+
+        val service = queryFactory.newQuery<ServiceQuery>()
+          .registryName("deep-fryer")
+          .variant("deep-fried")
+          .uniqueResult(session)
+
+        val run = service?.let {
+          queryFactory.newQuery<BackfillRunQuery>()
+            .serviceId(it.id)
+            .uniqueResult(session)
+        }
+
+        assertNotNull(run)
+        assertThat(run.state).isEqualTo(BackfillState.PAUSED)
+        assertThat(run.created_by_user).isEqualTo("molly")
+        assertThat(run.approved_by_user).isNull()
+        assertThat(run.approved_at).isNull()
+        assertThat(run.service.variant).isEqualTo("deep-fried")
         assertThat(run.parameters()).isEmpty()
         assertThat(response.backfill_run_id).isEqualTo(run.id.id)
 

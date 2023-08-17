@@ -32,8 +32,7 @@ class CreateAndStartBackfillAction @Inject constructor(
     val caller = caller.get()!!
     val service = caller.service!!
 
-    val backfilaFlavor = if (request.flavor == ConfigureServiceAction.RESERVED_FLAVOR) null else request.flavor
-    val id = backfillCreator.create(service, service, backfilaFlavor, request.create_request)
+    val id = backfillCreator.create(service, service, request.variant, request.create_request)
 
     backfillStateToggler.toggleRunningState(id.id, caller, BackfillState.RUNNING)
 

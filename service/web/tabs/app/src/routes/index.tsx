@@ -7,7 +7,7 @@ import {
   HomeContainer,
   ServiceContainer,
   ServiceRunsContainer,
-  ServiceFlavorsContainer,
+  ServiceVariantsContainer,
   LayoutContainer
 } from "../containers"
 
@@ -15,15 +15,15 @@ const routes = (
   <div>
     <Switch>
       <Route
-        path="/app/services/:service/flavors/:flavor/create"
+        path="/app/services/:service/variants/:variant/create"
         component={CreateFormContainer}
       />
       <Route
-        path="/app/services/:service/flavors/:flavor/runs/:offset"
+        path="/app/services/:service/variants/:variant/runs/:offset"
         component={ServiceRunsContainer}
       />
-      <Route path="/app/services/:service/flavors/:flavor" component={ServiceContainer} />
-      <Route path="/app/services/:service/flavors" component={ServiceFlavorsContainer} />
+      <Route path="/app/services/:service/variants/:variant" component={ServiceContainer} />
+      <Route path="/app/services/:service/variants" component={ServiceVariantsContainer} />
       <Route path="/app/backfills/:id/clone" component={CloneFormContainer} />
       <Route path="/app/backfills/:id" component={BackfillStatusContainer} />
       <Route path="/_admin/app/" component={HomeContainer} />

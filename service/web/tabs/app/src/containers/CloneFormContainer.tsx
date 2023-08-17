@@ -139,8 +139,8 @@ class CloneFormContainer extends React.Component<
       <LayoutContainer>
         <H1>
           Service:{" "}
-          <Link to={`/app/services/${this.state.statusResponse.service_name}/flavors/${this.state.statusResponse.flavor}`}>
-            {this.state.statusResponse.service_name} ({this.state.statusResponse.flavor})
+          <Link to={`/app/services/${this.state.statusResponse.service_name}/variants/${this.state.statusResponse.variant}`}>
+            {this.state.statusResponse.service_name} ({this.state.statusResponse.variant})
           </Link>
         </H1>
         <div style={{ width: "1000px", margin: "auto" }}>

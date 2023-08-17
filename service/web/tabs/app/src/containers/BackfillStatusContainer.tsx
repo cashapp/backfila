@@ -148,8 +148,8 @@ class BackfillStatusContainer extends React.Component<
         <LayoutContainer>
           <H2>
             Backfill #{this.id}: {status.name} in{" "}
-            <Link to={`/app/services/${status.service_name}/flavors/${status.flavor}`}>
-              {status.service_name} ({status.flavor})
+            <Link to={`/app/services/${status.service_name}/variants/${status.variant}`}>
+              {status.service_name} ({status.variant})
             </Link>
           </H2>
           <Link to={`/app/backfills/${this.id}/clone`}>

@@ -1,6 +1,6 @@
 package app.cash.backfila.dashboard
 
-import app.cash.backfila.api.ConfigureServiceAction.Companion.RESERVED_FLAVOR
+import app.cash.backfila.api.ConfigureServiceAction.Companion.RESERVED_VARIANT
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillRunQuery
 import app.cash.backfila.service.persistence.BackfillState
@@ -14,7 +14,6 @@ import misk.web.Get
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
-import wisp.logging.getLogger
 
 class GetServicesAction @Inject constructor(
   @BackfilaDb private val transacter: Transacter,
@@ -23,7 +22,7 @@ class GetServicesAction @Inject constructor(
 
   data class UiService(
     val name: String,
-    val flavors: List<String?>,
+    val variants: Set<String>,
     val running_backfills: Int,
   )
 
@@ -39,7 +38,7 @@ class GetServicesAction @Inject constructor(
     // Then have services/all ? to see all
 
     val services = transacter.transaction { session ->
-      val flavorsByService = queryFactory.newQuery<ServiceQuery>()
+      val variantsByService = queryFactory.newQuery<ServiceQuery>()
         .orderByName()
         .list(session)
         .groupBy { it.registry_name }
@@ -49,20 +48,16 @@ class GetServicesAction @Inject constructor(
         .list(session)
         .groupBy { it.service_id }
 
-      flavorsByService.keys.map { registry_name ->
+      variantsByService.keys.map { registry_name ->
         UiService(
           name = registry_name,
-          flavors = flavorsByService[registry_name]!!.map { serviceFlavor -> serviceFlavor.flavor ?: RESERVED_FLAVOR },
-          running_backfills = flavorsByService[registry_name]!!.sumOf { flavoredService ->
-            runningByService[flavoredService.id]?.size ?: 0
+          variants = variantsByService[registry_name]!!.map { serviceVariant -> serviceVariant.variant ?: RESERVED_VARIANT }.toSet(),
+          running_backfills = variantsByService[registry_name]!!.sumOf { variant ->
+            runningByService[variant.id]?.size ?: 0
           },
         )
       }
     }
     return GetServicesResponse(services)
-  }
-
-  companion object {
-    private val logger = getLogger<GetServicesAction>()
   }
 }

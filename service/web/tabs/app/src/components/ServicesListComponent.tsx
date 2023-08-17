@@ -5,19 +5,19 @@ import { Link } from "react-router-dom"
 
 export interface IServiceLinkProps {
   name: string
-  flavors: (string | null)[]
+  variants: (string | null)[]
 }
 
 function ServiceLink(props: IServiceLinkProps) {
-  if (props.flavors.length > 1) {
+  if (props.variants.length > 1) {
     return (
-      <Link to={`/app/services/${props.name}/flavors/`}>
+      <Link to={`/app/services/${props.name}/variants/`}>
         {this.props.name}
       </Link>
     );
   }
   return (
-    <Link to={`/app/services/${props.name}/flavors/${props.flavors[0]}`}>
+    <Link to={`/app/services/${props.name}/variants/${props.variants[0]}`}>
       {this.props.name}
     </Link>
   );
@@ -45,7 +45,7 @@ export const ServicesListComponent = (props: ITableProps) => {
                 <td>
                   <ServiceLink
                     name={service.name}
-                    flavors={service.flavors}
+                    variants={service.variants}
                   />
                 </td>
                 <td>{service.running_backfills} running</td>

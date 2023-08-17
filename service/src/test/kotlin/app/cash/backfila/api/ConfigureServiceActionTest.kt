@@ -1,7 +1,8 @@
 package app.cash.backfila.api
 
 import app.cash.backfila.BackfilaTestingModule
-import app.cash.backfila.api.ConfigureServiceAction.Companion.RESERVED_FLAVOR
+import app.cash.backfila.api.ConfigureServiceAction.Companion.MAX_VARIANTS
+import app.cash.backfila.api.ConfigureServiceAction.Companion.RESERVED_VARIANT
 import app.cash.backfila.client.Connectors.ENVOY
 import app.cash.backfila.client.Connectors.HTTP
 import app.cash.backfila.dashboard.GetRegisteredBackfillsAction
@@ -176,7 +177,7 @@ class ConfigureServiceActionTest {
   }
 
   @Test
-  fun configureMultipleFlavors() {
+  fun configureMultipleVariants() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(
         ConfigureServiceRequest.Builder()
@@ -200,7 +201,7 @@ class ConfigureServiceActionTest {
 
       configureServiceAction.configureService(
         ConfigureServiceRequest.Builder()
-          .flavor("deep-fried")
+          .variant("deep-fried")
           .backfills(
             listOf(
               ConfigureServiceRequest.BackfillData(
@@ -241,7 +242,7 @@ class ConfigureServiceActionTest {
   }
 
   @Test
-  fun configureMultipleFlavors_updateASpecificFlavor() {
+  fun `Given multiple configured variants, update a specific variant`() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(
         ConfigureServiceRequest.Builder()
@@ -265,7 +266,7 @@ class ConfigureServiceActionTest {
 
       configureServiceAction.configureService(
         ConfigureServiceRequest.Builder()
-          .flavor("deep-fried")
+          .variant("deep-fried")
           .backfills(
             listOf(
               ConfigureServiceRequest.BackfillData(
@@ -831,12 +832,12 @@ class ConfigureServiceActionTest {
   }
 
   @Test
-  fun invalidFlavor() {
+  fun invalidVariant() {
     scope.fakeCaller(service = "deep-fryer") {
       assertThatThrownBy {
         configureServiceAction.configureService(
           ConfigureServiceRequest.Builder()
-            .flavor("      ")
+            .variant("      ")
             .backfills(
               listOf(
                 ConfigureServiceRequest.BackfillData(
@@ -853,7 +854,63 @@ class ConfigureServiceActionTest {
       assertThatThrownBy {
         configureServiceAction.configureService(
           ConfigureServiceRequest.Builder()
-            .flavor(RESERVED_FLAVOR)
+            .variant("with whitespace in the middle")
+            .backfills(
+              listOf(
+                ConfigureServiceRequest.BackfillData(
+                  "xyz", "Description", listOf(), null, "String",
+                  false, null,
+                ),
+              ),
+            )
+            .connector_type(ENVOY)
+            .build(),
+        )
+      }.isInstanceOf(IllegalStateException::class.java)
+
+      assertThatThrownBy {
+        configureServiceAction.configureService(
+          ConfigureServiceRequest.Builder()
+            .variant(RESERVED_VARIANT)
+            .backfills(
+              listOf(
+                ConfigureServiceRequest.BackfillData(
+                  "xyz", "Description", listOf(), null, "String",
+                  false, null,
+                ),
+              ),
+            )
+            .connector_type(ENVOY)
+            .build(),
+        )
+      }.isInstanceOf(IllegalStateException::class.java)
+    }
+  }
+
+  @Test
+  fun tooManyVariants() {
+    scope.fakeCaller(service = "deep-fryer") {
+      for (i in 0..MAX_VARIANTS) {
+        configureServiceAction.configureService(
+          ConfigureServiceRequest.Builder()
+            .variant("$i")
+            .backfills(
+              listOf(
+                ConfigureServiceRequest.BackfillData(
+                  "xyz", "Description", listOf(), null, "String",
+                  false, null,
+                ),
+              ),
+            )
+            .connector_type(ENVOY)
+            .build(),
+        )
+      }
+
+      assertThatThrownBy {
+        configureServiceAction.configureService(
+          ConfigureServiceRequest.Builder()
+            .variant("OneTooMany")
             .backfills(
               listOf(
                 ConfigureServiceRequest.BackfillData(
@@ -977,16 +1034,16 @@ class ConfigureServiceActionTest {
     }
   }
 
-  private fun backfillNames(serviceName: String, flavor: String? = null): List<String> {
-    return getRegisteredBackfillsAction.backfills(serviceName, flavor)
+  private fun backfillNames(serviceName: String, variant: String? = null): List<String> {
+    return getRegisteredBackfillsAction.backfills(serviceName, variant)
       .backfills.map { it.name }
   }
 
-  private fun deletedBackfillNames(serviceName: String, flavor: String? = null): List<String> {
+  private fun deletedBackfillNames(serviceName: String, variant: String? = null): List<String> {
     return transacter.transaction { session ->
       val dbService = queryFactory.newQuery<ServiceQuery>()
         .registryName(serviceName)
-        .flavor(flavor)
+        .variant(variant)
         .uniqueResult(session)!!
       queryFactory.newQuery<RegisteredBackfillQuery>()
         .serviceId(dbService.id)

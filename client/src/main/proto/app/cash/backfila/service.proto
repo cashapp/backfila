@@ -50,12 +50,12 @@ message ConfigureServiceRequest {
 
   optional string slack_channel = 4;
 
-  // A service can have multiple flavors, each registered independently with Backfila.
-  // Flavors have their own set of runs, use different connector configs, etc but are grouped and still identify as the same service.
+  // A service can have multiple variants, each registered independently with Backfila.
+  // Variants have their own set of runs, use different connector configs, etc but are grouped and still identify as the same service.
   //
-  // As an example use case, a service could register different flavors for a production and sandbox deployment.
+  // As an example use case, a service could register different variants for a production and sandbox deployment.
   // Backfila would then be able to run backfills for both deployments independently.
-  optional string flavor = 5;
+  optional string variant = 5;
 }
 
 message ConfigureServiceResponse {
@@ -83,7 +83,7 @@ message CreateBackfillResponse {
 // Creates a backfill under the calling service and starts it.
 message CreateAndStartBackfillRequest {
   optional CreateBackfillRequest create_request = 1;
-  optional string flavor = 2;
+  optional string variant = 2;
 }
 
 message CreateAndStartBackfillResponse {
