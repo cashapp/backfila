@@ -34,11 +34,10 @@ class GetRegisteredBackfillsAction @Inject constructor(
     @PathParam service: String,
     @QueryParam variant: String? = null,
   ): GetRegisteredBackfillsResponse {
-    val backfilaVariant = if (variant == RESERVED_VARIANT) null else variant
     val backfills = transacter.transaction { session ->
       val dbService = queryFactory.newQuery<ServiceQuery>()
         .registryName(service)
-        .variant(backfilaVariant)
+        .variant(variant ?: RESERVED_VARIANT)
         .uniqueResult(session) ?: throw BadRequestException("`$service`-`$variant` doesn't exist")
       val backfills = queryFactory.newQuery<RegisteredBackfillQuery>()
         .serviceId(dbService.id)

@@ -32,8 +32,6 @@ class ConfigureServiceAction @Inject constructor(
   private val clock: Clock,
   private val connectorProvider: ConnectorProvider,
 ) : WebAction {
-  private val WHITESPACE_REGEX = Regex("\\s")
-
   @Post("/configure_service")
   @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
   @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)
@@ -49,6 +47,7 @@ class ConfigureServiceAction @Inject constructor(
       check(!request.variant.contains(WHITESPACE_REGEX)) { "Variant cannot contain whitespace" }
     }
 
+    val variant = request.variant ?: RESERVED_VARIANT
     val clientProvider = connectorProvider.clientProvider(request.connector_type)
     // This tests that the extra data is valid, throwing an exception if invalid.
     clientProvider.validateExtraData(request.connector_extra_data)
@@ -58,7 +57,7 @@ class ConfigureServiceAction @Inject constructor(
         .registryName(service)
         .list(session)
 
-      var dbService = variantsForService.firstOrNull() { it.variant.equals(request.variant) }
+      var dbService = variantsForService.firstOrNull() { it.variant == variant }
 
       if (dbService == null) {
         check(variantsForService.size <= MAX_VARIANTS) { "Variant limit exceeded" }
@@ -68,14 +67,14 @@ class ConfigureServiceAction @Inject constructor(
           request.connector_type,
           request.connector_extra_data,
           request.slack_channel,
-          request.variant,
+          variant,
         )
         session.save(dbService)
       } else {
         dbService.connector = request.connector_type
         dbService.connector_extra_data = request.connector_extra_data
         dbService.slack_channel = request.slack_channel
-        dbService.variant = request.variant
+        dbService.variant = variant
       }
 
       // Add any missing backfills, update modified ones, and mark missing ones as deleted.
@@ -136,5 +135,6 @@ class ConfigureServiceAction @Inject constructor(
     private val logger = getLogger<ConfigureServiceAction>()
     const val RESERVED_VARIANT = "default"
     const val MAX_VARIANTS = 10
+    private val WHITESPACE_REGEX = Regex("\\s")
   }
 }

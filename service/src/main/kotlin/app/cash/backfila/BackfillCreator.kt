@@ -35,7 +35,7 @@ class BackfillCreator @Inject constructor(
   ): Id<DbBackfillRun> {
     logger.info { "Create backfill for `$service` by `$author`" }
 
-    var variant = if (requestedVariant.equals(RESERVED_VARIANT)) null else requestedVariant
+    var variant = requestedVariant ?: RESERVED_VARIANT
     val num_threads = request.num_threads ?: 1
     val scan_size = request.scan_size ?: 1000L
     val batch_size = request.batch_size ?: 100L

@@ -59,11 +59,10 @@ class GetBackfillRunsAction @Inject constructor(
     @QueryParam pagination_token: String? = null,
     @QueryParam variant: String? = null,
   ): GetBackfillRunsResponse {
-    val backfilaVariant = if (variant == RESERVED_VARIANT) null else variant
     return transacter.transaction { session ->
       val dbService = queryFactory.newQuery<ServiceQuery>()
         .registryName(service)
-        .variant(backfilaVariant)
+        .variant(variant ?: RESERVED_VARIANT)
         .uniqueResult(session) ?: throw BadRequestException("`$service`-`$variant` doesn't exist")
 
       val runningBackfills = queryFactory.newQuery<BackfillRunQuery>()

@@ -1,6 +1,5 @@
 package app.cash.backfila.dashboard
 
-import app.cash.backfila.api.ConfigureServiceAction.Companion.RESERVED_VARIANT
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.DbBackfillRun
@@ -86,7 +85,7 @@ class GetBackfillStatusAction @Inject constructor(
       val partitions = run.partitions(session, queryFactory)
       GetBackfillStatusResponse(
         run.service.registry_name,
-        run.service.variant ?: RESERVED_VARIANT,
+        run.service.variant,
         run.registered_backfill.name,
         run.state,
         run.parameters()?.mapValues { (_, v) -> v.utf8() },

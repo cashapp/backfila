@@ -1,6 +1,5 @@
 package app.cash.backfila.dashboard
 
-import app.cash.backfila.api.ConfigureServiceAction.Companion.RESERVED_VARIANT
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillRunQuery
 import app.cash.backfila.service.persistence.BackfillState
@@ -51,7 +50,7 @@ class GetServicesAction @Inject constructor(
       variantsByService.keys.map { registry_name ->
         UiService(
           name = registry_name,
-          variants = variantsByService[registry_name]!!.map { serviceVariant -> serviceVariant.variant ?: RESERVED_VARIANT }.toSet(),
+          variants = variantsByService[registry_name]!!.map { serviceVariant -> serviceVariant.variant }.toSet(),
           running_backfills = variantsByService[registry_name]!!.sumOf { variant ->
             runningByService[variant.id]?.size ?: 0
           },

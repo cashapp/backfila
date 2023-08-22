@@ -16,7 +16,7 @@ import javax.inject.Inject
 import misk.scope.ActionScope
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 @MiskTest(startService = true)
@@ -43,7 +43,7 @@ class GetServiceVariantsActionTest {
   @Test
   fun nonExistentService() {
     scope.fakeCaller(user = "molly") {
-      Assertions.assertThat(getServiceVariantsAction.variants("non-existent-service").variants).isEmpty()
+      assertThat(getServiceVariantsAction.variants("non-existent-service").variants).isEmpty()
     }
   }
 
@@ -93,7 +93,7 @@ class GetServiceVariantsActionTest {
     }
 
     scope.fakeCaller(user = "molly") {
-      Assertions.assertThat(getServiceVariantsAction.variants("deep-fryer").variants).containsOnly(
+      assertThat(getServiceVariantsAction.variants("deep-fryer").variants).containsOnly(
         GetServiceVariantsAction.UiVariant("deep-fried", 1),
         GetServiceVariantsAction.UiVariant(RESERVED_VARIANT, 0),
       )
@@ -138,10 +138,10 @@ class GetServiceVariantsActionTest {
     }
 
     scope.fakeCaller(user = "molly") {
-      Assertions.assertThat(getServiceVariantsAction.variants("deep-fryer").variants).containsOnly(
+      assertThat(getServiceVariantsAction.variants("deep-fryer").variants).containsOnly(
         GetServiceVariantsAction.UiVariant("deep-fried", 1),
       )
-      Assertions.assertThat(getServiceVariantsAction.variants("oven").variants).containsOnly(
+      assertThat(getServiceVariantsAction.variants("oven").variants).containsOnly(
         GetServiceVariantsAction.UiVariant("under-baked", 0),
       )
     }

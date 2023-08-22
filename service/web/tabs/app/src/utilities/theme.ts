@@ -22,3 +22,5 @@ export const backfilaTheme: ITheme = {
   navbarBackground: backfilaRed,
   navbarText: color.white
 }
+
+export const RESERVED_VARIANT = "default"

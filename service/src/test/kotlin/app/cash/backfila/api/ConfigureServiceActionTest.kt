@@ -1039,7 +1039,7 @@ class ConfigureServiceActionTest {
       .backfills.map { it.name }
   }
 
-  private fun deletedBackfillNames(serviceName: String, variant: String? = null): List<String> {
+  private fun deletedBackfillNames(serviceName: String, variant: String = RESERVED_VARIANT): List<String> {
     return transacter.transaction { session ->
       val dbService = queryFactory.newQuery<ServiceQuery>()
         .registryName(serviceName)

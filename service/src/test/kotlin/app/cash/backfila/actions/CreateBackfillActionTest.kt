@@ -2,6 +2,7 @@ package app.cash.backfila.actions
 
 import app.cash.backfila.BackfilaTestingModule
 import app.cash.backfila.api.ConfigureServiceAction
+import app.cash.backfila.api.ConfigureServiceAction.Companion.RESERVED_VARIANT
 import app.cash.backfila.client.Connectors
 import app.cash.backfila.client.FakeBackfilaClientServiceClient
 import app.cash.backfila.dashboard.CreateBackfillAction
@@ -188,7 +189,7 @@ class CreateBackfillActionTest {
       transacter.transaction { session ->
         val service = queryFactory.newQuery<ServiceQuery>()
           .registryName("deep-fryer")
-          .variant(null)
+          .variant(RESERVED_VARIANT)
           .uniqueResult(session)
 
         val run = service?.let {
@@ -201,7 +202,7 @@ class CreateBackfillActionTest {
         assertThat(run.created_by_user).isEqualTo("molly")
         assertThat(run.approved_by_user).isNull()
         assertThat(run.approved_at).isNull()
-        assertThat(run.service.variant).isNull()
+        assertThat(run.service.variant).isEqualTo(RESERVED_VARIANT)
         assertThat(run.parameters()).isEmpty()
         assertThat(response.backfill_run_id).isEqualTo(run.id.id)
 
