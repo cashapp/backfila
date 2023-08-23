@@ -48,5 +48,19 @@ class JavaBackfila @Inject constructor(private val backfila: Backfila) {
     return backfila.createWetRun(backfill.kotlin, null, parameterData, rangeStart, rangeEnd)
   }
 
+  // Helper methods
+  fun <Type : Backfill> findExistingRun(
+    backfillType: Class<Type>,
+    backfillRunId: Long,
+  ): BackfillRun<Type> {
+    return backfila.findExistingRun(backfillType.kotlin, backfillRunId)
+  }
+
+  fun <Type : Backfill> findLatestRun(
+    backfillType: Class<Type>,
+  ): BackfillRun<Type> {
+    return backfila.findLatestRun(backfillType.kotlin)
+  }
+
   val configureServiceData = backfila.configureServiceData
 }

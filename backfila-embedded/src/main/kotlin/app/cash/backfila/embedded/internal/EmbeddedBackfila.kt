@@ -126,6 +126,16 @@ internal class EmbeddedBackfila @Inject internal constructor(
     return untypedBackfill as BackfillRun<Type>
   }
 
+  override fun <Type : Backfill> findLatestRun(backfillType: KClass<Type>): BackfillRun<Type> {
+    val untypedBackfill = createdBackfillRuns
+      .filter { it.value.backfill::class == backfillType }
+      .maxByOrNull { it.key.toLong() }
+      ?.value
+      ?: error("No latest backfill of type $backfillType found")
+    @Suppress("UNCHECKED_CAST") // We don't know the types statically, so fake them.
+    return untypedBackfill as BackfillRun<Type>
+  }
+
   private fun <Type : Backfill> createBackfill(
     backfillType: KClass<Type>,
     dryRun: Boolean,
