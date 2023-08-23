@@ -2,6 +2,7 @@ package app.cash.backfila.client
 
 import app.cash.backfila.client.fixedset.FixedSetDatastore
 import app.cash.backfila.embedded.Backfila
+import app.cash.backfila.embedded.createDryRun
 import app.cash.backfila.embedded.createWetRun
 import app.cash.backfila.protos.service.CheckBackfillStatusRequest
 import app.cash.backfila.protos.service.CheckBackfillStatusResponse.Status.COMPLETE
@@ -46,6 +47,18 @@ class BackfilaApiTest {
     assertThat(datastore.valuesToList()).containsExactly("A", "B", "C")
     val statusResponse = backfilaApi.checkBackfillStatus(CheckBackfillStatusRequest(backfillRunId)).execute().body()!!
     assertThat(statusResponse.status).isEqualTo(COMPLETE)
+  }
+
+  @Test fun `find latest backfill`() {
+    // Create a dry run and then a wet run.
+    val dryRun = backfila.createDryRun<ToUpperCaseBackfill>()
+    val wetRun = backfila.createWetRun<ToUpperCaseBackfill>()
+    assertThat(dryRun.backfillRunId.toLong()).isLessThan(wetRun.backfillRunId.toLong())
+
+    // The wet run should be the latest.
+    val foundRun = backfila.findLatestRun(ToUpperCaseBackfill::class)
+    assertThat(foundRun.dryRun).isFalse()
+    assertThat(foundRun.backfillRunId).isEqualTo(wetRun.backfillRunId)
   }
 
   @Test fun `find started backfill`() {
