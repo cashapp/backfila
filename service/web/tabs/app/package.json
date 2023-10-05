@@ -27,7 +27,7 @@
     "react-timeago": "4.4.0"
   },
   "devDependencies": {
-    "@misk/dev": "0.4.0",
+    "@misk/dev": "0.6.3",
     "@misk/prettier": "0.4.0",
     "@misk/test": "0.4.0",
     "@misk/tslint": "0.4.0",
