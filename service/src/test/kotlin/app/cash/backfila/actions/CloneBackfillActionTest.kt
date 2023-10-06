@@ -16,10 +16,12 @@ import app.cash.backfila.protos.service.ConfigureServiceRequest
 import app.cash.backfila.protos.service.CreateBackfillRequest
 import app.cash.backfila.protos.service.Parameter
 import app.cash.backfila.service.persistence.BackfilaDb
+import app.cash.backfila.service.persistence.BackfillRunQuery
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.RunPartitionQuery
 import com.google.inject.Module
 import javax.inject.Inject
+import misk.exceptions.BadRequestException
 import misk.hibernate.Query
 import misk.hibernate.Transacter
 import misk.hibernate.newQuery
@@ -423,6 +425,54 @@ class CloneBackfillActionTest {
       assertThat(partition.pkey_start).isEqualTo("2000")
       assertThat(partition.pkey_end).isEqualTo("3000")
       assertThat(partition.pkey_cursor).isNull()
+    }
+  }
+
+  @Test
+  fun `when prepare returns error message it gets propagated to the user`() {
+    scope.fakeCaller(user = "molly") {
+      val response = createBackfillAction.create(
+        "deep-fryer",
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .batch_size(100)
+          .scan_size(200)
+          .backoff_schedule("1000")
+          .num_threads(1)
+          .dry_run(true)
+          .extra_sleep_ms(10)
+          .parameter_map(mapOf("param1" to "val1".encodeUtf8()))
+          .build(),
+      )
+
+      // Prepare will now fail.
+      fakeBackfilaClientServiceClient.prepareBackfillResponses.add(
+        PrepareBackfillResponse.Builder()
+          .error_message("We're out of chicken")
+          .build(),
+      )
+
+      assertThatThrownBy {
+        cloneBackfillAction.create(
+          response.backfill_run_id,
+          CloneBackfillRequest(
+            batch_size = 123,
+            scan_size = 223,
+            backoff_schedule = "1000,2000",
+            num_threads = 5,
+            dry_run = false,
+            extra_sleep_ms = 15,
+            parameter_map = mapOf("param1" to "val2".encodeUtf8()),
+            range_clone_type = RangeCloneType.RESTART,
+          ),
+        )
+      }.isInstanceOf(BadRequestException::class.java)
+        .hasMessage("PrepareBackfill on `deep-fryer` failed: We're out of chicken")
+
+      transacter.transaction { session ->
+        val runs = queryFactory.newQuery<BackfillRunQuery>().list(session)
+        assertThat(runs).hasSize(1)
+      }
     }
   }
 }

@@ -203,6 +203,11 @@ class CloneBackfillAction @Inject constructor(
       logger.info(e) { "PrepareBackfill on `${dbData.serviceName}` failed" }
       throw BadRequestException("PrepareBackfill on `${dbData.serviceName}` failed: ${e.message}", e)
     }
+
+    prepareBackfillResponse.error_message?.let {
+      throw BadRequestException("PrepareBackfill on `${dbData.serviceName}` failed: $it")
+    }
+
     val partitions = prepareBackfillResponse.partitions
     if (partitions.isEmpty()) {
       throw BadRequestException("PrepareBackfill returned no partitions")
