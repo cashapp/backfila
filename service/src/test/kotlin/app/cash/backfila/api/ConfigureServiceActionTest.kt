@@ -1034,7 +1034,7 @@ class ConfigureServiceActionTest {
     }
   }
 
-  private fun backfillNames(serviceName: String, variant: String? = null): List<String> {
+  private fun backfillNames(serviceName: String, variant: String = RESERVED_VARIANT): List<String> {
     return getRegisteredBackfillsAction.backfills(serviceName, variant)
       .backfills.map { it.name }
   }

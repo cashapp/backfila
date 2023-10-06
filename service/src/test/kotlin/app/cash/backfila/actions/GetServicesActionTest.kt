@@ -63,7 +63,7 @@ class GetServicesActionTest {
   }
 
   @Test
-  fun oneService_multipleVariants() {
+  fun `one service multiple variants`() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(
         ConfigureServiceRequest.Builder()
@@ -129,9 +129,8 @@ class GetServicesActionTest {
       )
     }
     scope.fakeCaller(user = "molly") {
-      val response = createBackfillAction.create(
+      val response = createBackfillAction.createDefault(
         "deep-fryer",
-        null,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),

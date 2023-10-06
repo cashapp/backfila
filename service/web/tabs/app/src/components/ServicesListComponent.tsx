@@ -5,7 +5,7 @@ import { Link } from "react-router-dom"
 
 export interface IServiceLinkProps {
   name: string
-  variants: (string | null)[]
+  variants: string[]
 }
 
 function ServiceLink(props: IServiceLinkProps) {
@@ -17,7 +17,7 @@ function ServiceLink(props: IServiceLinkProps) {
     );
   }
   return (
-    <Link to={`/app/services/${props.name}/variants/${props.variants[0]}`}>
+    <Link to={`/app/services/${props.name}`}>
       {this.props.name}
     </Link>
   );

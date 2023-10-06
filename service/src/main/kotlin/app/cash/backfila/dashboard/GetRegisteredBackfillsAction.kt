@@ -12,7 +12,6 @@ import misk.hibernate.newQuery
 import misk.security.authz.Authenticated
 import misk.web.Get
 import misk.web.PathParam
-import misk.web.QueryParam
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
@@ -30,14 +29,27 @@ class GetRegisteredBackfillsAction @Inject constructor(
   @Get("/services/{service}/registered-backfills")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Authenticated
+  fun backfillsForDefault(
+    @PathParam service: String,
+  ): GetRegisteredBackfillsResponse {
+    return getRegisteredBackfills(service, RESERVED_VARIANT)
+  }
+
+  @Get("/services/{service}/{variant}/registered-backfills")
+  @ResponseContentType(MediaTypes.APPLICATION_JSON)
+  @Authenticated
   fun backfills(
     @PathParam service: String,
-    @QueryParam variant: String? = null,
+    @PathParam variant: String,
   ): GetRegisteredBackfillsResponse {
+    return getRegisteredBackfills(service, variant)
+  }
+
+  private fun getRegisteredBackfills(service: String, variant: String): GetRegisteredBackfillsResponse {
     val backfills = transacter.transaction { session ->
       val dbService = queryFactory.newQuery<ServiceQuery>()
         .registryName(service)
-        .variant(variant ?: RESERVED_VARIANT)
+        .variant(variant)
         .uniqueResult(session) ?: throw BadRequestException("`$service`-`$variant` doesn't exist")
       val backfills = queryFactory.newQuery<RegisteredBackfillQuery>()
         .serviceId(dbService.id)

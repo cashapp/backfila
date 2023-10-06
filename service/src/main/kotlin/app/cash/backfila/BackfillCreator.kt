@@ -1,6 +1,5 @@
 package app.cash.backfila
 
-import app.cash.backfila.api.ConfigureServiceAction.Companion.RESERVED_VARIANT
 import app.cash.backfila.client.ConnectorProvider
 import app.cash.backfila.protos.clientservice.KeyRange
 import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
@@ -30,12 +29,11 @@ class BackfillCreator @Inject constructor(
   fun create(
     author: String,
     service: String,
-    requestedVariant: String?,
+    variant: String,
     request: CreateBackfillRequest,
   ): Id<DbBackfillRun> {
     logger.info { "Create backfill for `$service` by `$author`" }
 
-    var variant = requestedVariant ?: RESERVED_VARIANT
     val num_threads = request.num_threads ?: 1
     val scan_size = request.scan_size ?: 1000L
     val batch_size = request.batch_size ?: 100L

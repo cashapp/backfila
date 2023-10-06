@@ -60,9 +60,8 @@ class LeaseHunterTest {
       )
     }
     scope.fakeCaller(user = "molly") {
-      createBackfillAction.create(
+      createBackfillAction.createDefault(
         "deep-fryer",
-        null,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
@@ -89,9 +88,8 @@ class LeaseHunterTest {
       )
     }
     scope.fakeCaller(user = "molly") {
-      val response = createBackfillAction.create(
+      val response = createBackfillAction.createDefault(
         "deep-fryer",
-        null,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
@@ -131,9 +129,8 @@ class LeaseHunterTest {
       )
     }
     scope.fakeCaller(user = "molly") {
-      val response = createBackfillAction.create(
+      val response = createBackfillAction.createDefault(
         "deep-fryer",
-        null,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),

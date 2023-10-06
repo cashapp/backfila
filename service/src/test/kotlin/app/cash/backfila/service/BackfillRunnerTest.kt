@@ -94,7 +94,7 @@ class BackfillRunnerTest {
     // Not all partitions complete.
     assertThat(status.state).isEqualTo(BackfillState.RUNNING)
 
-    with(getBackfillRunsAction.backfillRuns("deep-fryer")) {
+    with(getBackfillRunsAction.backfillRunsForDefault("deep-fryer")) {
       assertThat(running_backfills).hasSize(1)
       assertThat(paused_backfills).hasSize(0)
       val run = running_backfills.single()
@@ -129,7 +129,7 @@ class BackfillRunnerTest {
 
     assertThat(status.event_logs[0].message).isEqualTo("backfill completed")
 
-    with(getBackfillRunsAction.backfillRuns("deep-fryer")) {
+    with(getBackfillRunsAction.backfillRunsForDefault("deep-fryer")) {
       assertThat(running_backfills).hasSize(0)
       assertThat(paused_backfills).hasSize(1)
       val run = paused_backfills.single()
@@ -209,7 +209,7 @@ class BackfillRunnerTest {
       assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
       assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNull()
 
-      with(getBackfillRunsAction.backfillRuns("deep-fryer")) {
+      with(getBackfillRunsAction.backfillRunsForDefault("deep-fryer")) {
         assertThat(running_backfills).hasSize(1)
         assertThat(paused_backfills).hasSize(0)
         val run = running_backfills.single()
@@ -233,7 +233,7 @@ class BackfillRunnerTest {
       assertThat(partition.run_state).isEqualTo(BackfillState.RUNNING)
     }
 
-    with(getBackfillRunsAction.backfillRuns("deep-fryer")) {
+    with(getBackfillRunsAction.backfillRunsForDefault("deep-fryer")) {
       assertThat(running_backfills).hasSize(1)
       assertThat(paused_backfills).hasSize(0)
       val run = running_backfills.single()
@@ -934,9 +934,8 @@ class BackfillRunnerTest {
       )
     }
     scope.fakeCaller(user = "molly") {
-      val response = createBackfillAction.create(
+      val response = createBackfillAction.createDefault(
         "deep-fryer",
-        null,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .num_threads(numThreads)

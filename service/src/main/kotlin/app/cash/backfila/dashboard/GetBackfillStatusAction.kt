@@ -51,7 +51,7 @@ data class UiEventLog(
 
 data class GetBackfillStatusResponse(
   val service_name: String,
-  val variant: String?,
+  val variant: String,
   val name: String,
   val state: BackfillState,
   val parameters: Map<String, String>?,

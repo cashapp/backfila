@@ -83,19 +83,18 @@ class StartStopBackfillActionTest {
       )
     }
     scope.fakeCaller(user = "molly") {
-      var backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
+      var backfillRuns = getBackfillRunsAction.backfillRunsForDefault("deep-fryer")
       assertThat(backfillRuns.paused_backfills).hasSize(0)
       assertThat(backfillRuns.running_backfills).hasSize(0)
 
-      val response = createBackfillAction.create(
+      val response = createBackfillAction.createDefault(
         "deep-fryer",
-        null,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
       )
 
-      backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
+      backfillRuns = getBackfillRunsAction.backfillRunsForDefault("deep-fryer")
       assertThat(backfillRuns.paused_backfills).hasSize(1)
       assertThat(backfillRuns.running_backfills).hasSize(0)
 
@@ -110,7 +109,7 @@ class StartStopBackfillActionTest {
       assertThat(status.event_logs[0].message).isEqualTo("backfill started")
       assertThat(status.event_logs[0].user).isEqualTo("molly")
 
-      backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
+      backfillRuns = getBackfillRunsAction.backfillRunsForDefault("deep-fryer")
       assertThat(backfillRuns.paused_backfills).hasSize(0)
       assertThat(backfillRuns.running_backfills).hasSize(1)
 
@@ -123,7 +122,7 @@ class StartStopBackfillActionTest {
       assertThat(status.event_logs[0].message).isEqualTo("backfill stopped")
       assertThat(status.event_logs[0].user).isEqualTo("molly")
 
-      backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
+      backfillRuns = getBackfillRunsAction.backfillRunsForDefault("deep-fryer")
       assertThat(backfillRuns.paused_backfills).hasSize(1)
       assertThat(backfillRuns.running_backfills).hasSize(0)
     }
@@ -163,7 +162,7 @@ class StartStopBackfillActionTest {
     }
 
     scope.fakeCaller(user = "molly") {
-      var defaultRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
+      var defaultRuns = getBackfillRunsAction.backfillRunsForDefault("deep-fryer")
       assertThat(defaultRuns.paused_backfills).hasSize(0)
       assertThat(defaultRuns.running_backfills).hasSize(0)
 
@@ -171,15 +170,14 @@ class StartStopBackfillActionTest {
       assertThat(deepFriedRuns.paused_backfills).hasSize(0)
       assertThat(deepFriedRuns.running_backfills).hasSize(0)
 
-      val response = createBackfillAction.create(
+      val response = createBackfillAction.createDefault(
         "deep-fryer",
-        null,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
       )
 
-      defaultRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
+      defaultRuns = getBackfillRunsAction.backfillRunsForDefault("deep-fryer")
       assertThat(defaultRuns.paused_backfills).hasSize(1)
       assertThat(defaultRuns.running_backfills).hasSize(0)
 
@@ -195,7 +193,7 @@ class StartStopBackfillActionTest {
           .build(),
       )
 
-      defaultRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
+      defaultRuns = getBackfillRunsAction.backfillRunsForDefault("deep-fryer")
       assertThat(defaultRuns.paused_backfills).hasSize(1)
       assertThat(defaultRuns.running_backfills).hasSize(0)
 
@@ -207,7 +205,7 @@ class StartStopBackfillActionTest {
       assertThat(defaultRuns.paused_backfills[0].id).isEqualTo(defaultId.toString())
       startBackfillAction.start(defaultId, StartBackfillRequest())
 
-      defaultRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
+      defaultRuns = getBackfillRunsAction.backfillRunsForDefault("deep-fryer")
       assertThat(defaultRuns.paused_backfills).hasSize(0)
       assertThat(defaultRuns.running_backfills).hasSize(1)
 
@@ -219,7 +217,7 @@ class StartStopBackfillActionTest {
       assertThat(deepFriedRuns.paused_backfills[0].id).isEqualTo(deepFriedId.toString())
       startBackfillAction.start(deepFriedId, StartBackfillRequest())
 
-      defaultRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
+      defaultRuns = getBackfillRunsAction.backfillRunsForDefault("deep-fryer")
       assertThat(defaultRuns.paused_backfills).hasSize(0)
       assertThat(defaultRuns.running_backfills).hasSize(1)
 
@@ -229,7 +227,7 @@ class StartStopBackfillActionTest {
 
       stopBackfillAction.stop(defaultId, StopBackfillRequest())
 
-      defaultRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
+      defaultRuns = getBackfillRunsAction.backfillRunsForDefault("deep-fryer")
       assertThat(defaultRuns.paused_backfills).hasSize(1)
       assertThat(defaultRuns.running_backfills).hasSize(0)
 
@@ -239,7 +237,7 @@ class StartStopBackfillActionTest {
 
       stopBackfillAction.stop(deepFriedId, StopBackfillRequest())
 
-      defaultRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
+      defaultRuns = getBackfillRunsAction.backfillRunsForDefault("deep-fryer")
       assertThat(defaultRuns.paused_backfills).hasSize(1)
       assertThat(defaultRuns.running_backfills).hasSize(0)
 
@@ -272,25 +270,23 @@ class StartStopBackfillActionTest {
     }
     scope.fakeCaller(user = "molly") {
       repeat(15) {
-        createBackfillAction.create(
+        createBackfillAction.createDefault(
           "deep-fryer",
-          null,
           CreateBackfillRequest.Builder()
             .backfill_name("ChickenSandwich")
             .build(),
         )
-        createBackfillAction.create(
+        createBackfillAction.createDefault(
           "deep-fryer",
-          null,
           CreateBackfillRequest.Builder()
             .backfill_name("BeefSandwich")
             .build(),
         )
       }
-      val backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer")
+      val backfillRuns = getBackfillRunsAction.backfillRunsForDefault("deep-fryer")
       assertThat(backfillRuns.paused_backfills).hasSize(20)
 
-      val backfillRunsPage2 = getBackfillRunsAction.backfillRuns(
+      val backfillRunsPage2 = getBackfillRunsAction.backfillRunsForDefault(
         "deep-fryer",
         pagination_token = backfillRuns.next_pagination_token,
       )
@@ -316,9 +312,8 @@ class StartStopBackfillActionTest {
       )
     }
     scope.fakeCaller(user = "molly") {
-      val response = createBackfillAction.create(
+      val response = createBackfillAction.createDefault(
         "deep-fryer",
-        null,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
@@ -349,9 +344,8 @@ class StartStopBackfillActionTest {
       )
     }
     scope.fakeCaller(user = "molly") {
-      val response = createBackfillAction.create(
+      val response = createBackfillAction.createDefault(
         "deep-fryer",
-        null,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
@@ -389,9 +383,8 @@ class StartStopBackfillActionTest {
       )
     }
     scope.fakeCaller(user = "molly") {
-      val response = createBackfillAction.create(
+      val response = createBackfillAction.createDefault(
         "deep-fryer",
-        null,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
@@ -421,9 +414,8 @@ class StartStopBackfillActionTest {
       )
     }
     scope.fakeCaller(user = "molly") {
-      val response = createBackfillAction.create(
+      val response = createBackfillAction.createDefault(
         "deep-fryer",
-        null,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
