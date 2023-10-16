@@ -2,6 +2,7 @@ package app.cash.backfila.actions
 
 import app.cash.backfila.BackfilaTestingModule
 import app.cash.backfila.api.ConfigureServiceAction
+import app.cash.backfila.api.ConfigureServiceAction.Companion.RESERVED_VARIANT
 import app.cash.backfila.client.Connectors
 import app.cash.backfila.dashboard.CreateBackfillAction
 import app.cash.backfila.dashboard.GetBackfillRunsAction
@@ -83,18 +84,19 @@ class StartStopBackfillActionTest {
       )
     }
     scope.fakeCaller(user = "molly") {
-      var backfillRuns = getBackfillRunsAction.backfillRunsForDefault("deep-fryer")
+      var backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer", RESERVED_VARIANT)
       assertThat(backfillRuns.paused_backfills).hasSize(0)
       assertThat(backfillRuns.running_backfills).hasSize(0)
 
-      val response = createBackfillAction.createDefault(
+      val response = createBackfillAction.create(
         "deep-fryer",
+        ConfigureServiceAction.RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
       )
 
-      backfillRuns = getBackfillRunsAction.backfillRunsForDefault("deep-fryer")
+      backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer", RESERVED_VARIANT)
       assertThat(backfillRuns.paused_backfills).hasSize(1)
       assertThat(backfillRuns.running_backfills).hasSize(0)
 
@@ -109,7 +111,7 @@ class StartStopBackfillActionTest {
       assertThat(status.event_logs[0].message).isEqualTo("backfill started")
       assertThat(status.event_logs[0].user).isEqualTo("molly")
 
-      backfillRuns = getBackfillRunsAction.backfillRunsForDefault("deep-fryer")
+      backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer", RESERVED_VARIANT)
       assertThat(backfillRuns.paused_backfills).hasSize(0)
       assertThat(backfillRuns.running_backfills).hasSize(1)
 
@@ -122,7 +124,7 @@ class StartStopBackfillActionTest {
       assertThat(status.event_logs[0].message).isEqualTo("backfill stopped")
       assertThat(status.event_logs[0].user).isEqualTo("molly")
 
-      backfillRuns = getBackfillRunsAction.backfillRunsForDefault("deep-fryer")
+      backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer", RESERVED_VARIANT)
       assertThat(backfillRuns.paused_backfills).hasSize(1)
       assertThat(backfillRuns.running_backfills).hasSize(0)
     }
@@ -162,7 +164,7 @@ class StartStopBackfillActionTest {
     }
 
     scope.fakeCaller(user = "molly") {
-      var defaultRuns = getBackfillRunsAction.backfillRunsForDefault("deep-fryer")
+      var defaultRuns = getBackfillRunsAction.backfillRuns("deep-fryer", RESERVED_VARIANT)
       assertThat(defaultRuns.paused_backfills).hasSize(0)
       assertThat(defaultRuns.running_backfills).hasSize(0)
 
@@ -170,14 +172,15 @@ class StartStopBackfillActionTest {
       assertThat(deepFriedRuns.paused_backfills).hasSize(0)
       assertThat(deepFriedRuns.running_backfills).hasSize(0)
 
-      val response = createBackfillAction.createDefault(
+      val response = createBackfillAction.create(
         "deep-fryer",
+        ConfigureServiceAction.RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
       )
 
-      defaultRuns = getBackfillRunsAction.backfillRunsForDefault("deep-fryer")
+      defaultRuns = getBackfillRunsAction.backfillRuns("deep-fryer", RESERVED_VARIANT)
       assertThat(defaultRuns.paused_backfills).hasSize(1)
       assertThat(defaultRuns.running_backfills).hasSize(0)
 
@@ -193,7 +196,7 @@ class StartStopBackfillActionTest {
           .build(),
       )
 
-      defaultRuns = getBackfillRunsAction.backfillRunsForDefault("deep-fryer")
+      defaultRuns = getBackfillRunsAction.backfillRuns("deep-fryer", RESERVED_VARIANT)
       assertThat(defaultRuns.paused_backfills).hasSize(1)
       assertThat(defaultRuns.running_backfills).hasSize(0)
 
@@ -205,7 +208,7 @@ class StartStopBackfillActionTest {
       assertThat(defaultRuns.paused_backfills[0].id).isEqualTo(defaultId.toString())
       startBackfillAction.start(defaultId, StartBackfillRequest())
 
-      defaultRuns = getBackfillRunsAction.backfillRunsForDefault("deep-fryer")
+      defaultRuns = getBackfillRunsAction.backfillRuns("deep-fryer", RESERVED_VARIANT)
       assertThat(defaultRuns.paused_backfills).hasSize(0)
       assertThat(defaultRuns.running_backfills).hasSize(1)
 
@@ -217,7 +220,7 @@ class StartStopBackfillActionTest {
       assertThat(deepFriedRuns.paused_backfills[0].id).isEqualTo(deepFriedId.toString())
       startBackfillAction.start(deepFriedId, StartBackfillRequest())
 
-      defaultRuns = getBackfillRunsAction.backfillRunsForDefault("deep-fryer")
+      defaultRuns = getBackfillRunsAction.backfillRuns("deep-fryer", RESERVED_VARIANT)
       assertThat(defaultRuns.paused_backfills).hasSize(0)
       assertThat(defaultRuns.running_backfills).hasSize(1)
 
@@ -227,7 +230,7 @@ class StartStopBackfillActionTest {
 
       stopBackfillAction.stop(defaultId, StopBackfillRequest())
 
-      defaultRuns = getBackfillRunsAction.backfillRunsForDefault("deep-fryer")
+      defaultRuns = getBackfillRunsAction.backfillRuns("deep-fryer", RESERVED_VARIANT)
       assertThat(defaultRuns.paused_backfills).hasSize(1)
       assertThat(defaultRuns.running_backfills).hasSize(0)
 
@@ -237,7 +240,7 @@ class StartStopBackfillActionTest {
 
       stopBackfillAction.stop(deepFriedId, StopBackfillRequest())
 
-      defaultRuns = getBackfillRunsAction.backfillRunsForDefault("deep-fryer")
+      defaultRuns = getBackfillRunsAction.backfillRuns("deep-fryer", RESERVED_VARIANT)
       assertThat(defaultRuns.paused_backfills).hasSize(1)
       assertThat(defaultRuns.running_backfills).hasSize(0)
 
@@ -270,25 +273,27 @@ class StartStopBackfillActionTest {
     }
     scope.fakeCaller(user = "molly") {
       repeat(15) {
-        createBackfillAction.createDefault(
+        createBackfillAction.create(
           "deep-fryer",
+          ConfigureServiceAction.RESERVED_VARIANT,
           CreateBackfillRequest.Builder()
             .backfill_name("ChickenSandwich")
             .build(),
         )
-        createBackfillAction.createDefault(
+        createBackfillAction.create(
           "deep-fryer",
+          ConfigureServiceAction.RESERVED_VARIANT,
           CreateBackfillRequest.Builder()
             .backfill_name("BeefSandwich")
             .build(),
         )
       }
-      val backfillRuns = getBackfillRunsAction.backfillRunsForDefault("deep-fryer")
+      val backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer", RESERVED_VARIANT)
       assertThat(backfillRuns.paused_backfills).hasSize(20)
 
-      val backfillRunsPage2 = getBackfillRunsAction.backfillRunsForDefault(
+      val backfillRunsPage2 = getBackfillRunsAction.backfillRuns(
         "deep-fryer",
-        pagination_token = backfillRuns.next_pagination_token,
+        RESERVED_VARIANT, pagination_token = backfillRuns.next_pagination_token,
       )
       assertThat(backfillRunsPage2.paused_backfills).hasSize(10)
     }
@@ -312,8 +317,9 @@ class StartStopBackfillActionTest {
       )
     }
     scope.fakeCaller(user = "molly") {
-      val response = createBackfillAction.createDefault(
+      val response = createBackfillAction.create(
         "deep-fryer",
+        ConfigureServiceAction.RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
@@ -344,8 +350,9 @@ class StartStopBackfillActionTest {
       )
     }
     scope.fakeCaller(user = "molly") {
-      val response = createBackfillAction.createDefault(
+      val response = createBackfillAction.create(
         "deep-fryer",
+        ConfigureServiceAction.RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
@@ -383,8 +390,9 @@ class StartStopBackfillActionTest {
       )
     }
     scope.fakeCaller(user = "molly") {
-      val response = createBackfillAction.createDefault(
+      val response = createBackfillAction.create(
         "deep-fryer",
+        ConfigureServiceAction.RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
@@ -414,8 +422,9 @@ class StartStopBackfillActionTest {
       )
     }
     scope.fakeCaller(user = "molly") {
-      val response = createBackfillAction.createDefault(
+      val response = createBackfillAction.create(
         "deep-fryer",
+        ConfigureServiceAction.RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),

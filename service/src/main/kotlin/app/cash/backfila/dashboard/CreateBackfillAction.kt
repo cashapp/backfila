@@ -1,7 +1,6 @@
 package app.cash.backfila.dashboard
 
 import app.cash.backfila.BackfillCreator
-import app.cash.backfila.api.ConfigureServiceAction.Companion.RESERVED_VARIANT
 import app.cash.backfila.protos.service.CreateBackfillRequest
 import app.cash.backfila.protos.service.CreateBackfillResponse
 import javax.inject.Inject
@@ -20,20 +19,7 @@ class CreateBackfillAction @Inject constructor(
   private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
   private val backfillCreator: BackfillCreator,
 ) : WebAction {
-
-  @Post("/services/{service}/create")
-  @RequestContentType(MediaTypes.APPLICATION_JSON)
-  @ResponseContentType(MediaTypes.APPLICATION_JSON)
-  // TODO allow any user
-  @Authenticated(capabilities = ["users"])
-  fun createDefault(
-    @PathParam service: String,
-    @RequestBody request: CreateBackfillRequest,
-  ): CreateBackfillResponse {
-    return createBackfill(service, RESERVED_VARIANT, request)
-  }
-
-  @Post("/services/{service}/{variant}/create")
+  @Post("/services/{service}/variants/{variant}/create")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   // TODO allow any user

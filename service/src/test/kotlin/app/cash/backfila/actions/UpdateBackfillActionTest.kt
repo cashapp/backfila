@@ -59,8 +59,9 @@ class UpdateBackfillActionTest {
       )
     }
     scope.fakeCaller(user = "molly") {
-      val response = createBackfillAction.createDefault(
+      val response = createBackfillAction.create(
         "deep-fryer",
+        ConfigureServiceAction.RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
@@ -128,8 +129,9 @@ class UpdateBackfillActionTest {
       )
     }
     scope.fakeCaller(user = "molly") {
-      val defaultResponse = createBackfillAction.createDefault(
+      val defaultResponse = createBackfillAction.create(
         "deep-fryer",
+        ConfigureServiceAction.RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
@@ -215,8 +217,9 @@ class UpdateBackfillActionTest {
       )
     }
     scope.fakeCaller(user = "molly") {
-      val response = createBackfillAction.createDefault(
+      val response = createBackfillAction.create(
         "deep-fryer",
+        ConfigureServiceAction.RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
@@ -254,8 +257,9 @@ class UpdateBackfillActionTest {
       )
     }
     scope.fakeCaller(user = "molly") {
-      val response = createBackfillAction.createDefault(
+      val response = createBackfillAction.create(
         "deep-fryer",
+        ConfigureServiceAction.RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),

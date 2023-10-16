@@ -1,27 +1,7 @@
 import { Classes, H1, HTMLTable } from "@blueprintjs/core"
 import { ErrorCalloutComponent } from "@misk/core"
+import { ServiceLink } from "../components"
 import * as React from "react"
-import { Link } from "react-router-dom"
-
-export interface IServiceLinkProps {
-  name: string
-  variants: string[]
-}
-
-function ServiceLink(props: IServiceLinkProps) {
-  if (props.variants.length > 1) {
-    return (
-      <Link to={`/app/services/${props.name}/variants/`}>
-        {this.props.name}
-      </Link>
-    );
-  }
-  return (
-    <Link to={`/app/services/${props.name}`}>
-      {this.props.name}
-    </Link>
-  );
-}
 
 export interface ITableProps {
   data: any
@@ -44,7 +24,7 @@ export const ServicesListComponent = (props: ITableProps) => {
               <tr>
                 <td>
                   <ServiceLink
-                    name={service.name}
+                    serviceName={service.name}
                     variants={service.variants}
                   />
                 </td>

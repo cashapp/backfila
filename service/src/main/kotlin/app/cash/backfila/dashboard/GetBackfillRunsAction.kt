@@ -1,6 +1,5 @@
 package app.cash.backfila.dashboard
 
-import app.cash.backfila.api.ConfigureServiceAction.Companion.RESERVED_VARIANT
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillRunQuery
 import app.cash.backfila.service.persistence.BackfillState
@@ -51,17 +50,7 @@ class GetBackfillRunsAction @Inject constructor(
   @BackfilaDb private val transacter: Transacter,
   private val queryFactory: Query.Factory,
 ) : WebAction {
-  @Get("/services/{service}/backfill-runs")
-  @ResponseContentType(MediaTypes.APPLICATION_JSON)
-  @Authenticated
-  fun backfillRunsForDefault(
-    @PathParam service: String,
-    @QueryParam pagination_token: String? = null,
-  ): GetBackfillRunsResponse {
-    return getBackfillRuns(service, RESERVED_VARIANT, pagination_token)
-  }
-
-  @Get("/services/{service}/{variant}/backfill-runs")
+  @Get("/services/{service}/variants/{variant}/backfill-runs")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Authenticated
   fun backfillRuns(

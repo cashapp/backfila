@@ -1,39 +1,56 @@
 import * as React from "react"
 import { Route, Switch } from "react-router"
-import { Redirect } from "react-router-dom";
+import { Redirect } from "react-router-dom"
 import {
   BackfillStatusContainer,
   CloneFormContainer,
   CreateFormContainer,
   HomeContainer,
-  ServiceContainer,
+  ServiceDetailsContainer,
   ServiceRunsContainer,
   ServiceVariantsContainer,
   LayoutContainer
 } from "../containers"
-import { RESERVED_VARIANT } from "../utilities";
+import { RESERVED_VARIANT } from "../utilities"
 
 const routes = (
   <div>
     <Switch>
+      {/* Maintain compatibility for services that do not need variant functionality */}
+      <Route
+        path="/app/services/:service/create"
+        component={CreateFormContainer}
+      />
       <Route
         path="/app/services/:service/variants/:variant/create"
         component={CreateFormContainer}
       />
-      <Redirect
-        from="/app/services/:service/create"
-        to={`/app/services/:service/variants/${RESERVED_VARIANT}/create`}
+      {/* Maintain compatibility for services that do not need variant functionality */}
+      <Route
+        path="/app/services/:service/runs/:offset"
+        component={ServiceRunsContainer}
       />
       <Route
         path="/app/services/:service/variants/:variant/runs/:offset"
         component={ServiceRunsContainer}
       />
-      <Route path="/app/services/:service/variants/:variant" component={ServiceContainer} />
+      {/* Maintain compatibility for services that do not need variant functionality */}
+      <Route
+        path="/app/services/:service"
+        component={ServiceDetailsContainer}
+      />
+      <Route
+        path="/app/services/:service/variants/:variant"
+        component={ServiceDetailsContainer}
+      />
       <Redirect
         from="/app/services/:service"
         to={`/app/services/:service/variants/${RESERVED_VARIANT}`}
       />
-      <Route path="/app/services/:service/variants" component={ServiceVariantsContainer} />
+      <Route
+        path="/app/services/:service/variants"
+        component={ServiceVariantsContainer}
+      />
       <Route path="/app/backfills/:id/clone" component={CloneFormContainer} />
       <Route path="/app/backfills/:id" component={BackfillStatusContainer} />
       <Route path="/_admin/app/" component={HomeContainer} />

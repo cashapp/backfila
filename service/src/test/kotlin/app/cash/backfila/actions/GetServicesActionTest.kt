@@ -129,8 +129,9 @@ class GetServicesActionTest {
       )
     }
     scope.fakeCaller(user = "molly") {
-      val response = createBackfillAction.createDefault(
+      val response = createBackfillAction.create(
         "deep-fryer",
+        RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),

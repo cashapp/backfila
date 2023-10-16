@@ -1,6 +1,5 @@
 package app.cash.backfila.dashboard
 
-import app.cash.backfila.api.ConfigureServiceAction.Companion.RESERVED_VARIANT
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.RegisteredBackfillQuery
 import app.cash.backfila.service.persistence.ServiceQuery
@@ -26,16 +25,7 @@ class GetRegisteredBackfillsAction @Inject constructor(
   @BackfilaDb private val transacter: Transacter,
   private val queryFactory: Query.Factory,
 ) : WebAction {
-  @Get("/services/{service}/registered-backfills")
-  @ResponseContentType(MediaTypes.APPLICATION_JSON)
-  @Authenticated
-  fun backfillsForDefault(
-    @PathParam service: String,
-  ): GetRegisteredBackfillsResponse {
-    return getRegisteredBackfills(service, RESERVED_VARIANT)
-  }
-
-  @Get("/services/{service}/{variant}/registered-backfills")
+  @Get("/services/{service}/variants/{variant}/registered-backfills")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Authenticated
   fun backfills(

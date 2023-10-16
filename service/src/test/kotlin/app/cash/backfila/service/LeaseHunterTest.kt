@@ -2,6 +2,7 @@ package app.cash.backfila.service
 
 import app.cash.backfila.BackfilaTestingModule
 import app.cash.backfila.api.ConfigureServiceAction
+import app.cash.backfila.api.ConfigureServiceAction.Companion.RESERVED_VARIANT
 import app.cash.backfila.client.Connectors.ENVOY
 import app.cash.backfila.dashboard.CreateBackfillAction
 import app.cash.backfila.dashboard.StartBackfillAction
@@ -60,8 +61,9 @@ class LeaseHunterTest {
       )
     }
     scope.fakeCaller(user = "molly") {
-      createBackfillAction.createDefault(
+      createBackfillAction.create(
         "deep-fryer",
+        RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
@@ -88,8 +90,9 @@ class LeaseHunterTest {
       )
     }
     scope.fakeCaller(user = "molly") {
-      val response = createBackfillAction.createDefault(
+      val response = createBackfillAction.create(
         "deep-fryer",
+        ConfigureServiceAction.RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
@@ -129,8 +132,9 @@ class LeaseHunterTest {
       )
     }
     scope.fakeCaller(user = "molly") {
-      val response = createBackfillAction.createDefault(
+      val response = createBackfillAction.create(
         "deep-fryer",
+        ConfigureServiceAction.RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),

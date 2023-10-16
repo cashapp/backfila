@@ -1,6 +1,7 @@
 package app.cash.backfila.api
 
 import app.cash.backfila.BackfillCreator
+import app.cash.backfila.api.ConfigureServiceAction.Companion.RESERVED_VARIANT
 import app.cash.backfila.dashboard.BackfillStateToggler
 import app.cash.backfila.protos.service.CreateAndStartBackfillRequest
 import app.cash.backfila.protos.service.CreateAndStartBackfillResponse
@@ -32,7 +33,7 @@ class CreateAndStartBackfillAction @Inject constructor(
     val caller = caller.get()!!
     val service = caller.service!!
 
-    val id = backfillCreator.create(service, service, request.variant, request.create_request)
+    val id = backfillCreator.create(service, service, request.variant ?: RESERVED_VARIANT, request.create_request)
 
     backfillStateToggler.toggleRunningState(id.id, caller, BackfillState.RUNNING)
 

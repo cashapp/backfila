@@ -6,24 +6,26 @@ import {
   mapDispatchToProps,
   mapStateToProps
 } from "../ducks"
-import { H2, H3, Intent, AnchorButton, Spinner } from "@blueprintjs/core"
-import { BackfillRunsTable } from "../components"
+import { H3, Intent, AnchorButton, Spinner } from "@blueprintjs/core"
+import { BackfillRunsTable, ServiceHeader } from "../components"
 import { simpleSelectorGet } from "@misk/simpleredux"
 import { Link } from "react-router-dom"
 import { LayoutContainer } from "."
+import { RESERVED_VARIANT } from "../utilities"
 
-class ServiceContainer extends React.Component<
+class ServiceDetailsContainer extends React.Component<
   IState & IDispatchProps,
   IState
 > {
   private service: string = (this.props as any).match.params.service
-  private variant: string = (this.props as any).match.params.variant
+  private variant: string =
+    (this.props as any).match.params.variant ?? RESERVED_VARIANT
   private backfillRunsTag: string = `${this.service}::${this.variant}::BackfillRuns`
 
   componentDidMount() {
     this.props.simpleNetworkGet(
       this.backfillRunsTag,
-      `/services/${this.service}/backfill-runs?variant=${this.variant}`
+      `/services/${this.service}/variants/${this.variant}/backfill-runs`
     )
   }
 
@@ -35,20 +37,17 @@ class ServiceContainer extends React.Component<
     if (!this.service || !result) {
       return (
         <LayoutContainer>
-          <H2>{this.service} ({this.variant})</H2>
+          <ServiceHeader serviceName={this.service} variant={this.variant} />
           <Spinner />
         </LayoutContainer>
       )
     }
     return (
       <LayoutContainer>
-        <H2> {this.service} ({this.variant}) </H2>
-        <H3>
-          <Link to={`/app/services/${this.service}/variants`}>
-            Other variants
-          </Link>
-        </H3>
-        <Link to={`/app/services/${this.service}/variants/${this.variant}/create`}>
+        <ServiceHeader serviceName={this.service} variant={this.variant} />
+        <Link
+          to={`/app/services/${this.service}/variants/${this.variant}/create`}
+        >
           <AnchorButton text={"Create"} intent={Intent.PRIMARY} />
         </Link>
         <br />
@@ -71,4 +70,7 @@ class ServiceContainer extends React.Component<
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(ServiceContainer)
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ServiceDetailsContainer)
