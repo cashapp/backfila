@@ -1,0 +1,22 @@
+syntax = "proto2";
+package app.cash.backfila.protos.managementclient;
+
+option java_package = "app.cash.backfila.protos.managementclient";
+option java_generic_services = true;
+
+// In this file: APIs that the management client provides to callers.
+
+message CreateAndStartResponse {
+  optional uint64 backfill_run_id = 1;
+}
+
+message CheckStatusResponse {
+  optional Status status = 1;
+
+  enum Status {
+    UNKNOWN = 0;
+    PAUSED = 1;
+    RUNNING = 2;
+    COMPLETE = 3;
+  }
+}
