@@ -70,6 +70,7 @@ dependencies {
   testImplementation(Dependencies.kotlinxCoroutinesTest)
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.openTracingMock)
+  testImplementation(Dependencies.slf4jSimple)
 
   testImplementation(project(":backfila-embedded"))
 }

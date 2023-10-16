@@ -40,6 +40,7 @@ object Dependencies {
   val retrofitWire = "com.squareup.retrofit2:converter-wire:2.9.0"
   val shadowJarPlugin = "gradle.plugin.com.github.johnrengelman:shadow:7.1.2"
   val slf4jApi = "org.slf4j:slf4j-api:2.0.3"
+  val slf4jSimple = "org.slf4j:slf4j-simple:2.0.3"
   val spotlessPlugin = "com.diffplug.spotless:spotless-plugin-gradle:6.12.0"
   val tracingJaeger = "io.jaegertracing:jaeger-core:1.1.0"
 
