@@ -7,7 +7,6 @@ import app.cash.backfila.client.misk.ClientMiskService
 import app.cash.backfila.client.misk.ClientMiskTestingModule
 import app.cash.backfila.client.misk.DbMenu
 import app.cash.backfila.client.misk.MenuQuery
-import app.cash.backfila.protos.managementclient.CheckStatusResponse
 import com.google.inject.Module
 import javax.inject.Inject
 import misk.hibernate.Id
@@ -36,22 +35,22 @@ class BackfilaManagementClientTest {
       session.save(DbMenu("chicken"))
     }
 
-    val startResponse = managementClient.createAndStart(ChickenToBeefBackfill::class.java, dry_run = false)
+    val run_id = managementClient.createAndStart(ChickenToBeefBackfill::class.java, dry_run = false)
 
     val name = transacter.transaction { session ->
       session.load(id).name
     }
     assertThat(name).isEqualTo("beef")
-    assertThat(startResponse!!.backfill_run_id).isNotNull()
+    assertThat(run_id).isNotNull()
   }
 
   @Test
   fun `check status`() {
-    val startResponse =
+    val run_id =
       managementClient.createAndStart(ChickenToBeefBackfill::class.java, dry_run = false)
 
-    val statusResponse = managementClient.checkStatus(startResponse!!.backfill_run_id)
-    assertThat(statusResponse!!.status).isEqualTo(CheckStatusResponse.Status.COMPLETE)
+    val status = managementClient.checkStatus(run_id!!)
+    assertThat(status).isEqualTo("COMPLETE")
   }
 }
 

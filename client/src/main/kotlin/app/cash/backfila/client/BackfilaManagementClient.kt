@@ -1,7 +1,5 @@
 package app.cash.backfila.client
 
-import app.cash.backfila.protos.managementclient.CheckStatusResponse
-import app.cash.backfila.protos.managementclient.CreateAndStartResponse
 import okio.ByteString
 
 interface BackfilaManagementClient {
@@ -16,9 +14,9 @@ interface BackfilaManagementClient {
     scan_size: Long? = null,
     pkey_range_start: ByteString? = null,
     pkey_range_end: ByteString? = null,
-  ): CreateAndStartResponse?
+  ): Long?
 
   fun checkStatus(
     backfill_run_id: Long,
-  ): CheckStatusResponse?
+  ): String?
 }
