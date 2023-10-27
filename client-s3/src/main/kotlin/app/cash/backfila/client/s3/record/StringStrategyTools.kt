@@ -8,8 +8,7 @@ object StringStrategyTools {
    */
   fun newlineByteCalculator(source: BufferedSource): Long {
     val index = source.indexOf(NEWLINE_BYTE)
-    val bytes = if (index < 0) source.readByteString().size.toLong() else index + 1
-    return bytes
+    return if (index < 0) source.readByteString().size.toLong() else index + 1
   }
 
   /**

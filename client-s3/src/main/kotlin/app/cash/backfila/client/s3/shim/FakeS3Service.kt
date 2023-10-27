@@ -55,7 +55,15 @@ class FakeS3Service @Inject constructor() : S3Service {
     key: String,
     seekStart: Long,
     seekEnd: Long,
-  ): ByteString = files[bucket to key]?.substring(seekStart.toInt(), seekEnd.toInt()) ?: EMPTY
+  ): ByteString {
+    /*
+      S3's `withRange` has an inclusive end, so replicate that behaviour here.
+      This will also fail if bytes are requested after the file end which Amazon does not do. However,
+      this holds us to a higher standard to hopefully discover unintended behaviour.
+    */
+    val s3SeekEnd = seekEnd.toInt() + 1
+    return files[bucket to key]?.substring(seekStart.toInt(), s3SeekEnd) ?: EMPTY
+  }
 
   override fun getFileSize(bucket: String, key: String): Long =
     files[bucket to key]?.size?.toLong() ?: 0L
