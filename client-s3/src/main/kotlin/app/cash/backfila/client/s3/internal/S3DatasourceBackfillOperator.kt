@@ -163,11 +163,14 @@ class S3DatasourceBackfillOperator<R : Any, P : Any>(
     val batchRange = request.batch_range.decode()
     requireNotNull(batchRange.end) { "Batch was created without a range end." }
 
+    // Amazon S3 batch ranges are inclusive and backfila is exclusive, so we must subtract 1 byte.
+    val amazonS3BatchEnd = batchRange.end - 1
+
     val byteString = s3Service.getWithSeek(
       backfill.getBucket(config.prepareConfig()),
       pathPrefix + request.partition_name,
       batchRange.start,
-      batchRange.end,
+      amazonS3BatchEnd,
     )
 
     val batch = backfill.recordStrategy.bytesToRecords(byteString)
