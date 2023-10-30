@@ -35,21 +35,21 @@ class BackfilaManagementClientTest {
       session.save(DbMenu("chicken"))
     }
 
-    val run_id = managementClient.createAndStart(ChickenToBeefBackfill::class.java, dry_run = false)
+    val runId = managementClient.createAndStart(ChickenToBeefBackfill::class.java, dry_run = false)
 
     val name = transacter.transaction { session ->
       session.load(id).name
     }
     assertThat(name).isEqualTo("beef")
-    assertThat(run_id).isNotNull()
+    assertThat(runId).isNotNull()
   }
 
   @Test
   fun `check status`() {
-    val run_id =
+    val runId =
       managementClient.createAndStart(ChickenToBeefBackfill::class.java, dry_run = false)
 
-    val status = managementClient.checkStatus(run_id!!)
+    val status = managementClient.checkStatus(runId)
     assertThat(status).isEqualTo("COMPLETE")
   }
 }

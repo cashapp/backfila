@@ -14,9 +14,9 @@ interface BackfilaManagementClient {
     scan_size: Long? = null,
     pkey_range_start: ByteString? = null,
     pkey_range_end: ByteString? = null,
-  ): Long?
+  ): Long
 
   fun checkStatus(
     backfill_run_id: Long,
-  ): String?
+  ): String
 }

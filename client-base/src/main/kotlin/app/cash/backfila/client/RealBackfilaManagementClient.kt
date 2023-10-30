@@ -23,7 +23,7 @@ class RealBackfilaManagementClient @Inject internal constructor(
     scan_size: Long?,
     pkey_range_start: ByteString?,
     pkey_range_end: ByteString?,
-  ): Long? {
+  ): Long {
     val createResponse = client.createAndStartBackfill(
       CreateAndStartBackfillRequest.Builder()
         .create_request(
@@ -48,11 +48,11 @@ class RealBackfilaManagementClient @Inject internal constructor(
     return createResponse.backfill_run_id
   }
 
-  override fun checkStatus(backfill_run_id: Long): String? {
+  override fun checkStatus(backfill_run_id: Long): String {
     val statusResponse = client.checkBackfillStatus(
       CheckBackfillStatusRequest.Builder().backfill_run_id(backfill_run_id).build(),
     )
 
-    return statusResponse.status?.name
+    return statusResponse.status?.name.toString()
   }
 }
