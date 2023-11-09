@@ -12,7 +12,7 @@ class BackfillsModule : KAbstractModule() {
     install(
       MiskBackfillModule(
         BackfilaHttpClientConfig(
-          url = "test.url", slack_channel = "#test",
+          url = "test.url", slack_channel = "#test", variant = null,
         ),
       ),
     )
