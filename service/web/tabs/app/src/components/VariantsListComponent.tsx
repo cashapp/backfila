@@ -1,34 +1,34 @@
 import { Classes, H1, HTMLTable } from "@blueprintjs/core"
 import { ErrorCalloutComponent } from "@misk/core"
-import { ServiceLink } from "../components"
 import * as React from "react"
+import { Link } from "react-router-dom"
 
-export interface ITableProps {
+export interface IVariantTableProps {
   data: any
-  url?: string
-  tag?: string
+  service: string
 }
 
-export const ServicesListComponent = (props: ITableProps) => {
-  const { data } = props
+export const VariantsListComponent = (props: IVariantTableProps) => {
+  const { data, service } = props
   if (data) {
     /**
      * Data is loaded and ready to be rendered
      */
     return (
       <div>
-        <H1>Services</H1>
+        <H1>{service} variants</H1>
         <HTMLTable bordered={true} striped={true}>
           <tbody>
-            {data.map((service: any) => (
+            {data.map((variant: any) => (
               <tr>
                 <td>
-                  <ServiceLink
-                    serviceName={service.name}
-                    variants={service.variants}
-                  />
+                  <Link
+                    to={`/app/services/${props.service}/variants/${variant.name}`}
+                  >
+                    {variant.name}
+                  </Link>
                 </td>
-                <td>{service.running_backfills} running</td>
+                <td>{variant.running_backfills} running</td>
               </tr>
             ))}
           </tbody>
@@ -42,7 +42,7 @@ export const ServicesListComponent = (props: ITableProps) => {
     const FakeCell = <p className={Classes.SKELETON}>lorem ipsum 1234 5678</p>
     return (
       <div>
-        <H1>Services</H1>
+        <H1>Variants</H1>
         <HTMLTable bordered={true} striped={true}>
           <tbody>
             <tr>
@@ -62,4 +62,4 @@ export const ServicesListComponent = (props: ITableProps) => {
   }
 }
 
-export default ServicesListComponent
+export default VariantsListComponent

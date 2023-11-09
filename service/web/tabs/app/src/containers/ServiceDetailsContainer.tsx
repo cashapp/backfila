@@ -6,23 +6,26 @@ import {
   mapDispatchToProps,
   mapStateToProps
 } from "../ducks"
-import { H2, H3, Intent, AnchorButton, Spinner } from "@blueprintjs/core"
-import { BackfillRunsTable } from "../components"
+import { H3, Intent, AnchorButton, Spinner } from "@blueprintjs/core"
+import { BackfillRunsTable, ServiceHeader } from "../components"
 import { simpleSelectorGet } from "@misk/simpleredux"
 import { Link } from "react-router-dom"
 import { LayoutContainer } from "."
+import { RESERVED_VARIANT } from "../utilities"
 
-class ServiceContainer extends React.Component<
+class ServiceDetailsContainer extends React.Component<
   IState & IDispatchProps,
   IState
 > {
   private service: string = (this.props as any).match.params.service
-  private backfillRunsTag: string = `${this.service}::BackfillRuns`
+  private variant: string =
+    (this.props as any).match.params.variant ?? RESERVED_VARIANT
+  private backfillRunsTag: string = `${this.service}::${this.variant}::BackfillRuns`
 
   componentDidMount() {
     this.props.simpleNetworkGet(
       this.backfillRunsTag,
-      `/services/${this.service}/backfill-runs`
+      `/services/${this.service}/variants/${this.variant}/backfill-runs`
     )
   }
 
@@ -34,17 +37,21 @@ class ServiceContainer extends React.Component<
     if (!this.service || !result) {
       return (
         <LayoutContainer>
-          <H2>{this.service}</H2>
+          <ServiceHeader serviceName={this.service} variant={this.variant} />
           <Spinner />
         </LayoutContainer>
       )
     }
     return (
       <LayoutContainer>
-        <H2>{this.service}</H2>
-        <Link to={`/app/services/${this.service}/create`}>
+        <ServiceHeader serviceName={this.service} variant={this.variant} />
+        <Link
+          to={`/app/services/${this.service}/variants/${this.variant}/create`}
+        >
           <AnchorButton text={"Create"} intent={Intent.PRIMARY} />
         </Link>
+        <br />
+        <br />
         <H3>Running Backfills</H3>
         <BackfillRunsTable backfillRuns={result.running_backfills} />
         <H3>Paused Backfills</H3>
@@ -52,7 +59,7 @@ class ServiceContainer extends React.Component<
         {result.next_pagination_token && (
           <div style={{ paddingBottom: "100px" }}>
             <Link
-              to={`/app/services/${this.service}/runs/${result.next_pagination_token}`}
+              to={`/app/services/${this.service}/variants/${this.variant}/runs/${result.next_pagination_token}`}
             >
               more
             </Link>
@@ -63,4 +70,7 @@ class ServiceContainer extends React.Component<
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(ServiceContainer)
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ServiceDetailsContainer)

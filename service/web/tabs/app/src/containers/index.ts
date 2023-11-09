@@ -3,8 +3,9 @@ import CloneFormContainer from "./CloneFormContainer"
 import CreateFormContainer from "./CreateFormContainer"
 import HomeContainer from "./HomeContainer"
 import { LayoutContainer } from "./LayoutContainer"
-import ServiceContainer from "./ServiceContainer"
+import ServiceDetailsContainer from "./ServiceDetailsContainer"
 import ServiceRunsContainer from "./ServiceRunsContainer"
+import ServiceVariantsContainer from "./ServiceVariantsContainer"
 
 export {
   BackfillStatusContainer,
@@ -12,6 +13,7 @@ export {
   CreateFormContainer,
   HomeContainer,
   LayoutContainer,
-  ServiceContainer,
-  ServiceRunsContainer
+  ServiceDetailsContainer,
+  ServiceRunsContainer,
+  ServiceVariantsContainer
 }

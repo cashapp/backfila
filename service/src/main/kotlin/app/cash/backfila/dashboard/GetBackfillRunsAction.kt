@@ -50,17 +50,23 @@ class GetBackfillRunsAction @Inject constructor(
   @BackfilaDb private val transacter: Transacter,
   private val queryFactory: Query.Factory,
 ) : WebAction {
-  @Get("/services/{service}/backfill-runs")
+  @Get("/services/{service}/variants/{variant}/backfill-runs")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Authenticated
   fun backfillRuns(
     @PathParam service: String,
+    @PathParam variant: String,
     @QueryParam pagination_token: String? = null,
   ): GetBackfillRunsResponse {
+    return getBackfillRuns(service, variant, pagination_token)
+  }
+
+  private fun getBackfillRuns(service: String, variant: String, paginationToken: String?): GetBackfillRunsResponse {
     return transacter.transaction { session ->
       val dbService = queryFactory.newQuery<ServiceQuery>()
         .registryName(service)
-        .uniqueResult(session) ?: throw BadRequestException("`$service` doesn't exist")
+        .variant(variant)
+        .uniqueResult(session) ?: throw BadRequestException("`$service`-`$variant` doesn't exist")
 
       val runningBackfills = queryFactory.newQuery<BackfillRunQuery>()
         .serviceId(dbService.id)
@@ -85,7 +91,7 @@ class GetBackfillRunsAction @Inject constructor(
         .stateNot(BackfillState.RUNNING)
         .newPager(
           idDescPaginator(),
-          initialOffset = pagination_token?.let { Offset(it) },
+          initialOffset = paginationToken?.let { Offset(it) },
           pageSize = 20,
         )
         .nextPage(session) ?: Page.empty()

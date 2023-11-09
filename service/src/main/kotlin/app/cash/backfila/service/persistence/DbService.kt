@@ -28,6 +28,9 @@ class DbService() : DbUnsharded<DbService>, DbTimestampedEntity {
   @Column
   var slack_channel: String? = null
 
+  @Column(nullable = false)
+  lateinit var variant: String
+
   @Column
   override lateinit var created_at: Instant
 
@@ -39,10 +42,12 @@ class DbService() : DbUnsharded<DbService>, DbTimestampedEntity {
     connector: String,
     connector_extra_data: String?,
     slack_channel: String?,
+    variant: String,
   ) : this() {
     this.registry_name = registry_name
     this.connector = connector
     this.connector_extra_data = connector_extra_data
     this.slack_channel = slack_channel
+    this.variant = variant
   }
 }

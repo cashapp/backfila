@@ -2,6 +2,7 @@ package app.cash.backfila.service
 
 import app.cash.backfila.BackfilaTestingModule
 import app.cash.backfila.api.ConfigureServiceAction
+import app.cash.backfila.api.ConfigureServiceAction.Companion.RESERVED_VARIANT
 import app.cash.backfila.client.Connectors.ENVOY
 import app.cash.backfila.client.FakeBackfilaClientServiceClient
 import app.cash.backfila.dashboard.CreateBackfillAction
@@ -94,7 +95,7 @@ class BackfillRunnerTest {
     // Not all partitions complete.
     assertThat(status.state).isEqualTo(BackfillState.RUNNING)
 
-    with(getBackfillRunsAction.backfillRuns("deep-fryer")) {
+    with(getBackfillRunsAction.backfillRuns("deep-fryer", RESERVED_VARIANT)) {
       assertThat(running_backfills).hasSize(1)
       assertThat(paused_backfills).hasSize(0)
       val run = running_backfills.single()
@@ -129,7 +130,7 @@ class BackfillRunnerTest {
 
     assertThat(status.event_logs[0].message).isEqualTo("backfill completed")
 
-    with(getBackfillRunsAction.backfillRuns("deep-fryer")) {
+    with(getBackfillRunsAction.backfillRuns("deep-fryer", RESERVED_VARIANT)) {
       assertThat(running_backfills).hasSize(0)
       assertThat(paused_backfills).hasSize(1)
       val run = paused_backfills.single()
@@ -209,7 +210,7 @@ class BackfillRunnerTest {
       assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
       assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNull()
 
-      with(getBackfillRunsAction.backfillRuns("deep-fryer")) {
+      with(getBackfillRunsAction.backfillRuns("deep-fryer", RESERVED_VARIANT)) {
         assertThat(running_backfills).hasSize(1)
         assertThat(paused_backfills).hasSize(0)
         val run = running_backfills.single()
@@ -233,7 +234,7 @@ class BackfillRunnerTest {
       assertThat(partition.run_state).isEqualTo(BackfillState.RUNNING)
     }
 
-    with(getBackfillRunsAction.backfillRuns("deep-fryer")) {
+    with(getBackfillRunsAction.backfillRuns("deep-fryer", RESERVED_VARIANT)) {
       assertThat(running_backfills).hasSize(1)
       assertThat(paused_backfills).hasSize(0)
       val run = running_backfills.single()
@@ -936,6 +937,7 @@ class BackfillRunnerTest {
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create(
         "deep-fryer",
+        ConfigureServiceAction.RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .num_threads(numThreads)

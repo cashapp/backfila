@@ -23,7 +23,8 @@ import { Link } from "react-router-dom"
 import {
   BackfillProgressBar,
   StartStopButton,
-  EditableField
+  EditableField,
+  VariantLink
 } from "../components"
 import { LayoutContainer } from "../containers"
 
@@ -148,9 +149,10 @@ class BackfillStatusContainer extends React.Component<
         <LayoutContainer>
           <H2>
             Backfill #{this.id}: {status.name} in{" "}
-            <Link to={`/app/services/${status.service_name}`}>
-              {status.service_name}
-            </Link>
+            <VariantLink
+              serviceName={status.service_name}
+              variant={status.variant}
+            />
           </H2>
           <Link to={`/app/backfills/${this.id}/clone`}>
             <AnchorButton text={"Clone"} intent={Intent.PRIMARY} />
