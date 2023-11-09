@@ -16,4 +16,9 @@ data class BackfilaClientConfig(
    * Connector information so Backfila knows how to call your service.
    */
   val connector_extra_data: String,
+
+  /**
+   *
+   */
+  val variant: String?, 
 )
