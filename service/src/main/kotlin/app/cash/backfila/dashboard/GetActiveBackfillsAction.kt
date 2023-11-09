@@ -23,7 +23,7 @@ class GetActiveBackfillsAction @Inject constructor(
   private val queryFactory: Query.Factory,
 ) : WebAction {
 
-  @Get("/backfills/currently-running")
+  @Get("/backfills/running")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Authenticated
   fun currentlyRunningBackfills(): GetCurrentlyRunningBackfillsResponse {

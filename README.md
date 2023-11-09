@@ -23,6 +23,14 @@ $ gradle clean shadowJar
 
 ## Run the Service
 
+### Prerequisites
+You will need to have a MySQL instance running locally to run the application or the tests.
+
+You can start one up with Docker:
+```
+docker run -d --rm --name "$(basename "$(pwd)")-mysql-8" -p 3306:3306 -e MYSQL_ALLOW_EMPTY_PASSWORD=true mysql:8 --sql-mode=""
+```
+
 ### From the command line
 
 ```
