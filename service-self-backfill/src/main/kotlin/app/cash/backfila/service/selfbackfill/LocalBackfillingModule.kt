@@ -28,6 +28,7 @@ class LocalBackfillingModule : KAbstractModule() {
         slack_channel = null,
         connector_type = LOCAL,
         connector_extra_data = "",
+        variant = null,
       ),
     )
 

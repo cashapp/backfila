@@ -13,6 +13,8 @@ data class BackfilaHttpClientConfig(
   val url: String,
 
   val slack_channel: String?,
+
+  val variant: String?,
 ) {
   fun toBackfilaClientConfig(): BackfilaClientConfig {
     // Creating a local moshi to do the quick config conversion.
@@ -25,6 +27,7 @@ data class BackfilaHttpClientConfig(
       slack_channel,
       connector_type = Connectors.HTTP,
       connector_extra_data = connectorDataAdapter.toJson(httpConnectorData),
+      variant,
     )
   }
 }
