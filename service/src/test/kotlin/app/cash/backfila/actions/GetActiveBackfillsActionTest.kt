@@ -132,6 +132,7 @@ class GetActiveBackfillsActionTest {
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create(
         serviceName,
+        "variant1",
         CreateBackfillRequest.Builder()
           .backfill_name(backfillName)
           .dry_run(dryRun)
@@ -151,6 +152,7 @@ class GetActiveBackfillsActionTest {
         ConfigureServiceRequest.Builder()
           .backfills(backfills)
           .connector_type(Connectors.ENVOY)
+          .variant("variant1")
           .build(),
       )
     }
