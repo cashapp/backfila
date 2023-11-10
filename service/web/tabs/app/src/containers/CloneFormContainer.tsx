@@ -1,6 +1,7 @@
 import * as React from "react"
 import { connect } from "react-redux"
 import Axios from "axios"
+import { VariantLink } from "../components"
 import {
   IDispatchProps,
   IState,
@@ -139,9 +140,10 @@ class CloneFormContainer extends React.Component<
       <LayoutContainer>
         <H1>
           Service:{" "}
-          <Link to={`/app/services/${this.state.statusResponse.service_name}`}>
-            {this.state.statusResponse.service_name}
-          </Link>
+          <VariantLink
+            serviceName={this.state.statusResponse.service_name}
+            variant={this.state.statusResponse.variant}
+          />
         </H1>
         <div style={{ width: "1000px", margin: "auto" }}>
           <H2>

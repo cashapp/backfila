@@ -7,6 +7,7 @@ class BackfilaWebActionsModule() : KAbstractModule() {
   override fun configure() {
     install(WebActionModule.create<GetServicesAction>())
     install(WebActionModule.create<GetActiveBackfillsAction>())
+    install(WebActionModule.create<GetServiceVariantsAction>())
     install(WebActionModule.create<CloneBackfillAction>())
     install(WebActionModule.create<CreateBackfillAction>())
     install(WebActionModule.create<StartBackfillAction>())

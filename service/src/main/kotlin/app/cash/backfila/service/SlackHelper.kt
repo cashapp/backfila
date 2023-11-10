@@ -52,7 +52,7 @@ class SlackHelper @Inject constructor(
   }
 
   private fun nameAndId(run: DbBackfillRun) =
-    "[${deployment.name}] ${run.service.registry_name} `${run.registered_backfill.name}` " +
+    "[${deployment.name}] ${run.service.registry_name} (${run.service.variant}) `${run.registered_backfill.name}` " +
       "(${idLink(run.id)})"
 
   private fun dryRunEmoji(run: DbBackfillRun) =

@@ -5,7 +5,7 @@ import app.cash.backfila.api.ConfigureServiceAction
 import app.cash.backfila.api.ConfigureServiceAction.Companion.RESERVED_VARIANT
 import app.cash.backfila.client.Connectors
 import app.cash.backfila.dashboard.CreateBackfillAction
-import app.cash.backfila.dashboard.GetServicesAction
+import app.cash.backfila.dashboard.GetServiceVariantsAction
 import app.cash.backfila.dashboard.StartBackfillAction
 import app.cash.backfila.dashboard.StartBackfillRequest
 import app.cash.backfila.fakeCaller
@@ -20,7 +20,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 @MiskTest(startService = true)
-class GetServicesActionTest {
+class GetServiceVariantsActionTest {
   @Suppress("unused")
   @MiskTestModule
   val module: Module = BackfilaTestingModule()
@@ -29,7 +29,7 @@ class GetServicesActionTest {
   lateinit var configureServiceAction: ConfigureServiceAction
 
   @Inject
-  lateinit var getServicesAction: GetServicesAction
+  lateinit var getServiceVariantsAction: GetServiceVariantsAction
 
   @Inject
   lateinit var scope: ActionScope
@@ -41,9 +41,9 @@ class GetServicesActionTest {
   lateinit var startBackfillAction: StartBackfillAction
 
   @Test
-  fun noServices() {
+  fun nonExistentService() {
     scope.fakeCaller(user = "molly") {
-      assertThat(getServicesAction.services().services).isEmpty()
+      assertThat(getServiceVariantsAction.variants("non-existent-service").variants).isEmpty()
     }
   }
 
@@ -51,43 +51,35 @@ class GetServicesActionTest {
   fun oneService() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(
-        ConfigureServiceRequest.Builder().connector_type(Connectors.ENVOY).build(),
-      )
-    }
-
-    scope.fakeCaller(user = "molly") {
-      assertThat(getServicesAction.services().services).containsOnly(
-        GetServicesAction.UiService("deep-fryer", setOf(RESERVED_VARIANT), 0),
-      )
-    }
-  }
-
-  @Test
-  fun `one service multiple variants`() {
-    scope.fakeCaller(service = "deep-fryer") {
-      configureServiceAction.configureService(
         ConfigureServiceRequest.Builder()
-          .connector_type(Connectors.ENVOY)
-          .build(),
-      )
-    }
-
-    scope.fakeCaller(service = "deep-fryer") {
-      configureServiceAction.configureService(
-        ConfigureServiceRequest.Builder()
-          .connector_type(Connectors.ENVOY)
           .variant("deep-fried")
           .backfills(
             listOf(
-              ConfigureServiceRequest.BackfillData.Builder()
-                .name("ChickenSandwich")
-                .build(),
+              ConfigureServiceRequest.BackfillData(
+                "ChickenSandwich", "Description", listOf(), null, "String",
+                false, null,
+              ),
             ),
           )
+          .connector_type(Connectors.ENVOY)
           .build(),
       )
     }
-
+    scope.fakeCaller(service = "deep-fryer") {
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "ChickenSandwich", "Description", listOf(), null, "String",
+                false, null,
+              ),
+            ),
+          )
+          .connector_type(Connectors.ENVOY)
+          .build(),
+      )
+    }
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create(
         "deep-fryer",
@@ -101,8 +93,9 @@ class GetServicesActionTest {
     }
 
     scope.fakeCaller(user = "molly") {
-      assertThat(getServicesAction.services().services).containsOnly(
-        GetServicesAction.UiService("deep-fryer", setOf(RESERVED_VARIANT, "deep-fried"), 1),
+      assertThat(getServiceVariantsAction.variants("deep-fryer").variants).containsOnly(
+        GetServiceVariantsAction.UiVariant("deep-fried", 1),
+        GetServiceVariantsAction.UiVariant(RESERVED_VARIANT, 0),
       )
     }
   }
@@ -112,6 +105,7 @@ class GetServicesActionTest {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(
         ConfigureServiceRequest.Builder()
+          .variant("deep-fried")
           .backfills(
             listOf(
               ConfigureServiceRequest.BackfillData.Builder()
@@ -123,15 +117,10 @@ class GetServicesActionTest {
           .build(),
       )
     }
-    scope.fakeCaller(service = "freezer") {
-      configureServiceAction.configureService(
-        ConfigureServiceRequest.Builder().connector_type(Connectors.ENVOY).build(),
-      )
-    }
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create(
         "deep-fryer",
-        RESERVED_VARIANT,
+        "deep-fried",
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
@@ -139,10 +128,21 @@ class GetServicesActionTest {
       val id = response.backfill_run_id
       startBackfillAction.start(id, StartBackfillRequest())
     }
+    scope.fakeCaller(service = "oven") {
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .variant("under-baked")
+          .connector_type(Connectors.ENVOY)
+          .build(),
+      )
+    }
+
     scope.fakeCaller(user = "molly") {
-      assertThat(getServicesAction.services().services).containsOnly(
-        GetServicesAction.UiService("deep-fryer", setOf(RESERVED_VARIANT), 1),
-        GetServicesAction.UiService("freezer", setOf(RESERVED_VARIANT), 0),
+      assertThat(getServiceVariantsAction.variants("deep-fryer").variants).containsOnly(
+        GetServiceVariantsAction.UiVariant("deep-fried", 1),
+      )
+      assertThat(getServiceVariantsAction.variants("oven").variants).containsOnly(
+        GetServiceVariantsAction.UiVariant("under-baked", 0),
       )
     }
   }

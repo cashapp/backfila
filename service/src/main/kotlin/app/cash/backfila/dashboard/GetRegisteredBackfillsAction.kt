@@ -14,7 +14,6 @@ import misk.web.PathParam
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
-import wisp.logging.getLogger
 
 data class RegisteredBackfill(
   val name: String,
@@ -26,16 +25,22 @@ class GetRegisteredBackfillsAction @Inject constructor(
   @BackfilaDb private val transacter: Transacter,
   private val queryFactory: Query.Factory,
 ) : WebAction {
-  @Get("/services/{service}/registered-backfills")
+  @Get("/services/{service}/variants/{variant}/registered-backfills")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Authenticated
   fun backfills(
     @PathParam service: String,
+    @PathParam variant: String,
   ): GetRegisteredBackfillsResponse {
+    return getRegisteredBackfills(service, variant)
+  }
+
+  private fun getRegisteredBackfills(service: String, variant: String): GetRegisteredBackfillsResponse {
     val backfills = transacter.transaction { session ->
       val dbService = queryFactory.newQuery<ServiceQuery>()
         .registryName(service)
-        .uniqueResult(session) ?: throw BadRequestException("`$service` doesn't exist")
+        .variant(variant)
+        .uniqueResult(session) ?: throw BadRequestException("`$service`-`$variant` doesn't exist")
       val backfills = queryFactory.newQuery<RegisteredBackfillQuery>()
         .serviceId(dbService.id)
         .active()
@@ -49,9 +54,5 @@ class GetRegisteredBackfillsAction @Inject constructor(
       }
     }
     return GetRegisteredBackfillsResponse(backfills)
-  }
-
-  companion object {
-    private val logger = getLogger<GetRegisteredBackfillsAction>()
   }
 }

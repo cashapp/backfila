@@ -50,6 +50,7 @@ class BackfilaStartupConfigurator @Inject constructor(
       .connector_type(config.connector_type)
       .connector_extra_data(config.connector_extra_data)
       .slack_channel(config.slack_channel)
+      .variant(config.variant)
       .build()
 
     // TODO(mikepaw): make this async.

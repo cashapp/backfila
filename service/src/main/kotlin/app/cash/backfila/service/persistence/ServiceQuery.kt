@@ -8,6 +8,12 @@ interface ServiceQuery : Query<DbService> {
   @Constraint("registry_name")
   fun registryName(registryName: String): ServiceQuery
 
+  @Constraint("variant")
+  fun variant(variant: String): ServiceQuery
+
   @Order("registry_name")
   fun orderByName(): ServiceQuery
+
+  @Order("variant")
+  fun orderByVariant(): ServiceQuery
 }

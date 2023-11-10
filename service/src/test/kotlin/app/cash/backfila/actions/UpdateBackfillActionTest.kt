@@ -61,6 +61,7 @@ class UpdateBackfillActionTest {
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create(
         "deep-fryer",
+        ConfigureServiceAction.RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
@@ -96,6 +97,109 @@ class UpdateBackfillActionTest {
   }
 
   @Test
+  fun `update with variant`() {
+    scope.fakeCaller(service = "deep-fryer") {
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "ChickenSandwich", "Description", listOf(), null,
+                null, false, null,
+              ),
+            ),
+          )
+          .connector_type(Connectors.ENVOY)
+          .build(),
+      )
+
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .variant("deep-fried")
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData(
+                "ChickenSandwich", "Description", listOf(), null,
+                null, false, null,
+              ),
+            ),
+          )
+          .connector_type(Connectors.ENVOY)
+          .build(),
+      )
+    }
+    scope.fakeCaller(user = "molly") {
+      val defaultResponse = createBackfillAction.create(
+        "deep-fryer",
+        ConfigureServiceAction.RESERVED_VARIANT,
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build(),
+      )
+      val defaultId = defaultResponse.backfill_run_id
+
+      val deepFriedResponse = createBackfillAction.create(
+        "deep-fryer",
+        "deep-fried",
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build(),
+      )
+      val deepFriedId = deepFriedResponse.backfill_run_id
+
+      updateBackfillAction.update(defaultId, UpdateBackfillRequest(num_threads = 12))
+      var status = getBackfillStatusAction.status(defaultId)
+      assertThat(status.event_logs[0].message).isEqualTo("updated settings: num_threads 1->12")
+      assertThat(status.event_logs[0].user).isEqualTo("molly")
+
+      updateBackfillAction.update(deepFriedId, UpdateBackfillRequest(num_threads = 12))
+      status = getBackfillStatusAction.status(deepFriedId)
+      assertThat(status.event_logs[0].message).isEqualTo("updated settings: num_threads 1->12")
+      assertThat(status.event_logs[0].user).isEqualTo("molly")
+
+      updateBackfillAction.update(defaultId, UpdateBackfillRequest(scan_size = 2000))
+      status = getBackfillStatusAction.status(defaultId)
+      assertThat(status.event_logs[0].message).isEqualTo("updated settings: scan_size 1000->2000")
+      assertThat(status.event_logs[0].user).isEqualTo("molly")
+
+      updateBackfillAction.update(deepFriedId, UpdateBackfillRequest(scan_size = 2000))
+      status = getBackfillStatusAction.status(deepFriedId)
+      assertThat(status.event_logs[0].message).isEqualTo("updated settings: scan_size 1000->2000")
+      assertThat(status.event_logs[0].user).isEqualTo("molly")
+
+      updateBackfillAction.update(defaultId, UpdateBackfillRequest(batch_size = 10))
+      status = getBackfillStatusAction.status(defaultId)
+      assertThat(status.event_logs[0].message).isEqualTo("updated settings: batch_size 100->10")
+      assertThat(status.event_logs[0].user).isEqualTo("molly")
+
+      updateBackfillAction.update(deepFriedId, UpdateBackfillRequest(batch_size = 10))
+      status = getBackfillStatusAction.status(deepFriedId)
+      assertThat(status.event_logs[0].message).isEqualTo("updated settings: batch_size 100->10")
+      assertThat(status.event_logs[0].user).isEqualTo("molly")
+
+      updateBackfillAction.update(defaultId, UpdateBackfillRequest(backoff_schedule = "1000,2000"))
+      status = getBackfillStatusAction.status(defaultId)
+      assertThat(status.event_logs[0].message).isEqualTo("updated settings: backoff_schedule null->1000,2000")
+      assertThat(status.event_logs[0].user).isEqualTo("molly")
+
+      updateBackfillAction.update(deepFriedId, UpdateBackfillRequest(backoff_schedule = "1000,2000"))
+      status = getBackfillStatusAction.status(deepFriedId)
+      assertThat(status.event_logs[0].message).isEqualTo("updated settings: backoff_schedule null->1000,2000")
+      assertThat(status.event_logs[0].user).isEqualTo("molly")
+
+      updateBackfillAction.update(defaultId, UpdateBackfillRequest(extra_sleep_ms = 10))
+      status = getBackfillStatusAction.status(defaultId)
+      assertThat(status.event_logs[0].message).isEqualTo("updated settings: extra_sleep_ms 0->10")
+      assertThat(status.event_logs[0].user).isEqualTo("molly")
+
+      updateBackfillAction.update(deepFriedId, UpdateBackfillRequest(extra_sleep_ms = 10))
+      status = getBackfillStatusAction.status(deepFriedId)
+      assertThat(status.event_logs[0].message).isEqualTo("updated settings: extra_sleep_ms 0->10")
+      assertThat(status.event_logs[0].user).isEqualTo("molly")
+    }
+  }
+
+  @Test
   fun `scan size must be at least batch size`() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(
@@ -115,6 +219,7 @@ class UpdateBackfillActionTest {
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create(
         "deep-fryer",
+        ConfigureServiceAction.RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
@@ -154,6 +259,7 @@ class UpdateBackfillActionTest {
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create(
         "deep-fryer",
+        ConfigureServiceAction.RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),

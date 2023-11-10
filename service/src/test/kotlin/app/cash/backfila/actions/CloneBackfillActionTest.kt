@@ -2,6 +2,7 @@ package app.cash.backfila.actions
 
 import app.cash.backfila.BackfilaTestingModule
 import app.cash.backfila.api.ConfigureServiceAction
+import app.cash.backfila.api.ConfigureServiceAction.Companion.RESERVED_VARIANT
 import app.cash.backfila.client.Connectors
 import app.cash.backfila.client.FakeBackfilaClientServiceClient
 import app.cash.backfila.dashboard.CloneBackfillAction
@@ -95,6 +96,7 @@ class CloneBackfillActionTest {
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create(
         "deep-fryer",
+        RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .batch_size(100)
@@ -123,6 +125,88 @@ class CloneBackfillActionTest {
 
       val status = getBackfillStatusAction.status(cloneResponse.id)
       assertThat(status.state).isEqualTo(BackfillState.PAUSED)
+      assertThat(status.variant).isEqualTo(RESERVED_VARIANT)
+      assertThat(status.created_by_user).isEqualTo("molly")
+      assertThat(status.parameters!!["param1"]).isEqualTo("val2")
+      assertThat(status.dry_run).isFalse()
+      assertThat(status.batch_size).isEqualTo(123)
+      assertThat(status.scan_size).isEqualTo(223)
+      assertThat(status.backoff_schedule).isEqualTo("1000,2000")
+      assertThat(status.extra_sleep_ms).isEqualTo(15)
+    }
+  }
+
+  @Test
+  fun `cloning variants`() {
+    scope.fakeCaller(service = "deep-fryer") {
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .variant("deep-fried")
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData.Builder()
+                .name("ChickenSandwich")
+                .parameters(
+                  listOf(
+                    Parameter.Builder()
+                      .name("param1")
+                      .build(),
+                  ),
+                )
+                .build(),
+            ),
+          )
+          .connector_type(Connectors.ENVOY)
+          .build(),
+      )
+    }
+    scope.fakeCaller(user = "molly") {
+      createBackfillAction.create(
+        "deep-fryer",
+        RESERVED_VARIANT,
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .batch_size(100)
+          .scan_size(200)
+          .backoff_schedule("1000")
+          .num_threads(1)
+          .dry_run(true)
+          .extra_sleep_ms(10)
+          .parameter_map(mapOf("param1" to "val1".encodeUtf8()))
+          .build(),
+      )
+      val responseVariant = createBackfillAction.create(
+        "deep-fryer",
+        "deep-fried",
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .batch_size(100)
+          .scan_size(200)
+          .backoff_schedule("1000")
+          .num_threads(1)
+          .dry_run(true)
+          .extra_sleep_ms(10)
+          .parameter_map(mapOf("param1" to "val1".encodeUtf8()))
+          .build(),
+      )
+
+      val cloneResponse = cloneBackfillAction.create(
+        responseVariant.backfill_run_id,
+        CloneBackfillRequest(
+          batch_size = 123,
+          scan_size = 223,
+          backoff_schedule = "1000,2000",
+          num_threads = 5,
+          dry_run = false,
+          extra_sleep_ms = 15,
+          parameter_map = mapOf("param1" to "val2".encodeUtf8()),
+          range_clone_type = RangeCloneType.RESTART,
+        ),
+      )
+
+      val status = getBackfillStatusAction.status(cloneResponse.id)
+      assertThat(status.state).isEqualTo(BackfillState.PAUSED)
+      assertThat(status.variant).isEqualTo("deep-fried")
       assertThat(status.created_by_user).isEqualTo("molly")
       assertThat(status.parameters!!["param1"]).isEqualTo("val2")
       assertThat(status.dry_run).isFalse()
@@ -151,6 +235,7 @@ class CloneBackfillActionTest {
 
       val response = createBackfillAction.create(
         "deep-fryer",
+        RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
@@ -211,6 +296,7 @@ class CloneBackfillActionTest {
 
       val response = createBackfillAction.create(
         "deep-fryer",
+        RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
@@ -271,6 +357,7 @@ class CloneBackfillActionTest {
 
       val response = createBackfillAction.create(
         "deep-fryer",
+        RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
@@ -331,6 +418,7 @@ class CloneBackfillActionTest {
 
       val response = createBackfillAction.create(
         "deep-fryer",
+        RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
@@ -386,6 +474,7 @@ class CloneBackfillActionTest {
 
       val response = createBackfillAction.create(
         "deep-fryer",
+        RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
@@ -433,6 +522,7 @@ class CloneBackfillActionTest {
     scope.fakeCaller(user = "molly") {
       val response = createBackfillAction.create(
         "deep-fryer",
+        RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .batch_size(100)
