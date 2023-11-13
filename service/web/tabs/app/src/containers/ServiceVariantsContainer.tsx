@@ -24,7 +24,7 @@ class ServiceVariantsContainer extends React.Component<
   sendRequest() {
     this.props.simpleNetworkGet(
       this.serviceVariantsTag,
-      `/services/${this.service}/variants`
+      `/services/${this.service}/variants/`
     )
   }
 

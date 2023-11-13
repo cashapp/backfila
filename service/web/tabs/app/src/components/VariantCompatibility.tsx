@@ -46,7 +46,7 @@ export function ServiceHeader(props: IVariantLevelProps) {
     return (
       <H2>
         {props.serviceName} ({props.variant})
-        <Link to={`/app/services/${props.serviceName}/variants`}>
+        <Link to={`/app/services/${props.serviceName}/variants/`}>
           Other variants
         </Link>
       </H2>
