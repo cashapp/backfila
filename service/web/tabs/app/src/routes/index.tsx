@@ -15,10 +15,6 @@ const routes = (
   <div>
     <Switch>
       <Route
-        path="/app/services/:service/variants/"
-        component={ServiceVariantsContainer}
-      />
-      <Route
         path="/app/services/:service/variants/:variant/create"
         component={CreateFormContainer}
       />
@@ -39,6 +35,10 @@ const routes = (
       <Route
           path="/app/services/:service/variants/:variant/"
           component={ServiceDetailsContainer}
+      />
+      <Route
+          path="/app/services/:service/variants/"
+          component={ServiceVariantsContainer}
       />
       {/* Maintain compatibility for services that do not need variant functionality */}
       <Route
