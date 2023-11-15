@@ -27,14 +27,14 @@ class EnvoyClientServiceClientProvider @Inject constructor(
   override fun validateExtraData(connectorExtraData: String?) {
     connectorExtraData?.let {
       val fromJson = adapter().fromJson(connectorExtraData)
-      checkNotNull(fromJson, { "Failed to parse HTTP connector extra data JSON" })
+      checkNotNull(fromJson) { "Failed to parse HTTP connector extra data JSON" }
 
       if (!fromJson.headers.isNullOrEmpty()) {
         check(headersSizeWithinLimit(fromJson.headers)) { "Headers too large" }
 
         for (header in fromJson.headers) {
-          checkNotNull(header.name, { "Header names must be set" })
-          checkNotNull(header.value, { "Header values must be set" })
+          checkNotNull(header.name) { "Header names must be set" }
+          checkNotNull(header.value) { "Header values must be set" }
         }
       }
     }
