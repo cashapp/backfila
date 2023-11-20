@@ -4,6 +4,7 @@ import app.cash.backfila.client.BackfilaClientServiceClient
 import app.cash.backfila.client.BackfilaClientServiceClientProvider
 import app.cash.backfila.client.BackfilaDefaultEndpointConfigModule
 import app.cash.backfila.client.ForConnectors
+import app.cash.backfila.dashboard.SeedDbWebActionsModule
 import app.cash.backfila.dashboard.ViewLogsUrlProvider
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
@@ -115,6 +116,7 @@ fun main(args: Array<String>) {
     AdminDashboardModule(isDevelopment = true),
     BackfilaDefaultEndpointConfigModule(),
     MiskRealServiceModule(),
+    SeedDbWebActionsModule(),
   ).run(args)
 }
 
