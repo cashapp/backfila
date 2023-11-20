@@ -7,10 +7,13 @@ export interface ITableProps {
   data: any
   url?: string
   tag?: string
+  onlyShowRunningBackfills: boolean
 }
 
 export const ServicesListComponent = (props: ITableProps) => {
   const { data } = props
+  const serviceHasRunningBackfills = (service: any) => service.running_backfills > 0
+  const shouldShowService = (service: any) => !props.onlyShowRunningBackfills || serviceHasRunningBackfills(service)
   if (data) {
     /**
      * Data is loaded and ready to be rendered
@@ -20,7 +23,9 @@ export const ServicesListComponent = (props: ITableProps) => {
         <H1>Services</H1>
         <HTMLTable bordered={true} striped={true}>
           <tbody>
-            {data.map((service: any) => (
+            {data
+              .filter(shouldShowService)
+              .map((service: any) => (
               <tr>
                 <td>
                   <ServiceLink
