@@ -8,30 +8,55 @@ import {
   mapDispatchToProps,
   mapStateToProps
 } from "src/ducks"
+import {Checkbox, FormGroup} from "@blueprintjs/core"
 import { LayoutContainer } from "."
+import { RouteComponentProps } from 'react-router-dom';
 
-class TabContainer extends React.Component<IState & IDispatchProps, IState> {
+
+
+interface TabContainerState extends RouteComponentProps {
+  only_show_running_backfills: boolean
+}
+
+class TabContainer extends React.Component<IState & IDispatchProps & TabContainerState,
+         IState & TabContainerState> {
   private tableTag = "services"
   private tableUrl = "/services"
 
   componentDidMount() {
+    const queryParams = new URLSearchParams(this.props.location.search);
+    const onlyShowRunningBackfillsQueryParam = queryParams.get('onlyShowActivelyRunning') == "true"
+    this.setState({ only_show_running_backfills: onlyShowRunningBackfillsQueryParam})
     this.props.simpleNetworkGet(this.tableTag, this.tableUrl)
   }
 
   render() {
-    return (
-      <LayoutContainer>
-        <ServicesListComponent
-          data={simpleSelectorGet(
-            this.props.simpleNetwork,
-            [this.tableTag, "data", "services"],
-            []
-          )}
-          url={this.tableUrl}
-          tag={this.tableTag}
-        />
-      </LayoutContainer>
-    )
+        if (!this.state) {
+          return (<div>loading...</div>)
+        } else {
+          return (
+            <LayoutContainer>
+              <FormGroup>
+                <Checkbox checked={this.state.only_show_running_backfills}
+                                label={"Only Services with running Backfills"}
+                                disabled={false}
+                                onChange={() => {
+                                  this.setState({ only_show_running_backfills: !this.state.only_show_running_backfills })
+                                }}
+                              />
+              </FormGroup>
+              <ServicesListComponent
+                data={simpleSelectorGet(
+                  this.props.simpleNetwork,
+                  [this.tableTag, "data", "services"],
+                  []
+                )}
+                url={this.tableUrl}
+                tag={this.tableTag}
+                onlyShowRunningBackfills={this.state.only_show_running_backfills}
+              />
+            </LayoutContainer>)
+          }
   }
 }
 
