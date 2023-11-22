@@ -1,10 +1,10 @@
 package app.cash.backfila.ui.components
 
-import com.squareup.cash.monitorcheckup.ui.SLACK_CHANNEL_URL
-import com.squareup.cash.monitorcheckup.ui.USAGE_GUIDE_URL
 import app.cash.backfila.ui.pages.IndexAction
 import app.cash.backfila.ui.pages.ListMonitorsAction
 import app.cash.backfila.ui.pages.ServiceStatusAction
+import com.squareup.cash.monitorcheckup.ui.SLACK_CHANNEL_URL
+import com.squareup.cash.monitorcheckup.ui.USAGE_GUIDE_URL
 import kotlinx.html.TagConsumer
 import kotlinx.html.a
 import kotlinx.html.div

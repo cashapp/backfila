@@ -1,7 +1,7 @@
 package app.cash.backfila.ui.components
 
-import com.squareup.cash.monitorcheckup.ui.PathBuilder
 import app.cash.backfila.ui.actions.ServiceAutocompleteAction
+import com.squareup.cash.monitorcheckup.ui.PathBuilder
 import kotlinx.html.InputType
 import kotlinx.html.TagConsumer
 import kotlinx.html.div

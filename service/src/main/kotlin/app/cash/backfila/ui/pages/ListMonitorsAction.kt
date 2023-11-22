@@ -1,10 +1,11 @@
 package app.cash.backfila.ui.pages
 
-import com.squareup.cash.monitorcheckup.ui.SLACK_CHANNEL_NAME
-import com.squareup.cash.monitorcheckup.ui.SLACK_CHANNEL_URL
 import app.cash.backfila.ui.components.AlertInfoHighlight
 import app.cash.backfila.ui.components.DashboardLayout
 import app.cash.backfila.ui.components.PageTitle
+import com.squareup.cash.monitorcheckup.ui.SLACK_CHANNEL_NAME
+import com.squareup.cash.monitorcheckup.ui.SLACK_CHANNEL_URL
+import javax.inject.Inject
 import kotlinx.html.div
 import kotlinx.html.role
 import kotlinx.html.ul
@@ -14,7 +15,6 @@ import misk.web.Get
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
-import javax.inject.Inject
 
 class ListMonitorsAction @Inject constructor() : WebAction {
   @Get(PATH)
