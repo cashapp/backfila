@@ -1,6 +1,6 @@
 package com.squareup.cash.monitorcheckup.ui
 
-import app.cash.backfila.ui.pages.ServiceStatusAction
+import app.cash.backfila.ui.pages.ServiceAction
 
 // TODO add tests!
 data class PathBuilder(
@@ -26,7 +26,7 @@ data class PathBuilder(
     path?.removePrefix("/")?.let {
       append(it.split("{").first())
 
-      if (path == ServiceStatusAction.PATH && service != null) {
+      if (path == ServiceAction.PATH && service != null) {
         append(service)
         append("/")
       }

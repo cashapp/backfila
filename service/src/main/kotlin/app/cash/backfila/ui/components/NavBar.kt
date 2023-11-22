@@ -1,10 +1,7 @@
 package app.cash.backfila.ui.components
 
 import app.cash.backfila.ui.pages.IndexAction
-import app.cash.backfila.ui.pages.ListMonitorsAction
-import app.cash.backfila.ui.pages.ServiceStatusAction
-import com.squareup.cash.monitorcheckup.ui.SLACK_CHANNEL_URL
-import com.squareup.cash.monitorcheckup.ui.USAGE_GUIDE_URL
+import app.cash.backfila.ui.pages.ServiceAction
 import kotlinx.html.TagConsumer
 import kotlinx.html.a
 import kotlinx.html.div
@@ -14,10 +11,7 @@ import kotlinx.html.nav
 fun TagConsumer<*>.NavBar(currentPath: String) {
   val links = listOf(
     Pair(IndexAction.PATH, "Overview"),
-    Pair(ServiceStatusAction.PATH.split("{").first(), "Service Status"),
-    Pair(ListMonitorsAction.PATH, "All Monitors"),
-    Pair(USAGE_GUIDE_URL, "Usage Guide"),
-    Pair(SLACK_CHANNEL_URL, "Help"),
+    Pair(ServiceAction.PATH.split("{").first(), "Service"),
   )
 
   nav("bg-white shadow-sm") {
@@ -43,8 +37,6 @@ fun TagConsumer<*>.NavBar(currentPath: String) {
             links.map { (path, label) ->
               val selectedStyle = if (path == bestMatch.first) "border-green-500" else ""
               a(classes = "$selectedStyle text-gray-900 inline-flex items-center border-b-2 pt-1 text-sm font-medium") {
-                // Updates browser URL on click to support permalinks
-                attributes["target"] = "_top"
                 href = path
                 if (currentPath.startsWith(path)) {
                   attributes["aria-current"] = "page"

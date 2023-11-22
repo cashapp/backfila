@@ -28,7 +28,7 @@ class IndexAction @Inject constructor() : WebAction {
       ) {
         PageTitle("Backfila", s)
         e?.let { AlertError(it) }
-        ServiceAutocompleteWrapper(s, "/service")
+        ServiceAutocompleteWrapper(s, ServiceAction.PATH)
       }
     }
   }

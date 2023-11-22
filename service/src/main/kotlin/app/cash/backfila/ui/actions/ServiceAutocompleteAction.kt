@@ -1,7 +1,7 @@
 package app.cash.backfila.ui.actions
 
-import javax.inject.Inject
-import javax.inject.Singleton
+import app.cash.backfila.dashboard.GetServicesAction
+import kotlinx.html.a
 import kotlinx.html.li
 import kotlinx.html.role
 import misk.hotwire.buildHtml
@@ -11,27 +11,31 @@ import misk.web.QueryParam
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
-class ServiceAutocompleteAction @Inject constructor() : WebAction {
+class ServiceAutocompleteAction @Inject constructor(
+  private val getServicesAction: GetServicesAction
+) : WebAction {
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
   @Unauthenticated
   fun get(
     @QueryParam q: String?,
   ): String {
-    val services = listOf("alpha", "bravo", "charlie")
-    //   .getAllServices()
-    //   .sortedBy { it.name }
-    //   .filter { q.isNullOrBlank() || it.name.lowercase().contains(q.lowercase()) }
-    //   .toSet()
+    val services = getServicesAction.services().services
 
     return buildHtml {
       services.map { service ->
         li("list-group-item cursor-default select-none px-4 py-2 text-left") {
           role = "option"
-          attributes["data-autocomplete-value"] = service
-          +service
+          attributes["data-autocomplete-value"] = service.name
+
+          a {
+            href = "/services/${service.name}"
+            +"""${service.name} (${service.running_backfills})"""
+          }
         }
       }
     }
