@@ -35,7 +35,7 @@ fun TagConsumer<*>.NavBar(currentPath: String) {
           div("sm:-my-px sm:ml-6 sm:flex sm:space-x-8") {
             a(classes = "text-gray-900 inline-flex items-center text-sm font-bold") {
               href = "/"
-              +"""Monitor Checkup"""
+              +"""Backfila"""
             }
           }
           div("sm:-my-px sm:ml-6 sm:flex sm:space-x-8") {

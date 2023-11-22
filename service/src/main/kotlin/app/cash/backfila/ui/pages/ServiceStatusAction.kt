@@ -32,22 +32,22 @@ import okhttp3.Headers
 
 @Singleton
 class ServiceStatusAction @Inject constructor() : WebAction {
-//   @Get(PATH)
-//   @ResponseContentType(MediaTypes.TEXT_HTML)
-//   @Unauthenticated
-//   fun checkService(
-//     @QueryParam("s") serviceName: String?,
-//     @QueryParam("experimental") experimental: Boolean? = false,
-//   ): Response<ResponseBody> {
+  @Get(PATH)
+  @ResponseContentType(MediaTypes.TEXT_HTML)
+  @Unauthenticated
+  fun checkService(
+    @QueryParam("s") serviceName: String?,
+    @QueryParam("experimental") experimental: Boolean? = false,
+  ): Response<ResponseBody> {
 //     if (serviceName == null) {
-//       // Redirect back to home if service not found with an error message
-//       val errorMessage = "Service '$serviceName' not found. Try a new search below."
-//       val encodedQuery = "https://localhost/?e=$errorMessage".toHttpUrl().encodedQuery
-//       return Response(
-//         body = "go to /?$encodedQuery".toResponseBody(),
-//         statusCode = HTTP_MOVED_TEMP,
-//         headers = Headers.headersOf("Location", "/?$encodedQuery"),
-//       )
+      // Redirect back to home if service not found with an error message
+      val errorMessage = "Service '$serviceName' not found. Try a new search below."
+      val encodedQuery = "https://localhost/?e=$errorMessage".toHttpUrl().encodedQuery
+      return Response(
+        body = "go to /?$encodedQuery".toResponseBody(),
+        statusCode = HTTP_MOVED_TEMP,
+        headers = Headers.headersOf("Location", "/?$encodedQuery"),
+      )
 //     }
 //
 //     val htmlResponseBody = buildHtmlResponseBody {
@@ -107,7 +107,7 @@ class ServiceStatusAction @Inject constructor() : WebAction {
 //     }
 //
 //     return Response(htmlResponseBody)
-//   }
+  }
 //
   companion object {
     const val PATH = "/service/{service}"

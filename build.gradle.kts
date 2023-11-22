@@ -36,7 +36,7 @@ subprojects {
   apply(plugin = "org.jetbrains.kotlin.plugin.allopen")
 
   tasks.withType<KotlinCompile> {
-    dependsOn("spotlessKotlinApply")
+  //   dependsOn("spotlessKotlinApply")
     kotlinOptions {
       jvmTarget = "11"
     }

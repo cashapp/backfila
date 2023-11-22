@@ -23,10 +23,10 @@ class IndexAction @Inject constructor() : WebAction {
   ): String {
     return buildHtml {
       DashboardLayout(
-        title = "Monitor Checkup",
+        title = "Backfila",
         path = PATH,
       ) {
-        PageTitle("Monitor Checkup", s)
+        PageTitle("Backfila", s)
         e?.let { AlertError(it) }
         ServiceAutocompleteWrapper(s, "/service")
       }

@@ -1,5 +1,6 @@
 package app.cash.backfila.dashboard
 
+import com.squareup.cash.monitorcheckup.ui.UiModule
 import misk.inject.KAbstractModule
 import misk.web.WebActionModule
 
@@ -15,7 +16,9 @@ class BackfilaWebActionsModule() : KAbstractModule() {
     install(WebActionModule.create<GetBackfillRunsAction>())
     install(WebActionModule.create<GetBackfillStatusAction>())
     install(WebActionModule.create<UpdateBackfillAction>())
-    install(WebActionModule.create<RootRedirectAction>())
+    // install(WebActionModule.create<RootRedirectAction>())
     install(WebActionModule.create<ViewLogsAction>())
+
+    install(UiModule())
   }
 }

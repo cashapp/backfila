@@ -23,10 +23,10 @@ class ListMonitorsAction @Inject constructor() : WebAction {
   fun listMonitors(): String {
     return buildHtml {
       DashboardLayout(
-        title = "Monitor Checkup",
+        title = "Backfila",
         path = IndexAction.PATH,
       ) {
-        PageTitle("Monitor Checkup", "Recommended monitors")
+        PageTitle("Backfila", "Recommended monitors")
 
         div("pb-8") {
           +"These are all the monitors that monitor-checkup will recommend for any "
