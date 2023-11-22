@@ -35,6 +35,8 @@ import okio.ByteString.Companion.encodeUtf8
 import wisp.deployment.Deployment
 
 internal fun main(args: Array<String>) {
+  BackfilaDevelopmentLogging.configure()
+
   val deployment = Deployment(name = "backfila", isLocalDevelopment = true)
 
   MiskApplication(

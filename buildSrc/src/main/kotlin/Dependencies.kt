@@ -20,6 +20,7 @@ object Dependencies {
   val junitApi = "org.junit.jupiter:junit-jupiter-api:5.9.1"
   val junitEngine = "org.junit.jupiter:junit-jupiter-engine:5.9.1"
   val junitParams = "org.junit.jupiter:junit-jupiter-params:5.9.1"
+  val logbackClassic = "ch.qos.logback:logback-classic:1.4.11"
   val loggingApi = "io.github.microutils:kotlin-logging:2.1.23"
   val mavenPublishGradlePlugin = "com.vanniktech:gradle-maven-publish-plugin:0.25.2"
   val metricsCore = "io.dropwizard.metrics:metrics-core:4.0.2"
@@ -40,7 +41,6 @@ object Dependencies {
   val retrofitWire = "com.squareup.retrofit2:converter-wire:2.9.0"
   val shadowJarPlugin = "gradle.plugin.com.github.johnrengelman:shadow:7.1.2"
   val slf4jApi = "org.slf4j:slf4j-api:2.0.3"
-  val slf4jSimple = "org.slf4j:slf4j-simple:2.0.3"
   val spotlessPlugin = "com.diffplug.spotless:spotless-plugin-gradle:6.12.0"
   val tracingJaeger = "io.jaegertracing:jaeger-core:1.1.0"
 
