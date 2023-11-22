@@ -26,7 +26,8 @@ fun main(args: Array<String>) {
   MiskApplication(
     MiskBackfillModule(
       BackfilaHttpClientConfig(
-        url = "#test", slack_channel = "#test", variant = null,
+        url = "#test",
+        slack_channel = "#test",
       ),
     ),
     object : KAbstractModule() {

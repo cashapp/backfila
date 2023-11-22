@@ -42,7 +42,7 @@ internal class EmbeddedBackfila @Inject internal constructor(
     get() = serviceData
 
   override fun configureService(request: ConfigureServiceRequest): Call<ConfigureServiceResponse> {
-    check(serviceData == null) { "Should only be configuring a single backfila service." }
+    check(serviceData == null) { "Should only be configuring a single service for backfila." }
     // Creating a local moshi to do the quick config conversion.
     val moshi = Moshi.Builder()
       .add(KotlinJsonAdapterFactory())

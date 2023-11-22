@@ -20,7 +20,10 @@ public class JavaTestingModule extends AbstractModule {
     install(new MiskTestingServiceModule());
     install(
         new MiskBackfillModule(
-            new BackfilaHttpClientConfig("test.url", "#test", null)
+            new BackfilaHttpClientConfig(
+                "test.url",
+                "#test"
+            )
         )
     );
     install(FixedSetBackfillModule.create(JavaChangeCaseTestBackfill.class));
