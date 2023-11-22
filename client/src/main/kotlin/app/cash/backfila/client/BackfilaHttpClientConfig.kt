@@ -8,13 +8,13 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
  *
  * This is a helper config that client implementations can use to make config more readable.
  */
-data class BackfilaHttpClientConfig(
+data class BackfilaHttpClientConfig @JvmOverloads constructor(
   /** The URL of your service so backfila can call into it. */
   val url: String,
 
   val slack_channel: String?,
 
-  val variant: String?,
+  val variant: String? = null,
 ) {
   fun toBackfilaClientConfig(): BackfilaClientConfig {
     // Creating a local moshi to do the quick config conversion.

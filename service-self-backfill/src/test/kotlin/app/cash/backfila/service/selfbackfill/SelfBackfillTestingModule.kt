@@ -74,7 +74,8 @@ class SelfBackfillTestingModule : KAbstractModule() {
     install(
       MiskBackfillModule(
         BackfilaHttpClientConfig(
-          url = "test.url", slack_channel = "#test", variant = null,
+          url = "test.url",
+          slack_channel = "#test",
         ),
       ),
     )
