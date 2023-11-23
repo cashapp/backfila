@@ -20,6 +20,7 @@ object Dependencies {
   val junitApi = "org.junit.jupiter:junit-jupiter-api:5.9.1"
   val junitEngine = "org.junit.jupiter:junit-jupiter-engine:5.9.1"
   val junitParams = "org.junit.jupiter:junit-jupiter-params:5.9.1"
+  val logbackClassic = "ch.qos.logback:logback-classic:1.4.11"
   val loggingApi = "io.github.microutils:kotlin-logging:2.1.23"
   val mavenPublishGradlePlugin = "com.vanniktech:gradle-maven-publish-plugin:0.25.2"
   val metricsCore = "io.dropwizard.metrics:metrics-core:4.0.2"

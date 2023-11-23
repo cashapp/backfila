@@ -80,6 +80,8 @@ dependencies {
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.openTracingMock)
   testImplementation(Dependencies.okHttpMockWebServer)
+  testImplementation(Dependencies.logbackClassic)
+  testImplementation(Dependencies.slf4jApi)
 }
 
 val jar by tasks.getting(Jar::class) {
