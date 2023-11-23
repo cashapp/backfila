@@ -82,6 +82,11 @@ dependencies {
   testImplementation(Dependencies.okHttpMockWebServer)
   testImplementation(Dependencies.logbackClassic)
   testImplementation(Dependencies.slf4jApi)
+
+  // Dependencies for fake development services
+  testImplementation(project(":client-base"))
+  testImplementation(project(":client-misk"))
+  testImplementation(project(":client-static"))
 }
 
 val jar by tasks.getting(Jar::class) {
