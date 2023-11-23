@@ -67,6 +67,7 @@ dependencies {
   implementation(Dependencies.wispConfig)
   implementation(Dependencies.wispDeployment)
   implementation(Dependencies.wispLogging)
+  implementation(Dependencies.slf4jSimple)
 
   implementation(project(":client"))
 
