@@ -24,9 +24,7 @@ class TabContainer extends React.Component<IState & IDispatchProps & TabContaine
   private tableUrl = "/services"
 
   componentDidMount() {
-    const queryParams = new URLSearchParams(this.props.location.search);
-    const onlyShowRunningBackfillsQueryParam = queryParams.get('onlyShowActivelyRunning') == "true"
-    this.setState({ only_show_running_backfills: onlyShowRunningBackfillsQueryParam})
+    this.setState({ only_show_running_backfills: false})
     this.props.simpleNetworkGet(this.tableTag, this.tableUrl)
   }
 
