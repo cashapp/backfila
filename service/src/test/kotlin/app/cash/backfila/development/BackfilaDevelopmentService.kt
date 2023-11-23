@@ -1,4 +1,4 @@
-package app.cash.backfila.service
+package app.cash.backfila.development
 
 import app.cash.backfila.client.BackfilaClientServiceClient
 import app.cash.backfila.client.BackfilaClientServiceClientProvider
@@ -12,6 +12,8 @@ import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
 import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
 import app.cash.backfila.protos.clientservice.RunBatchRequest
 import app.cash.backfila.protos.clientservice.RunBatchResponse
+import app.cash.backfila.service.BackfilaConfig
+import app.cash.backfila.service.BackfilaServiceModule
 import app.cash.backfila.service.persistence.DbBackfillRun
 import misk.MiskApplication
 import misk.MiskCaller
@@ -32,6 +34,10 @@ import misk.web.dashboard.AdminDashboardModule
 import okio.ByteString.Companion.encodeUtf8
 import wisp.deployment.Deployment
 
+/**
+ * Use this backfila development service in conjunction with the fake development
+ * services mcdees and finedining to simulate a Backfila environment.
+ */
 fun main(args: Array<String>) {
   BackfilaDevelopmentLogging.configure()
 
