@@ -1,23 +1,30 @@
-package app.cash.backfila.development.finedining
+package app.cash.backfila.development.mcdees
 
 import app.cash.backfila.client.BackfilaHttpClientConfig
 import app.cash.backfila.client.misk.MiskBackfillModule
 import app.cash.backfila.client.misk.client.BackfilaMiskClientModule
 import app.cash.backfila.client.stat.StaticDatasourceBackfillModule
-import app.cash.backfila.development.DevServiceConstants.Companion.FINE_DINING_PORT
 import misk.inject.KAbstractModule
 
-internal class FineDiningServiceModule : KAbstractModule() {
+internal class McDeesServiceModule(
+  private val variant: String,
+  private val port: Int,
+) : KAbstractModule() {
   override fun configure() {
+    // Development Service Config
+
+    // Backfill Config
     install(BackfilaMiskClientModule())
     install(
       MiskBackfillModule(
         BackfilaHttpClientConfig(
-          url = "http://localhost:$FINE_DINING_PORT/",
+          url = "http://localhost:$port/",
           slack_channel = "#test",
+          variant = variant,
         ),
       ),
     )
-    install(StaticDatasourceBackfillModule.create<SlowMealsBackfill>())
+    install(StaticDatasourceBackfillModule.create<BurgerFlippingBackfill>())
+    install(StaticDatasourceBackfillModule.create<BootsAndCatsBackfill>())
   }
 }

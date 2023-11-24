@@ -1,6 +1,8 @@
 package app.cash.backfila.development.finedining
 
 import app.cash.backfila.development.BackfilaDevelopmentLogging
+import app.cash.backfila.development.DevServiceConstants.Companion.BACKFILA_PORT
+import app.cash.backfila.development.DevServiceConstants.Companion.FINE_DINING_PORT
 import app.cash.backfila.development.ServiceHeaderInterceptor
 import misk.MiskApplication
 import misk.MiskRealServiceModule
@@ -32,7 +34,7 @@ fun main(args: Array<String>) {
     object : KAbstractModule() {
       override fun configure() {
         val webConfig = WebConfig(
-          port = 8081,
+          port = FINE_DINING_PORT,
           idle_timeout = 500000,
           host = "0.0.0.0",
         )
@@ -40,7 +42,15 @@ fun main(args: Array<String>) {
         multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
         install(ConfigModule.create("FineDining", config))
         multibind<Interceptor>().toInstance(ServiceHeaderInterceptor("FineDining"))
-        install(HttpClientsConfigModule(HttpClientsConfig(endpoints = mapOf("backfila" to HttpClientEndpointConfig(url = "http://localhost:8080/")))))
+        install(
+          HttpClientsConfigModule(
+            HttpClientsConfig(
+              endpoints = mapOf(
+                "backfila" to HttpClientEndpointConfig(url = "http://localhost:$BACKFILA_PORT/"),
+              ),
+            ),
+          ),
+        )
       }
     },
     DeploymentModule(deployment),

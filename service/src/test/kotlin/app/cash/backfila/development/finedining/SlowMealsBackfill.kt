@@ -7,12 +7,12 @@ import wisp.logging.getLogger
 
 class SlowMealsBackfill @Inject constructor() : StaticDatasourceBackfill<String, SlowMealsBackfill.SlowMealsAttributes>() {
   override fun runOne(item: String, config: BackfillConfig<SlowMealsAttributes>) {
-    Thread.sleep(config.parameters.mealdelay)
+    Thread.sleep(config.parameters.mealDelayMs)
     logger.info { "Finished serving $item" }
   }
 
   data class SlowMealsAttributes(
-    val mealdelay: Long = 1000L,
+    val mealDelayMs: Long = 1000L,
   )
 
   // Generate the meal place settings for the backfill.
