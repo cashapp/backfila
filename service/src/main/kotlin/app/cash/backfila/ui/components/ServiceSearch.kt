@@ -16,7 +16,7 @@ import misk.tailwind.icons.heroicon
  * Autocomplete input bar for company search
  * Source: https://github.com/afcapel/stimulus-autocomplete
  */
-fun TagConsumer<*>.ServiceAutocomplete(
+fun TagConsumer<*>.ServiceSearch(
   pagePathBuilder: PathBuilder,
   inputPlaceholder: String = "Type a service name, use arrow keys to select, then enter to search...",
 ) {
@@ -30,7 +30,6 @@ fun TagConsumer<*>.ServiceAutocomplete(
     form("relative mt-1 rounded-md shadow-sm pt") {
       action = pagePathBuilder.build()
       // Updates browser URL for permalinks
-      attributes["data-turbo-action"] = "replace"
 
       div("relative mt-1 rounded-md shadow-sm") {
         // TODO fix CSS issue in production
@@ -38,29 +37,18 @@ fun TagConsumer<*>.ServiceAutocomplete(
           heroicon(Heroicons.MAGNIFYING_GLASS)
         }
         input(classes = "block w-full rounded-md border-gray-300 pl-10 focus:border-green-500 focus:ring-green-500 sm:text-sm") {
-          attributes["data-autocomplete-target"] = "input"
-
           type = InputType.text
           name = PathBuilder.SearchParam
           id = PathBuilder.SearchParam
           placeholder = inputPlaceholder
         }
         input {
-          attributes["data-autocomplete-target"] = "hidden"
-
-          type = InputType.hidden
+          type = InputType.text
           name = PathBuilder.ServiceParam
           id = PathBuilder.ServiceParam
         }
         input {
-          attributes["data-autocomplete-target"] = "hidden"
-
-          type = InputType.hidden
-          name = PathBuilder.VariantParam
-          id = PathBuilder.VariantParam
-        }
-        ul("list-group absolute z-10 mt-2 rounded-md bg-white shadow-md ring-1 ring-black ring-opacity-5 focus:outline-none text-left") {
-          attributes["data-autocomplete-target"] = "results"
+          type = InputType.submit
         }
       }
     }

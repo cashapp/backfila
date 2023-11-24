@@ -27,14 +27,16 @@ class ServiceAutocompleteAction @Inject constructor(
     val services = getServicesAction.services().services
 
     return buildHtml {
-      services.map { service ->
+      services.flatMap { service ->
+        service.variants.map { variant -> "${service.name}/${variant}" to service }
+      }.map { (path, service) ->
         li("list-group-item cursor-default select-none px-4 py-2 text-left") {
           role = "option"
           attributes["data-autocomplete-value"] = service.name
 
           a {
-            href = "/services/${service.name}"
-            +"""${service.name} (${service.running_backfills})"""
+            href = "/services/$path"
+            +"""$path (${service.running_backfills})"""
           }
         }
       }

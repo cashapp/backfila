@@ -1,7 +1,7 @@
 package app.cash.backfila.ui.components
 
-import app.cash.backfila.ui.pages.IndexAction
-import app.cash.backfila.ui.pages.ServiceAction
+import app.cash.backfila.ui.pages.ServiceIndexAction
+import app.cash.backfila.ui.pages.ServiceShowAction
 import kotlinx.html.TagConsumer
 import kotlinx.html.a
 import kotlinx.html.div
@@ -10,8 +10,8 @@ import kotlinx.html.nav
 
 fun TagConsumer<*>.NavBar(currentPath: String) {
   val links = listOf(
-    Pair(IndexAction.PATH, "Overview"),
-    Pair(ServiceAction.PATH.split("{").first(), "Service"),
+    Pair(ServiceIndexAction.PATH, "Overview"),
+    Pair(ServiceShowAction.PATH.split("{").first(), "Service"),
   )
 
   nav("bg-white shadow-sm") {

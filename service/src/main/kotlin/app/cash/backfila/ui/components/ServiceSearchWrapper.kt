@@ -5,7 +5,7 @@ import kotlinx.html.TagConsumer
 import kotlinx.html.div
 import kotlinx.html.label
 
-fun TagConsumer<*>.ServiceAutocompleteWrapper(redirectPath: String) {
+fun TagConsumer<*>.ServiceSearchWrapper(redirectPath: String) {
   div("rounded-lg bg-gray-100 my-5") {
     div("px-4 py-5 sm:p-6") {
       div {

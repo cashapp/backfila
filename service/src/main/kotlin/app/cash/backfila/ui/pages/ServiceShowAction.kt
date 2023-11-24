@@ -8,8 +8,6 @@ import app.cash.backfila.ui.components.DashboardLayout
 import app.cash.backfila.ui.components.PageTitle
 import com.squareup.cash.monitorcheckup.ui.SLACK_CHANNEL_NAME
 import com.squareup.cash.monitorcheckup.ui.SLACK_CHANNEL_URL
-import com.squareup.wire.toHttpUrl
-import java.net.HttpURLConnection.HTTP_MOVED_TEMP
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.html.a
@@ -25,51 +23,33 @@ import misk.web.ResponseBody
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
-import misk.web.toResponseBody
-import okhttp3.Headers
 
 @Singleton
-class ServiceAction @Inject constructor(
+class ServiceShowAction @Inject constructor(
   private val getBackfillRunsAction: GetBackfillRunsAction,
 ) : WebAction {
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
   @Unauthenticated
   fun checkService(
-    @QueryParam("s") serviceName: String?,
+    @QueryParam s: String,
+    @QueryParam v: String,
     @QueryParam("experimental") experimental: Boolean? = false,
   ): Response<ResponseBody> {
-    if (serviceName == null) {
-      // Redirect back to home if service not found with an error message
-      val errorMessage = "Service '$serviceName' not found. Try a new search below."
-      val encodedQuery = "https://localhost/?e=$errorMessage".toHttpUrl().encodedQuery
-      return Response(
-        body = "go to /?$encodedQuery".toResponseBody(),
-        statusCode = HTTP_MOVED_TEMP,
-        headers = Headers.headersOf("Location", "/?$encodedQuery"),
-      )
-    }
-
-    val backfillRuns = getBackfillRunsAction.backfillRuns(serviceName)
+    val backfillRuns = getBackfillRunsAction.backfillRuns(s, v.ifBlank { "default" })
 
     val htmlResponseBody = buildHtmlResponseBody {
       DashboardLayout(
-        title = "$serviceName | Monitor Checkup",
+        title = "$s | Monitor Checkup",
         path = PATH,
       ) {
-        PageTitle("Service", serviceName)
-
-
+        PageTitle("Service", s)
 
         BackfillsTable(true, backfillRuns.running_backfills)
         BackfillsTable(false, backfillRuns.paused_backfills)
 
-
-
-
         ul("space-y-3") {
           role = "list"
-
 
           AlertInfoHighlight(
             "Questions? Concerns? Contact us on Slack.",
@@ -95,6 +75,6 @@ class ServiceAction @Inject constructor(
   }
 
   companion object {
-    const val PATH = "/service/{service}"
+    const val PATH = "/services/"
   }
 }

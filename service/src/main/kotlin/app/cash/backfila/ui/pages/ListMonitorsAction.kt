@@ -24,7 +24,7 @@ class ListMonitorsAction @Inject constructor() : WebAction {
     return buildHtml {
       DashboardLayout(
         title = "Backfila",
-        path = IndexAction.PATH,
+        path = ServiceIndexAction.PATH,
       ) {
         PageTitle("Backfila", "Recommended monitors")
 

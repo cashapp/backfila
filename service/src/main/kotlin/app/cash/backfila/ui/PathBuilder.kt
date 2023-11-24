@@ -1,6 +1,7 @@
-package com.squareup.cash.monitorcheckup.ui
+package app.cash.backfila.ui
 
-import app.cash.backfila.ui.pages.ServiceAction
+import app.cash.backfila.ui.pages.ServiceShowAction
+import app.cash.protos.backfila.ui.SortCol
 
 // TODO add tests!
 data class PathBuilder(
@@ -11,9 +12,10 @@ data class PathBuilder(
   val limit: Int? = null,
   val page: Int? = null,
   val service: String? = null,
+  val variant: String? = null,
   /** Could be comma separated list of tokens */
   val token: String? = null,
-  val sortColumn: String? = null,
+  val sortColumn: SortCol? = null,
   val sortDesc: Boolean? = null,
   val platform: String? = null,
   val project: String? = null,
@@ -21,12 +23,14 @@ data class PathBuilder(
   val version: String? = null,
   val locale: String? = null,
 ) {
+  fun countFilters() = 0
+
   fun build(): String = StringBuilder().apply {
     append("/")
     path?.removePrefix("/")?.let {
       append(it.split("{").first())
 
-      if (path == ServiceAction.PATH && service != null) {
+      if (path == ServiceShowAction.PATH && service != null) {
         append(service)
         append("/")
       }
@@ -43,10 +47,11 @@ data class PathBuilder(
     page?.let { append("$PageParam=$it&") }
     sortDesc?.let { append("$SortDescParam=$it&") }
     if (!service.isNullOrBlank()) append("$ServiceParam=$service&")
+    if (!variant.isNullOrBlank()) append("$VariantParam=$variant&")
     if (!frame.isNullOrBlank()) { append("$FrameParam=$frame&") }
     if (!query.isNullOrBlank()) { append("$SearchParam=$query&") }
     if (!token.isNullOrBlank()) { append("$TokenParam=$token&") }
-    if (!sortColumn.isNullOrBlank()) { append("$SortColumnParam=$sortColumn&") }
+    if (sortColumn != null) { append("$SortColumnParam=${sortColumn.value}&") }
   }.toString().removeSuffix("?").removeSuffix("&")
 
   companion object {
@@ -56,6 +61,7 @@ data class PathBuilder(
     const val LimitParam = "limit"
     const val PageParam = "p"
     const val ServiceParam = "s"
+    const val VariantParam = "v"
     const val TokenParam = "t"
     const val SortColumnParam = "sc"
     const val SortDescParam = "sd"
