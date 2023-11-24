@@ -33,12 +33,12 @@ const routes = (
         component={ServiceRunsContainer}
       />
       <Route
-          path="/app/services/:service/variants/:variant/"
-          component={ServiceDetailsContainer}
+        path="/app/services/:service/variants/:variant/"
+        component={ServiceDetailsContainer}
       />
       <Route
-          path="/app/services/:service/variants/"
-          component={ServiceVariantsContainer}
+        path="/app/services/:service/variants/"
+        component={ServiceVariantsContainer}
       />
       {/* Maintain compatibility for services that do not need variant functionality */}
       <Route

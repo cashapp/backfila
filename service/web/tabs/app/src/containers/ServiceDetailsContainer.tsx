@@ -43,38 +43,36 @@ class ServiceDetailsContainer extends React.Component<
       )
     }
     if (this.variant != RESERVED_VARIANT) {
-        return (
-            <LayoutContainer>
-                <ServiceHeader serviceName={this.service} variant={this.variant} />
-                <Link
-                    to={`/app/services/${this.service}/variants/${this.variant}/create`}
-                >
-                    <AnchorButton text={"Create"} intent={Intent.PRIMARY} />
-                </Link>
-                <br />
-                <br />
-                <H3>Running Backfills</H3>
-                <BackfillRunsTable backfillRuns={result.running_backfills} />
-                <H3>Paused Backfills</H3>
-                <BackfillRunsTable backfillRuns={result.paused_backfills} />
-                {result.next_pagination_token && (
-                    <div style={{ paddingBottom: "100px" }}>
-                        <Link
-                            to={`/app/services/${this.service}/variants/${this.variant}/runs/${result.next_pagination_token}`}
-                        >
-                            more
-                        </Link>
-                    </div>
-                )}
-            </LayoutContainer>
-        )
+      return (
+        <LayoutContainer>
+          <ServiceHeader serviceName={this.service} variant={this.variant} />
+          <Link
+            to={`/app/services/${this.service}/variants/${this.variant}/create`}
+          >
+            <AnchorButton text={"Create"} intent={Intent.PRIMARY} />
+          </Link>
+          <br />
+          <br />
+          <H3>Running Backfills</H3>
+          <BackfillRunsTable backfillRuns={result.running_backfills} />
+          <H3>Paused Backfills</H3>
+          <BackfillRunsTable backfillRuns={result.paused_backfills} />
+          {result.next_pagination_token && (
+            <div style={{ paddingBottom: "100px" }}>
+              <Link
+                to={`/app/services/${this.service}/variants/${this.variant}/runs/${result.next_pagination_token}`}
+              >
+                more
+              </Link>
+            </div>
+          )}
+        </LayoutContainer>
+      )
     }
     return (
       <LayoutContainer>
         <ServiceHeader serviceName={this.service} variant={this.variant} />
-        <Link
-          to={`/app/services/${this.service}/create`}
-        >
+        <Link to={`/app/services/${this.service}/create`}>
           <AnchorButton text={"Create"} intent={Intent.PRIMARY} />
         </Link>
         <br />

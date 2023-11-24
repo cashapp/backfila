@@ -5,6 +5,7 @@ import app.cash.backfila.client.BackfilaClientServiceClientProvider
 import app.cash.backfila.client.BackfilaDefaultEndpointConfigModule
 import app.cash.backfila.client.ForConnectors
 import app.cash.backfila.dashboard.ViewLogsUrlProvider
+import app.cash.backfila.development.DevServiceConstants.Companion.BACKFILA_PORT
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.KeyRange
@@ -47,7 +48,7 @@ fun main(args: Array<String>) {
     object : KAbstractModule() {
       override fun configure() {
         val webConfig = WebConfig(
-          port = 8080,
+          port = BACKFILA_PORT,
           idle_timeout = 500000,
           host = "0.0.0.0",
         )
@@ -116,7 +117,7 @@ fun main(args: Array<String>) {
             ),
           ),
         ),
-        web_url_root = "http://localhost:8080/app/",
+        web_url_root = "http://localhost:$BACKFILA_PORT/app/",
         slack = null,
       ),
     ),
@@ -129,5 +130,14 @@ fun main(args: Array<String>) {
 internal class DevelopmentViewLogsUrlProvider : ViewLogsUrlProvider {
   override fun getUrl(session: Session, backfillRun: DbBackfillRun): String {
     return "/"
+  }
+}
+
+class DevServiceConstants {
+  companion object {
+    const val BACKFILA_PORT = 8080
+    const val FINE_DINING_PORT = 8081
+    const val MC_DEES_USA_PORT = 8082
+    const val MC_DEES_CANADA_PORT = 8083
   }
 }

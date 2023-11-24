@@ -58,37 +58,37 @@ class ServiceRunsContainer extends React.Component<
     }
     if (this.variant != RESERVED_VARIANT) {
       return (
-          <LayoutContainer>
-            <ServiceHeader serviceName={this.service} variant={this.variant}/>
-            <H3>Paused Backfills</H3>
-            <BackfillRunsTable backfillRuns={result.paused_backfills}/>
-            {result.next_pagination_token && (
-                <div style={{paddingBottom: "100px"}}>
-                  <Link
-                      to={`/app/services/${this.service}/variants/${this.variant}/runs/${result.next_pagination_token}`}
-                  >
-                    more
-                  </Link>
-                </div>
-            )}
-          </LayoutContainer>
+        <LayoutContainer>
+          <ServiceHeader serviceName={this.service} variant={this.variant} />
+          <H3>Paused Backfills</H3>
+          <BackfillRunsTable backfillRuns={result.paused_backfills} />
+          {result.next_pagination_token && (
+            <div style={{ paddingBottom: "100px" }}>
+              <Link
+                to={`/app/services/${this.service}/variants/${this.variant}/runs/${result.next_pagination_token}`}
+              >
+                more
+              </Link>
+            </div>
+          )}
+        </LayoutContainer>
       )
     }
     return (
-        <LayoutContainer>
-          <ServiceHeader serviceName={this.service} variant={this.variant}/>
-          <H3>Paused Backfills</H3>
-          <BackfillRunsTable backfillRuns={result.paused_backfills}/>
-          {result.next_pagination_token && (
-              <div style={{paddingBottom: "100px"}}>
-                <Link
-                    to={`/app/services/${this.service}/runs/${result.next_pagination_token}`}
-                >
-                  more
-                </Link>
-              </div>
-          )}
-        </LayoutContainer>
+      <LayoutContainer>
+        <ServiceHeader serviceName={this.service} variant={this.variant} />
+        <H3>Paused Backfills</H3>
+        <BackfillRunsTable backfillRuns={result.paused_backfills} />
+        {result.next_pagination_token && (
+          <div style={{ paddingBottom: "100px" }}>
+            <Link
+              to={`/app/services/${this.service}/runs/${result.next_pagination_token}`}
+            >
+              more
+            </Link>
+          </div>
+        )}
+      </LayoutContainer>
     )
   }
 }

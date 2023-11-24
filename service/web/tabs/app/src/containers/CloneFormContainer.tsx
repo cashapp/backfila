@@ -107,7 +107,11 @@ class CloneFormContainer extends React.Component<
       })
   }
 
-  requestRegisteredBackfills(service: string, variant: string, backfillName: string) {
+  requestRegisteredBackfills(
+    service: string,
+    variant: string,
+    backfillName: string
+  ) {
     Axios.get(`/services/${service}/variants/${variant}/registered-backfills`)
       .then(response => {
         let selected = response.data.backfills.find(
