@@ -33,7 +33,7 @@ dependencies {
 
   testImplementation(Dependencies.assertj)
   testImplementation(Dependencies.miskTesting)
-  testImplementation(Dependencies.miskJdbcTesting)
+  testImplementation(testFixtures(Dependencies.miskJdbc))
   testImplementation(Dependencies.miskHibernateTesting)
   testImplementation(project(":client-misk"))
   testImplementation(Dependencies.kotlinTest)

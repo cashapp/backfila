@@ -9,7 +9,7 @@ import wisp.deployment.Deployment
 class BackfilaDashboardModule(val deployment: Deployment) : KAbstractModule() {
   override fun configure() {
     install(
-      DashboardModule.createMiskWebTab<BackfilaApp, Unauthenticated>(
+      DashboardModule.createMiskWebDashboard<BackfilaApp, Unauthenticated>(
         isDevelopment = deployment.isLocalDevelopment,
         slug = "app",
         developmentWebProxyUrl = "http://localhost:4200/",

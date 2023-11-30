@@ -42,7 +42,7 @@ dependencies {
   // ****************************************
   testImplementation(Dependencies.misk)
   testImplementation(Dependencies.miskAwsDynamodb)
-  testImplementation(Dependencies.miskAwsDynamodbTesting)
+  testImplementation(testFixtures(Dependencies.miskAwsDynamodb))
   testImplementation(Dependencies.miskInject)
   testImplementation(Dependencies.miskTesting)
   testImplementation(project(":client-misk"))
