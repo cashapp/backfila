@@ -26,6 +26,10 @@ internal class HttpClientServiceClient internal constructor(
     return api.runBatch(request)
   }
 
+  override suspend fun finalizeBackfill(request: FinalizeBackfillRequest): FinalizeBackfillResponse {
+    return api.finalizeBackfill(request)
+  }
+
   private fun <T> Response<T>.getOrThrow(): T {
     if (!this.isSuccessful) {
       throw HttpException(this)

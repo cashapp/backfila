@@ -364,6 +364,17 @@ class BackfillRunner private constructor(
             ),
           )
         }
+        is FinalizeException -> {
+          session.save(
+            DbEventLog(
+              backfillRunId,
+              partition_id = partitionId,
+              type = DbEventLog.Type.ERROR,
+              message = "error $action, client finalized exception.",
+              extra_data = ExceptionUtils.getStackTrace(exception)
+            )
+          )
+        }
         else -> {
           session.save(
             DbEventLog(
@@ -377,6 +388,15 @@ class BackfillRunner private constructor(
         }
       }
     }
+  }
+
+  suspend fun finalize() {
+    client.finalizeBackfill(
+      FinalizeBackfillRequest(
+        metadata.backfillRunId.toString(),
+        backfillName,
+      )
+    )
   }
 
   fun logLabel() = "$backfillName::$backfillRunId::$partitionName::$partitionId"

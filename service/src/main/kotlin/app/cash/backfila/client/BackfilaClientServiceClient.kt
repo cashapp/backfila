@@ -13,4 +13,6 @@ interface BackfilaClientServiceClient {
   suspend fun getNextBatchRange(request: GetNextBatchRangeRequest): GetNextBatchRangeResponse
 
   suspend fun runBatch(request: RunBatchRequest): RunBatchResponse
+
+  suspend fun finalizeBackfill(request: FinalizeBackfillRequest): FinalizeBackfillResponse
 }

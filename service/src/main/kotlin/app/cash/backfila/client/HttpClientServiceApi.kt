@@ -46,6 +46,17 @@ interface HttpClientServiceApi {
     @Body request: RunBatchRequest,
   ): RunBatchResponse
 
+  @POST("$BASE_PATH/finalize_backfill")
+  @Headers(
+    value = [
+      "Accept: application/x-protobuf",
+      "Content-Type: application/x-protobuf"
+    ]
+  )
+  suspend fun finalizeBackfill(
+    @Body request: FinalizeBackfillRequest
+  ): FinalizeBackfillResponse
+
   companion object {
     private const val BASE_PATH = "backfila"
   }

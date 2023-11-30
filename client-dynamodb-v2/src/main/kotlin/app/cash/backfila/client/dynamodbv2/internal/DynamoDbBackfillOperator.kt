@@ -160,6 +160,14 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
       .build()
   }
 
+  override fun finalizeBackfill(request: FinalizeBackfillRequest): FinalizeBackfillResponse {
+    val config = parametersOperator.constructBackfillConfig(request)
+    backfill.finalize(config)
+
+    return FinalizeBackfillResponse.Builder()
+      .build()
+  }
+
   private fun Map<String, AttributeValue>.toKeyRange(originalRange: DynamoDbKeyRange): KeyRange {
     require(originalRange.start + 1 == originalRange.end)
     return keyRangeCodec.encodeKeyRange(

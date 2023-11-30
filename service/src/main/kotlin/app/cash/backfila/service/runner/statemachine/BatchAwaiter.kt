@@ -168,10 +168,9 @@ class BatchAwaiter(
     return backfillRunner.runBatchAsync(this, batch)
   }
 
-  private fun completePartition() {
+  private suspend fun completePartition() {
     val runComplete = backfillRunner.factory.transacter.transaction { session ->
       val dbRunPartition = session.load(backfillRunner.partitionId)
-      dbRunPartition.run_state = BackfillState.COMPLETE
       updateProgress(dbRunPartition)
 
       session.save(
@@ -183,14 +182,44 @@ class BatchAwaiter(
         ),
       )
 
-      // If all states are COMPLETE the whole backfill will be completed.
+      // If all states are COMPLETE, for every other partition, the whole backfill will be completed.
+      // In this case, don't mark the partition as complete until after the finalize call. This
+      // will ensure that the BackfillRunner is not marked as NOT running can cancel this coroutine.
       // If multiple partitions finish at the same time they will retry due to the hibernate
       // version mismatch on the DbBackfillRun.
       val partitions = dbRunPartition.backfill_run.partitions(
         session,
         backfillRunner.factory.queryFactory,
       )
-      if (partitions.all { it.run_state == BackfillState.COMPLETE }) {
+      partitions
+        .filterNot { it.id == backfillRunner.partitionId }
+        .all { it.run_state == BackfillState.COMPLETE }
+        .also { runComplete ->
+          if (!runComplete) {
+            dbRunPartition.run_state = BackfillState.COMPLETE
+          }
+        }
+    }
+
+    if (runComplete) {
+      // Finalize the backfill before marking it complete
+      logger.info { "Finalizing backfill ${backfillRunner.backfillName}" }
+      try {
+        backfillRunner.finalize()
+      } catch (e: Throwable) {
+        when (e) {
+          is HttpException ->
+            when (e.code()) {
+              404 -> logger.info { "No finalization endpoint found for ${backfillRunner.backfillName}, skipping" }
+              else -> throw FinalizeException(e)
+            }
+          else -> throw FinalizeException(e)
+        }
+      }
+
+      backfillRunner.factory.transacter.transaction { session ->
+        val dbRunPartition = session.load(backfillRunner.partitionId)
+        dbRunPartition.run_state = BackfillState.COMPLETE
         dbRunPartition.backfill_run.complete()
         logger.info { "Backfill ${backfillRunner.backfillName} completed" }
 
@@ -201,13 +230,7 @@ class BatchAwaiter(
             message = "backfill completed",
           ),
         )
-
-        return@transaction true
       }
-      false
-    }
-
-    if (runComplete) {
       backfillRunner.factory.slackHelper.runCompleted(backfillRunner.backfillRunId)
     }
   }

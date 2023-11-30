@@ -87,4 +87,9 @@ abstract class DynamoDbBackfill<I : Any, P : Any> : Backfill {
 
   /** See [ScanRequest.setExpressionAttributeNames]. */
   open fun expressionAttributeNames(config: BackfillConfig<P>): Map<String, String>? = null
+
+  /**
+   * Override this to do any work after the backfill completes or is cancelled.
+   */
+  open fun finalize(config: BackfillConfig<P>) {}
 }

@@ -17,4 +17,5 @@ interface BackfillOperator {
   fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse
   fun getNextBatchRange(request: GetNextBatchRangeRequest): GetNextBatchRangeResponse
   fun runBatch(request: RunBatchRequest): RunBatchResponse
+  fun finalizeBackfill(request: FinalizeBackfillRequest): FinalizeBackfillResponse
 }
