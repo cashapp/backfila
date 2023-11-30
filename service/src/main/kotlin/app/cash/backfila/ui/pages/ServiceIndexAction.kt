@@ -14,6 +14,7 @@ import kotlinx.html.input
 import kotlinx.html.legend
 import misk.hotwire.buildHtml
 import misk.security.authz.Unauthenticated
+import misk.turbo.turbo_frame
 import misk.web.Get
 import misk.web.QueryParam
 import misk.web.ResponseContentType
@@ -36,8 +37,7 @@ class ServiceIndexAction @Inject constructor() : WebAction {
         PageTitle("Services")
         val pathBuilder = PathBuilder(path = PATH)
 
-        ServiceSearchWrapper(redirectPath = PATH)
-
+        ServiceAutocompleteWrapper(redirectPath = ServiceShowAction.PATH)
 
         ToggleContainer(
           buttonText = "${pathBuilder.countFilters()} Filters",
@@ -194,6 +194,10 @@ class ServiceIndexAction @Inject constructor() : WebAction {
             placeholder = "Search yo"
 
           }
+        }
+
+        turbo_frame("") {
+
         }
       }
     }

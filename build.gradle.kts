@@ -75,6 +75,13 @@ subprojects {
   repositories {
     mavenCentral()
     maven(url = "https://s3-us-west-2.amazonaws.com/dynamodb-local/release")
+
+    mavenLocal {
+      content {
+        includeGroup("com.squareup.misk")
+        includeGroup("app.cash.wisp")
+      }
+    }
   }
 
   tasks.withType<Test> {

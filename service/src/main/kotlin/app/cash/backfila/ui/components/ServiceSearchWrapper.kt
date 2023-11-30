@@ -13,7 +13,7 @@ fun TagConsumer<*>.ServiceSearchWrapper(redirectPath: String) {
           htmlFor = "location"
           +"""Service Name"""
         }
-        ServiceAutocomplete(
+        ServiceSearch(
           pagePathBuilder = PathBuilder(path = redirectPath),
           // query = serviceQuery?.lowercase(),
         )

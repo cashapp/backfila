@@ -112,6 +112,7 @@ fun main(args: Array<String>) {
                 host = System.getenv("BACKFILA_DB_HOST") ?: "127.0.0.1",
                 port = (System.getenv("BACKFILA_DB_PORT") ?: "3306").toInt(),
                 password = System.getenv("BACKFILA_DB_PASSWORD"),
+                connection_idle_timeout = null,
               ),
               reader = null,
             ),

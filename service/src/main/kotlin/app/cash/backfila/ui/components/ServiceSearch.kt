@@ -32,7 +32,6 @@ fun TagConsumer<*>.ServiceSearch(
       // Updates browser URL for permalinks
 
       div("relative mt-1 rounded-md shadow-sm") {
-        // TODO fix CSS issue in production
         div("pointer-events-none absolute inset-y-0 left-0 mt-2.5 items-center pl-3") {
           heroicon(Heroicons.MAGNIFYING_GLASS)
         }

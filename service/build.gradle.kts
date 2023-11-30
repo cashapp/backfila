@@ -49,6 +49,7 @@ dependencies {
   implementation(Dependencies.miskHibernate)
   implementation(Dependencies.miskHotwire)
   implementation(Dependencies.miskInject)
+  implementation(Dependencies.miskJdbc)
   implementation(Dependencies.miskMetrics)
   implementation(Dependencies.miskService)
   implementation(Dependencies.miskSlack)
