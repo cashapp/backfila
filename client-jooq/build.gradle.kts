@@ -61,7 +61,7 @@ dependencies {
   testImplementation(Dependencies.miskActions)
   testImplementation(Dependencies.miskCore)
   testImplementation(Dependencies.miskInject)
-  testImplementation(Dependencies.miskJdbcTesting)
+  testImplementation(testFixtures(Dependencies.miskJdbc))
   testImplementation(Dependencies.miskTesting)
   testImplementation(project(":client-misk"))
 
