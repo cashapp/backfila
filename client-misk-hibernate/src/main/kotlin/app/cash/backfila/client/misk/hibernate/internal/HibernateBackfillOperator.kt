@@ -6,6 +6,8 @@ import app.cash.backfila.client.misk.hibernate.HibernateBackfill
 import app.cash.backfila.client.misk.hibernate.PrimaryKeyCursorMapper
 import app.cash.backfila.client.spi.BackfilaParametersOperator
 import app.cash.backfila.client.spi.BackfillOperator
+import app.cash.backfila.protos.clientservice.FinalizeBackfillRequest
+import app.cash.backfila.protos.clientservice.FinalizeBackfillResponse
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse.Batch
@@ -305,6 +307,14 @@ internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : An
     backfill.runBatch(pkeys, config)
 
     return RunBatchResponse.Builder().build()
+  }
+
+  override fun finalizeBackfill(request: FinalizeBackfillRequest): FinalizeBackfillResponse {
+    val config = parametersOperator.constructBackfillConfig(request)
+    backfill.finalizeBackfill(config)
+
+    return FinalizeBackfillResponse.Builder()
+      .build()
   }
 
   private fun HibernateBackfill<*, *, *>.getPrimaryKeyPath(queryRoot: Root<*>): Path<Number> {

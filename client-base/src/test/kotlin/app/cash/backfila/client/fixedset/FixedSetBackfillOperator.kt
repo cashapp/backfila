@@ -3,6 +3,8 @@ package app.cash.backfila.client.fixedset
 import app.cash.backfila.client.spi.BackfilaParametersOperator
 import app.cash.backfila.client.spi.BackfillOperator
 import app.cash.backfila.client.spi.parametersToBytes
+import app.cash.backfila.protos.clientservice.FinalizeBackfillRequest
+import app.cash.backfila.protos.clientservice.FinalizeBackfillResponse
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.KeyRange
@@ -87,6 +89,14 @@ class FixedSetBackfillOperator<Param : Any>(
     return KeyRange.Builder()
       .start(start.toString().encodeUtf8())
       .end(end.toString().encodeUtf8())
+      .build()
+  }
+
+  override fun finalizeBackfill(request: FinalizeBackfillRequest): FinalizeBackfillResponse {
+    val config = parametersOperator.constructBackfillConfig(request)
+    backfill.finalize(config)
+
+    return FinalizeBackfillResponse.Builder()
       .build()
   }
 }

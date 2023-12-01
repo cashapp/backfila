@@ -2,6 +2,7 @@ package app.cash.backfila.client.s3
 
 import app.cash.backfila.client.Backfill
 import app.cash.backfila.client.BackfillConfig
+import app.cash.backfila.client.FinalizeBackfillConfig
 import app.cash.backfila.client.PrepareBackfillConfig
 import app.cash.backfila.client.s3.record.RecordStrategy
 
@@ -48,4 +49,9 @@ abstract class S3DatasourceBackfill<R : Any, P : Any> : Backfill {
    * Produces records from the S3 file.
    */
   abstract val recordStrategy: RecordStrategy<R>
+
+  /**
+   * Override this to do any work after the backfill completes.
+   */
+  open fun finalize(config: FinalizeBackfillConfig<P>) {}
 }

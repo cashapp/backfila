@@ -2,6 +2,8 @@ package app.cash.backfila.service.runner
 
 import app.cash.backfila.client.BackfilaClientServiceClient
 import app.cash.backfila.client.ConnectorProvider
+import app.cash.backfila.protos.clientservice.FinalizeBackfillRequest
+import app.cash.backfila.protos.clientservice.FinalizeBackfillRequest.FinalizeState
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.PipelinedData
 import app.cash.backfila.protos.clientservice.RunBatchRequest
@@ -18,6 +20,7 @@ import app.cash.backfila.service.runner.statemachine.BatchAwaiter
 import app.cash.backfila.service.runner.statemachine.BatchPrecomputer
 import app.cash.backfila.service.runner.statemachine.BatchQueuer
 import app.cash.backfila.service.runner.statemachine.BatchRunner
+import app.cash.backfila.service.runner.statemachine.FinalizeException
 import app.cash.backfila.service.runner.statemachine.RunBatchException
 import app.cash.backfila.service.scheduler.LeaseHunter
 import com.google.common.annotations.VisibleForTesting
@@ -390,12 +393,15 @@ class BackfillRunner private constructor(
     }
   }
 
-  suspend fun finalize() {
+  suspend fun finalize(state: FinalizeState) {
     client.finalizeBackfill(
       FinalizeBackfillRequest(
         metadata.backfillRunId.toString(),
         backfillName,
-      )
+        metadata.parameters,
+        metadata.dryRun,
+        state,
+      ),
     )
   }
 

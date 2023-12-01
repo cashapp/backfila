@@ -13,3 +13,9 @@ data class PrepareBackfillConfig<Param : Any>(
   val parameters: Param,
   val dryRun: Boolean,
 )
+
+data class FinalizeBackfillConfig<Param : Any>(
+  val parameters: Param,
+  val backfillId: String,
+  val dryRun: Boolean,
+)

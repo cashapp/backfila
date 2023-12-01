@@ -154,4 +154,5 @@ message FinalizeBackfillRequest {
 }
 
 message FinalizeBackfillResponse {
+  optional string error_message = 1;
 }

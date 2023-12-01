@@ -1,5 +1,6 @@
 package app.cash.backfila.service.runner.statemachine
 
+import app.cash.backfila.protos.clientservice.FinalizeBackfillRequest.FinalizeState
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.RunBatchResponse
 import app.cash.backfila.service.persistence.BackfillState
@@ -17,6 +18,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import misk.hibernate.load
 import okio.ByteString
+import retrofit2.HttpException
 import wisp.logging.getLogger
 
 /**
@@ -205,7 +207,7 @@ class BatchAwaiter(
       // Finalize the backfill before marking it complete
       logger.info { "Finalizing backfill ${backfillRunner.backfillName}" }
       try {
-        backfillRunner.finalize()
+        backfillRunner.finalize(FinalizeState.COMPLETED)
       } catch (e: Throwable) {
         when (e) {
           is HttpException ->

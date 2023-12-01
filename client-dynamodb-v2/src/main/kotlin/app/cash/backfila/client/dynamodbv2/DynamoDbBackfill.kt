@@ -2,6 +2,7 @@ package app.cash.backfila.client.dynamodbv2
 
 import app.cash.backfila.client.Backfill
 import app.cash.backfila.client.BackfillConfig
+import app.cash.backfila.client.FinalizeBackfillConfig
 import app.cash.backfila.client.PrepareBackfillConfig
 import com.google.inject.TypeLiteral
 import com.squareup.moshi.Types
@@ -89,7 +90,7 @@ abstract class DynamoDbBackfill<I : Any, P : Any> : Backfill {
   open fun expressionAttributeNames(config: BackfillConfig<P>): Map<String, String>? = null
 
   /**
-   * Override this to do any work after the backfill completes or is cancelled.
+   * Override this to do any work after the backfill completes.
    */
-  open fun finalize(config: BackfillConfig<P>) {}
+  open fun finalize(config: FinalizeBackfillConfig<P>) {}
 }
