@@ -84,8 +84,11 @@ jobs:
 
       - name: Assign a version
         run: |
-          # set a version name like "2023.05.26.091805-c1fcb3a"
-          echo "VERSION_NAME=$(git log -n1 --pretty='format:%cd' --date=format:'%Y.%m.%d.%H%M%S')-$(git rev-parse --short=7 HEAD)" >> gradle.properties
+          # Set a version name like "2023.05.26.091805-c1fcb3a".
+          # Note the use of %ct which gets the timestamp in UTC, in seconds since UNIX epoch to
+          # avoid time zone differences leading to non-linear versioning.
+          VERSION="$(TZ=UTC0 git show --quiet --date='format-local:%Y.%m.%d.%H%M%S' --format='%cd')-$(git rev-parse --short=7 HEAD)"
+          echo "VERSION_NAME=$VERSION" >> gradle.properties
           cat gradle.properties
 
       - name: Build Misk Web
