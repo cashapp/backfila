@@ -36,14 +36,19 @@ class ServiceShowAction @Inject constructor(
     @QueryParam v: String,
     @QueryParam("experimental") experimental: Boolean? = false,
   ): Response<ResponseBody> {
-    val backfillRuns = getBackfillRunsAction.backfillRuns(s, v.ifBlank { "default" })
+    val serviceName = s.split("/").first()
+    val variant = s.split("/").last()
+
+    val backfillRuns = getBackfillRunsAction.backfillRuns(serviceName, variant)
 
     val htmlResponseBody = buildHtmlResponseBody {
+      // TODO show default if other variants and probably link to a switcher
+      val label = if (variant == "default") serviceName else "$serviceName ($variant)"
       DashboardLayout(
-        title = "$s | Monitor Checkup",
+        title = "$label | Backfila",
         path = PATH,
       ) {
-        PageTitle("Service", s)
+        PageTitle("Service", label)
 
         BackfillsTable(true, backfillRuns.running_backfills)
         BackfillsTable(false, backfillRuns.paused_backfills)
@@ -57,16 +62,6 @@ class ServiceShowAction @Inject constructor(
             SLACK_CHANNEL_URL,
             spaceAbove = true,
           )
-
-          p("px-4 py-5 text-xs") {
-            +"Computed using commit "
-            a(classes = "text-green-500 hover:underline") {
-              // TODO investigate how this is calculated, might be hardcoding to monitor-checkup repo
-              href = "#/commits/"
-              +"yo"
-            }
-            +"."
-          }
         }
       }
     }

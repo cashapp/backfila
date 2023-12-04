@@ -32,12 +32,11 @@ class ServiceAutocompleteAction @Inject constructor(
       }.map { (path, service) ->
         li("list-group-item cursor-default select-none px-4 py-2 text-left") {
           role = "option"
-          attributes["data-autocomplete-value"] = service.name
+          attributes["data-autocomplete-value"] = path
 
-          a {
-            href = "/services/$path"
-            +"""$path (${service.running_backfills})"""
-          }
+          // Don't include default variant in label, only for unique variants
+          val label = if (path.split("/").last() == "default") service.name else path
+          +"""$label (${service.running_backfills})"""
         }
       }
     }
