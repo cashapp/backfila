@@ -1,6 +1,7 @@
 package app.cash.backfila.actions
 
 import app.cash.backfila.BackfilaTestingModule
+import app.cash.backfila.BackfillCreator
 import app.cash.backfila.api.ConfigureServiceAction
 import app.cash.backfila.api.ConfigureServiceAction.Companion.RESERVED_VARIANT
 import app.cash.backfila.client.Connectors
@@ -11,6 +12,7 @@ import app.cash.backfila.protos.clientservice.KeyRange
 import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
 import app.cash.backfila.protos.service.ConfigureServiceRequest
 import app.cash.backfila.protos.service.CreateBackfillRequest
+import app.cash.backfila.protos.service.Parameter
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillRunQuery
 import app.cash.backfila.service.persistence.BackfillState
@@ -405,6 +407,43 @@ class CreateBackfillActionTest {
         )
       }.isInstanceOf(BadRequestException::class.java)
         .hasMessage("PrepareBackfill on `deep-fryer` failed: We're out of chicken")
+
+      transacter.transaction { session ->
+        val runs = queryFactory.newQuery<BackfillRunQuery>().list(session)
+        assertThat(runs).isEmpty()
+      }
+    }
+  }
+
+  @Test
+  fun `error is shown when parameter is too long`() {
+    scope.fakeCaller(service = "deep-fryer") {
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData.Builder()
+                .name("ChickenSandwich")
+                .parameters(listOf(Parameter.Builder().name("sauce").build()))
+                .build(),
+            ),
+          )
+          .connector_type(Connectors.ENVOY)
+          .build(),
+      )
+    }
+    scope.fakeCaller(user = "molly") {
+      assertThatThrownBy {
+        createBackfillAction.create(
+          "deep-fryer",
+          RESERVED_VARIANT,
+          CreateBackfillRequest.Builder()
+            .backfill_name("ChickenSandwich")
+            .parameter_map(mapOf("sauce" to "a".repeat(BackfillCreator.MAX_PARAMETER_VALUE_SIZE + 1).encodeUtf8()))
+            .build(),
+        )
+      }.isInstanceOf(BadRequestException::class.java)
+        .hasMessage("parameter sauce is too long (max 1000 characters)")
 
       transacter.transaction { session ->
         val runs = queryFactory.newQuery<BackfillRunQuery>().list(session)
