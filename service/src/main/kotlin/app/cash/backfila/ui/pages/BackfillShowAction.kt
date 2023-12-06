@@ -23,7 +23,7 @@ import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 
 @Singleton
-class ServiceShowAction @Inject constructor(
+class BackfillShowAction @Inject constructor(
   private val getBackfillRunsAction: GetBackfillRunsAction,
 ) : WebAction {
   @Get(PATH)
@@ -31,6 +31,7 @@ class ServiceShowAction @Inject constructor(
   @Unauthenticated
   fun checkService(
     @QueryParam s: String,
+    @QueryParam b: String,
     @QueryParam("experimental") experimental: Boolean? = false,
   ): Response<ResponseBody> {
     val serviceName = s.split("/").first()
@@ -40,17 +41,12 @@ class ServiceShowAction @Inject constructor(
 
     val htmlResponseBody = buildHtmlResponseBody {
       // TODO show default if other variants and probably link to a switcher
-      val label = if (variant == "default") serviceName else "$serviceName ($variant)"
+      val label = if (variant == "default") serviceName else "$b $serviceName ($variant)"
       DashboardLayout(
         title = "$label | Backfila",
         path = PATH,
       ) {
-        PageTitle("Service", label)
-
-        // TODO Add completed table
-        // TODO Add deleted support?
-        BackfillsTable(true, backfillRuns.running_backfills)
-        BackfillsTable(false, backfillRuns.paused_backfills)
+        PageTitle("Backfill", label)
 
         ul("space-y-3") {
           role = "list"

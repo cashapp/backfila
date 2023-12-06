@@ -26,6 +26,7 @@ fun TagConsumer<*>.Alert(
   theme: AlertTheme,
   message: String?,
   label: String?,
+  // TODO move to misk.tailwind.Link to expose open in new tab
   link: String?,
   spaceAbove: Boolean = false,
   spaceBelow: Boolean = true,
@@ -130,8 +131,7 @@ fun TagConsumer<*>.AlertInfoHighlight(
   link: String? = null,
   spaceAbove: Boolean = false,
   spaceBelow: Boolean = true,
-) =
-  Alert(AlertTheme.BLUE_HIGHLIGHT, message, label, link, spaceAbove, spaceBelow)
+) = Alert(AlertTheme.BLUE_HIGHLIGHT, message, label, link, spaceAbove, spaceBelow)
 
 enum class AlertTheme(
   val backgroundColor: String,
