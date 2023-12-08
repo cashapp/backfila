@@ -2,20 +2,14 @@ package app.cash.backfila.ui.components
 
 import app.cash.backfila.dashboard.UiBackfillRun
 import kotlinx.html.TagConsumer
-import kotlinx.html.ThScope
-import kotlinx.html.a
 import kotlinx.html.div
 import kotlinx.html.h1
-import kotlinx.html.p
-import kotlinx.html.span
-import kotlinx.html.style
 import kotlinx.html.table
 import kotlinx.html.tbody
 import kotlinx.html.td
 import kotlinx.html.th
 import kotlinx.html.thead
 import kotlinx.html.tr
-import kotlin.math.round
 
 fun TagConsumer<*>.BackfillsTable(running: Boolean, backfills: List<UiBackfillRun>) {
   val title = if (running) "Running" else "Paused"
@@ -35,7 +29,7 @@ fun TagConsumer<*>.BackfillsTable(running: Boolean, backfills: List<UiBackfillRu
               tr {
                 listOf("ID", "Name", "State", "Dry Run", "Progress", "Created by", "Created at", "Last active at").map {
                   th(
-                    classes = "py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0"
+                    classes = "py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0",
                   ) { +it }
                 }
               }
@@ -45,17 +39,17 @@ fun TagConsumer<*>.BackfillsTable(running: Boolean, backfills: List<UiBackfillRu
                 tr {
                   listOf(it.id, it.name, it.state, it.dry_run).map {
                     td(
-                      "whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0"
+                      "whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0",
                     ) { +"""$it""" }
                   }
                   td(
-                    "whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0"
+                    "whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0",
                   ) {
                     ProgressBar(it.backfilled_matching_record_count, it.computed_matching_record_count)
                   }
                   listOf(it.created_by_user, it.created_at, it.last_active_at).map {
                     td(
-                      "whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0"
+                      "whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0",
                     ) { +"""$it""" }
                   }
 

@@ -16,7 +16,6 @@ class BackfilaWebActionsModule() : KAbstractModule() {
     install(WebActionModule.create<GetBackfillRunsAction>())
     install(WebActionModule.create<GetBackfillStatusAction>())
     install(WebActionModule.create<UpdateBackfillAction>())
-    // install(WebActionModule.create<RootRedirectAction>())
     install(WebActionModule.create<ViewLogsAction>())
 
     install(UiModule())

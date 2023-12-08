@@ -1,11 +1,12 @@
 package app.cash.backfila.ui.pages
 
 import app.cash.backfila.ui.PathBuilder
+import app.cash.backfila.ui.components.AlertSlackHelp
 import app.cash.backfila.ui.components.DashboardLayout
 import app.cash.backfila.ui.components.PageTitle
 import app.cash.backfila.ui.components.ServiceAutocompleteWrapper
-import app.cash.backfila.ui.components.ServiceSearchWrapper
 import app.cash.backfila.ui.components.ToggleContainer
+import javax.inject.Inject
 import kotlinx.html.a
 import kotlinx.html.div
 import kotlinx.html.form
@@ -20,7 +21,6 @@ import misk.web.QueryParam
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
-import javax.inject.Inject
 
 class ServiceIndexAction @Inject constructor() : WebAction {
   @Get(PATH)
@@ -56,10 +56,13 @@ class ServiceIndexAction @Inject constructor() : WebAction {
 
               +"""Clear all"""
             }
-          }) {
+          },
+        ) {
           div("border-gray-200 py-10") {
             id = "filters"
-            div("mx-auto grid max-w-7xl grid-cols-4 gap-x-4 px-4 text-sm sm:px-6 md:gap-x-6 lg:px-8") {
+            div(
+              "mx-auto grid max-w-7xl grid-cols-4 gap-x-4 px-4 text-sm sm:px-6 md:gap-x-6 lg:px-8",
+            ) {
 //          div("grid auto-rows-min grid-cols-1 gap-y-10 md:grid-cols-2 md:gap-x-6") {
               div {
                 legend("block font-medium") { +"""Status""" }
@@ -187,18 +190,17 @@ class ServiceIndexAction @Inject constructor() : WebAction {
           }
         }
 
-
         form {
           action = ""
           input {
             placeholder = "Search yo"
-
           }
         }
 
         turbo_frame("") {
-
         }
+
+        AlertSlackHelp()
       }
     }
   }

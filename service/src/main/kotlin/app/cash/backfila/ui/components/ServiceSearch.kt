@@ -1,19 +1,18 @@
 package app.cash.backfila.ui.components
 
-import app.cash.backfila.ui.actions.ServiceAutocompleteAction
 import app.cash.backfila.ui.PathBuilder
+import app.cash.backfila.ui.actions.ServiceAutocompleteAction
 import kotlinx.html.InputType
 import kotlinx.html.TagConsumer
 import kotlinx.html.div
 import kotlinx.html.form
 import kotlinx.html.id
 import kotlinx.html.input
-import kotlinx.html.ul
 import misk.tailwind.icons.Heroicons
 import misk.tailwind.icons.heroicon
 
 /**
- * Autocomplete input bar for company search
+ * Autocomplete input bar for search
  * Source: https://github.com/afcapel/stimulus-autocomplete
  */
 fun TagConsumer<*>.ServiceSearch(

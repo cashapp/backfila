@@ -1,7 +1,8 @@
 package app.cash.backfila.ui.actions
 
 import app.cash.backfila.dashboard.GetServicesAction
-import kotlinx.html.a
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.html.li
 import kotlinx.html.role
 import misk.hotwire.buildHtml
@@ -11,12 +12,10 @@ import misk.web.QueryParam
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class ServiceAutocompleteAction @Inject constructor(
-  private val getServicesAction: GetServicesAction
+  private val getServicesAction: GetServicesAction,
 ) : WebAction {
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
@@ -28,7 +27,7 @@ class ServiceAutocompleteAction @Inject constructor(
 
     return buildHtml {
       services.flatMap { service ->
-        service.variants.map { variant -> "${service.name}/${variant}" to service }
+        service.variants.map { variant -> "${service.name}/$variant" to service }
       }.map { (path, service) ->
         li("list-group-item cursor-default select-none px-4 py-2 text-left") {
           role = "option"

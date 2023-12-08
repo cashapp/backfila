@@ -38,8 +38,7 @@ class ConfigureServiceAction @Inject constructor(
   // TODO authenticate but any service
   @Unauthenticated
   fun configureService(@RequestBody request: ConfigureServiceRequest): ConfigureServiceResponse {
-    // TODO don't ship this in production
-    val service = caller.get()?.service ?: "cash-postmaster"
+    val service = caller.get()!!.service!!
 
     logger.info { "Configuring service `$service` with ${request.backfills.size} backfills" }
 

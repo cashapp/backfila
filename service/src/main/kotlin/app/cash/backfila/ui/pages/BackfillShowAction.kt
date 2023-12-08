@@ -1,13 +1,12 @@
 package app.cash.backfila.ui.pages
 
 import app.cash.backfila.dashboard.GetBackfillRunsAction
-import app.cash.backfila.ui.components.AlertInfoHighlight
-import app.cash.backfila.ui.components.BackfillsTable
-// import app.cash.backfila.ui.components.CollapsibleMonitorList
-import app.cash.backfila.ui.components.DashboardLayout
-import app.cash.backfila.ui.components.PageTitle
 import app.cash.backfila.ui.SLACK_CHANNEL_NAME
 import app.cash.backfila.ui.SLACK_CHANNEL_URL
+import app.cash.backfila.ui.components.AlertInfoHighlight
+import app.cash.backfila.ui.components.AlertSlackHelp
+import app.cash.backfila.ui.components.DashboardLayout
+import app.cash.backfila.ui.components.PageTitle
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.html.role
@@ -51,13 +50,9 @@ class BackfillShowAction @Inject constructor(
         ul("space-y-3") {
           role = "list"
 
-          AlertInfoHighlight(
-            "Questions? Concerns? Contact us on Slack.",
-            SLACK_CHANNEL_NAME,
-            SLACK_CHANNEL_URL,
-            spaceAbove = true,
-          )
         }
+
+        AlertSlackHelp()
       }
     }
 

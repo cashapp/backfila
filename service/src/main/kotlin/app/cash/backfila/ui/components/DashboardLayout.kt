@@ -9,7 +9,7 @@ import misk.web.dashboard.HtmlLayout
 fun TagConsumer<*>.DashboardLayout(
   title: String,
   path: String,
-  block: TagConsumer<*>.() -> Unit = {}
+  block: TagConsumer<*>.() -> Unit = {},
 ) {
   HtmlLayout(
     appRoot = "/",
@@ -29,6 +29,8 @@ fun TagConsumer<*>.DashboardLayout(
       div("py-10") {
         main {
           div("mx-auto max-w-7xl sm:px-6 lg:px-8") {
+            // TODO remove when new UI is stable and preferred
+            UseOldUIAlert()
             block()
           }
         }

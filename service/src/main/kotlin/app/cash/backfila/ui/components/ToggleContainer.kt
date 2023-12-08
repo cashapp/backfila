@@ -18,7 +18,7 @@ fun TagConsumer<*>.ToggleContainer(
   isOpen: Boolean = false,
   justifyBetween: Boolean = false,
   labelBlock: TagConsumer<*>.() -> Unit = {},
-  hiddenBlock: TagConsumer<*>.() -> Unit
+  hiddenBlock: TagConsumer<*>.() -> Unit,
 ) {
   val borderStyle = if (!borderless) "border-b border-t border-gray-200" else ""
   section("grid items-center $borderStyle") {
@@ -64,7 +64,7 @@ private fun TagConsumer<*>.rowContents(
   buttonText: String,
   fullWidthButton: Boolean = false,
   justifyBetween: Boolean = false,
-  labelBlock: TagConsumer<*>.() -> Unit = {}
+  labelBlock: TagConsumer<*>.() -> Unit = {},
 ) {
   val justifyStyle = if (justifyBetween) "justify-between" else "justify-end"
   div("$justifyStyle mx-auto flex max-w-7xl space-x-6 divide-x divide-gray-200 text-sm text-left px-4 sm:px-6 lg:px-8") {

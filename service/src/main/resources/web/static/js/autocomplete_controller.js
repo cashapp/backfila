@@ -1,7 +1,6 @@
 // https://github.com/afcapel/stimulus-autocomplete
 //import { Application, Controller } from "https://unpkg.com/@hotwired/stimulus/dist/stimulus.js"
 import { Application, Controller } from "/static/cache/stimulus/3.1.0/stimulus.min.js" // provided by Misk
-//import { useTransition } from "https://unpkg.com/stimulus-use/dist/index.umd.js"
 import { Autocomplete } from "../cache/stimulus-autocomplete/3.0.2/autocomplete.min.js"
 window.Stimulus = Application.start()
 
