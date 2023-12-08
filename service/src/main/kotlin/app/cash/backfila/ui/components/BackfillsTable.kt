@@ -8,12 +8,14 @@ import kotlinx.html.div
 import kotlinx.html.h1
 import kotlinx.html.p
 import kotlinx.html.span
+import kotlinx.html.style
 import kotlinx.html.table
 import kotlinx.html.tbody
 import kotlinx.html.td
 import kotlinx.html.th
 import kotlinx.html.thead
 import kotlinx.html.tr
+import kotlin.math.round
 
 fun TagConsumer<*>.BackfillsTable(running: Boolean, backfills: List<UiBackfillRun>) {
   val title = if (running) "Running" else "Paused"
@@ -41,7 +43,17 @@ fun TagConsumer<*>.BackfillsTable(running: Boolean, backfills: List<UiBackfillRu
             tbody("divide-y divide-gray-200") {
               backfills.forEach {
                 tr {
-                  listOf(it.id, it.name, it.state, it.dry_run, "TODO Progress", it.created_by_user, it.created_at, it.last_active_at).map {
+                  listOf(it.id, it.name, it.state, it.dry_run).map {
+                    td(
+                      "whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0"
+                    ) { +"""$it""" }
+                  }
+                  td(
+                    "whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0"
+                  ) {
+                    ProgressBar(it.backfilled_matching_record_count, it.computed_matching_record_count)
+                  }
+                  listOf(it.created_by_user, it.created_at, it.last_active_at).map {
                     td(
                       "whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0"
                     ) { +"""$it""" }
