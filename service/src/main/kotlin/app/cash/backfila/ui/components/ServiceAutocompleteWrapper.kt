@@ -15,6 +15,7 @@ fun TagConsumer<*>.ServiceAutocompleteWrapper(redirectPath: String) {
         }
         ServiceAutocomplete(
           pagePathBuilder = PathBuilder(path = redirectPath),
+          // TODO delete if don't want URL query paramter to pre-fill the search bar
           // query = serviceQuery?.lowercase(),
         )
       }

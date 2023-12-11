@@ -49,10 +49,6 @@ class ServiceIndexAction @Inject constructor(
               href = PathBuilder(
                 path = pathBuilder.path,
                 service = pathBuilder.service,
-                // sortKey = pathBuilder.sortKey,
-                // filterKey = pathBuilder.filterKey
-
-                // All filters are empty
               ).build()
 
               attributes["target"] = "_top"
@@ -69,6 +65,7 @@ class ServiceIndexAction @Inject constructor(
 //          div("grid auto-rows-min grid-cols-1 gap-y-10 md:grid-cols-2 md:gap-x-6") {
               div {
                 legend("block font-medium") { +"""Status""" }
+                // TODO fill in applicable filters
                 // div("space-y-6 pt-6 sm:space-y-4 sm:pt-4") {
                 //   listOf(
                 //     FlagInfoStatus.ACTIVE,

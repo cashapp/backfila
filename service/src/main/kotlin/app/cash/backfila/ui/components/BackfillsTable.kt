@@ -18,6 +18,7 @@ fun TagConsumer<*>.BackfillsTable(running: Boolean, backfills: List<UiBackfillRu
     div("sm:flex sm:items-center") {
       div("sm:flex-auto") {
         h1("text-base font-semibold leading-6 text-gray-900") { +"""Backfills ($title)""" }
+        // TODO delete
         // p("mt-2 text-sm text-gray-700") { +"""A list of all the users in your account including their name, title, email and role.""" }
       }
     }
@@ -53,6 +54,7 @@ fun TagConsumer<*>.BackfillsTable(running: Boolean, backfills: List<UiBackfillRu
                     ) { +"""$it""" }
                   }
 
+                  // TODO delete
                   // td(
                   //   "relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
                   // ) {
