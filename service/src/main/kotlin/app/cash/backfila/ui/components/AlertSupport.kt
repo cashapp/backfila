@@ -9,6 +9,7 @@ fun TagConsumer<*>.AlertSupport(label: String?, url: String?) {
       message = "Questions? Concerns? Need help?",
       label = label,
       link = url,
+      linkInNewTab = true,
       spaceAbove = true,
     )
   }

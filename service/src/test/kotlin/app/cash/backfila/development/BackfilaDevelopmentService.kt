@@ -120,6 +120,8 @@ fun main(args: Array<String>) {
         ),
         web_url_root = "http://localhost:$BACKFILA_PORT/app/",
         slack = null,
+        support_button_label = "#backfila-discuss",
+        support_button_url = "https://square.enterprise.slack.com/archives/C0151JAREE7",
       ),
     ),
     AdminDashboardModule(isDevelopment = true),

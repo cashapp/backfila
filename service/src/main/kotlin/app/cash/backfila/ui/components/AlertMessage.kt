@@ -28,6 +28,7 @@ fun TagConsumer<*>.Alert(
   label: String?,
   // TODO move to misk.tailwind.Link to expose open in new tab
   link: String?,
+  linkInNewTab: Boolean = false,
   spaceAbove: Boolean = false,
   spaceBelow: Boolean = true,
 ) {
@@ -82,7 +83,13 @@ fun TagConsumer<*>.Alert(
           }
           p("mt-3 text-sm md:ml-6 md:mt-0") {
             a(classes = "whitespace-nowrap font-medium ${theme.textColor} hover:${theme.hoverTextColor}") {
-              link?.let { href = it }
+              link?.let {
+                href = it
+                if (linkInNewTab) {
+                  target = "_blank"
+                }
+              }
+
               label?.let {
                 +it
                 span {
@@ -102,36 +109,38 @@ fun TagConsumer<*>.AlertSuccess(
   message: String?,
   label: String? = null,
   link: String? = null,
+  linkInNewTab: Boolean = false,
   spaceAbove: Boolean = false,
   spaceBelow: Boolean = true,
 ) =
-  Alert(AlertTheme.GREEN, message, label, link, spaceAbove, spaceBelow)
+  Alert(AlertTheme.GREEN, message, label, link, linkInNewTab, spaceAbove, spaceBelow)
 
 fun TagConsumer<*>.AlertError(
   message: String?,
   label: String? = null,
   link: String? = null,
+  linkInNewTab: Boolean = false,
   spaceAbove: Boolean = false,
   spaceBelow: Boolean = true,
-) =
-  Alert(AlertTheme.RED, message, label, link, spaceAbove, spaceBelow)
+) = Alert(AlertTheme.RED, message, label, link, linkInNewTab, spaceAbove, spaceBelow)
 
 fun TagConsumer<*>.AlertInfo(
   message: String?,
   label: String? = null,
   link: String? = null,
+  linkInNewTab: Boolean = false,
   spaceAbove: Boolean = false,
   spaceBelow: Boolean = true,
-) =
-  Alert(AlertTheme.BLUE, message, label, link, spaceAbove, spaceBelow)
+) = Alert(AlertTheme.BLUE, message, label, link, linkInNewTab, spaceAbove, spaceBelow)
 
 fun TagConsumer<*>.AlertInfoHighlight(
   message: String?,
   label: String? = null,
   link: String? = null,
+  linkInNewTab: Boolean = false,
   spaceAbove: Boolean = false,
   spaceBelow: Boolean = true,
-) = Alert(AlertTheme.BLUE_HIGHLIGHT, message, label, link, spaceAbove, spaceBelow)
+) = Alert(AlertTheme.BLUE_HIGHLIGHT, message, label, link, linkInNewTab, spaceAbove, spaceBelow)
 
 enum class AlertTheme(
   val backgroundColor: String,

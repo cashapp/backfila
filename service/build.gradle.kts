@@ -7,6 +7,7 @@ plugins {
   kotlin("jvm")
   id("com.diffplug.spotless")
   id("com.vanniktech.maven.publish.base")
+  id("com.squareup.wire")
 }
 
 sourceSets {
@@ -90,6 +91,13 @@ dependencies {
   testImplementation(project(":client-base"))
   testImplementation(project(":client-misk"))
   testImplementation(project(":client-static"))
+}
+
+wire {
+  protoLibrary = true
+  kotlin {
+    javaInterop = true
+  }
 }
 
 val jar by tasks.getting(Jar::class) {
