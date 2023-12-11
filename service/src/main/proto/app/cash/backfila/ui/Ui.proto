@@ -1,0 +1,7 @@
+syntax = "proto3";
+package app.cash.protos.backfila.ui;
+
+enum SortCol {
+  DO_NOT_USE_SORT_COL = 0;
+  RUNNING = 1;
+}

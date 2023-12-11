@@ -30,7 +30,7 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 
 @MiskTest(startService = true)
-class ConfigureServiceActionTest {
+class ConfigureServiceShowActionTest {
   @Suppress("unused")
   @MiskTestModule
   val module: Module = BackfilaTestingModule()
