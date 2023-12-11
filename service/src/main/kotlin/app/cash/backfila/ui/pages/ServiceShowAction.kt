@@ -1,10 +1,8 @@
 package app.cash.backfila.ui.pages
 
 import app.cash.backfila.dashboard.GetBackfillRunsAction
-import app.cash.backfila.ui.SLACK_CHANNEL_NAME
-import app.cash.backfila.ui.SLACK_CHANNEL_URL
-import app.cash.backfila.ui.components.AlertInfoHighlight
-import app.cash.backfila.ui.components.AlertSlackHelp
+import app.cash.backfila.service.BackfilaConfig
+import app.cash.backfila.ui.components.AlertSupport
 import app.cash.backfila.ui.components.BackfillsTable
 import app.cash.backfila.ui.components.DashboardLayout
 import app.cash.backfila.ui.components.PageTitle
@@ -24,6 +22,7 @@ import misk.web.mediatype.MediaTypes
 
 @Singleton
 class ServiceShowAction @Inject constructor(
+  private val config: BackfilaConfig,
   private val getBackfillRunsAction: GetBackfillRunsAction,
 ) : WebAction {
   @Get(PATH)
@@ -56,7 +55,7 @@ class ServiceShowAction @Inject constructor(
           role = "list"
         }
 
-        AlertSlackHelp()
+        AlertSupport(config.support_button_label, config.support_button_url)
       }
     }
 

@@ -36,7 +36,7 @@ subprojects {
   apply(plugin = "org.jetbrains.kotlin.plugin.allopen")
 
   tasks.withType<KotlinCompile> {
-  //   dependsOn("spotlessKotlinApply")
+    dependsOn("spotlessKotlinApply")
     kotlinOptions {
       jvmTarget = "11"
     }
@@ -75,13 +75,6 @@ subprojects {
   repositories {
     mavenCentral()
     maven(url = "https://s3-us-west-2.amazonaws.com/dynamodb-local/release")
-
-    mavenLocal {
-      content {
-        includeGroup("com.squareup.misk")
-        includeGroup("app.cash.wisp")
-      }
-    }
   }
 
   tasks.withType<Test> {

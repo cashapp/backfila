@@ -1,7 +1,8 @@
 package app.cash.backfila.ui.pages
 
+import app.cash.backfila.service.BackfilaConfig
 import app.cash.backfila.ui.PathBuilder
-import app.cash.backfila.ui.components.AlertSlackHelp
+import app.cash.backfila.ui.components.AlertSupport
 import app.cash.backfila.ui.components.DashboardLayout
 import app.cash.backfila.ui.components.PageTitle
 import app.cash.backfila.ui.components.ServiceAutocompleteWrapper
@@ -22,7 +23,9 @@ import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 
-class ServiceIndexAction @Inject constructor() : WebAction {
+class ServiceIndexAction @Inject constructor(
+  private val config: BackfilaConfig,
+) : WebAction {
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
   @Unauthenticated
@@ -200,7 +203,7 @@ class ServiceIndexAction @Inject constructor() : WebAction {
         turbo_frame("") {
         }
 
-        AlertSlackHelp()
+        AlertSupport(config.support_button_label, config.support_button_url)
       }
     }
   }

@@ -1,6 +1,6 @@
 package app.cash.backfila.dashboard
 
-import com.squareup.cash.monitorcheckup.ui.UiModule
+import app.cash.backfila.ui.UiModule
 import misk.inject.KAbstractModule
 import misk.web.WebActionModule
 
