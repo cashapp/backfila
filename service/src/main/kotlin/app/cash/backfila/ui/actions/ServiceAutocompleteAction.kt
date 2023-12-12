@@ -28,6 +28,8 @@ class ServiceAutocompleteAction @Inject constructor(
     return buildHtml {
       services.flatMap { service ->
         service.variants.map { variant -> "${service.name}/$variant" to service }
+      }.filter { (path, _) ->
+        q.isNullOrBlank() || path.lowercase().contains(q.lowercase())
       }.map { (path, service) ->
         li("list-group-item cursor-default select-none px-4 py-2 text-left") {
           role = "option"
