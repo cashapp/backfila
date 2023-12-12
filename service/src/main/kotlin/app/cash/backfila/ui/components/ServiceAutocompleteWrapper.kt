@@ -5,7 +5,7 @@ import kotlinx.html.TagConsumer
 import kotlinx.html.div
 import kotlinx.html.label
 
-fun TagConsumer<*>.ServiceAutocompleteWrapper(redirectPath: String) {
+fun TagConsumer<*>.ServiceAutocompleteWrapper(serviceQuery: String?, redirectPath: String) {
   div("rounded-lg bg-gray-100 my-5") {
     div("px-4 py-5 sm:p-6") {
       div {
@@ -14,9 +14,10 @@ fun TagConsumer<*>.ServiceAutocompleteWrapper(redirectPath: String) {
           +"""Service Name"""
         }
         ServiceAutocomplete(
-          pagePathBuilder = PathBuilder(path = redirectPath),
-          // TODO delete if don't want URL query paramter to pre-fill the search bar
-          // query = serviceQuery?.lowercase(),
+          pagePathBuilder = PathBuilder(
+            path = redirectPath,
+            query = serviceQuery?.lowercase(),
+          )
         )
       }
     }

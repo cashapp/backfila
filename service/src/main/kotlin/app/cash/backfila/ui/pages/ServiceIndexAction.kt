@@ -30,7 +30,7 @@ class ServiceIndexAction @Inject constructor(
   @ResponseContentType(MediaTypes.TEXT_HTML)
   @Unauthenticated
   fun get(
-    @QueryParam sc: String?,
+    @QueryParam q: String?,
   ): String {
     return buildHtml {
       DashboardLayout(
@@ -40,7 +40,7 @@ class ServiceIndexAction @Inject constructor(
         PageTitle("Services")
         val pathBuilder = PathBuilder(path = PATH)
 
-        ServiceAutocompleteWrapper(redirectPath = ServiceShowAction.PATH)
+        ServiceAutocompleteWrapper(serviceQuery = q, redirectPath = ServiceShowAction.PATH)
 
         ToggleContainer(
           buttonText = "${pathBuilder.countFilters()} Filters",
