@@ -13,6 +13,7 @@ import kotlinx.html.ul
 import misk.hotwire.buildHtmlResponseBody
 import misk.security.authz.Unauthenticated
 import misk.web.Get
+import misk.web.PathParam
 import misk.web.QueryParam
 import misk.web.Response
 import misk.web.ResponseBody
@@ -29,17 +30,19 @@ class ServiceShowAction @Inject constructor(
   @ResponseContentType(MediaTypes.TEXT_HTML)
   @Unauthenticated
   fun checkService(
-    @QueryParam s: String,
+    @PathParam service: String?,
+    @PathParam variant: String?,
+    @QueryParam s: String?,
     @QueryParam("experimental") experimental: Boolean? = false,
   ): Response<ResponseBody> {
-    val serviceName = s.split("/").first()
-    val variant = s.split("/").last()
+    val serviceName = service ?: s!!.split("/").first()
+    val resolvedVariant = variant ?: s!!.split("/").last()
 
-    val backfillRuns = getBackfillRunsAction.backfillRuns(serviceName, variant)
+    val backfillRuns = getBackfillRunsAction.backfillRuns(serviceName, resolvedVariant)
 
     val htmlResponseBody = buildHtmlResponseBody {
       // TODO show default if other variants and probably link to a switcher
-      val label = if (variant == "default") serviceName else "$serviceName ($variant)"
+      val label = if (resolvedVariant == "default") serviceName else "$serviceName ($resolvedVariant)"
       DashboardLayout(
         title = "$label | Backfila",
         path = PATH,
@@ -63,6 +66,6 @@ class ServiceShowAction @Inject constructor(
   }
 
   companion object {
-    const val PATH = "/services/"
+    const val PATH = "/services/{service}/{variant}"
   }
 }

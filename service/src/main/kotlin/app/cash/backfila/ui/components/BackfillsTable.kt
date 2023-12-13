@@ -1,7 +1,11 @@
 package app.cash.backfila.ui.components
 
 import app.cash.backfila.dashboard.UiBackfillRun
+import app.cash.backfila.ui.PathBuilder
+import app.cash.backfila.ui.pages.BackfillShowAction
 import kotlinx.html.TagConsumer
+import kotlinx.html.a
+import kotlinx.html.classes
 import kotlinx.html.div
 import kotlinx.html.h1
 import kotlinx.html.table
@@ -38,7 +42,18 @@ fun TagConsumer<*>.BackfillsTable(running: Boolean, backfills: List<UiBackfillRu
             tbody("divide-y divide-gray-200") {
               backfills.forEach {
                 tr {
-                  listOf(it.id, it.name, it.state, it.dry_run).map {
+                  td(
+                    "whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0",
+                  ) { +it.id }
+                  td(
+                    "whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0",
+                  ) {
+                    a(classes = "text-green-500 hover:underline") {
+                      href = PathBuilder(path = BackfillShowAction.PATH.replace("{id}", it.id)).build()
+                      +it.name.collapseBackfillName()
+                    }
+                  }
+                  listOf(it.state, it.dry_run).map {
                     td(
                       "whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0",
                     ) { +"""$it""" }
@@ -72,4 +87,14 @@ fun TagConsumer<*>.BackfillsTable(running: Boolean, backfills: List<UiBackfillRu
       }
     }
   }
+}
+
+fun String.collapseBackfillName(): String {
+  val segments = this.split(".")
+  val name = segments.last()
+  val collapsed = segments.dropLast(1).joinToString(".") {
+    val pathTruncation = 5
+    if (it.length > pathTruncation) "${it.take(pathTruncation)}." else it
+  }
+  return "$collapsed.$name"
 }

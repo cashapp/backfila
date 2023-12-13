@@ -17,7 +17,7 @@ fun TagConsumer<*>.ServiceAutocompleteWrapper(serviceQuery: String?, redirectPat
           pagePathBuilder = PathBuilder(
             path = redirectPath,
             query = serviceQuery?.lowercase(),
-          )
+          ),
         )
       }
     }
