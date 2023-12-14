@@ -22,6 +22,7 @@ class RealBackfilaManagementClient @Inject internal constructor(
     scan_size: Long?,
     pkey_range_start: ByteString?,
     pkey_range_end: ByteString?,
+    variant: String?,
   ) {
     client.createAndStartBackfill(
       CreateAndStartBackfillRequest.Builder()
@@ -42,7 +43,9 @@ class RealBackfilaManagementClient @Inject internal constructor(
             .pkey_range_start(pkey_range_start)
             .pkey_range_end(pkey_range_end)
             .build(),
-        ).build(),
+        )
+        .variant(variant)
+        .build(),
     )
   }
 }
