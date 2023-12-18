@@ -100,6 +100,10 @@ wire {
     srcProject(":client")
   }
 
+  custom {
+    schemaHandlerFactory = app.cash.backfila.FakeGrpcClientGenerator.Factory()
+  }
+
   kotlin {
     javaInterop = true
   }

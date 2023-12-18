@@ -72,6 +72,7 @@ object Dependencies {
   val miskTesting = "com.squareup.misk:misk-testing:${Versions.misk}"
   val wireCompiler = "com.squareup.wire:wire-compiler:${Versions.wire}"
   val wireGradlePlugin = "com.squareup.wire:wire-gradle-plugin:${Versions.wire}"
+  val wireGrpcClient = "com.squareup.wire:wire-grpc-client:${Versions.wire}"
   val wireMoshiAdapter = "com.squareup.wire:wire-moshi-adapter:${Versions.wire}"
   val wireRuntime = "com.squareup.wire:wire-runtime:${Versions.wire}"
   val wireSchema = "com.squareup.wire:wire-schema:${Versions.wire}"
@@ -89,6 +90,6 @@ object Versions {
   val kotlinCoroutines = "1.6.3"
   val ktlint = "0.47.1"
   val misk = "2023.12.01.175902-d977e5a"
-  val wire = "4.4.2"
+  val wire = "4.9.3"
   val wisp = "2023.08.14.092919-cea18b8"
 }

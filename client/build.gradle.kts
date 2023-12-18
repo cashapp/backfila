@@ -26,6 +26,7 @@ dependencies {
   implementation(Dependencies.okio)
   implementation(Dependencies.kotlinStdLib)
   implementation(Dependencies.wireMoshiAdapter)
+  implementation(Dependencies.wireGrpcClient)
 }
 
 wire {
