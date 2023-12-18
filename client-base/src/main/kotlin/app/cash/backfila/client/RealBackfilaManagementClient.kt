@@ -9,6 +9,7 @@ import okio.ByteString
 
 // TODO(mikepaw) - add parameter_map method for Java uses.
 class RealBackfilaManagementClient @Inject internal constructor(
+  private val config: BackfilaClientConfig,
   private val client: BackfilaClient,
 ) : BackfilaManagementClient {
   override fun <B : Backfill> createAndStart(
@@ -42,7 +43,9 @@ class RealBackfilaManagementClient @Inject internal constructor(
             .pkey_range_start(pkey_range_start)
             .pkey_range_end(pkey_range_end)
             .build(),
-        ).build(),
+        )
+        .variant(config.variant)
+        .build(),
     )
   }
 }
