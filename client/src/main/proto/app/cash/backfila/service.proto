@@ -104,3 +104,8 @@ message CheckBackfillStatusResponse {
     COMPLETE = 3;
   }
 }
+
+service Backfila {
+  rpc ConfigureService(ConfigureServiceRequest) returns (ConfigureServiceResponse) {}
+  rpc CreateBackfill(CreateBackfillRequest) returns (CreateBackfillResponse) {}
+}

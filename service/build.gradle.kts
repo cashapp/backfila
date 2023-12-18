@@ -95,8 +95,21 @@ dependencies {
 
 wire {
   protoLibrary = true
+
+  sourcePath {
+    srcProject(":client")
+  }
+
   kotlin {
     javaInterop = true
+  }
+  kotlin {
+    includes = listOf(
+      "app.cash.backfila.protos.service.Backfila"
+    )
+    rpcCallStyle = "blocking"
+    rpcRole = "server"
+    singleMethodServices = true
   }
 }
 
