@@ -19,5 +19,6 @@ internal class FineDiningServiceModule : KAbstractModule() {
       ),
     )
     install(StaticDatasourceBackfillModule.create<SlowMealsBackfill>())
+    install(StaticDatasourceBackfillModule.create<ClumsyMealsBackfill>())
   }
 }
