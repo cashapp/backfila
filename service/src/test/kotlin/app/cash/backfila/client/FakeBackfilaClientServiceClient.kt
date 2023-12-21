@@ -93,4 +93,6 @@ class FakeBackfilaClientServiceClient @Inject constructor() : BackfilaClientServ
     runBatchRequests.send(request)
     return runBatchResponses.receive().getOrThrow()
   }
+
+  override fun connectionLogData() = "FakeBackfilaClientServiceClient so no connection"
 }

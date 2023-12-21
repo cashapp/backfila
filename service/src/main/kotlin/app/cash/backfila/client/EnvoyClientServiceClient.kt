@@ -11,6 +11,7 @@ import retrofit2.Response
 
 internal class EnvoyClientServiceClient internal constructor(
   private val api: EnvoyClientServiceApi,
+  private val connectionLogData: String,
 ) : BackfilaClientServiceClient {
 
   override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
@@ -25,6 +26,8 @@ internal class EnvoyClientServiceClient internal constructor(
   override suspend fun runBatch(request: RunBatchRequest): RunBatchResponse {
     return api.runBatch(request)
   }
+
+  override fun connectionLogData() = connectionLogData
 
   private fun <T> Response<T>.getOrThrow(): T {
     if (!this.isSuccessful) {

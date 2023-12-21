@@ -126,24 +126,38 @@ class BackfillCreator @Inject constructor(
       )
     } catch (e: Exception) {
       logger.info(e) { "PrepareBackfill on `$service` failed" }
-      throw BadRequestException("PrepareBackfill on `$service` failed: ${e.message}", e)
+      throw BadRequestException(
+        "PrepareBackfill on `$service` failed: ${e.message}. " +
+          "connectionData: ${client.connectionLogData()}",
+        e,
+      )
     }
 
     prepareBackfillResponse.error_message?.let {
-      throw BadRequestException("PrepareBackfill on `$service` failed: $it")
+      throw BadRequestException(
+        "PrepareBackfill on `$service` failed: $it. " +
+          "connectionData: ${client.connectionLogData()}",
+      )
     }
 
     val partitions = prepareBackfillResponse.partitions
     if (partitions.isEmpty()) {
-      throw BadRequestException("PrepareBackfill returned no partitions")
+      throw BadRequestException(
+        "PrepareBackfill returned no partitions. " +
+          "connectionData: ${client.connectionLogData()}",
+      )
     }
     if (partitions.any { it.partition_name == null }) {
-      throw BadRequestException("PrepareBackfill returned unnamed partitions")
+      throw BadRequestException(
+        "PrepareBackfill returned unnamed partitions. " +
+          "connectionData: ${client.connectionLogData()}",
+      )
     }
     if (partitions.distinctBy { it.partition_name }.size != partitions.size) {
       throw BadRequestException(
         "PrepareBackfill did not return distinct partition names:" +
-          " ${partitions.map { it.partition_name }}",
+          " ${partitions.map { it.partition_name }}. " +
+          "connectionData: ${client.connectionLogData()}",
       )
     }
 

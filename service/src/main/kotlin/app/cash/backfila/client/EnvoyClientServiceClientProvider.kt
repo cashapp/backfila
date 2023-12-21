@@ -71,7 +71,10 @@ class EnvoyClientServiceClientProvider @Inject constructor(
       .addCallAdapterFactory(GuavaCallAdapterFactory.create())
       .build()
     val api = retrofit.create(EnvoyClientServiceApi::class.java)
-    return EnvoyClientServiceClient(api)
+    val logData = "envoyConfig: ${httpClientEndpointConfig.envoy}, " +
+      "url: ${httpClientEndpointConfig.url}, " +
+      "headers: $headers"
+    return EnvoyClientServiceClient(api, logData)
   }
 
   private fun adapter() = moshi.adapter<EnvoyConnectorData>()
