@@ -406,7 +406,7 @@ class CreateBackfillActionTest {
             .build(),
         )
       }.isInstanceOf(BadRequestException::class.java)
-        .hasMessage("PrepareBackfill on `deep-fryer` failed: We're out of chicken")
+        .hasMessage("PrepareBackfill on `deep-fryer` failed: We're out of chicken. connectionData: FakeBackfilaClientServiceClient so no connection")
 
       transacter.transaction { session ->
         val runs = queryFactory.newQuery<BackfillRunQuery>().list(session)
