@@ -194,6 +194,6 @@ class BackfillCreator @Inject constructor(
   companion object {
     private val logger = getLogger<BackfillCreator>()
 
-    internal const val MAX_PARAMETER_VALUE_SIZE = 1000
+    internal const val MAX_PARAMETER_VALUE_SIZE = 6_000
   }
 }
