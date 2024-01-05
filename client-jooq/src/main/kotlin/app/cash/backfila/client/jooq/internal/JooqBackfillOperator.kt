@@ -5,6 +5,8 @@ import app.cash.backfila.client.jooq.CompoundKeyComparer
 import app.cash.backfila.client.jooq.JooqBackfill
 import app.cash.backfila.client.spi.BackfilaParametersOperator
 import app.cash.backfila.client.spi.BackfillOperator
+import app.cash.backfila.protos.clientservice.FinalizeBackfillRequest
+import app.cash.backfila.protos.clientservice.FinalizeBackfillResponse
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.KeyRange
@@ -142,6 +144,14 @@ class JooqBackfillOperator<K, Param : Any> internal constructor(
     return KeyRange.Builder()
       .start(rangeStart)
       .end(rangeEnd)
+      .build()
+  }
+
+  override fun finalizeBackfill(request: FinalizeBackfillRequest): FinalizeBackfillResponse {
+    val config = parametersOperator.constructBackfillConfig(request)
+    backfill.finalize(config)
+
+    return FinalizeBackfillResponse.Builder()
       .build()
   }
 }

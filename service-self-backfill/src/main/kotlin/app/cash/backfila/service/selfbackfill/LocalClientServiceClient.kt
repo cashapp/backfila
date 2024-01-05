@@ -2,6 +2,8 @@ package app.cash.backfila.service.selfbackfill
 
 import app.cash.backfila.client.BackfilaClientServiceClient
 import app.cash.backfila.client.spi.BackfilaClientServiceHandler
+import app.cash.backfila.protos.clientservice.FinalizeBackfillRequest
+import app.cash.backfila.protos.clientservice.FinalizeBackfillResponse
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
@@ -23,5 +25,9 @@ internal class LocalClientServiceClient @Inject internal constructor(
 
   override suspend fun runBatch(request: RunBatchRequest): RunBatchResponse {
     return backfilaClientServiceHandler.runBatch(request)
+  }
+
+  override suspend fun finalizeBackfill(request: FinalizeBackfillRequest): FinalizeBackfillResponse {
+    return backfilaClientServiceHandler.finalizeBackfill(request)
   }
 }

@@ -94,8 +94,14 @@ class BackfilaClientServiceHandler @Inject constructor(
     return loggingSetupProvider.withBackfillRunLogging(request.backfill_name, request.backfill_id) {
       logger.info { "Finalizing backfill `${request.backfill_name}::${request.backfill_id}`" }
 
-      // This is a stub for now
-      return@withBackfillRunLogging FinalizeBackfillResponse()
+      val operator = operatorFactory.create(request.backfill_name, request.backfill_id)
+      try {
+        return@withBackfillRunLogging operator.finalizeBackfill(request)
+      } catch (exception: Exception) {
+        return@withBackfillRunLogging FinalizeBackfillResponse.Builder()
+          .error_message(exception.message)
+          .build()
+      }
     }
   }
 

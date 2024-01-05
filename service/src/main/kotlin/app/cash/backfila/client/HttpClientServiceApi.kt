@@ -1,5 +1,7 @@
 package app.cash.backfila.client
 
+import app.cash.backfila.protos.clientservice.FinalizeBackfillRequest
+import app.cash.backfila.protos.clientservice.FinalizeBackfillResponse
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
@@ -45,6 +47,17 @@ interface HttpClientServiceApi {
   suspend fun runBatch(
     @Body request: RunBatchRequest,
   ): RunBatchResponse
+
+  @POST("$BASE_PATH/finalize_backfill")
+  @Headers(
+    value = [
+      "Accept: application/x-protobuf",
+      "Content-Type: application/x-protobuf"
+    ]
+  )
+  suspend fun finalizeBackfill(
+    @Body request: FinalizeBackfillRequest
+  ): FinalizeBackfillResponse
 
   companion object {
     private const val BASE_PATH = "backfila"

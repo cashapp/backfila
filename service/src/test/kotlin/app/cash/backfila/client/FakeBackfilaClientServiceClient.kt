@@ -1,5 +1,7 @@
 package app.cash.backfila.client
 
+import app.cash.backfila.protos.clientservice.FinalizeBackfillRequest
+import app.cash.backfila.protos.clientservice.FinalizeBackfillResponse
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.KeyRange
@@ -10,6 +12,7 @@ import app.cash.backfila.protos.clientservice.RunBatchResponse
 import java.util.LinkedList
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import okio.ByteString.Companion.encodeUtf8
 
@@ -27,12 +30,21 @@ class FakeBackfilaClientServiceClient @Inject constructor() : BackfilaClientServ
   /** Send responses or exceptions here to return them to the runner. */
   val runBatchResponses = Channel<Result<RunBatchResponse>>()
 
+  val finalizeRequests = Channel<FinalizeBackfillRequest>()
+
+  /** Send responses or exceptions here to return them to the runner. */
+  val finalizeResponses = Channel<Result<FinalizeBackfillResponse>>()
+
   fun dontBlockGetNextBatch() {
     getNextBatchRangeRequests.close()
   }
 
   fun dontBlockRunBatch() {
     runBatchRequests.close()
+  }
+
+  fun dontBlockFinalize() {
+    finalizeRequests.close()
   }
 
   override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
@@ -92,5 +104,14 @@ class FakeBackfilaClientServiceClient @Inject constructor() : BackfilaClientServ
     }
     runBatchRequests.send(request)
     return runBatchResponses.receive().getOrThrow()
+  }
+
+  @OptIn(ExperimentalCoroutinesApi::class)
+  override suspend fun finalizeBackfill(request: FinalizeBackfillRequest): FinalizeBackfillResponse {
+    if (finalizeRequests.isClosedForSend) {
+      return FinalizeBackfillResponse.Builder().build()
+    }
+    finalizeRequests.send(request)
+    return finalizeResponses.receive().getOrThrow()
   }
 }

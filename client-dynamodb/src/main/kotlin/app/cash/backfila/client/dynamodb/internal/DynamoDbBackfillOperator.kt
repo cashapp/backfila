@@ -3,6 +3,8 @@ package app.cash.backfila.client.dynamodb.internal
 import app.cash.backfila.client.dynamodb.DynamoDbBackfill
 import app.cash.backfila.client.spi.BackfilaParametersOperator
 import app.cash.backfila.client.spi.BackfillOperator
+import app.cash.backfila.protos.clientservice.FinalizeBackfillRequest
+import app.cash.backfila.protos.clientservice.FinalizeBackfillResponse
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.KeyRange
@@ -131,6 +133,14 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
 
     return RunBatchResponse.Builder()
       .remaining_batch_range(lastEvaluatedKey?.toKeyRange(keyRange))
+      .build()
+  }
+
+  override fun finalizeBackfill(request: FinalizeBackfillRequest): FinalizeBackfillResponse {
+    val config = parametersOperator.constructBackfillConfig(request)
+    backfill.finalize(config)
+
+    return FinalizeBackfillResponse.Builder()
       .build()
   }
 

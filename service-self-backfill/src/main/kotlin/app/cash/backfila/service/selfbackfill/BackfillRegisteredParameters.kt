@@ -21,9 +21,9 @@ internal class BackfillRegisteredParameters @Inject constructor(
   private val queryFactory: Query.Factory,
 ) : HibernateBackfill<DbRegisteredBackfill, Id<DbRegisteredBackfill>, NoParameters>() {
 
-  override fun runOne(id: Id<DbRegisteredBackfill>, config: BackfillConfig<NoParameters>) {
+  override fun runOne(pkey: Id<DbRegisteredBackfill>, config: BackfillConfig<NoParameters>) {
     transacter.transaction { session ->
-      val backfill = session.load(id)
+      val backfill = session.load(pkey)
       if (backfill.parameters.size == backfill.parameterNames().size) {
         return@transaction
       }

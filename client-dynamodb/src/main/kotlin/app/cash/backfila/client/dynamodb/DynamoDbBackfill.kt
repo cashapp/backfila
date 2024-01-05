@@ -2,6 +2,7 @@ package app.cash.backfila.client.dynamodb
 
 import app.cash.backfila.client.Backfill
 import app.cash.backfila.client.BackfillConfig
+import app.cash.backfila.client.FinalizeBackfillConfig
 import app.cash.backfila.client.PrepareBackfillConfig
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.amazonaws.services.dynamodbv2.model.ScanRequest
@@ -79,4 +80,9 @@ abstract class DynamoDbBackfill<I : Any, P : Any> : Backfill {
 
   /** See [ScanRequest.setIndexName]. */
   open fun indexName(config: BackfillConfig<P>): String? = null
+
+  /**
+   * Override this to do any work after the backfill completes.
+   */
+  open fun finalize(config: FinalizeBackfillConfig<P>) {}
 }

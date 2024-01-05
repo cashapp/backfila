@@ -2,6 +2,7 @@ package app.cash.backfila.client.stat
 
 import app.cash.backfila.client.Backfill
 import app.cash.backfila.client.BackfillConfig
+import app.cash.backfila.client.FinalizeBackfillConfig
 import app.cash.backfila.client.PrepareBackfillConfig
 import com.google.inject.TypeLiteral
 import com.squareup.moshi.Types
@@ -54,4 +55,9 @@ abstract class StaticDatasourceBackfill<I : Any, P : Any> : Backfill {
    * This invokes the static list of items that the backfill will iterate over.
    */
   abstract val staticDatasource: List<I>
+
+  /**
+   * Override this to do any work after the backfill completes.
+   */
+  open fun finalize(config: FinalizeBackfillConfig<P>) {}
 }

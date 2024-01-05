@@ -2,6 +2,7 @@ package app.cash.backfila.client.jooq
 
 import app.cash.backfila.client.Backfill
 import app.cash.backfila.client.BackfillConfig
+import app.cash.backfila.client.FinalizeBackfillConfig
 import app.cash.backfila.client.PrepareBackfillConfig
 import app.cash.backfila.protos.clientservice.KeyRange
 import okio.ByteString
@@ -151,4 +152,9 @@ abstract class JooqBackfill<K, Param : Any> : Backfill {
   fun compoundKeyComparer(): CompoundKeyComparer<K> {
     return CompoundKeyComparer(compoundKeyFields)
   }
+
+  /**
+   * Override this to do any work after the backfill completes.
+   */
+  open fun finalize(config: FinalizeBackfillConfig<Param>) {}
 }

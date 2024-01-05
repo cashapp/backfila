@@ -4,7 +4,9 @@ import app.cash.backfila.client.BackfilaDefault
 import app.cash.backfila.client.BackfilaRequired
 import app.cash.backfila.client.BackfillConfig
 import app.cash.backfila.client.Description
+import app.cash.backfila.client.FinalizeBackfillConfig
 import app.cash.backfila.client.PrepareBackfillConfig
+import app.cash.backfila.protos.clientservice.FinalizeBackfillRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
 import app.cash.backfila.protos.clientservice.RunBatchRequest
@@ -59,6 +61,13 @@ class BackfilaParametersOperator<T : Any>(
     request.backfill_id,
     request.dry_run,
   )
+
+  fun constructBackfillConfig(request: FinalizeBackfillRequest): FinalizeBackfillConfig<T> =
+    FinalizeBackfillConfig(
+      constructParameters(request.parameters),
+      request.backfill_id,
+      request.dry_run,
+    )
 
   fun constructParameters(
     parameters: MutableMap<String, ByteString>,

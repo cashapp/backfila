@@ -2,6 +2,7 @@ package app.cash.backfila.client.misk.hibernate
 
 import app.cash.backfila.client.Backfill
 import app.cash.backfila.client.BackfillConfig
+import app.cash.backfila.client.FinalizeBackfillConfig
 import app.cash.backfila.client.PrepareBackfillConfig
 import com.squareup.moshi.Types
 import java.lang.reflect.ParameterizedType
@@ -83,4 +84,9 @@ abstract class HibernateBackfill<E : DbEntity<E>, Pkey : Any, Param : Any> : Bac
    */
   open fun runOne(pkey: Pkey, config: BackfillConfig<Param>) {
   }
+
+  /**
+   * Override this to do any work after the backfill completes.
+   */
+  open fun finalizeBackfill(config: FinalizeBackfillConfig<Param>) {}
 }
