@@ -36,6 +36,11 @@ dependencies {
   testImplementation(Dependencies.junitEngine)
   testImplementation(Dependencies.kotlinTest)
 
+  if (org.apache.tools.ant.taskdefs.condition.Os.isArch("aarch64")) {
+    // Without this, we can't compile on Apple Silicon currently. This is likely not necessary to
+    // have longterm, so we should remove it when platform fixes things across Square.
+    testImplementation("io.github.ganadist.sqlite4java:libsqlite4java-osx-aarch64:1.0.392")
+  }
   testImplementation(project(":backfila-embedded"))
   testImplementation(project(":client-testing"))
 
