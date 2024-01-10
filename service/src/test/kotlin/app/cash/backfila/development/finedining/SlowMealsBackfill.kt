@@ -12,11 +12,11 @@ class SlowMealsBackfill @Inject constructor() : StaticDatasourceBackfill<String,
   }
 
   data class SlowMealsAttributes(
-    val mealDelayMs: Long = 1000L,
+    val mealDelayMs: Long = 100L,
   )
 
   // Generate the meal place settings for the backfill.
-  override val staticDatasource: List<String> = (1..1000).map { i -> "place setting $i" }
+  override val staticDatasource: List<String> = (1..5000).map { i -> "place setting $i" }
 
   companion object {
     private val logger = getLogger<SlowMealsBackfill>()

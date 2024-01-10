@@ -24,4 +24,6 @@ internal class LocalClientServiceClient @Inject internal constructor(
   override suspend fun runBatch(request: RunBatchRequest): RunBatchResponse {
     return backfilaClientServiceHandler.runBatch(request)
   }
+
+  override fun connectionLogData() = "LocalClientServiceClient so no connection"
 }

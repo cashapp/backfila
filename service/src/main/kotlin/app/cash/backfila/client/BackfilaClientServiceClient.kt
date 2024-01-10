@@ -13,4 +13,9 @@ interface BackfilaClientServiceClient {
   suspend fun getNextBatchRange(request: GetNextBatchRangeRequest): GetNextBatchRangeResponse
 
   suspend fun runBatch(request: RunBatchRequest): RunBatchResponse
+
+  /**
+   * Gives us a way to probe for connection information when something fails to help with debugging.
+   */
+  fun connectionLogData(): String
 }

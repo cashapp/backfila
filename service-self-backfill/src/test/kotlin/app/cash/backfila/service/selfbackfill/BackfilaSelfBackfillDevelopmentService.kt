@@ -85,6 +85,8 @@ internal fun main(args: Array<String>) {
                 override suspend fun runBatch(request: RunBatchRequest): RunBatchResponse {
                   TODO("Not yet implemented")
                 }
+
+                override fun connectionLogData() = "Fake development service client"
               }
             }
           },

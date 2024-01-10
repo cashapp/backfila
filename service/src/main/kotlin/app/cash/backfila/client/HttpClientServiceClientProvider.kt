@@ -67,7 +67,9 @@ class HttpClientServiceClientProvider @Inject constructor(
       .addCallAdapterFactory(GuavaCallAdapterFactory.create())
       .build()
     val api = retrofit.create(HttpClientServiceApi::class.java)
-    return HttpClientServiceClient(api)
+    val logData = "url: ${httpClientEndpointConfig.url}, " +
+      "headers: $headers"
+    return HttpClientServiceClient(api, logData)
   }
 
   private fun adapter() = moshi.adapter<HttpConnectorData>()
