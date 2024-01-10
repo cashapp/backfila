@@ -6,7 +6,7 @@ import okio.ByteString
 /**
  * Produces single string records separated by newlines.
  */
-class Utf8StringNewlineStrategy(
+open class Utf8StringNewlineStrategy(
   private val ignoreBlankLines: Boolean = true,
 ) : RecordStrategy<String> {
   override fun calculateNextRecordBytes(source: BufferedSource): Long {
