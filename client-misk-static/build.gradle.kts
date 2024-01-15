@@ -8,7 +8,7 @@ plugins {
   id("com.vanniktech.maven.publish.base")
 }
 dependencies {
-  implementation(Dependencies.kotlinStdLib)
+  implementation(libs.kotlinStdLib)
 
   api(project(":client-static"))
 }

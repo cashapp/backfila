@@ -12,8 +12,8 @@ dependencies {
   api(project(":client"))
   implementation(project(":backfila-embedded"))
 
-  implementation(Dependencies.junitEngine)
-  implementation(Dependencies.assertj)
+  implementation(libs.junitEngine)
+  implementation(libs.assertj)
 }
 
 configure<MavenPublishBaseExtension> {

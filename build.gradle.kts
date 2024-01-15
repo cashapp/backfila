@@ -13,13 +13,13 @@ buildscript {
   }
 
   dependencies {
-    classpath(Dependencies.kotlinGradlePlugin)
-    classpath(Dependencies.kotlinAllOpenPlugin)
-    classpath(Dependencies.dokkaGradlePlugin)
-    classpath(Dependencies.mavenPublishGradlePlugin)
-    classpath(Dependencies.spotlessPlugin)
-    classpath(Dependencies.wireGradlePlugin)
-    classpath(Dependencies.shadowJarPlugin)
+    classpath(libs.kotlinGradlePlugin)
+    classpath(libs.kotlinAllOpenPlugin)
+    classpath(libs.dokkaGradlePlugin)
+    classpath(libs.mavenPublishGradlePlugin)
+    classpath(libs.spotlessPlugin)
+    classpath(libs.wireGradlePlugin)
+    classpath(libs.shadowJarPlugin)
   }
 }
 
@@ -56,7 +56,7 @@ subprojects {
   configure<SpotlessExtension> {
     kotlin {
       target("**/*.kt")
-      ktlint(Versions.ktlint).editorConfigOverride(
+      ktlint(libs.versions.ktlint.get()).editorConfigOverride(
           mapOf(
               "indent_size" to "2",
               "continuation_indent_size" to "4",

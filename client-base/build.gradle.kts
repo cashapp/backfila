@@ -9,20 +9,20 @@ plugins {
 }
 
 dependencies {
-  implementation(Dependencies.apacheCommonsLang3)
-  implementation(Dependencies.guava)
-  implementation(Dependencies.moshiCore)
-  implementation(Dependencies.moshiKotlin)
-  implementation(Dependencies.wireRuntime)
-  implementation(Dependencies.guice)
-  implementation(Dependencies.retrofit)
-  implementation(Dependencies.retrofitMock)
-  implementation(Dependencies.retrofitMoshi)
-  implementation(Dependencies.retrofitWire)
-  implementation(Dependencies.okio)
-  implementation(Dependencies.kotlinStdLib)
-  implementation(Dependencies.wireMoshiAdapter)
-  implementation(Dependencies.wispLogging)
+  implementation(libs.apacheCommonsLang3)
+  implementation(libs.guava)
+  implementation(libs.moshiCore)
+  implementation(libs.moshiKotlin)
+  implementation(libs.wireRuntime)
+  implementation(libs.guice)
+  implementation(libs.retrofit)
+  implementation(libs.retrofitMock)
+  implementation(libs.retrofitMoshi)
+  implementation(libs.retrofitWire)
+  implementation(libs.okio)
+  implementation(libs.kotlinStdLib)
+  implementation(libs.wireMoshiAdapter)
+  implementation(libs.wispLogging)
 
   // "client" is an implementation not an api dependency because client implementations MUST
   // expose "client" as an explicit api dependency so that customers of that client have access to
@@ -32,18 +32,18 @@ dependencies {
   // base classes accessible to the client implementations but not the client customers.
   implementation(project(":client"))
 
-  testImplementation(Dependencies.junitEngine)
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.kotlinReflection)
-  testImplementation(Dependencies.kotlinTest)
+  testImplementation(libs.junitEngine)
+  testImplementation(libs.assertj)
+  testImplementation(libs.kotlinReflection)
+  testImplementation(libs.kotlinTest)
   testImplementation(project(":backfila-embedded"))
 
   // ****************************************
   // For TESTING purposes only. We only want Misk for easy testing.
   // DO NOT turn these into regular dependencies.
   // ****************************************
-  /* TEST ONLY */ testImplementation(Dependencies.misk)
-  /* TEST ONLY */ testImplementation(Dependencies.miskTesting)
+  /* TEST ONLY */ testImplementation(libs.misk)
+  /* TEST ONLY */ testImplementation(libs.miskTesting)
   /* TEST ONLY */ testImplementation(project(":client-misk"))
   // ****************************************
   // Can I make it any more obvious?
