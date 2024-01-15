@@ -9,7 +9,7 @@ plugins {
 }
 
 dependencies {
-  implementation(Dependencies.kotlinStdLib)
+  implementation(libs.kotlinStdLib)
 
   api(project(":client-dynamodb"))
 }

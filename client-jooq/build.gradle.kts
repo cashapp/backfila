@@ -10,44 +10,44 @@ buildscript {
     gradlePluginPortal()
   }
   dependencies {
-    classpath(Dependencies.mysql)
+    classpath(libs.mysql)
   }
 }
 
 plugins {
   kotlin("jvm")
   `java-library`
-  id("org.flywaydb.flyway") version Versions.flywayDBPlugin
-  id("nu.studer.jooq") version Versions.jooqGenPlugin
+  id("org.flywaydb.flyway") version "7.15.0"
+  id("nu.studer.jooq") version "8.1"
   id("com.vanniktech.maven.publish.base")
 }
 
 dependencies {
-  implementation(Dependencies.guava)
-  implementation(Dependencies.moshiCore)
-  implementation(Dependencies.moshiKotlin)
-  implementation(Dependencies.wireRuntime)
-  implementation(Dependencies.guice)
-  implementation(Dependencies.okio)
-  implementation(Dependencies.jooq)
-  implementation(Dependencies.kotlinReflection)
-  implementation(Dependencies.kotlinStdLib)
-  implementation(Dependencies.loggingApi)
-  implementation(Dependencies.wireMoshiAdapter)
+  implementation(libs.guava)
+  implementation(libs.moshiCore)
+  implementation(libs.moshiKotlin)
+  implementation(libs.wireRuntime)
+  implementation(libs.guice)
+  implementation(libs.okio)
+  implementation(libs.jooq)
+  implementation(libs.kotlinReflection)
+  implementation(libs.kotlinStdLib)
+  implementation(libs.loggingApi)
+  implementation(libs.wireMoshiAdapter)
 
-  jooqGenerator(Dependencies.mysql)
+  jooqGenerator(libs.mysql)
 
   api(project(":client"))
   // We do not want to leak client-base implementation details to customers.
   implementation(project(":client-base"))
 
-  testImplementation(Dependencies.assertj)
-  testImplementation(Dependencies.kotlinTest)
-  testImplementation(Dependencies.junitEngine)
-  testImplementation(Dependencies.junitParams)
-  testImplementation(Dependencies.okHttp)
-  testImplementation(Dependencies.mysql)
-  testImplementation(Dependencies.wispLogging)
+  testImplementation(libs.assertj)
+  testImplementation(libs.kotlinTest)
+  testImplementation(libs.junitEngine)
+  testImplementation(libs.junitParams)
+  testImplementation(libs.okHttp)
+  testImplementation(libs.mysql)
+  testImplementation(libs.wispLogging)
 
   testImplementation(project(":backfila-embedded"))
   testImplementation(project(":client-testing"))
@@ -56,13 +56,13 @@ dependencies {
   // For TESTING purposes only. We only want Misk for easy testing.
   // DO NOT turn these into regular dependencies.
   // ****************************************
-  testImplementation(Dependencies.misk)
-  testImplementation(Dependencies.miskJdbc)
-  testImplementation(Dependencies.miskActions)
-  testImplementation(Dependencies.miskCore)
-  testImplementation(Dependencies.miskInject)
-  testImplementation(testFixtures(Dependencies.miskJdbc))
-  testImplementation(Dependencies.miskTesting)
+  testImplementation(libs.misk)
+  testImplementation(libs.miskJdbc)
+  testImplementation(libs.miskActions)
+  testImplementation(libs.miskCore)
+  testImplementation(libs.miskInject)
+  testImplementation(testFixtures(libs.miskJdbc))
+  testImplementation(libs.miskTesting)
   testImplementation(project(":client-misk"))
 
 }
@@ -77,7 +77,7 @@ flyway {
 }
 
 jooq {
-  version.set(Versions.jooq)
+  version.set("3.18.1")
   edition.set(JooqEdition.OSS)
 
   configurations {

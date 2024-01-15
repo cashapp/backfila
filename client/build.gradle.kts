@@ -16,16 +16,16 @@ sourceSets {
 }
 
 dependencies {
-  implementation(Dependencies.moshiCore)
-  implementation(Dependencies.moshiKotlin)
-  implementation(Dependencies.wireRuntime)
-  implementation(Dependencies.guice)
-  implementation(Dependencies.retrofit)
-  implementation(Dependencies.retrofitMoshi)
-  implementation(Dependencies.retrofitWire)
-  implementation(Dependencies.okio)
-  implementation(Dependencies.kotlinStdLib)
-  implementation(Dependencies.wireMoshiAdapter)
+  implementation(libs.moshiCore)
+  implementation(libs.moshiKotlin)
+  implementation(libs.wireRuntime)
+  implementation(libs.guice)
+  implementation(libs.retrofit)
+  implementation(libs.retrofitMoshi)
+  implementation(libs.retrofitWire)
+  implementation(libs.okio)
+  implementation(libs.kotlinStdLib)
+  implementation(libs.wireMoshiAdapter)
 }
 
 wire {
