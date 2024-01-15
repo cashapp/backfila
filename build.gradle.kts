@@ -56,7 +56,7 @@ subprojects {
   configure<SpotlessExtension> {
     kotlin {
       target("**/*.kt")
-      ktlint("0.47.1").editorConfigOverride(
+      ktlint(libs.versions.ktlint.get()).editorConfigOverride(
           mapOf(
               "indent_size" to "2",
               "continuation_indent_size" to "4",

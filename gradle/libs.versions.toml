@@ -1,4 +1,6 @@
 [versions]
+jooq = "3.18.1"
+ktlint = "0.47.1"
 
 [libraries]
 apacheCommonsLang3 = { module = "org.apache.commons:commons-lang3", version = "3.12.0" }
@@ -45,7 +47,7 @@ shadowJarPlugin = { module = "gradle.plugin.com.github.johnrengelman:shadow", ve
 slf4jApi = { module = "org.slf4j:slf4j-api", version = "2.0.3" }
 spotlessPlugin = { module = "com.diffplug.spotless:spotless-plugin-gradle", version = "6.12.0" }
 tracingJaeger = { module = "io.jaegertracing:jaeger-core", version = "1.1.0" }
-jooq = { module = "org.jooq:jooq", version = "3.18.1" }
+jooq = { module = "org.jooq:jooq", version.ref = "jooq" }
 kotlinAllOpenPlugin = { module = "org.jetbrains.kotlin:kotlin-allopen", version = "1.7.0" }
 kotlinGradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version = "1.7.0" }
 kotlinReflection = { module = "org.jetbrains.kotlin:kotlin-reflect", version = "1.7.0" }

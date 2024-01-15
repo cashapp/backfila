@@ -77,7 +77,7 @@ flyway {
 }
 
 jooq {
-  version.set("3.18.1")
+  version.set(libs.versions.jooq)
   edition.set(JooqEdition.OSS)
 
   configurations {
