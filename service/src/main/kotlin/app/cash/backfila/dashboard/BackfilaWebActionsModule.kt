@@ -5,6 +5,7 @@ import misk.web.WebActionModule
 
 class BackfilaWebActionsModule() : KAbstractModule() {
   override fun configure() {
+    install(WebActionModule.create<StopAllBackfillsAction>())
     install(WebActionModule.create<GetServicesAction>())
     install(WebActionModule.create<GetServiceVariantsAction>())
     install(WebActionModule.create<CloneBackfillAction>())
