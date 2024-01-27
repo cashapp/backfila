@@ -39,15 +39,16 @@ class StopAllBackfillsAction @Inject constructor(
     // TODO check user has permissions for this service with access api
     logger.info { "Stop all backfills called by ${caller.get()?.user}" }
 
-    val runningBackfills = transacter.transaction { session ->
+    val runningBackfillIds = transacter.transaction { session ->
       queryFactory.newQuery<BackfillRunQuery>()
         .state(BackfillState.RUNNING)
         .list(session)
+        .map { it.id.id }
     }
 
-    runningBackfills.forEach { backfill ->
-      logger.info { "Stop backfill ${backfill.id} by ${caller.get()?.user}" }
-      backfillStateToggler.toggleRunningState(backfill.id.id, caller.get()!!, BackfillState.PAUSED)
+    runningBackfillIds.forEach { backfillId ->
+      logger.info { "Stop backfill ${backfillId} by ${caller.get()?.user}" }
+      backfillStateToggler.toggleRunningState(backfillId, caller.get()!!, BackfillState.PAUSED)
     }
 
     return StopAllBackfillsResponse()
