@@ -11,6 +11,7 @@ import {
 import { Checkbox, FormGroup } from "@blueprintjs/core"
 import { LayoutContainer } from "."
 import { RouteComponentProps } from "react-router-dom"
+import StopAllBackfillsButton from "../components/StopAllBackfillsButton";
 
 interface TabContainerState extends RouteComponentProps {
   only_show_running_backfills: boolean
@@ -57,6 +58,7 @@ class TabContainer extends React.Component<
             tag={this.tableTag}
             onlyShowRunningBackfills={this.state.only_show_running_backfills}
           />
+          <StopAllBackfillsButton />
         </LayoutContainer>
       )
     }

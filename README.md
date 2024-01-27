@@ -30,7 +30,7 @@ $ java -jar service/build/libs/service.jar
 ```
 
 ### From IntelliJ
-  Right-click on `BackfilaService.kt` and select `Run`
+  Right-click on `BackfilaDevelopmentService.kt` and select `Run`
 
 ### From Docker
 
