@@ -47,7 +47,7 @@ class StopAllBackfillsAction @Inject constructor(
     }
 
     runningBackfillIds.forEach { backfillId ->
-      logger.info { "Stop backfill ${backfillId} by ${caller.get()?.user}" }
+      logger.info { "Stop backfill $backfillId by ${caller.get()?.user}" }
       backfillStateToggler.toggleRunningState(backfillId, caller.get()!!, BackfillState.PAUSED)
     }
 
