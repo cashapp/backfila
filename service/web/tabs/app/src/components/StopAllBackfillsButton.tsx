@@ -1,23 +1,29 @@
 import * as React from "react"
 import Axios from "axios"
-import { Button, Intent, Toaster, Classes, Popover } from "@blueprintjs/core"
+import { Button, Intent, Toaster, Classes, Popover, InputGroup } from "@blueprintjs/core"
 
-interface IStopAllBackillsProps {
-  onUpdate?: () => void
+interface IStopAllRealBackillsProps {
+  onUpdate?: () => void,
+  disabled: boolean
 }
 
-interface IStopAllBackfillsState {
+interface IStopAllRealBackfillsState {
   loading: boolean
 }
 
-class StopAllRealButton extends React.Component<IStopAllBackillsProps, IStopAllBackfillsState> {
-  public state: IStopAllBackfillsState = {
+const EMERGENCY_PROMISE = "I realize that by breaking glass that I am imposing a cost on the whole organization"
+
+class StopAllRealButton extends React.Component<
+  IStopAllRealBackillsProps,
+  IStopAllRealBackfillsState
+> {
+  public state: IStopAllRealBackfillsState = {
     loading: false
   }
 
   stopall() {
     const url = `/backfills/stop_all`
-    this.setState({loading: true})
+    this.setState({ loading: true })
     Axios.post(url, {})
       .then(response => {
         if (this.props.onUpdate) {
@@ -30,13 +36,14 @@ class StopAllRealButton extends React.Component<IStopAllBackillsProps, IStopAllB
           message: `Error: ${error.response.data}`
         })
       })
-      .finally(() => this.setState({loading: false}))
+      .finally(() => this.setState({ loading: false }))
   }
 
   render() {
-    return(
+    return (
       <Button
         onClick={() => this.stopall()}
+        disabled={this.props.disabled}
         intent={Intent.DANGER}
         loading={this.state.loading}
         small={true}
@@ -46,7 +53,24 @@ class StopAllRealButton extends React.Component<IStopAllBackillsProps, IStopAllB
   }
 }
 
-class StopAllButton extends React.Component {
+interface IStopAllBackillsProps {
+}
+
+interface IStopAllBackfillsState {
+  disabled: boolean
+}
+
+class StopAllButton extends React.Component<IStopAllBackillsProps, IStopAllBackfillsState> {
+  handleTextChange(newValue: String) {
+    this.setState({
+      disabled: newValue != EMERGENCY_PROMISE
+    })
+  }
+
+  public state: IStopAllBackfillsState= {
+    disabled: true
+  }
+
   render() {
     return (
       <Popover
@@ -55,8 +79,24 @@ class StopAllButton extends React.Component {
         position="right"
         content={
           <div>
-            <p>Are you sure? This should only been done during large incidents.</p>
-            <StopAllRealButton />
+            <p>
+              Are you sure? This should only been done during large incidents.
+            </p>
+            <p>
+              If there is an ongoing incident, please type:
+            </p>
+            <p>
+              "{EMERGENCY_PROMISE}"
+            </p>
+            <p>
+              (without quotes) in the text box below to enable.
+            </p>
+            <InputGroup
+              onChange={(event: React.FormEvent<HTMLElement>) => this.handleTextChange((event.target as HTMLInputElement).value)}
+            />
+            <StopAllRealButton
+              disabled={this.state.disabled}
+            />
           </div>
         }
         children={
@@ -67,7 +107,7 @@ class StopAllButton extends React.Component {
           />
         }
       />
-    );
+    )
   }
 }
 
