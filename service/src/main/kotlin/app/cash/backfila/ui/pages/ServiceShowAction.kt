@@ -28,7 +28,7 @@ class ServiceShowAction @Inject constructor(
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
   @Unauthenticated
-  fun checkService(
+  fun get(
     @QueryParam s: String,
     @QueryParam("experimental") experimental: Boolean? = false,
   ): Response<ResponseBody> {
