@@ -8,17 +8,22 @@ import app.cash.backfila.ui.components.AlertError
 import app.cash.backfila.ui.components.AlertSupport
 import app.cash.backfila.ui.components.DashboardLayout
 import app.cash.backfila.ui.components.PageTitle
-import javax.inject.Inject
-import javax.inject.Singleton
+import app.cash.backfila.ui.components.ProgressBar
 import kotlinx.html.ButtonType
+import kotlinx.html.ThScope
 import kotlinx.html.button
 import kotlinx.html.dd
 import kotlinx.html.div
 import kotlinx.html.dl
 import kotlinx.html.dt
-import kotlinx.html.h1
 import kotlinx.html.h2
 import kotlinx.html.span
+import kotlinx.html.table
+import kotlinx.html.tbody
+import kotlinx.html.td
+import kotlinx.html.th
+import kotlinx.html.thead
+import kotlinx.html.tr
 import misk.hotwire.buildHtmlResponseBody
 import misk.security.authz.Unauthenticated
 import misk.tailwind.Link
@@ -29,6 +34,8 @@ import misk.web.ResponseBody
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class BackfillShowAction @Inject constructor(
@@ -94,10 +101,64 @@ class BackfillShowAction @Inject constructor(
             }
 
 //            +"""<!-- Left Main Column -->"""
-            div("-mx-4 px-4 py-8 shadow-sm ring-1 ring-gray-900/5 sm:mx-0 sm:rounded-lg sm:px-8 sm:pb-14 lg:col-span-2 lg:row-span-2 lg:row-end-2 xl:px-16 xl:pb-20 xl:pt-16") {
+            div("-mx-4 px-4 py-8 overflow-x-auto shadow-sm ring-1 ring-gray-900/5 sm:mx-0 sm:rounded-lg sm:px-8 sm:pb-14 lg:col-span-2 lg:row-span-2 lg:row-end-2 xl:px-16 xl:pb-20 xl:pt-16") {
               h2("text-base font-semibold leading-6 text-gray-900") { +"""Partitions""" }
-              dl("divide-y divide-gray-100") {
-                h1 { +"""Rows""" }
+
+              table("mt-16 whitespace-nowrap text-left text-sm leading-6") {
+                thead("border-b border-gray-200 text-gray-900") {
+                  tr {
+                    th(classes = "px-0 py-3 font-semibold") {
+                      scope = ThScope.col
+                      +"""Name"""
+                    }
+                    th(classes = "hidden py-3 pl-8 pr-0 text-right font-semibold sm:table-cell") {
+                      scope = ThScope.col
+                      +"""State"""
+                    }
+                    th(classes = "hidden py-3 pl-8 pr-0 text-right font-semibold sm:table-cell") {
+                      scope = ThScope.col
+                      +"""Cursor"""
+                    }
+                    th(classes = "py-3 pl-8 pr-0 text-right font-semibold") {
+                      scope = ThScope.col
+                      +"""Range"""
+                    }
+                    th(classes = "py-3 pl-8 pr-0 text-right font-semibold") {
+                      scope = ThScope.col
+                      +"""Progress"""
+                    }
+                    th(classes = "py-3 pl-8 pr-0 text-right font-semibold") {
+                      scope = ThScope.col
+                      +"""Progress (%)"""
+                    }
+                    th(classes = "py-3 pl-8 pr-0 text-right font-semibold") {
+                      scope = ThScope.col
+                      +"""Rate"""
+                    }
+                    th(classes = "py-3 pl-8 pr-0 text-right font-semibold") {
+                      scope = ThScope.col
+                      +"""ETA"""
+                    }
+                  }
+                }
+                tbody {
+                  backfill.partitions.map {
+                    tr("border-b border-gray-100") {
+                      td("max-w-[24px] px-0 py-5 align-top") {
+                        div("truncate font-medium text-gray-900") { +it.name }
+                      }
+                      td("hidden py-5 pl-8 pr-0 text-right align-top text-gray-700 sm:table-cell") { +it.state.name }
+                      td("hidden py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700 sm:table-cell") { +(it.pkey_cursor ?: "") }
+                      td("hidden py-5 pl-8 pr-0 text-right align-top text-gray-700 sm:table-cell") { +"""${it.pkey_start} to ${it.pkey_end}""" }
+                      td("hidden py-5 pl-8 pr-0 text-right align-top text-gray-700 sm:table-cell") { +"""${it.backfilled_matching_record_count} / ${it.computed_matching_record_count}""" }
+                      td("hidden py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700 sm:table-cell") {
+                        ProgressBar(it.backfilled_matching_record_count, it.computed_matching_record_count)
+                      }
+                      td("hidden py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700 sm:table-cell") { +"""${it.matching_records_per_minute} #/m""" }
+                      td("py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700") { +"""ETA TODO""" }
+                    }
+                  }
+                }
               }
             }
           }
