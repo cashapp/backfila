@@ -9,6 +9,8 @@ import app.cash.backfila.ui.components.AlertSupport
 import app.cash.backfila.ui.components.DashboardLayout
 import app.cash.backfila.ui.components.PageTitle
 import app.cash.backfila.ui.components.ProgressBar
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.html.ButtonType
 import kotlinx.html.ThScope
 import kotlinx.html.button
@@ -34,8 +36,6 @@ import misk.web.ResponseBody
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class BackfillShowAction @Inject constructor(
@@ -102,9 +102,9 @@ class BackfillShowAction @Inject constructor(
 
 //            +"""<!-- Left Main Column -->"""
             div("-mx-4 px-4 py-8 overflow-x-auto shadow-sm ring-1 ring-gray-900/5 sm:mx-0 sm:rounded-lg sm:px-8 sm:pb-14 lg:col-span-2 lg:row-span-2 lg:row-end-2 xl:px-16 xl:pb-20 xl:pt-16") {
+              // Partitions
               h2("text-base font-semibold leading-6 text-gray-900") { +"""Partitions""" }
-
-              table("mt-16 whitespace-nowrap text-left text-sm leading-6") {
+              table("my-8 whitespace-nowrap text-left text-sm leading-6") {
                 thead("border-b border-gray-200 text-gray-900") {
                   tr {
                     th(classes = "px-0 py-3 font-semibold") {
@@ -142,20 +142,60 @@ class BackfillShowAction @Inject constructor(
                   }
                 }
                 tbody {
-                  backfill.partitions.map {
+                  backfill.partitions.map { partition ->
                     tr("border-b border-gray-100") {
                       td("max-w-[24px] px-0 py-5 align-top") {
-                        div("truncate font-medium text-gray-900") { +it.name }
+                        div("truncate font-medium text-gray-900") { +partition.name }
                       }
-                      td("hidden py-5 pl-8 pr-0 text-right align-top text-gray-700 sm:table-cell") { +it.state.name }
-                      td("hidden py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700 sm:table-cell") { +(it.pkey_cursor ?: "") }
-                      td("hidden py-5 pl-8 pr-0 text-right align-top text-gray-700 sm:table-cell") { +"""${it.pkey_start} to ${it.pkey_end}""" }
-                      td("hidden py-5 pl-8 pr-0 text-right align-top text-gray-700 sm:table-cell") { +"""${it.backfilled_matching_record_count} / ${it.computed_matching_record_count}""" }
+                      td("hidden py-5 pl-8 pr-0 text-right align-top text-gray-700 sm:table-cell") { +partition.state.name }
+                      td("hidden py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700 sm:table-cell") { +(partition.pkey_cursor ?: "") }
+                      td("hidden py-5 pl-8 pr-0 text-right align-top text-gray-700 sm:table-cell") { +"""${partition.pkey_start} to ${partition.pkey_end}""" }
+                      td("hidden py-5 pl-8 pr-0 text-right align-top text-gray-700 sm:table-cell") { +"""${partition.backfilled_matching_record_count} / ${partition.computed_matching_record_count}""" }
                       td("hidden py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700 sm:table-cell") {
-                        ProgressBar(it.backfilled_matching_record_count, it.computed_matching_record_count)
+                        ProgressBar(partition.backfilled_matching_record_count, partition.computed_matching_record_count)
                       }
-                      td("hidden py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700 sm:table-cell") { +"""${it.matching_records_per_minute} #/m""" }
+                      td("hidden py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700 sm:table-cell") { +"""${partition.matching_records_per_minute} #/m""" }
                       td("py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700") { +"""ETA TODO""" }
+                    }
+                  }
+                }
+              }
+
+              // Logs
+              h2("text-base font-semibold leading-6 text-gray-900 pt-8") { +"""Logs""" }
+              table("my-8 text-left text-sm leading-6") {
+                thead("border-b border-gray-200 text-gray-900") {
+                  tr {
+                    th(classes = "px-0 py-3 font-semibold") {
+                      scope = ThScope.col
+                      +"""Time"""
+                    }
+                    th(classes = "hidden py-3 pl-8 pr-0 font-semibold sm:table-cell") {
+                      scope = ThScope.col
+                      +"""User"""
+                    }
+                    th(classes = "hidden py-3 pl-8 pr-0 font-semibold sm:table-cell") {
+                      scope = ThScope.col
+                      +"""Partition"""
+                    }
+                    th(classes = "py-3 pl-8 pr-0 font-semibold") {
+                      scope = ThScope.col
+                      +"""Event"""
+                    }
+                    th(classes = "py-3 pl-8 pr-0 font-semibold") {
+                      scope = ThScope.col
+                      +"""More Data"""
+                    }
+                  }
+                }
+                tbody {
+                  backfill.event_logs.map { log ->
+                    tr("border-b border-gray-100") {
+                      td("hidden py-5 pl-8 pr-0 align-top text-wrap text-gray-700 sm:table-cell") { +log.occurred_at.toString().replace("T", " ").dropLast(5) }
+                      td("hidden py-5 pl-8 pr-0 align-top text-gray-700 sm:table-cell") { log.user ?.let { +it } }
+                      td("hidden py-5 pl-8 pr-0 align-top text-gray-700 sm:table-cell") { log.partition_name ?.let { +it } }
+                      td("hidden py-5 pl-8 pr-0 align-top max-w-2 text-wrap text-gray-700 sm:table-cell") { +log.message }
+                      td("hidden py-5 pl-8 pr-0 align-top max-w-2 text-wrap text-gray-700 sm:table-cell") { log.extra_data?.let { +it } }
                     }
                   }
                 }
