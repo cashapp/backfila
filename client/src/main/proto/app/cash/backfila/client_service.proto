@@ -155,3 +155,10 @@ message FinalizeBackfillRequest {
 
 message FinalizeBackfillResponse {
 }
+
+service BackfilaClientService {
+  rpc PrepareBackfill(PrepareBackfillRequest) returns (PrepareBackfillResponse);
+  rpc GetNextBatchRange(GetNextBatchRangeRequest) returns (GetNextBatchRangeResponse);
+  rpc RunBatch(RunBatchRequest) returns (RunBatchResponse);
+  rpc FinalizeBackfill(FinalizeBackfillRequest) returns (FinalizeBackfillResponse);
+}

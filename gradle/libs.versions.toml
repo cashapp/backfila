@@ -78,6 +78,7 @@ miskTailwind = { module = "com.squareup.misk:misk-tailwind", version.ref = "misk
 miskTesting = { module = "com.squareup.misk:misk-testing", version.ref = "misk" }
 wireCompiler = { module = "com.squareup.wire:wire-compiler", version.ref = "wire" }
 wireGradlePlugin = { module = "com.squareup.wire:wire-gradle-plugin", version.ref = "wire" }
+wireGrpcClient = { module = "com.squareup.wire:wire-grpc-client", version.ref = "wire" }
 wireMoshiAdapter = { module = "com.squareup.wire:wire-moshi-adapter", version.ref = "wire" }
 wireRuntime = { module = "com.squareup.wire:wire-runtime", version.ref = "wire" }
 wireSchema = { module = "com.squareup.wire:wire-schema", version.ref = "wire" }
