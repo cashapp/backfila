@@ -1,6 +1,6 @@
 package app.cash.backfila.service.selfbackfill
 
-import app.cash.backfila.client.BackfilaClientServiceClient
+import app.cash.backfila.client.BackfilaCallbackConnector
 import app.cash.backfila.client.spi.BackfilaClientServiceHandler
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
@@ -10,9 +10,9 @@ import app.cash.backfila.protos.clientservice.RunBatchRequest
 import app.cash.backfila.protos.clientservice.RunBatchResponse
 import javax.inject.Inject
 
-internal class LocalClientServiceClient @Inject internal constructor(
+internal class LocalCallbackConnector @Inject internal constructor(
   private val backfilaClientServiceHandler: BackfilaClientServiceHandler,
-) : BackfilaClientServiceClient {
+) : BackfilaCallbackConnector {
   override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
     return backfilaClientServiceHandler.prepareBackfill(request)
   }

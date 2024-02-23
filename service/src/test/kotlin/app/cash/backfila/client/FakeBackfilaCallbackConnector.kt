@@ -14,7 +14,7 @@ import kotlinx.coroutines.channels.Channel
 import okio.ByteString.Companion.encodeUtf8
 
 @Singleton
-class FakeBackfilaClientServiceClient @Inject constructor() : BackfilaClientServiceClient {
+class FakeBackfilaCallbackConnector @Inject constructor() : BackfilaCallbackConnector {
   val prepareBackfillResponses = LinkedList<PrepareBackfillResponse>()
 
   val getNextBatchRangeRequests = Channel<GetNextBatchRangeRequest>()

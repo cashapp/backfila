@@ -1,6 +1,6 @@
 package app.cash.backfila.service.runner
 
-import app.cash.backfila.client.BackfilaClientServiceClient
+import app.cash.backfila.client.BackfilaCallbackConnector
 import app.cash.backfila.client.ConnectorProvider
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.PipelinedData
@@ -209,7 +209,7 @@ class BackfillRunner private constructor(
     )
   }
 
-  private fun createClient(): BackfilaClientServiceClient {
+  private fun createClient(): BackfilaCallbackConnector {
     data class DbData(
       val serviceName: String,
       val connector: String,

@@ -3,7 +3,7 @@ package app.cash.backfila.service.selfbackfill
 import app.cash.backfila.api.ServiceWebActionsModule
 import app.cash.backfila.client.BackfilaClientLoggingSetupProvider
 import app.cash.backfila.client.BackfilaClientNoLoggingSetupProvider
-import app.cash.backfila.client.BackfilaClientServiceClientProvider
+import app.cash.backfila.client.BackfilaCallbackConnectorProvider
 import app.cash.backfila.client.BackfilaHttpClientConfig
 import app.cash.backfila.client.ForConnectors
 import app.cash.backfila.client.misk.MiskBackfillModule
@@ -83,9 +83,9 @@ class SelfBackfillTestingModule : KAbstractModule() {
     bind(BackfilaClientLoggingSetupProvider::class.java)
       .to(BackfilaClientNoLoggingSetupProvider::class.java)
 
-    newMapBinder<String, BackfilaClientServiceClientProvider>(ForConnectors::class)
+    newMapBinder<String, BackfilaCallbackConnectorProvider>(ForConnectors::class)
       .addBinding("ENVOY")
-      .to(LocalClientServiceClientProvider::class.java)
+      .to(LocalCallbackConnectorProvider::class.java)
 
     install(HibernateBackfillModule.create<BackfillRegisteredParameters>())
   }

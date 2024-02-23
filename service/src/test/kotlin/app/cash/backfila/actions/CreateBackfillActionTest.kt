@@ -5,7 +5,7 @@ import app.cash.backfila.BackfillCreator
 import app.cash.backfila.api.ConfigureServiceAction
 import app.cash.backfila.api.ConfigureServiceAction.Companion.RESERVED_VARIANT
 import app.cash.backfila.client.Connectors
-import app.cash.backfila.client.FakeBackfilaClientServiceClient
+import app.cash.backfila.client.FakeBackfilaCallbackConnector
 import app.cash.backfila.dashboard.CreateBackfillAction
 import app.cash.backfila.fakeCaller
 import app.cash.backfila.protos.clientservice.KeyRange
@@ -56,7 +56,7 @@ class CreateBackfillActionTest {
   lateinit var transacter: Transacter
 
   @Inject
-  lateinit var fakeBackfilaClientServiceClient: FakeBackfilaClientServiceClient
+  lateinit var fakeBackfilaClientServiceClient: FakeBackfilaCallbackConnector
 
   @Test
   fun serviceDoesntExist() {

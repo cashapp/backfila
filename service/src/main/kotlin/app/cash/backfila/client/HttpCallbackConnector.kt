@@ -9,10 +9,10 @@ import app.cash.backfila.protos.clientservice.RunBatchResponse
 import retrofit2.HttpException
 import retrofit2.Response
 
-internal class HttpClientServiceClient internal constructor(
+internal class HttpCallbackConnector internal constructor(
   private val api: HttpClientServiceApi,
   private val connectionLogData: String,
-) : BackfilaClientServiceClient {
+) : BackfilaCallbackConnector {
 
   override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
     return api.prepareBackfill(request).execute().getOrThrow()

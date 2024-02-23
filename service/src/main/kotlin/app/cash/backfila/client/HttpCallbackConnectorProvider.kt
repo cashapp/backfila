@@ -17,13 +17,13 @@ import retrofit2.adapter.guava.GuavaCallAdapterFactory
 import retrofit2.converter.wire.WireConverterFactory
 
 @Singleton
-class HttpClientServiceClientProvider @Inject constructor(
+class HttpCallbackConnectorProvider @Inject constructor(
   private val httpClientsConfig: HttpClientsConfig,
   private val httpClientFactory: HttpClientFactory,
   private val httpClientConfigUrlProvider: HttpClientConfigUrlProvider,
   @HttpClientNetworkInterceptor private val networkInterceptors: List<Interceptor>,
   private val moshi: Moshi,
-) : BackfilaClientServiceClientProvider {
+) : BackfilaCallbackConnectorProvider {
   override fun validateExtraData(connectorExtraData: String?) {
     checkNotNull(connectorExtraData, { "Extra data required for HTTP connector" })
     val fromJson = adapter().fromJson(connectorExtraData)
@@ -43,7 +43,7 @@ class HttpClientServiceClientProvider @Inject constructor(
   override fun clientFor(
     serviceName: String,
     connectorExtraData: String?,
-  ): BackfilaClientServiceClient {
+  ): BackfilaCallbackConnector {
     val extraData = adapter().fromJson(connectorExtraData!!)
     val url = URL(extraData!!.url)
     val headers = extraData!!.headers
@@ -69,7 +69,7 @@ class HttpClientServiceClientProvider @Inject constructor(
     val api = retrofit.create(HttpClientServiceApi::class.java)
     val logData = "url: ${httpClientEndpointConfig.url}, " +
       "headers: $headers"
-    return HttpClientServiceClient(api, logData)
+    return HttpCallbackConnector(api, logData)
   }
 
   private fun adapter() = moshi.adapter<HttpConnectorData>()

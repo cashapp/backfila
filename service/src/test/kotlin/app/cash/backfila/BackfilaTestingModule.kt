@@ -1,9 +1,9 @@
 package app.cash.backfila
 
 import app.cash.backfila.api.ServiceWebActionsModule
-import app.cash.backfila.client.BackfilaClientServiceClientProvider
+import app.cash.backfila.client.BackfilaCallbackConnectorProvider
 import app.cash.backfila.client.Connectors
-import app.cash.backfila.client.FakeBackfilaClientServiceClientProvider
+import app.cash.backfila.client.FakeBackfilaCallbackConnectorProvider
 import app.cash.backfila.client.ForConnectors
 import app.cash.backfila.service.BackfilaConfig
 import app.cash.backfila.service.persistence.BackfilaDb
@@ -59,8 +59,8 @@ internal class BackfilaTestingModule : KAbstractModule() {
 
     install(ServiceWebActionsModule())
 
-    bind(BackfilaClientServiceClientProvider::class.java)
-      .to(FakeBackfilaClientServiceClientProvider::class.java)
+    bind(BackfilaCallbackConnectorProvider::class.java)
+      .to(FakeBackfilaCallbackConnectorProvider::class.java)
 
     bind(BackfillRunnerLoggingSetupProvider::class.java)
       .to(BackfillRunnerNoLoggingSetupProvider::class.java)
@@ -72,12 +72,12 @@ internal class BackfilaTestingModule : KAbstractModule() {
     },
     )
 
-    newMapBinder<String, BackfilaClientServiceClientProvider>(ForConnectors::class)
+    newMapBinder<String, BackfilaCallbackConnectorProvider>(ForConnectors::class)
       .addBinding(Connectors.HTTP)
-      .to(FakeBackfilaClientServiceClientProvider::class.java)
-    newMapBinder<String, BackfilaClientServiceClientProvider>(ForConnectors::class)
+      .to(FakeBackfilaCallbackConnectorProvider::class.java)
+    newMapBinder<String, BackfilaCallbackConnectorProvider>(ForConnectors::class)
       .addBinding(Connectors.ENVOY)
-      .to(FakeBackfilaClientServiceClientProvider::class.java)
+      .to(FakeBackfilaCallbackConnectorProvider::class.java)
   }
 
   @Provides @ForBackfilaScheduler @Singleton
