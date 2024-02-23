@@ -2,6 +2,7 @@ package app.cash.backfila.client
 
 import app.cash.backfila.client.interceptors.OkHttpClientSpecifiedHeadersInterceptor
 import app.cash.backfila.client.interceptors.OkHttpClientSpecifiedHeadersInterceptor.Companion.headersSizeWithinLimit
+import app.cash.backfila.protos.clientservice.BackfilaClientServiceClient
 import com.squareup.moshi.Moshi
 import com.squareup.wire.GrpcClient
 import java.net.URL
@@ -11,25 +12,21 @@ import misk.client.HttpClientConfigUrlProvider
 import misk.client.HttpClientFactory
 import misk.client.HttpClientsConfig
 import misk.moshi.adapter
-import retrofit2.Retrofit
-import retrofit2.adapter.guava.GuavaCallAdapterFactory
-import retrofit2.converter.wire.WireConverterFactory
-import wisp.client.EnvoyClientEndpointProvider
-import wisp.client.HttpClientEnvoyConfig
 
 @Singleton
-class GrpcClientServiceClientProvider @Inject constructor(
+class GrpcCallbackConnectorProvider @Inject constructor(
   private val httpClientsConfig: HttpClientsConfig,
   private val httpClientFactory: HttpClientFactory,
+  private val httpClientConfigUrlProvider: HttpClientConfigUrlProvider,
   private val moshi: Moshi,
-) : BackfilaClientServiceClientProvider {
-  @com.google.inject.Inject(optional = true)
-  lateinit var envoyClientEndpointProvider: EnvoyClientEndpointProvider
+) : BackfilaCallbackConnectorProvider {
 
   override fun validateExtraData(connectorExtraData: String?) {
-    connectorExtraData?.let {
+    connectorExtraData.let {
+      checkNotNull(connectorExtraData) { "Extra data required for GRPC connector" }
       val fromJson = adapter().fromJson(connectorExtraData)
-      checkNotNull(fromJson) { "Failed to parse HTTP connector extra data JSON" }
+      checkNotNull(fromJson) { "Failed to parse GRPC connector extra data JSON" }
+      checkNotNull(fromJson.url) { "GRPC connector extra data must contain a URL" }
 
       if (!fromJson.headers.isNullOrEmpty()) {
         check(headersSizeWithinLimit(fromJson.headers)) { "Headers too large" }
@@ -45,20 +42,13 @@ class GrpcClientServiceClientProvider @Inject constructor(
   override fun clientFor(
     serviceName: String,
     connectorExtraData: String?,
-  ): BackfilaClientServiceClient {
-    val extraData = connectorExtraData?.let { adapter().fromJson(connectorExtraData) }
-    // If clusterType is specified use it for env, otherwise use null to default to current env.
-    var env: String? = extraData?.clusterType
+  ): BackfilaCallbackConnector {
+    val extraData = connectorExtraData.let { adapter().fromJson(connectorExtraData) }
+    val url = URL(extraData!!.url)
     // If client-specified HTTP headers are specified, honor them.
-    var headers: List<HttpHeader>? = extraData?.headers
+    var headers: List<HttpHeader>? = extraData!!.headers
 
-    val envoyConfig = HttpClientEnvoyConfig(
-      app = serviceName,
-      env = env,
-    )
-    val baseUrl = URL(envoyClientEndpointProvider.url(envoyConfig))
-    val httpClientEndpointConfig = httpClientsConfig[baseUrl]
-
+    val httpClientEndpointConfig = httpClientsConfig[url]
     var okHttpClient = httpClientFactory.create(httpClientEndpointConfig)
     if (!headers.isNullOrEmpty()) {
       okHttpClient = okHttpClient.newBuilder()
@@ -66,18 +56,17 @@ class GrpcClientServiceClientProvider @Inject constructor(
         .build()
     }
 
-    val retrofit = Retrofit.Builder()
-      .baseUrl(baseUrl)
+    val baseUrl = httpClientConfigUrlProvider.getUrl(httpClientEndpointConfig)
+    val grpcClient = GrpcClient.Builder()
       .client(okHttpClient)
-      .addConverterFactory(WireConverterFactory.create())
-      .addCallAdapterFactory(GuavaCallAdapterFactory.create())
+      .baseUrl(baseUrl)
       .build()
-    val api = retrofit.create(EnvoyClientServiceApi::class.java)
-    val logData = "envoyConfig: ${httpClientEndpointConfig.envoy}, " +
+    val api = grpcClient.create(BackfilaClientServiceClient::class)
+    val logData = "grpcConfig: ${httpClientEndpointConfig.url}, " +
       "url: ${httpClientEndpointConfig.url}, " +
       "headers: $headers"
-    return EnvoyClientServiceClient(api, logData)
+    return GrpcCallbackConnector(api, logData)
   }
 
-  private fun adapter() = moshi.adapter<EnvoyConnectorData>()
+  private fun adapter() = moshi.adapter<GrpcConnectorData>()
 }

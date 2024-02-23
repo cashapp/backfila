@@ -27,15 +27,15 @@ class HttpCallbackConnectorProvider @Inject constructor(
   override fun validateExtraData(connectorExtraData: String?) {
     checkNotNull(connectorExtraData, { "Extra data required for HTTP connector" })
     val fromJson = adapter().fromJson(connectorExtraData)
-    checkNotNull(fromJson, { "Failed to parse HTTP connector extra data JSON" })
-    checkNotNull(fromJson.url, { "HTTP connector extra data must contain a URL" })
+    checkNotNull(fromJson) { "Failed to parse HTTP connector extra data JSON" }
+    checkNotNull(fromJson.url) { "HTTP connector extra data must contain a URL" }
 
     if (!fromJson.headers.isNullOrEmpty()) {
       check(headersSizeWithinLimit(fromJson.headers)) { "Headers too large" }
 
       for (header in fromJson.headers) {
-        checkNotNull(header.name, { "Header names must be set" })
-        checkNotNull(header.value, { "Header values must be set" })
+        checkNotNull(header.name) { "Header names must be set" }
+        checkNotNull(header.value) { "Header values must be set" }
       }
     }
   }
@@ -46,6 +46,7 @@ class HttpCallbackConnectorProvider @Inject constructor(
   ): BackfilaCallbackConnector {
     val extraData = adapter().fromJson(connectorExtraData!!)
     val url = URL(extraData!!.url)
+    // If client-specified HTTP headers are specified, honor them.
     val headers = extraData!!.headers
 
     val httpClientEndpointConfig = httpClientsConfig[url]
