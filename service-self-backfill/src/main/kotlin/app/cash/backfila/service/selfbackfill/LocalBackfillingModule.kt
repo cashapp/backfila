@@ -3,7 +3,7 @@ package app.cash.backfila.service.selfbackfill
 import app.cash.backfila.client.BackfilaClientConfig
 import app.cash.backfila.client.BackfilaClientLoggingSetupProvider
 import app.cash.backfila.client.BackfilaClientNoLoggingSetupProvider
-import app.cash.backfila.client.BackfilaClientServiceClientProvider
+import app.cash.backfila.client.BackfilaCallbackConnectorProvider
 import app.cash.backfila.client.ForConnectors
 import app.cash.backfila.client.internal.BackfilaClient
 import app.cash.backfila.client.misk.hibernate.HibernateBackfillModule
@@ -32,9 +32,9 @@ class LocalBackfillingModule : KAbstractModule() {
       ),
     )
 
-    newMapBinder<String, BackfilaClientServiceClientProvider>(ForConnectors::class)
+    newMapBinder<String, BackfilaCallbackConnectorProvider>(ForConnectors::class)
       .addBinding(LOCAL)
-      .to(LocalClientServiceClientProvider::class.java)
+      .to(LocalCallbackConnectorProvider::class.java)
 
     bind(BackfilaClient::class.java).to(LocalBackfilaClient::class.java)
     bind(BackfilaClientLoggingSetupProvider::class.java)

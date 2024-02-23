@@ -1,7 +1,7 @@
 package app.cash.backfila.service.selfbackfill
 
-import app.cash.backfila.client.BackfilaClientServiceClient
-import app.cash.backfila.client.BackfilaClientServiceClientProvider
+import app.cash.backfila.client.BackfilaCallbackConnector
+import app.cash.backfila.client.BackfilaCallbackConnectorProvider
 import app.cash.backfila.client.BackfilaDefaultEndpointConfigModule
 import app.cash.backfila.client.ForConnectors
 import app.cash.backfila.dashboard.ViewLogsUrlProvider
@@ -53,17 +53,17 @@ internal fun main(args: Array<String>) {
           .toInstance(MiskCaller(user = "testfila"))
         bind<ViewLogsUrlProvider>().to<DevelopmentViewLogsUrlProvider>()
 
-        newMapBinder<String, BackfilaClientServiceClientProvider>(ForConnectors::class)
+        newMapBinder<String, BackfilaCallbackConnectorProvider>(ForConnectors::class)
           .permitDuplicates().addBinding("DEV")
-          .toInstance(object : BackfilaClientServiceClientProvider {
+          .toInstance(object : BackfilaCallbackConnectorProvider {
             override fun validateExtraData(connectorExtraData: String?) {
             }
 
             override fun clientFor(
               serviceName: String,
               connectorExtraData: String?,
-            ): BackfilaClientServiceClient {
-              return object : BackfilaClientServiceClient {
+            ): BackfilaCallbackConnector {
+              return object : BackfilaCallbackConnector {
                 override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
                   return PrepareBackfillResponse.Builder()
                     .partitions(

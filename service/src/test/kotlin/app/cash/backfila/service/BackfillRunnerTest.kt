@@ -4,7 +4,7 @@ import app.cash.backfila.BackfilaTestingModule
 import app.cash.backfila.api.ConfigureServiceAction
 import app.cash.backfila.api.ConfigureServiceAction.Companion.RESERVED_VARIANT
 import app.cash.backfila.client.Connectors.ENVOY
-import app.cash.backfila.client.FakeBackfilaClientServiceClient
+import app.cash.backfila.client.FakeBackfilaCallbackConnector
 import app.cash.backfila.dashboard.CreateBackfillAction
 import app.cash.backfila.dashboard.GetBackfillRunsAction
 import app.cash.backfila.dashboard.GetBackfillStatusAction
@@ -68,7 +68,7 @@ class BackfillRunnerTest {
   @Inject @BackfilaDb
   lateinit var transacter: Transacter
 
-  @Inject lateinit var fakeBackfilaClientServiceClient: FakeBackfilaClientServiceClient
+  @Inject lateinit var fakeBackfilaClientServiceClient: FakeBackfilaCallbackConnector
 
   @Inject lateinit var updateBackfillAction: UpdateBackfillAction
 

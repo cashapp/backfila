@@ -7,7 +7,10 @@ import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
 import app.cash.backfila.protos.clientservice.RunBatchRequest
 import app.cash.backfila.protos.clientservice.RunBatchResponse
 
-interface BackfilaClientServiceClient {
+/**
+ * Handles the callback connection back to the client services.
+ */
+interface BackfilaCallbackConnector {
   fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse
 
   suspend fun getNextBatchRange(request: GetNextBatchRangeRequest): GetNextBatchRangeResponse

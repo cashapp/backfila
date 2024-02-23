@@ -23,7 +23,7 @@ class BackfilaDefaultEndpointConfigModule() : KAbstractModule() {
   fun httpClientsConfigDefault() = DEFAULT_HTTP_CLIENTS_CONFIG
 }
 
-interface BackfilaClientServiceClientProvider {
+interface BackfilaCallbackConnectorProvider {
   fun validateExtraData(connectorExtraData: String?)
-  fun clientFor(serviceName: String, connectorExtraData: String?): BackfilaClientServiceClient
+  fun clientFor(serviceName: String, connectorExtraData: String?): BackfilaCallbackConnector
 }
