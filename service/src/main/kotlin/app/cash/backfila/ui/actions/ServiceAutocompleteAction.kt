@@ -6,7 +6,7 @@ import javax.inject.Singleton
 import kotlinx.html.li
 import kotlinx.html.role
 import misk.hotwire.buildHtml
-import misk.security.authz.Unauthenticated
+import misk.security.authz.Authenticated
 import misk.web.Get
 import misk.web.QueryParam
 import misk.web.ResponseContentType
@@ -19,7 +19,7 @@ class ServiceAutocompleteAction @Inject constructor(
 ) : WebAction {
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
-  @Unauthenticated
+  @Authenticated(capabilities = ["users"])
   fun get(
     @QueryParam q: String?,
   ): String {

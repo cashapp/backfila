@@ -4,6 +4,7 @@ import app.cash.backfila.dashboard.GetBackfillStatusAction
 import app.cash.backfila.dashboard.GetBackfillStatusResponse
 import app.cash.backfila.service.BackfilaConfig
 import app.cash.backfila.service.persistence.BackfillState
+import app.cash.backfila.ui.actions.BackfillShowButtonHandlerAction
 import app.cash.backfila.ui.components.AlertError
 import app.cash.backfila.ui.components.AlertSupport
 import app.cash.backfila.ui.components.DashboardLayout
@@ -12,13 +13,16 @@ import app.cash.backfila.ui.components.ProgressBar
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.html.ButtonType
+import kotlinx.html.InputType
 import kotlinx.html.ThScope
 import kotlinx.html.button
 import kotlinx.html.dd
 import kotlinx.html.div
 import kotlinx.html.dl
 import kotlinx.html.dt
+import kotlinx.html.form
 import kotlinx.html.h2
+import kotlinx.html.input
 import kotlinx.html.span
 import kotlinx.html.table
 import kotlinx.html.tbody
@@ -27,7 +31,7 @@ import kotlinx.html.th
 import kotlinx.html.thead
 import kotlinx.html.tr
 import misk.hotwire.buildHtmlResponseBody
-import misk.security.authz.Unauthenticated
+import misk.security.authz.Authenticated
 import misk.tailwind.Link
 import misk.web.Get
 import misk.web.PathParam
@@ -44,7 +48,7 @@ class BackfillShowAction @Inject constructor(
 ) : WebAction {
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
-  @Unauthenticated
+  @Authenticated(capabilities = ["users"])
   fun get(
     @PathParam id: String,
   ): Response<ResponseBody> {
@@ -80,16 +84,40 @@ class BackfillShowAction @Inject constructor(
               div("rounded-lg bg-gray-50 shadow-sm ring-1 ring-gray-900/5 p-6") {
                 h2("text-base font-semibold leading-6 text-gray-900") { +"""Configuration""" }
                 dl("divide-y divide-gray-100") {
-                  backfill.toRows().map {
+                  backfill.toRows(id).map {
                     div("px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0") {
                       this@dl.dt("text-sm font-medium leading-6 text-gray-900") { +it.label }
                       this@dl.dd("mt-1 flex text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0") {
                         span("flex-grow") { +it.description }
                         span("ml-4 flex-shrink-0") {
                           it.button?.let { button ->
-                            button(classes = "rounded-md bg-white font-medium text-indigo-600 hover:text-indigo-500") {
-                              type = ButtonType.button
-                              +button.label
+                            form {
+                              action = BackfillShowButtonHandlerAction.PATH.replace("{id}", id)
+
+                              // POST /backfills/1/start
+                              // POST /backfills/1/stop
+                              // POST /backfills/1/update { num_threads: 2 }
+
+                              it.updateFieldId?.let {
+                                input {
+                                  type = InputType.hidden
+                                  name = "field_id"
+                                  value = it
+                                }
+
+                                input {
+                                  type = InputType.hidden
+                                  name = "field_value"
+                                  value = button.href
+                                }
+                              }
+
+                              button(
+                                classes = "rounded-md bg-white font-medium text-indigo-600 hover:text-indigo-500",
+                              ) {
+                                type = ButtonType.submit
+                                +button.label
+                              }
                             }
                           }
                         }
@@ -214,17 +242,31 @@ class BackfillShowAction @Inject constructor(
   data class DescriptionListRow(
     val label: String,
     val description: String,
+    /* Value of the button click is provided through the button.href field. */
     val button: Link? = null,
+    val updateFieldId: String? = null,
   )
 
-  private fun GetBackfillStatusResponse.toRows() = listOf(
+  private fun getStateButton(state: BackfillState, id: String): Link? {
+    return when (state) {
+      BackfillState.PAUSED -> Link(
+        label = "Start",
+        href = BackfillState.RUNNING.name,
+      )
+      BackfillState.COMPLETE -> null
+      else -> Link(
+        label = "Pause",
+        href = BackfillState.PAUSED.name,
+      )
+    }
+  }
+
+  private fun GetBackfillStatusResponse.toRows(id: String) = listOf(
     DescriptionListRow(
       label = "State",
       description = state.name,
-      button = Link(
-        label = if (state == BackfillState.PAUSED) "Start" else "Pause",
-        href = "#",
-      ),
+      button = getStateButton(state, id),
+      updateFieldId = "state",
     ),
     DescriptionListRow(
       label = "Dry Run",
@@ -237,6 +279,7 @@ class BackfillShowAction @Inject constructor(
         label = "Update",
         href = "#",
       ),
+      updateFieldId = "num_threads",
     ),
     DescriptionListRow(
       label = "Scan Size",
@@ -245,6 +288,7 @@ class BackfillShowAction @Inject constructor(
         label = "Update",
         href = "#",
       ),
+      updateFieldId = "scan_size",
     ),
     DescriptionListRow(
       label = "Batch Size",
@@ -253,6 +297,7 @@ class BackfillShowAction @Inject constructor(
         label = "Update",
         href = "#",
       ),
+      updateFieldId = "batch_size",
     ),
     DescriptionListRow(
       label = "Sleep betweeen batches (ms)",
@@ -261,6 +306,7 @@ class BackfillShowAction @Inject constructor(
         label = "Update",
         href = "#",
       ),
+      updateFieldId = "extra_sleep_ms",
     ),
     DescriptionListRow(
       label = "Backoff Schedule",
@@ -269,6 +315,7 @@ class BackfillShowAction @Inject constructor(
         label = "Update",
         href = "#",
       ),
+      updateFieldId = "backoff_schedule",
     ),
     DescriptionListRow(
       label = "Created",

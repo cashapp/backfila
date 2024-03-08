@@ -11,7 +11,7 @@ import javax.inject.Singleton
 import kotlinx.html.role
 import kotlinx.html.ul
 import misk.hotwire.buildHtmlResponseBody
-import misk.security.authz.Unauthenticated
+import misk.security.authz.Authenticated
 import misk.web.Get
 import misk.web.QueryParam
 import misk.web.Response
@@ -27,7 +27,7 @@ class ServiceShowAction @Inject constructor(
 ) : WebAction {
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
-  @Unauthenticated
+  @Authenticated(capabilities = ["users"])
   fun get(
     @QueryParam s: String,
     @QueryParam("experimental") experimental: Boolean? = false,
