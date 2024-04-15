@@ -1,5 +1,6 @@
 package app.cash.backfila.ui
 
+import app.cash.backfila.ui.actions.BackfillShowButtonHandlerAction
 import app.cash.backfila.ui.actions.ServiceAutocompleteAction
 import app.cash.backfila.ui.pages.BackfillShowAction
 import app.cash.backfila.ui.pages.ServiceIndexAction
@@ -15,6 +16,7 @@ class UiModule : KAbstractModule() {
     install(WebActionModule.create<BackfillShowAction>())
 
     // Other
+    install(WebActionModule.create<BackfillShowButtonHandlerAction>())
     install(WebActionModule.create<ServiceAutocompleteAction>())
   }
 }

@@ -15,7 +15,7 @@ import kotlinx.html.id
 import kotlinx.html.input
 import kotlinx.html.legend
 import misk.hotwire.buildHtml
-import misk.security.authz.Unauthenticated
+import misk.security.authz.Authenticated
 import misk.turbo.turbo_frame
 import misk.web.Get
 import misk.web.QueryParam
@@ -28,7 +28,7 @@ class ServiceIndexAction @Inject constructor(
 ) : WebAction {
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
-  @Unauthenticated
+  @Authenticated(capabilities = ["users"])
   fun get(
     @QueryParam sc: String?,
   ): String {
