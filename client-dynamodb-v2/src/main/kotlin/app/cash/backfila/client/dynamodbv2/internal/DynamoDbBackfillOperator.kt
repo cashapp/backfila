@@ -133,6 +133,7 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
         .filterExpression(backfill.filterExpression(config))
         .expressionAttributeValues(backfill.expressionAttributeValues(config))
         .expressionAttributeNames(backfill.expressionAttributeNames(config))
+        .indexName(backfill.indexName(config))
         .build()
 
       val result = dynamoDbClient.scan(scanRequest)

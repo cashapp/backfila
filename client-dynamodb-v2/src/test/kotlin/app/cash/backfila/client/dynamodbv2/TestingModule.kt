@@ -13,7 +13,10 @@ import misk.inject.KAbstractModule
 import misk.logging.LogCollectorModule
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema
+import software.amazon.awssdk.enhanced.dynamodb.model.EnhancedGlobalSecondaryIndex
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
+import software.amazon.awssdk.services.dynamodb.model.ProjectionType
+import software.amazon.awssdk.services.dynamodb.model.ProvisionedThroughput
 
 /**
  * Simulates a specific service implementation module
@@ -27,7 +30,24 @@ class TestingModule : KAbstractModule() {
 
     install(EmbeddedBackfilaModule())
 
-    install(InProcessDynamoDbModule(DynamoDbTable(TrackItem.TABLE_NAME, TrackItem::class)))
+    install(
+      InProcessDynamoDbModule(
+        DynamoDbTable(TrackItem.TABLE_NAME, TrackItem::class) { table ->
+          val provisionedThroughput = ProvisionedThroughput.builder()
+            .readCapacityUnits(100)
+            .writeCapacityUnits(100)
+            .build()
+          table.globalSecondaryIndices(
+            EnhancedGlobalSecondaryIndex.builder()
+              .indexName("trackTitleIndex")
+              .projection { it.projectionType(ProjectionType.KEYS_ONLY) }
+              .provisionedThroughput(provisionedThroughput)
+              .build(),
+          )
+          table
+        },
+      ),
+    )
   }
 
   @Provides

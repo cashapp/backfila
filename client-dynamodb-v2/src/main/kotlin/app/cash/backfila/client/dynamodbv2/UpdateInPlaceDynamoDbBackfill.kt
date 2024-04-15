@@ -31,7 +31,7 @@ abstract class UpdateInPlaceDynamoDbBackfill<I : Any, P : Any>(
             dynamoDbTable.tableName() to itemsToSave.map {
               WriteRequest.builder().putRequest(
                 PutRequest.builder().item(
-                  dynamoDbTable.tableSchema().itemToMap(it, false),
+                  dynamoDbTable.tableSchema().itemToMap(it, true),
                 ).build(),
               ).build()
             },
