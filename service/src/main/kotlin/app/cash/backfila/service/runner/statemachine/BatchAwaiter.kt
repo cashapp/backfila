@@ -208,7 +208,9 @@ class BatchAwaiter(
     }
 
     if (runComplete) {
-      backfillRunner.factory.slackHelper.runCompleted(backfillRunner.backfillRunId)
+      for (listener in backfillRunner.factory.backfillRunListeners) {
+        listener.runCompleted(backfillRunner.backfillRunId)
+      }
     }
   }
 

@@ -65,6 +65,10 @@ class BackfilaServiceModule(
       install(SlackModule(config.slack))
     }
 
+    newMultibinder<BackfillRunListener>()
+            .addBinding()
+            .to(SlackHelper::class)
+
     // TODO:mikepaw Require that the Admin Console is installed so it isn't forgotten.
     // something along the lines of requireBinding but works for multibindings.
   }

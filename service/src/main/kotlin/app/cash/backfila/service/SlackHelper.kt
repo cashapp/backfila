@@ -14,8 +14,8 @@ class SlackHelper @Inject constructor(
   private val slackClient: SlackClient,
   private val backfilaConfig: BackfilaConfig,
   private val deployment: Deployment,
-) {
-  fun runStarted(id: Id<DbBackfillRun>, user: String) {
+) : BackfillRunListener {
+  override fun runStarted(id: Id<DbBackfillRun>, user: String) {
     val (message, channel) = transacter.transaction { session ->
       val run = session.load(id)
       val message = ":backfila_start:${dryRunEmoji(run)} ${nameAndId(run)} started by @$user"
@@ -24,7 +24,7 @@ class SlackHelper @Inject constructor(
     slackClient.postMessage("Backfila", ":backfila:", message, channel)
   }
 
-  fun runPaused(id: Id<DbBackfillRun>, user: String) {
+  override fun runPaused(id: Id<DbBackfillRun>, user: String) {
     val (message, channel) = transacter.transaction { session ->
       val run = session.load(id)
       val message = ":backfila_pause:${dryRunEmoji(run)} ${nameAndId(run)} paused by @$user"
@@ -33,7 +33,7 @@ class SlackHelper @Inject constructor(
     slackClient.postMessage("Backfila", ":backfila:", message, channel)
   }
 
-  fun runErrored(id: Id<DbBackfillRun>) {
+  override fun runErrored(id: Id<DbBackfillRun>) {
     val (message, channel) = transacter.transaction { session ->
       val run = session.load(id)
       val message = ":backfila_error:${dryRunEmoji(run)} ${nameAndId(run)} paused due to error"
@@ -42,7 +42,7 @@ class SlackHelper @Inject constructor(
     slackClient.postMessage("Backfila", ":backfila:", message, channel)
   }
 
-  fun runCompleted(id: Id<DbBackfillRun>) {
+  override fun runCompleted(id: Id<DbBackfillRun>) {
     val (message, channel) = transacter.transaction { session ->
       val run = session.load(id)
       val message = ":backfila_complete:${dryRunEmoji(run)} ${nameAndId(run)} completed"
