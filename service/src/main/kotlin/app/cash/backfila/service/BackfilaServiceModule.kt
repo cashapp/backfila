@@ -42,6 +42,10 @@ class BackfilaServiceModule(
       AccessAnnotationEntry<AdminDashboardAccess>(capabilities = listOf("backfila--owners")),
     )
 
+    newMultibinder<BackfillRunListener>()
+            .addBinding()
+            .to(SlackHelper::class)
+
     install(ConfigModule.create("backfila", config))
     install(BackfilaPersistenceModule(config))
     install(BackfilaWebActionsModule())
@@ -64,10 +68,6 @@ class BackfilaServiceModule(
     if (config.slack != null) {
       install(SlackModule(config.slack))
     }
-
-    newMultibinder<BackfillRunListener>()
-            .addBinding()
-            .to(SlackHelper::class)
 
     // TODO:mikepaw Require that the Admin Console is installed so it isn't forgotten.
     // something along the lines of requireBinding but works for multibindings.
