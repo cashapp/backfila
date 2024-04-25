@@ -281,10 +281,7 @@ class BackfillRunner private constructor(
           "Paused backfill ${logLabel()} due to too many consecutive failures: $failuresSinceSuccess"
         }
 
-        for (listener in factory.backfillRunListeners) {
-          listener.runErrored(backfillRunId)
-        }
-
+        factory.backfillRunListeners.forEach { it.runErrored(backfillRunId) }
         recordErrorEvent(exception, action, elapsed, backoffMs = null, paused = true)
       }
 

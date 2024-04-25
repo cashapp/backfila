@@ -60,13 +60,9 @@ class BackfillStateToggler @Inject constructor(
     }
 
     if (desiredState == RUNNING) {
-      for (listener in backfillRunListeners) {
-        listener.runStarted(Id(id), caller.principal)
-      }
+      backfillRunListeners.forEach { it.runStarted(Id(id), caller.principal) }
     } else {
-      for (listener in backfillRunListeners) {
-        listener.runPaused(Id(id), caller.principal)
-      }
+      backfillRunListeners.forEach { it.runPaused(Id(id), caller.principal) }
     }
   }
 

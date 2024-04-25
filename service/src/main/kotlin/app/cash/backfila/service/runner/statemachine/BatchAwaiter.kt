@@ -208,9 +208,7 @@ class BatchAwaiter(
     }
 
     if (runComplete) {
-      for (listener in backfillRunner.factory.backfillRunListeners) {
-        listener.runCompleted(backfillRunner.backfillRunId)
-      }
+      backfillRunner.factory.backfillRunListeners.forEach { it.runCompleted(backfillRunner.backfillRunId) }
     }
   }
 
