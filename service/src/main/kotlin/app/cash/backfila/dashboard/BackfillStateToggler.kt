@@ -1,5 +1,6 @@
 package app.cash.backfila.dashboard
 
+import app.cash.backfila.service.BackfillRunListener
 import app.cash.backfila.service.SlackHelper
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillState
@@ -19,7 +20,7 @@ import wisp.logging.getLogger
 class BackfillStateToggler @Inject constructor(
   @BackfilaDb private val transacter: Transacter,
   private val queryFactory: Query.Factory,
-  private val slackHelper: SlackHelper,
+  private val backfillRunListeners: Set<BackfillRunListener>,
 ) {
   fun toggleRunningState(id: Long, caller: MiskCaller, desiredState: BackfillState) {
     val requiredCurrentState = when (desiredState) {
@@ -59,9 +60,9 @@ class BackfillStateToggler @Inject constructor(
     }
 
     if (desiredState == RUNNING) {
-      slackHelper.runStarted(Id(id), caller.principal)
+      backfillRunListeners.forEach { it.runStarted(Id(id), caller.principal) }
     } else {
-      slackHelper.runPaused(Id(id), caller.principal)
+      backfillRunListeners.forEach { it.runPaused(Id(id), caller.principal) }
     }
   }
 

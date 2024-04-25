@@ -42,6 +42,10 @@ class BackfilaServiceModule(
       AccessAnnotationEntry<AdminDashboardAccess>(capabilities = listOf("backfila--owners")),
     )
 
+    newMultibinder<BackfillRunListener>()
+      .addBinding()
+      .to(SlackHelper::class.java)
+
     install(ConfigModule.create("backfila", config))
     install(BackfilaPersistenceModule(config))
     install(BackfilaWebActionsModule())

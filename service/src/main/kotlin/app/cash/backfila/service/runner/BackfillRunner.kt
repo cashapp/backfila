@@ -8,7 +8,7 @@ import app.cash.backfila.protos.clientservice.RunBatchRequest
 import app.cash.backfila.protos.clientservice.RunBatchResponse
 import app.cash.backfila.service.BackfilaConfig
 import app.cash.backfila.service.BackfilaMetrics
-import app.cash.backfila.service.SlackHelper
+import app.cash.backfila.service.BackfillRunListener
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.DbBackfillRun
@@ -281,8 +281,7 @@ class BackfillRunner private constructor(
           "Paused backfill ${logLabel()} due to too many consecutive failures: $failuresSinceSuccess"
         }
 
-        factory.slackHelper.runErrored(backfillRunId)
-
+        factory.backfillRunListeners.forEach { it.runErrored(backfillRunId) }
         recordErrorEvent(exception, action, elapsed, backoffMs = null, paused = true)
       }
 
@@ -410,7 +409,7 @@ class BackfillRunner private constructor(
     val clock: Clock,
     val queryFactory: Query.Factory,
     val connectorProvider: ConnectorProvider,
-    val slackHelper: SlackHelper,
+    val backfillRunListeners: Set<BackfillRunListener>,
     val loggingSetupProvider: BackfillRunnerLoggingSetupProvider,
     val metrics: BackfilaMetrics,
     val backfilaConfig: BackfilaConfig,
