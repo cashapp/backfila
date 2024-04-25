@@ -54,8 +54,8 @@ internal class BackfilaTestingModule : KAbstractModule() {
     bind<BackfilaConfig>().toInstance(config)
 
     newMultibinder<BackfillRunListener>()
-            .addBinding()
-            .to(SlackHelper::class.java)
+      .addBinding()
+      .to(SlackHelper::class.java)
 
     install(DeploymentModule(wisp.deployment.TESTING))
     install(LogCollectorModule())

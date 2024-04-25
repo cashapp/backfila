@@ -43,8 +43,8 @@ class BackfilaServiceModule(
     )
 
     newMultibinder<BackfillRunListener>()
-            .addBinding()
-            .to(SlackHelper::class.java)
+      .addBinding()
+      .to(SlackHelper::class.java)
 
     install(ConfigModule.create("backfila", config))
     install(BackfilaPersistenceModule(config))
