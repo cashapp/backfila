@@ -82,6 +82,9 @@ class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimestampedE
   @Column
   var delete_by: Instant? = null
 
+  @Column
+  var description: String? = null
+
   constructor(
     service_id: Id<DbService>,
     name: String,
@@ -90,6 +93,7 @@ class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimestampedE
     type_consumed: String?,
     requires_approval: Boolean,
     delete_by: Instant?,
+    description: String?,
   ) : this() {
     this.service_id = service_id
     this.name = name
@@ -101,6 +105,7 @@ class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimestampedE
     this.active = true
     this.requires_approval = requires_approval
     this.delete_by = delete_by
+    this.description = description
 
     parameters.forEach {
       this.parameters.add(

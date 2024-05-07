@@ -1,10 +1,12 @@
 package app.cash.backfila.development.mcdees
 
 import app.cash.backfila.client.BackfillConfig
+import app.cash.backfila.client.Description
 import app.cash.backfila.client.stat.StaticDatasourceBackfill
 import javax.inject.Inject
 import wisp.logging.getLogger
 
+@Description("Flips Burgers at a rate.")
 class BurgerFlippingBackfill @Inject constructor() : StaticDatasourceBackfill<String, BurgerFlippingBackfill.SlowMealsAttributes>() {
   override fun runOne(item: String, config: BackfillConfig<SlowMealsAttributes>) {
     Thread.sleep(config.parameters.waitBetweenFlipsMs())
@@ -12,6 +14,7 @@ class BurgerFlippingBackfill @Inject constructor() : StaticDatasourceBackfill<St
   }
 
   data class SlowMealsAttributes(
+    @Description("aka FPM.")
     val flipsPerMinute: Long = 5L,
   ) {
     fun waitBetweenFlipsMs() = (1000L * 60L) / flipsPerMinute

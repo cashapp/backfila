@@ -7,6 +7,7 @@ import app.cash.backfila.client.stat.StaticDatasourceBackfill
 import javax.inject.Inject
 import wisp.logging.getLogger
 
+@Description("A very clumsy restaurant that keeps breaking plates.")
 class ClumsyMealsBackfill @Inject constructor() : StaticDatasourceBackfill<String, ClumsyMealsBackfill.ClumsyMealsAttributes>() {
   var servedPlates = 0 // Keeps track of the number of successfully served plates.
   var brokenPlatesSoFar = 0 // When plates break it keeps track of how many have broken so far.

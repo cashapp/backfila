@@ -1,6 +1,7 @@
 package app.cash.backfila.development.mcdees
 
 import app.cash.backfila.client.BackfillConfig
+import app.cash.backfila.client.Description
 import app.cash.backfila.client.stat.StaticDatasourceBackfill
 import javax.inject.Inject
 import wisp.logging.getLogger
@@ -8,6 +9,7 @@ import wisp.logging.getLogger
 /**
  * Inspired by https://www.youtube.com/watch?v=Nni0rTLg5B8
  */
+@Description("Boots 🥾 👢 and Cats 🐈 🐅")
 class BootsAndCatsBackfill @Inject constructor() : StaticDatasourceBackfill<String, BootsAndCatsBackfill.SlowMealsAttributes>() {
   override fun runOne(item: String, config: BackfillConfig<SlowMealsAttributes>) {
     if (config.parameters.eatMoreChikin and item.contains("beef", true)) throw RuntimeException("Eat More Chikin")
@@ -16,7 +18,9 @@ class BootsAndCatsBackfill @Inject constructor() : StaticDatasourceBackfill<Stri
   }
 
   data class SlowMealsAttributes(
+    @Description("🥁How quick are those beatz?🥁")
     val beatsPerMinute: Long = 120L,
+    @Description("Throws if it finds 🥩.")
     val eatMoreChikin: Boolean = false,
   ) {
     fun waitBetweenHalfBeatsMs() = (1000L * 60L) / (beatsPerMinute * 2)

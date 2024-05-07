@@ -95,6 +95,7 @@ class ConfigureServiceAction @Inject constructor(
           backfill.type_consumed,
           backfill.requires_approval == true,
           backfill.delete_by?.let(Instant::ofEpochMilli),
+          backfill.description,
         )
         var save = false
         if (existingBackfill != null) {

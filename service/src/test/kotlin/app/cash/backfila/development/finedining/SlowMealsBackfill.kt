@@ -1,10 +1,12 @@
 package app.cash.backfila.development.finedining
 
 import app.cash.backfila.client.BackfillConfig
+import app.cash.backfila.client.Description
 import app.cash.backfila.client.stat.StaticDatasourceBackfill
 import javax.inject.Inject
 import wisp.logging.getLogger
 
+@Description("A restaurant that takes forever to serve meals.")
 class SlowMealsBackfill @Inject constructor() : StaticDatasourceBackfill<String, SlowMealsBackfill.SlowMealsAttributes>() {
   override fun runOne(item: String, config: BackfillConfig<SlowMealsAttributes>) {
     Thread.sleep(config.parameters.mealDelayMs)

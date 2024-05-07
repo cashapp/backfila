@@ -17,7 +17,14 @@ import misk.web.mediatype.MediaTypes
 
 data class RegisteredBackfill(
   val name: String,
-  val parameterNames: List<String>,
+  val description: String?,
+  val parameters: List<RegisteredParameter>,
+) {
+  val parameterNames by lazy { parameters.map { it.name } }
+}
+data class RegisteredParameter(
+  val name: String,
+  val description: String?,
 )
 data class GetRegisteredBackfillsResponse(val backfills: List<RegisteredBackfill>)
 
@@ -49,7 +56,10 @@ class GetRegisteredBackfillsAction @Inject constructor(
       backfills.map {
         RegisteredBackfill(
           it.name,
-          it.parameterNames(),
+          it.description,
+          it.parameters.map { parameter ->
+            RegisteredParameter(parameter.name, parameter.description)
+          }.toList(),
         )
       }
     }
