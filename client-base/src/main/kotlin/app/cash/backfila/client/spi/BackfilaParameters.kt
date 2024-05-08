@@ -115,9 +115,10 @@ class BackfilaParametersOperator<T : Any>(
       }
       return fetchConstructor(parametersClass).parameters.map {
         val description = it.findAnnotation<Description>()?.text
-        // For Java we use BackfilaDefault since the name is arg0... otherwise.
+        // For Java we use BackfilaDefault or BackfilaRequired since the name is arg0... otherwise.
         val defaultAnnotation = it.findAnnotation<BackfilaDefault>()
-        val name = defaultAnnotation?.name ?: it.name
+        val requiredAnnotation = it.findAnnotation<BackfilaRequired>()
+        val name = defaultAnnotation?.name ?: requiredAnnotation?.name ?: it.name
         Parameter.Builder()
           .name(name)
           .description(description)
