@@ -1,7 +1,6 @@
 package app.cash.backfila.embedded;
 
 import app.cash.backfila.client.BackfilaDefault;
-import app.cash.backfila.client.BackfilaNullDefault;
 import app.cash.backfila.client.BackfilaRequired;
 import app.cash.backfila.client.Description;
 
@@ -21,9 +20,9 @@ public class CaseParameters {
       @BackfilaDefault(name = "testLong", value = "123") long testLong,
       @BackfilaDefault(name = "testInt", value = "789") int testInt,
       @BackfilaDefault(name = "testBool", value = "false") boolean testBool,
-      @BackfilaNullDefault(name = "testNullString") String testNullString,
-      @BackfilaNullDefault(name = "testNullInt") Integer testNullInt,
-      @BackfilaNullDefault(name = "testNullBoolean") Boolean testNullBoolean,
+      @BackfilaDefault(name = "testNullString", nullDefault = true) String testNullString,
+      @BackfilaDefault(name = "testNullInt", nullDefault = true) Integer testNullInt,
+      @BackfilaDefault(name = "testNullBoolean", nullDefault = true) Boolean testNullBoolean,
       @BackfilaRequired(name = "required") String required) {
     if ("upper".equalsIgnoreCase(casing)) {
       toUpper = true;

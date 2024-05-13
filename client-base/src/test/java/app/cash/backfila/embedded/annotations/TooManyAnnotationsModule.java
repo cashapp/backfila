@@ -32,7 +32,6 @@ public class TooManyAnnotationsModule extends AbstractModule {
         )
     );
     install(FixedSetBackfillModule.create(TwoAnnotationParameterBackfill.class));
-    install(FixedSetBackfillModule.create(ThreeAnnotationParameterBackfill.class));
 
     install(new EmbeddedBackfilaModule(OnStartup.CONTINUE_ON_STARTUP));
   }

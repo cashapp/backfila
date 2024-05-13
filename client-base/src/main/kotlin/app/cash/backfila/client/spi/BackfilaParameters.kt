@@ -1,7 +1,6 @@
 package app.cash.backfila.client.spi
 
 import app.cash.backfila.client.BackfilaDefault
-import app.cash.backfila.client.BackfilaNullDefault
 import app.cash.backfila.client.BackfilaRequired
 import app.cash.backfila.client.BackfillConfig
 import app.cash.backfila.client.Description
@@ -72,22 +71,13 @@ class BackfilaParametersOperator<T : Any>(
       } else {
         val requiredAnnotation = parameter.findAnnotation<BackfilaRequired>()
         val defaultAnnotation = parameter.findAnnotation<BackfilaDefault>()
-        val nullableAnnotation = parameter.findAnnotation<BackfilaNullDefault>()
-        check(listOfNotNull(requiredAnnotation, defaultAnnotation, nullableAnnotation).size <= 1) {
-          "Only one of @BackfilaRequired, @BackfilaDefault, or @BackfilaNullDefault can be set on each constructor Parameter. " +
+        check(listOfNotNull(requiredAnnotation, defaultAnnotation).size <= 1) {
+          "Only one of @BackfilaRequired or @BackfilaDefault can be set on each constructor Parameter. " +
             "@BackfilaRequired: $requiredAnnotation " +
-            "@BackfilaDefault: $defaultAnnotation " +
-            "@BackfilaNullDefault: $nullableAnnotation "
+            "@BackfilaDefault: $defaultAnnotation "
         }
 
-        if (nullableAnnotation != null) {
-          if (parameters.containsKey(nullableAnnotation.name)) {
-            val value = parameters[nullableAnnotation.name]!!
-            map[parameter] = TYPE_CONVERTERS[parameter.type.jvmErasure]!!.invoke(value)
-          } else {
-            map[parameter] = null
-          }
-        } else if (requiredAnnotation != null) {
+        if (requiredAnnotation != null) {
           require(parameters.containsKey(requiredAnnotation.name)) {
             "Parameter data class has a required member ${requiredAnnotation.name} with no provided value."
           }
@@ -97,9 +87,10 @@ class BackfilaParametersOperator<T : Any>(
           if (parameters.containsKey(defaultAnnotation.name)) {
             val value = parameters[defaultAnnotation.name]!!
             map[parameter] = TYPE_CONVERTERS[parameter.type.jvmErasure]!!.invoke(value)
+          } else if (defaultAnnotation.nullDefault) {
+            map[parameter] = null
           } else {
-            val defaultValue = defaultAnnotation.value
-            map[parameter] = TYPE_CONVERTERS[parameter.type.jvmErasure]!!.invoke(defaultValue.encodeUtf8())
+            map[parameter] = TYPE_CONVERTERS[parameter.type.jvmErasure]!!.invoke(defaultAnnotation.value.encodeUtf8())
           }
         } else if (!parameter.isOptional && parameter.type.isMarkedNullable) {
           map[parameter] = null
@@ -133,16 +124,13 @@ class BackfilaParametersOperator<T : Any>(
         // For Java we use BackfilaDefault or BackfilaRequired since the name is arg0... otherwise.
         val defaultAnnotation = it.findAnnotation<BackfilaDefault>()
         val requiredAnnotation = it.findAnnotation<BackfilaRequired>()
-        val nullableAnnotation = it.findAnnotation<BackfilaNullDefault>()
-        check(listOfNotNull(requiredAnnotation, defaultAnnotation, nullableAnnotation).size <= 1) {
-          "Only one of @BackfilaRequired, @BackfilaDefault, or @BackfilaNullDefault can be set on each constructor Parameter." +
+        check(listOfNotNull(requiredAnnotation, defaultAnnotation).size <= 1) {
+          "Only one of @BackfilaRequired or @BackfilaDefault can be set on each constructor Parameter." +
             "@BackfilaRequired: $requiredAnnotation " +
-            "@BackfilaDefault: $defaultAnnotation " +
-            "@BackfilaNullDefault: $nullableAnnotation "
+            "@BackfilaDefault: $defaultAnnotation "
         }
         val name = defaultAnnotation?.name
           ?: requiredAnnotation?.name
-          ?: nullableAnnotation?.name
           ?: it.name
         Parameter.Builder()
           .name(name)

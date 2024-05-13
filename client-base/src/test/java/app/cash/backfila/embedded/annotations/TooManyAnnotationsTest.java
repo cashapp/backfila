@@ -35,20 +35,14 @@ public class TooManyAnnotationsTest {
     // Check that the service failed to register to backfila
     assertThat(configureServiceData).isNull();
 
-    // Check that the backfills were registered to the backend though.
-    assertThat(backend.backfills().stream().map(it -> it.getName()).collect(Collectors.toList()))
-        .containsExactlyInAnyOrderElementsOf(List.of("app.cash.backfila.embedded.annotations.TwoAnnotationParameterBackfill",
-            "app.cash.backfila.embedded.annotations.ThreeAnnotationParameterBackfill"));
+    // Check that the backfill was registered to the backend though.
+    assertThat(backend.backfills().iterator().next().getName())
+        .isEqualTo("app.cash.backfila.embedded.annotations.TwoAnnotationParameterBackfill");
 
     // And that collecting parameters fail.
     var twoParameterException = assertThrows(IllegalStateException.class, () -> {
       BackfilaParametersOperator.Companion.backfilaParametersFromClass(JvmClassMappingKt.getKotlinClass(TwoAnnotationParameterBackfill.TwoAnnotationParameter.class));
     });
-    assertThat(twoParameterException).hasMessageContaining("Only one of @BackfilaRequired, @BackfilaDefault, or @BackfilaNullDefault can be set on each constructor Parameter.");
-
-    var threeParameterException = assertThrows(IllegalStateException.class, () -> {
-      BackfilaParametersOperator.Companion.backfilaParametersFromClass(JvmClassMappingKt.getKotlinClass(ThreeAnnotationParameterBackfill.ThreeAnnotationParameter.class));
-    });
-    assertThat(threeParameterException).hasMessageContaining("Only one of @BackfilaRequired, @BackfilaDefault, or @BackfilaNullDefault can be set on each constructor Parameter.");
+    assertThat(twoParameterException).hasMessageContaining("Only one of @BackfilaRequired or @BackfilaDefault can be set on each constructor Parameter.");
   }
 }

@@ -34,51 +34,55 @@ class BackfilaStartupConfigurator @Inject constructor(
     }
 
     // Send the Backfila registration request
-    val request: ConfigureServiceRequest? = try {
-      ConfigureServiceRequest.Builder()
-        .backfills(
-          registrations.map { registration ->
-            @Suppress("UNCHECKED_CAST")
-            val parameters = backfilaParametersFromClass(registration.parametersClass)
-            ConfigureServiceRequest.BackfillData.Builder()
-              .name(registration.name)
-              .description(registration.description)
-              .parameters(parameters)
-              .delete_by(registration.deleteBy?.toEpochMilli())
-              .build()
-          },
-        )
-        .connector_type(config.connector_type)
-        .connector_extra_data(config.connector_extra_data)
-        .slack_channel(config.slack_channel)
-        .variant(config.variant)
-        .build()
-    } catch (e: Exception) {
-      if (backfilaClient.throwOnStartup) {
-        throw e
-      } else {
-        logger.error(e) { "Exception generating backfila registration request, skipped!" }
-        null // request
+    val request: ConfigureServiceRequest? = if (backfilaClient.throwOnStartup) {
+      getRequest(registrations).getOrThrow()
+    } else {
+      getRequest(registrations).getOrElse {
+        logger.error(it.cause) { "Exception generating backfila registration request, skipped!" }
+        null
       }
     }
 
     // TODO(mikepaw): make this async.
     if (request != null) {
-      try {
-        backfilaClient.configureService(request)
-
-        logger.info {
-          "Backfila lifecycle listener initialized. " +
-            "Updated backfila with ${registrations.size} backfills."
-        }
-      } catch (e: Exception) {
-        if (backfilaClient.throwOnStartup) {
-          throw e
-        } else {
-          logger.error(e) { "Exception making startup call to configure backfila, skipped!" }
+      if (backfilaClient.throwOnStartup) {
+        sendConfigureRequest(request, registrations).getOrThrow()
+      } else {
+        sendConfigureRequest(request, registrations).getOrElse {
+          logger.error(it.cause) { "Exception making startup call to configure backfila, skipped!" }
         }
       }
     }
+  }
+
+  private fun sendConfigureRequest(request: ConfigureServiceRequest, registrations: MutableSet<BackfillRegistration>) = kotlin.runCatching {
+    backfilaClient.configureService(request)
+
+    logger.info {
+      "Backfila lifecycle listener initialized. " +
+        "Updated backfila with ${registrations.size} backfills."
+    }
+  }
+
+  private fun getRequest(registrations: MutableSet<BackfillRegistration>): Result<ConfigureServiceRequest> = kotlin.runCatching {
+    ConfigureServiceRequest.Builder()
+      .backfills(
+        registrations.map { registration ->
+          @Suppress("UNCHECKED_CAST")
+          val parameters = backfilaParametersFromClass(registration.parametersClass)
+          ConfigureServiceRequest.BackfillData.Builder()
+            .name(registration.name)
+            .description(registration.description)
+            .parameters(parameters)
+            .delete_by(registration.deleteBy?.toEpochMilli())
+            .build()
+        },
+      )
+      .connector_type(config.connector_type)
+      .connector_extra_data(config.connector_extra_data)
+      .slack_channel(config.slack_channel)
+      .variant(config.variant)
+      .build()
   }
 
   companion object {
