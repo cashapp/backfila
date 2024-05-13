@@ -10,6 +10,7 @@ import misk.testing.MiskTestModule;
 import okio.ByteString;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -31,7 +32,16 @@ class JavaBackfilaTest {
     var toUpperParameter = backfillData.get().parameters.stream().filter(it -> it.name.equals("casing")).findFirst();
     assertThat(toUpperParameter.get().description).isEqualTo("Whether to change case to upper case or lower case.");
     var parameterList = backfillData.get().parameters.stream().map(it -> it.name).collect(Collectors.toList());
-    assertThat(parameterList).containsExactly("casing", "testLong", "testInt", "testBool", "required");
+    assertThat(parameterList).containsExactly(
+        "casing",
+        "testLong",
+        "testInt",
+        "testBool",
+        "testNullString",
+        "testNullInt",
+        "testNullBoolean",
+        "required"
+    );
 
     datastore.put("instance", "a", "B", "c");
 
@@ -45,6 +55,10 @@ class JavaBackfilaTest {
     assertThat(seenParameters.testLong).isEqualTo(123);
     assertThat(seenParameters.testInt).isEqualTo(789);
     assertThat(seenParameters.testBool).isEqualTo(false);
+    assertThat(seenParameters.testNullString).isNull();
+    assertThat(seenParameters.testNullInt).isNull();
+    assertThat(seenParameters.testNullBoolean).isNull();
+    assertThat(seenParameters.required).isEqualTo("isRequired");
   }
 
   @Test
@@ -64,6 +78,10 @@ class JavaBackfilaTest {
     assertThat(seenParameters.testLong).isEqualTo(123);
     assertThat(seenParameters.testInt).isEqualTo(789);
     assertThat(seenParameters.testBool).isEqualTo(false);
+    assertThat(seenParameters.testNullString).isNull();
+    assertThat(seenParameters.testNullInt).isNull();
+    assertThat(seenParameters.testNullBoolean).isNull();
+    assertThat(seenParameters.required).isEqualTo("isRequired");
   }
 
   @Test
@@ -76,6 +94,9 @@ class JavaBackfilaTest {
             "testLong", ByteString.encodeUtf8("456"),
             "testInt", ByteString.encodeUtf8("1011"),
             "testBool", ByteString.encodeUtf8("true"),
+            "testNullString", ByteString.encodeUtf8("Not null this time"),
+            "testNullInt", ByteString.encodeUtf8("9876"),
+            "testNullBoolean", ByteString.encodeUtf8("false"),
             "required", ByteString.encodeUtf8("isRequired")
         ));
     CaseParameters seenParameters = backfillRun.getBackfill().seenParameters;
@@ -83,6 +104,10 @@ class JavaBackfilaTest {
     assertThat(seenParameters.testLong).isEqualTo(456);
     assertThat(seenParameters.testInt).isEqualTo(1011);
     assertThat(seenParameters.testBool).isEqualTo(true);
+    assertThat(seenParameters.testNullString).isEqualTo("Not null this time");
+    assertThat(seenParameters.testNullInt).isEqualTo(9876);
+    assertThat(seenParameters.testNullBoolean).isEqualTo(false);
+    assertThat(seenParameters.required).isEqualTo("isRequired");
   }
 
   @Test

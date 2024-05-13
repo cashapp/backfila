@@ -9,6 +9,10 @@ public class CaseParameters {
   public final long testLong;
   public final int testInt;
   public final boolean testBool;
+  public final String testNullString;
+  public final Integer testNullInt;
+  public final Boolean testNullBoolean;
+  public final String required;
 
   public CaseParameters(
       @Description(text = "Whether to change case to upper case or lower case.")
@@ -16,7 +20,10 @@ public class CaseParameters {
       @BackfilaDefault(name = "testLong", value = "123") long testLong,
       @BackfilaDefault(name = "testInt", value = "789") int testInt,
       @BackfilaDefault(name = "testBool", value = "false") boolean testBool,
-      @BackfilaRequired(name = "required") String requiredParameter) {
+      @BackfilaDefault(name = "testNullString", nullDefault = true) String testNullString,
+      @BackfilaDefault(name = "testNullInt", nullDefault = true) Integer testNullInt,
+      @BackfilaDefault(name = "testNullBoolean", nullDefault = true) Boolean testNullBoolean,
+      @BackfilaRequired(name = "required") String required) {
     if ("upper".equalsIgnoreCase(casing)) {
       toUpper = true;
     } else if ("lower".equalsIgnoreCase(casing)) {
@@ -27,5 +34,9 @@ public class CaseParameters {
     this.testLong = testLong;
     this.testInt = testInt;
     this.testBool = testBool;
+    this.testNullString = testNullString;
+    this.testNullInt = testNullInt;
+    this.testNullBoolean = testNullBoolean;
+    this.required = required;
   }
 }

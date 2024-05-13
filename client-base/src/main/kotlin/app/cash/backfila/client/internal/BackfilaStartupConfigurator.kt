@@ -34,7 +34,38 @@ class BackfilaStartupConfigurator @Inject constructor(
     }
 
     // Send the Backfila registration request
-    val request = ConfigureServiceRequest.Builder()
+    val request: ConfigureServiceRequest? = if (backfilaClient.throwOnStartup) {
+      getRequest(registrations).getOrThrow()
+    } else {
+      getRequest(registrations).getOrElse {
+        logger.error(it.cause) { "Exception generating backfila registration request, skipped!" }
+        null
+      }
+    }
+
+    // TODO(mikepaw): make this async.
+    if (request != null) {
+      if (backfilaClient.throwOnStartup) {
+        sendConfigureRequest(request, registrations).getOrThrow()
+      } else {
+        sendConfigureRequest(request, registrations).getOrElse {
+          logger.error(it.cause) { "Exception making startup call to configure backfila, skipped!" }
+        }
+      }
+    }
+  }
+
+  private fun sendConfigureRequest(request: ConfigureServiceRequest, registrations: MutableSet<BackfillRegistration>) = kotlin.runCatching {
+    backfilaClient.configureService(request)
+
+    logger.info {
+      "Backfila lifecycle listener initialized. " +
+        "Updated backfila with ${registrations.size} backfills."
+    }
+  }
+
+  private fun getRequest(registrations: MutableSet<BackfillRegistration>): Result<ConfigureServiceRequest> = kotlin.runCatching {
+    ConfigureServiceRequest.Builder()
       .backfills(
         registrations.map { registration ->
           @Suppress("UNCHECKED_CAST")
@@ -52,22 +83,6 @@ class BackfilaStartupConfigurator @Inject constructor(
       .slack_channel(config.slack_channel)
       .variant(config.variant)
       .build()
-
-    // TODO(mikepaw): make this async.
-    try {
-      backfilaClient.configureService(request)
-
-      logger.info {
-        "Backfila lifecycle listener initialized. " +
-          "Updated backfila with ${registrations.size} backfills."
-      }
-    } catch (e: Exception) {
-      if (backfilaClient.throwOnStartup) {
-        throw e
-      } else {
-        logger.error(e) { "Exception making startup call to configure backfila, skipped!" }
-      }
-    }
   }
 
   companion object {
