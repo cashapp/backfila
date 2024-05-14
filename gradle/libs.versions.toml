@@ -1,6 +1,8 @@
 [versions]
 jooq = "3.18.1"
 ktlint = "0.47.1"
+kotlin = "1.9.23"
+misk = "2024.05.07.211405-28ee413"
 
 [libraries]
 apacheCommonsLang3 = { module = "org.apache.commons:commons-lang3", version = "3.12.0" }
@@ -9,7 +11,7 @@ aws2Dynamodb = { module = "software.amazon.awssdk:dynamodb", version = "2.17.267
 aws2DynamodbEnhanced = { module = "software.amazon.awssdk:dynamodb-enhanced", version = "2.17.267" }
 awsDynamodb = { module = "com.amazonaws:aws-java-sdk-dynamodb", version = "1.11.960" }
 awsS3 = { module = "com.amazonaws:aws-java-sdk-s3", version = "1.12.231" }
-dokkaGradlePlugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version = "1.5.0" }
+dokkaGradlePlugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version = "1.9.20" }
 guava = { module = "com.google.guava:guava", version = "31.1-jre" }
 guice = { module = "com.google.inject:guice", version = "5.1.0" }
 jCommander = { module = "com.beust:jcommander", version = "1.72" }
@@ -48,36 +50,36 @@ slf4jApi = { module = "org.slf4j:slf4j-api", version = "2.0.3" }
 spotlessPlugin = { module = "com.diffplug.spotless:spotless-plugin-gradle", version = "6.12.0" }
 tracingJaeger = { module = "io.jaegertracing:jaeger-core", version = "1.1.0" }
 jooq = { module = "org.jooq:jooq", version.ref = "jooq" }
-kotlinAllOpenPlugin = { module = "org.jetbrains.kotlin:kotlin-allopen", version = "1.7.0" }
-kotlinGradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version = "1.7.0" }
-kotlinReflection = { module = "org.jetbrains.kotlin:kotlin-reflect", version = "1.7.0" }
-kotlinStdLib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version = "1.7.0" }
-kotlinTest = { module = "org.jetbrains.kotlin:kotlin-test", version = "1.7.0" }
+kotlinAllOpenPlugin = { module = "org.jetbrains.kotlin:kotlin-allopen", version.ref = "kotlin" }
+kotlinGradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+kotlinReflection = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
+kotlinStdLib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
+kotlinTest = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlinxCoroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version = "1.6.3" }
 kotlinxCoroutinesLogging = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-slf4j", version = "1.6.3" }
 kotlinxCoroutinesTest = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version = "1.6.3" }
-misk = { module = "com.squareup.misk:misk", version = "2023.12.01.175902-d977e5a" }
-miskActions = { module = "com.squareup.misk:misk-actions", version = "2023.12.01.175902-d977e5a" }
-miskAdmin = { module = "com.squareup.misk:misk-admin", version = "2023.12.01.175902-d977e5a" }
-miskAwsDynamodb = { module = "com.squareup.misk:misk-aws-dynamodb", version = "2023.12.01.175902-d977e5a" }
-miskAws2Dynamodb = { module = "com.squareup.misk:misk-aws2-dynamodb", version = "2023.12.01.175902-d977e5a" }
-miskCore = { module = "com.squareup.misk:misk-core", version = "2023.12.01.175902-d977e5a" }
-miskHibernate = { module = "com.squareup.misk:misk-hibernate", version = "2023.12.01.175902-d977e5a" }
-miskHibernateTesting = { module = "com.squareup.misk:misk-hibernate-testing", version = "2023.12.01.175902-d977e5a" }
-miskHotwire = { module = "com.squareup.misk:misk-hotwire", version = "2023.12.01.175902-d977e5a" }
-miskJdbc = { module = "com.squareup.misk:misk-jdbc", version = "2023.12.01.175902-d977e5a" }
-miskInject = { module = "com.squareup.misk:misk-inject", version = "2023.12.01.175902-d977e5a" }
-miskMetrics = { module = "com.squareup.misk:misk-metrics", version = "2023.12.01.175902-d977e5a" }
-miskService = { module = "com.squareup.misk:misk-service", version = "2023.12.01.175902-d977e5a" }
-miskSlack = { module = "com.squareup.misk:misk-slack", version = "2023.12.01.175902-d977e5a" }
-miskTailwind = { module = "com.squareup.misk:misk-tailwind", version = "2023.12.01.175902-d977e5a" }
-miskTesting = { module = "com.squareup.misk:misk-testing", version = "2023.12.01.175902-d977e5a" }
+misk = { module = "com.squareup.misk:misk", version.ref = "misk" }
+miskActions = { module = "com.squareup.misk:misk-actions", version.ref = "misk" }
+miskAdmin = { module = "com.squareup.misk:misk-admin", version.ref = "misk" }
+miskAwsDynamodb = { module = "com.squareup.misk:misk-aws-dynamodb", version.ref = "misk" }
+miskAws2Dynamodb = { module = "com.squareup.misk:misk-aws2-dynamodb", version.ref = "misk" }
+miskCore = { module = "com.squareup.misk:misk-core", version.ref = "misk" }
+miskHibernate = { module = "com.squareup.misk:misk-hibernate", version.ref = "misk" }
+miskHibernateTesting = { module = "com.squareup.misk:misk-hibernate-testing", version.ref = "misk" }
+miskHotwire = { module = "com.squareup.misk:misk-hotwire", version.ref = "misk" }
+miskJdbc = { module = "com.squareup.misk:misk-jdbc", version.ref = "misk" }
+miskInject = { module = "com.squareup.misk:misk-inject", version.ref = "misk" }
+miskMetrics = { module = "com.squareup.misk:misk-metrics", version.ref = "misk" }
+miskService = { module = "com.squareup.misk:misk-service", version.ref = "misk" }
+miskSlack = { module = "com.squareup.misk:misk-slack", version.ref = "misk" }
+miskTailwind = { module = "com.squareup.misk:misk-tailwind", version.ref = "misk" }
+miskTesting = { module = "com.squareup.misk:misk-testing", version.ref = "misk" }
 wireCompiler = { module = "com.squareup.wire:wire-compiler", version = "4.4.2" }
 wireGradlePlugin = { module = "com.squareup.wire:wire-gradle-plugin", version = "4.4.2" }
 wireMoshiAdapter = { module = "com.squareup.wire:wire-moshi-adapter", version = "4.4.2" }
 wireRuntime = { module = "com.squareup.wire:wire-runtime", version = "4.4.2" }
 wireSchema = { module = "com.squareup.wire:wire-schema", version = "4.4.2" }
-wispClient = { module = "app.cash.wisp:wisp-client", version = "2023.12.01.175902-d977e5a" }
-wispConfig = { module = "app.cash.wisp:wisp-config", version = "2023.12.01.175902-d977e5a" }
-wispDeployment = { module = "app.cash.wisp:wisp-deployment", version = "2023.12.01.175902-d977e5a" }
-wispLogging = { module = "app.cash.wisp:wisp-logging", version = "2023.12.01.175902-d977e5a" }
+wispClient = { module = "app.cash.wisp:wisp-client", version.ref = "misk" }
+wispConfig = { module = "app.cash.wisp:wisp-config", version.ref = "misk" }
+wispDeployment = { module = "app.cash.wisp:wisp-deployment", version.ref = "misk" }
+wispLogging = { module = "app.cash.wisp:wisp-logging", version.ref = "misk" }
