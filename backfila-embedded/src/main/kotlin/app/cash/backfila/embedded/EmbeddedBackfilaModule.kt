@@ -10,10 +10,15 @@ import com.google.inject.AbstractModule
  * also need to install a [BackfillModule].
  */
 class EmbeddedBackfilaModule
-@JvmOverloads constructor(private val onStartup: OnStartup = OnStartup.THROW_ON_STARTUP) : AbstractModule() {
+@JvmOverloads constructor(
+  private val throwOnStartup: Boolean = true
+) : AbstractModule() {
   override fun configure() {
     bind(BackfilaApi::class.java).to(EmbeddedBackfila::class.java)
     bind(Backfila::class.java).to(EmbeddedBackfila::class.java)
-    bind(OnStartup::class.java).toInstance(onStartup)
+    bind(OnStartup::class.java).toInstance(
+      if (throwOnStartup) OnStartup.THROW_ON_STARTUP
+      else OnStartup.CONTINUE_ON_STARTUP
+    )
   }
 }
