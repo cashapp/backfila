@@ -1,12 +1,8 @@
 package app.cash.backfila.embedded.annotations;
 
-import app.cash.backfila.client.BackfilaApi;
 import app.cash.backfila.client.BackfilaHttpClientConfig;
-import app.cash.backfila.client.OnStartup;
 import app.cash.backfila.client.fixedset.FixedSetBackfillModule;
-import app.cash.backfila.client.internal.EmbeddedBackfila;
 import app.cash.backfila.client.misk.MiskBackfillModule;
-import app.cash.backfila.embedded.Backfila;
 import app.cash.backfila.embedded.EmbeddedBackfilaModule;
 import com.google.inject.AbstractModule;
 import misk.MiskTestingServiceModule;
@@ -33,6 +29,6 @@ public class TooManyAnnotationsModule extends AbstractModule {
     );
     install(FixedSetBackfillModule.create(TwoAnnotationParameterBackfill.class));
 
-    install(new EmbeddedBackfilaModule(OnStartup.CONTINUE_ON_STARTUP));
+    install(new EmbeddedBackfilaModule(false));
   }
 }
