@@ -11,7 +11,7 @@ import com.google.inject.AbstractModule
  */
 class EmbeddedBackfilaModule
 @JvmOverloads constructor(
-  private val throwOnStartup: Boolean = true
+  private val throwOnStartup: Boolean = true,
 ) : AbstractModule() {
   override fun configure() {
     bind(BackfilaApi::class.java).to(EmbeddedBackfila::class.java)
