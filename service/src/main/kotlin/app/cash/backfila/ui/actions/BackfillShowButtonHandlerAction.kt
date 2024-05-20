@@ -4,6 +4,8 @@ import app.cash.backfila.dashboard.StartBackfillAction
 import app.cash.backfila.dashboard.StartBackfillRequest
 import app.cash.backfila.dashboard.StopBackfillAction
 import app.cash.backfila.dashboard.StopBackfillRequest
+import app.cash.backfila.dashboard.UpdateBackfillAction
+import app.cash.backfila.dashboard.UpdateBackfillRequest
 import app.cash.backfila.service.persistence.BackfillState
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -23,8 +25,7 @@ import okhttp3.Headers
 class BackfillShowButtonHandlerAction @Inject constructor(
   private val startBackfillAction: StartBackfillAction,
   private val stopBackfillAction: StopBackfillAction,
-  // TODO add support for updating other fields, not just state
-  // private val updateBackfillAction: UpdateBackfillAction,
+  private val updateBackfillAction: UpdateBackfillAction,
 ) : WebAction {
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
@@ -42,6 +43,33 @@ class BackfillShowButtonHandlerAction @Inject constructor(
           } else if (field_value == BackfillState.RUNNING.name) {
             startBackfillAction.start(id.toLong(), StartBackfillRequest())
           }
+        }
+        "num_threads" -> {
+          val numThreads = field_value?.toIntOrNull()
+          if (numThreads != null) {
+            updateBackfillAction.update(id.toLong(), UpdateBackfillRequest(num_threads = numThreads))
+          }
+        }
+        "scan_size" -> {
+          val scanSize = field_value?.toLongOrNull()
+          if (scanSize != null) {
+            updateBackfillAction.update(id.toLong(), UpdateBackfillRequest(scan_size = scanSize))
+          }
+        }
+        "batch_size" -> {
+          val batchSize = field_value?.toLongOrNull()
+          if (batchSize != null) {
+            updateBackfillAction.update(id.toLong(), UpdateBackfillRequest(batch_size = batchSize))
+          }
+        }
+        "extra_sleep_ms" -> {
+          val extraSleepMs = field_value?.toLongOrNull()
+          if (extraSleepMs != null) {
+            updateBackfillAction.update(id.toLong(), UpdateBackfillRequest(extra_sleep_ms = extraSleepMs))
+          }
+        }
+        "backoff_schedule" -> {
+          updateBackfillAction.update(id.toLong(), UpdateBackfillRequest(backoff_schedule = field_value))
         }
 
         // TODO add support for updating other fields, not just state

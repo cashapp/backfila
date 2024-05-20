@@ -119,10 +119,6 @@ class BackfillShowAction @Inject constructor(
 
                               action = BackfillShowButtonHandlerAction.PATH.replace("{id}", id)
 
-                              // POST /backfills/1/start
-                              // POST /backfills/1/stop
-                              // POST /backfills/1/update { num_threads: 2 }
-
                               it.updateFieldId?.let { updateFieldId ->
                                 input {
                                   type = InputType.hidden
@@ -165,10 +161,6 @@ class BackfillShowAction @Inject constructor(
                               // Button when clicked updates without additional form
                               form {
                                 action = BackfillShowButtonHandlerAction.PATH.replace("{id}", id)
-
-                                // POST /backfills/1/start
-                                // POST /backfills/1/stop
-                                // POST /backfills/1/update { num_threads: 2 }
 
                                 it.updateFieldId?.let {
                                   input {
