@@ -1,7 +1,6 @@
 package app.cash.backfila.dashboard
 
 import app.cash.backfila.service.BackfillRunListener
-import app.cash.backfila.service.SlackHelper
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.BackfillState.PAUSED

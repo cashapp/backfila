@@ -86,37 +86,110 @@ class BackfillShowAction @Inject constructor(
                 dl("divide-y divide-gray-100") {
                   backfill.toRows(id).map {
                     div("px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0") {
+                      attributes["data-controller"] = "toggle"
+
                       this@dl.dt("text-sm font-medium leading-6 text-gray-900") { +it.label }
                       this@dl.dd("mt-1 flex text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0") {
-                        span("flex-grow") { +it.description }
-                        span("ml-4 flex-shrink-0") {
-                          it.button?.let { button ->
-                            form {
+                        span("flex-grow") {
+                          attributes["data-toggle-target"] = "toggleable"
+                          attributes["data-css-class"] = "hidden"
+
+                          +it.description
+                        }
+                        it.button?.let { button ->
+                          if (button.label == UPDATE_BUTTON_LABEL) {
+                            // Initial Update Button to toggle showing form
+                            span("ml-4 flex-shrink-0") {
+                              attributes["data-toggle-target"] = "toggleable"
+                              attributes["data-css-class"] = "hidden"
+
+                              button(
+                                classes = "mt-1 rounded-md font-medium text-indigo-600 hover:text-indigo-500",
+                              ) {
+                                attributes["data-action"] = "toggle#toggle"
+                                type = ButtonType.button
+                                +button.label
+                              }
+                            }
+
+                            // Have initial click reveal the update form with editable input
+                            form(classes = "flex-grow hidden") {
+                              attributes["data-toggle-target"] = "toggleable"
+                              attributes["data-css-class"] = "hidden"
+
                               action = BackfillShowButtonHandlerAction.PATH.replace("{id}", id)
 
                               // POST /backfills/1/start
                               // POST /backfills/1/stop
                               // POST /backfills/1/update { num_threads: 2 }
 
-                              it.updateFieldId?.let {
+                              it.updateFieldId?.let { updateFieldId ->
                                 input {
                                   type = InputType.hidden
                                   name = "field_id"
-                                  value = it
+                                  value = updateFieldId
                                 }
 
-                                input {
-                                  type = InputType.hidden
-                                  name = "field_value"
-                                  value = button.href
+                                div {
+                                  div("flex rounded-md shadow-sm") {
+                                    div("relative flex flex-grow items-stretch focus-within:z-10") {
+                                      input(classes = "block w-full rounded-none rounded-l-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6") {
+                                        name = "field_value"
+                                        value = it.description
+                                      }
+                                    }
+                                    button(classes = "relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-md px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50") {
+                                      type = ButtonType.submit
+                                      +"""Update"""
+                                    }
+                                  }
                                 }
                               }
+                            }
+
+                            // Cancel Button to hide form
+                            span("hidden ml-4 flex-shrink-0") {
+                              attributes["data-toggle-target"] = "toggleable"
+                              attributes["data-css-class"] = "hidden"
 
                               button(
-                                classes = "rounded-md bg-white font-medium text-indigo-600 hover:text-indigo-500",
+                                classes = "mt-1 rounded-md font-medium text-indigo-600 hover:text-indigo-500",
                               ) {
-                                type = ButtonType.submit
-                                +button.label
+                                attributes["data-action"] = "toggle#toggle"
+                                type = ButtonType.button
+                                +"Cancel"
+                              }
+                            }
+                          } else {
+                            span("ml-4 flex-shrink-0") {
+                              // Button when clicked updates without additional form
+                              form {
+                                action = BackfillShowButtonHandlerAction.PATH.replace("{id}", id)
+
+                                // POST /backfills/1/start
+                                // POST /backfills/1/stop
+                                // POST /backfills/1/update { num_threads: 2 }
+
+                                it.updateFieldId?.let {
+                                  input {
+                                    type = InputType.hidden
+                                    name = "field_id"
+                                    value = it
+                                  }
+
+                                  input {
+                                    type = InputType.hidden
+                                    name = "field_value"
+                                    value = button.href
+                                  }
+                                }
+
+                                button(
+                                  classes = "rounded-md font-medium text-indigo-600 hover:text-indigo-500",
+                                ) {
+                                  type = ButtonType.submit
+                                  +button.label
+                                }
                               }
                             }
                           }
@@ -176,11 +249,16 @@ class BackfillShowAction @Inject constructor(
                         div("truncate font-medium text-gray-900") { +partition.name }
                       }
                       td("hidden py-5 pl-8 pr-0 text-right align-top text-gray-700 sm:table-cell") { +partition.state.name }
-                      td("hidden py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700 sm:table-cell") { +(partition.pkey_cursor ?: "") }
+                      td("hidden py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700 sm:table-cell") {
+                        +(partition.pkey_cursor ?: "")
+                      }
                       td("hidden py-5 pl-8 pr-0 text-right align-top text-gray-700 sm:table-cell") { +"""${partition.pkey_start} to ${partition.pkey_end}""" }
                       td("hidden py-5 pl-8 pr-0 text-right align-top text-gray-700 sm:table-cell") { +"""${partition.backfilled_matching_record_count} / ${partition.computed_matching_record_count}""" }
                       td("hidden py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700 sm:table-cell") {
-                        ProgressBar(partition.backfilled_matching_record_count, partition.computed_matching_record_count)
+                        ProgressBar(
+                          partition.backfilled_matching_record_count,
+                          partition.computed_matching_record_count,
+                        )
                       }
                       td("hidden py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700 sm:table-cell") { +"""${partition.matching_records_per_minute} #/m""" }
                       td("py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700") { +"""ETA TODO""" }
@@ -219,9 +297,11 @@ class BackfillShowAction @Inject constructor(
                 tbody {
                   backfill.event_logs.map { log ->
                     tr("border-b border-gray-100") {
-                      td("hidden py-5 pl-8 pr-0 align-top text-wrap text-gray-700 sm:table-cell") { +log.occurred_at.toString().replace("T", " ").dropLast(5) }
-                      td("hidden py-5 pl-8 pr-0 align-top text-gray-700 sm:table-cell") { log.user ?.let { +it } }
-                      td("hidden py-5 pl-8 pr-0 align-top text-gray-700 sm:table-cell") { log.partition_name ?.let { +it } }
+                      td("hidden py-5 pl-8 pr-0 align-top text-wrap text-gray-700 sm:table-cell") {
+                        +log.occurred_at.toString().replace("T", " ").dropLast(5)
+                      }
+                      td("hidden py-5 pl-8 pr-0 align-top text-gray-700 sm:table-cell") { log.user?.let { +it } }
+                      td("hidden py-5 pl-8 pr-0 align-top text-gray-700 sm:table-cell") { log.partition_name?.let { +it } }
                       td("hidden py-5 pl-8 pr-0 align-top max-w-2 text-wrap text-gray-700 sm:table-cell") { +log.message }
                       td("hidden py-5 pl-8 pr-0 align-top max-w-2 text-wrap text-gray-700 sm:table-cell") { log.extra_data?.let { +it } }
                     }
@@ -253,6 +333,7 @@ class BackfillShowAction @Inject constructor(
         label = "Start",
         href = BackfillState.RUNNING.name,
       )
+
       BackfillState.COMPLETE -> null
       else -> Link(
         label = "Pause",
@@ -276,7 +357,7 @@ class BackfillShowAction @Inject constructor(
       label = "Threads per partition",
       description = num_threads.toString(),
       button = Link(
-        label = "Update",
+        label = UPDATE_BUTTON_LABEL,
         href = "#",
       ),
       updateFieldId = "num_threads",
@@ -285,7 +366,7 @@ class BackfillShowAction @Inject constructor(
       label = "Scan Size",
       description = scan_size.toString(),
       button = Link(
-        label = "Update",
+        label = UPDATE_BUTTON_LABEL,
         href = "#",
       ),
       updateFieldId = "scan_size",
@@ -294,7 +375,7 @@ class BackfillShowAction @Inject constructor(
       label = "Batch Size",
       description = batch_size.toString(),
       button = Link(
-        label = "Update",
+        label = UPDATE_BUTTON_LABEL,
         href = "#",
       ),
       updateFieldId = "batch_size",
@@ -303,7 +384,7 @@ class BackfillShowAction @Inject constructor(
       label = "Sleep betweeen batches (ms)",
       description = extra_sleep_ms.toString(),
       button = Link(
-        label = "Update",
+        label = UPDATE_BUTTON_LABEL,
         href = "#",
       ),
       updateFieldId = "extra_sleep_ms",
@@ -312,7 +393,7 @@ class BackfillShowAction @Inject constructor(
       label = "Backoff Schedule",
       description = backoff_schedule ?: "",
       button = Link(
-        label = "Update",
+        label = UPDATE_BUTTON_LABEL,
         href = "#",
       ),
       updateFieldId = "backoff_schedule",
@@ -333,5 +414,7 @@ class BackfillShowAction @Inject constructor(
 
   companion object {
     const val PATH = "/backfills/{id}"
+
+    const val UPDATE_BUTTON_LABEL = "Update"
   }
 }
