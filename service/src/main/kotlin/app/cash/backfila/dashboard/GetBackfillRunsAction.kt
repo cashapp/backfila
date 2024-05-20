@@ -52,7 +52,7 @@ class GetBackfillRunsAction @Inject constructor(
 ) : WebAction {
   @Get("/services/{service}/variants/{variant}/backfill-runs")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
-  @Authenticated
+  @Authenticated(allowAnyUser = true)
   fun backfillRuns(
     @PathParam service: String,
     @PathParam variant: String,

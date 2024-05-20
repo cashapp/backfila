@@ -31,7 +31,7 @@ class StopAllBackfillsAction @Inject constructor(
   @Post("/backfills/stop_all")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
-  @Authenticated(capabilities = ["users"])
+  @Authenticated(allowAnyUser = true)
   fun stopAll(
     @Suppress("unused") @RequestBody
     request: StopAllBackfillsRequest,

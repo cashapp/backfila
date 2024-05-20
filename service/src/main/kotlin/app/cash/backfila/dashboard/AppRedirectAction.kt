@@ -11,7 +11,7 @@ import okhttp3.Headers
 
 class AppRedirectAction : WebAction {
   @Get("/app")
-  @Authenticated
+  @Authenticated(allowAnyUser = true)
   fun root(): Response<ResponseBody> {
     return Response(
       body = "go to /app/".toResponseBody(),

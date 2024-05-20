@@ -22,8 +22,7 @@ class CreateBackfillAction @Inject constructor(
   @Post("/services/{service}/variants/{variant}/create")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
-  // TODO allow any user
-  @Authenticated(capabilities = ["users"])
+  @Authenticated(allowAnyUser = true)
   fun create(
     @PathParam service: String,
     @PathParam variant: String,

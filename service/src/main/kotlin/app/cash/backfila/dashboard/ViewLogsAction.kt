@@ -27,7 +27,7 @@ class ViewLogsAction @Inject constructor(
   private val viewLogsUrlProvider: ViewLogsUrlProvider,
 ) : WebAction {
   @Get("/backfills/{id}/view-logs")
-  @Authenticated
+  @Authenticated(allowAnyUser = true)
   fun viewLogs(
     @PathParam id: Long,
   ): Response<ResponseBody> {

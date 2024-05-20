@@ -31,7 +31,7 @@ class GetServicesAction @Inject constructor(
 
   @Get("/services")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
-  @Authenticated
+  @Authenticated(allowAnyUser = true)
   fun services(): GetServicesResponse {
     // TODO use caller user and registry API (cache result?) to determine visible services by Owner role
     // Then have services/all ? to see all

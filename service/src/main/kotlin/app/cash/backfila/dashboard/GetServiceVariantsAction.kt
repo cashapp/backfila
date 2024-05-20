@@ -30,7 +30,7 @@ class GetServiceVariantsAction @Inject constructor(
 
   @Get("/services/{service}/variants")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
-  @Authenticated
+  @Authenticated(allowAnyUser = true)
   fun variants(
     @PathParam service: String,
   ): GetServiceVariantsResponse {

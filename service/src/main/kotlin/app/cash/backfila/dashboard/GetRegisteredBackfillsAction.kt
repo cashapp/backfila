@@ -27,7 +27,7 @@ class GetRegisteredBackfillsAction @Inject constructor(
 ) : WebAction {
   @Get("/services/{service}/variants/{variant}/registered-backfills")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
-  @Authenticated
+  @Authenticated(allowAnyUser = true)
   fun backfills(
     @PathParam service: String,
     @PathParam variant: String,
