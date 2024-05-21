@@ -102,7 +102,7 @@ class UpdateBackfillAction @Inject constructor(
 
       request.backoff_schedule?.let { schedule ->
         if (request.backoff_schedule.isEmpty()) {
-          changesLog += "backoff_schedule ${run.backoff_schedule}->"
+          changesLog += "backoff_schedule ${run.backoff_schedule}->null"
           run.backoff_schedule = null
           return@let
         }
