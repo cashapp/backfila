@@ -39,8 +39,7 @@ class UpdateBackfillAction @Inject constructor(
   @Post("/backfills/{id}/update")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
-  // TODO allow any user
-  @Authenticated(capabilities = ["users"])
+  @Authenticated(allowAnyUser = true)
   fun update(
     @PathParam id: Long,
     @RequestBody request: UpdateBackfillRequest,
