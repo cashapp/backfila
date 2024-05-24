@@ -28,6 +28,11 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
     val config = parametersOperator.constructBackfillConfig(request)
     backfill.validate(config)
 
+    require(
+      request.range == null ||
+        (request.range.start == null && request.range.end == null),
+    ) { "Range is not supported for this Dynamo Backfila client" }
+
     val tableMapper = dynamoDb.newTableMapper<I, Any, Any>(backfill.itemType.java)
     val tableDescription = tableMapper.describeTable()
     if (backfill.mustHaveProvisionedBillingMode()) {
