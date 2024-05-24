@@ -59,15 +59,15 @@ class DynamoDbBackfillTest {
 
     assertThatCode {
       backfila.createWetRun<MakeTracksExplicitBackfill>(rangeStart = "start")
-    }.hasMessageContaining("Range is an invalid input for this Dynamo Backfila client")
+    }.hasMessageContaining("Range is not supported for this Dynamo Backfila client")
 
     assertThatCode {
       backfila.createWetRun<MakeTracksExplicitBackfill>(rangeEnd = "end")
-    }.hasMessageContaining("Range is an invalid input for this Dynamo Backfila client")
+    }.hasMessageContaining("Range is not supported for this Dynamo Backfila client")
 
     assertThatCode {
       backfila.createWetRun<MakeTracksExplicitBackfill>(rangeStart = "start", rangeEnd = "end")
-    }.hasMessageContaining("Range is an invalid input for this Dynamo Backfila client")
+    }.hasMessageContaining("Range is not supported for this Dynamo Backfila client")
   }
 
   class MakeTracksExplicitBackfill @Inject constructor(
