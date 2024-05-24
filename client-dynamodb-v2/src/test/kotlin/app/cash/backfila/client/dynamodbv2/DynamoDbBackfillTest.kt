@@ -59,6 +59,23 @@ class DynamoDbBackfillTest {
     }.hasMessageContaining("Validate failed")
   }
 
+  @Test
+  fun `adding a range fails creation`() {
+    testData.addThriller()
+
+    assertThatCode {
+      backfila.createWetRun<MakeTracksExplicitBackfill>(rangeStart = "start")
+    }.hasMessageContaining("Range is an invalid input for this Dynamo Backfila client")
+
+    assertThatCode {
+      backfila.createWetRun<MakeTracksExplicitBackfill>(rangeEnd = "end")
+    }.hasMessageContaining("Range is an invalid input for this Dynamo Backfila client")
+
+    assertThatCode {
+      backfila.createWetRun<MakeTracksExplicitBackfill>(rangeStart = "start", rangeEnd = "end")
+    }.hasMessageContaining("Range is an invalid input for this Dynamo Backfila client")
+  }
+
   class MakeTracksExplicitBackfill @Inject constructor(
     dynamoDb: DynamoDbClient,
     private val dynamoDbEnhancedClient: DynamoDbEnhancedClient,

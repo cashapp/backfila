@@ -29,6 +29,11 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
     val config = parametersOperator.constructBackfillConfig(request)
     backfill.validate(config)
 
+    require(
+      request.range == null ||
+        (request.range.start == null && request.range.end == null),
+    ) { "Range is an invalid input for this Dynamo Backfila client" }
+
     var table = dynamoDbClient.describeTable {
       it.tableName(backfill.dynamoDbTable.tableName())
     }.table()
