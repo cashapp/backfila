@@ -32,7 +32,7 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
     require(
       request.range == null ||
         (request.range.start == null && request.range.end == null),
-    ) { "Range is an invalid input for this Dynamo Backfila client" }
+    ) { "Range is not supported for this Dynamo Backfila client" }
 
     var table = dynamoDbClient.describeTable {
       it.tableName(backfill.dynamoDbTable.tableName())
