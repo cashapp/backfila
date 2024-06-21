@@ -37,7 +37,7 @@ fun hockeyPlayerRowSource(hockeyDataDatabase: HockeyDataDatabase) = SqlDelightRo
   { rangeStart: Int, rangeEnd: Int, scanSize: Long ->
     hockeyDataDatabase.allHockeyPlayersBackfillQueries.selectInitialMaxBound(rangeStart, rangeEnd, scanSize) {
       SqlDelightRowSource.NullKeyContainer(
-        it
+        it,
       )
     }
   },
@@ -45,7 +45,7 @@ fun hockeyPlayerRowSource(hockeyDataDatabase: HockeyDataDatabase) = SqlDelightRo
     hockeyDataDatabase.allHockeyPlayersBackfillQueries.selectNextMaxBound(
       previousEndKey,
       rangeEnd,
-      scanSize
+      scanSize,
     ) { SqlDelightRowSource.NullKeyContainer(it) }
   },
   { rangeStart: Int, rangeEnd: Int, offset: Long -> hockeyDataDatabase.allHockeyPlayersBackfillQueries.produceInitialBatchFromRange(rangeStart, rangeEnd, offset) },
@@ -56,14 +56,14 @@ fun hockeyPlayerRowSource(hockeyDataDatabase: HockeyDataDatabase) = SqlDelightRo
     hockeyDataDatabase.allHockeyPlayersBackfillQueries.getInitialStartKeyAndScanCount(rangeStart, rangeEnd) { min, count ->
       SqlDelightRowSource.MinAndCount(
         min,
-        count
+        count,
       )
     }
   },
   { previousEndKey: Int, rangeEnd: Int ->
     hockeyDataDatabase.allHockeyPlayersBackfillQueries.getNextStartKeyAndScanCount(
       previousEndKey,
-      rangeEnd
+      rangeEnd,
     ) { min, count -> SqlDelightRowSource.MinAndCount(min, count) }
   },
   { start: Int, end: Int -> hockeyDataDatabase.allHockeyPlayersBackfillQueries.getBatch(start, end) },
