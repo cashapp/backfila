@@ -181,7 +181,20 @@ private fun <E : DbEntity<E>, Pkey : Any> selectMaxBound(
 private fun <E : DbEntity<E>, Pkey : Any> schemaAndTable(backfill: HibernateBackfill<E, Pkey, *>): String {
   val tableAnnotation = backfill.entityClass.java.getAnnotation(Table::class.java)
   val schema = tableAnnotation.schema
-  val table = tableAnnotation.name
+  val table = tableAnnotation.name.ifEmpty {
+    error(
+      """
+      Entity class ${backfill.entityClass.simpleName} is missing Table name.
+      
+      We require a table name to encourage best practices. An entity is singular while your table
+      is plural. Additionally, you probably want to name your classes in a way to make them
+      obviously entity classes. Such as prefixing all entities with `DB`.
+      
+      You are welcome to create a copy of the bounding range strategy limited to your service
+      if you absolutely cannot have table name annotation on your entity class.
+      """.trimIndent()
+    )
+  }
   return when {
     schema.isEmpty() -> "`$table`"
     else -> "`$schema`.`$table`"
@@ -190,6 +203,19 @@ private fun <E : DbEntity<E>, Pkey : Any> schemaAndTable(backfill: HibernateBack
 
 private fun <E : DbEntity<E>, Pkey : Any> onlyTable(backfill: HibernateBackfill<E, Pkey, *>): String {
   val tableAnnotation = backfill.entityClass.java.getAnnotation(Table::class.java)
-  val table = tableAnnotation.name
+  val table = tableAnnotation.name.ifEmpty {
+    error(
+      """
+      Entity class ${backfill.entityClass.simpleName} is missing Table name.
+      
+      We require a table name to encourage best practices. An entity is singular while your table
+      is plural. Additionally, you probably want to name your classes in a way to make them
+      obviously entity classes. Such as prefixing all entities with `DB`.
+      
+      You are welcome to create a copy of the bounding range strategy limited to your service
+      if you absolutely cannot have table name annotation on your entity class.
+      """.trimIndent()
+    )
+  }
   return "`$table`"
 }
