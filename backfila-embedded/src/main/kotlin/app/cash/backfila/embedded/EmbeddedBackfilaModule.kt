@@ -17,8 +17,11 @@ class EmbeddedBackfilaModule
     bind(BackfilaApi::class.java).to(EmbeddedBackfila::class.java)
     bind(Backfila::class.java).to(EmbeddedBackfila::class.java)
     bind(OnStartup::class.java).toInstance(
-      if (throwOnStartup) OnStartup.THROW_ON_STARTUP
-      else OnStartup.CONTINUE_ON_STARTUP
+      if (throwOnStartup) {
+        OnStartup.THROW_ON_STARTUP
+      } else {
+        OnStartup.CONTINUE_ON_STARTUP
+      },
     )
   }
 }

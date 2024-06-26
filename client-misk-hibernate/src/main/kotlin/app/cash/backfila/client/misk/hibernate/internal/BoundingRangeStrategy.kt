@@ -192,7 +192,7 @@ private fun <E : DbEntity<E>, Pkey : Any> schemaAndTable(backfill: HibernateBack
       
       You are welcome to create a copy of the bounding range strategy limited to your service
       if you absolutely cannot have table name annotation on your entity class.
-      """.trimIndent()
+      """.trimIndent(),
     )
   }
   return when {
@@ -214,7 +214,7 @@ private fun <E : DbEntity<E>, Pkey : Any> onlyTable(backfill: HibernateBackfill<
       
       You are welcome to create a copy of the bounding range strategy limited to your service
       if you absolutely cannot have table name annotation on your entity class.
-      """.trimIndent()
+      """.trimIndent(),
     )
   }
   return "`$table`"
