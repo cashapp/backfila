@@ -3,7 +3,6 @@ package app.cash.backfila.client.misk
 import app.cash.backfila.client.BackfilaClientLoggingSetupProvider
 import app.cash.backfila.client.BackfilaClientNoLoggingSetupProvider
 import app.cash.backfila.client.BackfilaHttpClientConfig
-import app.cash.backfila.client.Backfill
 import app.cash.backfila.client.RealBackfillModule
 import app.cash.backfila.client.misk.internal.BackfilaStartupService
 import com.google.common.util.concurrent.Service
@@ -37,6 +36,7 @@ class MiskBackfillModule @JvmOverloads constructor(
         dependsOn = dependsOn,
       ),
     )
+
     install(MetadataModule(BackfillMetadataProvider()))
   }
 }

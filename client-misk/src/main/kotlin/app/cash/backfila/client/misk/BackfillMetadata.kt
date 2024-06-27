@@ -1,7 +1,7 @@
 package app.cash.backfila.client.misk
 
-import app.cash.backfila.client.Backfill
-import com.google.inject.Injector
+import app.cash.backfila.client.spi.BackfillBackend
+import app.cash.backfila.client.spi.BackfillRegistration
 import jakarta.inject.Inject
 import misk.web.metadata.Metadata
 import misk.web.metadata.MetadataProvider
@@ -9,33 +9,35 @@ import misk.web.metadata.toFormattedJson
 import wisp.moshi.adapter
 import wisp.moshi.defaultKotlinMoshi
 
-data class BackfillInstanceMetadata(
-  val qualifiedName: String,
-  val type: String,
+internal data class BackfillMetadata(
+  val name: String,
+  val description: String?,
+  val parametersClass: String?,
 )
 
-data class BackfillMetadata(
-  val backfills: List<BackfillInstanceMetadata>,
+internal data class BackfillsMetadata(
+  val backfills: Map<String, List<BackfillMetadata>>,
 ) : Metadata(
   metadata = backfills,
   prettyPrint = defaultKotlinMoshi
-    .adapter<List<BackfillInstanceMetadata>>()
+    .adapter<Map<String, List<BackfillMetadata>>>()
     .toFormattedJson(backfills),
   descriptionString = "Backfill classes registered with Backfila.",
 )
 
-class BackfillMetadataProvider : MetadataProvider<BackfillMetadata> {
-  @Inject lateinit var injector: Injector
+internal class BackfillMetadataProvider : MetadataProvider<BackfillsMetadata> {
+  @Inject lateinit var backends: Set<BackfillBackend>
 
   override val id = "backfila"
 
-  override fun get(): BackfillMetadata {
-    val backfillMetadata = backfills.map {
-      BackfillInstanceMetadata(
-        qualifiedName = it::class.qualifiedName!!,
-        type = it::class.supertypes.joinToString { ", " },
-      )
-    }
-    return BackfillMetadata(backfillMetadata)
+  override fun get(): BackfillsMetadata {
+    val backfills = backends.associate { it::class.simpleName!! to it.backfills().map { it.toMetadata() } }
+    return BackfillsMetadata(backfills)
   }
+
+  private fun BackfillRegistration.toMetadata() = BackfillMetadata(
+    name = name,
+    description = description,
+    parametersClass = parametersClass.simpleName,
+  )
 }

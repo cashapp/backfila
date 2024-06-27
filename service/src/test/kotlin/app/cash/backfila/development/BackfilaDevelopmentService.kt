@@ -17,7 +17,6 @@ import app.cash.backfila.service.BackfilaConfig
 import app.cash.backfila.service.BackfilaServiceModule
 import app.cash.backfila.service.persistence.DbBackfillRun
 import misk.MiskApplication
-import misk.MiskCaller
 import misk.MiskRealServiceModule
 import misk.environment.DeploymentModule
 import misk.hibernate.Session
@@ -26,12 +25,10 @@ import misk.jdbc.DataSourceClusterConfig
 import misk.jdbc.DataSourceClustersConfig
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
-import misk.security.authz.DevelopmentOnly
 import misk.security.authz.FakeCallerAuthenticator
 import misk.security.authz.MiskCallerAuthenticator
 import misk.web.MiskWebModule
 import misk.web.WebConfig
-import misk.web.dashboard.AdminDashboardModule
 import okio.ByteString.Companion.encodeUtf8
 import wisp.deployment.Deployment
 
@@ -54,8 +51,6 @@ fun main(args: Array<String>) {
         )
         install(MiskWebModule(webConfig))
         multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
-        bind<MiskCaller>().annotatedWith<DevelopmentOnly>()
-          .toInstance(MiskCaller(user = "testfila"))
         bind<ViewLogsUrlProvider>().to<DevelopmentViewLogsUrlProvider>()
 
         newMapBinder<String, BackfilaCallbackConnectorProvider>(ForConnectors::class)
@@ -126,7 +121,7 @@ fun main(args: Array<String>) {
         support_button_url = "https://square.enterprise.slack.com/archives/C0151JAREE7",
       ),
     ),
-    AdminDashboardModule(isDevelopment = true),
+    DevelopmentAdminDashboardModule(),
     BackfilaDefaultEndpointConfigModule(),
     MiskRealServiceModule(),
   ).run(args)
