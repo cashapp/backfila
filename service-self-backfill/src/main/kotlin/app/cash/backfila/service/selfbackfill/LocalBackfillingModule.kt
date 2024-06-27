@@ -1,9 +1,9 @@
 package app.cash.backfila.service.selfbackfill
 
+import app.cash.backfila.client.BackfilaCallbackConnectorProvider
 import app.cash.backfila.client.BackfilaClientConfig
 import app.cash.backfila.client.BackfilaClientLoggingSetupProvider
 import app.cash.backfila.client.BackfilaClientNoLoggingSetupProvider
-import app.cash.backfila.client.BackfilaCallbackConnectorProvider
 import app.cash.backfila.client.ForConnectors
 import app.cash.backfila.client.internal.BackfilaClient
 import app.cash.backfila.client.misk.hibernate.HibernateBackfillModule

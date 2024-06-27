@@ -1,9 +1,9 @@
 package app.cash.backfila.service.selfbackfill
 
 import app.cash.backfila.api.ServiceWebActionsModule
+import app.cash.backfila.client.BackfilaCallbackConnectorProvider
 import app.cash.backfila.client.BackfilaClientLoggingSetupProvider
 import app.cash.backfila.client.BackfilaClientNoLoggingSetupProvider
-import app.cash.backfila.client.BackfilaCallbackConnectorProvider
 import app.cash.backfila.client.BackfilaHttpClientConfig
 import app.cash.backfila.client.ForConnectors
 import app.cash.backfila.client.misk.MiskBackfillModule

@@ -36,6 +36,7 @@ dependencies {
   implementation(libs.miskInject)
   implementation(libs.miskService)
   implementation(libs.wispLogging)
+  implementation(libs.wispMoshi)
 
   testImplementation(libs.assertj)
   testImplementation(libs.miskTesting)

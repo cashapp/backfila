@@ -3,6 +3,7 @@ package app.cash.backfila.development.finedining
 import app.cash.backfila.development.BackfilaDevelopmentLogging
 import app.cash.backfila.development.DevServiceConstants.Companion.BACKFILA_PORT
 import app.cash.backfila.development.DevServiceConstants.Companion.FINE_DINING_PORT
+import app.cash.backfila.development.DevelopmentAdminDashboardModule
 import app.cash.backfila.development.ServiceHeaderInterceptor
 import misk.MiskApplication
 import misk.MiskRealServiceModule
@@ -17,7 +18,6 @@ import misk.security.authz.FakeCallerAuthenticator
 import misk.security.authz.MiskCallerAuthenticator
 import misk.web.MiskWebModule
 import misk.web.WebConfig
-import misk.web.dashboard.AdminDashboardModule
 import okhttp3.Interceptor
 import wisp.deployment.Deployment
 
@@ -55,7 +55,7 @@ fun main(args: Array<String>) {
     },
     DeploymentModule(deployment),
     FineDiningServiceModule(),
-    AdminDashboardModule(isDevelopment = true),
+    DevelopmentAdminDashboardModule(),
     MiskRealServiceModule(),
   ).run(args)
 }

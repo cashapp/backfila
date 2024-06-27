@@ -11,6 +11,7 @@ import kotlin.reflect.KClass
 import misk.ServiceModule
 import misk.inject.KAbstractModule
 import misk.inject.toKey
+import misk.web.metadata.MetadataModule
 
 /**
  * Backfila-using applications install at minimum 3 things.
@@ -35,5 +36,7 @@ class MiskBackfillModule @JvmOverloads constructor(
         dependsOn = dependsOn,
       ),
     )
+
+    install(MetadataModule(BackfillMetadataProvider()))
   }
 }
