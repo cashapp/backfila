@@ -14,7 +14,7 @@ import kotlin.reflect.jvm.jvmName
 /**
  * Installs the [BackfillBackend] for Static Datasource backfills. See the java doc for [RealBackfillModule].
  */
-class StaticDatasourceBackfillModule<T : StaticDatasourceBackfill<*, *>> private constructor(
+class StaticDatasourceBackfillModule<T : StaticDatasourceBackfillBase<*, *>> private constructor(
   private val backfillClass: KClass<T>,
 ) : AbstractModule() {
   override fun configure() {
@@ -26,15 +26,15 @@ class StaticDatasourceBackfillModule<T : StaticDatasourceBackfill<*, *>> private
   }
 
   companion object {
-    inline fun <reified T : StaticDatasourceBackfill<*, *>> create(): StaticDatasourceBackfillModule<T> = create(T::class)
+    inline fun <reified T : StaticDatasourceBackfillBase<*, *>> create(): StaticDatasourceBackfillModule<T> = create(T::class)
 
     @JvmStatic
-    fun <T : StaticDatasourceBackfill<*, *>> create(backfillClass: KClass<T>): StaticDatasourceBackfillModule<T> {
+    fun <T : StaticDatasourceBackfillBase<*, *>> create(backfillClass: KClass<T>): StaticDatasourceBackfillModule<T> {
       return StaticDatasourceBackfillModule(backfillClass)
     }
 
     @JvmStatic
-    fun <T : StaticDatasourceBackfill<*, *>> create(backfillClass: Class<T>): StaticDatasourceBackfillModule<T> {
+    fun <T : StaticDatasourceBackfillBase<*, *>> create(backfillClass: Class<T>): StaticDatasourceBackfillModule<T> {
       return StaticDatasourceBackfillModule(backfillClass.kotlin)
     }
   }
@@ -53,7 +53,7 @@ private object StaticDatasourceBackfillBackendModule : AbstractModule() {
 private fun mapBinder(binder: Binder) = MapBinder.newMapBinder(
   binder,
   object : TypeLiteral<String>() {},
-  object : TypeLiteral<KClass<out StaticDatasourceBackfill<*, *>>>() {},
+  object : TypeLiteral<KClass<out StaticDatasourceBackfillBase<*, *>>>() {},
   ForStaticBackend::class.java,
 )
 

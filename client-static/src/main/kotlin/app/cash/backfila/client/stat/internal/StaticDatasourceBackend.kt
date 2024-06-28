@@ -8,7 +8,7 @@ import app.cash.backfila.client.spi.BackfillBackend
 import app.cash.backfila.client.spi.BackfillOperator
 import app.cash.backfila.client.spi.BackfillRegistration
 import app.cash.backfila.client.stat.ForStaticBackend
-import app.cash.backfila.client.stat.StaticDatasourceBackfill
+import app.cash.backfila.client.stat.StaticDatasourceBackfillBase
 import com.google.inject.Injector
 import com.google.inject.TypeLiteral
 import com.squareup.moshi.Types
@@ -21,21 +21,21 @@ import kotlin.reflect.full.findAnnotation
 @Singleton
 class StaticDatasourceBackend @Inject constructor(
   private val injector: Injector,
-  @ForStaticBackend private val backfills: MutableMap<String, KClass<out StaticDatasourceBackfill<*, *>>>,
+  @ForStaticBackend private val backfills: MutableMap<String, KClass<out StaticDatasourceBackfillBase<*, *>>>,
 ) : BackfillBackend {
 
   /** Creates Backfill instances. Each backfill ID gets a new Backfill instance. */
-  private fun getBackfill(name: String): StaticDatasourceBackfill<*, *>? {
+  private fun getBackfill(name: String): StaticDatasourceBackfillBase<*, *>? {
     val backfillClass = backfills[name]
     return if (backfillClass != null) {
-      injector.getInstance(backfillClass.java) as StaticDatasourceBackfill<*, *>
+      injector.getInstance(backfillClass.java) as StaticDatasourceBackfillBase<*, *>
     } else {
       null
     }
   }
 
   private fun <E : Any, Param : Any> createStaticDatasourceOperator(
-    backfill: StaticDatasourceBackfill<E, Param>,
+    backfill: StaticDatasourceBackfillBase<E, Param>,
   ) = StaticDatasourceBackfillOperator(
     backfill,
     BackfilaParametersOperator(parametersClass(backfill::class)),
@@ -46,7 +46,7 @@ class StaticDatasourceBackend @Inject constructor(
 
     if (backfill != null) {
       @Suppress("UNCHECKED_CAST") // We don't know the types statically, so fake them.
-      return createStaticDatasourceOperator(backfill as StaticDatasourceBackfill<Any, Any>)
+      return createStaticDatasourceOperator(backfill as StaticDatasourceBackfillBase<Any, Any>)
     }
 
     return null
@@ -57,18 +57,18 @@ class StaticDatasourceBackend @Inject constructor(
       BackfillRegistration(
         name = it.key,
         description = it.value.findAnnotation<Description>()?.text,
-        parametersClass = parametersClass(it.value as KClass<StaticDatasourceBackfill<Any, Any>>),
+        parametersClass = parametersClass(it.value as KClass<StaticDatasourceBackfillBase<Any, Any>>),
         deleteBy = it.value.findAnnotation<DeleteBy>()?.parseDeleteByDate(),
       )
     }.toSet()
   }
 
-  private fun <P : Any> parametersClass(backfillClass: KClass<out StaticDatasourceBackfill<*, P>>): KClass<P> {
+  private fun <P : Any> parametersClass(backfillClass: KClass<out StaticDatasourceBackfillBase<*, P>>): KClass<P> {
     // Like MyBackfill.
     val thisType = TypeLiteral.get(backfillClass.java)
 
-    // Like StaticDatasourceBackfill<MyItemClass, MyParameterClass>.
-    val supertype = thisType.getSupertype(StaticDatasourceBackfill::class.java).type as ParameterizedType
+    // Like StaticDatasourceBackfillBase<MyItemClass, MyParameterClass>.
+    val supertype = thisType.getSupertype(StaticDatasourceBackfillBase::class.java).type as ParameterizedType
 
     // Like MyParameterClass
     return (Types.getRawType(supertype.actualTypeArguments[1]) as Class<P>).kotlin
