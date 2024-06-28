@@ -2,7 +2,7 @@ package app.cash.backfila.client.stat.internal
 
 import app.cash.backfila.client.spi.BackfilaParametersOperator
 import app.cash.backfila.client.spi.BackfillOperator
-import app.cash.backfila.client.stat.StaticDatasourceBackfill
+import app.cash.backfila.client.stat.StaticDatasourceBackfillBase
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.KeyRange
@@ -14,7 +14,7 @@ import com.google.common.base.Preconditions.checkArgument
 import okio.ByteString.Companion.encodeUtf8
 
 class StaticDatasourceBackfillOperator<I : Any, P : Any>(
-  override val backfill: StaticDatasourceBackfill<I, P>,
+  override val backfill: StaticDatasourceBackfillBase<I, P>,
   val parametersOperator: BackfilaParametersOperator<P>,
 ) : BackfillOperator {
 
@@ -23,13 +23,14 @@ class StaticDatasourceBackfillOperator<I : Any, P : Any>(
   override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
     val config = parametersOperator.constructBackfillConfig(request)
     backfill.validate(config)
+    val datasource = backfill.getStaticDatasource(config)
 
     val start = request.range?.start?.utf8()?.let {
       it.toIntOrNull() ?: error("Start of range must be a number")
     } ?: 0
     val end = request.range?.end?.utf8()?.let {
       it.toIntOrNull() ?: error("End of range must be a number")
-    } ?: backfill.staticDatasource.size
+    } ?: datasource.size
 
     // Sanity check that this backfill will actually process something
     require(start >= 0 && end >= 0) {
@@ -38,8 +39,8 @@ class StaticDatasourceBackfillOperator<I : Any, P : Any>(
     require(start <= end) {
       "Start must be less than or equal to end, start: $start end: $end"
     }
-    require(start <= backfill.staticDatasource.size) {
-      "Start is greater than the static datasource size, start: $start size: ${backfill.staticDatasource.size}"
+    require(start <= datasource.size) {
+      "Start is greater than the static datasource size, start: $start size: ${datasource.size}"
     }
 
     val onlyPartition = PrepareBackfillResponse.Partition.Builder()
@@ -91,7 +92,7 @@ class StaticDatasourceBackfillOperator<I : Any, P : Any>(
     val batchRange = request.batch_range.decode()
     val config = parametersOperator.constructBackfillConfig(request)
 
-    val batch = backfill.staticDatasource.subList(batchRange.start, batchRange.end)
+    val batch = backfill.getStaticDatasource(config.prepareConfig()).subList(batchRange.start, batchRange.end)
 
     backfill.runBatch(batch, config)
 

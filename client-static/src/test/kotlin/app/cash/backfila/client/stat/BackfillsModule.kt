@@ -18,5 +18,7 @@ class BackfillsModule : KAbstractModule() {
       ),
     )
     install(StaticDatasourceBackfillModule.create<StaticKotlinValBackfillTest.SaucesBackfill>())
+    install(StaticDatasourceBackfillModule.create<ParametersStaticBackfillTest.ArtisanCheeseBackfill>())
+    install(StaticDatasourceBackfillModule.create<ParametersStaticBackfillTest.ProcessedCheeseBackfill>())
   }
 }
