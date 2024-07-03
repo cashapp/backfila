@@ -1,7 +1,7 @@
 package app.cash.backfila.client.stat
 
 import app.cash.backfila.client.BackfillConfig
-import app.cash.backfila.client.stat.parameters.CsvDatasourceParameters
+import app.cash.backfila.client.stat.parameters.CommaParameterDatasource
 import app.cash.backfila.client.stat.parameters.DatasourceParameters
 import app.cash.backfila.client.stat.parameters.ParametersDatasourceBackfill
 import app.cash.backfila.embedded.Backfila
@@ -28,7 +28,7 @@ class ParametersStaticBackfillTest {
   @Test
   fun `backfilling artisan cheese`() {
     val run = backfila.createWetRun<ArtisanCheeseBackfill>(
-      parameterData = mapOf("csvData" to artisanCheeses.encodeUtf8()),
+      parameterData = mapOf("commaDatasource" to artisanCheeses.encodeUtf8()),
     )
     run.execute()
 
@@ -60,7 +60,7 @@ class ParametersStaticBackfillTest {
   @Test
   fun `dry run doesn't backfill`() {
     val run = backfila.createDryRun<ArtisanCheeseBackfill>(
-      parameterData = mapOf("csvData" to artisanCheeses.encodeUtf8()),
+      parameterData = mapOf("commaDatasource" to artisanCheeses.encodeUtf8()),
     )
     run.execute()
 
@@ -70,7 +70,7 @@ class ParametersStaticBackfillTest {
   @Test
   fun `test single batch`() {
     val run = backfila.createWetRun<ArtisanCheeseBackfill>(
-      parameterData = mapOf("csvData" to artisanCheeses.encodeUtf8()),
+      parameterData = mapOf("commaDatasource" to artisanCheeses.encodeUtf8()),
     )
     run.batchSize = 5
     run.scanRemaining()
@@ -83,7 +83,7 @@ class ParametersStaticBackfillTest {
     val run = backfila.createWetRun<ArtisanCheeseBackfill>(
       rangeStart = "2",
       rangeEnd = "8",
-      parameterData = mapOf("csvData" to artisanCheeses.encodeUtf8()),
+      parameterData = mapOf("commaDatasource" to artisanCheeses.encodeUtf8()),
     )
     run.batchSize = 3
     run.execute()
@@ -94,7 +94,7 @@ class ParametersStaticBackfillTest {
   fun `test rangeStart`() {
     val run = backfila.createWetRun<ArtisanCheeseBackfill>(
       rangeStart = "3",
-      parameterData = mapOf("csvData" to artisanCheeses.encodeUtf8()),
+      parameterData = mapOf("commaDatasource" to artisanCheeses.encodeUtf8()),
     )
     run.batchSize = 3
     run.execute()
@@ -106,7 +106,7 @@ class ParametersStaticBackfillTest {
     val run = backfila.createWetRun<ArtisanCheeseBackfill>(
       rangeEnd = "8",
       parameterData = mapOf(
-        "csvData" to artisanCheeses.encodeUtf8(),
+        "commaDatasource" to artisanCheeses.encodeUtf8(),
       ),
     )
     run.batchSize = 3
@@ -120,28 +120,28 @@ class ParametersStaticBackfillTest {
       this.assertThatCode {
         backfila.createWetRun<ArtisanCheeseBackfill>(
           rangeStart = "abc",
-          parameterData = mapOf("csvData" to artisanCheeses.encodeUtf8()),
+          parameterData = mapOf("commaDatasource" to artisanCheeses.encodeUtf8()),
         )
       }.hasMessageContaining("must be a number")
 
       this.assertThatCode {
         backfila.createWetRun<ArtisanCheeseBackfill>(
           rangeEnd = "abc",
-          parameterData = mapOf("csvData" to artisanCheeses.encodeUtf8()),
+          parameterData = mapOf("commaDatasource" to artisanCheeses.encodeUtf8()),
         )
       }.hasMessageContaining("must be a number")
 
       this.assertThatCode {
         backfila.createWetRun<ArtisanCheeseBackfill>(
           rangeStart = "-10",
-          parameterData = mapOf("csvData" to artisanCheeses.encodeUtf8()),
+          parameterData = mapOf("commaDatasource" to artisanCheeses.encodeUtf8()),
         )
       }.hasMessageContaining("must be positive integers")
 
       this.assertThatCode {
         backfila.createWetRun<ArtisanCheeseBackfill>(
           rangeEnd = "-5",
-          parameterData = mapOf("csvData" to artisanCheeses.encodeUtf8()),
+          parameterData = mapOf("commaDatasource" to artisanCheeses.encodeUtf8()),
         )
       }.hasMessageContaining("must be positive integers")
 
@@ -149,7 +149,7 @@ class ParametersStaticBackfillTest {
         backfila.createWetRun<ArtisanCheeseBackfill>(
           rangeStart = "5",
           rangeEnd = "2",
-          parameterData = mapOf("csvData" to artisanCheeses.encodeUtf8()),
+          parameterData = mapOf("commaDatasource" to artisanCheeses.encodeUtf8()),
         )
       }.hasMessageContaining("Start must be less than or equal to end")
 
@@ -157,7 +157,7 @@ class ParametersStaticBackfillTest {
         backfila.createWetRun<ArtisanCheeseBackfill>(
           rangeStart = "20",
           rangeEnd = "30",
-          parameterData = mapOf("csvData" to artisanCheeses.encodeUtf8()),
+          parameterData = mapOf("commaDatasource" to artisanCheeses.encodeUtf8()),
         )
       }.hasMessageContaining("Start is greater than the static datasource size")
 
@@ -165,10 +165,10 @@ class ParametersStaticBackfillTest {
     }
   }
 
-  class ArtisanCheeseBackfill @Inject constructor() : ParametersDatasourceBackfill<String, CsvDatasourceParameters>() {
+  class ArtisanCheeseBackfill @Inject constructor() : ParametersDatasourceBackfill<String, CommaParameterDatasource>() {
     val backfilledCheese = newMutableList<String>()
 
-    override fun runOne(item: String, config: BackfillConfig<CsvDatasourceParameters>) {
+    override fun runOne(item: String, config: BackfillConfig<CommaParameterDatasource>) {
       if (!config.dryRun) {
         backfilledCheese.add(item)
       }

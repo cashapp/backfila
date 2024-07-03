@@ -4,7 +4,9 @@ import app.cash.backfila.client.PrepareBackfillConfig
 import app.cash.backfila.client.stat.StaticDatasourceBackfillBase
 
 /**
- * This backfill type is a sub variant of the [StaticDatasourceBackfillBase]. If you have too
+ * This backfill type is a sub variant of the [StaticDatasourceBackfillBase].
+ *
+ * It uses a parameter populated in the Backfila UI as the datasource for the backfill.If you have too
  * much data to fit in a parameter consider using a different client such as the S3 client.
  */
 abstract class ParametersDatasourceBackfill<I : Any, P : DatasourceParameters<I>> : StaticDatasourceBackfillBase<I, P>() {
@@ -19,10 +21,19 @@ interface DatasourceParameters<out I : Any> {
 }
 
 /**
- * Simple CSV datasource that produces a list of strings from a CSV parameter.
+ * Simple comma parameter datasource that produces a list of strings from a comma separated parameter.
  */
-data class CsvDatasourceParameters(
-  val csvData: String,
+data class CommaParameterDatasource(
+  val commaDatasource: String,
 ) : DatasourceParameters<String> {
-  override fun getBackfillData() = csvData.split(',')
+  override fun getBackfillData() = commaDatasource.split(',')
+}
+
+/**
+ * Simple newline parameter datasource that produces a list of strings from a newline separated parameter.
+ */
+data class NewlineParameterDatasource(
+  val newlineDatasource: String,
+) : DatasourceParameters<String> {
+  override fun getBackfillData() = newlineDatasource.split('\n')
 }
