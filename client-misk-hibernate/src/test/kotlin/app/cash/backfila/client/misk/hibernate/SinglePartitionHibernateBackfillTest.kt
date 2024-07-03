@@ -44,7 +44,7 @@ abstract class SinglePartitionHibernateBackfillTest {
     assertThat(run.partitionProgressSnapshot.values.single().previousEndKey).isNull()
 
     val scan1 = run.singleScan()
-    assertThat(scan1.batches).size().isEqualTo(1)
+    assertThat(scan1.batches).hasSize(1)
     assertThat(scan1.batches.single().scanned_record_count).isEqualTo(5)
     assertThat(scan1.batches.single().matching_record_count).isEqualTo(0)
     assertThat(run.partitionProgressSnapshot.values.single()).isNotDone()
@@ -150,7 +150,7 @@ abstract class SinglePartitionHibernateBackfillTest {
     run.computeCountLimit = 1L
 
     val scan1 = run.precomputeScan()
-    assertThat(scan1.batches).size().isEqualTo(1)
+    assertThat(scan1.batches).hasSize(1)
     val batch1 = scan1.batches.single()
     assertThat(batch1.batch_range.start.utf8()).isEqualTo(expectedIds[0].toString())
     assertThat(batch1.matching_record_count).isEqualTo(10)
@@ -158,7 +158,7 @@ abstract class SinglePartitionHibernateBackfillTest {
 
     run.scanSize = 20L
     val scan2 = run.precomputeScan()
-    assertThat(scan2.batches).size().isEqualTo(1)
+    assertThat(scan2.batches).hasSize(1)
     val batch2 = scan2.batches.single()
     assertThat(batch2.matching_record_count).isEqualTo(10)
     // 5 extra were scanned and skipped, because they were interspersed.
@@ -188,7 +188,7 @@ abstract class SinglePartitionHibernateBackfillTest {
 
     run1.computeCountLimit = 2
     val scan = run1.singleScan()
-    assertThat(scan.batches).size().isEqualTo(2)
+    assertThat(scan.batches).hasSize(2)
     assertThat(scan.batches[0].batch_range.end).isLessThan(scan.batches[1].batch_range.start)
 
     // Requesting two batches should give the same batches as requesting one twice.
@@ -208,7 +208,7 @@ abstract class SinglePartitionHibernateBackfillTest {
     run1.scanSize = 4L
     run1.computeCountLimit = 3
     val scan = run1.singleScan()
-    assertThat(scan.batches).size().isEqualTo(3)
+    assertThat(scan.batches).hasSize(3)
     assertThat(scan.batches[0].batch_range.end).isLessThan(scan.batches[1].batch_range.start)
     assertThat(scan.batches[1].batch_range.end).isLessThan(scan.batches[2].batch_range.start)
 
@@ -272,7 +272,7 @@ abstract class SinglePartitionHibernateBackfillTest {
       .apply { configureForTest() }
 
     run.execute()
-    assertThat(run.backfill.idsRanDry).size().isEqualTo(5)
+    assertThat(run.backfill.idsRanDry).hasSize(5)
     assertThat(run.backfill.idsRanWet).isEmpty()
     // We got beef as a parameter
     assertThat(run.backfill.parametersLog).containsExactly(SandwichParameters("beef"))
@@ -300,7 +300,7 @@ abstract class SinglePartitionHibernateBackfillTest {
       .apply { configureForTest() }
 
     run.execute()
-    assertThat(run.backfill.idsRanDry).size().isEqualTo(20)
+    assertThat(run.backfill.idsRanDry).hasSize(20)
     assertThat(run.backfill.idsRanWet).isEmpty()
     // Null parameter used the default
     assertThat(run.backfill.parametersLog).contains(SandwichParameters("chicken"))

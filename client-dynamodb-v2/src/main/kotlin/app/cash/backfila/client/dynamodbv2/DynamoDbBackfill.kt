@@ -27,7 +27,7 @@ abstract class DynamoDbBackfill<I : Any, P : Any> : Backfill {
     // Like MyBackfill.
     val thisType = TypeLiteral.get(this::class.java)
 
-    // Like Backfill<MyItem, Parameters>.
+    // Like MyBackfill<MyItem, Parameters>.
     val supertype = thisType.getSupertype(
       DynamoDbBackfill::class.java,
     ).type as ParameterizedType
