@@ -32,7 +32,7 @@ class ParametersStaticBackfillTest {
     )
     run.execute()
 
-    assertThat(run.backfill.backfilledCheese).size().isEqualTo(11)
+    assertThat(run.backfill.backfilledCheese).hasSize(11)
     assertThat(run.backfill.backfilledCheese).contains("Brie", "Blue", "Goat", "Swiss", "Havarti", "Manchego")
   }
 
@@ -43,7 +43,7 @@ class ParametersStaticBackfillTest {
     )
     run.execute()
 
-    assertThat(run.backfill.backfilledCheese).size().isEqualTo(6)
+    assertThat(run.backfill.backfilledCheese).hasSize(6)
     assertThat(run.backfill.backfilledCheese).contains(ProcessedCheese.LAUGHING_COW, ProcessedCheese.VELVEETA)
   }
 
@@ -64,7 +64,7 @@ class ParametersStaticBackfillTest {
     )
     run.execute()
 
-    assertThat(run.backfill.backfilledCheese).size().isEqualTo(0)
+    assertThat(run.backfill.backfilledCheese).hasSize(0)
   }
 
   @Test
@@ -75,7 +75,7 @@ class ParametersStaticBackfillTest {
     run.batchSize = 5
     run.scanRemaining()
     run.runBatch()
-    assertThat(run.backfill.backfilledCheese).size().isEqualTo(5)
+    assertThat(run.backfill.backfilledCheese).hasSize(5)
   }
 
   @Test
@@ -87,7 +87,7 @@ class ParametersStaticBackfillTest {
     )
     run.batchSize = 3
     run.execute()
-    assertThat(run.backfill.backfilledCheese).size().isEqualTo(6)
+    assertThat(run.backfill.backfilledCheese).hasSize(6)
   }
 
   @Test
@@ -98,7 +98,7 @@ class ParametersStaticBackfillTest {
     )
     run.batchSize = 3
     run.execute()
-    assertThat(run.backfill.backfilledCheese).size().isEqualTo(8)
+    assertThat(run.backfill.backfilledCheese).hasSize(8)
   }
 
   @Test
@@ -111,7 +111,7 @@ class ParametersStaticBackfillTest {
     )
     run.batchSize = 3
     run.execute()
-    assertThat(run.backfill.backfilledCheese).size().isEqualTo(8)
+    assertThat(run.backfill.backfilledCheese).hasSize(8)
   }
 
   @Test

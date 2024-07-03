@@ -27,7 +27,7 @@ class StaticKotlinValBackfillTest {
     val run = backfila.createWetRun<SaucesBackfill>()
     run.execute()
 
-    assertThat(run.backfill.backfilledSauces).size().isEqualTo(sweetSauces.size + savourySauces.size)
+    assertThat(run.backfill.backfilledSauces).hasSize(sweetSauces.size + savourySauces.size)
     assertThat(run.backfill.backfilledSauces).containsAll(savourySauces)
     assertThat(run.backfill.backfilledSauces).containsAll(sweetSauces)
   }
@@ -39,7 +39,7 @@ class StaticKotlinValBackfillTest {
     )
     run.execute()
 
-    assertThat(run.backfill.backfilledSauces).size().isEqualTo(sweetSauces.size + savourySauces.size)
+    assertThat(run.backfill.backfilledSauces).hasSize(sweetSauces.size + savourySauces.size)
     assertThat(run.backfill.backfilledSauces).containsAll(savourySauces)
     assertThat(run.backfill.backfilledSauces).containsAll(sweetSauces.map { it.markSweet() })
   }
@@ -51,7 +51,7 @@ class StaticKotlinValBackfillTest {
     )
     run.execute()
 
-    assertThat(run.backfill.backfilledSauces).size().isEqualTo(0)
+    assertThat(run.backfill.backfilledSauces).hasSize(0)
   }
 
   @Test
@@ -60,7 +60,7 @@ class StaticKotlinValBackfillTest {
     run.batchSize = 5
     run.scanRemaining()
     run.runBatch()
-    assertThat(run.backfill.backfilledSauces).size().isEqualTo(5)
+    assertThat(run.backfill.backfilledSauces).hasSize(5)
   }
 
   @Test
@@ -68,7 +68,7 @@ class StaticKotlinValBackfillTest {
     val run = backfila.createWetRun<SaucesBackfill>(rangeStart = "2", rangeEnd = "8")
     run.batchSize = 3
     run.execute()
-    assertThat(run.backfill.backfilledSauces).size().isEqualTo(6)
+    assertThat(run.backfill.backfilledSauces).hasSize(6)
   }
 
   @Test
@@ -76,7 +76,7 @@ class StaticKotlinValBackfillTest {
     val run = backfila.createWetRun<SaucesBackfill>(rangeStart = "3")
     run.batchSize = 3
     run.execute()
-    assertThat(run.backfill.backfilledSauces).size().isEqualTo(7)
+    assertThat(run.backfill.backfilledSauces).hasSize(7)
   }
 
   @Test
@@ -84,7 +84,7 @@ class StaticKotlinValBackfillTest {
     val run = backfila.createWetRun<SaucesBackfill>(rangeEnd = "8")
     run.batchSize = 3
     run.execute()
-    assertThat(run.backfill.backfilledSauces).size().isEqualTo(8)
+    assertThat(run.backfill.backfilledSauces).hasSize(8)
   }
 
   @Test

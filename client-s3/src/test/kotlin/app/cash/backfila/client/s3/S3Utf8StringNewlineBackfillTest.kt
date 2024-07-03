@@ -58,7 +58,7 @@ class S3Utf8StringNewlineBackfillTest {
       .containsExactlyInAnyOrder("main-blt")
 
     // See that we processed two empty lines
-    assertThat(run.backfill.backfilledIngredients.filter { it.second == "" }).size().isEqualTo(2)
+    assertThat(run.backfill.backfilledIngredients.filter { it.second == "" }).hasSize(2)
 
     // Now run efficiently aka "without empty ingredient lines"
     val optimizedRun = backfila.createWetRun<OptimizedLunchBackfill>(parameters = RecipeAttributes())
