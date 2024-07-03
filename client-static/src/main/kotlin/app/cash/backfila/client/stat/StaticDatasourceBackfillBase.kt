@@ -19,7 +19,7 @@ abstract class StaticDatasourceBackfillBase<I : Any, P : Any> : Backfill {
     // Like MyBackfill.
     val thisType = TypeLiteral.get(this::class.java)
 
-    // Like Backfill<MyItem, Parameters>.
+    // Like MyBackfill<MyItem, Parameters>.
     val supertype = thisType.getSupertype(
       StaticDatasourceBackfillBase::class.java,
     ).type as ParameterizedType

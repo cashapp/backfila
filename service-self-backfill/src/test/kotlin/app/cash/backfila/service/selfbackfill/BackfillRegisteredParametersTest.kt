@@ -18,6 +18,7 @@ import misk.scope.ActionScope
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 @MiskTest(startService = true)
@@ -68,10 +69,10 @@ class BackfillRegisteredParametersTest {
     transacter.transaction { session ->
       val backfill = queryFactory.newQuery<RegisteredBackfillQuery>()
         .uniqueResult(session)!!
-      Assertions.assertThat(backfill.parameters).hasSize(1)
-      Assertions.assertThat(backfill.parameters.single().name).isEqualTo("name")
-      Assertions.assertThat(backfill.parameters.single().description).isEqualTo("desc")
-      Assertions.assertThat(backfill.parameters.single().required).isFalse()
+      assertThat(backfill.parameters).hasSize(1)
+      assertThat(backfill.parameters.single().name).isEqualTo("name")
+      assertThat(backfill.parameters.single().description).isEqualTo("desc")
+      assertThat(backfill.parameters.single().required).isFalse()
       backfill.parameters.forEach { session.delete(it) }
     }
 
@@ -80,10 +81,10 @@ class BackfillRegisteredParametersTest {
     transacter.transaction { session ->
       val backfill = queryFactory.newQuery<RegisteredBackfillQuery>()
         .uniqueResult(session)!!
-      Assertions.assertThat(backfill.parameters).hasSize(1)
-      Assertions.assertThat(backfill.parameters.single().name).isEqualTo("name")
-      Assertions.assertThat(backfill.parameters.single().description).isEqualTo(null)
-      Assertions.assertThat(backfill.parameters.single().required).isFalse()
+      assertThat(backfill.parameters).hasSize(1)
+      assertThat(backfill.parameters.single().name).isEqualTo("name")
+      assertThat(backfill.parameters.single().description).isEqualTo(null)
+      assertThat(backfill.parameters.single().required).isFalse()
     }
   }
 
@@ -114,7 +115,7 @@ class BackfillRegisteredParametersTest {
     transacter.transaction { session ->
       val backfill = queryFactory.newQuery<RegisteredBackfillQuery>()
         .uniqueResult(session)!!
-      Assertions.assertThat(backfill.parameters).hasSize(2)
+      assertThat(backfill.parameters).hasSize(2)
       backfill.parameters.forEach { session.delete(it) }
     }
 
@@ -123,13 +124,13 @@ class BackfillRegisteredParametersTest {
     transacter.transaction { session ->
       val backfill = queryFactory.newQuery<RegisteredBackfillQuery>()
         .uniqueResult(session)!!
-      Assertions.assertThat(backfill.parameters).hasSize(2)
-      Assertions.assertThat(backfill.parameters.first().name).isEqualTo("abc")
-      Assertions.assertThat(backfill.parameters.first().description).isEqualTo(null)
-      Assertions.assertThat(backfill.parameters.first().required).isFalse()
-      Assertions.assertThat(backfill.parameters.last().name).isEqualTo("def")
-      Assertions.assertThat(backfill.parameters.last().description).isEqualTo(null)
-      Assertions.assertThat(backfill.parameters.last().required).isFalse()
+      assertThat(backfill.parameters).hasSize(2)
+      assertThat(backfill.parameters.first().name).isEqualTo("abc")
+      assertThat(backfill.parameters.first().description).isEqualTo(null)
+      assertThat(backfill.parameters.first().required).isFalse()
+      assertThat(backfill.parameters.last().name).isEqualTo("def")
+      assertThat(backfill.parameters.last().description).isEqualTo(null)
+      assertThat(backfill.parameters.last().required).isFalse()
     }
   }
 
@@ -158,7 +159,7 @@ class BackfillRegisteredParametersTest {
     transacter.transaction { session ->
       val backfill = queryFactory.newQuery<RegisteredBackfillQuery>()
         .uniqueResult(session)!!
-      Assertions.assertThat(backfill.parameters).hasSize(0)
+      assertThat(backfill.parameters).hasSize(0)
     }
 
     backfila.createWetRun<BackfillRegisteredParameters>().execute()
@@ -166,7 +167,7 @@ class BackfillRegisteredParametersTest {
     transacter.transaction { session ->
       val backfill = queryFactory.newQuery<RegisteredBackfillQuery>()
         .uniqueResult(session)!!
-      Assertions.assertThat(backfill.parameters).hasSize(0)
+      assertThat(backfill.parameters).hasSize(0)
     }
   }
 }

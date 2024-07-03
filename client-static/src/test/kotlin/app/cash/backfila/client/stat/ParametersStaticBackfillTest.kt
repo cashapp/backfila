@@ -13,7 +13,6 @@ import kotlin.test.assertFails
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okio.ByteString.Companion.encodeUtf8
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions
 import org.junit.jupiter.api.Test
@@ -88,7 +87,7 @@ class ParametersStaticBackfillTest {
     )
     run.batchSize = 3
     run.execute()
-    Assertions.assertThat(run.backfill.backfilledCheese).size().isEqualTo(6)
+    assertThat(run.backfill.backfilledCheese).size().isEqualTo(6)
   }
 
   @Test
@@ -99,7 +98,7 @@ class ParametersStaticBackfillTest {
     )
     run.batchSize = 3
     run.execute()
-    Assertions.assertThat(run.backfill.backfilledCheese).size().isEqualTo(8)
+    assertThat(run.backfill.backfilledCheese).size().isEqualTo(8)
   }
 
   @Test
@@ -112,7 +111,7 @@ class ParametersStaticBackfillTest {
     )
     run.batchSize = 3
     run.execute()
-    Assertions.assertThat(run.backfill.backfilledCheese).size().isEqualTo(8)
+    assertThat(run.backfill.backfilledCheese).size().isEqualTo(8)
   }
 
   @Test
