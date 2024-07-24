@@ -2,7 +2,7 @@
 
 Backfila is a service that manages backfill state, calling into other services to do batched work.
 
-[![Mutable.ai Auto Wiki](https://img.shields.io/badge/Auto_Wiki-Mutable.ai-blue)](https://wiki.mutable.ai/cashapp/backfila)
+[![Mutable.ai Auto Wiki](https://img.shields.io/badge/Auto_Wiki-Mutable.ai-blue)] (https://wiki.mutable.ai/cashapp/backfila)
 
 Note: some instructions here are out of date
 
