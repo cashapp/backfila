@@ -48,7 +48,7 @@ class RealBackfilaManagementClient @Inject internal constructor(
         )
         .variant(config.variant)
         .build(),
-    ).backfill_run_id ?: error("Failed to create and start backfill")
+    ).backfill_run_id!!
   }
 
   override fun checkBackfillStatus(
@@ -58,6 +58,6 @@ class RealBackfilaManagementClient @Inject internal constructor(
       CheckBackfillStatusRequest.Builder()
         .backfill_run_id(backfill_run_id)
         .build(),
-    ).status
+    ).status!!
   }
 }
