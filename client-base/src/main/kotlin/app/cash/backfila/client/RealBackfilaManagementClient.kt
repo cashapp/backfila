@@ -2,6 +2,8 @@ package app.cash.backfila.client
 
 import app.cash.backfila.client.internal.BackfilaClient
 import app.cash.backfila.client.spi.parametersToBytes
+import app.cash.backfila.protos.service.CheckBackfillStatusRequest
+import app.cash.backfila.protos.service.CheckBackfillStatusResponse
 import app.cash.backfila.protos.service.CreateAndStartBackfillRequest
 import app.cash.backfila.protos.service.CreateBackfillRequest
 import javax.inject.Inject
@@ -47,5 +49,15 @@ class RealBackfilaManagementClient @Inject internal constructor(
         .variant(config.variant)
         .build(),
     ).backfill_run_id ?: error("Failed to create and start backfill")
+  }
+
+  override fun checkBackfillStatus(
+    backfill_run_id: Long,
+  ): CheckBackfillStatusResponse.Status {
+    return client.checkBackfillStatus(
+      CheckBackfillStatusRequest.Builder()
+        .backfill_run_id(backfill_run_id)
+        .build(),
+    ).status
   }
 }

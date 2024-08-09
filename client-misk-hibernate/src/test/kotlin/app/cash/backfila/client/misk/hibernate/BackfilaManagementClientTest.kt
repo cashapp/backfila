@@ -7,6 +7,7 @@ import app.cash.backfila.client.misk.ClientMiskService
 import app.cash.backfila.client.misk.ClientMiskTestingModule
 import app.cash.backfila.client.misk.DbMenu
 import app.cash.backfila.client.misk.MenuQuery
+import app.cash.backfila.protos.service.CheckBackfillStatusResponse
 import com.google.inject.Module
 import javax.inject.Inject
 import misk.hibernate.Id
@@ -37,6 +38,8 @@ class BackfilaManagementClientTest {
 
     val backfillId = managementClient.createAndStart(ChickenToBeefBackfill::class.java, dry_run = false)
     assertThat(backfillId).isNotNull()
+    val status = managementClient.checkBackfillStatus(backfillId)
+    assertThat(status).isEqualTo(CheckBackfillStatusResponse.Status.COMPLETE)
 
     val name = transacter.transaction { session ->
       session.load(id).name
