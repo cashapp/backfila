@@ -23,8 +23,8 @@ class RealBackfilaManagementClient @Inject internal constructor(
     scan_size: Long?,
     pkey_range_start: ByteString?,
     pkey_range_end: ByteString?,
-  ) {
-    client.createAndStartBackfill(
+  ): Long {
+    return client.createAndStartBackfill(
       CreateAndStartBackfillRequest.Builder()
         .create_request(
           CreateBackfillRequest.Builder()
@@ -46,6 +46,6 @@ class RealBackfilaManagementClient @Inject internal constructor(
         )
         .variant(config.variant)
         .build(),
-    )
+    ).backfill_run_id ?: error("Failed to create and start backfill")
   }
 }
