@@ -35,7 +35,8 @@ class BackfilaManagementClientTest {
       session.save(DbMenu("chicken"))
     }
 
-    managementClient.createAndStart(ChickenToBeefBackfill::class.java, dry_run = false)
+    val backfillId = managementClient.createAndStart(ChickenToBeefBackfill::class.java, dry_run = false)
+    assertThat(backfillId).isNotNull()
 
     val name = transacter.transaction { session ->
       session.load(id).name
