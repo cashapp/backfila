@@ -2,6 +2,8 @@ package app.cash.backfila.client
 
 import app.cash.backfila.client.internal.BackfilaClient
 import app.cash.backfila.client.spi.parametersToBytes
+import app.cash.backfila.protos.service.CheckBackfillStatusRequest
+import app.cash.backfila.protos.service.CheckBackfillStatusResponse
 import app.cash.backfila.protos.service.CreateAndStartBackfillRequest
 import app.cash.backfila.protos.service.CreateBackfillRequest
 import javax.inject.Inject
@@ -23,8 +25,8 @@ class RealBackfilaManagementClient @Inject internal constructor(
     scan_size: Long?,
     pkey_range_start: ByteString?,
     pkey_range_end: ByteString?,
-  ) {
-    client.createAndStartBackfill(
+  ): Long {
+    return client.createAndStartBackfill(
       CreateAndStartBackfillRequest.Builder()
         .create_request(
           CreateBackfillRequest.Builder()
@@ -46,6 +48,16 @@ class RealBackfilaManagementClient @Inject internal constructor(
         )
         .variant(config.variant)
         .build(),
-    )
+    ).backfill_run_id!!
+  }
+
+  override fun checkBackfillStatus(
+    backfill_run_id: Long,
+  ): CheckBackfillStatusResponse.Status {
+    return client.checkBackfillStatus(
+      CheckBackfillStatusRequest.Builder()
+        .backfill_run_id(backfill_run_id)
+        .build(),
+    ).status!!
   }
 }

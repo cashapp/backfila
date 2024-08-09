@@ -1,5 +1,6 @@
 package app.cash.backfila.client
 
+import app.cash.backfila.protos.service.CheckBackfillStatusResponse
 import okio.ByteString
 
 interface BackfilaManagementClient {
@@ -14,5 +15,9 @@ interface BackfilaManagementClient {
     scan_size: Long? = null,
     pkey_range_start: ByteString? = null,
     pkey_range_end: ByteString? = null,
-  )
+  ): Long
+
+  fun checkBackfillStatus(
+    backfill_run_id: Long,
+  ): CheckBackfillStatusResponse.Status
 }
