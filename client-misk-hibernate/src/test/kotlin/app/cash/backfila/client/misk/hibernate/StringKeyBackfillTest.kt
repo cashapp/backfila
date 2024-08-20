@@ -12,6 +12,7 @@ import com.google.inject.Module
 import javax.inject.Inject
 import misk.hibernate.Query
 import misk.hibernate.Transacter
+import misk.hibernate.newQuery
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -73,7 +74,7 @@ class StringKeyBackfill @Inject constructor(
   }
 
   override fun backfillCriteria(config: BackfillConfig<NoParameters>): Query<DbMenu> {
-    return queryFactory.newQuery(MenuQuery::class)
+    return queryFactory.newQuery<MenuQuery>()
   }
 
   override fun runOne(pkey: String, config: BackfillConfig<NoParameters>) {

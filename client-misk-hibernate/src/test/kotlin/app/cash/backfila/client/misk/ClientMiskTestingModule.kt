@@ -9,6 +9,7 @@ import app.cash.backfila.client.misk.hibernate.NullableParameterBackfill
 import app.cash.backfila.client.misk.hibernate.RecordNoParametersConfigValuesBackfill
 import app.cash.backfila.client.misk.hibernate.SinglePartitionHibernateTestBackfill
 import app.cash.backfila.client.misk.hibernate.StringKeyBackfill
+import app.cash.backfila.client.misk.menustack.MenuStackModule
 import app.cash.backfila.embedded.EmbeddedBackfilaModule
 import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
@@ -72,5 +73,7 @@ internal class ClientMiskTestingModule(
     install(HibernateBackfillModule.create<RecordNoParametersConfigValuesBackfill>())
     install(HibernateBackfillModule.create<StringKeyBackfill>())
     install(HibernateBackfillModule.create<NullableParameterBackfill>())
+
+    install(MenuStackModule())
   }
 }

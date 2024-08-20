@@ -41,6 +41,7 @@ dependencies {
   testImplementation(libs.okHttp)
 
   testImplementation(project(":backfila-embedded"))
+  testImplementation(project(":client-static"))
   testImplementation(project(":client-testing"))
 }
 
