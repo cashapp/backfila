@@ -12,6 +12,7 @@ import javax.inject.Inject
 import misk.hibernate.Id
 import misk.hibernate.Query
 import misk.hibernate.Transacter
+import misk.hibernate.newQuery
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -72,7 +73,7 @@ class NullableParameterBackfill @Inject constructor(
   val parameters = mutableListOf<Parameters>()
 
   override fun backfillCriteria(config: BackfillConfig<Parameters>): Query<DbMenu> {
-    return queryFactory.newQuery(MenuQuery::class)
+    return queryFactory.newQuery<MenuQuery>()
   }
 
   override fun runOne(pkey: Id<DbMenu>, config: BackfillConfig<Parameters>) {

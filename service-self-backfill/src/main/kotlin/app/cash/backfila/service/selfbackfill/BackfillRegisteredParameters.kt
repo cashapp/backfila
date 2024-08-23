@@ -14,6 +14,7 @@ import misk.hibernate.Id
 import misk.hibernate.Query
 import misk.hibernate.Transacter
 import misk.hibernate.load
+import misk.hibernate.newQuery
 import wisp.logging.getLogger
 
 internal class BackfillRegisteredParameters @Inject constructor(
@@ -41,7 +42,7 @@ internal class BackfillRegisteredParameters @Inject constructor(
   override fun partitionProvider(): PartitionProvider = UnshardedPartitionProvider(transacter)
 
   override fun backfillCriteria(config: BackfillConfig<NoParameters>): Query<DbRegisteredBackfill> {
-    return queryFactory.newQuery(RegisteredBackfillQuery::class)
+    return queryFactory.newQuery<RegisteredBackfillQuery>()
   }
 
   companion object {

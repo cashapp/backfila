@@ -13,6 +13,7 @@ import javax.inject.Inject
 import misk.hibernate.Id
 import misk.hibernate.Query
 import misk.hibernate.Transacter
+import misk.hibernate.newQuery
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -49,7 +50,7 @@ class RecordNoParametersConfigValuesBackfill @Inject constructor(
   val configLog = mutableListOf<BackfillConfig<NoParameters>>()
 
   override fun backfillCriteria(config: BackfillConfig<NoParameters>): Query<DbMenu> {
-    return queryFactory.newQuery(MenuQuery::class)
+    return queryFactory.newQuery<MenuQuery>()
   }
 
   override fun runOne(pkey: Id<DbMenu>, config: BackfillConfig<NoParameters>) {

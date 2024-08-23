@@ -23,6 +23,8 @@ class DbMenu() : DbUnsharded<DbMenu> {
   constructor(name: String) : this() {
     this.name = name
   }
+
+  fun menuItem() = MenuItem(id, name)
 }
 
 interface MenuQuery : Query<DbMenu> {
@@ -32,3 +34,8 @@ interface MenuQuery : Query<DbMenu> {
   @Constraint(path = "id", operator = Operator.EQ)
   fun id(id: Id<DbMenu>): MenuQuery
 }
+
+data class MenuItem(
+  val id: Id<DbMenu>,
+  val name: String,
+)

@@ -9,6 +9,7 @@ import javax.inject.Inject
 import misk.hibernate.Id
 import misk.hibernate.Query
 import misk.hibernate.Transacter
+import misk.hibernate.newQuery
 
 @Description("So we can backfill menus.")
 class SinglePartitionHibernateTestBackfill @Inject constructor(
@@ -20,7 +21,7 @@ class SinglePartitionHibernateTestBackfill @Inject constructor(
   val parametersLog = mutableListOf<SandwichParameters>()
 
   override fun backfillCriteria(config: BackfillConfig<SandwichParameters>): Query<DbMenu> {
-    return queryFactory.newQuery(MenuQuery::class).name(config.parameters.type ?: "beef")
+    return queryFactory.newQuery<MenuQuery>().name(config.parameters.type ?: "beef")
   }
 
   override fun runBatch(pkeys: List<Id<DbMenu>>, config: BackfillConfig<SandwichParameters>) {

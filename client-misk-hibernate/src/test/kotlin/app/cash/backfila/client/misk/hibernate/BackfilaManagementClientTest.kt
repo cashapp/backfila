@@ -14,6 +14,7 @@ import misk.hibernate.Id
 import misk.hibernate.Query
 import misk.hibernate.Transacter
 import misk.hibernate.load
+import misk.hibernate.newQuery
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
@@ -54,7 +55,7 @@ class ChickenToBeefBackfill @Inject constructor(
 ) : HibernateBackfill<DbMenu, Id<DbMenu>, NoParameters>() {
 
   override fun backfillCriteria(config: BackfillConfig<NoParameters>): Query<DbMenu> {
-    return queryFactory.newQuery(MenuQuery::class)
+    return queryFactory.newQuery<MenuQuery>()
       .name("chicken")
   }
 
