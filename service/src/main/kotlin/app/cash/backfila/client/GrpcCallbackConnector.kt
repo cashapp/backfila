@@ -7,8 +7,6 @@ import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
 import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
 import app.cash.backfila.protos.clientservice.RunBatchRequest
 import app.cash.backfila.protos.clientservice.RunBatchResponse
-import retrofit2.HttpException
-import retrofit2.Response
 
 internal class GrpcCallbackConnector internal constructor(
   private val api: BackfilaClientServiceClient,
@@ -29,12 +27,4 @@ internal class GrpcCallbackConnector internal constructor(
   }
 
   override fun connectionLogData() = connectionLogData
-
-  private fun <T> Response<T>.getOrThrow(): T {
-    // I should test what happens in a non-200
-    if (!this.isSuccessful) {
-      throw HttpException(this)
-    }
-    return this.body()!!
-  }
 }
