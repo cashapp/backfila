@@ -28,7 +28,7 @@ class GrpcCallbackConnectorProvider @Inject constructor(
       checkNotNull(fromJson) { "Failed to parse GRPC connector extra data JSON" }
       checkNotNull(fromJson.url) { "GRPC connector extra data must contain a URL" }
 
-      if (!fromJson.headers.isNullOrEmpty()) {
+      if (fromJson.headers.isNotEmpty()) {
         check(headersSizeWithinLimit(fromJson.headers)) { "Headers too large" }
 
         for (header in fromJson.headers) {
@@ -46,7 +46,7 @@ class GrpcCallbackConnectorProvider @Inject constructor(
     val extraData = connectorExtraData.let { adapter().fromJson(connectorExtraData) }
     val url = URL(extraData!!.url)
     // If client-specified HTTP headers are specified, honor them.
-    var headers: List<HttpHeader>? = extraData!!.headers
+    val headers: List<HttpHeader>? = extraData!!.headers
 
     val httpClientEndpointConfig = httpClientsConfig[url]
     var okHttpClient = httpClientFactory.create(httpClientEndpointConfig)
