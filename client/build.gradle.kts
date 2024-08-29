@@ -18,6 +18,7 @@ sourceSets {
 dependencies {
   implementation(libs.moshiCore)
   implementation(libs.moshiKotlin)
+  implementation(libs.wireGrpcClient)
   implementation(libs.wireRuntime)
   implementation(libs.guice)
   implementation(libs.retrofit)
@@ -32,6 +33,14 @@ wire {
   protoLibrary = true
   sourcePath {
     srcDir("src/main/proto")
+  }
+  kotlin {
+    includes = listOf(
+      "app.cash.backfila.protos.clientservice.BackfilaClientService",
+    )
+    rpcRole = "client"
+    javaInterop = true
+    exclusive = true
   }
   java {
   }
