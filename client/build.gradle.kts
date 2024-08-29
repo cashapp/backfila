@@ -37,7 +37,6 @@ wire {
   kotlin {
     includes = listOf(
       "app.cash.backfila.protos.clientservice.BackfilaClientService",
-      "app.cash.backfila.protos.service.BackfilaService",
     )
     rpcRole = "client"
     javaInterop = true
