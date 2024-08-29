@@ -3,6 +3,7 @@ package app.cash.backfila.client
 object Connectors {
   const val HTTP = "HTTP"
   const val ENVOY = "ENVOY"
+  const val GRPC = "GRPC"
 }
 
 data class HttpHeader(val name: String, val value: String)

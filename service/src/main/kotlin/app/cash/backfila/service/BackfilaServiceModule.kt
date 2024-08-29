@@ -5,6 +5,7 @@ import app.cash.backfila.client.BackfilaCallbackConnectorProvider
 import app.cash.backfila.client.Connectors
 import app.cash.backfila.client.EnvoyCallbackConnectorProvider
 import app.cash.backfila.client.ForConnectors
+import app.cash.backfila.client.GrpcCallbackConnectorProvider
 import app.cash.backfila.client.HttpCallbackConnectorProvider
 import app.cash.backfila.dashboard.BackfilaDashboardModule
 import app.cash.backfila.dashboard.BackfilaWebActionsModule
@@ -60,6 +61,9 @@ class BackfilaServiceModule(
     newMapBinder<String, BackfilaCallbackConnectorProvider>(ForConnectors::class)
       .addBinding(Connectors.ENVOY)
       .to(EnvoyCallbackConnectorProvider::class.java)
+    newMapBinder<String, BackfilaCallbackConnectorProvider>(ForConnectors::class)
+      .addBinding(Connectors.GRPC)
+      .to(GrpcCallbackConnectorProvider::class.java)
 
     newMultibinder<Interceptor>(HttpClientNetworkInterceptor::class)
 
