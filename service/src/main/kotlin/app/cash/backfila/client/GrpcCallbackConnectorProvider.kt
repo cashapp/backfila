@@ -12,6 +12,7 @@ import misk.client.HttpClientConfigUrlProvider
 import misk.client.HttpClientFactory
 import misk.client.HttpClientsConfig
 import misk.moshi.adapter
+import okhttp3.Protocol
 
 @Singleton
 class GrpcCallbackConnectorProvider @Inject constructor(
@@ -49,16 +50,22 @@ class GrpcCallbackConnectorProvider @Inject constructor(
     val headers: List<HttpHeader>? = extraData!!.headers
 
     val httpClientEndpointConfig = httpClientsConfig[url]
-    var okHttpClient = httpClientFactory.create(httpClientEndpointConfig)
+    val baseUrl = httpClientConfigUrlProvider.getUrl(httpClientEndpointConfig)
+
+    val okHttpClientBuilder = httpClientFactory.create(httpClientEndpointConfig).newBuilder()
     if (!headers.isNullOrEmpty()) {
-      okHttpClient = okHttpClient.newBuilder()
-        .addInterceptor(OkHttpClientSpecifiedHeadersInterceptor(headers))
-        .build()
+      okHttpClientBuilder.addInterceptor(OkHttpClientSpecifiedHeadersInterceptor(headers))
     }
 
-    val baseUrl = httpClientConfigUrlProvider.getUrl(httpClientEndpointConfig)
+    // Since gRPC uses HTTP/2, force h2c when calling an unencrypted endpoint
+    if (baseUrl.startsWith("http://")) {
+      okHttpClientBuilder.protocols(listOf(Protocol.H2_PRIOR_KNOWLEDGE))
+    } else {
+      okHttpClientBuilder.protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
+    }
+
     val grpcClient = GrpcClient.Builder()
-      .client(okHttpClient)
+      .client(okHttpClientBuilder.build())
       .baseUrl(baseUrl)
       .build()
     val api = grpcClient.create(BackfilaClientServiceClient::class)
