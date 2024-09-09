@@ -13,6 +13,7 @@ plugins {
 dependencies {
   implementation(libs.guava)
   implementation(libs.kotlinGradlePlugin)
+  implementation(libs.kotlinPoet)
   implementation(libs.moshiCore)
   implementation(libs.moshiKotlin)
   implementation(libs.wireRuntime)
@@ -70,8 +71,8 @@ gradlePlugin {
   plugins {
     create("backfila-client-sqldelight") {
       id = "app.cash.backfila.client.sqldelight"
-      displayName = "TODO"
-      description = "TODO"
+      displayName = "backfilaClientSqlDelight"
+      description = "Gradle plugin to generate sqldelight files for Backfila backfills."
       implementationClass = "app.cash.backfila.client.sqldelight.plugin.BackfilaSqlDelightGradlePlugin"
     }
   }

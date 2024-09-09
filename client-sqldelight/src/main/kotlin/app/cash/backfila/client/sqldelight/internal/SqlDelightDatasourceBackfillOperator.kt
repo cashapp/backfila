@@ -3,7 +3,7 @@ package app.cash.backfila.client.sqldelight.internal
 import app.cash.backfila.client.spi.BackfilaParametersOperator
 import app.cash.backfila.client.spi.BackfillOperator
 import app.cash.backfila.client.sqldelight.SqlDelightDatasourceBackfill
-import app.cash.backfila.client.sqldelight.SqlDelightRowSource
+import app.cash.backfila.client.sqldelight.SqlDelightRecordSource
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse.Batch
@@ -16,7 +16,7 @@ import com.google.common.base.Stopwatch
 import com.google.common.collect.ImmutableList
 import java.util.concurrent.TimeUnit
 
-class SqlDelightDatasourceBackfillOperator<S : SqlDelightRowSource<K, R>, K : Any, R : Any, P : Any>(
+class SqlDelightDatasourceBackfillOperator<S : SqlDelightRecordSource<K, R>, K : Any, R : Any, P : Any>(
   override val backfill: SqlDelightDatasourceBackfill<S, K, R, P>,
   private val parametersOperator: BackfilaParametersOperator<P>,
 ) : BackfillOperator {

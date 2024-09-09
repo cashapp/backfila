@@ -9,7 +9,7 @@ import app.cash.backfila.client.spi.BackfillOperator
 import app.cash.backfila.client.spi.BackfillRegistration
 import app.cash.backfila.client.sqldelight.ForSqlDelightBackend
 import app.cash.backfila.client.sqldelight.SqlDelightDatasourceBackfill
-import app.cash.backfila.client.sqldelight.SqlDelightRowSource
+import app.cash.backfila.client.sqldelight.SqlDelightRecordSource
 import com.google.inject.Injector
 import com.google.inject.TypeLiteral
 import com.squareup.moshi.Types
@@ -33,7 +33,7 @@ class SqlDelightDatasourceBackend @Inject constructor(
     }
   }
 
-  private fun <S : SqlDelightRowSource<K, R>, K : Any, R : Any, Param : Any> createSqlDelightDatasourceOperator(
+  private fun <S : SqlDelightRecordSource<K, R>, K : Any, R : Any, Param : Any> createSqlDelightDatasourceOperator(
     backfill: SqlDelightDatasourceBackfill<S, K, R, Param>,
   ) = SqlDelightDatasourceBackfillOperator(
     backfill,
@@ -43,7 +43,7 @@ class SqlDelightDatasourceBackend @Inject constructor(
   override fun create(backfillName: String): BackfillOperator? {
     return getBackfill(backfillName)?.let { backfill ->
       @Suppress("UNCHECKED_CAST") // We don't know the types statically, so fake them.
-      return createSqlDelightDatasourceOperator(backfill as SqlDelightDatasourceBackfill<SqlDelightRowSource<Any, Any>, Any, Any, Any>)
+      return createSqlDelightDatasourceOperator(backfill as SqlDelightDatasourceBackfill<SqlDelightRecordSource<Any, Any>, Any, Any, Any>)
     }
   }
 
@@ -52,13 +52,13 @@ class SqlDelightDatasourceBackend @Inject constructor(
       BackfillRegistration(
         name = it.key,
         description = it.value.findAnnotation<Description>()?.text,
-        parametersClass = parametersClass(it.value as KClass<SqlDelightDatasourceBackfill<SqlDelightRowSource<Any, Any>, Any, Any, Any>>),
+        parametersClass = parametersClass(it.value as KClass<SqlDelightDatasourceBackfill<SqlDelightRecordSource<Any, Any>, Any, Any, Any>>),
         deleteBy = it.value.findAnnotation<DeleteBy>()?.parseDeleteByDate(),
       )
     }.toSet()
   }
 
-  private fun <S : SqlDelightRowSource<K, R>, K : Any, R : Any, P : Any> parametersClass(backfillClass: KClass<out SqlDelightDatasourceBackfill<S, K, R, P>>): KClass<P> {
+  private fun <S : SqlDelightRecordSource<K, R>, K : Any, R : Any, P : Any> parametersClass(backfillClass: KClass<out SqlDelightDatasourceBackfill<S, K, R, P>>): KClass<P> {
     // Like MyBackfill.
     val thisType = TypeLiteral.get(backfillClass.java)
 

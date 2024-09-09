@@ -4,30 +4,14 @@ import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse.Batch
 import app.cash.backfila.protos.clientservice.KeyRange
 import app.cash.backfila.protos.clientservice.RunBatchRequest
-import app.cash.sqldelight.Query
-import app.cash.sqldelight.Transacter
 import com.google.common.base.Stopwatch
 
-class SqlDelightRowSource<K : Any, R : Any>(
-  val transacter: Transacter, // The query has the transacter part of it? How is sharding meant to work? Might make more sense if each function took in the transacter to operate on.
+class SqlDelightRecordSource<K : Any, R : Any>(
   val keyConverter: KeyConverter<K>,
-  private val selectOverallRange: Query<MinMax<K>>,
-  private val selectInitialMaxBound: (rangeStart: K, rangeEnd: K, scanSize: Long) -> Query<NullKeyContainer<K>>,
-  private val selectNextMaxBound: (previousEndKey: K, rangeEnd: K, scanSize: Long) -> Query<NullKeyContainer<K>>,
-  private val produceInitialBatchFromRange: (rangeStart: K, boundingMax: K, offset: Long) -> Query<K>,
-  private val produceNextBatchFromRange: (previousEndKey: K, boundingMax: K, offset: Long) -> Query<K>,
-  private val countInitialBatchMatches: (rangeStart: K, boundingMax: K) -> Query<Long>,
-  private val countNextBatchMatches: (previousEndKey: K, boundingMax: K) -> Query<Long>,
-  private val getInitialStartKeyAndScanCount: (rangeStart: K, batchEnd: K) -> Query<MinAndCount<K>>,
-  private val getNextStartKeyAndScanCount: (previousEndKey: K, batchEnd: K) -> Query<MinAndCount<K>>,
-  private val getBatch: (start: K, end: K) -> Query<R>,
+  private val recordSourceQueries: SqlDelightRecordSourceQueries<K, R>,
 ) {
 
-  /**
-   * TODO maybe this should go somewhere else.
-   */
   fun validateRange(range: KeyRange) {
-    if (range == null) return
     range.start?.let {
       keyConverter.toKeyOrNull(it) ?: error("Start of range must be a valid key.")
     }
@@ -36,17 +20,12 @@ class SqlDelightRowSource<K : Any, R : Any>(
     }
   }
 
-  data class MinMax<K>(
-    val min: K?,
-    val max: K?,
-  )
-
   fun computeOverallRange(requestedRange: KeyRange): KeyRange {
     if (requestedRange.start != null && requestedRange.end != null) {
       return requestedRange
     }
 
-    val minMax = selectOverallRange.executeAsOneOrNull()
+    val minMax = recordSourceQueries.selectOverallRange().executeAsOneOrNull()
     return if (minMax == null) {
       // Empty table, no work to do for this partition.
       KeyRange.Builder().build()
@@ -64,15 +43,6 @@ class SqlDelightRowSource<K : Any, R : Any>(
   fun getBatchGenerator(request: GetNextBatchRangeRequest): BatchGenerator {
     return BatchGenerator(request)
   }
-
-  data class NullKeyContainer<K>(
-    val key: K?,
-  )
-
-  data class MinAndCount<K>(
-    val min: K?,
-    val count: Long,
-  )
 
   inner class BatchGenerator(request: GetNextBatchRangeRequest) {
     private val partitionName: String = request.partition_name // TODO How to do sharding.
@@ -92,9 +62,9 @@ class SqlDelightRowSource<K : Any, R : Any>(
       if (boundingMax == null) {
         val stopwatch = Stopwatch.createStarted()
         boundingMax = if (previousEndKey == null) {
-          selectInitialMaxBound(rangeStart, rangeEnd, scanSize).executeAsOne().key
+          recordSourceQueries.selectInitialMaxBound(rangeStart, rangeEnd, scanSize).executeAsOne().key
         } else {
-          selectNextMaxBound(previousEndKey!!, rangeEnd, scanSize).executeAsOne().key
+          recordSourceQueries.selectNextMaxBound(previousEndKey!!, rangeEnd, scanSize).executeAsOne().key
         }
 
         if (boundingMax == null) {
@@ -130,9 +100,9 @@ class SqlDelightRowSource<K : Any, R : Any>(
         // to figure out the last id in the batch. Where offset = batchSize - 1.
         // We can't use raw SQL as above because we're working with a backfill-provided Criteria.
         if (previousEndKey == null) {
-          produceInitialBatchFromRange(rangeStart, boundingMax!!, batchSize - 1).executeAsOneOrNull()
+          recordSourceQueries.produceInitialBatchFromRange(rangeStart, boundingMax!!, batchSize - 1).executeAsOneOrNull()
         } else {
-          produceNextBatchFromRange(previousEndKey!!, boundingMax!!, batchSize - 1).executeAsOneOrNull()
+          recordSourceQueries.produceNextBatchFromRange(previousEndKey!!, boundingMax!!, batchSize - 1).executeAsOneOrNull()
         }
       }
 
@@ -141,9 +111,9 @@ class SqlDelightRowSource<K : Any, R : Any>(
       if (batchEndPkey == null) {
         // Less than batchSize matches, so return the end of the scan size and count the matches.
         matchingCount = if (previousEndKey == null) {
-          countInitialBatchMatches(rangeStart, boundingMax!!).executeAsOne().toLong()
+          recordSourceQueries.countInitialBatchMatches(rangeStart, boundingMax!!).executeAsOne().toLong()
         } else {
-          countNextBatchMatches(previousEndKey!!, boundingMax!!).executeAsOne().toLong()
+          recordSourceQueries.countNextBatchMatches(previousEndKey!!, boundingMax!!).executeAsOne().toLong()
         }
         end = boundingMax!!
       } else {
@@ -154,9 +124,9 @@ class SqlDelightRowSource<K : Any, R : Any>(
 
       // Get start pkey and scanned record count for this batch.
       val result = if (previousEndKey == null) {
-        getInitialStartKeyAndScanCount(rangeStart, end!!).executeAsOne()
+        recordSourceQueries.getInitialStartKeyAndScanCount(rangeStart, end!!).executeAsOne()
       } else {
-        getNextStartKeyAndScanCount(previousEndKey!!, end!!).executeAsOne()
+        recordSourceQueries.getNextStartKeyAndScanCount(previousEndKey!!, end!!).executeAsOne()
       }
       require(result.min != null && result.count != null) {
         "getInitialStartKeyAndScanCount or getNextStartKeyAndScanCount query failed to return a min and/or count. result: $result"
@@ -183,6 +153,6 @@ class SqlDelightRowSource<K : Any, R : Any>(
     // TODO create a transaction and deal with sharding.
     val start = keyConverter.toKey(request.batch_range.start)
     val end = keyConverter.toKey(request.batch_range.end)
-    return getBatch(start, end).executeAsList()
+    return recordSourceQueries.getBatch(start, end).executeAsList()
   }
 }

@@ -11,7 +11,7 @@ import app.cash.backfila.client.PrepareBackfillConfig
  * P - Parameters type
  *
  */
-abstract class SqlDelightDatasourceBackfill<S : SqlDelightRowSource<K, R>, K : Any, R : Any, P : Any>(
+abstract class SqlDelightDatasourceBackfill<S : SqlDelightRecordSource<K, R>, K : Any, R : Any, P : Any>(
   val rowSource: S,
 ) : Backfill {
 

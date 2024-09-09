@@ -9,7 +9,7 @@ import javax.inject.Inject
 
 class PlayerOriginBackfill @Inject constructor(
   val hockeyDataDatabase: HockeyDataDatabase,
-) : SqlDelightDatasourceBackfill<SqlDelightRowSource<Int, HockeyPlayer>, Int, HockeyPlayer, PlayerOriginBackfill.PlayerOriginParameters>(
+) : SqlDelightDatasourceBackfill<SqlDelightRecordSource<Int, HockeyPlayer>, Int, HockeyPlayer, PlayerOriginBackfill.PlayerOriginParameters>(
   hockeyPlayerRowSource(hockeyDataDatabase),
 ) {
   val backfilledPlayers = newMutableList<Pair<String, HockeyPlayer>>()
@@ -30,41 +30,42 @@ class PlayerOriginBackfill @Inject constructor(
   )
 }
 
-fun hockeyPlayerRowSource(hockeyDataDatabase: HockeyDataDatabase) = SqlDelightRowSource(
-  hockeyDataDatabase,
+fun hockeyPlayerRowSource(hockeyDataDatabase: HockeyDataDatabase) = SqlDelightRecordSource(
   IntKeyConverter(),
-  hockeyDataDatabase.allHockeyPlayersBackfillQueries.selectOverallRange { min, max -> SqlDelightRowSource.MinMax(min, max) },
-  { rangeStart: Int, rangeEnd: Int, scanSize: Long ->
-    hockeyDataDatabase.allHockeyPlayersBackfillQueries.selectInitialMaxBound(rangeStart, rangeEnd, scanSize) {
-      SqlDelightRowSource.NullKeyContainer(
-        it,
-      )
-    }
-  },
-  { previousEndKey: Int, rangeEnd: Int, scanSize: Long ->
-    hockeyDataDatabase.allHockeyPlayersBackfillQueries.selectNextMaxBound(
-      previousEndKey,
-      rangeEnd,
-      scanSize,
-    ) { SqlDelightRowSource.NullKeyContainer(it) }
-  },
-  { rangeStart: Int, rangeEnd: Int, offset: Long -> hockeyDataDatabase.allHockeyPlayersBackfillQueries.produceInitialBatchFromRange(rangeStart, rangeEnd, offset) },
-  { previousEndKey: Int, rangeEnd: Int, offset: Long -> hockeyDataDatabase.allHockeyPlayersBackfillQueries.produceNextBatchFromRange(previousEndKey, rangeEnd, offset) },
-  { rangeStart: Int, boundingMax: Int -> hockeyDataDatabase.allHockeyPlayersBackfillQueries.countInitialBatchMatches(rangeStart, boundingMax) },
-  { previousEndKey: Int, boundingMax: Int -> hockeyDataDatabase.allHockeyPlayersBackfillQueries.countNextBatchMatches(previousEndKey, boundingMax) },
-  { rangeStart: Int, rangeEnd: Int ->
-    hockeyDataDatabase.allHockeyPlayersBackfillQueries.getInitialStartKeyAndScanCount(rangeStart, rangeEnd) { min, count ->
-      SqlDelightRowSource.MinAndCount(
-        min,
-        count,
-      )
-    }
-  },
-  { previousEndKey: Int, rangeEnd: Int ->
-    hockeyDataDatabase.allHockeyPlayersBackfillQueries.getNextStartKeyAndScanCount(
-      previousEndKey,
-      rangeEnd,
-    ) { min, count -> SqlDelightRowSource.MinAndCount(min, count) }
-  },
-  { start: Int, end: Int -> hockeyDataDatabase.allHockeyPlayersBackfillQueries.getBatch(start, end) },
+  SqlDelightRecordSourceQueries.create(
+    hockeyDataDatabase.allHockeyPlayersBackfillQueries.selectOverallRange { min, max -> SqlDelightRecordSourceQueries.MinMax(min, max) },
+    { rangeStart: Int, rangeEnd: Int, scanSize: Long ->
+      hockeyDataDatabase.allHockeyPlayersBackfillQueries.selectInitialMaxBound(rangeStart, rangeEnd, scanSize) {
+        SqlDelightRecordSourceQueries.NullKeyContainer(
+          it,
+        )
+      }
+    },
+    { previousEndKey: Int, rangeEnd: Int, scanSize: Long ->
+      hockeyDataDatabase.allHockeyPlayersBackfillQueries.selectNextMaxBound(
+        previousEndKey,
+        rangeEnd,
+        scanSize,
+      ) { SqlDelightRecordSourceQueries.NullKeyContainer(it) }
+    },
+    { rangeStart: Int, rangeEnd: Int, offset: Long -> hockeyDataDatabase.allHockeyPlayersBackfillQueries.produceInitialBatchFromRange(rangeStart, rangeEnd, offset) },
+    { previousEndKey: Int, rangeEnd: Int, offset: Long -> hockeyDataDatabase.allHockeyPlayersBackfillQueries.produceNextBatchFromRange(previousEndKey, rangeEnd, offset) },
+    { rangeStart: Int, boundingMax: Int -> hockeyDataDatabase.allHockeyPlayersBackfillQueries.countInitialBatchMatches(rangeStart, boundingMax) },
+    { previousEndKey: Int, boundingMax: Int -> hockeyDataDatabase.allHockeyPlayersBackfillQueries.countNextBatchMatches(previousEndKey, boundingMax) },
+    { rangeStart: Int, rangeEnd: Int ->
+      hockeyDataDatabase.allHockeyPlayersBackfillQueries.getInitialStartKeyAndScanCount(rangeStart, rangeEnd) { min, count ->
+        SqlDelightRecordSourceQueries.MinAndCount(
+          min,
+          count,
+        )
+      }
+    },
+    { previousEndKey: Int, rangeEnd: Int ->
+      hockeyDataDatabase.allHockeyPlayersBackfillQueries.getNextStartKeyAndScanCount(
+        previousEndKey,
+        rangeEnd,
+      ) { min, count -> SqlDelightRecordSourceQueries.MinAndCount(min, count) }
+    },
+    { start: Int, end: Int -> hockeyDataDatabase.allHockeyPlayersBackfillQueries.getBatch(start, end) },
+  ),
 )

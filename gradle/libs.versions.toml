@@ -58,6 +58,7 @@ tracingJaeger = { module = "io.jaegertracing:jaeger-core", version = "1.1.0" }
 jooq = { module = "org.jooq:jooq", version.ref = "jooq" }
 kotlinAllOpenPlugin = { module = "org.jetbrains.kotlin:kotlin-allopen", version.ref = "kotlin" }
 kotlinGradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+kotlinPoet = { module = "com.squareup:kotlinpoet", version = "1.18.1" }
 kotlinReflection = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 kotlinStdLib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 kotlinTest = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
