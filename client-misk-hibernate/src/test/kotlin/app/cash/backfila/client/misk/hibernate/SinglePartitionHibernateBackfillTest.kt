@@ -313,27 +313,31 @@ abstract class SinglePartitionHibernateBackfillTest {
   }
 
   private fun createSome(): List<Id<DbMenu>> {
-    return transacter.transaction { session: Session ->
-      val expected = mutableListOf<Id<DbMenu>>()
-      repeat((0..9).count()) {
-        val id = session.save(DbMenu("chicken"))
-        expected.add(id)
-      }
-
-      // Intersperse these to make sure we test skipping non matching records.
-      repeat((0..4).count()) { session.save(DbMenu("beef")) }
-
-      repeat((0..9).count()) {
-        val id = session.save(DbMenu("chicken"))
-        expected.add(id)
-      }
-      expected
-    }
+    val expected = mutableListOf<Id<DbMenu>>()
+    expected += createMatching(10)
+    // Intersperse these to make sure we test skipping non matching records.
+    createNoMatching(5)
+    expected += createMatching(10)
+    return expected
   }
 
-  private fun createNoMatching() {
-    transacter.transaction { session: Session ->
-      repeat((0..4).count()) { session.save(DbMenu("beef")) }
+  private fun createMatching(times: Int): List<Id<DbMenu>> {
+    val expected = mutableListOf<Id<DbMenu>>()
+    transacter.transaction { session ->
+      repeat(times) {
+        expected.add(session.save(DbMenu("chicken")))
+      }
     }
+    return expected
+  }
+
+  private fun createNoMatching(times: Int = 5): List<Id<DbMenu>> {
+    val expected = mutableListOf<Id<DbMenu>>()
+    transacter.transaction { session: Session ->
+      repeat(times) {
+        expected.add(session.save(DbMenu("beef")))
+      }
+    }
+    return expected
   }
 }
