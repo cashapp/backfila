@@ -89,27 +89,15 @@ internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : An
         .estimated_record_count(null)
         .build()
     }
-    val keyRange: KeyRange = partitionProvider.transaction(partitionName) { session ->
-      val minmax = queryFactory.dynamicQuery(backfill.entityClass)
-        .dynamicUniqueResult(session) { criteriaBuilder, queryRoot ->
-          criteriaBuilder.tuple(
-            criteriaBuilder.min(backfill.getPrimaryKeyPath(queryRoot)),
-            criteriaBuilder.max(backfill.getPrimaryKeyPath(queryRoot)),
-          )
-        }!!
-
-      val min = minmax[0] as Pkey?
-      val max = minmax[1] as Pkey?
-      if (min == null) {
-        // Empty table, no work to do for this partition.
-        KeyRange.Builder().build()
-      } else {
-        checkNotNull(max) { "Table max was null but min wasn't, this shouldn't happen" }
-        KeyRange.Builder()
-          .start(requestedRange?.start ?: primaryKeyCursorMapper.toByteString(min))
-          .end(requestedRange?.end ?: primaryKeyCursorMapper.toByteString(max))
-          .build()
-      }
+    val minMax = boundingRangeStrategy.computeAbsoluteMinMax(backfill, partitionName)
+    val keyRange: KeyRange = if (minMax == null) {
+      // Empty table, no work to do for this partition.
+      KeyRange.Builder().build()
+    } else {
+      KeyRange.Builder()
+        .start(requestedRange?.start ?: primaryKeyCursorMapper.toByteString(minMax.min))
+        .end(requestedRange?.end ?: primaryKeyCursorMapper.toByteString(minMax.max))
+        .build()
     }
     return Partition.Builder()
       .partition_name(partitionName)
@@ -185,12 +173,12 @@ internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : An
         val stopwatch = Stopwatch.createStarted()
         boundingMax = boundingRangeStrategy
           .computeBoundingRangeMax(
-            backfill,
-            partitionName,
-            previousEndKey,
-            primaryKeyCursorMapper.fromByteString(backfill.pkeyClass.java, backfillRange.start).getOrThrow(),
-            primaryKeyCursorMapper.fromByteString(backfill.pkeyClass.java, backfillRange.end).getOrThrow(),
-            scanSize,
+            backfill = backfill,
+            partitionName = partitionName,
+            previousEndKey = previousEndKey,
+            backfillRangeStart = primaryKeyCursorMapper.fromByteString(backfill.pkeyClass.java, backfillRange.start).getOrThrow(),
+            backfillRangeEnd = primaryKeyCursorMapper.fromByteString(backfill.pkeyClass.java, backfillRange.end).getOrThrow(),
+            scanSize = scanSize,
           )
         if (boundingMax == null) {
           logger.info("Bounding range returned no records, done computing batches")
@@ -247,19 +235,13 @@ internal class HibernateBackfillOperator<E : DbEntity<E>, Pkey : Any, Param : An
         }
 
         // Get start pkey and scanned record count for this batch.
-        val result = queryFactory.dynamicQuery(backfill.entityClass).apply {
-          addBoundingMin(this)
-          dynamicAddConstraint(pkeyProperty, LE, end)
-        }.dynamicUniqueResult(session) { criteriaBuilder, queryRoot ->
-          criteriaBuilder.tuple(
-            criteriaBuilder.min(backfill.getPrimaryKeyPath(queryRoot)),
-            criteriaBuilder.count(queryRoot),
-          )
-        }!!
-
-        @Suppress("UNCHECKED_CAST") // Return type from the query should always match.
-        val start = result[0] as Pkey
-        val scannedCount = result[1] as Long
+        val (start, scannedCount) = boundingRangeStrategy.computeMinAndCountForRange(
+          backfill = backfill,
+          session = session,
+          previousEndKey = previousEndKey,
+          backfillRangeStart = primaryKeyCursorMapper.fromByteString(backfill.pkeyClass.java, backfillRange.start).getOrThrow(),
+          end = end,
+        )
 
         TxResult(
           end,
