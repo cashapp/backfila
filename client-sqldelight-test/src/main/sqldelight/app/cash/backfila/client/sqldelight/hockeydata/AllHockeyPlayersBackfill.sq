@@ -1,4 +1,4 @@
-selectOverallRange:
+selectAbsoluteRange:
 SELECT min(player_number), max(player_number)
 FROM hockeyPlayer;
 

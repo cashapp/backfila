@@ -25,13 +25,13 @@ class SqlDelightRecordSource<K : Any, R : Any>(
       return requestedRange
     }
 
-    val minMax = recordSourceQueries.selectOverallRange().executeAsOneOrNull()
+    val minMax = recordSourceQueries.selectAbsoluteRange().executeAsOneOrNull()
     return if (minMax == null) {
       // Empty table, no work to do for this partition.
       KeyRange.Builder().build()
     } else {
       require(minMax.min != null && minMax.max != null) {
-        "selectOverallRange query failed to return a min and/or max. minMax $minMax"
+        "selectAbsoluteRange query failed to return a min or a max. minMax $minMax"
       }
       KeyRange.Builder()
         .start(requestedRange?.start ?: keyConverter.toBytes(minMax.min))

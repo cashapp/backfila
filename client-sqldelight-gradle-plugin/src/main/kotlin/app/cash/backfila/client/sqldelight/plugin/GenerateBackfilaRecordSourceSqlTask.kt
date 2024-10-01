@@ -25,7 +25,7 @@ abstract class GenerateBackfilaRecordSourceSqlTask : DefaultTask() {
     sqlFile.parentFile.mkdirs()
     sqlFile.writeText(
       """
-    selectOverallRange:
+    selectAbsoluteRange:
     SELECT min($key), max($key)
     FROM $table;
 
@@ -49,6 +49,7 @@ abstract class GenerateBackfilaRecordSourceSqlTask : DefaultTask() {
     SELECT $key FROM $table
     WHERE $key >= :backfillRangeStart
       AND $key <= :boundingMax
+      AND ( $where )
     ORDER BY $key ASC
     LIMIT 1
     OFFSET :offset;
@@ -57,6 +58,7 @@ abstract class GenerateBackfilaRecordSourceSqlTask : DefaultTask() {
     SELECT $key FROM $table
     WHERE $key > :previousEndKey
       AND $key <= :boundingMax
+      AND ( $where )
     ORDER BY $key ASC
     LIMIT 1
     OFFSET :offset;
@@ -64,12 +66,14 @@ abstract class GenerateBackfilaRecordSourceSqlTask : DefaultTask() {
     countInitialBatchMatches:
     SELECT COUNT(DISTINCT $key) FROM $table
     WHERE $key >= :backfillRangeStart
-      AND $key <= :boundingMax;
+      AND $key <= :boundingMax
+      AND ( $where );
 
     countNextBatchMatches:
     SELECT COUNT(DISTINCT $key) FROM $table
     WHERE $key > :previousEndKey
-      AND $key <= :boundingMax;
+      AND $key <= :boundingMax
+      AND ( $where );
 
     getInitialStartKeyAndScanCount:
     SELECT MIN($key), COUNT(*) FROM $table
@@ -85,6 +89,7 @@ abstract class GenerateBackfilaRecordSourceSqlTask : DefaultTask() {
     SELECT $recordColumns FROM $table
     WHERE $key >= :start
       AND $key <= :end
+      AND ( $where )
     ORDER BY $key ASC;
 
       """.trimIndent(),

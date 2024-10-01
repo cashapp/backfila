@@ -17,7 +17,7 @@ interface SqlDelightRecordSourceQueries<K : Any, R : Any> {
     val count: Long,
   )
 
-  fun selectOverallRange(): Query<MinMax<K>>
+  fun selectAbsoluteRange(): Query<MinMax<K>>
   fun selectInitialMaxBound(rangeStart: K, rangeEnd: K, scanSize: Long): Query<NullKeyContainer<K>>
   fun selectNextMaxBound(previousEndKey: K, rangeEnd: K, scanSize: Long): Query<NullKeyContainer<K>>
   fun produceInitialBatchFromRange(rangeStart: K, boundingMax: K, offset: Long): Query<K>
@@ -30,7 +30,7 @@ interface SqlDelightRecordSourceQueries<K : Any, R : Any> {
 
   companion object {
     fun <K : Any, R : Any> create(
-      selectOverallRange: Query<MinMax<K>>,
+      selectAbsoluteRange: Query<MinMax<K>>,
       selectInitialMaxBound: (rangeStart: K, rangeEnd: K, scanSize: Long) -> Query<NullKeyContainer<K>>,
       selectNextMaxBound: (previousEndKey: K, rangeEnd: K, scanSize: Long) -> Query<NullKeyContainer<K>>,
       produceInitialBatchFromRange: (rangeStart: K, boundingMax: K, offset: Long) -> Query<K>,
@@ -42,7 +42,7 @@ interface SqlDelightRecordSourceQueries<K : Any, R : Any> {
       getBatch: (start: K, end: K) -> Query<R>,
     ): SqlDelightRecordSourceQueries<K, R> {
       return object : SqlDelightRecordSourceQueries<K, R> {
-        override fun selectOverallRange(): Query<MinMax<K>> = selectOverallRange
+        override fun selectAbsoluteRange(): Query<MinMax<K>> = selectAbsoluteRange
         override fun selectInitialMaxBound(rangeStart: K, rangeEnd: K, scanSize: Long): Query<NullKeyContainer<K>> = selectInitialMaxBound(rangeStart, rangeEnd, scanSize)
         override fun selectNextMaxBound(previousEndKey: K, rangeEnd: K, scanSize: Long): Query<NullKeyContainer<K>> = selectNextMaxBound(previousEndKey, rangeEnd, scanSize)
         override fun produceInitialBatchFromRange(rangeStart: K, boundingMax: K, offset: Long): Query<K> = produceInitialBatchFromRange(rangeStart, boundingMax, offset)

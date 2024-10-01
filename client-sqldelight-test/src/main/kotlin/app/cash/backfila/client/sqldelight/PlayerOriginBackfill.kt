@@ -33,7 +33,7 @@ class PlayerOriginBackfill @Inject constructor(
 fun hockeyPlayerRowSource(hockeyDataDatabase: HockeyDataDatabase) = SqlDelightRecordSource(
   IntKeyConverter(),
   SqlDelightRecordSourceQueries.create(
-    hockeyDataDatabase.allHockeyPlayersBackfillQueries.selectOverallRange { min, max -> SqlDelightRecordSourceQueries.MinMax(min, max) },
+    hockeyDataDatabase.allHockeyPlayersBackfillQueries.selectAbsoluteRange { min, max -> SqlDelightRecordSourceQueries.MinMax(min, max) },
     { rangeStart: Int, rangeEnd: Int, scanSize: Long ->
       hockeyDataDatabase.allHockeyPlayersBackfillQueries.selectInitialMaxBound(rangeStart, rangeEnd, scanSize) {
         SqlDelightRecordSourceQueries.NullKeyContainer(
