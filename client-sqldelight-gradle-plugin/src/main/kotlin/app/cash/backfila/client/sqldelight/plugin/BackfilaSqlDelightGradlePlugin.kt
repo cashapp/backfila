@@ -12,6 +12,7 @@ class BackfilaSqlDelightGradlePlugin : Plugin<Project> {
     val backfilaExtension = target.extensions.create("backfilaSqlDelight", BackfilaSqlDelightExtension::class.java)
 
     backfilaExtension.backfills.all { backfill ->
+      check(!backfill.name.contains("\\s")) { "Backfill `name` is not allowed to contain whitespace." }
       val sqlDirectory = target.layout.buildDirectory.dir("backfilaSqlDelight/${backfill.name}/sql")
       val kotlinDirectory = target.layout.buildDirectory.dir("backfilaSqlDelight/${backfill.name}/kotlin")
 
@@ -28,17 +29,17 @@ class BackfilaSqlDelightGradlePlugin : Plugin<Project> {
         "The Backfila gradle plugin requires the SqlDelight gradle plugin to function."
       }
 
-      sqlDelightExtension
-        .databases.all {
-          if (it.name == backfill.backfill.get().database) {
-            it.srcDirs.from(sqlDirectory)
-          }
+      sqlDelightExtension.databases.all {
+        if (it.name == backfill.backfill.get().database) {
+          it.srcDirs.from(sqlDirectory)
         }
+      }
 
       val kotlinTask = target.tasks.register(
         "generateBackfilaRecordSourceQueries${backfill.name.replaceFirstChar { it.uppercase() }}",
         GenerateBackfilaRecordSourceQueriesTask::class.java,
       ) {
+        it.dependsOn(sqlTask)
         it.backfill.set(backfill.backfill)
         it.kotlinDirectory.set(kotlinDirectory)
       }
@@ -83,6 +84,7 @@ abstract class BackfilaSqlDelightExtension {
   ) {
     backfills.create(name).backfill.set(
       SqlDelightRecordSource(
+        name = name,
         database = database,
         tableName = tableName,
         keyName = keyName,
@@ -99,10 +101,11 @@ abstract class SqlDelightRecordSourceEntry(val name: String) {
 }
 
 data class SqlDelightRecordSource(
+  val name: String,
   val database: String,
   val tableName: String,
   val keyName: String, // TODO: Maybe eventually also support compound keys.
-  val keyType: String, // TODO: Get this information from SQLDelight
+  val keyType: String, // TODO: Get this information directly from SQLDelight
   val recordColumns: String,
   val whereClause: String,
 ) : Serializable

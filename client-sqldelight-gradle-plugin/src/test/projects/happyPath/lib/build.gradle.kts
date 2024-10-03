@@ -6,9 +6,22 @@ plugins {
   kotlin("jvm")
 }
 
+sqldelight {
+  databases {
+    create("HockeyDataDatabase") {
+      packageName.set("app.cash.backfila.client.sqldelight.hockeydata")
+      dialect(libs.sqldelightMysqlDialect)
+      srcDirs.setFrom(listOf("lib/resources/migrations"))
+      deriveSchemaFromMigrations.set(true)
+      migrationOutputDirectory.set(file("$buildDir/resources/main/migrations"))
+      verifyMigrations.set(true)
+    }
+  }
+}
+
 backfilaSqlDelight {
   addRecordSource(
-    name = "hockeyPlayerOrigin",
+    name = "HockeyPlayerOrigin",
     database = "app.cash.backfila.client.sqldelight.hockeydata.HockeyDataDatabase",
     tableName = "hockeyPlayer",
     keyName = "player_number",

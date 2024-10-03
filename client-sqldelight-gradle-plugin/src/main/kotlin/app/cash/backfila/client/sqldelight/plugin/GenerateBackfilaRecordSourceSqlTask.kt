@@ -20,8 +20,9 @@ abstract class GenerateBackfilaRecordSourceSqlTask : DefaultTask() {
     val key = backfill.get().keyName
     val where = backfill.get().whereClause
     val recordColumns = backfill.get().recordColumns
+    val name = backfill.get().name.replaceFirstChar { it.uppercase() }
 
-    val sqlFile = sqlDirectory.file("hello.sq").get().asFile
+    val sqlFile = sqlDirectory.file("$name.sq").get().asFile
     sqlFile.parentFile.mkdirs()
     sqlFile.writeText(
       """
@@ -44,6 +45,16 @@ abstract class GenerateBackfilaRecordSourceSqlTask : DefaultTask() {
         AND $key <= :backfillRangeEnd
       ORDER BY $key ASC
       LIMIT :scanSize) AS subquery;
+
+    getInitialStartKeyAndScanCount:
+    SELECT MIN($key), COUNT(*) FROM $table
+    WHERE $key >= :backfillRangeStart
+      AND $key <= :batchEnd;
+
+    getNextStartKeyAndScanCount:
+    SELECT MIN($key), COUNT(*) FROM $table
+    WHERE $key > :previousEndKey
+      AND $key <= :batchEnd;
 
     produceInitialBatchFromRange:
     SELECT $key FROM $table
@@ -74,16 +85,6 @@ abstract class GenerateBackfilaRecordSourceSqlTask : DefaultTask() {
     WHERE $key > :previousEndKey
       AND $key <= :boundingMax
       AND ( $where );
-
-    getInitialStartKeyAndScanCount:
-    SELECT MIN($key), COUNT(*) FROM $table
-    WHERE $key >= :backfillRangeStart
-      AND $key <= :batchEnd;
-
-    getNextStartKeyAndScanCount:
-    SELECT MIN($key), COUNT(*) FROM $table
-    WHERE $key > :previousEndKey
-      AND $key <= :batchEnd;
 
     getBatch:
     SELECT $recordColumns FROM $table

@@ -37,8 +37,6 @@ class BackfilaSqlDelightGradlePluginTest {
     projectDir: File,
     vararg taskNames: String,
   ): GradleRunner {
-    // val gradleRoot = projectDir.resolve("gradle").also { it.mkdir() }
-    // File("../gradle/wrapper").copyRecursively(gradleRoot.resolve("wrapper"), true)
     val arguments = arrayOf("--info", "--stacktrace", "--continue")
     return GradleRunner.create()
       .withProjectDir(projectDir)
