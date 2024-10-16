@@ -5,7 +5,6 @@ import app.cash.backfila.client.PrepareBackfillConfig
 import app.cash.backfila.embedded.Backfila
 import app.cash.backfila.embedded.createDryRun
 import app.cash.backfila.embedded.createWetRun
-import com.squareup.wire.internal.newMutableList
 import javax.inject.Inject
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -125,7 +124,7 @@ class StaticKotlinValBackfillTest {
   }
 
   class SaucesBackfill @Inject constructor() : StaticDatasourceBackfill<String, SaucesBackfill.SauceAttributes>() {
-    val backfilledSauces = newMutableList<String>()
+    val backfilledSauces = mutableListOf<String>()
 
     override fun runOne(item: String, config: BackfillConfig<SauceAttributes>) {
       val sauce = if (config.parameters.markSweet && item in sweetSauces) item.markSweet() else item

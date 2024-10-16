@@ -7,7 +7,6 @@ import app.cash.backfila.client.stat.parameters.ParametersDatasourceBackfill
 import app.cash.backfila.embedded.Backfila
 import app.cash.backfila.embedded.createDryRun
 import app.cash.backfila.embedded.createWetRun
-import com.squareup.wire.internal.newMutableList
 import javax.inject.Inject
 import kotlin.test.assertFails
 import misk.testing.MiskTest
@@ -166,7 +165,7 @@ class ParametersStaticBackfillTest {
   }
 
   class ArtisanCheeseBackfill @Inject constructor() : ParametersDatasourceBackfill<String, CommaParameterDatasource>() {
-    val backfilledCheese = newMutableList<String>()
+    val backfilledCheese = mutableListOf<String>()
 
     override fun runOne(item: String, config: BackfillConfig<CommaParameterDatasource>) {
       if (!config.dryRun) {

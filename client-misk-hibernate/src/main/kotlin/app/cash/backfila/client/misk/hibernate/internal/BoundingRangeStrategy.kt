@@ -20,7 +20,7 @@ interface BoundingRangeStrategy<E : DbEntity<E>, Pkey : Any> {
   /**
    * Computes the raw table min and max based on the primary key. Returns null if the table is empty.
    */
-  fun computeAbsoluteMinMax(
+  fun computeAbsoluteRange(
     backfill: HibernateBackfill<E, Pkey, *>,
     partitionName: String,
   ): MinMax<Pkey>?
@@ -72,7 +72,7 @@ interface BoundingRangeStrategy<E : DbEntity<E>, Pkey : Any> {
 class UnshardedHibernateBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any>(
   private val partitionProvider: PartitionProvider,
 ) : BoundingRangeStrategy<E, Pkey> {
-  override fun computeAbsoluteMinMax(
+  override fun computeAbsoluteRange(
     backfill: HibernateBackfill<E, Pkey, *>,
     partitionName: String,
   ): MinMax<Pkey>? {
@@ -127,7 +127,7 @@ class UnshardedHibernateBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any>(
 class VitessShardedBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any>(
   private val partitionProvider: PartitionProvider,
 ) : BoundingRangeStrategy<E, Pkey> {
-  override fun computeAbsoluteMinMax(
+  override fun computeAbsoluteRange(
     backfill: HibernateBackfill<E, Pkey, *>,
     partitionName: String,
   ): MinMax<Pkey>? {
@@ -184,7 +184,7 @@ class VitessSingleCursorBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any>(
   private val transacter: Transacter,
   private val keyspace: Keyspace,
 ) : BoundingRangeStrategy<E, Pkey> {
-  override fun computeAbsoluteMinMax(
+  override fun computeAbsoluteRange(
     backfill: HibernateBackfill<E, Pkey, *>,
     partitionName: String,
   ): MinMax<Pkey>? {

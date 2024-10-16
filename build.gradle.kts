@@ -19,6 +19,7 @@ buildscript {
     classpath(libs.mavenPublishGradlePlugin)
     classpath(libs.spotlessPlugin)
     classpath(libs.wireGradlePlugin)
+    classpath(libs.buildConfigPlugin)
     classpath(libs.shadowJarPlugin)
   }
 }
@@ -120,6 +121,15 @@ subprojects {
 
 allprojects {
   plugins.withId("com.vanniktech.maven.publish.base") {
+    configure<PublishingExtension> {
+      // For the Gradle plugin's tests.
+      repositories {
+        maven {
+          name = "testMaven"
+          url = rootProject.layout.buildDirectory.dir("testMaven").get().asFile.toURI()
+        }
+      }
+    }
     configure<MavenPublishBaseExtension> {
       publishToMavenCentral(SonatypeHost.DEFAULT, automaticRelease = true)
       signAllPublications()
