@@ -26,6 +26,7 @@ backfilaSqlDelight {
     tableName = "hockeyPlayer",
     keyName = "player_number",
     keyType = "kotlin.Int",
+    keyEncoder = "app.cash.backfila.client.sqldelight.IntKeyEncoder",
     recordColumns = "*",
     recordType = "app.cash.backfila.client.sqldelight.hockeydata.HockeyPlayer"
   )

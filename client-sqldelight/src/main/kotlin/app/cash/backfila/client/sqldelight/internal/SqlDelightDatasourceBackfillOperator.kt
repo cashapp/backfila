@@ -3,7 +3,6 @@ package app.cash.backfila.client.sqldelight.internal
 import app.cash.backfila.client.spi.BackfilaParametersOperator
 import app.cash.backfila.client.spi.BackfillOperator
 import app.cash.backfila.client.sqldelight.SqlDelightDatasourceBackfill
-import app.cash.backfila.client.sqldelight.SqlDelightRecordSource
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse.Batch
@@ -16,16 +15,17 @@ import com.google.common.base.Stopwatch
 import com.google.common.collect.ImmutableList
 import java.util.concurrent.TimeUnit
 
-class SqlDelightDatasourceBackfillOperator<S : SqlDelightRecordSource<K, R>, K : Any, R : Any, P : Any>(
-  override val backfill: SqlDelightDatasourceBackfill<S, K, R, P>,
+class SqlDelightDatasourceBackfillOperator<K : Any, R : Any, P : Any>(
+  override val backfill: SqlDelightDatasourceBackfill<K, R, P>,
   private val parametersOperator: BackfilaParametersOperator<P>,
 ) : BackfillOperator {
-  private val rowSource = backfill.rowSource
+  private val recSourceConfig = backfill.recordSourceConfig
+  private val recordSource = SqlDelightRecordSource(recSourceConfig)
 
   override fun name(): String = backfill.javaClass.toString()
 
   override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
-    rowSource.validateRange(request.range)
+    recordSource.validateRange(request.range)
 
     backfill.validate(
       parametersOperator.constructBackfillConfig(request),
@@ -40,7 +40,7 @@ class SqlDelightDatasourceBackfillOperator<S : SqlDelightRecordSource<K, R>, K :
       PrepareBackfillResponse.Partition.Builder()
         .partition_name(it.key)
         .backfill_range(
-          rowSource.computeOverallRange(request.range),
+          recordSource.computeOverallRange(request.range),
         ).build()
     }
     return PrepareBackfillResponse.Builder()
@@ -60,9 +60,9 @@ class SqlDelightDatasourceBackfillOperator<S : SqlDelightRecordSource<K, R>, K :
     }
 
     val stopwatch = Stopwatch.createStarted()
-    val batchGenerator = rowSource.getBatchGenerator(request)
+    val batchGenerator = recordSource.getBatchGenerator(request)
 
-    val batches = ArrayList<Batch>()
+    val batches = mutableListOf<Batch>()
     while (batches.size < request.compute_count_limit) {
       val batch = batchGenerator.next() ?: break // No more batches can be computed.
 
@@ -85,7 +85,7 @@ class SqlDelightDatasourceBackfillOperator<S : SqlDelightRecordSource<K, R>, K :
       request,
     )
 
-    val batch = rowSource.getBatchData(request)
+    val batch = recordSource.getBatchData(request)
     backfill.runBatch(batch, config)
 
     return RunBatchResponse.Builder().build()

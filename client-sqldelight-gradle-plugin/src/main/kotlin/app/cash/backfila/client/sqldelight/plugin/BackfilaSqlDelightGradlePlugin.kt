@@ -1,11 +1,13 @@
 package app.cash.backfila.client.sqldelight.plugin
 
+import app.cash.sqldelight.gradle.SqlDelightExtension
 import java.io.Serializable
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.file.Directory
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 
 class BackfilaSqlDelightGradlePlugin : Plugin<Project> {
@@ -16,14 +18,8 @@ class BackfilaSqlDelightGradlePlugin : Plugin<Project> {
       check(!backfill.name.matches(Regex("\\s"))) { "Backfill `name` is not allowed to contain whitespace." }
       val baseSqlDirectory = target.layout.buildDirectory.dir("backfilaSqlDelight/${backfill.name}/sql")
       val baseKotlinDirectory = target.layout.buildDirectory.dir("backfilaSqlDelight/${backfill.name}/kotlin")
-      val packageProvider = backfill.backfill.map {
-        val fullDatabaseName = it.database
-        fullDatabaseName.substring(0, fullDatabaseName.lastIndexOf('.'))
-      }
-      val databaseClassNameProvider = backfill.backfill.map {
-        val fullDatabaseName = it.database
-        fullDatabaseName.substring(fullDatabaseName.lastIndexOf('.') + 1)
-      }
+      val packageProvider = backfill.backfill.databaseProvider().packageName()
+      val databaseClassNameProvider = backfill.backfill.databaseProvider().className()
 
       val sqlTask = target.tasks.register(
         "generateBackfilaRecordSourceSql${backfill.name.replaceFirstChar { it.uppercase() }}",
@@ -33,7 +29,7 @@ class BackfilaSqlDelightGradlePlugin : Plugin<Project> {
         it.sqlDirectory.set(baseSqlDirectory.map { baseDir -> baseDir.dir(packageProvider.get()) })
       }
 
-      val sqlDelightExtension = target.extensions.findByType(app.cash.sqldelight.gradle.SqlDelightExtension::class.java)
+      val sqlDelightExtension = target.extensions.findByType(SqlDelightExtension::class.java)
       check(sqlDelightExtension != null) {
         "The Backfila gradle plugin requires the SqlDelight gradle plugin to function."
       }
@@ -66,6 +62,18 @@ class BackfilaSqlDelightGradlePlugin : Plugin<Project> {
   }
 }
 
+private fun Property<SqlDelightRecordSource>.databaseProvider(): Provider<String> = map {
+  it.database
+}
+
+private fun Provider<String>.packageName(): Provider<String> = map {
+  it.substring(0, it.lastIndexOf('.'))
+}
+
+private fun Provider<String>.className(): Provider<String> = map {
+  it.substring(it.lastIndexOf('.') + 1)
+}
+
 abstract class BackfilaSqlDelightExtension {
   abstract val backfills: NamedDomainObjectContainer<SqlDelightRecordSourceEntry>
 
@@ -75,6 +83,7 @@ abstract class BackfilaSqlDelightExtension {
     tableName: String,
     keyName: String,
     keyType: String,
+    keyEncoder: String,
     recordColumns: String,
     recordType: String,
     whereClause: String = "1 = 1",
@@ -87,6 +96,7 @@ abstract class BackfilaSqlDelightExtension {
           tableName = tableName,
           keyName = keyName,
           keyType = keyType,
+          keyEncoder = keyEncoder,
           recordColumns = recordColumns,
           recordType = recordType,
           whereClause = whereClause,
@@ -106,6 +116,7 @@ data class SqlDelightRecordSource(
   val tableName: String,
   val keyName: String, // TODO: Eventually also support compound keys.
   val keyType: String, // TODO: Get this information directly from SQLDelight
+  val keyEncoder: String, // TODO: Automatically set this when it can.
   val recordColumns: String,
   val recordType: String, // TODO: Get this information directly from SQLDelight
   val whereClause: String,

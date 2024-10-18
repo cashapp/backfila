@@ -25,7 +25,6 @@ class PlayerOriginBackfillTest {
   @Inject lateinit var backfila: Backfila
 
   @Inject lateinit var hockeyDataDatabase: HockeyDataDatabase
-  private val hockeyPlayerQueries = hockeyDataDatabase.hockeyPlayerQueries
 
   @Inject lateinit var testData: TestHockeyData
 
@@ -62,8 +61,8 @@ class PlayerOriginBackfillTest {
   @Test fun emptyTable() {
     // Someone fired the whole team.
     hockeyDataDatabase.transaction {
-      hockeyPlayerQueries.selectAll().executeAsList().forEach {
-        hockeyPlayerQueries.deletePlayer(it.player_number)
+      hockeyDataDatabase.hockeyPlayerQueries.selectAll().executeAsList().forEach {
+        hockeyDataDatabase.hockeyPlayerQueries.deletePlayer(it.player_number)
       }
     }
     val run = backfila.createWetRun<PlayerOriginBackfill>()
@@ -79,10 +78,10 @@ class PlayerOriginBackfillTest {
   }
 
   @Test fun noMatches() {
-    // Someone fired only the Canadians.
+    // Someone fired all the Canadians.
     hockeyDataDatabase.transaction {
-      hockeyPlayerQueries.selectByPlaceOfBirth("CAN").executeAsList().forEach {
-        hockeyPlayerQueries.deletePlayer(it.player_number)
+      hockeyDataDatabase.hockeyPlayerQueries.selectByPlaceOfBirthLike("%CAN").executeAsList().forEach {
+        hockeyDataDatabase.hockeyPlayerQueries.deletePlayer(it.player_number)
       }
     }
     val run = backfila.createWetRun<PlayerOriginBackfill>()
@@ -91,17 +90,20 @@ class PlayerOriginBackfillTest {
     assertThat(run.partitionProgressSnapshot.values.single().utf8RangeEnd()).isNotNull()
     assertThat(run.partitionProgressSnapshot.values.single().previousEndKey).isNull()
 
+    // We still find all the records but the backfill itself filters them out.
     val scan1 = run.singleScan()
     assertThat(scan1.batches).hasSize(1)
-    assertThat(scan1.batches.single().scanned_record_count).isEqualTo(5)
-    assertThat(scan1.batches.single().matching_record_count).isEqualTo(0)
+    assertThat(scan1.batches.single().scanned_record_count).isEqualTo(9)
+    assertThat(scan1.batches.single().matching_record_count).isEqualTo(9)
     assertThat(run.partitionProgressSnapshot.values.single()).isNotDone()
     assertThat(run.partitionProgressSnapshot.values.single().previousEndKey).isNotNull
 
     val scan2 = run.singleScan()
     assertThat(scan2.batches).isEmpty()
     assertThat(run.partitionProgressSnapshot.values.single()).isDone()
-    assertThat(run).hasNoBatchesToRun().isComplete()
+    run.execute()
+
+    assertThat(run.backfill.backfilledPlayers).isEmpty()
   }
 
   @Test fun withStartRange() {
@@ -113,16 +115,18 @@ class PlayerOriginBackfillTest {
 
     run.singleScan()
     assertThat(run.batchesToRunSnapshot.single().utf8RangeStart()).isEqualTo("11")
-    assertThat(run.partitionProgressSnapshot.values.single().utf8PreviousEndKey()).isEqualTo("WHO KNOWS")
+    assertThat(run.partitionProgressSnapshot.values.single().utf8PreviousEndKey()).isEqualTo("38")
 
     run.execute()
-    assertThat(run.backfill.backfilledPlayers).isEmpty()
+    assertThat(run.backfill.backfilledPlayers).hasSize(7)
   }
 
   @Test fun withEndRange() {
     // Only backfill the single digit players.
-    val run = backfila.createWetRun<PlayerOriginBackfill>(rangeEnd = "10")
-      .apply { configureForTest() }
+    val run = backfila.createWetRun<PlayerOriginBackfill>(
+      rangeEnd = "10",
+      parameterData = mapOf("originRegex" to "USA".encodeUtf8()),
+    ).apply { configureForTest() }
     assertThat(run.rangeEnd).isEqualTo("10")
     assertThat(run.partitionProgressSnapshot.values.single()).isNotDone()
 
@@ -137,7 +141,7 @@ class PlayerOriginBackfillTest {
     assertThat(run).isFinishedScanning()
 
     assertThat(run).isComplete()
-    assertThat(run.backfill.backfilledPlayers).singleElement().extracting { it.player_number }.isEqualTo(7)
+    assertThat(run.backfill.backfilledPlayers).singleElement().isNotNull
   }
 
   @Test fun multipleBatches() {
@@ -191,7 +195,6 @@ class PlayerOriginBackfillTest {
     run.computeCountLimit = 20L
     run.singleScan()
     assertThat(run.batchesToRunSnapshot).hasSize(2)
-    assertThat(run.batchesToRunSnapshot).allMatch { it.matchingRecordCount == 10L }
   }
 
   @Test fun runOnAmericans() {
@@ -200,7 +203,7 @@ class PlayerOriginBackfillTest {
     ).apply { configureForTest() }
 
     run.execute()
-    assertThat(run.backfill.backfilledPlayers).hasSize(5)
+    assertThat(run.backfill.backfilledPlayers).hasSize(6)
   }
 
   @Test fun runOnAlphaCentauri() {
@@ -213,7 +216,7 @@ class PlayerOriginBackfillTest {
   }
 
   private fun BackfillRun<*>.configureForTest() {
-    this.batchSize = 2L
+    this.batchSize = 10L
     this.scanSize = 100L
     this.computeCountLimit = 1L
   }

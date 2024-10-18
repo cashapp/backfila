@@ -7,9 +7,9 @@ import app.cash.backfila.client.sqldelight.hockeydata.HockeyPlayer
 import javax.inject.Inject
 
 class PlayerOriginBackfill @Inject constructor(
-  val hockeyDataDatabase: HockeyDataDatabase,
-) : SqlDelightDatasourceBackfill<SqlDelightRecordSource<Int, HockeyPlayer>, Int, HockeyPlayer, PlayerOriginBackfill.PlayerOriginParameters>(
-  hockeyPlayerRowSource(hockeyDataDatabase),
+  hockeyDataDatabase: HockeyDataDatabase,
+) : SqlDelightDatasourceBackfill<Int, HockeyPlayer, PlayerOriginBackfill.PlayerOriginParameters>(
+  HockeyPlayersBackfillRecordSourceConfig(hockeyDataDatabase),
 ) {
   val backfilledPlayers = mutableListOf<HockeyPlayer>()
 
@@ -28,8 +28,3 @@ class PlayerOriginBackfill @Inject constructor(
     val validate: Boolean = true,
   )
 }
-
-fun hockeyPlayerRowSource(hockeyDataDatabase: HockeyDataDatabase) = SqlDelightRecordSource(
-  IntKeyConverter(),
-  getHockeyPlayersBackfillQueries(hockeyDataDatabase),
-)

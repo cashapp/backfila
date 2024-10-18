@@ -3,32 +3,25 @@ package app.cash.backfila.client.sqldelight
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
 
-class IntKeyConverter : KeyConverter<Int> {
+object IntKeyEncoder : KeyEncoder<Int> {
 
-  override fun toKeyOrNull(bytes: ByteString?): Int? = bytes?.utf8()?.toIntOrNull()
+  override fun decode(bytes: ByteString): Int = bytes.utf8().toIntOrNull()
+    ?: throw NullPointerException("Integer key is invalid or null: $bytes")
 
-  override fun toKey(bytes: ByteString): Int = toKeyOrNull(bytes)
-    ?: throw NullPointerException("Integer key is invalid or null")
-
-  override fun toBytes(value: Int): ByteString = value.toString().encodeUtf8()
+  override fun encode(value: Int): ByteString = value.toString().encodeUtf8()
 }
 
-class LongKeyConverter : KeyConverter<Long> {
+object LongKeyEncoder : KeyEncoder<Long> {
 
-  override fun toKeyOrNull(bytes: ByteString?): Long? = bytes?.utf8()?.toLongOrNull()
+  override fun decode(bytes: ByteString): Long = bytes.utf8().toLongOrNull()
+    ?: throw NullPointerException("Long integer key is invalid or null: $bytes")
 
-  override fun toKey(bytes: ByteString): Long = toKeyOrNull(bytes)
-    ?: throw NullPointerException("Long integer key is invalid or null")
-
-  override fun toBytes(value: Long): ByteString = value.toString().encodeUtf8()
+  override fun encode(value: Long): ByteString = value.toString().encodeUtf8()
 }
 
-class StringKeyConverter : KeyConverter<String> {
+object StringKeyEncoder : KeyEncoder<String> {
 
-  override fun toKeyOrNull(bytes: ByteString?): String? = bytes?.utf8()
+  override fun decode(bytes: ByteString): String = bytes.utf8()
 
-  override fun toKey(bytes: ByteString): String = toKeyOrNull(bytes)
-    ?: throw NullPointerException("Long integer key is invalid or null")
-
-  override fun toBytes(value: String): ByteString = value.encodeUtf8()
+  override fun encode(value: String): ByteString = value.encodeUtf8()
 }

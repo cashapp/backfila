@@ -5,14 +5,13 @@ import app.cash.backfila.client.BackfillConfig
 import app.cash.backfila.client.PrepareBackfillConfig
 
 /**
- * S - RowSource - Maybe I can eliminate?
- * K - Key type (maybe can be compound later?)
+ * K - Key type
  * R - Row type
  * P - Parameters type
  *
  */
-abstract class SqlDelightDatasourceBackfill<S : SqlDelightRecordSource<K, R>, K : Any, R : Any, P : Any>(
-  val rowSource: S,
+abstract class SqlDelightDatasourceBackfill<K : Any, R : Any, P : Any>(
+  val recordSourceConfig: SqlDelightRecordSourceConfig<K, R>,
 ) : Backfill {
 
   /**

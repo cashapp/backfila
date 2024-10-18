@@ -2,10 +2,10 @@ selectAll:
 SELECT *
 FROM hockeyPlayer;
 
-selectByPlaceOfBirth:
+selectByPlaceOfBirthLike:
 SELECT *
 FROM hockeyPlayer
-WHERE place_of_birth = ?;
+WHERE place_of_birth LIKE ?;
 
 insertPlayer:
 INSERT

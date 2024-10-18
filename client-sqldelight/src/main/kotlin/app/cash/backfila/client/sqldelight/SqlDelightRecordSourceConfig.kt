@@ -2,21 +2,8 @@ package app.cash.backfila.client.sqldelight
 
 import app.cash.sqldelight.Query
 
-interface SqlDelightRecordSourceQueries<K : Any, R : Any> {
-  data class MinMax<K>(
-    val min: K?,
-    val max: K?,
-  )
-
-  data class NullKeyContainer<K>(
-    val key: K?,
-  )
-
-  data class MinAndCount<K>(
-    val min: K?,
-    val count: Long,
-  )
-
+interface SqlDelightRecordSourceConfig<K : Any, R : Any> {
+  val keyEncoder: KeyEncoder<K>
   fun selectAbsoluteRange(): Query<MinMax<K>>
   fun selectInitialMaxBound(rangeStart: K, rangeEnd: K, scanSize: Long): Query<NullKeyContainer<K>>
   fun selectNextMaxBound(previousEndKey: K, rangeEnd: K, scanSize: Long): Query<NullKeyContainer<K>>
@@ -30,6 +17,7 @@ interface SqlDelightRecordSourceQueries<K : Any, R : Any> {
 
   companion object {
     fun <K : Any, R : Any> create(
+      keyEncoder: KeyEncoder<K>,
       selectAbsoluteRange: Query<MinMax<K>>,
       selectInitialMaxBound: (rangeStart: K, rangeEnd: K, scanSize: Long) -> Query<NullKeyContainer<K>>,
       selectNextMaxBound: (previousEndKey: K, rangeEnd: K, scanSize: Long) -> Query<NullKeyContainer<K>>,
@@ -40,8 +28,9 @@ interface SqlDelightRecordSourceQueries<K : Any, R : Any> {
       getInitialStartKeyAndScanCount: (rangeStart: K, batchEnd: K) -> Query<MinAndCount<K>>,
       getNextStartKeyAndScanCount: (previousEndKey: K, batchEnd: K) -> Query<MinAndCount<K>>,
       getBatch: (start: K, end: K) -> Query<R>,
-    ): SqlDelightRecordSourceQueries<K, R> {
-      return object : SqlDelightRecordSourceQueries<K, R> {
+    ): SqlDelightRecordSourceConfig<K, R> {
+      return object : SqlDelightRecordSourceConfig<K, R> {
+        override val keyEncoder = keyEncoder
         override fun selectAbsoluteRange(): Query<MinMax<K>> = selectAbsoluteRange
         override fun selectInitialMaxBound(rangeStart: K, rangeEnd: K, scanSize: Long): Query<NullKeyContainer<K>> = selectInitialMaxBound(rangeStart, rangeEnd, scanSize)
         override fun selectNextMaxBound(previousEndKey: K, rangeEnd: K, scanSize: Long): Query<NullKeyContainer<K>> = selectNextMaxBound(previousEndKey, rangeEnd, scanSize)
@@ -56,3 +45,17 @@ interface SqlDelightRecordSourceQueries<K : Any, R : Any> {
     }
   }
 }
+
+data class MinMax<K>(
+  val min: K?,
+  val max: K?,
+)
+
+data class NullKeyContainer<K>(
+  val key: K?,
+)
+
+data class MinAndCount<K>(
+  val min: K?,
+  val count: Long,
+)

@@ -1,43 +1,81 @@
 package app.cash.backfila.client.sqldelight
 
+import app.cash.backfila.client.DeleteBy
+import app.cash.backfila.client.Description
+import app.cash.backfila.client.parseDeleteByDate
 import app.cash.backfila.client.spi.BackfillBackend
+import app.cash.backfila.client.spi.BackfillRegistration
 import app.cash.backfila.client.sqldelight.internal.SqlDelightDatasourceBackend
 import com.google.inject.AbstractModule
-import com.google.inject.Binder
 import com.google.inject.TypeLiteral
 import com.google.inject.multibindings.MapBinder
 import com.google.inject.multibindings.Multibinder
+import com.squareup.moshi.Types
+import java.lang.reflect.ParameterizedType
 import javax.inject.Qualifier
 import kotlin.reflect.KClass
+import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.jvm.jvmName
 
 /**
- * Installs the [BackfillBackend] for SqlDelight Datasource backfills. See the java doc for [RealBackfillModule].
+ * Installs the [BackfillBackend] for SqlDelight Datasource backfills. See the documentation for [RealBackfillModule].
  */
-class SqlDelightDatasourceBackfillModule<T : SqlDelightDatasourceBackfill<*, *, *, *>> private constructor(
+class SqlDelightDatasourceBackfillModule<T : SqlDelightDatasourceBackfill<*, *, *>> private constructor(
   private val backfillClass: KClass<T>,
 ) : AbstractModule() {
+  private val registration = BackfillRegistration(
+    name = backfillClass.jvmName,
+    description = backfillClass.findAnnotation<Description>()?.text,
+    parametersClass = parametersClass(),
+    deleteBy = backfillClass.findAnnotation<DeleteBy>()?.parseDeleteByDate(),
+  )
+
   override fun configure() {
     install(SqlDelightDatasourceBackfillBackendModule)
-    // Ensures that the backfill class is injectable. If you are failing this check you probably
-    // want to add an @Inject annotation to your class or check that all of your dependencies are provided.
-    binder().getProvider(backfillClass.java)
-    mapBinder(binder()).addBinding(backfillClass.jvmName).toInstance(backfillClass)
+    backfillBinder().addBinding(backfillClass.jvmName).to(backfillClass.java as Class<SqlDelightDatasourceBackfill<*, *, *>>)
+    backfillRegistrationBinder().addBinding(backfillClass.jvmName).toInstance(registration)
+  }
+
+  private fun parametersClass(): KClass<Any> {
+    // Like MyBackfill.
+    val thisType = TypeLiteral.get(backfillClass.java)
+
+    // Like S3DatasourceBackfill<MyParameterClass>.
+    val supertype = thisType.getSupertype(
+      SqlDelightDatasourceBackfill::class.java,
+    ).type as ParameterizedType
+
+    // Like MyParameterClass
+    return (Types.getRawType(supertype.actualTypeArguments[2]) as Class<Any>).kotlin
   }
 
   companion object {
-    inline fun <reified T : SqlDelightDatasourceBackfill<*, *, *, *>> create(): SqlDelightDatasourceBackfillModule<T> = create(T::class)
+    inline fun <reified T : SqlDelightDatasourceBackfill<*, *, *>> create(): SqlDelightDatasourceBackfillModule<T> = create(T::class)
 
     @JvmStatic
-    fun <T : SqlDelightDatasourceBackfill<*, *, *, *>> create(backfillClass: KClass<T>): SqlDelightDatasourceBackfillModule<T> {
+    fun <T : SqlDelightDatasourceBackfill<*, *, *>> create(backfillClass: KClass<T>): SqlDelightDatasourceBackfillModule<T> {
       return SqlDelightDatasourceBackfillModule(backfillClass)
     }
 
     @JvmStatic
-    fun <T : SqlDelightDatasourceBackfill<*, *, *, *>> create(backfillClass: Class<T>): SqlDelightDatasourceBackfillModule<T> {
+    fun <T : SqlDelightDatasourceBackfill<*, *, *>> create(backfillClass: Class<T>): SqlDelightDatasourceBackfillModule<T> {
       return SqlDelightDatasourceBackfillModule(backfillClass.kotlin)
     }
   }
+
+  private fun backfillBinder() = MapBinder.newMapBinder(
+    binder(),
+    object : TypeLiteral<String>() {},
+    object : TypeLiteral<SqlDelightDatasourceBackfill<*, *, *>>() {},
+    ForSqlDelightBackend::class.java,
+  )
+
+  private fun backfillRegistrationBinder() = MapBinder.newMapBinder(
+    binder(),
+    String::class.java,
+    BackfillRegistration::class.java,
+    ForSqlDelightBackend::class.java,
+  )
 }
 
 /**
@@ -49,13 +87,6 @@ private object SqlDelightDatasourceBackfillBackendModule : AbstractModule() {
       .to(SqlDelightDatasourceBackend::class.java)
   }
 }
-
-private fun mapBinder(binder: Binder) = MapBinder.newMapBinder(
-  binder,
-  object : TypeLiteral<String>() {},
-  object : TypeLiteral<KClass<out SqlDelightDatasourceBackfill<*, *, *, *>>>() {},
-  ForSqlDelightBackend::class.java,
-)
 
 /** Annotation for specifying dependencies specifically for this Backend. */
 @Qualifier annotation class ForSqlDelightBackend
