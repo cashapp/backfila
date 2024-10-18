@@ -2,12 +2,17 @@ selectAll:
 SELECT *
 FROM hockeyPlayer;
 
-selectByPosition:
+selectByPlaceOfBirth:
 SELECT *
 FROM hockeyPlayer
-WHERE position = ?;
+WHERE place_of_birth = ?;
 
 insertPlayer:
 INSERT
 INTO hockeyPlayer(player_number, full_name, position, shoots, height, weight, date_of_birth, place_of_birth)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+deletePlayer:
+DELETE
+FROM hockeyPlayer
+WHERE player_number = ?;

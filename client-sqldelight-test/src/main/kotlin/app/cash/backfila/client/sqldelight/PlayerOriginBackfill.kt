@@ -11,7 +11,7 @@ class PlayerOriginBackfill @Inject constructor(
 ) : SqlDelightDatasourceBackfill<SqlDelightRecordSource<Int, HockeyPlayer>, Int, HockeyPlayer, PlayerOriginBackfill.PlayerOriginParameters>(
   hockeyPlayerRowSource(hockeyDataDatabase),
 ) {
-  val backfilledPlayers = mutableListOf<Pair<String, HockeyPlayer>>()
+  val backfilledPlayers = mutableListOf<HockeyPlayer>()
 
   override fun validate(config: PrepareBackfillConfig<PlayerOriginParameters>) {
     check(config.parameters.validate) { "Validate failed" }
@@ -19,7 +19,7 @@ class PlayerOriginBackfill @Inject constructor(
 
   override fun runOne(record: HockeyPlayer, config: BackfillConfig<PlayerOriginParameters>) {
     if (record.place_of_birth.contains(config.parameters.originRegex)) {
-      backfilledPlayers.add(config.partitionName to record)
+      backfilledPlayers.add(record)
     }
   }
 

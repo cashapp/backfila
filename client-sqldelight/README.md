@@ -1,9 +1,10 @@
 # client-sqldelight
 
-Backfila client backend implementation for the SQLDelight ORM.
+Backfila client backend implementation for the SQLDelight ORM. It consists of two parts. This client 
+which manages the backfills in your service and `client-sqldelight-gradle-plugin` that helps you 
+generate the queries that the client needs.
 
-We think this might involve two parts. One part here that uses some kind of interface to point out 
-the queries that we need to do the backfill and a part in sqldelight that makes it harder to screw 
-up the queries. Something along the lines of templates might be good? OR perhaps guardrails?
+If you end up using this client directly without the plugin you will need to be abundantly cautious 
+to ensure that the queries collaborate correctly.
 
-SqlDelight has the idea of plugins so we could create a plugin that enforces guardrails.
+See `client-sqldelight-test` for examples.

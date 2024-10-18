@@ -1,7 +1,6 @@
 plugins {
   kotlin("jvm")
   id("app.cash.sqldelight") version libs.versions.sqldelight.get()
-  id("app.cash.backfila.client.sqldelight")
 }
 
 // TODO May have to make the other module dependent on this test module although we would have to avoid cycles.

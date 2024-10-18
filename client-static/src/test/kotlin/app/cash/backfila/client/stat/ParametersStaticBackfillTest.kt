@@ -175,7 +175,7 @@ class ParametersStaticBackfillTest {
   }
 
   class ProcessedCheeseBackfill @Inject constructor() : ParametersDatasourceBackfill<ProcessedCheese, ProcessedCheeseBackfill.ProcessedCheeseParameters>() {
-    val backfilledCheese = newMutableList<ProcessedCheese>()
+    val backfilledCheese = mutableListOf<ProcessedCheese>()
 
     override fun runOne(item: ProcessedCheese, config: BackfillConfig<ProcessedCheeseParameters>) {
       if (!config.dryRun) {
