@@ -111,13 +111,22 @@ abstract class SqlDelightRecordSourceEntry(val name: String) {
 }
 
 data class SqlDelightRecordSource(
+  // The name of your Backfill. This will affect the generated file and class names.
   val name: String,
+  // The SQLDelight database full classname.
   val database: String,
+  // The name of the table this backfill is to operate on.
   val tableName: String,
+  // The name of the key of the table above.
   val keyName: String, // TODO: Eventually also support compound keys.
+  // The type of the key above.
   val keyType: String, // TODO: Get this information directly from SQLDelight
+  // An encoder implementation for the key type above.
   val keyEncoder: String, // TODO: Automatically set this when it can.
+  // The columns to be selected. These will be provided to you in the runBatch. `*` or comma notation accepted.
   val recordColumns: String,
+  // The type that SQLDelight creates for the above.
   val recordType: String, // TODO: Get this information directly from SQLDelight
+  // The additional where clause is optional.
   val whereClause: String,
 ) : Serializable

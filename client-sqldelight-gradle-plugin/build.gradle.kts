@@ -21,7 +21,6 @@ dependencies {
   implementation(libs.guice)
   implementation(libs.kotlinStdLib)
   implementation(libs.sqldelightJdbcDriver)
-  // /Users/mikepaw/.gradle/caches/jars-9/fd3f67ac2b6df3442dc9a5c8c256f2e1/gradle-plugin-2.0.2.jar
   implementation(libs.sqldelightGradlePlugin)
   implementation(libs.okHttp)
   implementation(libs.okio)
