@@ -1,0 +1,18 @@
+selectAll:
+SELECT *
+FROM hockeyPlayer;
+
+selectByPlaceOfBirthLike:
+SELECT *
+FROM hockeyPlayer
+WHERE place_of_birth LIKE ?;
+
+insertPlayer:
+INSERT
+INTO hockeyPlayer(player_number, full_name, position, shoots, height, weight, date_of_birth, place_of_birth)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+deletePlayer:
+DELETE
+FROM hockeyPlayer
+WHERE player_number = ?;

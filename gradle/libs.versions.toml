@@ -5,6 +5,7 @@ kotlin = "1.9.23"
 misk = "2024.06.26.052833-88986ac"
 okhttp = "5.0.0-alpha.14"
 wire = "5.0.0"
+sqldelight = "2.0.2"
 
 [libraries]
 apacheCommonsLang3 = { module = "org.apache.commons:commons-lang3", version = "3.12.0" }
@@ -13,6 +14,7 @@ aws2Dynamodb = { module = "software.amazon.awssdk:dynamodb", version = "2.17.267
 aws2DynamodbEnhanced = { module = "software.amazon.awssdk:dynamodb-enhanced", version = "2.17.267" }
 awsDynamodb = { module = "com.amazonaws:aws-java-sdk-dynamodb", version = "1.11.960" }
 awsS3 = { module = "com.amazonaws:aws-java-sdk-s3", version = "1.12.231" }
+buildConfigPlugin = { module = "com.github.gmazzo:gradle-buildconfig-plugin", version = "3.1.0" }
 dokkaGradlePlugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version = "1.9.20" }
 guava = { module = "com.google.guava:guava", version = "31.1-jre" }
 guice = { module = "com.google.inject:guice", version = "5.1.0" }
@@ -49,11 +51,15 @@ retrofitMoshi = { module = "com.squareup.retrofit2:converter-moshi", version = "
 retrofitWire = { module = "com.squareup.retrofit2:converter-wire", version = "2.9.0" }
 shadowJarPlugin = { module = "gradle.plugin.com.github.johnrengelman:shadow", version = "7.1.2" }
 slf4jApi = { module = "org.slf4j:slf4j-api", version = "2.0.3" }
+sqldelightGradlePlugin = { module = "app.cash.sqldelight:gradle-plugin", version.ref = "sqldelight" }
+sqldelightJdbcDriver = { module = "app.cash.sqldelight:jdbc-driver", version.ref = "sqldelight" }
+sqldelightMysqlDialect = { module = "app.cash.sqldelight:mysql-dialect", version.ref = "sqldelight" }
 spotlessPlugin = { module = "com.diffplug.spotless:spotless-plugin-gradle", version = "6.12.0" }
 tracingJaeger = { module = "io.jaegertracing:jaeger-core", version = "1.1.0" }
 jooq = { module = "org.jooq:jooq", version.ref = "jooq" }
 kotlinAllOpenPlugin = { module = "org.jetbrains.kotlin:kotlin-allopen", version.ref = "kotlin" }
 kotlinGradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+kotlinPoet = { module = "com.squareup:kotlinpoet", version = "1.18.1" }
 kotlinReflection = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 kotlinStdLib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 kotlinTest = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }

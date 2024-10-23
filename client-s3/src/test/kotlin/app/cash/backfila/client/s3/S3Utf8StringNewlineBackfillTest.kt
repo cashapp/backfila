@@ -7,7 +7,6 @@ import app.cash.backfila.client.s3.record.Utf8StringNewlineStrategy
 import app.cash.backfila.client.s3.shim.FakeS3Service
 import app.cash.backfila.embedded.Backfila
 import app.cash.backfila.embedded.createWetRun
-import com.squareup.wire.internal.newMutableList
 import javax.inject.Inject
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -143,7 +142,7 @@ class S3Utf8StringNewlineBackfillTest {
   }
 
   abstract class RecipiesBackfill : S3DatasourceBackfill<String, RecipeAttributes>() {
-    val backfilledIngredients = newMutableList<Pair<String, String>>()
+    val backfilledIngredients = mutableListOf<Pair<String, String>>()
 
     override fun runOne(item: String, config: BackfillConfig<RecipeAttributes>) {
       val regex = Regex(config.parameters.ingredientRegex)

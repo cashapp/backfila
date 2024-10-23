@@ -151,9 +151,9 @@ internal class EmbeddedBackfillRun<B : Backfill>(
   }
 
   override fun scanRemaining() {
-    do {
+    while (!finishedScanning()) {
       singleScan()
-    } while (!finishedScanning())
+    }
   }
 
   override fun finishedScanning() = scanProgress.all { it.value.done }
