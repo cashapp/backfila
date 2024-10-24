@@ -107,19 +107,19 @@ abstract class GenerateBackfilaRecordSourceQueriesTask : DefaultTask() {
           ).addFunction(
             FunSpec.builder("produceInitialBatchFromRange")
               .addParameter("rangeStart", keyType)
-              .addParameter("rangeEnd", keyType)
+              .addParameter("boundingMax", keyType)
               .addParameter("offset", LONG)
               .returns(keyQueryType)
-              .addStatement("return database.%L.produceInitialBatchFromRange(rangeStart, rangeEnd, offset)", queriesFunctionName)
+              .addStatement("return database.%L.produceInitialBatchFromRange(rangeStart, boundingMax, offset)", queriesFunctionName)
               .addModifiers(OVERRIDE)
               .build(),
           ).addFunction(
             FunSpec.builder("produceNextBatchFromRange")
               .addParameter("previousEndKey", keyType)
-              .addParameter("rangeEnd", keyType)
+              .addParameter("boundingMax", keyType)
               .addParameter("offset", LONG)
               .returns(keyQueryType)
-              .addStatement("return database.%L.produceNextBatchFromRange(previousEndKey, rangeEnd, offset)", queriesFunctionName)
+              .addStatement("return database.%L.produceNextBatchFromRange(previousEndKey, boundingMax, offset)", queriesFunctionName)
               .addModifiers(OVERRIDE)
               .build(),
           ).addFunction(
@@ -141,17 +141,17 @@ abstract class GenerateBackfilaRecordSourceQueriesTask : DefaultTask() {
           ).addFunction(
             FunSpec.builder("getInitialStartKeyAndScanCount")
               .addParameter("rangeStart", keyType)
-              .addParameter("rangeEnd", keyType)
+              .addParameter("batchEnd", keyType)
               .returns(minAndCountQueryType)
-              .addStatement("return database.%L.getInitialStartKeyAndScanCount(rangeStart, rangeEnd) { min, count -> %T(min, count) }", queriesFunctionName, minAndCountType)
+              .addStatement("return database.%L.getInitialStartKeyAndScanCount(rangeStart, batchEnd) { min, count -> %T(min, count) }", queriesFunctionName, minAndCountType)
               .addModifiers(OVERRIDE)
               .build(),
           ).addFunction(
             FunSpec.builder("getNextStartKeyAndScanCount")
               .addParameter("previousEndKey", keyType)
-              .addParameter("rangeEnd", keyType)
+              .addParameter("batchEnd", keyType)
               .returns(minAndCountQueryType)
-              .addStatement("return database.%L.getNextStartKeyAndScanCount(previousEndKey, rangeEnd) { min, count -> %T(min, count) }", queriesFunctionName, minAndCountType)
+              .addStatement("return database.%L.getNextStartKeyAndScanCount(previousEndKey, batchEnd) { min, count -> %T(min, count) }", queriesFunctionName, minAndCountType)
               .addModifiers(OVERRIDE)
               .build(),
           ).addFunction(
