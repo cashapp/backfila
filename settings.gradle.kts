@@ -1,3 +1,11 @@
+rootProject.name = "backfila"
+
+includeBuild("build-support") {
+  dependencySubstitution {
+    substitute(module("app.cash.backfila:client-sqldelight-gradle-plugin")).using(project(":client-sqldelight-gradle-plugin"))
+  }
+}
+
 include("backfila-embedded")
 include("bom")
 include("client")
