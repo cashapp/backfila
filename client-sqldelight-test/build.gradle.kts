@@ -1,6 +1,7 @@
 plugins {
   kotlin("jvm")
-  id("app.cash.sqldelight") version libs.versions.sqldelight.get()
+  id("app.cash.sqldelight")
+  id("app.cash.backfila.client.sqldelight")
 }
 
 // TODO May have to make the other module dependent on this test module although we would have to avoid cycles.
@@ -15,6 +16,19 @@ sqldelight {
       verifyMigrations.set(true)
     }
   }
+}
+
+backfilaSqlDelight {
+  addRecordSource(
+    name = "hockeyPlayersBackfill",
+    database = "app.cash.backfila.client.sqldelight.hockeydata.HockeyDataDatabase",
+    tableName = "hockeyPlayer",
+    keyName = "player_number",
+    keyType = "kotlin.Int",
+    keyEncoder = "app.cash.backfila.client.sqldelight.IntKeyEncoder",
+    recordColumns = "*",
+    recordType = "app.cash.backfila.client.sqldelight.hockeydata.HockeyPlayer"
+  )
 }
 
 val compileKotlin by tasks.getting {

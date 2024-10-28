@@ -21,6 +21,7 @@ buildscript {
     classpath(libs.wireGradlePlugin)
     classpath(libs.buildConfigPlugin)
     classpath(libs.shadowJarPlugin)
+    classpath("app.cash.backfila:client-sqldelight-gradle-plugin")
   }
 }
 

@@ -1,65 +1,46 @@
 import com.vanniktech.maven.publish.GradlePlugin
 import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   id("java-gradle-plugin")
   kotlin("jvm")
-  `java-library`
   id("com.github.gmazzo.buildconfig")
   id("com.vanniktech.maven.publish.base")
 }
 
+// This module is used in two places:
+//
+// - In the root project, so we can:
+//    - publish the plugin
+//    - run the plugin's own unit test
+//
+// - In build-support project
+//    - In this project, we consume it internally.
+//
+// We only want to publish when it's being built in the root project.
+if (rootProject.name == "backfila") {
+  configure<MavenPublishBaseExtension> {
+    configure(
+      GradlePlugin(
+        javadocJar = JavadocJar.Empty()
+      )
+    )
+  }
+} else {
+  // Move the build directory when included in build-support so as to not poison the real build.
+  // If we don't there's a chance incorrect build config values (configured below) will be used.
+  layout.buildDirectory.set(File(rootDir, "build/internal"))
+}
+
 dependencies {
-  implementation(libs.guava)
   implementation(libs.kotlinGradlePlugin)
   implementation(libs.kotlinPoet)
-  implementation(libs.moshiCore)
-  implementation(libs.moshiKotlin)
-  implementation(libs.wireRuntime)
-  implementation(libs.guice)
-  implementation(libs.kotlinStdLib)
-  implementation(libs.sqldelightJdbcDriver)
   implementation(libs.sqldelightGradlePlugin)
-  implementation(libs.okHttp)
-  implementation(libs.okio)
-  implementation(libs.retrofit)
-  implementation(libs.retrofitMock)
-  implementation(libs.retrofitMoshi)
-  implementation(libs.retrofitWire)
-  implementation(libs.wireMoshiAdapter)
-
-  api(project(":client"))
-  // We do not want to leak client-base implementation details to customers.
-  implementation(project(":client-base"))
-
 
   testImplementation(libs.assertj)
   testImplementation(libs.junitEngine)
   testImplementation(libs.kotlinTest)
-
-  testImplementation(project(":backfila-embedded"))
-  testImplementation(project(":client-testing"))
-
-  // ****************************************
-  // For TESTING purposes only. We only want Misk for easy testing.
-  // DO NOT turn these into regular dependencies.
-  // ****************************************
-  testImplementation(libs.misk)
-  testImplementation(libs.miskActions)
-  testImplementation(libs.miskInject)
-  testImplementation(libs.miskJdbc)
-  testImplementation(testFixtures(libs.miskJdbc))
-  testImplementation(libs.miskTesting)
-  testImplementation(project(":client-misk"))
-}
-
-tasks.withType<KotlinCompile> {
-  dependsOn("spotlessKotlinApply")
-  kotlinOptions {
-    jvmTarget = "17"
-  }
 }
 
 tasks.withType<JavaCompile> {
@@ -80,6 +61,14 @@ gradlePlugin {
 
 tasks {
   test {
+    // We do not want the tests to run within build-support.
+    // Note that by default intellij may still try to run them through build support.
+    if (rootProject.name != "backfila") {
+      onlyIf { false }
+      return@test
+    }
+
+    useJUnitPlatform()
     // The test in 'src/test/projects/android' needs Java 17+.
     javaLauncher.set(
       project.javaToolchains.launcherFor {
@@ -87,6 +76,7 @@ tasks {
       }
     )
     systemProperty("backfilaVersion", rootProject.findProperty("VERSION_NAME") ?: "0.0-SNAPSHOT")
+
     dependsOn(":client:publishAllPublicationsToTestMavenRepository")
     dependsOn(":client-base:publishAllPublicationsToTestMavenRepository")
     dependsOn(":client-sqldelight:publishAllPublicationsToTestMavenRepository")
@@ -102,12 +92,4 @@ buildConfig {
 
   packageName("app.cash.backfila.client.sqldelight.plugin")
   buildConfigField("String", "VERSION", "\"${project.version}\"")
-}
-
-configure<MavenPublishBaseExtension> {
-  configure(
-    GradlePlugin(
-      javadocJar = JavadocJar.Empty()
-    )
-  )
 }
