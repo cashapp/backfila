@@ -9,9 +9,14 @@ plugins {
   id("com.vanniktech.maven.publish.base")
 }
 
-// This module is included in two projects:
-// - In the root project where it's released as one of our artifacts
-// - In build-support project where we can use it for the test-app and samples.
+// This module is used in two places:
+//
+// - In the root project, so we can:
+//    - publish the plugin
+//    - run the plugin's own unit test
+//
+// - In build-support project
+//    - In this project, we consume it internally.
 //
 // We only want to publish when it's being built in the root project.
 if (rootProject.name == "backfila") {
@@ -64,6 +69,13 @@ tasks {
       }
     )
     systemProperty("backfilaVersion", rootProject.findProperty("VERSION_NAME") ?: "0.0-SNAPSHOT")
+
+    if (rootProject.name == "backfila") {
+      dependsOn(":client:publishAllPublicationsToTestMavenRepository")
+      dependsOn(":client-base:publishAllPublicationsToTestMavenRepository")
+      dependsOn(":client-sqldelight:publishAllPublicationsToTestMavenRepository")
+      dependsOn(":client-sqldelight-gradle-plugin:publishAllPublicationsToTestMavenRepository")
+    }
   }
 }
 
