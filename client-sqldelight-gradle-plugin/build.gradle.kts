@@ -61,6 +61,13 @@ gradlePlugin {
 
 tasks {
   test {
+    // We do not want the tests to run within build-support.
+    // Note that by default intellij may still try to run them through build support.
+    if (rootProject.name != "backfila") {
+      onlyIf { false }
+      return@test
+    }
+
     useJUnitPlatform()
     // The test in 'src/test/projects/android' needs Java 17+.
     javaLauncher.set(
@@ -70,12 +77,10 @@ tasks {
     )
     systemProperty("backfilaVersion", rootProject.findProperty("VERSION_NAME") ?: "0.0-SNAPSHOT")
 
-    if (rootProject.name == "backfila") {
-      dependsOn(":client:publishAllPublicationsToTestMavenRepository")
-      dependsOn(":client-base:publishAllPublicationsToTestMavenRepository")
-      dependsOn(":client-sqldelight:publishAllPublicationsToTestMavenRepository")
-      dependsOn(":client-sqldelight-gradle-plugin:publishAllPublicationsToTestMavenRepository")
-    }
+    dependsOn(":client:publishAllPublicationsToTestMavenRepository")
+    dependsOn(":client-base:publishAllPublicationsToTestMavenRepository")
+    dependsOn(":client-sqldelight:publishAllPublicationsToTestMavenRepository")
+    dependsOn(":client-sqldelight-gradle-plugin:publishAllPublicationsToTestMavenRepository")
   }
 }
 
