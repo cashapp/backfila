@@ -123,6 +123,7 @@ internal class EmbeddedBackfillRun<B : Backfill>(
           .batch_size(batchSize)
           .scan_size(scanSize)
           .compute_count_limit(computeCountLimit)
+          .precomputing(false)
           .dry_run(dryRun)
           .build(),
       )
