@@ -43,16 +43,21 @@ class SearchBackfillRunsAction @Inject constructor(
   @Get("/services/{service}/variants/{variant}/backfill-runs/search")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Authenticated(allowAnyUser = true)
-  fun backfillRuns(
+  fun searchBackfillRuns(
     @PathParam service: String,
     @PathParam variant: String,
     @QueryParam pagination_token: String? = null,
     @QueryParam backfill_name: String? = null,
   ): SearchBackfillRunsResponse {
-    return searchBackfillRuns(service, variant, pagination_token)
+    return search(service, variant, pagination_token, backfill_name)
   }
 
-  private fun searchBackfillRuns(service: String, variant: String, paginationToken: String?): SearchBackfillRunsResponse {
+  private fun search(
+    service: String,
+    variant: String,
+    paginationToken: String?,
+    backfill_name: String?,
+  ): SearchBackfillRunsResponse {
     logger.info("new log info ***\n\n\n\n\n new log!!")
     return transacter.transaction { session ->
       val dbService = queryFactory.newQuery<ServiceQuery>()
@@ -64,6 +69,8 @@ class SearchBackfillRunsAction @Inject constructor(
         .serviceId(dbService.id)
         .state(BackfillState.RUNNING)
         .orderByIdDesc()
+        // to do - make null safe
+        .backfillName(backfill_name!!)
         .list(session)
 
       val runningPartitionSummaries = partitionSummary(session, runningBackfills)
