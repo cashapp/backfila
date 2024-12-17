@@ -29,41 +29,30 @@ import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import wisp.logging.getLogger
 
-data class UiBackfillRun(
-  val id: String,
-  val name: String,
-  val state: BackfillState,
-  val dry_run: Boolean,
-  val created_at: Instant,
-  val created_by_user: String?,
-  val last_active_at: Instant,
-  val precomputing_done: Boolean,
-  val computed_matching_record_count: Long,
-  val backfilled_matching_record_count: Long,
-)
 
-data class GetBackfillRunsResponse(
+data class SearchBackfillRunsResponse(
   val running_backfills: List<UiBackfillRun>,
   val paused_backfills: List<UiBackfillRun>,
   val next_pagination_token: String?,
 )
 
-class GetBackfillRunsAction @Inject constructor(
+class SearchBackfillRunsAction @Inject constructor(
   @BackfilaDb private val transacter: Transacter,
   private val queryFactory: Query.Factory,
 ) : WebAction {
-  @Get("/services/{service}/variants/{variant}/backfill-runs")
+  @Get("/services/{service}/variants/{variant}/backfill-runs/search")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Authenticated(allowAnyUser = true)
   fun backfillRuns(
     @PathParam service: String,
     @PathParam variant: String,
     @QueryParam pagination_token: String? = null,
-  ): GetBackfillRunsResponse {
-    return getBackfillRuns(service, variant, pagination_token)
+    @QueryParam backfill_name: String? = null,
+  ): SearchBackfillRunsResponse {
+    return searchBackfillRuns(service, variant, pagination_token)
   }
 
-  private fun getBackfillRuns(service: String, variant: String, paginationToken: String?): GetBackfillRunsResponse {
+  private fun searchBackfillRuns(service: String, variant: String, paginationToken: String?): SearchBackfillRunsResponse {
     logger.info("new log info ***\n\n\n\n\n new log!!")
     return transacter.transaction { session ->
       val dbService = queryFactory.newQuery<ServiceQuery>()
@@ -111,7 +100,7 @@ class GetBackfillRunsAction @Inject constructor(
           )
         }
 
-      GetBackfillRunsResponse(
+      SearchBackfillRunsResponse(
         runningUiBackfills,
         pausedUiBackfills,
         next_pagination_token = nextOffset?.offset,
