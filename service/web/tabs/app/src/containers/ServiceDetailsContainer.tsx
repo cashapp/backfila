@@ -50,28 +50,43 @@ class ServiceDetailsContainer extends React.Component<
       this.registeredBackfills,
       `/services/${this.service}/variants/${this.variant}/registered-backfills`
     )
+
+    this.setState({
+      loading: false,
+      errorText: null,
+      backfill: null,
+      author: null, 
+    })
     this.fetchBackfillRuns()
   }
 
-  fetchBackfillRuns(backfill?: IBackfill) {
-    // todo: add the author in here too once BE api is ready
-    const url = backfill
-      ? `/services/${this.service}/variants/${this.variant}/backfill-runs/search?backfill_name=${backfill.name}`
-      : `/services/${this.service}/variants/${this.variant}/backfill-runs`
+  fetchBackfillRuns(backfill?: IBackfill, author?: string) {
+    var url = `/services/${this.service}/variants/${this.variant}/backfill-runs/search`
+
+    if (backfill && author) {
+      url += `?backfill_name=${backfill.name}&created_by_user=${author}`
+    }
+    else {
+      if (backfill) {
+        url += `?backfill_name=${backfill.name}`
+      }
+      if (author) {
+        url += `?created_by_user=${author}`
+      }
+    }
 
     this.props.simpleNetworkGet(this.backfillRunsTag, url)
 
     this.setState({
       loading: false,
       errorText: null,
-      backfill: backfill
     })
   }
 
   handleKeyPress = (event: React.KeyboardEvent<HTMLElement>) => {
     if (event.key === "Enter") {
       this.setState({ loading: true })
-      this.fetchBackfillRuns()
+      this.fetchBackfillRuns(this.state.backfill, this.state.author)
     }
   }
 
@@ -134,8 +149,8 @@ class ServiceDetailsContainer extends React.Component<
               <H5>Backfill Name</H5>
               <BackfillSelector
                 backfills={registeredBackfills.backfills}
-                onValueChange={backfill =>
-                  this.setState({ backfill: backfill })
+                onValueChange={ newBackfill =>
+                  this.setState({ backfill: newBackfill })
                 }
                 selected_item={this.state.backfill}
               />
@@ -159,7 +174,7 @@ class ServiceDetailsContainer extends React.Component<
           <Button
             onClick={() => {
               this.setState({ loading: true })
-              this.fetchBackfillRuns(this.state.backfill)
+              this.fetchBackfillRuns(this.state.backfill, this.state.author)
             }}
             intent={Intent.PRIMARY}
             loading={this.state.loading}

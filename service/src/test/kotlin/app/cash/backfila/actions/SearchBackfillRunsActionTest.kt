@@ -25,8 +25,6 @@ import misk.scope.ActionScope
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.Before
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -259,7 +257,7 @@ class SearchBackfillRunsActionTest {
   }
 
   @Test
-  fun `null and empty search queries are ignored` () {
+  fun `null and empty search queries are ignored`() {
     scope.fakeCaller(user = "molly") {
       var backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer", RESERVED_VARIANT)
       assertThat(backfillRuns.paused_backfills).hasSize(0)
@@ -272,7 +270,6 @@ class SearchBackfillRunsActionTest {
           .backfill_name("ChickenSandwich")
           .build(),
       )
-
 
       var backfillSearchResults = searchBackfillRunsAction.searchBackfillRuns(
         service = "deep-fryer",

@@ -178,8 +178,7 @@ class SearchBackfillRunsAction @Inject constructor(
   private fun BackfillRunQuery.filterByBackfillNameIfPresent(backfillName: String?): BackfillRunQuery {
     return if (backfillName.isNullOrEmpty()) {
       this
-    }
-    else {
+    } else {
       this.backfillName(backfillName)
     }
   }
@@ -187,8 +186,7 @@ class SearchBackfillRunsAction @Inject constructor(
   private fun BackfillRunQuery.filterByAuthorIfPresent(author: String?): BackfillRunQuery {
     return if (author.isNullOrEmpty()) {
       this
-    }
-    else {
+    } else {
       this.createdByUser(author)
     }
   }
