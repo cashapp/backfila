@@ -45,8 +45,9 @@ class SearchBackfillRunsAction @Inject constructor(
     @PathParam variant: String,
     @QueryParam pagination_token: String? = null,
     @QueryParam backfill_name: String? = null,
+    @QueryParam created_by_user: String? = null,
   ): SearchBackfillRunsResponse {
-    return search(service, variant, pagination_token, backfill_name)
+    return search(service, variant, pagination_token, backfill_name, created_by_user)
   }
 
   private fun search(
@@ -54,6 +55,7 @@ class SearchBackfillRunsAction @Inject constructor(
     variant: String,
     paginationToken: String?,
     backfill_name: String?,
+    created_by_user: String?,
   ): SearchBackfillRunsResponse {
     logger.info("new log info ***\n\n\n\n\n new log!!")
     return transacter.transaction { session ->
@@ -67,6 +69,7 @@ class SearchBackfillRunsAction @Inject constructor(
         .state(BackfillState.RUNNING)
         .orderByIdDesc()
         .filterByBackfillNameIfPresent(backfill_name)
+        .filterByAuthorIfPresent(created_by_user)
         .list(session)
 
       val runningPartitionSummaries = partitionSummary(session, runningBackfills)
@@ -85,6 +88,7 @@ class SearchBackfillRunsAction @Inject constructor(
         .serviceId(dbService.id)
         .stateNot(BackfillState.RUNNING)
         .filterByBackfillNameIfPresent(backfill_name)
+        .filterByAuthorIfPresent(created_by_user)
         .newPager(
           idDescPaginator(),
           initialOffset = paginationToken?.let { Offset(it) },
@@ -177,6 +181,15 @@ class SearchBackfillRunsAction @Inject constructor(
     }
     else {
       this.backfillName(backfillName)
+    }
+  }
+
+  private fun BackfillRunQuery.filterByAuthorIfPresent(author: String?): BackfillRunQuery {
+    return if (author.isNullOrEmpty()) {
+      this
+    }
+    else {
+      this.createdByUser(author)
     }
   }
 
