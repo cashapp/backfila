@@ -43,6 +43,7 @@ internal class BackfilaTestingModule : KAbstractModule() {
               database = "backfila_test",
               username = "root",
               migrations_resource = "classpath:/migrations",
+              show_sql = "true",
             ),
             reader = null,
           ),
