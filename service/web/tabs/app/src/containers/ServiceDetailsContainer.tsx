@@ -16,7 +16,12 @@ import {
   AnchorButton,
   Spinner
 } from "@blueprintjs/core"
-import { BackfillRunsTable, ServiceHeader } from "../components"
+import {
+  BackfillRunsTable,
+  ServiceHeader,
+  BackfillSelector,
+  IBackfill
+} from "../components"
 import { simpleSelectorGet } from "@misk/simpleredux"
 import { Link } from "react-router-dom"
 import { LayoutContainer } from "."
@@ -26,7 +31,8 @@ interface BackfillSearchState {
   loading: boolean
   errorText?: string
 
-  backfill_name?: string
+  backfill?: IBackfill
+  author?: string
 }
 
 class ServiceDetailsContainer extends React.Component<
@@ -37,14 +43,20 @@ class ServiceDetailsContainer extends React.Component<
   private variant: string =
     (this.props as any).match.params.variant ?? RESERVED_VARIANT
   private backfillRunsTag: string = `${this.service}::${this.variant}::BackfillRuns`
+  private registeredBackfills: string = `${this.service}::BackfillRuns`
 
   componentDidMount() {
+    this.props.simpleNetworkGet(
+      this.registeredBackfills,
+      `/services/${this.service}/variants/${this.variant}/registered-backfills`
+    )
     this.fetchBackfillRuns()
   }
 
-  fetchBackfillRuns(backfillName?: string) {
-    const url = backfillName
-      ? `/services/${this.service}/variants/${this.variant}/backfill-runs/search?backfill_name=${backfillName}`
+  fetchBackfillRuns(backfill?: IBackfill) {
+    // todo: add the author in here too once BE api is ready
+    const url = backfill
+      ? `/services/${this.service}/variants/${this.variant}/backfill-runs/search?backfill_name=${backfill.name}`
       : `/services/${this.service}/variants/${this.variant}/backfill-runs`
 
     this.props.simpleNetworkGet(this.backfillRunsTag, url)
@@ -52,13 +64,25 @@ class ServiceDetailsContainer extends React.Component<
     this.setState({
       loading: false,
       errorText: null,
-      backfill_name: backfillName || null
+      backfill: backfill
     })
+  }
+
+  handleKeyPress = (event: React.KeyboardEvent<HTMLElement>) => {
+    if (event.key === "Enter") {
+      this.setState({ loading: true })
+      this.fetchBackfillRuns()
+    }
   }
 
   render() {
     let result = simpleSelectorGet(this.props.simpleNetwork, [
       this.backfillRunsTag,
+      "data"
+    ])
+
+    let registeredBackfills = simpleSelectorGet(this.props.simpleNetwork, [
+      this.registeredBackfills,
       "data"
     ])
     if (!this.service || !result) {
@@ -103,25 +127,43 @@ class ServiceDetailsContainer extends React.Component<
           <AnchorButton text={"Create"} intent={Intent.PRIMARY} />
         </Link>
         <br />
+        <br />
         <FormGroup>
-          <H5>Backfill Name</H5>
-          <InputGroup
-            id="text-input"
-            placeholder="PublishableEntityBackfill"
-            onChange={(event: React.FormEvent<HTMLElement>) => {
-              this.setState({
-                backfill_name: (event.target as any).value
-              })
-            }}
-          />
+          <div style={{ display: "flex", gap: "10px" }}>
+            <div style={{ flex: 1 }}>
+              <H5>Backfill Name</H5>
+              <BackfillSelector
+                backfills={registeredBackfills.backfills}
+                onValueChange={backfill =>
+                  this.setState({ backfill: backfill })
+                }
+                selected_item={this.state.backfill}
+              />
+            </div>
+            <div style={{ flex: 1 }}>
+              <H5>Author</H5>
+              <InputGroup
+                id="text-input"
+                fill={false}
+                value={this.state.author}
+                placeholder="kara.dietz"
+                onChange={(event: React.FormEvent<HTMLElement>) => {
+                  this.setState({
+                    author: (event.target as any).value
+                  })
+                }}
+                onKeyPress={this.handleKeyPress}
+              />
+            </div>
+          </div>
           <Button
             onClick={() => {
               this.setState({ loading: true })
-              this.fetchBackfillRuns(this.state.backfill_name)
+              this.fetchBackfillRuns(this.state.backfill)
             }}
             intent={Intent.PRIMARY}
             loading={this.state.loading}
-            disabled={!this.state.backfill_name}
+            disabled={!this.state.backfill && !this.state.author}
             text={"Filter"}
           />
         </FormGroup>
