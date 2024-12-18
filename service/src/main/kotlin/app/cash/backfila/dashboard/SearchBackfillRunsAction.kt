@@ -7,8 +7,6 @@ import app.cash.backfila.service.persistence.DbBackfillRun
 import app.cash.backfila.service.persistence.DbRegisteredBackfill
 import app.cash.backfila.service.persistence.RegisteredBackfillQuery
 import app.cash.backfila.service.persistence.ServiceQuery
-import app.cash.backfila.service.runner.statemachine.BatchAwaiter
-import java.time.Instant
 import javax.inject.Inject
 import misk.exceptions.BadRequestException
 import misk.hibernate.Id
@@ -28,7 +26,6 @@ import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import wisp.logging.getLogger
-
 
 data class SearchBackfillRunsResponse(
   val running_backfills: List<UiBackfillRun>,
@@ -88,6 +85,7 @@ class SearchBackfillRunsAction @Inject constructor(
       val (pausedBackfills, nextOffset) = queryFactory.newQuery<BackfillRunQuery>()
         .serviceId(dbService.id)
         .stateNot(BackfillState.RUNNING)
+        .backfillName(backfill_name)
         .newPager(
           idDescPaginator(),
           initialOffset = paginationToken?.let { Offset(it) },

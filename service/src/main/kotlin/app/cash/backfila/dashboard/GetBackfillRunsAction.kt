@@ -7,7 +7,6 @@ import app.cash.backfila.service.persistence.DbBackfillRun
 import app.cash.backfila.service.persistence.DbRegisteredBackfill
 import app.cash.backfila.service.persistence.RegisteredBackfillQuery
 import app.cash.backfila.service.persistence.ServiceQuery
-import app.cash.backfila.service.runner.statemachine.BatchAwaiter
 import java.time.Instant
 import javax.inject.Inject
 import misk.exceptions.BadRequestException
