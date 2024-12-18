@@ -13,6 +13,7 @@ export interface IBackfill {
 
 export interface IBackfillSelectorProps {
   backfills: IBackfill[]
+  selected_item?: IBackfill
 
   onValueChange?(value: IBackfill): void
 }
@@ -39,6 +40,7 @@ export default class BackfillSelector extends React.PureComponent<
           onItemSelect={this.props.onValueChange}
           itemPredicate={this.filterBackfill}
           itemRenderer={this.renderBackfill}
+          selectedItem={this.props.selected_item}
         />
       </div>
     )
