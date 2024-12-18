@@ -71,9 +71,6 @@ class SearchBackfillRunsAction @Inject constructor(
         .filterByAuthorIfPresent(created_by_user)
         .list(session)
 
-//      val test = queryFactory.dynamicQuery<DbBackfillRun>(DbBackfillRun::class)
-//
-
       val runningPartitionSummaries = partitionSummary(session, runningBackfills)
       val runningRegisteredBackfills = registeredBackfills(session, runningBackfills)
       val runningUiBackfills = runningBackfills
@@ -195,7 +192,6 @@ class SearchBackfillRunsAction @Inject constructor(
       this
     }
     else {
-//      this.createdByUser(author)
       this.constraint { backfillRunRoot ->
         like(backfillRunRoot.get("created_by_user"), "%${author}%")
       }
