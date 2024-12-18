@@ -81,6 +81,10 @@ class SearchBackfillRunsActionTest {
                 "ChickenSandwich", "Description", listOf(), null,
                 null, false, null,
               ),
+              ConfigureServiceRequest.BackfillData(
+                "FrenchFries", "Description", listOf(), null,
+                null, false, null,
+              ),
             ),
           )
           .connector_type(Connectors.ENVOY)
@@ -186,7 +190,72 @@ class SearchBackfillRunsActionTest {
 
   @Test
   fun `multiple criteria search`() {
-    assertThat(true).isTrue()
+    scope.fakeCaller(user = "diana") {
+      val response = createBackfillAction.create(
+        "deep-fryer",
+        ConfigureServiceAction.RESERVED_VARIANT,
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build(),
+      )
+    }
+    scope.fakeCaller(user = "molly") {
+      var backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer", RESERVED_VARIANT)
+      assertThat(backfillRuns.paused_backfills).hasSize(0)
+      assertThat(backfillRuns.running_backfills).hasSize(0)
+
+      createBackfillAction.create(
+        "deep-fryer",
+        ConfigureServiceAction.RESERVED_VARIANT,
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build(),
+      )
+      createBackfillAction.create(
+        "deep-fryer",
+        ConfigureServiceAction.RESERVED_VARIANT,
+        CreateBackfillRequest.Builder()
+          .backfill_name("FrenchFries")
+          .build(),
+      )
+      createBackfillAction.create(
+        "deep-fryer",
+        ConfigureServiceAction.RESERVED_VARIANT,
+        CreateBackfillRequest.Builder()
+          .backfill_name("FrenchFries")
+          .build(),
+      )
+
+      var backfillSearchResults = searchBackfillRunsAction.searchBackfillRuns(
+        service = "deep-fryer",
+        variant = RESERVED_VARIANT,
+        pagination_token = null,
+        backfill_name = "FrenchFries",
+        created_by_user = "molly",
+      )
+      assertThat(backfillSearchResults.paused_backfills).hasSize(2)
+
+      backfillSearchResults = searchBackfillRunsAction.searchBackfillRuns(
+        service = "deep-fryer",
+        variant = RESERVED_VARIANT,
+        pagination_token = null,
+        created_by_user = "molly",
+      )
+      backfillSearchResults = searchBackfillRunsAction.searchBackfillRuns(
+        service = "deep-fryer",
+        variant = RESERVED_VARIANT,
+        backfill_name = "FrenchFries",
+        created_by_user = "diana",
+      )
+      assertThat(backfillSearchResults.paused_backfills).hasSize(0)
+
+      backfillSearchResults = searchBackfillRunsAction.searchBackfillRuns(
+        service = "deep-fryer",
+        variant = RESERVED_VARIANT,
+        backfill_name = "ChickenSandwich",
+      )
+      assertThat(backfillSearchResults.paused_backfills).hasSize(2)
+    }
   }
 
   @Test
