@@ -25,6 +25,9 @@ import misk.scope.ActionScope
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.Before
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 @MiskTest(startService = true)
@@ -67,8 +70,8 @@ class SearchBackfillRunsActionTest {
   @BackfilaDb
   lateinit var transacter: Transacter
 
-  @Test
-  fun searchBackfillRuns() {
+  @BeforeEach
+  fun setup() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(
         ConfigureServiceRequest.Builder()
@@ -84,6 +87,10 @@ class SearchBackfillRunsActionTest {
           .build(),
       )
     }
+  }
+
+  @Test
+  fun searchBackfillRuns() {
     scope.fakeCaller(user = "molly") {
       var backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer", RESERVED_VARIANT)
       assertThat(backfillRuns.paused_backfills).hasSize(0)
@@ -130,6 +137,50 @@ class SearchBackfillRunsActionTest {
       backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer", RESERVED_VARIANT)
       assertThat(backfillRuns.paused_backfills).hasSize(1)
       assertThat(backfillRuns.running_backfills).hasSize(0)
+
+      backfillSearchResults = searchBackfillRunsAction.searchBackfillRuns(
+        service = "deep-fryer",
+        variant = RESERVED_VARIANT,
+        pagination_token = null,
+        backfill_name = "ChickenSandwich",
+      )
+      assertThat(backfillSearchResults.running_backfills).hasSize(0)
+      assertThat(backfillSearchResults.paused_backfills).hasSize(1)
+    }
+  }
+
+  @Test
+  fun `null and empty search queries are ignored` () {
+    scope.fakeCaller(user = "molly") {
+      var backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer", RESERVED_VARIANT)
+      assertThat(backfillRuns.paused_backfills).hasSize(0)
+      assertThat(backfillRuns.running_backfills).hasSize(0)
+
+      createBackfillAction.create(
+        "deep-fryer",
+        ConfigureServiceAction.RESERVED_VARIANT,
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build(),
+      )
+
+
+      var backfillSearchResults = searchBackfillRunsAction.searchBackfillRuns(
+        service = "deep-fryer",
+        variant = RESERVED_VARIANT,
+        pagination_token = null,
+        backfill_name = "",
+      )
+      assertThat(backfillSearchResults.running_backfills).hasSize(0)
+      assertThat(backfillSearchResults.paused_backfills).hasSize(1)
+
+      backfillSearchResults = searchBackfillRunsAction.searchBackfillRuns(
+        service = "deep-fryer",
+        variant = RESERVED_VARIANT,
+        pagination_token = null,
+      )
+      assertThat(backfillSearchResults.running_backfills).hasSize(0)
+      assertThat(backfillSearchResults.paused_backfills).hasSize(1)
     }
   }
 //

@@ -66,8 +66,7 @@ class SearchBackfillRunsAction @Inject constructor(
         .serviceId(dbService.id)
         .state(BackfillState.RUNNING)
         .orderByIdDesc()
-        // to do - make null safe
-        .backfillName(backfill_name!!)
+        .filterByBackfillNameIfPresent(backfill_name)
         .list(session)
 
       val runningPartitionSummaries = partitionSummary(session, runningBackfills)
@@ -85,7 +84,7 @@ class SearchBackfillRunsAction @Inject constructor(
       val (pausedBackfills, nextOffset) = queryFactory.newQuery<BackfillRunQuery>()
         .serviceId(dbService.id)
         .stateNot(BackfillState.RUNNING)
-        .backfillName(backfill_name)
+        .filterByBackfillNameIfPresent(backfill_name)
         .newPager(
           idDescPaginator(),
           initialOffset = paginationToken?.let { Offset(it) },
@@ -170,6 +169,15 @@ class SearchBackfillRunsAction @Inject constructor(
       partitionSummary.totalComputedMatchingRecordCount,
       partitionSummary.totalBackfilledMatchingRecordCount,
     )
+  }
+
+  private fun BackfillRunQuery.filterByBackfillNameIfPresent(backfillName: String?): BackfillRunQuery {
+    return if (backfillName.isNullOrEmpty()) {
+      this
+    }
+    else {
+      this.backfillName(backfillName)
+    }
   }
 
   companion object {
