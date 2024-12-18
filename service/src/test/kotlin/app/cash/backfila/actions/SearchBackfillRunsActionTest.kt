@@ -80,6 +80,10 @@ class SearchBackfillRunsActionTest {
                 null, false, null,
               ),
               ConfigureServiceRequest.BackfillData(
+                "TurkeySandwich", "Description", listOf(), null,
+                null, false, null,
+              ),
+              ConfigureServiceRequest.BackfillData(
                 "FrenchFries", "Description", listOf(), null,
                 null, false, null,
               ),
@@ -198,10 +202,6 @@ class SearchBackfillRunsActionTest {
       )
     }
     scope.fakeCaller(user = "molly") {
-      var backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer", RESERVED_VARIANT)
-      assertThat(backfillRuns.paused_backfills).hasSize(0)
-      assertThat(backfillRuns.running_backfills).hasSize(0)
-
       createBackfillAction.create(
         "deep-fryer",
         ConfigureServiceAction.RESERVED_VARIANT,
@@ -239,6 +239,8 @@ class SearchBackfillRunsActionTest {
         pagination_token = null,
         created_by_user = "molly",
       )
+      assertThat(backfillSearchResults.paused_backfills).hasSize(3)
+
       backfillSearchResults = searchBackfillRunsAction.searchBackfillRuns(
         service = "deep-fryer",
         variant = RESERVED_VARIANT,
@@ -253,6 +255,84 @@ class SearchBackfillRunsActionTest {
         backfill_name = "ChickenSandwich",
       )
       assertThat(backfillSearchResults.paused_backfills).hasSize(2)
+    }
+  }
+
+
+  @Test
+  fun `fuzzy search`() {
+    scope.fakeCaller(user = "molly.baker") {
+      createBackfillAction.create(
+        "deep-fryer",
+        ConfigureServiceAction.RESERVED_VARIANT,
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build(),
+      )
+      createBackfillAction.create(
+        "deep-fryer",
+        ConfigureServiceAction.RESERVED_VARIANT,
+        CreateBackfillRequest.Builder()
+          .backfill_name("TurkeySandwich")
+          .build(),
+      )
+    }
+    scope.fakeCaller(user = "molly.chen") {
+      createBackfillAction.create(
+        "deep-fryer",
+        ConfigureServiceAction.RESERVED_VARIANT,
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build(),
+      )
+      createBackfillAction.create(
+        "deep-fryer",
+        ConfigureServiceAction.RESERVED_VARIANT,
+        CreateBackfillRequest.Builder()
+          .backfill_name("FrenchFries")
+          .build(),
+      )
+      createBackfillAction.create(
+        "deep-fryer",
+        ConfigureServiceAction.RESERVED_VARIANT,
+        CreateBackfillRequest.Builder()
+          .backfill_name("FrenchFries")
+          .build(),
+      )
+
+      var backfillSearchResults = searchBackfillRunsAction.searchBackfillRuns(
+        service = "deep-fryer",
+        variant = RESERVED_VARIANT,
+        pagination_token = null,
+        created_by_user = "molly",
+      )
+      assertThat(backfillSearchResults.paused_backfills).hasSize(5)
+
+      backfillSearchResults = searchBackfillRunsAction.searchBackfillRuns(
+        service = "deep-fryer",
+        variant = RESERVED_VARIANT,
+        pagination_token = null,
+        backfill_name = "Sandwich",
+      )
+      assertThat(backfillSearchResults.paused_backfills).hasSize(3)
+
+      backfillSearchResults = searchBackfillRunsAction.searchBackfillRuns(
+        service = "deep-fryer",
+        variant = RESERVED_VARIANT,
+        pagination_token = null,
+        backfill_name = "Sandwich",
+        created_by_user = "baker",
+        )
+      assertThat(backfillSearchResults.paused_backfills).hasSize(2)
+
+      backfillSearchResults = searchBackfillRunsAction.searchBackfillRuns(
+        service = "deep-fryer",
+        variant = RESERVED_VARIANT,
+        pagination_token = null,
+        backfill_name = "sandwich",
+        created_by_user = "chen",
+      )
+      assertThat(backfillSearchResults.paused_backfills).hasSize(0)
     }
   }
 

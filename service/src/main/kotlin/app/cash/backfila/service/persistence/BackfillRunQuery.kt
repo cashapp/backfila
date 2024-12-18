@@ -1,10 +1,6 @@
 package app.cash.backfila.service.persistence
 
-import misk.hibernate.Constraint
-import misk.hibernate.Id
-import misk.hibernate.Operator
-import misk.hibernate.Order
-import misk.hibernate.Query
+import misk.hibernate.*
 
 interface BackfillRunQuery : Query<DbBackfillRun> {
   @Constraint("id")

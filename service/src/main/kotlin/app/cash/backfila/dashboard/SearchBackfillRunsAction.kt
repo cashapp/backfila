@@ -7,13 +7,10 @@ import app.cash.backfila.service.persistence.DbBackfillRun
 import app.cash.backfila.service.persistence.DbRegisteredBackfill
 import app.cash.backfila.service.persistence.RegisteredBackfillQuery
 import app.cash.backfila.service.persistence.ServiceQuery
+import com.sksamuel.hoplite.Undefined.path
 import javax.inject.Inject
 import misk.exceptions.BadRequestException
-import misk.hibernate.Id
-import misk.hibernate.Query
-import misk.hibernate.Session
-import misk.hibernate.Transacter
-import misk.hibernate.newQuery
+import misk.hibernate.*
 import misk.hibernate.pagination.Offset
 import misk.hibernate.pagination.Page
 import misk.hibernate.pagination.idDescPaginator
@@ -25,7 +22,9 @@ import misk.web.QueryParam
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
+import org.hibernate.criterion.Restrictions.like
 import wisp.logging.getLogger
+import javax.persistence.criteria.Root
 
 data class SearchBackfillRunsResponse(
   val running_backfills: List<UiBackfillRun>,
@@ -71,6 +70,9 @@ class SearchBackfillRunsAction @Inject constructor(
         .filterByBackfillNameIfPresent(backfill_name)
         .filterByAuthorIfPresent(created_by_user)
         .list(session)
+
+//      val test = queryFactory.dynamicQuery<DbBackfillRun>(DbBackfillRun::class)
+//
 
       val runningPartitionSummaries = partitionSummary(session, runningBackfills)
       val runningRegisteredBackfills = registeredBackfills(session, runningBackfills)
@@ -178,16 +180,25 @@ class SearchBackfillRunsAction @Inject constructor(
   private fun BackfillRunQuery.filterByBackfillNameIfPresent(backfillName: String?): BackfillRunQuery {
     return if (backfillName.isNullOrEmpty()) {
       this
-    } else {
-      this.backfillName(backfillName)
+    }
+    else {
+        this.constraint { backfillRunRoot ->
+          val registeredBackfillJoin = backfillRunRoot.join<DbBackfillRun, DbRegisteredBackfill>("registered_backfill")
+          like(registeredBackfillJoin.get("name"), "%${backfillName}%")
+        }
     }
   }
+
 
   private fun BackfillRunQuery.filterByAuthorIfPresent(author: String?): BackfillRunQuery {
     return if (author.isNullOrEmpty()) {
       this
-    } else {
-      this.createdByUser(author)
+    }
+    else {
+//      this.createdByUser(author)
+      this.constraint { backfillRunRoot ->
+        like(backfillRunRoot.get("created_by_user"), "%${author}%")
+      }
     }
   }
 
