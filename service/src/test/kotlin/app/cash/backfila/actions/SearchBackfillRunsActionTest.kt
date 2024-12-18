@@ -258,7 +258,6 @@ class SearchBackfillRunsActionTest {
     }
   }
 
-
   @Test
   fun `fuzzy search`() {
     scope.fakeCaller(user = "molly.baker") {
@@ -322,7 +321,7 @@ class SearchBackfillRunsActionTest {
         pagination_token = null,
         backfill_name = "Sandwich",
         created_by_user = "baker",
-        )
+      )
       assertThat(backfillSearchResults.paused_backfills).hasSize(2)
 
       backfillSearchResults = searchBackfillRunsAction.searchBackfillRuns(
