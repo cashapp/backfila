@@ -27,6 +27,6 @@ class DevelopmentAdminDashboardModule : KAbstractModule() {
     )
     // Setup authentication in the development environment
     bind<MiskCaller>().annotatedWith<DevelopmentOnly>()
-      .toInstance(MiskCaller(user = "testfila", capabilities = setOf("admin_console", "users")))
+      .toInstance(MiskCaller(user = "diana.snyder", capabilities = setOf("admin_console", "users")))
   }
 }
