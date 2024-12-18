@@ -7,13 +7,13 @@ import app.cash.backfila.service.persistence.DbBackfillRun
 import app.cash.backfila.service.persistence.DbRegisteredBackfill
 import app.cash.backfila.service.persistence.RegisteredBackfillQuery
 import app.cash.backfila.service.persistence.ServiceQuery
-import java.time.Instant
 import javax.inject.Inject
 import misk.exceptions.BadRequestException
 import misk.hibernate.Id
 import misk.hibernate.Query
 import misk.hibernate.Session
 import misk.hibernate.Transacter
+import misk.hibernate.constraint
 import misk.hibernate.newQuery
 import misk.hibernate.pagination.Offset
 import misk.hibernate.pagination.Page
@@ -28,41 +28,36 @@ import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import wisp.logging.getLogger
 
-data class UiBackfillRun(
-  val id: String,
-  val name: String,
-  val state: BackfillState,
-  val dry_run: Boolean,
-  val created_at: Instant,
-  val created_by_user: String?,
-  val last_active_at: Instant,
-  val precomputing_done: Boolean,
-  val computed_matching_record_count: Long,
-  val backfilled_matching_record_count: Long,
-)
-
-data class GetBackfillRunsResponse(
+data class SearchBackfillRunsResponse(
   val running_backfills: List<UiBackfillRun>,
   val paused_backfills: List<UiBackfillRun>,
   val next_pagination_token: String?,
 )
 
-class GetBackfillRunsAction @Inject constructor(
+class SearchBackfillRunsAction @Inject constructor(
   @BackfilaDb private val transacter: Transacter,
   private val queryFactory: Query.Factory,
 ) : WebAction {
-  @Get("/services/{service}/variants/{variant}/backfill-runs")
+  @Get("/services/{service}/variants/{variant}/backfill-runs/search")
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
   @Authenticated(allowAnyUser = true)
-  fun backfillRuns(
+  fun searchBackfillRuns(
     @PathParam service: String,
     @PathParam variant: String,
     @QueryParam pagination_token: String? = null,
-  ): GetBackfillRunsResponse {
-    return getBackfillRuns(service, variant, pagination_token)
+    @QueryParam backfill_name: String? = null,
+    @QueryParam created_by_user: String? = null,
+  ): SearchBackfillRunsResponse {
+    return search(service, variant, pagination_token, backfill_name, created_by_user)
   }
 
-  private fun getBackfillRuns(service: String, variant: String, paginationToken: String?): GetBackfillRunsResponse {
+  private fun search(
+    service: String,
+    variant: String,
+    paginationToken: String?,
+    backfill_name: String?,
+    created_by_user: String?,
+  ): SearchBackfillRunsResponse {
     logger.info("new log info ***\n\n\n\n\n new log!!")
     return transacter.transaction { session ->
       val dbService = queryFactory.newQuery<ServiceQuery>()
@@ -74,6 +69,8 @@ class GetBackfillRunsAction @Inject constructor(
         .serviceId(dbService.id)
         .state(BackfillState.RUNNING)
         .orderByIdDesc()
+        .filterByBackfillNameIfPresent(backfill_name)
+        .filterByAuthorIfPresent(created_by_user)
         .list(session)
 
       val runningPartitionSummaries = partitionSummary(session, runningBackfills)
@@ -91,6 +88,8 @@ class GetBackfillRunsAction @Inject constructor(
       val (pausedBackfills, nextOffset) = queryFactory.newQuery<BackfillRunQuery>()
         .serviceId(dbService.id)
         .stateNot(BackfillState.RUNNING)
+        .filterByBackfillNameIfPresent(backfill_name)
+        .filterByAuthorIfPresent(created_by_user)
         .newPager(
           idDescPaginator(),
           initialOffset = paginationToken?.let { Offset(it) },
@@ -110,7 +109,7 @@ class GetBackfillRunsAction @Inject constructor(
           )
         }
 
-      GetBackfillRunsResponse(
+      SearchBackfillRunsResponse(
         runningUiBackfills,
         pausedUiBackfills,
         next_pagination_token = nextOffset?.offset,
@@ -175,6 +174,27 @@ class GetBackfillRunsAction @Inject constructor(
       partitionSummary.totalComputedMatchingRecordCount,
       partitionSummary.totalBackfilledMatchingRecordCount,
     )
+  }
+
+  private fun BackfillRunQuery.filterByBackfillNameIfPresent(backfillName: String?): BackfillRunQuery {
+    return if (backfillName.isNullOrEmpty()) {
+      this
+    } else {
+      this.constraint { backfillRunRoot ->
+        val registeredBackfillJoin = backfillRunRoot.join<DbBackfillRun, DbRegisteredBackfill>("registered_backfill")
+        like(registeredBackfillJoin.get("name"), "%$backfillName%")
+      }
+    }
+  }
+
+  private fun BackfillRunQuery.filterByAuthorIfPresent(author: String?): BackfillRunQuery {
+    return if (author.isNullOrEmpty()) {
+      this
+    } else {
+      this.constraint { backfillRunRoot ->
+        like(backfillRunRoot.get("created_by_user"), "%$author%")
+      }
+    }
   }
 
   companion object {

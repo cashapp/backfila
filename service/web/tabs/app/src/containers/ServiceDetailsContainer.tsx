@@ -6,16 +6,32 @@ import {
   mapDispatchToProps,
   mapStateToProps
 } from "../ducks"
-import { H3, Intent, AnchorButton, Spinner } from "@blueprintjs/core"
+import {
+  H3,
+  H5,
+  FormGroup,
+  InputGroup,
+  Button,
+  Intent,
+  AnchorButton,
+  Spinner
+} from "@blueprintjs/core"
 import { BackfillRunsTable, ServiceHeader } from "../components"
 import { simpleSelectorGet } from "@misk/simpleredux"
 import { Link } from "react-router-dom"
 import { LayoutContainer } from "."
 import { RESERVED_VARIANT } from "../utilities"
 
+interface BackfillSearchState {
+  loading: boolean
+  errorText?: string
+
+  backfill_name?: string
+}
+
 class ServiceDetailsContainer extends React.Component<
   IState & IDispatchProps,
-  IState
+  IState & BackfillSearchState
 > {
   private service: string = (this.props as any).match.params.service
   private variant: string =
@@ -23,10 +39,21 @@ class ServiceDetailsContainer extends React.Component<
   private backfillRunsTag: string = `${this.service}::${this.variant}::BackfillRuns`
 
   componentDidMount() {
-    this.props.simpleNetworkGet(
-      this.backfillRunsTag,
-      `/services/${this.service}/variants/${this.variant}/backfill-runs`
-    )
+    this.fetchBackfillRuns()
+  }
+
+  fetchBackfillRuns(backfillName?: string) {
+    const url = backfillName
+      ? `/services/${this.service}/variants/${this.variant}/backfill-runs/search?backfill_name=${backfillName}`
+      : `/services/${this.service}/variants/${this.variant}/backfill-runs`
+
+    this.props.simpleNetworkGet(this.backfillRunsTag, url)
+
+    this.setState({
+      loading: false,
+      errorText: null,
+      backfill_name: backfillName || null
+    })
   }
 
   render() {
@@ -76,6 +103,28 @@ class ServiceDetailsContainer extends React.Component<
           <AnchorButton text={"Create"} intent={Intent.PRIMARY} />
         </Link>
         <br />
+        <FormGroup>
+          <H5>Backfill Name</H5>
+          <InputGroup
+            id="text-input"
+            placeholder="PublishableEntityBackfill"
+            onChange={(event: React.FormEvent<HTMLElement>) => {
+              this.setState({
+                backfill_name: (event.target as any).value
+              })
+            }}
+          />
+          <Button
+            onClick={() => {
+              this.setState({ loading: true })
+              this.fetchBackfillRuns(this.state.backfill_name)
+            }}
+            intent={Intent.PRIMARY}
+            loading={this.state.loading}
+            disabled={!this.state.backfill_name}
+            text={"Filter"}
+          />
+        </FormGroup>
         <br />
         <H3>Running Backfills</H3>
         <BackfillRunsTable backfillRuns={result.running_backfills} />

@@ -297,11 +297,13 @@ class BackfillStatusContainer extends React.Component<
             </HTMLTable>
           </div>
           <div>
-            Total backfilled items(client dependent, such as records/segments/bytes):{" "}
+            Total backfilled items(client dependent, such as
+            records/segments/bytes):{" "}
             {total_backfilled_matching_record_count.toLocaleString()}
           </div>
           <div>
-            Total items(client dependent, such as records/segments/bytes) to run:{" "}
+            Total items(client dependent, such as records/segments/bytes) to
+            run:{" "}
             <ComputedCount
               precomputing_done={all_precomputing_done}
               computed_matching_record_count={
