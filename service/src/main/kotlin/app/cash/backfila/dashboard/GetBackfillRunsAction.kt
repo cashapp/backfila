@@ -14,6 +14,7 @@ import misk.hibernate.Id
 import misk.hibernate.Query
 import misk.hibernate.Session
 import misk.hibernate.Transacter
+import misk.hibernate.constraint
 import misk.hibernate.newQuery
 import misk.hibernate.pagination.Offset
 import misk.hibernate.pagination.Page
@@ -58,12 +59,26 @@ class GetBackfillRunsAction @Inject constructor(
     @PathParam service: String,
     @PathParam variant: String,
     @QueryParam pagination_token: String? = null,
+    @QueryParam backfill_name: String? = null,
+    @QueryParam created_by_user: String? = null,
+    @QueryParam created_start_date: Instant? = null,
+    @QueryParam created_end_date: Instant? = null,
   ): GetBackfillRunsResponse {
-    return getBackfillRuns(service, variant, pagination_token)
+    val filterArgs = FilterArgs(
+      backfillName = backfill_name,
+      createdByUser = created_by_user,
+      createdStartDate = created_start_date,
+      createdEndDate = created_end_date,
+    )
+    return search(service, variant, pagination_token, filterArgs)
   }
 
-  private fun getBackfillRuns(service: String, variant: String, paginationToken: String?): GetBackfillRunsResponse {
-    logger.info("new log info ***\n\n\n\n\n new log!!")
+  private fun search(
+    service: String,
+    variant: String,
+    paginationToken: String?,
+    filterArgs: FilterArgs,
+  ): GetBackfillRunsResponse {
     return transacter.transaction { session ->
       val dbService = queryFactory.newQuery<ServiceQuery>()
         .registryName(service)
@@ -74,6 +89,7 @@ class GetBackfillRunsAction @Inject constructor(
         .serviceId(dbService.id)
         .state(BackfillState.RUNNING)
         .orderByIdDesc()
+        .filterByArgs(filterArgs)
         .list(session)
 
       val runningPartitionSummaries = partitionSummary(session, runningBackfills)
@@ -91,6 +107,7 @@ class GetBackfillRunsAction @Inject constructor(
       val (pausedBackfills, nextOffset) = queryFactory.newQuery<BackfillRunQuery>()
         .serviceId(dbService.id)
         .stateNot(BackfillState.RUNNING)
+        .filterByArgs(filterArgs)
         .newPager(
           idDescPaginator(),
           initialOffset = paginationToken?.let { Offset(it) },
@@ -177,7 +194,55 @@ class GetBackfillRunsAction @Inject constructor(
     )
   }
 
-  companion object {
-    private val logger = getLogger<GetBackfillRunsAction>()
+  private fun BackfillRunQuery.filterByBackfillNameIfPresent(backfillName: String?): BackfillRunQuery {
+    return if (backfillName.isNullOrEmpty()) {
+      this
+    } else {
+      this.constraint { backfillRunRoot ->
+        val registeredBackfillJoin = backfillRunRoot.join<DbBackfillRun, DbRegisteredBackfill>("registered_backfill")
+        like(registeredBackfillJoin.get("name"), "%$backfillName%")
+      }
+    }
   }
+
+  private fun BackfillRunQuery.filterByUserCreatedIfPresent(author: String?): BackfillRunQuery {
+    return if (author.isNullOrEmpty()) {
+      this
+    } else {
+      this.constraint { backfillRunRoot ->
+        like(backfillRunRoot.get("created_by_user"), "%$author%")
+      }
+    }
+  }
+
+  private fun BackfillRunQuery.filterByStartDate(startDate: Instant?): BackfillRunQuery {
+    return if (startDate == null) {
+      this
+    } else {
+      this.createdAfter(startDate)
+    }
+  }
+
+  private fun BackfillRunQuery.filterByEndDate(endDate: Instant?): BackfillRunQuery {
+    return if (endDate == null) {
+      this
+    } else {
+      this.createdBefore(endDate)
+    }
+  }
+
+  private fun BackfillRunQuery.filterByArgs(filterArgs: FilterArgs): BackfillRunQuery {
+    return this.filterByUserCreatedIfPresent(filterArgs.createdByUser)
+      .filterByBackfillNameIfPresent(filterArgs.backfillName)
+      .filterByStartDate(filterArgs.createdStartDate)
+      .filterByEndDate(filterArgs.createdEndDate)
+  }
+
+  private data class FilterArgs (
+    val backfillName: String? = null,
+    val createdByUser: String? = null,
+    val createdStartDate: Instant? = null,
+    val createdEndDate: Instant? = null,
+  )
 }
+

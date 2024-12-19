@@ -61,7 +61,7 @@ class ServiceDetailsContainer extends React.Component<
   }
 
   fetchBackfillRuns(backfill?: IBackfill, author?: string) {
-    var url = `/services/${this.service}/variants/${this.variant}/backfill-runs/search`
+    var url = `/services/${this.service}/variants/${this.variant}/backfill-runs`
 
     if (backfill && author) {
       url += `?backfill_name=${backfill.name}&created_by_user=${author}`
