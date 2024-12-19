@@ -22,9 +22,6 @@ interface BackfillRunQuery : Query<DbBackfillRun> {
   @Constraint("registered_backfill.name")
   fun backfillName(name: String): BackfillRunQuery
 
-  @Constraint("created_by_user")
-  fun createdByUser(user: String): BackfillRunQuery
-
   @Constraint("state", Operator.NE)
   fun stateNot(state: BackfillState): BackfillRunQuery
 

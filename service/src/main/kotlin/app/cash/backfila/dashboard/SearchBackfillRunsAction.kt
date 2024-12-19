@@ -202,9 +202,27 @@ class SearchBackfillRunsAction @Inject constructor(
     }
   }
 
+  private fun BackfillRunQuery.filterByStartDate(startDate: Instant?): BackfillRunQuery {
+    return if (startDate == null) {
+      this
+    } else {
+      this.createdAfter(startDate)
+    }
+  }
+
+  private fun BackfillRunQuery.filterByEndDate(endDate: Instant?): BackfillRunQuery {
+    return if (endDate == null) {
+      this
+    } else {
+      this.createdBefore(endDate)
+    }
+  }
+
   private fun BackfillRunQuery.filterByArgs(filterArgs: FilterArgs): BackfillRunQuery {
     return this.filterByUserCreatedIfPresent(filterArgs.createdByUser)
                .filterByBackfillNameIfPresent(filterArgs.backfillName)
+               .filterByStartDate(filterArgs.createdStartDate)
+               .filterByEndDate(filterArgs.createdEndDate)
   }
 
   private data class FilterArgs (

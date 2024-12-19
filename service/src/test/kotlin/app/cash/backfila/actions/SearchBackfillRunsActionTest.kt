@@ -24,9 +24,12 @@ import misk.hibernate.Transacter
 import misk.scope.ActionScope
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
+import misk.time.FakeClock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.Duration
+import java.time.temporal.TemporalAmount
 
 @MiskTest(startService = true)
 class SearchBackfillRunsActionTest {
@@ -60,6 +63,9 @@ class SearchBackfillRunsActionTest {
 
   @Inject
   lateinit var scope: ActionScope
+
+  @Inject
+  lateinit var clock: FakeClock
 
   @Inject
   @BackfilaDb
@@ -155,10 +161,6 @@ class SearchBackfillRunsActionTest {
   @Test
   fun `search by author`() {
     scope.fakeCaller(user = "molly") {
-      var backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer", RESERVED_VARIANT)
-      assertThat(backfillRuns.paused_backfills).hasSize(0)
-      assertThat(backfillRuns.running_backfills).hasSize(0)
-
       val response = createBackfillAction.create(
         "deep-fryer",
         ConfigureServiceAction.RESERVED_VARIANT,
@@ -184,6 +186,65 @@ class SearchBackfillRunsActionTest {
       )
       assertThat(backfillSearchResults.running_backfills).hasSize(0)
       assertThat(backfillSearchResults.paused_backfills).hasSize(0)
+    }
+  }
+
+  @Test
+  fun `search by date`() {
+    scope.fakeCaller(user = "molly") {
+
+      val backfillStartTime1 = clock.instant()
+
+      val response = createBackfillAction.create(
+        "deep-fryer",
+        ConfigureServiceAction.RESERVED_VARIANT,
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build(),
+      )
+
+      clock.add(Duration.ofDays(1))
+      val backfillStartTime2 = clock.instant()
+      createBackfillAction.create(
+        "deep-fryer",
+        ConfigureServiceAction.RESERVED_VARIANT,
+        CreateBackfillRequest.Builder()
+          .backfill_name("FrenchFries")
+          .build(),
+      )
+      createBackfillAction.create(
+        "deep-fryer",
+        ConfigureServiceAction.RESERVED_VARIANT,
+        CreateBackfillRequest.Builder()
+          .backfill_name("FrenchFries")
+          .build(),
+      )
+      var backfillSearchResults = searchBackfillRunsAction.searchBackfillRuns(
+        service = "deep-fryer",
+        variant = RESERVED_VARIANT,
+        pagination_token = null,
+        created_start_date = backfillStartTime1,
+        created_end_date = backfillStartTime1.plus(Duration.ofSeconds(1)),
+      )
+      assertThat(backfillSearchResults.paused_backfills).hasSize(1)
+
+
+      backfillSearchResults = searchBackfillRunsAction.searchBackfillRuns(
+        service = "deep-fryer",
+        variant = RESERVED_VARIANT,
+        pagination_token = null,
+        created_start_date = backfillStartTime1,
+      )
+      assertThat(backfillSearchResults.paused_backfills).hasSize(3)
+
+      backfillSearchResults = searchBackfillRunsAction.searchBackfillRuns(
+        service = "deep-fryer",
+        variant = RESERVED_VARIANT,
+        pagination_token = null,
+        created_end_date = backfillStartTime1,
+      )
+      assertThat(backfillSearchResults.paused_backfills).hasSize(1)
+
     }
   }
 
