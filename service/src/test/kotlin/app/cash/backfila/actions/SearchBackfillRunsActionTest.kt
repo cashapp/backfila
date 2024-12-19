@@ -47,9 +47,6 @@ class SearchBackfillRunsActionTest {
   lateinit var stopBackfillAction: StopBackfillAction
 
   @Inject
-  lateinit var stopAllBackfillsAction: StopAllBackfillsAction
-
-  @Inject
   lateinit var getBackfillRunsAction: GetBackfillRunsAction
 
   @Inject
