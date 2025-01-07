@@ -2,21 +2,23 @@ package app.cash.backfila.ui.pages
 
 import app.cash.backfila.service.BackfilaConfig
 import app.cash.backfila.ui.PathBuilder
+import app.cash.backfila.ui.actions.ServiceAutocompleteAction
 import app.cash.backfila.ui.components.AlertSupport
 import app.cash.backfila.ui.components.DashboardLayout
 import app.cash.backfila.ui.components.PageTitle
-import app.cash.backfila.ui.components.ServiceAutocompleteWrapper
-import app.cash.backfila.ui.components.ToggleContainer
 import javax.inject.Inject
+import kotlinx.html.InputType
 import kotlinx.html.a
 import kotlinx.html.div
-import kotlinx.html.form
-import kotlinx.html.id
+import kotlinx.html.h3
 import kotlinx.html.input
-import kotlinx.html.legend
+import kotlinx.html.li
+import kotlinx.html.p
+import kotlinx.html.role
+import kotlinx.html.span
+import kotlinx.html.ul
 import misk.hotwire.buildHtml
 import misk.security.authz.Authenticated
-import misk.turbo.turbo_frame
 import misk.web.Get
 import misk.web.QueryParam
 import misk.web.ResponseContentType
@@ -25,6 +27,7 @@ import misk.web.mediatype.MediaTypes
 
 class ServiceIndexAction @Inject constructor(
   private val config: BackfilaConfig,
+  private val serviceAutocompleteAction: ServiceAutocompleteAction,
 ) : WebAction {
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
@@ -40,164 +43,88 @@ class ServiceIndexAction @Inject constructor(
         PageTitle("Services")
         val pathBuilder = PathBuilder(path = PATH)
 
-        ServiceAutocompleteWrapper(redirectPath = ServiceShowAction.PATH)
+        div {
+          attributes["data-controller"] = "search-bar"
 
-        ToggleContainer(
-          buttonText = "${pathBuilder.countFilters()} Filters",
-          labelBlock = {
-            a(classes = "text-gray-500") {
-              href = PathBuilder(
-                path = pathBuilder.path,
-                service = pathBuilder.service,
-              ).build()
-
-              attributes["target"] = "_top"
-
-              +"""Clear all"""
-            }
-          },
-        ) {
-          div("border-gray-200 py-10") {
-            id = "filters"
-            div(
-              "mx-auto grid max-w-7xl grid-cols-4 gap-x-4 px-4 text-sm sm:px-6 md:gap-x-6 lg:px-8",
+          // Search Bar
+          div {
+            input(
+              type = InputType.search,
+              classes = "flex h-10 w-full bg-gray-100 hover:bg-gray-200 duration-500 border-none rounded-lg text-sm",
             ) {
-//          div("grid auto-rows-min grid-cols-1 gap-y-10 md:grid-cols-2 md:gap-x-6") {
-              div {
-                legend("block font-medium") { +"""Status""" }
-                // TODO fill in applicable filters
-                // div("space-y-6 pt-6 sm:space-y-4 sm:pt-4") {
-                //   listOf(
-                //     FlagInfoStatus.ACTIVE,
-                //     FlagInfoStatus.ROLLED_OUT,
-                //     FlagInfoStatus.NEEDS_CLEANUP,
-                //     FlagInfoStatus.NEEDS_ARCHIVE,
-                //     FlagInfoStatus.NONE,
-                //   ).forEach {
-                //     div("flex items-center text-base sm:text-sm") {
-                //       a {
-                //         val selected = pathBuilder.filterFlagInfoStatus.contains(it)
-                //         val toggledList = if (selected) {
-                //           pathBuilder.filterFlagInfoStatus.toMutableList().minus(it)
-                //         } else {
-                //           pathBuilder.filterFlagInfoStatus.toMutableList().plus(it)
-                //         }
-                //         href = pathBuilder.copy(
-                //           filterFlagInfoStatus = toggledList
-                //         ).build()
-                //
-                //         input(classes = "h-4 w-4 flex-shrink-0 rounded border-gray-300 text-green-600 focus:ring-green-500") {
-                //           id = "status-${it.ordinal}"
-                //           name = "status[]"
-                //           value = "${it.ordinal}"
-                //           type = InputType.checkBox
-                //           checked = selected
-                //         }
-                //         label("cursor-pointer ml-3 min-w-0 flex-1 text-gray-600") {
-                //           htmlFor = "status-0"
-                //           FlagStatusBadge(it)
-                //         }
-                //       }
-                //     }
-                //   }
-                // }
-              }
-              div {
-                legend("block font-medium") { +"""Category""" }
-                // div("space-y-6 pt-6 sm:space-y-4 sm:pt-4") {
-                //   listOf(
-                //     FlagCategory.ROLLOUT,
-                //     FlagCategory.EXPERIMENT,
-                //     FlagCategory.PERMANENT_CONFIG,
-                //     FlagCategory.UNCATEGORIZED,
-                //   ).forEach {
-                //     div("flex items-center text-base sm:text-sm") {
-                //       a {
-                //         val selected = pathBuilder.filterFlagCategory.contains(it)
-                //         val toggledList = if (selected) {
-                //           pathBuilder.filterFlagCategory.toMutableList().minus(it)
-                //         } else {
-                //           pathBuilder.filterFlagCategory.toMutableList().plus(it)
-                //         }
-                //         href = pathBuilder.copy(
-                //           filterFlagCategory = toggledList
-                //         ).build()
-                //
-                //         input(classes = "h-4 w-4 flex-shrink-0 rounded border-gray-300 text-green-600 focus:ring-green-500 hover:bg-green") {
-                //           id = "category-${it.ordinal}"
-                //           name = "category[]"
-                //           value = "${it.ordinal}"
-                //           type = InputType.checkBox
-                //           checked = selected
-                //         }
-                //         label("cursor-pointer ml-3 min-w-0 flex-1 text-gray-600") {
-                //           htmlFor = "category-0"
-                //           FlagCategoryBadge(it)
-                //         }
-                //       }
-                //     }
-                //   }
-                // }
-              }
-              div {
-                legend("block font-medium") { +"""Other""" }
-                // div("space-y-6 pt-6 sm:space-y-4 sm:pt-4") {
-                //
-                //   div("flex items-center text-base sm:text-sm") {
-                //     a {
-                //       val selected = pathBuilder.filterDivergent
-                //       href = pathBuilder.copy(
-                //         filterDivergent = !pathBuilder.filterDivergent
-                //       ).build()
-                //
-                //       input(classes = "h-4 w-4 flex-shrink-0 rounded border-gray-300 text-green-600 focus:ring-green-500") {
-                //         id = "divergent"
-                //         name = "divergent"
-                //         value = "${selected}"
-                //         type = InputType.checkBox
-                //         checked = selected
-                //       }
-                //       label("cursor-pointer ml-3 min-w-0 flex-1 text-gray-600") {
-                //         htmlFor = "divergent-0"
-                //         +"Divergent"
-                //       }
-                //     }
-                //   }
-                //
-                //   div("flex items-center text-base sm:text-sm") {
-                //     a {
-                //       val selected = pathBuilder.filterMyFlags
-                //       href = pathBuilder.copy(
-                //         filterMyFlags = !pathBuilder.filterMyFlags
-                //       ).build()
-                //
-                //       input(classes = "h-4 w-4 flex-shrink-0 rounded border-gray-300 text-green-600 focus:ring-green-500") {
-                //         id = "my-flags"
-                //         name = "my-flags"
-                //         value = "${selected}"
-                //         type = InputType.checkBox
-                //         checked = selected
-                //       }
-                //       label("cursor-pointer ml-3 min-w-0 flex-1 text-gray-600") {
-                //         htmlFor = "my-flags-0"
-                //         +"My Flags"
-                //       }
-                //     }
-                //   }
-                // }
+              attributes["data-action"] = "input->search-bar#search"
+              placeholder = "Search"
+            }
+          }
+
+          // List of Services
+          val services = serviceAutocompleteAction.getFlattenedServices()
+          div("py-10") {
+            ul("grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3") {
+              role = "list"
+
+              services.map { (path, service) ->
+                li("registration col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow") {
+                  div("flex w-full items-center justify-between space-x-6 p-6") {
+                    div("flex-1 truncate") {
+                      div("flex items-center space-x-3") {
+                        // Don't include default variant in label, only for unique variants
+                        val label = if (path.split("/").last() == "default") service.name else path
+                        val variant = if (path.split("/").last() == "default") null else path.split("/").last()
+                        h3("truncate text-sm font-medium text-gray-900") {
+                          +"""$label (${service.running_backfills})"""
+                        }
+                        variant?.let { span("inline-flex shrink-0 items-center rounded-full bg-green-50 px-1.5 py-0.5 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20") { +it } }
+                      }
+                      p("mt-1 truncate text-sm text-gray-500") { +"""Regional Paradigm Technician""" }
+                    }
+                  }
+                  div {
+                    div("-mt-px flex divide-x divide-gray-200") {
+                      div("flex w-0 flex-1") {
+                        a(classes = "relative -mr-px inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-bl-lg border border-transparent py-4 text-sm font-semibold text-gray-900") {
+                          href = "mailto:janecooper@example.com"
+//                        svg("size-5 text-gray-400") {
+//                          viewbox = "0 0 20 20"
+//                          fill = "currentColor"
+//                          attributes["aria-hidden"] = "true"
+//                          attributes["data-slot"] = "icon"
+//                          path {
+//                            d =
+//                              "M3 4a2 2 0 0 0-2 2v1.161l8.441 4.221a1.25 1.25 0 0 0 1.118 0L19 7.162V6a2 2 0 0 0-2-2H3Z"
+//                          }
+//                          path {
+//                            d =
+//                              "m19 8.839-7.77 3.885a2.75 2.75 0 0 1-2.46 0L1 8.839V14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.839Z"
+//                          }
+//                        }
+                          +"""Email"""
+                        }
+                      }
+                      div("-ml-px flex w-0 flex-1") {
+                        a(classes = "relative inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-br-lg border border-transparent py-4 text-sm font-semibold text-gray-900") {
+                          href = "tel:+1-202-555-0170"
+//                        svg("size-5 text-gray-400") {
+//                          viewbox = "0 0 20 20"
+//                          fill = "currentColor"
+//                          attributes["aria-hidden"] = "true"
+//                          attributes["data-slot"] = "icon"
+//                          path {
+//                            attributes["fill-rule"] = "evenodd"
+//                            d =
+//                              "M2 3.5A1.5 1.5 0 0 1 3.5 2h1.148a1.5 1.5 0 0 1 1.465 1.175l.716 3.223a1.5 1.5 0 0 1-1.052 1.767l-.933.267c-.41.117-.643.555-.48.95a11.542 11.542 0 0 0 6.254 6.254c.395.163.833-.07.95-.48l.267-.933a1.5 1.5 0 0 1 1.767-1.052l3.223.716A1.5 1.5 0 0 1 18 15.352V16.5a1.5 1.5 0 0 1-1.5 1.5H15c-1.149 0-2.263-.15-3.326-.43A13.022 13.022 0 0 1 2.43 8.326 13.019 13.019 0 0 1 2 5V3.5Z"
+//                            attributes["clip-rule"] = "evenodd"
+//                          }
+//                        }
+                          +"""Call"""
+                        }
+                      }
+                    }
+                  }
+                }
               }
             }
           }
-        }
-
-        form {
-          action = ""
-          input {
-            placeholder = "Search yo"
-          }
-        }
-
-        turbo_frame("") {
         }
 
         AlertSupport(config.support_button_label, config.support_button_url)

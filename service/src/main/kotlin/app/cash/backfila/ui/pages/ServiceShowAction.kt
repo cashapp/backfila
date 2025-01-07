@@ -6,6 +6,7 @@ import app.cash.backfila.ui.components.AlertSupport
 import app.cash.backfila.ui.components.BackfillsTable
 import app.cash.backfila.ui.components.DashboardLayout
 import app.cash.backfila.ui.components.PageTitle
+import java.net.HttpURLConnection
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.html.role
@@ -19,6 +20,8 @@ import misk.web.ResponseBody
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
+import misk.web.toResponseBody
+import okhttp3.Headers
 
 @Singleton
 class ServiceShowAction @Inject constructor(
@@ -29,9 +32,17 @@ class ServiceShowAction @Inject constructor(
   @ResponseContentType(MediaTypes.TEXT_HTML)
   @Authenticated(capabilities = ["users"])
   fun get(
-    @QueryParam s: String,
+    @QueryParam s: String?,
     @QueryParam("experimental") experimental: Boolean? = false,
   ): Response<ResponseBody> {
+    if (s.isNullOrBlank()) {
+      return Response(
+        body = "go to /".toResponseBody(),
+        statusCode = HttpURLConnection.HTTP_MOVED_TEMP,
+        headers = Headers.headersOf("Location", "/"),
+      )
+    }
+
     val serviceName = s.split("/").first()
     val variant = s.split("/").last()
 

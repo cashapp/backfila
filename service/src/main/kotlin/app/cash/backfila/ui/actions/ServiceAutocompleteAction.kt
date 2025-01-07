@@ -23,12 +23,10 @@ class ServiceAutocompleteAction @Inject constructor(
   fun get(
     @QueryParam q: String?,
   ): String {
-    val services = getServicesAction.services().services
+    val services = getFlattenedServices()
 
     return buildHtml {
-      services.flatMap { service ->
-        service.variants.map { variant -> "${service.name}/$variant" to service }
-      }.filter { (path, _) ->
+      services.filter { (path, _) ->
         q.isNullOrBlank() || path.lowercase().contains(q.lowercase())
       }.map { (path, service) ->
         li("list-group-item cursor-default select-none px-4 py-2 text-left") {
@@ -41,6 +39,13 @@ class ServiceAutocompleteAction @Inject constructor(
         }
       }
     }
+  }
+
+  fun getFlattenedServices(): Map<String, GetServicesAction.UiService> {
+    val services = getServicesAction.services().services
+    return services.flatMap { service ->
+      service.variants.map { variant -> "${service.name}/$variant" to service }
+    }.toMap()
   }
 
   companion object {

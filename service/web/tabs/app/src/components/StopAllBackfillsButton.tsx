@@ -1,9 +1,16 @@
 import * as React from "react"
 import Axios from "axios"
-import { Button, Intent, Toaster, Classes, Popover, InputGroup } from "@blueprintjs/core"
+import {
+  Button,
+  Intent,
+  Toaster,
+  Classes,
+  Popover,
+  InputGroup
+} from "@blueprintjs/core"
 
 interface IStopAllRealBackillsProps {
-  onUpdate?: () => void,
+  onUpdate?: () => void
   disabled: boolean
 }
 
@@ -11,7 +18,8 @@ interface IStopAllRealBackfillsState {
   loading: boolean
 }
 
-const EMERGENCY_PROMISE = "I realize that by breaking glass that I am imposing a cost on the whole organization"
+const EMERGENCY_PROMISE =
+  "I realize that by breaking glass that I am imposing a cost on the whole organization"
 
 class StopAllRealButton extends React.Component<
   IStopAllRealBackillsProps,
@@ -53,21 +61,23 @@ class StopAllRealButton extends React.Component<
   }
 }
 
-interface IStopAllBackillsProps {
-}
+interface IStopAllBackillsProps {}
 
 interface IStopAllBackfillsState {
   disabled: boolean
 }
 
-class StopAllButton extends React.Component<IStopAllBackillsProps, IStopAllBackfillsState> {
+class StopAllButton extends React.Component<
+  IStopAllBackillsProps,
+  IStopAllBackfillsState
+> {
   handleTextChange(newValue: String) {
     this.setState({
       disabled: newValue != EMERGENCY_PROMISE
     })
   }
 
-  public state: IStopAllBackfillsState= {
+  public state: IStopAllBackfillsState = {
     disabled: true
   }
 
@@ -82,21 +92,15 @@ class StopAllButton extends React.Component<IStopAllBackillsProps, IStopAllBackf
             <p>
               Are you sure? This should only been done during large incidents.
             </p>
-            <p>
-              If there is an ongoing incident, please type:
-            </p>
-            <p>
-              "{EMERGENCY_PROMISE}"
-            </p>
-            <p>
-              (without quotes) in the text box below to enable.
-            </p>
+            <p>If there is an ongoing incident, please type:</p>
+            <p>"{EMERGENCY_PROMISE}"</p>
+            <p>(without quotes) in the text box below to enable.</p>
             <InputGroup
-              onChange={(event: React.FormEvent<HTMLElement>) => this.handleTextChange((event.target as HTMLInputElement).value)}
+              onChange={(event: React.FormEvent<HTMLElement>) =>
+                this.handleTextChange((event.target as HTMLInputElement).value)
+              }
             />
-            <StopAllRealButton
-              disabled={this.state.disabled}
-            />
+            <StopAllRealButton disabled={this.state.disabled} />
           </div>
         }
         children={
