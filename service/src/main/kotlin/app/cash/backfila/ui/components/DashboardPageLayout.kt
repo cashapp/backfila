@@ -1,6 +1,9 @@
 package app.cash.backfila.ui.components
 
 import app.cash.backfila.dashboard.GetBackfillRunsAction
+import app.cash.backfila.service.persistence.BackfilaDb
+import app.cash.backfila.service.persistence.BackfillRunQuery
+import app.cash.backfila.service.persistence.BackfillState
 import jakarta.inject.Inject
 import kotlinx.html.TagConsumer
 import kotlinx.html.div
@@ -8,6 +11,9 @@ import kotlinx.html.main
 import kotlinx.html.script
 import misk.MiskCaller
 import misk.config.AppName
+import misk.hibernate.Query
+import misk.hibernate.Transacter
+import misk.hibernate.newQuery
 import misk.hotwire.buildHtml
 import misk.scope.ActionScoped
 import misk.tailwind.Link
@@ -34,6 +40,8 @@ class DashboardPageLayout @Inject constructor(
   private val deployment: Deployment,
   private val clientHttpCall: ActionScoped<HttpCall>,
   private val getBackfillRunsAction: GetBackfillRunsAction,
+  @BackfilaDb private val transacter: Transacter,
+  private val queryFactory: Query.Factory,
 ) {
   private var newBuilder = false
   private var headBlock: TagConsumer<*>.() -> Unit = {}
@@ -60,6 +68,8 @@ class DashboardPageLayout @Inject constructor(
     deployment = deployment,
     clientHttpCall = clientHttpCall,
     getBackfillRunsAction = getBackfillRunsAction,
+    transacter = transacter,
+    queryFactory = queryFactory,
   ).setNewBuilder()
 
   fun title(title: String) = apply {
@@ -135,50 +145,53 @@ class DashboardPageLayout @Inject constructor(
   private fun buildMenuSections(
     currentPath: String,
   ): List<MenuSection> {
-    val callerBackfills = getBackfillRunsAction.backfillRuns(serviceName, variant)
+    return transacter.transaction { session ->
+      val runningBackfills = queryFactory.newQuery<BackfillRunQuery>()
+        .createdByUser(callerProvider.get()!!.user!!)
+        .state(BackfillState.RUNNING)
+        .orderByUpdatedAtDesc()
+        .list(session)
 
-    return listOf(
-      MenuSection(
-        title = "Backfila",
-        links = listOf(
-          Link(
-            label = "Services",
-            href = "/services/",
-            isSelected = currentPath.startsWith("/services/"),
-          ),
-          Link(
-            label = "Backfills",
-            href = "/backfills/",
-            isSelected = currentPath.startsWith("/backfills/"),
-          ),
-        ),
-      ),
-      MenuSection(
-        title = "Your Services",
-        links = listOf(
-          Link(
-            label = "Fine Dining",
-            href = "/services/?q=FineDining",
-            isSelected = currentPath.startsWith("/services/?q=FindDining"),
+      // TODO get services from REgistry for user || group backfills by service
+
+      listOf(
+        MenuSection(
+          title = "Backfila",
+          links = listOf(
+            Link(
+              label = "Services",
+              href = "/services/",
+              isSelected = currentPath.startsWith("/services/"),
+            ),
+            Link(
+              label = "Backfills",
+              href = "/backfills/",
+              isSelected = currentPath.startsWith("/backfills/"),
+            ),
           ),
         ),
-      ),
-      MenuSection(
-        title = "Your Backfills",
-        links = listOf(
-          Link(
-            label = "FineDining #0034",
-            href = "/services/",
-            isSelected = currentPath.startsWith("/backfill/"),
-          ),
-          Link(
-            label = "FineDining #0067",
-            href = "/backfill/",
-            isSelected = currentPath.startsWith("/backfill/"),
+        MenuSection(
+          title = "Your Services",
+          links = listOf(
+            Link(
+              label = "Fine Dining",
+              href = "/services/?q=FineDining",
+              isSelected = currentPath.startsWith("/services/?q=FindDining"),
+            ),
           ),
         ),
-      ),
-    )
+        MenuSection(
+          title = "Your Backfills",
+          links = runningBackfills.map { backfill ->
+            Link(
+              label = backfill.service.registry_name + " #" + backfill.id,
+              href = "/backfills/${backfill.id}",
+              isSelected = currentPath.startsWith("/backfills/${backfill.id}"),
+            )
+          },
+        ),
+      )
+    }
   }
 
   companion object {
