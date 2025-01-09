@@ -2,7 +2,7 @@
 jooq = "3.18.1"
 ktlint = "0.47.1"
 kotlin = "1.9.23"
-misk = "2024.06.26.052833-88986ac"
+misk = "2025.01.09.184726-680bca2"
 okhttp = "5.0.0-alpha.14"
 wire = "5.0.0"
 sqldelight = "2.0.2"

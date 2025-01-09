@@ -4,7 +4,7 @@ import app.cash.backfila.service.BackfilaConfig
 import app.cash.backfila.ui.PathBuilder
 import app.cash.backfila.ui.actions.ServiceAutocompleteAction
 import app.cash.backfila.ui.components.AlertSupport
-import app.cash.backfila.ui.components.DashboardLayout
+import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.components.PageTitle
 import javax.inject.Inject
 import kotlinx.html.InputType
@@ -17,7 +17,6 @@ import kotlinx.html.p
 import kotlinx.html.role
 import kotlinx.html.span
 import kotlinx.html.ul
-import misk.hotwire.buildHtml
 import misk.security.authz.Authenticated
 import misk.web.Get
 import misk.web.QueryParam
@@ -28,62 +27,61 @@ import misk.web.mediatype.MediaTypes
 class ServiceIndexAction @Inject constructor(
   private val config: BackfilaConfig,
   private val serviceAutocompleteAction: ServiceAutocompleteAction,
+  private val dashboardPageLayout: DashboardPageLayout,
 ) : WebAction {
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
   @Authenticated(capabilities = ["users"])
   fun get(
     @QueryParam sc: String?,
-  ): String {
-    return buildHtml {
-      DashboardLayout(
-        title = "Backfila",
-        path = PATH,
-      ) {
-        PageTitle("Services")
-        val pathBuilder = PathBuilder(path = PATH)
+  ): String = dashboardPageLayout
+    .newBuilder()
+    .title("Backfila Home")
+    .build {
+      PageTitle("Services")
+      val pathBuilder = PathBuilder(path = PATH)
 
+      div {
+        attributes["data-controller"] = "search-bar"
+
+        // Search Bar
         div {
-          attributes["data-controller"] = "search-bar"
-
-          // Search Bar
-          div {
-            input(
-              type = InputType.search,
-              classes = "flex h-10 w-full bg-gray-100 hover:bg-gray-200 duration-500 border-none rounded-lg text-sm",
-            ) {
-              attributes["data-action"] = "input->search-bar#search"
-              placeholder = "Search"
-            }
+          input(
+            type = InputType.search,
+            classes = "flex h-10 w-full bg-gray-100 hover:bg-gray-200 duration-500 border-none rounded-lg text-sm",
+          ) {
+            attributes["data-action"] = "input->search-bar#search"
+            placeholder = "Search"
           }
+        }
 
-          // List of Services
-          val services = serviceAutocompleteAction.getFlattenedServices()
-          div("py-10") {
-            ul("grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3") {
-              role = "list"
+        // List of Services
+        val services = serviceAutocompleteAction.getFlattenedServices()
+        div("py-10") {
+          ul("grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3") {
+            role = "list"
 
-              services.map { (path, service) ->
-                li("registration col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow") {
-                  div("flex w-full items-center justify-between space-x-6 p-6") {
-                    div("flex-1 truncate") {
-                      div("flex items-center space-x-3") {
-                        // Don't include default variant in label, only for unique variants
-                        val label = if (path.split("/").last() == "default") service.name else path
-                        val variant = if (path.split("/").last() == "default") null else path.split("/").last()
-                        h3("truncate text-sm font-medium text-gray-900") {
-                          +"""$label (${service.running_backfills})"""
-                        }
-                        variant?.let { span("inline-flex shrink-0 items-center rounded-full bg-green-50 px-1.5 py-0.5 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20") { +it } }
+            services.map { (path, service) ->
+              li("registration col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow") {
+                div("flex w-full items-center justify-between space-x-6 p-6") {
+                  div("flex-1 truncate") {
+                    div("flex items-center space-x-3") {
+                      // Don't include default variant in label, only for unique variants
+                      val label = if (path.split("/").last() == "default") service.name else path
+                      val variant = if (path.split("/").last() == "default") null else path.split("/").last()
+                      h3("truncate text-sm font-medium text-gray-900") {
+                        +"""$label (${service.running_backfills})"""
                       }
-                      p("mt-1 truncate text-sm text-gray-500") { +"""Regional Paradigm Technician""" }
+                      variant?.let { span("inline-flex shrink-0 items-center rounded-full bg-green-50 px-1.5 py-0.5 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20") { +it } }
                     }
+                    p("mt-1 truncate text-sm text-gray-500") { +"""Regional Paradigm Technician""" }
                   }
-                  div {
-                    div("-mt-px flex divide-x divide-gray-200") {
-                      div("flex w-0 flex-1") {
-                        a(classes = "relative -mr-px inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-bl-lg border border-transparent py-4 text-sm font-semibold text-gray-900") {
-                          href = "mailto:janecooper@example.com"
+                }
+                div {
+                  div("-mt-px flex divide-x divide-gray-200") {
+                    div("flex w-0 flex-1") {
+                      a(classes = "relative -mr-px inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-bl-lg border border-transparent py-4 text-sm font-semibold text-gray-900") {
+                        href = "mailto:janecooper@example.com"
 //                        svg("size-5 text-gray-400") {
 //                          viewbox = "0 0 20 20"
 //                          fill = "currentColor"
@@ -98,12 +96,12 @@ class ServiceIndexAction @Inject constructor(
 //                              "m19 8.839-7.77 3.885a2.75 2.75 0 0 1-2.46 0L1 8.839V14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.839Z"
 //                          }
 //                        }
-                          +"""Email"""
-                        }
+                        +"""Email"""
                       }
-                      div("-ml-px flex w-0 flex-1") {
-                        a(classes = "relative inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-br-lg border border-transparent py-4 text-sm font-semibold text-gray-900") {
-                          href = "tel:+1-202-555-0170"
+                    }
+                    div("-ml-px flex w-0 flex-1") {
+                      a(classes = "relative inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-br-lg border border-transparent py-4 text-sm font-semibold text-gray-900") {
+                        href = "tel:+1-202-555-0170"
 //                        svg("size-5 text-gray-400") {
 //                          viewbox = "0 0 20 20"
 //                          fill = "currentColor"
@@ -116,8 +114,7 @@ class ServiceIndexAction @Inject constructor(
 //                            attributes["clip-rule"] = "evenodd"
 //                          }
 //                        }
-                          +"""Call"""
-                        }
+                        +"""Call"""
                       }
                     }
                   }
@@ -126,11 +123,10 @@ class ServiceIndexAction @Inject constructor(
             }
           }
         }
-
-        AlertSupport(config.support_button_label, config.support_button_url)
       }
+
+      AlertSupport(config.support_button_label, config.support_button_url)
     }
-  }
 
   companion object {
     const val PATH = "/"
