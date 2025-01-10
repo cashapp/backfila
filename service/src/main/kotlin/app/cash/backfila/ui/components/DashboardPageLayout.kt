@@ -20,10 +20,12 @@ import misk.tailwind.Link
 import misk.tailwind.pages.MenuSection
 import misk.tailwind.pages.Navbar
 import misk.web.HttpCall
+import misk.web.ResponseBody
 import misk.web.dashboard.DashboardHomeUrl
 import misk.web.dashboard.DashboardNavbarItem
 import misk.web.dashboard.DashboardTab
 import misk.web.dashboard.HtmlLayout
+import okio.BufferedSink
 import wisp.deployment.Deployment
 
 /**
@@ -32,10 +34,6 @@ import wisp.deployment.Deployment
  * Must be called within a Web Action.
  */
 class DashboardPageLayout @Inject constructor(
-  private val allHomeUrls: List<DashboardHomeUrl>,
-  @AppName private val appName: String,
-  private val allNavbarItem: List<DashboardNavbarItem>,
-  private val allTabs: List<DashboardTab>,
   private val callerProvider: ActionScoped<MiskCaller?>,
   private val deployment: Deployment,
   private val clientHttpCall: ActionScoped<HttpCall>,
@@ -50,20 +48,10 @@ class DashboardPageLayout @Inject constructor(
   private val path by lazy {
     clientHttpCall.get().url.encodedPath
   }
-  private val dashboardHomeUrl by lazy {
-    allHomeUrls.firstOrNull { path.startsWith(it.url) }
-  }
-  private val homeUrl by lazy {
-    dashboardHomeUrl?.url ?: "/"
-  }
 
   private fun setNewBuilder() = apply { newBuilder = true }
 
   fun newBuilder(): DashboardPageLayout = DashboardPageLayout(
-    allHomeUrls = allHomeUrls,
-    appName = appName,
-    allNavbarItem = allNavbarItem,
-    allTabs = allTabs,
     callerProvider = callerProvider,
     deployment = deployment,
     clientHttpCall = clientHttpCall,
@@ -104,29 +92,16 @@ class DashboardPageLayout @Inject constructor(
         },
       ) {
         div("min-h-full") {
-          if (true) {
-            // Uses Misk's Navbar with sidebar
-            Navbar(
-              appName = "Backfila",
-              deployment = deployment,
-              homeHref = "/",
-              menuSections = buildMenuSections(
-                currentPath = path,
-              ),
-            ) {
-              div("py-10") {
-                main {
-                  div("mx-auto max-w-7xl sm:px-6 lg:px-8") {
-                    // TODO remove when new UI is stable and preferred
-                    UseOldUIAlert()
-                    block()
-                  }
-                }
-              }
-            }
-          } else {
-            // Old UI
-            NavBar(path)
+          // Uses Misk's Navbar with sidebar
+          Navbar(
+            appName = "Backfila",
+            deployment = deployment,
+            homeHref = "/",
+            menuSections = buildMenuSections(
+              currentPath = path,
+            ),
+            sortedMenuLinks = false,
+          ) {
             div("py-10") {
               main {
                 div("mx-auto max-w-7xl sm:px-6 lg:px-8") {
@@ -142,55 +117,78 @@ class DashboardPageLayout @Inject constructor(
     }
   }
 
+  fun buildHtmlResponseBody(block: TagConsumer<*>.() -> Unit): ResponseBody = object : ResponseBody {
+    override fun writeTo(sink: BufferedSink) {
+      sink.writeUtf8(build(block))
+    }
+  }
+
   private fun buildMenuSections(
     currentPath: String,
   ): List<MenuSection> {
     return transacter.transaction { session ->
-      val runningBackfills = queryFactory.newQuery<BackfillRunQuery>()
+      val runningBackfillsForCaller = queryFactory.newQuery<BackfillRunQuery>()
         .createdByUser(callerProvider.get()!!.user!!)
         .state(BackfillState.RUNNING)
         .orderByUpdatedAtDesc()
         .list(session)
 
       // TODO get services from REgistry for user || group backfills by service
+      val services = runningBackfillsForCaller.groupBy { it.service }
 
       listOf(
         MenuSection(
           title = "Backfila",
           links = listOf(
             Link(
+              label = "Home",
+              href = "/",
+              isSelected = currentPath == "/",
+            ),
+            Link(
               label = "Services",
               href = "/services/",
-              isSelected = currentPath.startsWith("/services/"),
+              isSelected = currentPath == "/services/",
             ),
             Link(
               label = "Backfills",
               href = "/backfills/",
-              isSelected = currentPath.startsWith("/backfills/"),
+              isSelected = currentPath == "/backfills/",
             ),
           ),
         ),
-        MenuSection(
-          title = "Your Services",
-          links = listOf(
-            Link(
-              label = "Fine Dining",
-              href = "/services/?q=FineDining",
-              isSelected = currentPath.startsWith("/services/?q=FindDining"),
-            ),
+      ) + if (services.isNotEmpty()) {
+        listOf(
+          MenuSection(
+            title = "Your Services",
+            links = services.map { (service, backfills) ->
+              val variant = if (service.variant == "default") "" else service.variant
+              Link(
+                label = service.registry_name,
+                href = "/services/${service.registry_name}/$variant",
+                isSelected = currentPath.startsWith("/services/${service.registry_name}/$variant"),
+              )
+            },
           ),
-        ),
-        MenuSection(
-          title = "Your Backfills",
-          links = runningBackfills.map { backfill ->
-            Link(
-              label = backfill.service.registry_name + " #" + backfill.id,
-              href = "/backfills/${backfill.id}",
-              isSelected = currentPath.startsWith("/backfills/${backfill.id}"),
-            )
-          },
-        ),
-      )
+        )
+      } else {
+        listOf()
+      } + if (runningBackfillsForCaller.isNotEmpty()) {
+        listOf(
+          MenuSection(
+            title = "Your Backfills",
+            links = runningBackfillsForCaller.map { backfill ->
+              Link(
+                label = backfill.service.registry_name + " #" + backfill.id,
+                href = "/backfills/${backfill.id}",
+                isSelected = currentPath.startsWith("/backfills/${backfill.id}"),
+              )
+            },
+          ),
+        )
+      } else {
+        listOf()
+      }
     }
   }
 

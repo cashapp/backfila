@@ -129,6 +129,6 @@ class ServiceIndexAction @Inject constructor(
     }
 
   companion object {
-    const val PATH = "/"
+    const val PATH = "/services/"
   }
 }

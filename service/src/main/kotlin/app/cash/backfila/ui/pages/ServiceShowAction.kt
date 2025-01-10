@@ -4,16 +4,16 @@ import app.cash.backfila.dashboard.GetBackfillRunsAction
 import app.cash.backfila.service.BackfilaConfig
 import app.cash.backfila.ui.components.AlertSupport
 import app.cash.backfila.ui.components.BackfillsTable
-import app.cash.backfila.ui.components.DashboardLayout
+import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.components.PageTitle
 import java.net.HttpURLConnection
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.html.role
 import kotlinx.html.ul
-import misk.hotwire.buildHtmlResponseBody
 import misk.security.authz.Authenticated
 import misk.web.Get
+import misk.web.PathParam
 import misk.web.QueryParam
 import misk.web.Response
 import misk.web.ResponseBody
@@ -27,34 +27,32 @@ import okhttp3.Headers
 class ServiceShowAction @Inject constructor(
   private val config: BackfilaConfig,
   private val getBackfillRunsAction: GetBackfillRunsAction,
+  private val dashboardPageLayout: DashboardPageLayout,
 ) : WebAction {
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
   @Authenticated(capabilities = ["users"])
   fun get(
-    @QueryParam s: String?,
+    @PathParam service: String?,
+    @PathParam variantOrBlank: String = "",
     @QueryParam("experimental") experimental: Boolean? = false,
   ): Response<ResponseBody> {
-    if (s.isNullOrBlank()) {
+    if (service.isNullOrBlank()) {
       return Response(
         body = "go to /".toResponseBody(),
         statusCode = HttpURLConnection.HTTP_MOVED_TEMP,
         headers = Headers.headersOf("Location", "/"),
       )
     }
+    val variant = variantOrBlank.ifBlank { "default" }
 
-    val serviceName = s.split("/").first()
-    val variant = s.split("/").last()
+    val backfillRuns = getBackfillRunsAction.backfillRuns(service, variant)
 
-    val backfillRuns = getBackfillRunsAction.backfillRuns(serviceName, variant)
-
-    val htmlResponseBody = buildHtmlResponseBody {
-      // TODO show default if other variants and probably link to a switcher
-      val label = if (variant == "default") serviceName else "$serviceName ($variant)"
-      DashboardLayout(
-        title = "$label | Backfila",
-        path = PATH,
-      ) {
+    // TODO show default if other variants and probably link to a switcher
+    val label = if (variant == "default") service else "$service ($variant)"
+    val htmlResponseBody = dashboardPageLayout.newBuilder()
+      .title("$label | Backfila")
+      .buildHtmlResponseBody {
         PageTitle("Service", label)
 
         // TODO Add completed table
@@ -68,12 +66,11 @@ class ServiceShowAction @Inject constructor(
 
         AlertSupport(config.support_button_label, config.support_button_url)
       }
-    }
 
     return Response(htmlResponseBody)
   }
 
   companion object {
-    const val PATH = "/services/"
+    const val PATH = "/services/{service}/{variantOrBlank}"
   }
 }

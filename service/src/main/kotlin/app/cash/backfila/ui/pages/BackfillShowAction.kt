@@ -7,7 +7,7 @@ import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.ui.actions.BackfillShowButtonHandlerAction
 import app.cash.backfila.ui.components.AlertError
 import app.cash.backfila.ui.components.AlertSupport
-import app.cash.backfila.ui.components.DashboardLayout
+import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.components.PageTitle
 import app.cash.backfila.ui.components.ProgressBar
 import javax.inject.Inject
@@ -30,7 +30,6 @@ import kotlinx.html.td
 import kotlinx.html.th
 import kotlinx.html.thead
 import kotlinx.html.tr
-import misk.hotwire.buildHtmlResponseBody
 import misk.security.authz.Authenticated
 import misk.tailwind.Link
 import misk.web.Get
@@ -45,6 +44,7 @@ import misk.web.mediatype.MediaTypes
 class BackfillShowAction @Inject constructor(
   private val config: BackfilaConfig,
   private val getBackfillStatusAction: GetBackfillStatusAction,
+  private val dashboardPageLayout: DashboardPageLayout,
 ) : WebAction {
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
@@ -54,25 +54,20 @@ class BackfillShowAction @Inject constructor(
   ): Response<ResponseBody> {
     if (id.toLongOrNull() == null) {
       return Response(
-        buildHtmlResponseBody {
-          DashboardLayout(
-            title = "Backfill $id | Backfila",
-            path = PATH,
-          ) {
+        dashboardPageLayout.newBuilder()
+          .title("Backfill $id | Backfila")
+          .buildHtmlResponseBody {
             PageTitle("Backfill", id)
             AlertError("Invalid Backfill Id [id=$id], must be of type Long.")
             AlertSupport(config.support_button_label, config.support_button_url)
-          }
-        },
+          },
       )
     }
     val backfill = getBackfillStatusAction.status(id.toLong())
 
-    val htmlResponseBody = buildHtmlResponseBody {
-      DashboardLayout(
-        title = "Backfill $id | Backfila",
-        path = PATH,
-      ) {
+    val htmlResponseBody = dashboardPageLayout.newBuilder()
+      .title("Backfill $id | Backfila")
+      .buildHtmlResponseBody {
         PageTitle("Backfill", id)
 
         // TODO add Header buttons / metrics
@@ -306,7 +301,6 @@ class BackfillShowAction @Inject constructor(
 
         AlertSupport(config.support_button_label, config.support_button_url)
       }
-    }
 
     return Response(htmlResponseBody)
   }
