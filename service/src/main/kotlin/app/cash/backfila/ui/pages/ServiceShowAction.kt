@@ -1,8 +1,6 @@
 package app.cash.backfila.ui.pages
 
 import app.cash.backfila.dashboard.GetBackfillRunsAction
-import app.cash.backfila.service.BackfilaConfig
-import app.cash.backfila.ui.components.AlertSupport
 import app.cash.backfila.ui.components.BackfillsTable
 import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.components.PageTitle
@@ -25,7 +23,6 @@ import okhttp3.Headers
 
 @Singleton
 class ServiceShowAction @Inject constructor(
-  private val config: BackfilaConfig,
   private val getBackfillRunsAction: GetBackfillRunsAction,
   private val dashboardPageLayout: DashboardPageLayout,
 ) : WebAction {
@@ -34,7 +31,7 @@ class ServiceShowAction @Inject constructor(
   @Authenticated(capabilities = ["users"])
   fun get(
     @PathParam service: String?,
-    @PathParam variantOrBlank: String = "",
+    @PathParam variantOrBlank: String? = "",
     @QueryParam("experimental") experimental: Boolean? = false,
   ): Response<ResponseBody> {
     if (service.isNullOrBlank()) {
@@ -44,7 +41,7 @@ class ServiceShowAction @Inject constructor(
         headers = Headers.headersOf("Location", "/"),
       )
     }
-    val variant = variantOrBlank.ifBlank { "default" }
+    val variant = variantOrBlank?.ifBlank { "default" } ?: "default"
 
     val backfillRuns = getBackfillRunsAction.backfillRuns(service, variant)
 
@@ -63,8 +60,6 @@ class ServiceShowAction @Inject constructor(
         ul("space-y-3") {
           role = "list"
         }
-
-        AlertSupport(config.support_button_label, config.support_button_url)
       }
 
     return Response(htmlResponseBody)

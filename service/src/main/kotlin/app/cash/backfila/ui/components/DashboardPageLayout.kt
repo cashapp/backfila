@@ -1,6 +1,7 @@
 package app.cash.backfila.ui.components
 
 import app.cash.backfila.dashboard.GetBackfillRunsAction
+import app.cash.backfila.service.BackfilaConfig
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillRunQuery
 import app.cash.backfila.service.persistence.BackfillState
@@ -10,7 +11,6 @@ import kotlinx.html.div
 import kotlinx.html.main
 import kotlinx.html.script
 import misk.MiskCaller
-import misk.config.AppName
 import misk.hibernate.Query
 import misk.hibernate.Transacter
 import misk.hibernate.newQuery
@@ -21,9 +21,6 @@ import misk.tailwind.pages.MenuSection
 import misk.tailwind.pages.Navbar
 import misk.web.HttpCall
 import misk.web.ResponseBody
-import misk.web.dashboard.DashboardHomeUrl
-import misk.web.dashboard.DashboardNavbarItem
-import misk.web.dashboard.DashboardTab
 import misk.web.dashboard.HtmlLayout
 import okio.BufferedSink
 import wisp.deployment.Deployment
@@ -37,6 +34,7 @@ class DashboardPageLayout @Inject constructor(
   private val callerProvider: ActionScoped<MiskCaller?>,
   private val deployment: Deployment,
   private val clientHttpCall: ActionScoped<HttpCall>,
+  private val config: BackfilaConfig,
   private val getBackfillRunsAction: GetBackfillRunsAction,
   @BackfilaDb private val transacter: Transacter,
   private val queryFactory: Query.Factory,
@@ -55,6 +53,7 @@ class DashboardPageLayout @Inject constructor(
     callerProvider = callerProvider,
     deployment = deployment,
     clientHttpCall = clientHttpCall,
+    config = config,
     getBackfillRunsAction = getBackfillRunsAction,
     transacter = transacter,
     queryFactory = queryFactory,
@@ -107,7 +106,10 @@ class DashboardPageLayout @Inject constructor(
                 div("mx-auto max-w-7xl sm:px-6 lg:px-8") {
                   // TODO remove when new UI is stable and preferred
                   UseOldUIAlert()
+
                   block()
+
+                  AlertSupport(config.support_button_label, config.support_button_url)
                 }
               }
             }
@@ -131,6 +133,9 @@ class DashboardPageLayout @Inject constructor(
         .createdByUser(callerProvider.get()!!.user!!)
         .state(BackfillState.RUNNING)
         .orderByUpdatedAtDesc()
+        .apply {
+          maxRows = 10
+        }
         .list(session)
 
       // TODO get services from REgistry for user || group backfills by service

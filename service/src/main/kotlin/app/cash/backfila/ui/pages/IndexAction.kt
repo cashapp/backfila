@@ -2,7 +2,6 @@ package app.cash.backfila.ui.pages
 
 import app.cash.backfila.service.BackfilaConfig
 import app.cash.backfila.ui.actions.ServiceAutocompleteAction
-import app.cash.backfila.ui.components.AlertSupport
 import app.cash.backfila.ui.components.DashboardPageLayout
 import javax.inject.Inject
 import kotlinx.html.dd
@@ -63,8 +62,6 @@ class IndexAction @Inject constructor(
       }
 
       // Running Backfills
-
-      AlertSupport(config.support_button_label, config.support_button_url)
     }
 
   companion object {

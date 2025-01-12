@@ -2,11 +2,8 @@ package app.cash.backfila.ui.pages
 
 import app.cash.backfila.dashboard.GetBackfillStatusAction
 import app.cash.backfila.dashboard.GetBackfillStatusResponse
-import app.cash.backfila.service.BackfilaConfig
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.ui.actions.BackfillShowButtonHandlerAction
-import app.cash.backfila.ui.components.AlertError
-import app.cash.backfila.ui.components.AlertSupport
 import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.components.PageTitle
 import app.cash.backfila.ui.components.ProgressBar
@@ -42,7 +39,6 @@ import misk.web.mediatype.MediaTypes
 
 @Singleton
 class BackfillShowAction @Inject constructor(
-  private val config: BackfilaConfig,
   private val getBackfillStatusAction: GetBackfillStatusAction,
   private val dashboardPageLayout: DashboardPageLayout,
 ) : WebAction {
@@ -52,17 +48,6 @@ class BackfillShowAction @Inject constructor(
   fun get(
     @PathParam id: String,
   ): Response<ResponseBody> {
-    if (id.toLongOrNull() == null) {
-      return Response(
-        dashboardPageLayout.newBuilder()
-          .title("Backfill $id | Backfila")
-          .buildHtmlResponseBody {
-            PageTitle("Backfill", id)
-            AlertError("Invalid Backfill Id [id=$id], must be of type Long.")
-            AlertSupport(config.support_button_label, config.support_button_url)
-          },
-      )
-    }
     val backfill = getBackfillStatusAction.status(id.toLong())
 
     val htmlResponseBody = dashboardPageLayout.newBuilder()
@@ -298,8 +283,6 @@ class BackfillShowAction @Inject constructor(
             }
           }
         }
-
-        AlertSupport(config.support_button_label, config.support_button_url)
       }
 
     return Response(htmlResponseBody)
