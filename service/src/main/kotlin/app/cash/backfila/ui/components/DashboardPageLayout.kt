@@ -86,6 +86,10 @@ class DashboardPageLayout @Inject constructor(
           }
           script {
             type = "module"
+            src = "/static/js/auto_reload_controller.js"
+          }
+          script {
+            type = "module"
             src = "/static/js/search_bar_controller.js"
           }
         },

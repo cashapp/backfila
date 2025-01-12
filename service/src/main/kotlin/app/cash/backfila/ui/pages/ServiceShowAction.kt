@@ -7,10 +7,12 @@ import app.cash.backfila.ui.components.PageTitle
 import java.net.HttpURLConnection
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.html.role
-import kotlinx.html.ul
+import kotlinx.html.div
+import misk.scope.ActionScoped
 import misk.security.authz.Authenticated
+import misk.tokens.TokenGenerator
 import misk.web.Get
+import misk.web.HttpCall
 import misk.web.PathParam
 import misk.web.QueryParam
 import misk.web.Response
@@ -23,9 +25,15 @@ import okhttp3.Headers
 
 @Singleton
 class ServiceShowAction @Inject constructor(
-  private val getBackfillRunsAction: GetBackfillRunsAction,
+  private val clientHttpCall: ActionScoped<HttpCall>,
   private val dashboardPageLayout: DashboardPageLayout,
+  private val getBackfillRunsAction: GetBackfillRunsAction,
+  private val tokenGenerator: TokenGenerator,
 ) : WebAction {
+  private val path by lazy {
+    clientHttpCall.get().url.encodedPath
+  }
+
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
   @Authenticated(capabilities = ["users"])
@@ -50,15 +58,18 @@ class ServiceShowAction @Inject constructor(
     val htmlResponseBody = dashboardPageLayout.newBuilder()
       .title("$label | Backfila")
       .buildHtmlResponseBody {
-        PageTitle("Service", label)
+        div {
+          attributes["data-controller"] = "auto-reload"
+          attributes["data-auto-reload-target"] = "frame"
 
-        // TODO Add completed table
-        // TODO Add deleted support?
-        BackfillsTable(true, backfillRuns.running_backfills)
-        BackfillsTable(false, backfillRuns.paused_backfills)
+          PageTitle("Service", label)
 
-        ul("space-y-3") {
-          role = "list"
+          // TODO Add completed table
+          // TODO Add deleted support?
+//          turbo_frame(id = "backfill-tables", src = path.replace("services", "services/progress/${tokenGenerator.generate()}")) {
+          BackfillsTable(true, backfillRuns.running_backfills)
+          BackfillsTable(false, backfillRuns.paused_backfills)
+//          }
         }
       }
 
