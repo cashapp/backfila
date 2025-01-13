@@ -1,13 +1,13 @@
 package app.cash.backfila.ui.pages
 
 import app.cash.backfila.dashboard.GetBackfillRunsAction
+import app.cash.backfila.ui.components.AutoReload
 import app.cash.backfila.ui.components.BackfillsTable
 import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.components.PageTitle
 import java.net.HttpURLConnection
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.html.div
 import misk.scope.ActionScoped
 import misk.security.authz.Authenticated
 import misk.tokens.TokenGenerator
@@ -58,18 +58,13 @@ class ServiceShowAction @Inject constructor(
     val htmlResponseBody = dashboardPageLayout.newBuilder()
       .title("$label | Backfila")
       .buildHtmlResponseBody {
-        div {
-          attributes["data-controller"] = "auto-reload"
-          attributes["data-auto-reload-target"] = "frame"
-
+        AutoReload {
           PageTitle("Service", label)
 
           // TODO Add completed table
           // TODO Add deleted support?
-//          turbo_frame(id = "backfill-tables", src = path.replace("services", "services/progress/${tokenGenerator.generate()}")) {
           BackfillsTable(true, backfillRuns.running_backfills)
           BackfillsTable(false, backfillRuns.paused_backfills)
-//          }
         }
       }
 

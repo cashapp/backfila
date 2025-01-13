@@ -8,7 +8,7 @@ Stimulus.register("auto-reload", class extends Controller {
     this.reloadInterval = setInterval(() => {
       console.log("Reloading page...");
       window.location.reload();
-    }, 5000); // 5000 milliseconds = 1 second
+    }, 10000); // 10000 milliseconds = 10 seconds
   }
 
   disconnect() {
