@@ -284,11 +284,15 @@ class BackfillStatusContainer extends React.Component<
                   </tr>
                 )}
                 {Object.entries(status.parameters).map(
-                  ([name, value]: [string, string]) => (
+                  ([name, value]) => (
                     <tr>
                       <td>{name}</td>
                       <td>
-                        <code>{value}</code>
+                      <code style={{ 
+                          wordBreak: "break-word", 
+                          whiteSpace: "pre-wrap",
+                          display: "block"
+                        }}>{String(value)}</code>
                       </td>
                     </tr>
                   )
