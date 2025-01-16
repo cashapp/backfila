@@ -6,10 +6,14 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
+import java.io.File
 
 abstract class GenerateBackfilaRecordSourceSqlTask : DefaultTask() {
   @get:Input
   abstract val backfill: Property<SqlDelightRecordSource>
+
+  @get:Input
+  abstract val packageName: Property<String>
 
   @get:OutputDirectory
   abstract val sqlDirectory: DirectoryProperty
@@ -23,7 +27,7 @@ abstract class GenerateBackfilaRecordSourceSqlTask : DefaultTask() {
     val recordColumns = backfillConfig.recordColumns
     val name = backfillConfig.name.replaceFirstChar { it.uppercase() }
 
-    val sqlFile = sqlDirectory.file("$name.sq").get().asFile
+    val sqlFile = File(sqlDirectory.get().asFile, "${packageName.get()}/$name.sq")
     sqlFile.parentFile.mkdirs()
     sqlFile.writeText(
       """
