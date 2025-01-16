@@ -8,6 +8,7 @@ import org.gradle.api.Project
 import org.gradle.api.file.Directory
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 
 class BackfilaSqlDelightGradlePlugin : Plugin<Project> {
@@ -26,7 +27,8 @@ class BackfilaSqlDelightGradlePlugin : Plugin<Project> {
         GenerateBackfilaRecordSourceSqlTask::class.java,
       ) {
         it.backfill.set(backfill.backfill)
-        it.sqlDirectory.set(baseSqlDirectory.map { baseDir -> baseDir.dir(packageProvider.get()) })
+        it.sqlDirectory.set(baseSqlDirectory)
+        it.packageName.set(packageProvider)
       }
 
       val sqlDelightExtension = target.extensions.findByType(SqlDelightExtension::class.java)
@@ -36,9 +38,9 @@ class BackfilaSqlDelightGradlePlugin : Plugin<Project> {
 
       sqlDelightExtension.databases.all { sqlDelightDatabase ->
         sqlDelightDatabase.srcDirs.from(
-          baseSqlDirectory.map<List<Directory>> { sqlDirectory ->
+          baseSqlDirectory.map<List<TaskProvider<*>>> { _ ->
             if (packageProvider.get() == sqlDelightDatabase.packageName.get() && databaseClassNameProvider.get() == sqlDelightDatabase.name) {
-              listOf(sqlDirectory)
+              listOf(sqlTask)
             } else {
               listOf()
             }
