@@ -289,7 +289,7 @@ class BackfillStatusContainer extends React.Component<
                       <td>{name}</td>
                       <td>
                       <code style={{ 
-                          wordBreak: "break-word", 
+                          wordBreak: "break-all", 
                           whiteSpace: "pre-wrap",
                           display: "block"
                         }}>{String(value)}</code>
