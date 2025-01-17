@@ -7,7 +7,9 @@ import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.components.PageTitle
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.html.ButtonType
 import kotlinx.html.a
+import kotlinx.html.button
 import kotlinx.html.div
 import kotlinx.html.h3
 import kotlinx.html.li
@@ -48,7 +50,16 @@ class BackfillIndexAction @Inject constructor(
       dashboardPageLayout.newBuilder()
         .title("Backfills | Backfila")
         .buildHtmlResponseBody {
-          PageTitle("Backfills")
+          PageTitle("Backfills") {
+            a {
+              href = BackfillCreateIndexAction.PATH
+
+              button(classes = "rounded-full bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600") {
+                type = ButtonType.button
+                +"""Create"""
+              }
+            }
+          }
 
           // List of Services
           div("py-10") {

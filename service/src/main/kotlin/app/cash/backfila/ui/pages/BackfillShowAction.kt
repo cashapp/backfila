@@ -13,6 +13,7 @@ import javax.inject.Singleton
 import kotlinx.html.ButtonType
 import kotlinx.html.InputType
 import kotlinx.html.ThScope
+import kotlinx.html.a
 import kotlinx.html.button
 import kotlinx.html.dd
 import kotlinx.html.div
@@ -55,8 +56,14 @@ class BackfillShowAction @Inject constructor(
       .title("Backfill $id | Backfila")
       .buildHtmlResponseBody {
         AutoReload {
-          PageTitle("Backfill", id)
-          // TODO add clone button
+          PageTitle("Backfill", id) {
+            a {
+              button(classes = "rounded-full bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600") {
+                type = ButtonType.button
+                +"""Clone"""
+              }
+            }
+          }
 
           // TODO add Header buttons / metrics
 

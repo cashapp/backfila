@@ -8,13 +8,15 @@ import app.cash.backfila.ui.components.PageTitle
 import java.net.HttpURLConnection
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.html.ButtonType
+import kotlinx.html.a
+import kotlinx.html.button
 import misk.scope.ActionScoped
 import misk.security.authz.Authenticated
 import misk.tokens.TokenGenerator
 import misk.web.Get
 import misk.web.HttpCall
 import misk.web.PathParam
-import misk.web.QueryParam
 import misk.web.Response
 import misk.web.ResponseBody
 import misk.web.ResponseContentType
@@ -40,7 +42,6 @@ class ServiceShowAction @Inject constructor(
   fun get(
     @PathParam service: String?,
     @PathParam variantOrBlank: String? = "",
-    @QueryParam("experimental") experimental: Boolean? = false,
   ): Response<ResponseBody> {
     if (service.isNullOrBlank()) {
       return Response(
@@ -49,7 +50,7 @@ class ServiceShowAction @Inject constructor(
         headers = Headers.headersOf("Location", "/"),
       )
     }
-    val variant = variantOrBlank?.ifBlank { "default" } ?: "default"
+    val variant = variantOrBlank.orEmpty().ifBlank { "default" }
 
     val backfillRuns = getBackfillRunsAction.backfillRuns(service, variant)
 
@@ -59,7 +60,16 @@ class ServiceShowAction @Inject constructor(
       .title("$label | Backfila")
       .buildHtmlResponseBody {
         AutoReload {
-          PageTitle("Service", label)
+          PageTitle("Service", label) {
+            a {
+              href = BackfillCreateAction.PATH.replace("{service}", service).replace("{variantOrBlank}", variantOrBlank ?: "")
+
+              button(classes = "rounded-full bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600") {
+                type = ButtonType.button
+                +"""Create"""
+              }
+            }
+          }
 
           // TODO Add completed table
           // TODO Add deleted support?
