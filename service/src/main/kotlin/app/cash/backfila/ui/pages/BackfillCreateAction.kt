@@ -1,8 +1,11 @@
 package app.cash.backfila.ui.pages
 
+import app.cash.backfila.dashboard.GetBackfillRunsAction
 import app.cash.backfila.dashboard.GetBackfillStatusAction
 import app.cash.backfila.dashboard.GetRegisteredBackfillsAction
+import app.cash.backfila.ui.actions.BackfillCreateHandlerAction
 import app.cash.backfila.ui.actions.ServiceAutocompleteAction
+import app.cash.backfila.ui.components.AlertError
 import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.components.PageTitle
 import javax.inject.Inject
@@ -20,12 +23,9 @@ import kotlinx.html.input
 import kotlinx.html.label
 import kotlinx.html.legend
 import kotlinx.html.li
-import kotlinx.html.option
 import kotlinx.html.p
 import kotlinx.html.role
-import kotlinx.html.select
 import kotlinx.html.span
-import kotlinx.html.textArea
 import kotlinx.html.ul
 import misk.security.authz.Authenticated
 import misk.web.Get
@@ -42,6 +42,7 @@ class BackfillCreateAction @Inject constructor(
   private val serviceAutocompleteAction: ServiceAutocompleteAction,
   private val getBackfillStatusAction: GetBackfillStatusAction,
   private val getRegisteredBackfillsAction: GetRegisteredBackfillsAction,
+  private val getBackfillRunsAction: GetBackfillRunsAction,
   private val dashboardPageLayout: DashboardPageLayout,
 ) : WebAction {
   @Get(PATH)
@@ -50,19 +51,25 @@ class BackfillCreateAction @Inject constructor(
   fun get(
     @PathParam service: String,
     @PathParam variantOrBlank: String? = "",
-    @QueryParam backfill: String? = "",
-    @QueryParam backfillIdToClone: Long? = null,
+    @QueryParam backfillName: String? = "",
+    @QueryParam backfillIdToClone: String? = null,
   ): Response<ResponseBody> {
     val htmlResponseBody = dashboardPageLayout.newBuilder()
       .title("Create Backfill | Backfila")
       .buildHtmlResponseBody {
-        PageTitle("Create Backfill")
+        PageTitle("Create Backfill", backfillName ?: "") {
+          span("inline-flex shrink-0 items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-s font-medium text-blue-700 ring-1 ring-inset ring-blue-600/20") {
+            val suffix = if (variantOrBlank.isNullOrBlank()) "" else "/$variantOrBlank"
+            +"$service$suffix"
+          }
+        }
+
         val variant = variantOrBlank.orEmpty().ifBlank { "default" }
-        if (service.isNotBlank() && backfill.isNullOrBlank() && backfillIdToClone == null) {
+        val registeredBackfills = getRegisteredBackfillsAction.backfills(service, variant)
+        val backfill = registeredBackfills.backfills.firstOrNull { it.name == backfillName }
+
+        if (service.isNotBlank() && backfill == null && backfillIdToClone == null) {
           // If service + variant is set and valid, show registered backfills drop down
-
-          val registeredBackfills = getRegisteredBackfillsAction.backfills(service, variant)
-
           p {
             +"Service: $service"
           }
@@ -76,7 +83,8 @@ class BackfillCreateAction @Inject constructor(
               registeredBackfills.backfills.map {
                 a {
                   // TODO redirect to same page but with backfill filled in
-                  href = PATH.replace("{service}", service).replace("{variantOrBlank}", variantOrBlank ?: "") + "?backfill=${it.name}"
+                  href = PATH.replace("{service}", service)
+                    .replace("{variantOrBlank}", variantOrBlank ?: "") + "?backfillName=${it.name}"
 
                   // TODO make full width
                   this@ul.li("registration col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow") {
@@ -141,430 +149,259 @@ class BackfillCreateAction @Inject constructor(
               }
             }
           }
-        } else if (backfill.orEmpty().isNotBlank() || backfillIdToClone != null) {
+        } else if (backfill != null || backfillIdToClone != null) {
           // If service + variant + backfill id to clone are valid, pre-fill form with backfill details
-
-          p {
-            +"Service: $service"
-          }
-          p {
-            +"Variant: $variant"
-          }
-          p {
-            +"Backfill: $backfill"
-          }
-          p {
-            +"Backfill ID to clone: $backfillIdToClone"
+          val backfillRuns = getBackfillRunsAction.backfillRuns(service, variant)
+          val backfillToClone =
+            (backfillRuns.paused_backfills + backfillRuns.running_backfills).firstOrNull { it.id == backfillIdToClone }
+          if (backfill == null && backfillToClone == null) {
+            AlertError(
+              message = "Backfill ID $backfillIdToClone to clone not found.",
+              label = "Choose a Backfill",
+              link = PATH.replace("{service}", service).replace("{variantOrBlank}", variantOrBlank ?: ""),
+            )
           }
 
           // TODO add Header buttons / metrics
 
+          // TODO add backfill name and back button to select a different backfill, or select/options
+
           div("mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8") {
             form {
+              action = BackfillCreateHandlerAction.PATH
+
+              input {
+                type = InputType.hidden
+                name = "service"
+                value = service
+              }
+
+              input {
+                type = InputType.hidden
+                name = "variant"
+                value = variant
+              }
+
+              input {
+                type = InputType.hidden
+                name = "backfillName"
+                value = backfill?.name ?: backfillToClone?.name ?: ""
+              }
+
               div("space-y-12") {
                 div("border-b border-gray-900/10 pb-12") {
-                  h2("text-base/7 font-semibold text-gray-900") { +"""Profile""" }
-                  p("mt-1 text-sm/6 text-gray-600") { +"""This information will be displayed publicly so be careful what you share.""" }
+                  h2("text-base/7 font-semibold text-gray-900") { +"""Immutable Options""" }
+                  p("mt-1 text-sm/6 text-gray-600") { +"""These options can't be changed once the backfill is created.""" }
+                  div {
+                    div("mt-6 space-y-6") {
+                      div("flex gap-3") {
+                        val field = "dryRun"
+                        div("flex h-6 shrink-0 items-center") {
+                          div("group grid size-4 grid-cols-1") {
+                            input(classes = "col-start-1 row-start-1 appearance-none rounded border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto") {
+                              id = field
+                              attributes["aria-describedby"] = "dry-run-description"
+                              name = field
+                              type = InputType.checkBox
+                            }
+                          }
+                        }
+                        div("text-sm/6") {
+                          label("font-medium text-gray-900") {
+                            htmlFor = field
+                            +"""Dry Run"""
+                          }
+                          p("text-gray-500") {
+                            id = "dry-run-description"
+                            +"""Anything within your not Dry Run block will not be run."""
+                          }
+                        }
+                      }
+                    }
+                  }
+
                   div("mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6") {
-                    div("sm:col-span-4") {
+                    div("sm:col-span-3") {
+                      val field = "rangeStart"
                       label("block text-sm/6 font-medium text-gray-900") {
-                        htmlFor = "username"
-                        +"""Username"""
+                        htmlFor = field
+                        +"""Range Start (optional)"""
                       }
                       div("mt-2") {
-                        div("flex items-center rounded-md bg-white pl-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600") {
-                          div("shrink-0 select-none text-base text-gray-500 sm:text-sm/6") { +"""workcation.com/""" }
-                          input(classes = "block min-w-0 grow py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6") {
-                            type = InputType.text
-                            name = "username"
-                            this@input.id = "username"
-                            placeholder = "janesmith"
-                          }
+                        input(classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
+                          type = InputType.number
+                          name = field
+                          id = field
+                          attributes["autocomplete"] = field
                         }
                       }
                     }
-                    div("col-span-full") {
+                    div("sm:col-span-3") {
+                      val field = "rangeEnd"
                       label("block text-sm/6 font-medium text-gray-900") {
-                        htmlFor = "about"
-                        +"""About"""
+                        htmlFor = field
+                        +"""Range End (optional)"""
                       }
                       div("mt-2") {
-                        textArea(classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
-                          name = "about"
-                          this@textArea.id = "about"
-                          rows = "3"
+                        input(classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
+                          type = InputType.number
+                          name = field
+                          id = field
+                          attributes["autocomplete"] = field
                         }
-                      }
-                      p("mt-3 text-sm/6 text-gray-600") { +"""Write a few sentences about yourself.""" }
-                    }
-                    div("col-span-full") {
-                      label("block text-sm/6 font-medium text-gray-900") {
-                        htmlFor = "photo"
-                        +"""Photo"""
-                      }
-                      div("mt-2 flex items-center gap-x-3") {
-//                      svg("size-12 text-gray-300") {
-//                        viewbox = "0 0 24 24"
-//                        fill = "currentColor"
-//                        attributes["aria-hidden"] = "true"
-//                        attributes["data-slot"] = "icon"
-//                        path {
-//                          attributes["fill-rule"] = "evenodd"
-//                          d =
-//                            "M18.685 19.097A9.723 9.723 0 0 0 21.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 0 0 3.065 7.097A9.716 9.716 0 0 0 12 21.75a9.716 9.716 0 0 0 6.685-2.653Zm-12.54-1.285A7.486 7.486 0 0 1 12 15a7.486 7.486 0 0 1 5.855 2.812A8.224 8.224 0 0 1 12 20.25a8.224 8.224 0 0 1-5.855-2.438ZM15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"
-//                          attributes["clip-rule"] = "evenodd"
-//                        }
-                      }
-                      button(classes = "rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50") {
-                        type = ButtonType.button
-                        +"""Change"""
-                      }
-                    }
-                  }
-                  div("col-span-full") {
-                    label("block text-sm/6 font-medium text-gray-900") {
-                      htmlFor = "cover-photo"
-                      +"""Cover photo"""
-                    }
-                    div("mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10") {
-                      div("text-center") {
-//                        svg("mx-auto size-12 text-gray-300") {
-//                          viewbox = "0 0 24 24"
-//                          fill = "currentColor"
-//                          attributes["aria-hidden"] = "true"
-//                          attributes["data-slot"] = "icon"
-//                          path {
-//                            attributes["fill-rule"] = "evenodd"
-//                            d =
-//                              "M1.5 6a2.25 2.25 0 0 1 2.25-2.25h16.5A2.25 2.25 0 0 1 22.5 6v12a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 18V6ZM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18v-1.94l-2.69-2.689a1.5 1.5 0 0 0-2.12 0l-.88.879.97.97a.75.75 0 1 1-1.06 1.06l-5.16-5.159a1.5 1.5 0 0 0-2.12 0L3 16.061Zm10.125-7.81a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Z"
-//                            attributes["clip-rule"] = "evenodd"
-//                          }
-                      }
-                      div("mt-4 flex text-sm/6 text-gray-600") {
-                        label("relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500") {
-                          htmlFor = "file-upload"
-                          span { +"""Upload a file""" }
-                          input(classes = "sr-only") {
-                            id = "file-upload"
-                            name = "file-upload"
-                            type = InputType.file
-                          }
-                        }
-                        p("pl-1") { +"""or drag and drop""" }
-                      }
-                      p("text-xs/5 text-gray-600") { +"""PNG, JPG, GIF up to 10MB""" }
-                    }
-                  }
-                }
-              }
-            }
-            div("border-b border-gray-900/10 pb-12") {
-              h2("text-base/7 font-semibold text-gray-900") { +"""Personal Information""" }
-              p("mt-1 text-sm/6 text-gray-600") { +"""Use a permanent address where you can receive mail.""" }
-              div("mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6") {
-                div("sm:col-span-3") {
-                  label("block text-sm/6 font-medium text-gray-900") {
-                    htmlFor = "first-name"
-                    +"""First name"""
-                  }
-                  div("mt-2") {
-                    input(classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
-                      type = InputType.text
-                      name = "first-name"
-                      id = "first-name"
-                      attributes["autocomplete"] = "given-name"
-                    }
-                  }
-                }
-                div("sm:col-span-3") {
-                  label("block text-sm/6 font-medium text-gray-900") {
-                    htmlFor = "last-name"
-                    +"""Last name"""
-                  }
-                  div("mt-2") {
-                    input(classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
-                      type = InputType.text
-                      name = "last-name"
-                      id = "last-name"
-                      attributes["autocomplete"] = "family-name"
-                    }
-                  }
-                }
-                div("sm:col-span-4") {
-                  label("block text-sm/6 font-medium text-gray-900") {
-                    htmlFor = "email"
-                    +"""Email address"""
-                  }
-                  div("mt-2") {
-                    input(classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
-                      id = "email"
-                      name = "email"
-                      type = InputType.email
-                      attributes["autocomplete"] = "email"
-                    }
-                  }
-                }
-                div("sm:col-span-3") {
-                  label("block text-sm/6 font-medium text-gray-900") {
-                    htmlFor = "country"
-                    +"""Country"""
-                  }
-                  div("mt-2 grid grid-cols-1") {
-                    select("col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
-                      id = "country"
-                      name = "country"
-                      attributes["autocomplete"] = "country-name"
-                      option { +"""United States""" }
-                      option { +"""Canada""" }
-                      option { +"""Mexico""" }
-                    }
-//                      svg("pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end text-gray-500 sm:size-4") {
-//                        viewbox = "0 0 16 16"
-//                        fill = "currentColor"
-//                        attributes["aria-hidden"] = "true"
-//                        attributes["data-slot"] = "icon"
-//                        path {
-//                          attributes["fill-rule"] = "evenodd"
-//                          d =
-//                            "M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z"
-//                          attributes["clip-rule"] = "evenodd"
-//                        }
-//                      }
-                  }
-                }
-                div("col-span-full") {
-                  label("block text-sm/6 font-medium text-gray-900") {
-                    htmlFor = "street-address"
-                    +"""Street address"""
-                  }
-                  div("mt-2") {
-                    input(classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
-                      type = InputType.text
-                      name = "street-address"
-                      id = "street-address"
-                      attributes["autocomplete"] = "street-address"
-                    }
-                  }
-                }
-                div("sm:col-span-2 sm:col-start-1") {
-                  label("block text-sm/6 font-medium text-gray-900") {
-                    htmlFor = "city"
-                    +"""City"""
-                  }
-                  div("mt-2") {
-                    input(classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
-                      type = InputType.text
-                      name = "city"
-                      id = "city"
-                      attributes["autocomplete"] = "address-level2"
-                    }
-                  }
-                }
-                div("sm:col-span-2") {
-                  label("block text-sm/6 font-medium text-gray-900") {
-                    htmlFor = "region"
-                    +"""State / Province"""
-                  }
-                  div("mt-2") {
-                    input(classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
-                      type = InputType.text
-                      name = "region"
-                      id = "region"
-                      attributes["autocomplete"] = "address-level1"
-                    }
-                  }
-                }
-                div("sm:col-span-2") {
-                  label("block text-sm/6 font-medium text-gray-900") {
-                    htmlFor = "postal-code"
-                    +"""ZIP / Postal code"""
-                  }
-                  div("mt-2") {
-                    input(classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
-                      type = InputType.text
-                      name = "postal-code"
-                      id = "postal-code"
-                      attributes["autocomplete"] = "postal-code"
-                    }
-                  }
-                }
-              }
-            }
-            div("border-b border-gray-900/10 pb-12") {
-              h2("text-base/7 font-semibold text-gray-900") { +"""Notifications""" }
-              p("mt-1 text-sm/6 text-gray-600") { +"""We'll always let you know about important changes, but you pick what else you want to hear about.""" }
-              div("mt-10 space-y-10") {
-                div {
-                  legend("text-sm/6 font-semibold text-gray-900") { +"""By email""" }
-                  div("mt-6 space-y-6") {
-                    div("flex gap-3") {
-                      div("flex h-6 shrink-0 items-center") {
-                        div("group grid size-4 grid-cols-1") {
-                          input(classes = "col-start-1 row-start-1 appearance-none rounded border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto") {
-                            id = "comments"
-                            attributes["aria-describedby"] = "comments-description"
-                            name = "comments"
-                            type = InputType.checkBox
-                            checked = true
-                          }
-//                            svg("pointer-events-none col-start-1 row-start-1 size-3.5 self-center justify-self-center stroke-white group-has-[:disabled]:stroke-gray-950/25") {
-//                              viewbox = "0 0 14 14"
-//                              fill = "none"
-//                              path(classes = "opacity-0 group-has-[:checked]:opacity-100") {
-//                                d = "M3 8L6 11L11 3.5"
-//                                attributes["stroke-width"] = "2"
-//                                attributes["stroke-linecap"] = "round"
-//                                attributes["stroke-linejoin"] = "round"
-//                              }
-//                              path(classes = "opacity-0 group-has-[:indeterminate]:opacity-100") {
-//                                d = "M3 7H11"
-//                                attributes["stroke-width"] = "2"
-//                                attributes["stroke-linecap"] = "round"
-//                                attributes["stroke-linejoin"] = "round"
-//                              }
-//                            }
-                        }
-                      }
-                      div("text-sm/6") {
-                        label("font-medium text-gray-900") {
-                          htmlFor = "comments"
-                          +"""Comments"""
-                        }
-                        p("text-gray-500") {
-                          id = "comments-description"
-                          +"""Get notified when someones posts a comment on a posting."""
-                        }
-                      }
-                    }
-                    div("flex gap-3") {
-                      div("flex h-6 shrink-0 items-center") {
-                        div("group grid size-4 grid-cols-1") {
-                          input(classes = "col-start-1 row-start-1 appearance-none rounded border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto") {
-                            id = "candidates"
-                            attributes["aria-describedby"] = "candidates-description"
-                            name = "candidates"
-                            type = InputType.checkBox
-                          }
-//                            svg("pointer-events-none col-start-1 row-start-1 size-3.5 self-center justify-self-center stroke-white group-has-[:disabled]:stroke-gray-950/25") {
-//                              viewbox = "0 0 14 14"
-//                              fill = "none"
-//                              path(classes = "opacity-0 group-has-[:checked]:opacity-100") {
-//                                d = "M3 8L6 11L11 3.5"
-//                                attributes["stroke-width"] = "2"
-//                                attributes["stroke-linecap"] = "round"
-//                                attributes["stroke-linejoin"] = "round"
-//                              }
-//                              path(classes = "opacity-0 group-has-[:indeterminate]:opacity-100") {
-//                                d = "M3 7H11"
-//                                attributes["stroke-width"] = "2"
-//                                attributes["stroke-linecap"] = "round"
-//                                attributes["stroke-linejoin"] = "round"
-//                              }
-//                            }
-                        }
-                      }
-                      div("text-sm/6") {
-                        label("font-medium text-gray-900") {
-                          htmlFor = "candidates"
-                          +"""Candidates"""
-                        }
-                        p("text-gray-500") {
-                          id = "candidates-description"
-                          +"""Get notified when a candidate applies for a job."""
-                        }
-                      }
-                    }
-                    div("flex gap-3") {
-                      div("flex h-6 shrink-0 items-center") {
-                        div("group grid size-4 grid-cols-1") {
-                          input(classes = "col-start-1 row-start-1 appearance-none rounded border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto") {
-                            id = "offers"
-                            attributes["aria-describedby"] = "offers-description"
-                            name = "offers"
-                            type = InputType.checkBox
-                          }
-//                            svg("pointer-events-none col-start-1 row-start-1 size-3.5 self-center justify-self-center stroke-white group-has-[:disabled]:stroke-gray-950/25") {
-//                              viewbox = "0 0 14 14"
-//                              fill = "none"
-//                              path(classes = "opacity-0 group-has-[:checked]:opacity-100") {
-//                                d = "M3 8L6 11L11 3.5"
-//                                attributes["stroke-width"] = "2"
-//                                attributes["stroke-linecap"] = "round"
-//                                attributes["stroke-linejoin"] = "round"
-//                              }
-//                              path(classes = "opacity-0 group-has-[:indeterminate]:opacity-100") {
-//                                d = "M3 7H11"
-//                                attributes["stroke-width"] = "2"
-//                                attributes["stroke-linecap"] = "round"
-//                                attributes["stroke-linejoin"] = "round"
-//                              }
-//                            }
-                        }
-                      }
-                      div("text-sm/6") {
-                        label("font-medium text-gray-900") {
-                          htmlFor = "offers"
-                          +"""Offers"""
-                        }
-                        p("text-gray-500") {
-                          id = "offers-description"
-                          +"""Get notified when a candidate accepts or rejects an offer."""
-                        }
-                      }
-                    }
-                  }
-                }
-                div {
-                  legend("text-sm/6 font-semibold text-gray-900") { +"""Push notifications""" }
-                  p("mt-1 text-sm/6 text-gray-600") { +"""These are delivered via SMS to your mobile phone.""" }
-                  div("mt-6 space-y-6") {
-                    div("flex items-center gap-x-3") {
-                      input(classes = "relative size-4 appearance-none rounded-full border border-gray-300 bg-white before:absolute before:inset-1 before:rounded-full before:bg-white checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:before:bg-gray-400 forced-colors:appearance-auto forced-colors:before:hidden [&:not(:checked)]:before:hidden") {
-                        id = "push-everything"
-                        name = "push-notifications"
-                        type = InputType.radio
-                        checked = true
-                      }
-                      label("block text-sm/6 font-medium text-gray-900") {
-                        htmlFor = "push-everything"
-                        +"""Everything"""
-                      }
-                    }
-                    div("flex items-center gap-x-3") {
-                      input(classes = "relative size-4 appearance-none rounded-full border border-gray-300 bg-white before:absolute before:inset-1 before:rounded-full before:bg-white checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:before:bg-gray-400 forced-colors:appearance-auto forced-colors:before:hidden [&:not(:checked)]:before:hidden") {
-                        id = "push-email"
-                        name = "push-notifications"
-                        type = InputType.radio
-                      }
-                      label("block text-sm/6 font-medium text-gray-900") {
-                        htmlFor = "push-email"
-                        +"""Same as email"""
-                      }
-                    }
-                    div("flex items-center gap-x-3") {
-                      input(classes = "relative size-4 appearance-none rounded-full border border-gray-300 bg-white before:absolute before:inset-1 before:rounded-full before:bg-white checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:before:bg-gray-400 forced-colors:appearance-auto forced-colors:before:hidden [&:not(:checked)]:before:hidden") {
-                        id = "push-nothing"
-                        name = "push-notifications"
-                        type = InputType.radio
-                      }
-                      label("block text-sm/6 font-medium text-gray-900") {
-                        htmlFor = "push-nothing"
-                        +"""No push notifications"""
                       }
                     }
                   }
                 }
               }
-            }
-          }
-          div("mt-6 flex items-center justify-end gap-x-6") {
-            button(classes = "text-sm/6 font-semibold text-gray-900") {
-              type = ButtonType.button
-              +"""Cancel"""
-            }
-            button(classes = "rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600") {
-              type = ButtonType.submit
-              +"""Save"""
+
+              div("pt-12 space-y-12") {
+                div("border-b border-gray-900/10 pb-12") {
+                  h2("text-base/7 font-semibold text-gray-900") { +"""Mutable Options""" }
+                  p("mt-1 text-sm/6 text-gray-600") { +"""These options can be changed once the backfill is created.""" }
+
+                  div("mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6") {
+                    div("sm:col-span-3") {
+                      val field = "batchSize"
+                      label("block text-sm/6 font-medium text-gray-900") {
+                        htmlFor = field
+                        +"""Batch Size"""
+
+                        legend("text-sm/6 font-normal text-gray-900") { +"""How many *matching* records to send per call to RunBatch.""" }
+                      }
+                      div("mt-2") {
+                        input(classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
+                          type = InputType.text
+                          name = field
+                          id = field
+                          attributes["autocomplete"] = field
+                          value = "100"
+                        }
+                      }
+                    }
+                  }
+
+                  div("mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6") {
+                    div("sm:col-span-3") {
+                      val field = "scanSize"
+                      label("block text-sm/6 font-medium text-gray-900") {
+                        htmlFor = field
+                        +"""Scan Size"""
+
+                        legend("text-sm/6 font-normal text-gray-900") { +"""How many records to scan when computing batches.""" }
+                      }
+                      div("mt-2") {
+                        input(classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
+                          type = InputType.number
+                          name = field
+                          id = field
+                          attributes["autocomplete"] = field
+                          value = "10000"
+                        }
+                      }
+                    }
+                  }
+
+                  div("mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6") {
+                    div("sm:col-span-3") {
+                      val field = "threadsPerPartition"
+                      label("block text-sm/6 font-medium text-gray-900") {
+                        htmlFor = field
+                        +"""Threads Per Partition"""
+                      }
+                      div("mt-2") {
+                        input(classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
+                          type = InputType.number
+                          name = field
+                          id = field
+                          attributes["autocomplete"] = field
+                          value = "1"
+                        }
+                      }
+                    }
+                  }
+
+                  div("mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6") {
+                    div("sm:col-span-3") {
+                      val field = "extraSleepMs"
+                      label("block text-sm/6 font-medium text-gray-900") {
+                        htmlFor = field
+                        +"""Extra Sleep (ms)"""
+                      }
+                      div("mt-2") {
+                        input(classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
+                          type = InputType.number
+                          name = field
+                          id = field
+                          attributes["autocomplete"] = field
+                          value = "1"
+                        }
+                      }
+                    }
+                  }
+
+                  div("mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6") {
+                    div("sm:col-span-3") {
+                      val field = "backoffSchedule"
+                      label("block text-sm/6 font-medium text-gray-900") {
+                        htmlFor = field
+                        +"""Backoff Schedule (optional)"""
+
+                        legend("text-sm/6 font-normal text-gray-900") { +"""Comma separated list of milliseconds to backoff subsequent failures.""" }
+                      }
+                      div("mt-2") {
+                        input(classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
+                          type = InputType.text
+                          name = field
+                          id = field
+                          attributes["autocomplete"] = field
+                          placeholder = "5000,15000,30000"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+
+              // Custom Parameters
+              if (backfill?.parameterNames?.isNotEmpty() == true) {
+                div("pt-12 space-y-12") {
+                  div("border-b border-gray-900/10 pb-12") {
+                    h2("text-base/7 font-semibold text-gray-900") { +"""Immutable Custom Parameters""" }
+                    p("mt-1 text-sm/6 text-gray-600") { +"""These custom parameters can't be changed once the backfill is created.""" }
+
+                    backfill.parameterNames.map {
+                      div("mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6") {
+                        div("sm:col-span-3") {
+                          val field = "customParameter_$it"
+                          label("block text-sm/6 font-medium text-gray-900") {
+                            htmlFor = field
+                            +it
+                          }
+                          div("mt-2") {
+                            input(classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
+                              type = InputType.text
+                              name = field
+                              id = field
+                              attributes["autocomplete"] = field
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+
+              button(classes = "rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600") {
+                type = ButtonType.submit
+
+                if (backfillToClone != null) {
+                  +"Clone"
+                } else {
+                  +"""Create"""
+                }
+              }
             }
           }
         }
