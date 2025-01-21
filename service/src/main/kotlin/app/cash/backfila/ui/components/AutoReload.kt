@@ -9,7 +9,7 @@ import kotlinx.html.div
 //     (ie. update form for backfill show page)
 fun TagConsumer<*>.AutoReload(block: TagConsumer<*>.() -> Unit) {
   div {
-//    attributes["data-controller"] = "auto-reload"
+    attributes["data-controller"] = "auto-reload"
     attributes["data-auto-reload-target"] = "frame"
 
     block()

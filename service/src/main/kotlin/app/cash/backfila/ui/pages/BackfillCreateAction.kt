@@ -57,18 +57,27 @@ class BackfillCreateAction @Inject constructor(
     val htmlResponseBody = dashboardPageLayout.newBuilder()
       .title("Create Backfill | Backfila")
       .buildHtmlResponseBody {
-        PageTitle("Create Backfill", backfillName ?: "") {
+        val variant = variantOrBlank.orEmpty().ifBlank { "default" }
+
+        // If service + variant + backfill id to clone are valid, pre-fill form with backfill details
+        val backfillRuns = getBackfillRunsAction.backfillRuns(service, variant)
+        val backfillToClone =
+          (backfillRuns.paused_backfills + backfillRuns.running_backfills).firstOrNull { it.id == backfillIdToClone }
+        val backfillToCloneStatus = backfillToClone?.id?.toLongOrNull()?.let { getBackfillStatusAction.status(it) }
+
+        val registeredBackfills = getRegisteredBackfillsAction.backfills(service, variant)
+        val registeredBackfill = registeredBackfills.backfills.firstOrNull { it.name == backfillName || backfillToClone?.name == backfillName }
+
+        val resolvedBackfillName = registeredBackfill?.name ?: backfillToClone?.name ?: ""
+
+        PageTitle("Create Backfill", resolvedBackfillName) {
           span("inline-flex shrink-0 items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-s font-medium text-blue-700 ring-1 ring-inset ring-blue-600/20") {
             val suffix = if (variantOrBlank.isNullOrBlank()) "" else "/$variantOrBlank"
             +"$service$suffix"
           }
         }
 
-        val variant = variantOrBlank.orEmpty().ifBlank { "default" }
-        val registeredBackfills = getRegisteredBackfillsAction.backfills(service, variant)
-        val backfill = registeredBackfills.backfills.firstOrNull { it.name == backfillName }
-
-        if (service.isNotBlank() && backfill == null && backfillIdToClone == null) {
+        if (service.isNotBlank() && registeredBackfill == null && backfillIdToClone == null) {
           // If service + variant is set and valid, show registered backfills drop down
           p {
             +"Service: $service"
@@ -149,241 +158,259 @@ class BackfillCreateAction @Inject constructor(
               }
             }
           }
-        } else if (backfill != null || backfillIdToClone != null) {
-          // If service + variant + backfill id to clone are valid, pre-fill form with backfill details
-          val backfillRuns = getBackfillRunsAction.backfillRuns(service, variant)
-          val backfillToClone =
-            (backfillRuns.paused_backfills + backfillRuns.running_backfills).firstOrNull { it.id == backfillIdToClone }
-          if (backfill == null && backfillToClone == null) {
+        } else if (registeredBackfill != null || backfillIdToClone != null) {
+          if (registeredBackfill == null && backfillToClone == null) {
             AlertError(
-              message = "Backfill ID $backfillIdToClone to clone not found.",
-              label = "Choose a Backfill",
+              message = "Backfill to clone not found [id=$backfillIdToClone].",
+              label = "Create a Backfill",
               link = PATH.replace("{service}", service).replace("{variantOrBlank}", variantOrBlank ?: ""),
             )
-          }
+          } else {
+            // TODO add Header buttons / metrics
 
-          // TODO add Header buttons / metrics
+            // TODO add backfill name and back button to select a different backfill, or select/options
 
-          // TODO add backfill name and back button to select a different backfill, or select/options
+            div("mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8") {
+              form {
+                action = BackfillCreateHandlerAction.PATH
 
-          div("mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8") {
-            form {
-              action = BackfillCreateHandlerAction.PATH
+                input {
+                  type = InputType.hidden
+                  name = BackfillCreateField.SERVICE.fieldId
+                  value = service
+                }
 
-              input {
-                type = InputType.hidden
-                name = "service"
-                value = service
-              }
+                input {
+                  type = InputType.hidden
+                  name = BackfillCreateField.VARIANT.fieldId
+                  value = variant
+                }
 
-              input {
-                type = InputType.hidden
-                name = "variant"
-                value = variant
-              }
+                input {
+                  type = InputType.hidden
+                  name = BackfillCreateField.BACKFILL_NAME.fieldId
+                  value = resolvedBackfillName
+                }
 
-              input {
-                type = InputType.hidden
-                name = "backfillName"
-                value = backfill?.name ?: backfillToClone?.name ?: ""
-              }
-
-              div("space-y-12") {
-                div("border-b border-gray-900/10 pb-12") {
-                  h2("text-base/7 font-semibold text-gray-900") { +"""Immutable Options""" }
-                  p("mt-1 text-sm/6 text-gray-600") { +"""These options can't be changed once the backfill is created.""" }
-                  div {
-                    div("mt-6 space-y-6") {
-                      div("flex gap-3") {
-                        val field = BackfillCreateField.DRY_RUN.fieldId
-                        div("flex h-6 shrink-0 items-center") {
-                          div("group grid size-4 grid-cols-1") {
-                            input(classes = "col-start-1 row-start-1 appearance-none rounded border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto") {
-                              id = field
-                              attributes["aria-describedby"] = "dry-run-description"
-                              name = field
-                              type = InputType.checkBox
+                div("space-y-12") {
+                  div("border-b border-gray-900/10 pb-12") {
+                    h2("text-base/7 font-semibold text-gray-900") { +"""Immutable Options""" }
+                    p("mt-1 text-sm/6 text-gray-600") { +"""These options can't be changed once the backfill is created.""" }
+                    div {
+                      div("mt-6 space-y-6") {
+                        div("flex gap-3") {
+                          val field = BackfillCreateField.DRY_RUN.fieldId
+                          div("flex h-6 shrink-0 items-center") {
+                            div("group grid size-4 grid-cols-1") {
+                              input(classes = "col-start-1 row-start-1 appearance-none rounded border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto") {
+                                id = field
+                                attributes["aria-describedby"] = "dry-run-description"
+                                name = field
+                                type = InputType.checkBox
+                                // Checked by default to force user to opt-in to non-dry-run
+                                checked = true
+                                placeholder = "on"
+                                backfillToCloneStatus?.let {
+                                  if (it.dry_run) {
+                                    value = "on"
+                                    checked = true
+                                  } else {
+                                    value = "off"
+                                    checked = false
+                                  }
+                                }
+                              }
+                            }
+                          }
+                          div("text-sm/6") {
+                            label("font-medium text-gray-900") {
+                              htmlFor = field
+                              +"""Dry Run"""
+                            }
+                            p("text-gray-500") {
+                              id = "dry-run-description"
+                              +"""Anything within your not Dry Run block will not be run."""
                             }
                           }
                         }
-                        div("text-sm/6") {
-                          label("font-medium text-gray-900") {
-                            htmlFor = field
-                            +"""Dry Run"""
-                          }
-                          p("text-gray-500") {
-                            id = "dry-run-description"
-                            +"""Anything within your not Dry Run block will not be run."""
-                          }
-                        }
                       }
                     }
-                  }
 
-                  div("mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6") {
-                    div("sm:col-span-3") {
-                      val field = BackfillCreateField.RANGE_START.fieldId
-                      label("block text-sm/6 font-medium text-gray-900") {
-                        htmlFor = field
-                        +"""Range Start (optional)"""
-                      }
-                      div("mt-2") {
-                        input(classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
-                          type = InputType.number
-                          name = field
-                          id = field
-                          attributes["autocomplete"] = field
+                    div("mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6") {
+                      div("sm:col-span-3") {
+                        val field = BackfillCreateField.RANGE_START.fieldId
+                        label("block text-sm/6 font-medium text-gray-900") {
+                          htmlFor = field
+                          +"""Range Start (optional)"""
+                        }
+                        div("mt-2") {
+                          input(classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
+                            type = InputType.number
+                            name = field
+                            id = field
+                            attributes["autocomplete"] = field
+                            // TODO is this how to clone?
+                            backfillToCloneStatus?.partitions?.firstOrNull()?.pkey_start?.let { value = it }
+                          }
                         }
                       }
-                    }
-                    div("sm:col-span-3") {
-                      val field = BackfillCreateField.RANGE_END.fieldId
-                      label("block text-sm/6 font-medium text-gray-900") {
-                        htmlFor = field
-                        +"""Range End (optional)"""
-                      }
-                      div("mt-2") {
-                        input(classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
-                          type = InputType.number
-                          name = field
-                          id = field
-                          attributes["autocomplete"] = field
+                      div("sm:col-span-3") {
+                        val field = BackfillCreateField.RANGE_END.fieldId
+                        label("block text-sm/6 font-medium text-gray-900") {
+                          htmlFor = field
+                          +"""Range End (optional)"""
+                        }
+                        div("mt-2") {
+                          input(classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
+                            type = InputType.number
+                            name = field
+                            id = field
+                            attributes["autocomplete"] = field
+                            // TODO is this how to clone?
+                            backfillToCloneStatus?.partitions?.firstOrNull()?.pkey_end?.let { value = it }
+                          }
                         }
                       }
                     }
                   }
                 }
-              }
 
-              div("pt-12 space-y-12") {
-                div("border-b border-gray-900/10 pb-12") {
-                  h2("text-base/7 font-semibold text-gray-900") { +"""Mutable Options""" }
-                  p("mt-1 text-sm/6 text-gray-600") { +"""These options can be changed once the backfill is created.""" }
-
-                  div("mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6") {
-                    div("sm:col-span-3") {
-                      val field = BackfillCreateField.BATCH_SIZE.fieldId
-                      label("block text-sm/6 font-medium text-gray-900") {
-                        htmlFor = field
-                        +"""Batch Size"""
-
-                        legend("text-sm/6 font-normal text-gray-900") { +"""How many *matching* records to send per call to RunBatch.""" }
-                      }
-                      div("mt-2") {
-                        input(classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
-                          type = InputType.text
-                          name = field
-                          id = field
-                          attributes["autocomplete"] = field
-                          value = "100"
-                        }
-                      }
-                    }
-                  }
-
-                  div("mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6") {
-                    div("sm:col-span-3") {
-                      val field = BackfillCreateField.SCAN_SIZE.fieldId
-                      label("block text-sm/6 font-medium text-gray-900") {
-                        htmlFor = field
-                        +"""Scan Size"""
-
-                        legend("text-sm/6 font-normal text-gray-900") { +"""How many records to scan when computing batches.""" }
-                      }
-                      div("mt-2") {
-                        input(classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
-                          type = InputType.number
-                          name = field
-                          id = field
-                          attributes["autocomplete"] = field
-                          value = "10000"
-                        }
-                      }
-                    }
-                  }
-
-                  div("mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6") {
-                    div("sm:col-span-3") {
-                      val field = BackfillCreateField.THREADS_PER_PARTITION.fieldId
-                      label("block text-sm/6 font-medium text-gray-900") {
-                        htmlFor = field
-                        +"""Threads Per Partition"""
-                      }
-                      div("mt-2") {
-                        input(classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
-                          type = InputType.number
-                          name = field
-                          id = field
-                          attributes["autocomplete"] = field
-                          value = "1"
-                        }
-                      }
-                    }
-                  }
-
-                  div("mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6") {
-                    div("sm:col-span-3") {
-                      val field = BackfillCreateField.EXTRA_SLEEP_MS.fieldId
-                      label("block text-sm/6 font-medium text-gray-900") {
-                        htmlFor = field
-                        +"""Extra Sleep (ms)"""
-                      }
-                      div("mt-2") {
-                        input(classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
-                          type = InputType.number
-                          name = field
-                          id = field
-                          attributes["autocomplete"] = field
-                          value = "1"
-                        }
-                      }
-                    }
-                  }
-
-                  div("mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6") {
-                    div("sm:col-span-3") {
-                      val field = BackfillCreateField.BACKOFF_SCHEDULE.fieldId
-                      label("block text-sm/6 font-medium text-gray-900") {
-                        htmlFor = field
-                        +"""Backoff Schedule (optional)"""
-
-                        legend("text-sm/6 font-normal text-gray-900") { +"""Comma separated list of milliseconds to backoff subsequent failures.""" }
-                      }
-                      div("mt-2") {
-                        input(classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
-                          type = InputType.text
-                          name = field
-                          id = field
-                          attributes["autocomplete"] = field
-                          placeholder = "5000,15000,30000"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-
-              // Custom Parameters
-              if (backfill?.parameterNames?.isNotEmpty() == true) {
                 div("pt-12 space-y-12") {
                   div("border-b border-gray-900/10 pb-12") {
-                    h2("text-base/7 font-semibold text-gray-900") { +"""Immutable Custom Parameters""" }
-                    p("mt-1 text-sm/6 text-gray-600") { +"""These custom parameters can't be changed once the backfill is created.""" }
+                    h2("text-base/7 font-semibold text-gray-900") { +"""Mutable Options""" }
+                    p("mt-1 text-sm/6 text-gray-600") { +"""These options can be changed once the backfill is created.""" }
 
-                    backfill.parameterNames.map {
-                      div("mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6") {
-                        div("sm:col-span-3") {
-                          val field = "${BackfillCreateField.CUSTOM_PARAMETER_PREFIX}$it"
-                          label("block text-sm/6 font-medium text-gray-900") {
-                            htmlFor = field
-                            +it
+                    div("mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6") {
+                      div("sm:col-span-3") {
+                        val field = BackfillCreateField.BATCH_SIZE.fieldId
+                        label("block text-sm/6 font-medium text-gray-900") {
+                          htmlFor = field
+                          +"""Batch Size"""
+
+                          legend("text-sm/6 font-normal text-gray-900") { +"""How many *matching* records to send per call to RunBatch.""" }
+                        }
+                        div("mt-2") {
+                          input(classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
+                            type = InputType.text
+                            name = field
+                            id = field
+                            attributes["autocomplete"] = field
+                            value = "100"
+                            backfillToCloneStatus?.batch_size?.let { value = it.toString() }
                           }
-                          div("mt-2") {
-                            input(classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
-                              type = InputType.text
-                              name = field
-                              id = field
-                              attributes["autocomplete"] = field
+                        }
+                      }
+                    }
+
+                    div("mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6") {
+                      div("sm:col-span-3") {
+                        val field = BackfillCreateField.SCAN_SIZE.fieldId
+                        label("block text-sm/6 font-medium text-gray-900") {
+                          htmlFor = field
+                          +"""Scan Size"""
+
+                          legend("text-sm/6 font-normal text-gray-900") { +"""How many records to scan when computing batches.""" }
+                        }
+                        div("mt-2") {
+                          input(classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
+                            type = InputType.number
+                            name = field
+                            id = field
+                            attributes["autocomplete"] = field
+                            value = "10000"
+                            backfillToCloneStatus?.scan_size?.let { value = it.toString() }
+                          }
+                        }
+                      }
+                    }
+
+                    div("mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6") {
+                      div("sm:col-span-3") {
+                        val field = BackfillCreateField.THREADS_PER_PARTITION.fieldId
+                        label("block text-sm/6 font-medium text-gray-900") {
+                          htmlFor = field
+                          +"""Threads Per Partition"""
+                        }
+                        div("mt-2") {
+                          input(classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
+                            type = InputType.number
+                            name = field
+                            id = field
+                            attributes["autocomplete"] = field
+                            value = "1"
+                            backfillToCloneStatus?.num_threads?.let { value = it.toString() }
+                          }
+                        }
+                      }
+                    }
+
+                    div("mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6") {
+                      div("sm:col-span-3") {
+                        val field = BackfillCreateField.EXTRA_SLEEP_MS.fieldId
+                        label("block text-sm/6 font-medium text-gray-900") {
+                          htmlFor = field
+                          +"""Extra Sleep (ms)"""
+                        }
+                        div("mt-2") {
+                          input(classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
+                            type = InputType.number
+                            name = field
+                            id = field
+                            attributes["autocomplete"] = field
+                            value = "1"
+                            backfillToCloneStatus?.extra_sleep_ms?.let { value = it.toString() }
+                          }
+                        }
+                      }
+                    }
+
+                    div("mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6") {
+                      div("sm:col-span-3") {
+                        val field = BackfillCreateField.BACKOFF_SCHEDULE.fieldId
+                        label("block text-sm/6 font-medium text-gray-900") {
+                          htmlFor = field
+                          +"""Backoff Schedule (optional)"""
+
+                          legend("text-sm/6 font-normal text-gray-900") { +"""Comma separated list of milliseconds to backoff subsequent failures.""" }
+                        }
+                        div("mt-2") {
+                          input(classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
+                            type = InputType.text
+                            name = field
+                            id = field
+                            attributes["autocomplete"] = field
+                            placeholder = "5000,15000,30000"
+                            backfillToCloneStatus?.backoff_schedule?.let { value = it }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+
+                // Custom Parameters
+                if (registeredBackfill?.parameterNames?.isNotEmpty() == true) {
+                  div("pt-12 space-y-12") {
+                    div("border-b border-gray-900/10 pb-12") {
+                      h2("text-base/7 font-semibold text-gray-900") { +"""Immutable Custom Parameters""" }
+                      p("mt-1 text-sm/6 text-gray-600") { +"""These custom parameters can't be changed once the backfill is created.""" }
+
+                      registeredBackfill.parameterNames.map {
+                        div("mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6") {
+                          div("sm:col-span-3") {
+                            val field = "${BackfillCreateField.CUSTOM_PARAMETER_PREFIX.fieldId}$it"
+                            label("block text-sm/6 font-medium text-gray-900") {
+                              htmlFor = field
+                              +it
+                            }
+                            div("mt-2") {
+                              input(classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6") {
+                                type = InputType.text
+                                name = field
+                                id = field
+                                attributes["autocomplete"] = field
+                                backfillToCloneStatus?.parameters?.get(it)?.let { value = it }
+                              }
                             }
                           }
                         }
@@ -391,15 +418,15 @@ class BackfillCreateAction @Inject constructor(
                     }
                   }
                 }
-              }
 
-              button(classes = "rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600") {
-                type = ButtonType.submit
+                button(classes = "rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600") {
+                  type = ButtonType.submit
 
-                if (backfillToClone != null) {
-                  +"Clone"
-                } else {
-                  +"""Create"""
+                  if (backfillToClone != null) {
+                    +"Clone"
+                  } else {
+                    +"""Create"""
+                  }
                 }
               }
             }
@@ -411,6 +438,9 @@ class BackfillCreateAction @Inject constructor(
   }
 
   enum class BackfillCreateField(val fieldId: String) {
+    SERVICE("service"),
+    VARIANT("variant"),
+    BACKFILL_NAME("backfillName"),
     DRY_RUN("dryRun"),
     RANGE_START("rangeStart"),
     RANGE_END("rangeEnd"),

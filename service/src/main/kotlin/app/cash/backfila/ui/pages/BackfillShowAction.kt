@@ -58,6 +58,8 @@ class BackfillShowAction @Inject constructor(
         AutoReload {
           PageTitle("Backfill", id) {
             a {
+              href = BackfillCreateAction.PATH.replace("{service}", backfill.service_name).replace("{variantOrBlank}", backfill.variant) + "?backfillIdToClone=$id"
+
               button(classes = "rounded-full bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600") {
                 type = ButtonType.button
                 +"""Clone"""
