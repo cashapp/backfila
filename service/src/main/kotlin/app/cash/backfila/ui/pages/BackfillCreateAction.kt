@@ -195,7 +195,7 @@ class BackfillCreateAction @Inject constructor(
                   div {
                     div("mt-6 space-y-6") {
                       div("flex gap-3") {
-                        val field = "dryRun"
+                        val field = BackfillCreateField.DRY_RUN.fieldId
                         div("flex h-6 shrink-0 items-center") {
                           div("group grid size-4 grid-cols-1") {
                             input(classes = "col-start-1 row-start-1 appearance-none rounded border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto") {
@@ -222,7 +222,7 @@ class BackfillCreateAction @Inject constructor(
 
                   div("mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6") {
                     div("sm:col-span-3") {
-                      val field = "rangeStart"
+                      val field = BackfillCreateField.RANGE_START.fieldId
                       label("block text-sm/6 font-medium text-gray-900") {
                         htmlFor = field
                         +"""Range Start (optional)"""
@@ -237,7 +237,7 @@ class BackfillCreateAction @Inject constructor(
                       }
                     }
                     div("sm:col-span-3") {
-                      val field = "rangeEnd"
+                      val field = BackfillCreateField.RANGE_END.fieldId
                       label("block text-sm/6 font-medium text-gray-900") {
                         htmlFor = field
                         +"""Range End (optional)"""
@@ -262,7 +262,7 @@ class BackfillCreateAction @Inject constructor(
 
                   div("mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6") {
                     div("sm:col-span-3") {
-                      val field = "batchSize"
+                      val field = BackfillCreateField.BATCH_SIZE.fieldId
                       label("block text-sm/6 font-medium text-gray-900") {
                         htmlFor = field
                         +"""Batch Size"""
@@ -283,7 +283,7 @@ class BackfillCreateAction @Inject constructor(
 
                   div("mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6") {
                     div("sm:col-span-3") {
-                      val field = "scanSize"
+                      val field = BackfillCreateField.SCAN_SIZE.fieldId
                       label("block text-sm/6 font-medium text-gray-900") {
                         htmlFor = field
                         +"""Scan Size"""
@@ -304,7 +304,7 @@ class BackfillCreateAction @Inject constructor(
 
                   div("mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6") {
                     div("sm:col-span-3") {
-                      val field = "threadsPerPartition"
+                      val field = BackfillCreateField.THREADS_PER_PARTITION.fieldId
                       label("block text-sm/6 font-medium text-gray-900") {
                         htmlFor = field
                         +"""Threads Per Partition"""
@@ -323,7 +323,7 @@ class BackfillCreateAction @Inject constructor(
 
                   div("mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6") {
                     div("sm:col-span-3") {
-                      val field = "extraSleepMs"
+                      val field = BackfillCreateField.EXTRA_SLEEP_MS.fieldId
                       label("block text-sm/6 font-medium text-gray-900") {
                         htmlFor = field
                         +"""Extra Sleep (ms)"""
@@ -342,7 +342,7 @@ class BackfillCreateAction @Inject constructor(
 
                   div("mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6") {
                     div("sm:col-span-3") {
-                      val field = "backoffSchedule"
+                      val field = BackfillCreateField.BACKOFF_SCHEDULE.fieldId
                       label("block text-sm/6 font-medium text-gray-900") {
                         htmlFor = field
                         +"""Backoff Schedule (optional)"""
@@ -373,7 +373,7 @@ class BackfillCreateAction @Inject constructor(
                     backfill.parameterNames.map {
                       div("mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6") {
                         div("sm:col-span-3") {
-                          val field = "customParameter_$it"
+                          val field = "${BackfillCreateField.CUSTOM_PARAMETER_PREFIX}$it"
                           label("block text-sm/6 font-medium text-gray-900") {
                             htmlFor = field
                             +it
@@ -408,6 +408,18 @@ class BackfillCreateAction @Inject constructor(
       }
 
     return Response(htmlResponseBody)
+  }
+
+  enum class BackfillCreateField(val fieldId: String) {
+    DRY_RUN("dryRun"),
+    RANGE_START("rangeStart"),
+    RANGE_END("rangeEnd"),
+    BATCH_SIZE("batchSize"),
+    SCAN_SIZE("scanSize"),
+    THREADS_PER_PARTITION("threadsPerPartition"),
+    EXTRA_SLEEP_MS("extraSleepMs"),
+    BACKOFF_SCHEDULE("backoffSchedule"),
+    CUSTOM_PARAMETER_PREFIX("customParameter_"),
   }
 
   companion object {

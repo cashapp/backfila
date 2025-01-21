@@ -1,10 +1,11 @@
 package app.cash.backfila.ui.actions
 
+import app.cash.backfila.dashboard.CreateBackfillAction
 import app.cash.backfila.dashboard.StartBackfillAction
 import app.cash.backfila.dashboard.StopBackfillAction
 import app.cash.backfila.dashboard.UpdateBackfillAction
-import javax.inject.Inject
-import javax.inject.Singleton
+import app.cash.backfila.protos.service.CreateBackfillRequest
+import com.squareup.wire.internal.immutableCopyOf
 import misk.scope.ActionScoped
 import misk.security.authz.Authenticated
 import misk.web.Get
@@ -14,11 +15,13 @@ import misk.web.ResponseBody
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
-import misk.web.toResponseBody
-import okhttp3.Headers
+import okio.ByteString
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class BackfillCreateHandlerAction @Inject constructor(
+  private val createBackfillAction: CreateBackfillAction,
   private val startBackfillAction: StartBackfillAction,
   private val stopBackfillAction: StopBackfillAction,
   private val updateBackfillAction: UpdateBackfillAction,
@@ -42,11 +45,32 @@ class BackfillCreateHandlerAction @Inject constructor(
 //    @QueryParam customParameter_mealDelayMs: String?,
   ): Response<ResponseBody> {
     // Parse form
-    val formFieldName = this.httpCall.get().asOkHttpRequest().url.queryParameterNames
+    val formFieldNames = this.httpCall.get().asOkHttpRequest().url.queryParameterNames
+    val formFields = formFieldNames.associateWith { this.httpCall.get().asOkHttpRequest().url.queryParameter(it) }
 
 
     // Submit create call
+    createBackfillAction.create(
+      service = TODO(),
+      variant = TODO(),
+      request = CreateBackfillRequest.Builder()
+        .backfill_name(TODO())
+        .dry_run(TODO())
+        .range_start(TODO())
+        .range_end(TODO())
+        .batch_size(TODO())
+        .scan_size(TODO())
+        .extra_sleep_ms(TODO())
+        .backoff_schedule(TODO())
+        .custom_parameters(
+          mapOf(
+            "mealDelayMs" to ByteString.encodeUtf8(TODO())
+          )
+        )
+        .build()
 
+
+    )
 
 
     // TODO get created backfill id and redirect to that page on create/clone
