@@ -4,6 +4,7 @@ import app.cash.backfila.dashboard.GetServicesAction
 import kotlinx.html.InputType
 import kotlinx.html.TagConsumer
 import kotlinx.html.a
+import kotlinx.html.classes
 import kotlinx.html.div
 import kotlinx.html.h3
 import kotlinx.html.input
@@ -35,11 +36,11 @@ fun TagConsumer<*>.ServiceSelect(
         role = "list"
 
         services.map { (servicePath, service) ->
-          a {
+          a(classes = "registration") {
             val variant = if (servicePath.split("/").last() == "default") null else servicePath.split("/").last()
             href = serviceLinkBuilder(service.name, variant)
 
-            this@ul.li("registration col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow") {
+            this@ul.li("col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow") {
               div("flex w-full items-center justify-between space-x-6 p-6") {
                 div("flex-1 truncate") {
                   div("flex items-center space-x-3") {
