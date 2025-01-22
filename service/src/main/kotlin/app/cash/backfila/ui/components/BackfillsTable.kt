@@ -1,7 +1,6 @@
 package app.cash.backfila.ui.components
 
 import app.cash.backfila.dashboard.UiBackfillRun
-import app.cash.backfila.ui.PathBuilder
 import app.cash.backfila.ui.pages.BackfillShowAction
 import kotlinx.html.TagConsumer
 import kotlinx.html.a
@@ -48,7 +47,7 @@ fun TagConsumer<*>.BackfillsTable(running: Boolean, backfills: List<UiBackfillRu
                     "whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0",
                   ) {
                     a(classes = "text-green-500 hover:underline") {
-                      href = PathBuilder(path = BackfillShowAction.PATH.replace("{id}", it.id)).build()
+                      href = BackfillShowAction.PATH.replace("{id}", it.id)
                       +it.name
                     }
                   }

@@ -60,16 +60,14 @@ class ServiceShowAction @Inject constructor(
     val htmlResponseBody = dashboardPageLayout.newBuilder()
       .title("$label | Backfila")
       .breadcrumbLinks(
-        listOf(
-          Link("Services", ServiceIndexAction.PATH),
-          Link(label, path),
-        ),
+        Link("Services", ServiceIndexAction.PATH),
+        Link(label, path),
       )
       .buildHtmlResponseBody {
         AutoReload {
           PageTitle("Service", label) {
             a {
-              href = BackfillCreateAction.PATH.replace("{service}", service)
+              href = BackfillCreateServiceIndexAction.PATH.replace("{service}", service)
                 .replace("{variantOrBlank}", variantOrBlank ?: "")
 
               button(classes = "rounded-full bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600") {

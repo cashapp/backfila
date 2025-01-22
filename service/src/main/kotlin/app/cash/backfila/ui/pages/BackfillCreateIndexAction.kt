@@ -1,14 +1,12 @@
 package app.cash.backfila.ui.pages
 
-import app.cash.backfila.dashboard.GetBackfillStatusAction
 import app.cash.backfila.dashboard.GetServicesAction
-import app.cash.backfila.ui.actions.ServiceAutocompleteAction
+import app.cash.backfila.ui.actions.ServiceDataHelper
 import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.components.PageTitle
 import app.cash.backfila.ui.components.ServiceSelect
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.html.div
 import misk.security.authz.Authenticated
 import misk.web.Get
 import misk.web.Response
@@ -19,8 +17,7 @@ import misk.web.mediatype.MediaTypes
 
 @Singleton
 class BackfillCreateIndexAction @Inject constructor(
-  private val serviceAutocompleteAction: ServiceAutocompleteAction,
-  private val getBackfillStatusAction: GetBackfillStatusAction,
+  private val servicesGetter: ServiceDataHelper,
   private val dashboardPageLayout: DashboardPageLayout,
 ) : WebAction {
   @Get(PATH)
@@ -33,9 +30,9 @@ class BackfillCreateIndexAction @Inject constructor(
         PageTitle("Create Backfill")
 
         // If service + variant is blank, show service selection
-        val services: Map<String, GetServicesAction.UiService> = serviceAutocompleteAction.getFlattenedServices()
+        val services: Map<String, GetServicesAction.UiService> = servicesGetter.getFlattenedServices()
         ServiceSelect(services) { service, variant ->
-          BackfillCreateAction.PATH.replace("{service}", service).replace("{variantOrBlank}", variant ?: "")
+          BackfillCreateServiceIndexAction.PATH.replace("{service}", service).replace("{variantOrBlank}", variant ?: "")
         }
       }
 

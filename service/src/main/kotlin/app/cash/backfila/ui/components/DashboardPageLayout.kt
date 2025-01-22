@@ -75,7 +75,7 @@ class DashboardPageLayout @Inject constructor(
 
   fun headBlock(block: TagConsumer<*>.() -> Unit) = apply { this.headBlock = block }
 
-  fun breadcrumbLinks(links: List<Link>) = apply { this.breadcrumbLinks = links }
+  fun breadcrumbLinks(vararg links: Link?) = apply { this.breadcrumbLinks = links.toList().filterNotNull() }
 
   @JvmOverloads
   fun build(block: TagConsumer<*>.() -> Unit = { }): String {

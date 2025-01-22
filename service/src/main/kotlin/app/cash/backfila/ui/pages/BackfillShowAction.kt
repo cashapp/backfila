@@ -51,21 +51,28 @@ class BackfillShowAction @Inject constructor(
     @PathParam id: String,
   ): Response<ResponseBody> {
     val backfill = getBackfillStatusAction.status(id.toLong())
-    val label = if (backfill.variant == "default") backfill.service_name else "${backfill.service_name} (${backfill.variant})"
+    val label =
+      if (backfill.variant == "default") backfill.service_name else "${backfill.service_name} (${backfill.variant})"
 
     val htmlResponseBody = dashboardPageLayout.newBuilder()
       .title("Backfill $id | Backfila")
       .breadcrumbLinks(
-        listOf(
-          Link(label, ServiceShowAction.PATH.replace("{service}", backfill.service_name).replace("{variantOrBlank}", if (backfill.variant != "default") backfill.variant else "")),
-          Link("Backfill $id", PATH.replace("{id}", id)),
+        Link("Services", ServiceIndexAction.PATH),
+        Link(
+          label,
+          ServiceShowAction.PATH.replace("{service}", backfill.service_name)
+            .replace("{variantOrBlank}", if (backfill.variant != "default") backfill.variant else ""),
         ),
+        Link("Backfill #$id", PATH.replace("{id}", id)),
       )
       .buildHtmlResponseBody {
         AutoReload {
           PageTitle("Backfill", id) {
             a {
-              href = BackfillCreateAction.PATH.replace("{service}", backfill.service_name).replace("{variantOrBlank}", backfill.variant) + "?backfillIdToClone=$id"
+              href = BackfillCreateAction.PATH
+                .replace("{service}", backfill.service_name)
+                .replace("{variantOrBackfillNameOrId}", if (backfill.variant != "default") backfill.variant else id)
+                .replace("{backfillNameOrId}", if (backfill.variant != "default") id else "")
 
               button(classes = "rounded-full bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600") {
                 type = ButtonType.button

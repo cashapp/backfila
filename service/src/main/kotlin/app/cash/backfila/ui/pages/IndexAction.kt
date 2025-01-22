@@ -1,7 +1,7 @@
 package app.cash.backfila.ui.pages
 
 import app.cash.backfila.service.BackfilaConfig
-import app.cash.backfila.ui.actions.ServiceAutocompleteAction
+import app.cash.backfila.ui.actions.ServiceDataHelper
 import app.cash.backfila.ui.components.DashboardPageLayout
 import javax.inject.Inject
 import kotlinx.html.dd
@@ -22,7 +22,7 @@ import misk.web.mediatype.MediaTypes
 
 class IndexAction @Inject constructor(
   private val config: BackfilaConfig,
-  private val serviceAutocompleteAction: ServiceAutocompleteAction,
+  private val serviceDataHelper: ServiceDataHelper,
   private val dashboardPageLayout: DashboardPageLayout,
   private val callerProvider: ActionScoped<MiskCaller?>,
 ) : WebAction {

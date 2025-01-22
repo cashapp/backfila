@@ -1,7 +1,7 @@
 package app.cash.backfila.ui.pages
 
 import app.cash.backfila.dashboard.GetServicesAction
-import app.cash.backfila.ui.actions.ServiceAutocompleteAction
+import app.cash.backfila.ui.actions.ServiceDataHelper
 import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.components.PageTitle
 import app.cash.backfila.ui.components.ServiceSelect
@@ -13,7 +13,7 @@ import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 
 class ServiceIndexAction @Inject constructor(
-  private val serviceAutocompleteAction: ServiceAutocompleteAction,
+  private val serviceDataHelper: ServiceDataHelper,
   private val dashboardPageLayout: DashboardPageLayout,
 ) : WebAction {
   @Get(PATH)
@@ -26,7 +26,7 @@ class ServiceIndexAction @Inject constructor(
       PageTitle("Services")
 
       // Search and select from Services
-      val services: Map<String, GetServicesAction.UiService> = serviceAutocompleteAction.getFlattenedServices()
+      val services: Map<String, GetServicesAction.UiService> = serviceDataHelper.getFlattenedServices()
       ServiceSelect(services) { service, variant ->
         ServiceShowAction.PATH.replace("{service}", service).replace("{variantOrBlank}", variant ?: "")
       }
