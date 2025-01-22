@@ -71,8 +71,6 @@ class BackfillShowButtonHandlerAction @Inject constructor(
         "backoff_schedule" -> {
           updateBackfillAction.update(id.toLong(), UpdateBackfillRequest(backoff_schedule = field_value))
         }
-
-        // TODO add support for updating other fields, not just state
       }
     }
 

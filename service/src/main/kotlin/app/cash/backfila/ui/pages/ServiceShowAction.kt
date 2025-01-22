@@ -77,8 +77,6 @@ class ServiceShowAction @Inject constructor(
             }
           }
 
-          // TODO Add completed table
-          // TODO Add deleted support?
           BackfillsTable(true, backfillRuns.running_backfills)
           BackfillsTable(false, backfillRuns.paused_backfills)
         }

@@ -81,8 +81,6 @@ class BackfillShowAction @Inject constructor(
             }
           }
 
-          // TODO add Header buttons / metrics
-
           div("mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8") {
             div("mx-auto grid max-w-2xl grid-cols-1 grid-rows-1 items-start gap-x-8 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-3") {
 //            +"""<!-- Right Small Column -->"""
@@ -260,6 +258,7 @@ class BackfillShowAction @Inject constructor(
                           )
                         }
                         td("hidden py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700 sm:table-cell") { +"""${partition.matching_records_per_minute} #/m""" }
+                        // TODO properly calculate the ETA until finished
                         td("py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700") { +"""ETA TODO""" }
                       }
                     }

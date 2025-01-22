@@ -1,13 +1,8 @@
 package app.cash.backfila.ui.actions
 
 import app.cash.backfila.dashboard.CreateBackfillAction
-import app.cash.backfila.dashboard.StartBackfillAction
-import app.cash.backfila.dashboard.StopBackfillAction
-import app.cash.backfila.dashboard.UpdateBackfillAction
 import app.cash.backfila.protos.service.CreateBackfillRequest
 import app.cash.backfila.ui.pages.BackfillCreateAction.BackfillCreateField
-import javax.inject.Inject
-import javax.inject.Singleton
 import misk.scope.ActionScoped
 import misk.security.authz.Authenticated
 import misk.web.Get
@@ -20,32 +15,18 @@ import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import okhttp3.Headers
 import okio.ByteString.Companion.encodeUtf8
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class BackfillCreateHandlerAction @Inject constructor(
   private val createBackfillAction: CreateBackfillAction,
-  private val startBackfillAction: StartBackfillAction,
-  private val stopBackfillAction: StopBackfillAction,
-  private val updateBackfillAction: UpdateBackfillAction,
   private val httpCall: ActionScoped<HttpCall>,
 ) : WebAction {
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
   @Authenticated(capabilities = ["users"])
-  fun get(
-//    @QueryParam service: String,
-//    @QueryParam variant: String,
-//    @QueryParam backfillName: String,
-//    @QueryParam dryRun: Boolean?,
-//    @QueryParam rangeStart: String?,
-//    @QueryParam rangeEnd: String?,
-//    @QueryParam batchSize: String?,
-//    @QueryParam scanSize: String?,
-//    @QueryParam extraSleepMs: String?,
-//    @QueryParam backoffSchedule: String?,
-//    // TODO need to make this generic to work with any named custom params
-//    @QueryParam customParameter_mealDelayMs: String?,
-  ): Response<ResponseBody> {
+  fun get(): Response<ResponseBody> {
     // Parse form
     val formFieldNames = this.httpCall.get().asOkHttpRequest().url.queryParameterNames
     val formFields = formFieldNames.associateWith { this.httpCall.get().asOkHttpRequest().url.queryParameter(it) }
@@ -79,7 +60,6 @@ class BackfillCreateHandlerAction @Inject constructor(
       request = createRequestBuilder.build(),
     )
 
-    // TODO get created backfill id and redirect to that page on create/clone
     val id = response.backfill_run_id
 
     return Response(

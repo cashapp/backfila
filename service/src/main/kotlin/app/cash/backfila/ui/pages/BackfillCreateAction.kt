@@ -133,10 +133,6 @@ class BackfillCreateAction @Inject constructor(
               .replace("{variantOrBlank}", variantOrBlank ?: ""),
           )
         } else {
-          // TODO add Header buttons / metrics
-
-          // TODO add backfill name and back button to select a different backfill, or select/options
-
           div("mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8") {
             form {
               action = BackfillCreateHandlerAction.PATH
