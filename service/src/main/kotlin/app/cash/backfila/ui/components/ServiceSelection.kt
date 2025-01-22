@@ -44,11 +44,10 @@ fun TagConsumer<*>.ServiceSelect(
               div("flex w-full items-center justify-between space-x-6 p-6") {
                 div("flex-1 truncate") {
                   div("flex items-center space-x-3") {
-                    // Don't include default variant in label, only for unique variants
-                    val label = if (variant == null) service.name else servicePath
                     h3("truncate text-sm font-medium text-gray-900") {
-                      +"""$label (${service.running_backfills})"""
+                      +"""${service.name} (${service.running_backfills})"""
                     }
+                    // Don't include default variant in label, only for unique variants
                     variant?.let { span("inline-flex shrink-0 items-center rounded-full bg-green-50 px-1.5 py-0.5 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20") { +it } }
                   }
                   //                    p("mt-1 truncate text-sm text-gray-500") { +"""Regional Paradigm Technician""" }
