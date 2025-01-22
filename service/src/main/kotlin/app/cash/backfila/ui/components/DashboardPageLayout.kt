@@ -5,11 +5,18 @@ import app.cash.backfila.service.BackfilaConfig
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillRunQuery
 import app.cash.backfila.service.persistence.BackfillState
+import app.cash.backfila.ui.pages.IndexAction
 import jakarta.inject.Inject
 import kotlinx.html.TagConsumer
+import kotlinx.html.a
 import kotlinx.html.div
+import kotlinx.html.li
 import kotlinx.html.main
+import kotlinx.html.nav
+import kotlinx.html.ol
+import kotlinx.html.role
 import kotlinx.html.script
+import kotlinx.html.span
 import misk.MiskCaller
 import misk.hibernate.Query
 import misk.hibernate.Transacter
@@ -17,6 +24,8 @@ import misk.hibernate.newQuery
 import misk.hotwire.buildHtml
 import misk.scope.ActionScoped
 import misk.tailwind.Link
+import misk.tailwind.icons.Heroicons
+import misk.tailwind.icons.heroicon
 import misk.tailwind.pages.MenuSection
 import misk.tailwind.pages.Navbar
 import misk.web.HttpCall
@@ -42,6 +51,7 @@ class DashboardPageLayout @Inject constructor(
   private var newBuilder = false
   private var headBlock: TagConsumer<*>.() -> Unit = {}
   private var title: String = "Backfila"
+  private var breadcrumbLinks: List<Link> = listOf()
 
   private val path by lazy {
     clientHttpCall.get().url.encodedPath
@@ -64,6 +74,8 @@ class DashboardPageLayout @Inject constructor(
   }
 
   fun headBlock(block: TagConsumer<*>.() -> Unit) = apply { this.headBlock = block }
+
+  fun breadcrumbLinks(links: List<Link>) = apply { this.breadcrumbLinks = links }
 
   @JvmOverloads
   fun build(block: TagConsumer<*>.() -> Unit = { }): String {
@@ -111,6 +123,10 @@ class DashboardPageLayout @Inject constructor(
                 div("mx-auto max-w-7xl sm:px-6 lg:px-8") {
                   // TODO remove when new UI is stable and preferred
                   UseOldUIAlert()
+
+                  if (breadcrumbLinks.isNotEmpty()) {
+                    Breadcrumbs(breadcrumbLinks)
+                  }
 
                   block()
 
@@ -198,6 +214,37 @@ class DashboardPageLayout @Inject constructor(
         )
       } else {
         listOf()
+      }
+    }
+  }
+
+  private fun TagConsumer<*>.Breadcrumbs(links: List<Link>) {
+    nav("flex") {
+      attributes["aria-label"] = "Breadcrumb"
+      ol("flex items-center space-x-4") {
+        role = "list"
+        li {
+          div {
+            a(classes = "text-gray-400 hover:text-gray-500") {
+              href = IndexAction.PATH
+
+              heroicon(Heroicons.OUTLINE_HOME)
+              span("sr-only") { +"""Home""" }
+            }
+          }
+        }
+        links.forEach {
+          li {
+            div("flex items-center") {
+              // TODO upstream chevron_right and use instead
+              heroicon(Heroicons.MINI_ARROW_LONG_RIGHT)
+              a(classes = "ml-4 text-sm font-medium text-gray-500 hover:text-gray-700") {
+                href = it.href
+                +it.label
+              }
+            }
+          }
+        }
       }
     }
   }

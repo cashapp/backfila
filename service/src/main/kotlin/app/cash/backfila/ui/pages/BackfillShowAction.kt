@@ -51,9 +51,16 @@ class BackfillShowAction @Inject constructor(
     @PathParam id: String,
   ): Response<ResponseBody> {
     val backfill = getBackfillStatusAction.status(id.toLong())
+    val label = if (backfill.variant == "default") backfill.service_name else "${backfill.service_name} (${backfill.variant})"
 
     val htmlResponseBody = dashboardPageLayout.newBuilder()
       .title("Backfill $id | Backfila")
+      .breadcrumbLinks(
+        listOf(
+          Link(label, ServiceShowAction.PATH.replace("{service}", backfill.service_name).replace("{variantOrBlank}", if (backfill.variant != "default") backfill.variant else "")),
+          Link("Backfill $id", PATH.replace("{id}", id)),
+        ),
+      )
       .buildHtmlResponseBody {
         AutoReload {
           PageTitle("Backfill", id) {
