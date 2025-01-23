@@ -13,7 +13,6 @@ import kotlinx.html.button
 import kotlinx.html.div
 import kotlinx.html.h3
 import kotlinx.html.li
-import kotlinx.html.p
 import kotlinx.html.role
 import kotlinx.html.span
 import kotlinx.html.ul
