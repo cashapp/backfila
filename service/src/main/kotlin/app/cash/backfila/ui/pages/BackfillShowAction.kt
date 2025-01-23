@@ -60,19 +60,22 @@ class BackfillShowAction @Inject constructor(
         Link("Services", ServiceIndexAction.PATH),
         Link(
           label,
-          ServiceShowAction.PATH.replace("{service}", backfill.service_name)
-            .replace("{variantOrBlank}", if (backfill.variant != "default") backfill.variant else ""),
+          ServiceShowAction.path(
+            service = backfill.service_name,
+            variantOrBlank = if (backfill.variant != "default") backfill.variant else ""
+          )
         ),
-        Link("Backfill #$id", PATH.replace("{id}", id)),
+        Link("Backfill #$id", path(id)),
       )
       .buildHtmlResponseBody {
         AutoReload {
           PageTitle("Backfill", id) {
             a {
-              href = BackfillCreateAction.PATH
-                .replace("{service}", backfill.service_name)
-                .replace("{variantOrBackfillNameOrId}", if (backfill.variant != "default") backfill.variant else id)
-                .replace("{backfillNameOrId}", if (backfill.variant != "default") id else "")
+              href = BackfillCreateAction.path(
+                service = backfill.service_name,
+                variantOrBackfillNameOrId = if (backfill.variant != "default") backfill.variant else id,
+                backfillNameOrId = if (backfill.variant != "default") id else ""
+              )
 
               button(classes = "rounded-full bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600") {
                 type = ButtonType.button
@@ -409,7 +412,8 @@ class BackfillShowAction @Inject constructor(
   )
 
   companion object {
-    const val PATH = "/backfills/{id}"
+    private const val PATH = "/backfills/{id}"
+    fun path(id: String) = PATH.replace("{id}", id)
 
     const val UPDATE_BUTTON_LABEL = "Update"
   }

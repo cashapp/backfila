@@ -45,7 +45,7 @@ fun TagConsumer<*>.BackfillsTable(running: Boolean, backfills: List<UiBackfillRu
                     "whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0",
                   ) {
                     a(classes = "text-green-500 hover:underline") {
-                      href = BackfillShowAction.PATH.replace("{id}", it.id)
+                      href = BackfillShowAction.path(it.id)
                       +it.name
                     }
                   }

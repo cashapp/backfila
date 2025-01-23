@@ -32,7 +32,7 @@ class BackfillCreateIndexAction @Inject constructor(
         // If service + variant is blank, show service selection
         val services: Map<String, GetServicesAction.UiService> = servicesGetter.getFlattenedServices()
         ServiceSelect(services) { service, variant ->
-          BackfillCreateServiceIndexAction.PATH.replace("{service}", service).replace("{variantOrBlank}", variant ?: "")
+          BackfillCreateServiceIndexAction.path(service, variant)
         }
       }
 

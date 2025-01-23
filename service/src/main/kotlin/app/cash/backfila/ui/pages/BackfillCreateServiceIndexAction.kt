@@ -41,10 +41,11 @@ class BackfillCreateServiceIndexAction @Inject constructor(
   ): Response<ResponseBody> {
     if (variantOrBlank.orEmpty().contains(".") || variantOrBlank.orEmpty().toIntOrNull() != null) {
       // This means variant is default and the value provided is the backfill name or backfill ID to clone, redirect accordingly
-      val newPath = BackfillCreateAction.PATH
-        .replace("{service}", service)
-        .replace("{variantOrBackfillNameOrId}", variantOrBlank.orEmpty())
-        .replace("{backfillNameOrId}", "")
+      val newPath = BackfillCreateAction.path(
+        service = service,
+        variantOrBackfillNameOrId = variantOrBlank.orEmpty(),
+        backfillNameOrId = ""
+      )
       return Response(
         body = "go to $newPath".toResponseBody(),
         statusCode = HttpURLConnection.HTTP_MOVED_TEMP,
@@ -60,9 +61,7 @@ class BackfillCreateServiceIndexAction @Inject constructor(
         Link("Services", ServiceIndexAction.PATH),
         Link(
           label,
-          ServiceShowAction.PATH
-            .replace("{service}", service)
-            .replace("{variantOrBlank}", variantOrBlank ?: ""),
+          ServiceShowAction.path(service, variantOrBlank),
         ),
         Link(
           "Create",
@@ -93,10 +92,11 @@ class BackfillCreateServiceIndexAction @Inject constructor(
               registeredBackfills.backfills.map {
                 a {
                   val variantOrBackfillNameOrId = variantOrBlank.orEmpty().ifBlank { it.name }
-                  href = BackfillCreateAction.PATH
-                    .replace("{service}", service)
-                    .replace("{variantOrBackfillNameOrId}", variantOrBackfillNameOrId)
-                    .replace("{backfillNameOrId}", if (variantOrBackfillNameOrId == it.name) "" else it.name)
+                  href = BackfillCreateAction.path(
+                    service = service,
+                    variantOrBackfillNameOrId = variantOrBackfillNameOrId,
+                    backfillNameOrId = if (variantOrBackfillNameOrId == it.name) "" else it.name
+                  )
 
                   this@ul.li("registration col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow") {
                     div("flex w-full items-center justify-between space-x-6 p-6") {
@@ -124,22 +124,10 @@ class BackfillCreateServiceIndexAction @Inject constructor(
     return Response(htmlResponseBody)
   }
 
-  enum class BackfillCreateField(val fieldId: String) {
-    SERVICE("service"),
-    VARIANT("variant"),
-    BACKFILL_NAME("backfillName"),
-    DRY_RUN("dryRun"),
-    RANGE_START("rangeStart"),
-    RANGE_END("rangeEnd"),
-    BATCH_SIZE("batchSize"),
-    SCAN_SIZE("scanSize"),
-    THREADS_PER_PARTITION("threadsPerPartition"),
-    EXTRA_SLEEP_MS("extraSleepMs"),
-    BACKOFF_SCHEDULE("backoffSchedule"),
-    CUSTOM_PARAMETER_PREFIX("customParameter_"),
-  }
-
   companion object {
-    const val PATH = "/backfills/create/{service}/{variantOrBlank}"
+    private const val PATH = "/backfills/create/{service}/{variantOrBlank}"
+    fun path(service: String, variantOrBlank: String?) = PATH
+      .replace("{service}", service)
+      .replace("{variantOrBlank}", variantOrBlank ?: "")
   }
 }

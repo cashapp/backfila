@@ -28,7 +28,7 @@ class ServiceIndexAction @Inject constructor(
       // Search and select from Services
       val services: Map<String, GetServicesAction.UiService> = serviceDataHelper.getFlattenedServices()
       ServiceSelect(services) { service, variant ->
-        ServiceShowAction.PATH.replace("{service}", service).replace("{variantOrBlank}", variant ?: "")
+        ServiceShowAction.path(service, variant)
       }
     }
 

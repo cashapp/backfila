@@ -8,8 +8,6 @@ import app.cash.backfila.ui.actions.ServiceDataHelper
 import app.cash.backfila.ui.components.AlertError
 import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.components.PageTitle
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.html.ButtonType
 import kotlinx.html.InputType
 import kotlinx.html.button
@@ -31,6 +29,8 @@ import misk.web.ResponseBody
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class BackfillCreateAction @Inject constructor(
@@ -86,22 +86,12 @@ class BackfillCreateAction @Inject constructor(
         Link("Services", ServiceIndexAction.PATH),
         Link(
           label,
-          ServiceShowAction.PATH
-            .replace("{service}", service)
-            .replace("{variantOrBlank}", if (variant != "default") variant else ""),
+          ServiceShowAction.path(service = service, variantOrBlank = if (variant != "default") variant else ""),
         ),
         if (backfillToClone != null) {
-          Link(
-            "Backfill #${backfillToClone.id}",
-            BackfillShowAction.PATH.replace("{id}", backfillToClone.id),
-          )
+          Link("Backfill #${backfillToClone.id}", BackfillShowAction.path(backfillToClone.id))
         } else if (registeredBackfill != null) {
-          Link(
-            "Create",
-            BackfillCreateServiceIndexAction.PATH
-              .replace("{service}", service)
-              .replace("{variantOrBlank}", variantOrBlank ?: ""),
-          )
+          Link("Create", BackfillCreateServiceIndexAction.path(service = service, variantOrBlank = variantOrBlank))
         } else {
           null
         },
@@ -129,8 +119,7 @@ class BackfillCreateAction @Inject constructor(
           AlertError(
             message = "Invalid backfill name to create or ID to clone provided.",
             label = "Create a Backfill",
-            link = BackfillCreateServiceIndexAction.PATH.replace("{service}", service)
-              .replace("{variantOrBlank}", variantOrBlank ?: ""),
+            link = BackfillCreateServiceIndexAction.path(service = service, variantOrBlank = variantOrBlank ?: ""),
           )
         } else {
           div("mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8") {
@@ -411,6 +400,10 @@ class BackfillCreateAction @Inject constructor(
   }
 
   companion object {
-    const val PATH = "/backfills/create/{service}/{variantOrBackfillNameOrId}/{backfillNameOrId}"
+    private const val PATH = "/backfills/create/{service}/{variantOrBackfillNameOrId}/{backfillNameOrId}"
+    fun path(service: String, variantOrBackfillNameOrId: String, backfillNameOrId: String) = PATH
+      .replace("{service}", service)
+      .replace("{variantOrBackfillNameOrId}", variantOrBackfillNameOrId)
+      .replace("{backfillNameOrId}", backfillNameOrId)
   }
 }
