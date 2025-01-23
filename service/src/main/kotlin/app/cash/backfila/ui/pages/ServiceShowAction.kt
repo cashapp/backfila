@@ -1,68 +1,91 @@
 package app.cash.backfila.ui.pages
 
 import app.cash.backfila.dashboard.GetBackfillRunsAction
-import app.cash.backfila.service.BackfilaConfig
-import app.cash.backfila.ui.components.AlertSupport
+import app.cash.backfila.ui.components.AutoReload
 import app.cash.backfila.ui.components.BackfillsTable
-import app.cash.backfila.ui.components.DashboardLayout
+import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.components.PageTitle
+import java.net.HttpURLConnection
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.html.role
-import kotlinx.html.ul
-import misk.hotwire.buildHtmlResponseBody
+import kotlinx.html.ButtonType
+import kotlinx.html.a
+import kotlinx.html.button
+import misk.scope.ActionScoped
 import misk.security.authz.Authenticated
+import misk.tailwind.Link
+import misk.tokens.TokenGenerator
 import misk.web.Get
-import misk.web.QueryParam
+import misk.web.HttpCall
+import misk.web.PathParam
 import misk.web.Response
 import misk.web.ResponseBody
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
+import misk.web.toResponseBody
+import okhttp3.Headers
 
 @Singleton
 class ServiceShowAction @Inject constructor(
-  private val config: BackfilaConfig,
+  private val clientHttpCall: ActionScoped<HttpCall>,
+  private val dashboardPageLayout: DashboardPageLayout,
   private val getBackfillRunsAction: GetBackfillRunsAction,
+  private val tokenGenerator: TokenGenerator,
 ) : WebAction {
+  private val path by lazy {
+    clientHttpCall.get().url.encodedPath
+  }
+
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
   @Authenticated(capabilities = ["users"])
   fun get(
-    @QueryParam s: String,
-    @QueryParam("experimental") experimental: Boolean? = false,
+    @PathParam service: String?,
+    @PathParam variantOrBlank: String? = "",
   ): Response<ResponseBody> {
-    val serviceName = s.split("/").first()
-    val variant = s.split("/").last()
-
-    val backfillRuns = getBackfillRunsAction.backfillRuns(serviceName, variant)
-
-    val htmlResponseBody = buildHtmlResponseBody {
-      // TODO show default if other variants and probably link to a switcher
-      val label = if (variant == "default") serviceName else "$serviceName ($variant)"
-      DashboardLayout(
-        title = "$label | Backfila",
-        path = PATH,
-      ) {
-        PageTitle("Service", label)
-
-        // TODO Add completed table
-        // TODO Add deleted support?
-        BackfillsTable(true, backfillRuns.running_backfills)
-        BackfillsTable(false, backfillRuns.paused_backfills)
-
-        ul("space-y-3") {
-          role = "list"
-        }
-
-        AlertSupport(config.support_button_label, config.support_button_url)
-      }
+    if (service.isNullOrBlank()) {
+      return Response(
+        body = "go to /".toResponseBody(),
+        statusCode = HttpURLConnection.HTTP_MOVED_TEMP,
+        headers = Headers.headersOf("Location", "/"),
+      )
     }
+    val variant = variantOrBlank.orEmpty().ifBlank { "default" }
+
+    val backfillRuns = getBackfillRunsAction.backfillRuns(service, variant)
+
+    // TODO show default if other variants and probably link to a switcher
+    val label = if (variant == "default") service else "$service ($variant)"
+    val htmlResponseBody = dashboardPageLayout.newBuilder()
+      .title("$label | Backfila")
+      .breadcrumbLinks(
+        Link("Services", ServiceIndexAction.PATH),
+        Link(label, path),
+      )
+      .buildHtmlResponseBody {
+        AutoReload {
+          PageTitle("Service", label) {
+            a {
+              href = BackfillCreateServiceIndexAction.PATH.replace("{service}", service)
+                .replace("{variantOrBlank}", variantOrBlank ?: "")
+
+              button(classes = "rounded-full bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600") {
+                type = ButtonType.button
+                +"""Create"""
+              }
+            }
+          }
+
+          BackfillsTable(true, backfillRuns.running_backfills)
+          BackfillsTable(false, backfillRuns.paused_backfills)
+        }
+      }
 
     return Response(htmlResponseBody)
   }
 
   companion object {
-    const val PATH = "/services/"
+    const val PATH = "/services/{service}/{variantOrBlank}"
   }
 }

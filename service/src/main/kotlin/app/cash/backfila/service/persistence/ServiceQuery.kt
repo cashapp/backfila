@@ -1,6 +1,7 @@
 package app.cash.backfila.service.persistence
 
 import misk.hibernate.Constraint
+import misk.hibernate.Id
 import misk.hibernate.Order
 import misk.hibernate.Query
 
@@ -16,4 +17,7 @@ interface ServiceQuery : Query<DbService> {
 
   @Order("variant")
   fun orderByVariant(): ServiceQuery
+
+  @Constraint("id")
+  fun id(id: Id<DbService>): ServiceQuery
 }

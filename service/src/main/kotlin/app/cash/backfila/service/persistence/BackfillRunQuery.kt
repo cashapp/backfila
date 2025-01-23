@@ -22,6 +22,12 @@ interface BackfillRunQuery : Query<DbBackfillRun> {
   @Constraint("state", Operator.NE)
   fun stateNot(state: BackfillState): BackfillRunQuery
 
+  @Constraint("created_by_user", Operator.EQ)
+  fun createdByUser(user: String): BackfillRunQuery
+
   @Order("id", asc = false)
   fun orderByIdDesc(): BackfillRunQuery
+
+  @Order("updated_at", asc = false)
+  fun orderByUpdatedAtDesc(): BackfillRunQuery
 }

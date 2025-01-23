@@ -1,7 +1,6 @@
 package app.cash.backfila.ui.components
 
 import app.cash.backfila.dashboard.UiBackfillRun
-import app.cash.backfila.ui.PathBuilder
 import app.cash.backfila.ui.pages.BackfillShowAction
 import kotlinx.html.TagConsumer
 import kotlinx.html.a
@@ -21,8 +20,6 @@ fun TagConsumer<*>.BackfillsTable(running: Boolean, backfills: List<UiBackfillRu
     div("sm:flex sm:items-center") {
       div("sm:flex-auto") {
         h1("text-base font-semibold leading-6 text-gray-900") { +"""Backfills ($title)""" }
-        // TODO delete
-        // p("mt-2 text-sm text-gray-700") { +"""A list of all the users in your account including their name, title, email and role.""" }
       }
     }
     div("mt-8 flow-root") {
@@ -48,7 +45,7 @@ fun TagConsumer<*>.BackfillsTable(running: Boolean, backfills: List<UiBackfillRu
                     "whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0",
                   ) {
                     a(classes = "text-green-500 hover:underline") {
-                      href = PathBuilder(path = BackfillShowAction.PATH.replace("{id}", it.id)).build()
+                      href = BackfillShowAction.PATH.replace("{id}", it.id)
                       +it.name
                     }
                   }
@@ -68,17 +65,6 @@ fun TagConsumer<*>.BackfillsTable(running: Boolean, backfills: List<UiBackfillRu
                       "whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0",
                     ) { +"""$it""" }
                   }
-
-                  // TODO delete
-                  // td(
-                  //   "relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
-                  // ) {
-                  //   a(classes = "text-indigo-600 hover:text-indigo-900") {
-                  //     href = "#"
-                  //     +"""Edit"""
-                  //     span("sr-only") { +""", Lindsay Walton""" }
-                  //   }
-                  // }
                 }
               }
             }
