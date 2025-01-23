@@ -4,12 +4,10 @@ import app.cash.backfila.dashboard.GetBackfillStatusAction
 import app.cash.backfila.dashboard.GetBackfillStatusResponse
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.ui.actions.BackfillShowButtonHandlerAction
-import app.cash.backfila.ui.actions.BackfillShowButtonHandlerAction.Companion
 import app.cash.backfila.ui.components.AutoReload
 import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.components.PageTitle
 import app.cash.backfila.ui.components.ProgressBar
-import app.cash.backfila.ui.pages.BackfillShowAction.Companion.UPDATE_BUTTON_LABEL
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.html.ButtonType
@@ -61,7 +59,6 @@ class BackfillShowAction @Inject constructor(
     val leftColumnConfigurationRows = configurationRows.take(configurationRows.size / 2)
     val rightColumnConfigurationRows = configurationRows.takeLast(configurationRows.size / 2)
 
-
     val htmlResponseBody = dashboardPageLayout.newBuilder()
       .title("Backfill $id | Backfila")
       .breadcrumbLinks(
@@ -92,139 +89,30 @@ class BackfillShowAction @Inject constructor(
             }
           }
 
-          div("mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8") {
-            div("mx-auto grid max-w-2xl grid-cols-1 grid-rows-1 items-start gap-x-8 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-3") {
-//            +"""<!-- Right Column -->"""
-              div("lg:col-start-3 lg:row-end-1") {
-                div("rounded-lg bg-gray-50 shadow-sm ring-1 ring-gray-900/5 p-6") {
-                  h2("text-base font-semibold leading-6 text-gray-900") { +"""Configuration""" }
-                  dl("divide-y divide-gray-100") {
-                    configurationRows.map {
-
-                    }
+          Card {
+            div("mx-auto grid max-w-2xl grid-cols-1 grid-rows-1 items-start gap-x-24 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-2") {
+              // <!-- Left Column -->"""
+              div("") {
+                h2("text-base font-semibold leading-6 text-gray-900") { +"""Configuration""" }
+                dl("divide-y divide-gray-100") {
+                  leftColumnConfigurationRows.map {
+                    ConfigurationRows(id, it)
                   }
                 }
               }
 
-              //            +"""<!-- Left Column -->"""
-              div("") {
-                div("rounded-lg bg-gray-50 shadow-sm ring-1 ring-gray-900/5 p-6") {
-                  h2("text-base font-semibold leading-6 text-gray-900") { +"""Configuration""" }
-                  dl("divide-y divide-gray-100") {
-                    configurationRows.map {
-                      div("px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0") {
-                        attributes["data-controller"] = "toggle"
-
-                        this@dl.dt("text-sm font-medium leading-6 text-gray-900") { +it.label }
-                        this@dl.dd("mt-1 flex text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0") {
-                          span("flex-grow") {
-                            attributes["data-toggle-target"] = "toggleable"
-                            attributes["data-css-class"] = "hidden"
-
-                            +it.description
-                          }
-                          it.button?.let { button ->
-                            if (button.label == UPDATE_BUTTON_LABEL) {
-                              // Initial Update Button to toggle showing form
-                              span("ml-4 flex-shrink-0") {
-                                attributes["data-toggle-target"] = "toggleable"
-                                attributes["data-css-class"] = "hidden"
-
-                                button(
-                                  classes = "mt-1 rounded-md font-medium text-indigo-600 hover:text-indigo-500",
-                                ) {
-                                  attributes["data-action"] = "toggle#toggle"
-                                  type = ButtonType.button
-                                  +button.label
-                                }
-                              }
-
-                              // Have initial click reveal the update form with editable input
-                              form(classes = "flex-grow hidden") {
-                                attributes["data-toggle-target"] = "toggleable"
-                                attributes["data-css-class"] = "hidden"
-
-                                action = BackfillShowButtonHandlerAction.PATH.replace("{id}", id)
-
-                                it.updateFieldId?.let { updateFieldId ->
-                                  input {
-                                    type = InputType.hidden
-                                    name = "field_id"
-                                    value = updateFieldId
-                                  }
-
-                                  div {
-                                    div("flex rounded-md shadow-sm") {
-                                      div("relative flex flex-grow items-stretch focus-within:z-10") {
-                                        input(classes = "block w-full rounded-none rounded-l-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6") {
-                                          name = "field_value"
-                                          value = it.description
-                                        }
-                                      }
-                                      button(classes = "relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-md px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50") {
-                                        type = ButtonType.submit
-                                        +"""Update"""
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-
-                              // Cancel Button to hide form
-                              span("hidden ml-4 flex-shrink-0") {
-                                attributes["data-toggle-target"] = "toggleable"
-                                attributes["data-css-class"] = "hidden"
-
-                                button(
-                                  classes = "mt-1 rounded-md font-medium text-indigo-600 hover:text-indigo-500",
-                                ) {
-                                  attributes["data-action"] = "toggle#toggle"
-                                  type = ButtonType.button
-                                  +"Cancel"
-                                }
-                              }
-                            } else {
-                              span("ml-4 flex-shrink-0") {
-                                // Button when clicked updates without additional form
-                                form {
-                                  action = BackfillShowButtonHandlerAction.PATH.replace("{id}", id)
-
-                                  it.updateFieldId?.let {
-                                    input {
-                                      type = InputType.hidden
-                                      name = "field_id"
-                                      value = it
-                                    }
-
-                                    input {
-                                      type = InputType.hidden
-                                      name = "field_value"
-                                      value = button.href
-                                    }
-                                  }
-
-                                  button(
-                                    classes = "rounded-md font-medium text-indigo-600 hover:text-indigo-500",
-                                  ) {
-                                    type = ButtonType.submit
-                                    +button.label
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
+              // <!-- Right Column -->"""
+              div("divide-x divide-gray-100") {
+                dl("divide-y divide-gray-100") {
+                  rightColumnConfigurationRows.map {
+                    ConfigurationRows(id, it)
                   }
                 }
               }
             }
           }
 
-          //            +"""<!-- Left Main Column -->"""
-          // TODO shrink padding so it shows full width
-          div("-mx-4 px-4 py-8 overflow-x-auto shadow-sm ring-1 ring-gray-900/5 sm:mx-0 sm:rounded-lg sm:px-8 sm:pb-14 lg:col-span-2 lg:row-span-2 lg:row-end-2 xl:px-16 xl:pb-20 xl:pt-16") {
+          Card {
             // Partitions
             h2("text-base font-semibold leading-6 text-gray-900") { +"""Partitions""" }
             table("my-8 whitespace-nowrap text-left text-sm leading-6") {
@@ -289,9 +177,11 @@ class BackfillShowAction @Inject constructor(
                 }
               }
             }
+          }
 
+          Card {
             // Logs
-            h2("text-base font-semibold leading-6 text-gray-900 pt-8") { +"""Logs""" }
+            h2("text-base font-semibold leading-6 text-gray-900") { +"""Logs""" }
             table("my-8 text-left text-sm leading-6") {
               thead("border-b border-gray-200 text-gray-900") {
                 tr {
@@ -424,12 +314,19 @@ class BackfillShowAction @Inject constructor(
     DescriptionListRow(
       label = "Logs",
       description = "",
+      // TODO add link real URL
       button = Link(
         label = "View",
         href = "#",
       ),
-    ),
+    )
   )
+
+  private fun TagConsumer<*>.Card(block: TagConsumer<*>.() -> Unit) {
+    div("-mx-4 mb-8 px-4 py-8 overflow-x-auto shadow-sm ring-1 ring-gray-900/5 sm:mx-0 sm:rounded-lg sm:px-8 lg:col-span-2 lg:row-span-2 lg:row-end-2") {
+      block()
+    }
+  }
 
   private fun TagConsumer<*>.ConfigurationRows(id: String, it: DescriptionListRow) {
     div("px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0") {
@@ -464,7 +361,7 @@ class BackfillShowAction @Inject constructor(
               attributes["data-toggle-target"] = "toggleable"
               attributes["data-css-class"] = "hidden"
 
-              action = BackfillShowButtonHandlerAction.PATH.replace("{id}", id)
+              action = BackfillShowButtonHandlerAction.path(id)
 
               it.updateFieldId?.let { updateFieldId ->
                 input {
@@ -507,7 +404,7 @@ class BackfillShowAction @Inject constructor(
             span("ml-4 flex-shrink-0") {
               // Button when clicked updates without additional form
               form {
-                action = BackfillShowButtonHandlerAction.PATH.replace("{id}", id)
+                action = BackfillShowButtonHandlerAction.path(id)
 
                 it.updateFieldId?.let {
                   input {
