@@ -49,7 +49,7 @@ class BackfillCreateHandlerAction @Inject constructor(
     formFields[BackfillCreateField.EXTRA_SLEEP_MS.fieldId]?.ifNotBlank { createRequestBuilder.extra_sleep_ms(it.toLongOrNull()) }
     formFields[BackfillCreateField.BACKOFF_SCHEDULE.fieldId]?.ifNotBlank { createRequestBuilder.backoff_schedule(it) }
     val customParameters = formFields.filter { it.key.startsWith(BackfillCreateField.CUSTOM_PARAMETER_PREFIX.fieldId) }
-      .mapValues { it.value?.encodeUtf8() }
+      .map { it.key.removePrefix(BackfillCreateField.CUSTOM_PARAMETER_PREFIX.fieldId) to it.value?.encodeUtf8() }.toMap()
     if (customParameters.isNotEmpty()) {
       createRequestBuilder.parameter_map(customParameters)
     }

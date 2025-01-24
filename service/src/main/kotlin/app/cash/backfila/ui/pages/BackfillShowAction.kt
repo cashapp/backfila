@@ -8,6 +8,7 @@ import app.cash.backfila.ui.components.AutoReload
 import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.components.PageTitle
 import app.cash.backfila.ui.components.ProgressBar
+import app.cash.backfila.ui.pages.BackfillCreateAction.BackfillCreateField.CUSTOM_PARAMETER_PREFIX
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.html.ButtonType
@@ -319,8 +320,13 @@ class BackfillShowAction @Inject constructor(
         label = "View",
         href = "#",
       ),
+    ),
+  ) + (parameters ?: mapOf()).map { (key, value) ->
+    DescriptionListRow(
+      label = key.removePrefix(CUSTOM_PARAMETER_PREFIX.fieldId),
+      description = value,
     )
-  )
+  }
 
   private fun TagConsumer<*>.Card(block: TagConsumer<*>.() -> Unit) {
     div("-mx-4 mb-8 px-4 py-8 overflow-x-auto shadow-sm ring-1 ring-gray-900/5 sm:mx-0 sm:rounded-lg sm:px-8 lg:col-span-2 lg:row-span-2 lg:row-end-2") {
