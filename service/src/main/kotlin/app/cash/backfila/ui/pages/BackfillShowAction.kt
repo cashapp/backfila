@@ -57,7 +57,11 @@ class BackfillShowAction @Inject constructor(
       if (backfill.variant == "default") backfill.service_name else "${backfill.service_name} (${backfill.variant})"
 
     val configurationRows = backfill.toConfigurationRows(id)
-    val leftColumnConfigurationRows = configurationRows.take(configurationRows.size / 2)
+    val leftColumnConfigurationRows = configurationRows.take(
+      configurationRows.size / 2 +
+        // Handles odd length of rows, chooses the odd row to be in the left column
+        configurationRows.size % 2,
+    )
     val rightColumnConfigurationRows = configurationRows.takeLast(configurationRows.size / 2)
 
     val htmlResponseBody = dashboardPageLayout.newBuilder()
