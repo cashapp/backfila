@@ -39,6 +39,7 @@ dependencies {
   implementation(libs.kotlinReflection)
   implementation(libs.kotlinxCoroutines)
   implementation(libs.kotlinxCoroutinesLogging)
+  implementation(libs.kotlinxHtml)
   implementation(libs.loggingApi)
   implementation(libs.metricsCore)
   implementation(libs.metricsParent)

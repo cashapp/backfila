@@ -66,6 +66,7 @@ kotlinTest = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotli
 kotlinxCoroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version = "1.6.3" }
 kotlinxCoroutinesLogging = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-slf4j", version = "1.6.3" }
 kotlinxCoroutinesTest = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version = "1.6.3" }
+kotlinxHtml = { module = "org.jetbrains.kotlinx:kotlinx-html-jvm", version = "0.12.0" }
 misk = { module = "com.squareup.misk:misk", version.ref = "misk" }
 miskActions = { module = "com.squareup.misk:misk-actions", version.ref = "misk" }
 miskAdmin = { module = "com.squareup.misk:misk-admin", version.ref = "misk" }
