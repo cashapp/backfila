@@ -1,5 +1,9 @@
 rootProject.name = "backfila"
 
+plugins {
+  id("com.autonomousapps.build-health") version "2.7.0"
+}
+
 includeBuild("build-support") {
   dependencySubstitution {
     substitute(module("app.cash.backfila:client-sqldelight-gradle-plugin")).using(project(":client-sqldelight-gradle-plugin"))
