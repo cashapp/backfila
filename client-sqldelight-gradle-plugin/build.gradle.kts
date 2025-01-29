@@ -4,7 +4,7 @@ import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
   id("java-gradle-plugin")
-  kotlin("jvm")
+  id("org.jetbrains.kotlin.jvm")
   id("com.github.gmazzo.buildconfig")
   id("com.vanniktech.maven.publish.base")
 }

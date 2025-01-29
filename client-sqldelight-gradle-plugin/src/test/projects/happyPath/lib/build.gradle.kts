@@ -3,7 +3,7 @@ import app.cash.backfila.client.sqldelight.plugin.SqlDelightRecordSource
 plugins {
   id("app.cash.backfila.client.sqldelight")
   id("app.cash.sqldelight")
-  kotlin("jvm")
+  id("org.jetbrains.kotlin.jvm")
 }
 
 sqldelight {

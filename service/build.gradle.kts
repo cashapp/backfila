@@ -4,7 +4,7 @@ import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
   id("com.github.johnrengelman.shadow")
-  kotlin("jvm")
+  id("org.jetbrains.kotlin.jvm")
   id("com.diffplug.spotless")
   id("com.vanniktech.maven.publish.base")
   id("com.squareup.wire")
