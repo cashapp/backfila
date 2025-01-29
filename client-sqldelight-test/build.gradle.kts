@@ -1,5 +1,5 @@
 plugins {
-  kotlin("jvm")
+  id("org.jetbrains.kotlin.jvm")
   id("app.cash.sqldelight")
   id("app.cash.backfila.client.sqldelight")
 }

@@ -2,6 +2,7 @@ package app.cash.backfila.ui.pages
 
 import app.cash.backfila.dashboard.GetBackfillStatusAction
 import app.cash.backfila.dashboard.GetBackfillStatusResponse
+import app.cash.backfila.dashboard.ViewLogsAction
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.ui.actions.BackfillShowButtonHandlerAction
 import app.cash.backfila.ui.components.AutoReload
@@ -45,14 +46,15 @@ import misk.web.mediatype.MediaTypes
 class BackfillShowAction @Inject constructor(
   private val getBackfillStatusAction: GetBackfillStatusAction,
   private val dashboardPageLayout: DashboardPageLayout,
+  private val viewLogsAction: ViewLogsAction,
 ) : WebAction {
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
   @Authenticated(capabilities = ["users"])
   fun get(
-    @PathParam id: String,
+    @PathParam id: Long,
   ): Response<ResponseBody> {
-    val backfill = getBackfillStatusAction.status(id.toLong())
+    val backfill = getBackfillStatusAction.status(id)
     val label =
       if (backfill.variant == "default") backfill.service_name else "${backfill.service_name} (${backfill.variant})"
 
@@ -79,12 +81,12 @@ class BackfillShowAction @Inject constructor(
       )
       .buildHtmlResponseBody {
         AutoReload {
-          PageTitle("Backfill", id) {
+          PageTitle("Backfill", id.toString()) {
             a {
               href = BackfillCreateAction.path(
                 service = backfill.service_name,
-                variantOrBackfillNameOrId = if (backfill.variant != "default") backfill.variant else id,
-                backfillNameOrId = if (backfill.variant != "default") id else "",
+                variantOrBackfillNameOrId = if (backfill.variant != "default") backfill.variant else id.toString(),
+                backfillNameOrId = if (backfill.variant != "default") id.toString() else "",
               )
 
               button(classes = "rounded-full bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600") {
@@ -241,26 +243,26 @@ class BackfillShowAction @Inject constructor(
     val updateFieldId: String? = null,
   )
 
-  private fun getStateButton(state: BackfillState, id: String): Link? {
+  private fun getStateButton(state: BackfillState): Link? {
     return when (state) {
       BackfillState.PAUSED -> Link(
-        label = "Start",
+        label = START_STATE_BUTTON_LABEL,
         href = BackfillState.RUNNING.name,
       )
 
       BackfillState.COMPLETE -> null
       else -> Link(
-        label = "Pause",
+        label = PAUSE_STATE_BUTTON_LABEL,
         href = BackfillState.PAUSED.name,
       )
     }
   }
 
-  private fun GetBackfillStatusResponse.toConfigurationRows(id: String) = listOf(
+  private fun GetBackfillStatusResponse.toConfigurationRows(id: Long) = listOf(
     DescriptionListRow(
       label = "State",
       description = state.name,
-      button = getStateButton(state, id),
+      button = getStateButton(state),
       updateFieldId = "state",
     ),
     DescriptionListRow(
@@ -319,10 +321,9 @@ class BackfillShowAction @Inject constructor(
     DescriptionListRow(
       label = "Logs",
       description = "",
-      // TODO add link real URL
       button = Link(
-        label = "View",
-        href = "#",
+        label = VIEW_LOGS_BUTTON_LABEL,
+        href = viewLogsAction.getUrl(id),
       ),
     ),
   ) + if (parameters?.isNotEmpty() == true) {
@@ -348,7 +349,7 @@ class BackfillShowAction @Inject constructor(
     }
   }
 
-  private fun TagConsumer<*>.ConfigurationRows(id: String, it: DescriptionListRow) {
+  private fun TagConsumer<*>.ConfigurationRows(id: Long, it: DescriptionListRow) {
     div("px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0") {
       attributes["data-controller"] = "toggle"
 
@@ -420,6 +421,21 @@ class BackfillShowAction @Inject constructor(
                 +"Cancel"
               }
             }
+          } else if (button.label == VIEW_LOGS_BUTTON_LABEL) {
+            span("ml-4 flex-shrink-0") {
+              // View logs button will link to external logs provider
+              a {
+                href = button.href
+                target = "_blank"
+
+                button(
+                  classes = "rounded-md font-medium text-indigo-600 hover:text-indigo-500",
+                ) {
+                  type = ButtonType.submit
+                  +button.label
+                }
+              }
+            }
           } else {
             span("ml-4 flex-shrink-0") {
               // Button when clicked updates without additional form
@@ -440,8 +456,14 @@ class BackfillShowAction @Inject constructor(
                   }
                 }
 
+                val buttonStyle = if (it.updateFieldId == "state") {
+                  val color = if (it.button.label == START_STATE_BUTTON_LABEL) "green" else "yellow"
+                  "rounded-full bg-$color-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-$color-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-$color-600"
+                } else {
+                  "rounded-md font-medium text-indigo-600 hover:text-indigo-500"
+                }
                 button(
-                  classes = "rounded-md font-medium text-indigo-600 hover:text-indigo-500",
+                  classes = buttonStyle,
                 ) {
                   type = ButtonType.submit
                   +button.label
@@ -457,7 +479,11 @@ class BackfillShowAction @Inject constructor(
   companion object {
     private const val PATH = "/backfills/{id}"
     fun path(id: String) = PATH.replace("{id}", id)
+    fun path(id: Long) = PATH.replace("{id}", id.toString())
 
+    const val START_STATE_BUTTON_LABEL = "Start"
+    const val PAUSE_STATE_BUTTON_LABEL = "Pause"
     const val UPDATE_BUTTON_LABEL = "Update"
+    const val VIEW_LOGS_BUTTON_LABEL = "View Logs"
   }
 }

@@ -1,11 +1,11 @@
 [versions]
-jooq = "3.18.1"
+jooq = "3.18.25"
+kotlin = "2.1.10"
 ktlint = "0.47.1"
-kotlin = "1.9.23"
-misk = "2025.01.09.184726-680bca2"
+misk = "2025.01.29.125750-6f470ec"
 okhttp = "5.0.0-alpha.14"
-wire = "5.0.0"
 sqldelight = "2.0.2"
+wire = "5.2.1"
 
 [libraries]
 apacheCommonsLang3 = { module = "org.apache.commons:commons-lang3", version = "3.12.0" }

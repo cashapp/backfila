@@ -14,7 +14,6 @@ import kotlinx.html.button
 import misk.scope.ActionScoped
 import misk.security.authz.Authenticated
 import misk.tailwind.Link
-import misk.tokens.TokenGenerator
 import misk.web.Get
 import misk.web.HttpCall
 import misk.web.PathParam
@@ -31,7 +30,6 @@ class ServiceShowAction @Inject constructor(
   private val clientHttpCall: ActionScoped<HttpCall>,
   private val dashboardPageLayout: DashboardPageLayout,
   private val getBackfillRunsAction: GetBackfillRunsAction,
-  private val tokenGenerator: TokenGenerator,
 ) : WebAction {
   private val path by lazy {
     clientHttpCall.get().url.encodedPath

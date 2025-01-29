@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
   id("java-gradle-plugin")
-  kotlin("jvm")
+  id("org.jetbrains.kotlin.jvm")
   id("com.github.gmazzo.buildconfig")
   id("com.vanniktech.maven.publish.base")
 }
