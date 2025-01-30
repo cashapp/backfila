@@ -2,6 +2,7 @@ package app.cash.backfila.service
 
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 
 /**
@@ -10,10 +11,10 @@ import kotlinx.coroutines.test.runTest
  * https://github.com/Kotlin/kotlinx.coroutines/issues/1910
  */
 @Suppress("EXPERIMENTAL_API_USAGE")
-internal fun runTestCancellable(
+internal fun runBlockingTestCancellable(
   testBody: suspend TestScope.() -> Unit,
 ) {
-  runTest {
+  runTest(UnconfinedTestDispatcher()) {
     try {
       this.testBody()
     } catch (t: Throwable) {
