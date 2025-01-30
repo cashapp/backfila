@@ -84,5 +84,6 @@ class BackfillShowButtonHandlerAction @Inject constructor(
   companion object {
     const val PATH = "/api/backfill/{id}/update"
     fun path(id: String) = PATH.replace("{id}", id)
+    fun path(id: Long) = PATH.replace("{id}", id.toString())
   }
 }

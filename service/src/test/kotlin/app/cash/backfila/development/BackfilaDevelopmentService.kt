@@ -129,7 +129,7 @@ fun main(args: Array<String>) {
 
 internal class DevelopmentViewLogsUrlProvider : ViewLogsUrlProvider {
   override fun getUrl(session: Session, backfillRun: DbBackfillRun): String {
-    return "/"
+    return "/${backfillRun.service.registry_name}/${backfillRun.service.variant}/${backfillRun.id}/logs"
   }
 }
 

@@ -31,15 +31,17 @@ class ViewLogsAction @Inject constructor(
   fun viewLogs(
     @PathParam id: Long,
   ): Response<ResponseBody> {
-    val url = transacter.transaction { session ->
-      val backfillRun = session.loadOrNull<DbBackfillRun>(Id(id))
-        ?: throw BadRequestException("backfill $id doesn't exist")
-      viewLogsUrlProvider.getUrl(session, backfillRun)
-    }
+    val url = getUrl(id)
     return Response(
       body = "go to $url".toResponseBody(),
       statusCode = HttpURLConnection.HTTP_MOVED_TEMP,
       headers = Headers.headersOf("Location", url),
     )
+  }
+
+  fun getUrl(id: Long) = transacter.transaction { session ->
+    val backfillRun = session.loadOrNull<DbBackfillRun>(Id(id))
+      ?: throw BadRequestException("backfill $id doesn't exist")
+    viewLogsUrlProvider.getUrl(session, backfillRun)
   }
 }

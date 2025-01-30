@@ -3,7 +3,7 @@ import com.vanniktech.maven.publish.KotlinJvm
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  kotlin("jvm")
+  id("org.jetbrains.kotlin.jvm")
   `java-library`
   id("com.squareup.wire")
   id("com.vanniktech.maven.publish.base")
@@ -11,7 +11,7 @@ plugins {
 
 sourceSets {
   val main by getting {
-    java.srcDir("$buildDir/generated/source/wire/")
+    java.srcDir(layout.buildDirectory.dir("generated/source/wire"))
   }
 }
 

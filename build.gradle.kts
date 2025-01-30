@@ -4,6 +4,7 @@ import com.vanniktech.maven.publish.SonatypeHost
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.allopen.gradle.AllOpenExtension
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
@@ -39,14 +40,14 @@ subprojects {
 
   tasks.withType<KotlinCompile> {
     dependsOn("spotlessKotlinApply")
-    kotlinOptions {
-      jvmTarget = "11"
+    compilerOptions {
+      jvmTarget = JvmTarget.JVM_17
     }
   }
 
   tasks.withType<JavaCompile> {
-    sourceCompatibility = JavaVersion.VERSION_11.toString()
-    targetCompatibility = JavaVersion.VERSION_11.toString()
+    sourceCompatibility = JavaVersion.VERSION_17.toString()
+    targetCompatibility = JavaVersion.VERSION_17.toString()
   }
 
   configure<AllOpenExtension> {
