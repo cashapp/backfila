@@ -33,6 +33,7 @@ backfilaSqlDelight {
 
 val compileKotlin by tasks.getting {
   dependsOn("generateMainHockeyDataDatabaseMigrations")
+  dependsOn("generateBackfilaRecordSourceSqlHockeyPlayersBackfill")
 }
 
 dependencies {
