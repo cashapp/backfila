@@ -35,10 +35,6 @@ val compileKotlin by tasks.getting {
   dependsOn("generateMainHockeyDataDatabaseMigrations")
 }
 
-tasks.named("generateMainHockeyDataDatabaseInterface") {
-  dependsOn("generateBackfilaRecordSourceSqlHockeyPlayersBackfill")
-}
-
 dependencies {
   implementation(libs.guava)
   implementation(libs.moshiCore)
