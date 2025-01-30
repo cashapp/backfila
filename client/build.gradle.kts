@@ -11,7 +11,7 @@ plugins {
 
 sourceSets {
   val main by getting {
-    java.srcDir("$buildDir/generated/source/wire/")
+    java.srcDir(layout.buildDirectory.dir("generated/source/wire"))
   }
 }
 
