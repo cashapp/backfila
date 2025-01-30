@@ -143,12 +143,8 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
 
       val result = dynamoDbClient.scan(scanRequest)
 
-      backfill.runBatch(
-        result.items().map {
-          backfill.dynamoDbTable.tableSchema().mapToItem(it)
-        },
-        config,
-      )
+      backfill.handleScanResponse(result, config)
+
       lastEvaluatedKey = result.lastEvaluatedKey()
       if (stopwatch.elapsed() > Duration.ofMillis(1_000L)) {
         break

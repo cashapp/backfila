@@ -9,6 +9,7 @@ import java.lang.reflect.ParameterizedType
 import kotlin.reflect.KClass
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
+import software.amazon.awssdk.services.dynamodb.model.ScanResponse
 
 abstract class DynamoDbBackfill<I : Any, P : Any> : Backfill {
   val itemType: KClass<I>
@@ -47,6 +48,17 @@ abstract class DynamoDbBackfill<I : Any, P : Any> : Backfill {
    * This is also a good place to do any prep work before batches are run.
    */
   open fun validate(config: PrepareBackfillConfig<P>) {}
+
+
+  /**
+   * Called with the response of each [software.amazon.awssdk.services.dynamodb.model.ScanRequest]
+   *
+   * Override if you want fine-grained access to the results of each scan call. Failing to
+   * call the super method will result in [runBatch] not being called.
+   */
+  open fun handleScanResponse(scanResponse: ScanResponse, config: BackfillConfig<P>) {
+    runBatch(scanResponse.items().map { dynamoDbTable.tableSchema().mapToItem(it) }, config)
+  }
 
   /**
    * Called for each batch of matching records.
