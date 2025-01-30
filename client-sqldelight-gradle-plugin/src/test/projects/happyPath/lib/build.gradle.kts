@@ -37,3 +37,7 @@ dependencies {
   implementation("app.cash.backfila:client:${project.property("backfilaVersion")}")
   implementation(libs.sqldelightJdbcDriver)
 }
+
+tasks.named { it == "generateMainHockeyDataDatabaseInterface" }.configureEach {
+  dependsOn("generateBackfilaRecordSourceSqlHockeyPlayerOrigin")
+}
