@@ -35,7 +35,7 @@ val compileKotlin by tasks.getting {
   dependsOn("generateMainHockeyDataDatabaseMigrations")
 }
 
-val generateMainHockeyDataDatabaseInterface by tasks.getting {
+tasks.named("generateMainHockeyDataDatabaseInterface") {
   dependsOn("generateBackfilaRecordSourceSqlHockeyPlayersBackfill")
 }
 
