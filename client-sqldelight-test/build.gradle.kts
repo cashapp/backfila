@@ -12,7 +12,7 @@ sqldelight {
       dialect(libs.sqldelightMysqlDialect)
       srcDirs.setFrom(listOf("src/main/sqldelight", "src/main/resources/migrations"))
       deriveSchemaFromMigrations.set(true)
-      migrationOutputDirectory.set(file("$buildDir/resources/main/migrations"))
+      migrationOutputDirectory.set(file("${buildDir}/resources/main/migrations"))
       verifyMigrations.set(true)
     }
   }
@@ -33,7 +33,18 @@ backfilaSqlDelight {
 
 val compileKotlin by tasks.getting {
   dependsOn("generateMainHockeyDataDatabaseMigrations")
+}
+
+tasks.named { it == "generateMainHockeyDataDatabaseInterface" }.configureEach {
   dependsOn("generateBackfilaRecordSourceSqlHockeyPlayersBackfill")
+}
+
+tasks.named { it == "generateBackfilaRecordSourceSqlHockeyPlayersBackfill" }.configureEach {
+  dependsOn("generateMainHockeyDataDatabaseMigrations")
+}
+
+tasks.named { it == "generateMainHockeyDataDatabaseMigrations" }.configureEach {
+  dependsOn("spotlessKotlin")
 }
 
 dependencies {
