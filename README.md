@@ -23,6 +23,13 @@ $ gradle clean shadowJar
 
 ## Run the Service
 
+### Run the Misk-Web Build
+In order to ensure the web UI is built and able to be served by the service, run the following command:
+
+```
+$ npm install -g @misk/cli && miskweb ci-build -e
+```
+
 ### From the command line
 
 ```
@@ -30,7 +37,7 @@ $ java -jar service/build/libs/service.jar
 ```
 
 ### From IntelliJ
-  Right-click on `BackfilaDevelopmentService.kt` and select `Run`
+Right-click on `BackfilaDevelopmentService.kt` and select `Run`
 
 ### From Docker
 
@@ -39,7 +46,7 @@ $ java -jar service/build/libs/service.jar
 Build a Docker image of backfila:
 
 ```
-$ docker build -t backfila-0.0.1 service
+$ docker build -t backfila-0.0.1
 ```
 
 #### Running locally
