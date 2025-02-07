@@ -332,13 +332,15 @@ class BackfillShowAction @Inject constructor(
         description = "",
       ),
     ) +
-    parameters.map { (key, value) ->
-      DescriptionListRow(
-        label = key.removePrefix(CUSTOM_PARAMETER_PREFIX.fieldId),
-        description = value,
-      )
-    }
-  } else listOf()
+      parameters.map { (key, value) ->
+        DescriptionListRow(
+          label = key.removePrefix(CUSTOM_PARAMETER_PREFIX.fieldId),
+          description = value,
+        )
+      }
+  } else {
+    listOf()
+  }
 
   private fun TagConsumer<*>.Card(block: TagConsumer<*>.() -> Unit) {
     div("-mx-4 mb-8 px-4 py-8 overflow-x-auto shadow-sm ring-1 ring-gray-900/5 sm:mx-0 sm:rounded-lg sm:px-8 lg:col-span-2 lg:row-span-2 lg:row-end-2") {

@@ -125,6 +125,7 @@ allprojects {
     configure<PublishingExtension> {
       // For the Gradle plugin's tests.
       repositories {
+        mavenLocal()
         maven {
           name = "testMaven"
           url = rootProject.layout.buildDirectory.dir("testMaven").get().asFile.toURI()
@@ -133,7 +134,7 @@ allprojects {
     }
     configure<MavenPublishBaseExtension> {
       publishToMavenCentral(SonatypeHost.DEFAULT, automaticRelease = true)
-      signAllPublications()
+      // signAllPublications()
       pom {
         description.set("Backfila is a service that manages backfill state, calling into other services to do batched work.")
         name.set(project.name)

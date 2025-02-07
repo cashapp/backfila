@@ -1,17 +1,20 @@
 package app.cash.backfila.client.sqldelight.plugin
 
 import app.cash.sqldelight.gradle.SqlDelightExtension
+import app.cash.sqldelight.gradle.SqlDelightTask
 import java.io.Serializable
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.file.Directory
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
+import java.lang.System.getLogger
 
 class BackfilaSqlDelightGradlePlugin : Plugin<Project> {
+
+
   override fun apply(target: Project) {
     val backfilaExtension = target.extensions.create("backfilaSqlDelight", BackfilaSqlDelightExtension::class.java)
 
@@ -46,6 +49,14 @@ class BackfilaSqlDelightGradlePlugin : Plugin<Project> {
             }
           },
         )
+      }
+
+      // ADD WHY and doesn't need this.
+      target.tasks.all {
+        log.
+        if (it is SqlDelightTask) {
+          it.dependsOn(sqlTask)
+        }
       }
 
       val kotlinTask = target.tasks.register(
@@ -105,6 +116,10 @@ abstract class BackfilaSqlDelightExtension {
         ),
       )
     }
+  }
+
+  companion object {
+    val log = getLogger("stuff")
   }
 }
 

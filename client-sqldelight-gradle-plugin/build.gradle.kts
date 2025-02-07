@@ -36,6 +36,7 @@ if (rootProject.name == "backfila") {
 dependencies {
   implementation(libs.kotlinGradlePlugin)
   implementation(libs.kotlinPoet)
+  implementation(libs.loggingApi)
   implementation(libs.sqldelightGradlePlugin)
 
   testImplementation(libs.assertj)
