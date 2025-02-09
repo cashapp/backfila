@@ -14,6 +14,7 @@ import app.cash.backfila.fakeCaller
 import app.cash.backfila.protos.service.ConfigureServiceRequest
 import app.cash.backfila.protos.service.CreateBackfillRequest
 import com.google.inject.Module
+import java.time.Duration
 import javax.inject.Inject
 import misk.scope.ActionScope
 import misk.testing.MiskTest
@@ -22,7 +23,6 @@ import misk.time.FakeClock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.Duration
 
 @MiskTest(startService = true)
 class GetBackfillRunsActionFilteredTest {
@@ -164,7 +164,6 @@ class GetBackfillRunsActionFilteredTest {
   @Test
   fun `search by date`() {
     scope.fakeCaller(user = "molly") {
-
       val backfillStartTime1 = clock.instant()
 
       createBackfillAction.create(
@@ -217,7 +216,6 @@ class GetBackfillRunsActionFilteredTest {
       )
       assertThat(backfillSearchResults.paused_backfills).hasSize(3)
 
-
       backfillSearchResults = getBackfillRunsAction.backfillRuns(
         service = "deep-fryer",
         variant = RESERVED_VARIANT,
@@ -225,7 +223,6 @@ class GetBackfillRunsActionFilteredTest {
         created_end_date = backfillStartTime1,
       )
       assertThat(backfillSearchResults.paused_backfills).hasSize(1)
-
     }
   }
 
@@ -447,14 +444,14 @@ class GetBackfillRunsActionFilteredTest {
         )
       }
       val backfillRuns = getBackfillRunsAction.backfillRuns(
-        service= "deep-fryer",
+        service = "deep-fryer",
         variant = RESERVED_VARIANT,
         backfill_name = "ChickenSandwich",
       )
       assertThat(backfillRuns.paused_backfills).hasSize(20)
 
       val backfillRunsPage2 = getBackfillRunsAction.backfillRuns(
-        service= "deep-fryer",
+        service = "deep-fryer",
         variant = RESERVED_VARIANT,
         backfill_name = "ChickenSandwich",
         pagination_token = backfillRuns.next_pagination_token,

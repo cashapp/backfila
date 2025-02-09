@@ -27,7 +27,6 @@ import misk.web.QueryParam
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
-import wisp.logging.getLogger
 
 data class UiBackfillRun(
   val id: String,
@@ -128,8 +127,8 @@ class GetBackfillRunsAction @Inject constructor(
         }
 
       GetBackfillRunsResponse(
-        runningUiBackfills,
-        pausedUiBackfills,
+        running_backfills = runningUiBackfills,
+        paused_backfills = pausedUiBackfills,
         next_pagination_token = nextOffset?.offset,
       )
     }
@@ -198,10 +197,7 @@ class GetBackfillRunsAction @Inject constructor(
     return if (backfillName.isNullOrEmpty()) {
       this
     } else {
-      this.constraint { backfillRunRoot ->
-        val registeredBackfillJoin = backfillRunRoot.join<DbBackfillRun, DbRegisteredBackfill>("registered_backfill")
-        like(registeredBackfillJoin.get("name"), "%$backfillName%")
-      }
+      this.backfillName(backfillName)
     }
   }
 
@@ -238,11 +234,10 @@ class GetBackfillRunsAction @Inject constructor(
       .filterByEndDate(filterArgs.createdEndDate)
   }
 
-  private data class FilterArgs (
+  private data class FilterArgs(
     val backfillName: String? = null,
     val createdByUser: String? = null,
     val createdStartDate: Instant? = null,
     val createdEndDate: Instant? = null,
   )
 }
-
