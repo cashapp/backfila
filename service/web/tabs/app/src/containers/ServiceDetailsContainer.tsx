@@ -32,7 +32,7 @@ interface BackfillSearchState {
   errorText?: string
 
   backfill?: IBackfill
-  author?: string
+  createdBy?: string
 }
 
 class ServiceDetailsContainer extends React.Component<
@@ -55,39 +55,66 @@ class ServiceDetailsContainer extends React.Component<
       loading: false,
       errorText: null,
       backfill: null,
-      author: null, 
+      createdBy: null
     })
+
     this.fetchBackfillRuns()
   }
 
-  fetchBackfillRuns(backfill?: IBackfill, author?: string) {
-    var url = `/services/${this.service}/variants/${this.variant}/backfill-runs`
+  fetchBackfillRuns(
+    backfill?: IBackfill,
+    createdBy?: string,
+    next_pagination_token?: string
+  ) {
+    const url = new URL(
+      `/services/${this.service}/variants/${this.variant}/backfill-runs`,
+      window.location.origin
+    )
+    const params = new URLSearchParams()
 
-    if (backfill && author) {
-      url += `?backfill_name=${backfill.name}&created_by_user=${author}`
+    if (next_pagination_token) {
+      params.append("pagination_token", next_pagination_token)
     }
-    else {
-      if (backfill) {
-        url += `?backfill_name=${backfill.name}`
-      }
-      if (author) {
-        url += `?created_by_user=${author}`
-      }
+    if (backfill) {
+      params.append("backfill_name", backfill.name)
     }
-
-    this.props.simpleNetworkGet(this.backfillRunsTag, url)
+    if (createdBy) {
+      params.append("created_by_user", createdBy)
+    }
+    url.search = params.toString()
+    this.props.simpleNetworkGet(this.backfillRunsTag, url.toString())
 
     this.setState({
       loading: false,
-      errorText: null,
+      errorText: null
     })
+  }
+
+  fetchNextPage(pagination_token: string) {
+    this.fetchBackfillRuns(
+      this.state.backfill,
+      this.state.createdBy,
+      pagination_token
+    )
+  }
+
+  filterBackfills = () => {
+    this.setState({ loading: true })
+    this.fetchBackfillRuns(this.state.backfill, this.state.createdBy)
   }
 
   handleKeyPress = (event: React.KeyboardEvent<HTMLElement>) => {
     if (event.key === "Enter") {
-      this.setState({ loading: true })
-      this.fetchBackfillRuns(this.state.backfill, this.state.author)
+      this.filterBackfills()
     }
+  }
+
+  handleClearFilters = () => {
+    this.setState({
+      backfill: null,
+      createdBy: ""
+    })
+    this.fetchBackfillRuns()
   }
 
   render() {
@@ -108,92 +135,92 @@ class ServiceDetailsContainer extends React.Component<
         </LayoutContainer>
       )
     }
-    if (this.variant != RESERVED_VARIANT) {
-      return (
-        <LayoutContainer>
-          <ServiceHeader serviceName={this.service} variant={this.variant} />
-          <Link
-            to={`/app/services/${this.service}/variants/${this.variant}/create`}
-          >
-            <AnchorButton text={"Create"} intent={Intent.PRIMARY} />
-          </Link>
-          <br />
-          <br />
-          <H3>Running Backfills</H3>
-          <BackfillRunsTable backfillRuns={result.running_backfills} />
-          <H3>Paused Backfills</H3>
-          <BackfillRunsTable backfillRuns={result.paused_backfills} />
-          {result.next_pagination_token && (
-            <div style={{ paddingBottom: "100px" }}>
-              <Link
-                to={`/app/services/${this.service}/variants/${this.variant}/runs/${result.next_pagination_token}`}
-              >
-                more
-              </Link>
-            </div>
-          )}
-        </LayoutContainer>
-      )
-    }
+
     return (
       <LayoutContainer>
-        <ServiceHeader serviceName={this.service} variant={this.variant} />
-        <Link to={`/app/services/${this.service}/create`}>
-          <AnchorButton text={"Create"} intent={Intent.PRIMARY} />
-        </Link>
+        {this.variant != RESERVED_VARIANT ? (
+          <div>
+            <ServiceHeader serviceName={this.service} variant={this.variant} />
+            <Link
+              to={`/app/services/${this.service}/variants/${this.variant}/create`}
+            >
+              <AnchorButton text={"Create"} intent={Intent.PRIMARY} />
+            </Link>
+
+          </div>
+          ) : (
+            <div>
+            <ServiceHeader serviceName={this.service} variant={this.variant} />
+            <Link to={`/app/services/${this.service}/create`}>
+              <AnchorButton text={"Create"} intent={Intent.PRIMARY} />
+            </Link>
+            </div>
+          )
+        }
         <br />
         <br />
         <FormGroup>
-          <div style={{ display: "flex", gap: "10px" }}>
+          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
             <div style={{ flex: 1 }}>
               <H5>Backfill Name</H5>
               <BackfillSelector
                 backfills={registeredBackfills.backfills}
-                onValueChange={ newBackfill =>
-                  this.setState({ backfill: newBackfill })
+                onValueChange={selectedBackfill =>
+                  this.setState({ backfill: selectedBackfill })
                 }
                 selected_item={this.state.backfill}
               />
             </div>
             <div style={{ flex: 1 }}>
-              <H5>Author</H5>
+              <H5>Created by</H5>
               <InputGroup
                 id="text-input"
                 fill={false}
-                value={this.state.author}
-                placeholder="kara.dietz"
+                value={this.state.createdBy}
+                placeholder="first.last"
                 onChange={(event: React.FormEvent<HTMLElement>) => {
                   this.setState({
-                    author: (event.target as any).value
+                    createdBy: (event.target as any).value
                   })
                 }}
                 onKeyPress={this.handleKeyPress}
               />
             </div>
+            <div style={{ flex: 1 }}>
+              <Button
+                text={"Filter"}
+                onClick={() => {
+                  this.filterBackfills()
+                }}
+                intent={Intent.NONE}
+                minimal={true}
+                loading={this.state.loading}
+                disabled={!this.state.backfill && !this.state.createdBy}
+              />
+              <Button
+                text={"Clear filters"}
+                onClick={this.handleClearFilters}
+                intent={Intent.PRIMARY}
+                minimal={true}
+                disabled={!this.state.backfill && !this.state.createdBy}
+              />
+            </div>
           </div>
-          <Button
-            onClick={() => {
-              this.setState({ loading: true })
-              this.fetchBackfillRuns(this.state.backfill, this.state.author)
-            }}
-            intent={Intent.PRIMARY}
-            loading={this.state.loading}
-            disabled={!this.state.backfill && !this.state.author}
-            text={"Filter"}
-          />
         </FormGroup>
-        <br />
         <H3>Running Backfills</H3>
         <BackfillRunsTable backfillRuns={result.running_backfills} />
         <H3>Paused Backfills</H3>
         <BackfillRunsTable backfillRuns={result.paused_backfills} />
         {result.next_pagination_token && (
-          <div style={{ paddingBottom: "100px" }}>
-            <Link
-              to={`/app/services/${this.service}/runs/${result.next_pagination_token}`}
-            >
-              more
-            </Link>
+          <div style= {{paddingBottom: "100px"}}>
+            <Button
+              text={"Next"}
+              onClick={() => {
+                this.fetchNextPage(result.next_pagination_token)
+              }}
+              intent={Intent.PRIMARY}
+              minimal={true}
+            />
           </div>
         )}
       </LayoutContainer>

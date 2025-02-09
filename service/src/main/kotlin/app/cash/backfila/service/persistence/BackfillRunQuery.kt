@@ -1,5 +1,6 @@
 package app.cash.backfila.service.persistence
 
+import java.time.Instant
 import misk.hibernate.Constraint
 import misk.hibernate.Id
 import misk.hibernate.Operator
