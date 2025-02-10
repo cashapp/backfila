@@ -1,6 +1,8 @@
 package app.cash.backfila.client.sqldelight.plugin
 
+import app.cash.sqldelight.gradle.GenerateMigrationOutputTask
 import app.cash.sqldelight.gradle.SqlDelightExtension
+import app.cash.sqldelight.gradle.SqlDelightTask
 import java.io.Serializable
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Plugin
@@ -46,6 +48,16 @@ class BackfilaSqlDelightGradlePlugin : Plugin<Project> {
             }
           },
         )
+      }
+
+      // This is to unblock usage. We need these dependencies so that gradle understands that sqldelight
+      // components need these. But that with take SQLDelight changes to its plugin.
+      // TODO: Remove these and replace with proper source sets to the correct SQLDelight tasks.
+      target.tasks.withType(SqlDelightTask::class.java) { t ->
+        t.dependsOn(sqlTask)
+      }
+      target.tasks.withType(GenerateMigrationOutputTask::class.java) { t ->
+        t.dependsOn(sqlTask)
       }
 
       val kotlinTask = target.tasks.register(
