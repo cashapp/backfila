@@ -1,6 +1,7 @@
 import com.vanniktech.maven.publish.GradlePlugin
 import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
+import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
   id("java-gradle-plugin")
@@ -46,6 +47,12 @@ dependencies {
 tasks.withType<JavaCompile> {
   sourceCompatibility = JavaVersion.VERSION_17.toString()
   targetCompatibility = JavaVersion.VERSION_17.toString()
+}
+
+tasks.withType(KotlinJvmCompile::class.java).configureEach {
+  kotlinOptions {
+    jvmTarget = "17"
+  }
 }
 
 gradlePlugin {
