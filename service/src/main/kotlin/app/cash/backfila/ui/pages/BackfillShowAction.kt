@@ -479,7 +479,7 @@ class BackfillShowAction @Inject constructor(
   companion object {
     private const val PATH = "/backfills/{id}"
     fun path(id: String) = PATH.replace("{id}", id)
-    fun path(id: Long) = PATH.replace("{id}", id.toString())
+    fun path(id: Long) = path(id.toString())
 
     const val START_STATE_BUTTON_LABEL = "Start"
     const val PAUSE_STATE_BUTTON_LABEL = "Pause"

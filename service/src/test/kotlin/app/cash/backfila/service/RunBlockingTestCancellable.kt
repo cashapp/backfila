@@ -6,7 +6,7 @@ import kotlinx.coroutines.test.runBlockingTest
 
 /**
  * Same as runBlocking but cancels the coroutines if an exception is thrown.
- * runTest has a bug where it hangs instead:
+ * runBlockingTest has a bug where it hangs instead:
  * https://github.com/Kotlin/kotlinx.coroutines/issues/1910
  */
 @Suppress("EXPERIMENTAL_API_USAGE")

@@ -25,13 +25,6 @@ jobs:
       - name: Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
 
-      - name: Cache Gradle packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
-          restore-keys: ${{ runner.os }}-gradle
-
       - name: Prep mkdocs
         run: .github/workflows/prepare_mkdocs.sh
 
