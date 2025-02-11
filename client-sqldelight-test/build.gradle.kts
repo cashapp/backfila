@@ -1,5 +1,5 @@
 plugins {
-  id("org.jetbrains.kotlin.jvm")
+  kotlin("jvm")
   id("app.cash.sqldelight")
   id("app.cash.backfila.client.sqldelight")
 }
@@ -33,18 +33,6 @@ backfilaSqlDelight {
 
 val compileKotlin by tasks.getting {
   dependsOn("generateMainHockeyDataDatabaseMigrations")
-}
-
-tasks.named { it == "generateMainHockeyDataDatabaseInterface" }.configureEach {
-  dependsOn("generateBackfilaRecordSourceSqlHockeyPlayersBackfill")
-}
-
-tasks.named { it == "generateBackfilaRecordSourceSqlHockeyPlayersBackfill" }.configureEach {
-  dependsOn("generateMainHockeyDataDatabaseMigrations")
-}
-
-tasks.named { it == "generateMainHockeyDataDatabaseMigrations" }.configureEach {
-  dependsOn("spotlessKotlin")
 }
 
 dependencies {

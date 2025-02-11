@@ -15,7 +15,7 @@ buildscript {
 }
 
 plugins {
-  id("org.jetbrains.kotlin.jvm")
+  kotlin("jvm")
   `java-library`
   id("org.flywaydb.flyway") version "7.15.0"
   id("nu.studer.jooq") version "8.1"

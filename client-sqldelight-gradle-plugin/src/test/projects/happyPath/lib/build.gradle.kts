@@ -3,7 +3,7 @@ import app.cash.backfila.client.sqldelight.plugin.SqlDelightRecordSource
 plugins {
   id("app.cash.backfila.client.sqldelight")
   id("app.cash.sqldelight")
-  id("org.jetbrains.kotlin.jvm")
+  kotlin("jvm")
 }
 
 sqldelight {
@@ -36,8 +36,4 @@ dependencies {
   implementation("app.cash.backfila:client-sqldelight:${project.property("backfilaVersion")}")
   implementation("app.cash.backfila:client:${project.property("backfilaVersion")}")
   implementation(libs.sqldelightJdbcDriver)
-}
-
-tasks.named { it == "generateMainHockeyDataDatabaseInterface" }.configureEach {
-  dependsOn("generateBackfilaRecordSourceSqlHockeyPlayerOrigin")
 }

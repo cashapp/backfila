@@ -3,7 +3,7 @@ import com.vanniktech.maven.publish.KotlinJvm
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  id("org.jetbrains.kotlin.jvm")
+  kotlin("jvm")
   `java-library`
   id("com.vanniktech.maven.publish.base")
 }

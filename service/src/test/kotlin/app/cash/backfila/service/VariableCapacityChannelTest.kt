@@ -7,8 +7,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.runBlockingTest
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
 import org.junit.jupiter.api.Test
@@ -17,7 +16,7 @@ import org.junit.jupiter.api.Test
 class VariableCapacityChannelTest {
   @Test
   fun empty() {
-    runTest(UnconfinedTestDispatcher()) {
+    runBlockingTest {
       val variableCapacityChannel = VariableCapacityChannel<String>(1)
       val upstream = variableCapacityChannel.upstream()
       launch {
@@ -30,7 +29,7 @@ class VariableCapacityChannelTest {
 
   @Test
   fun sendBlockedUntilCoroutineRunsAndBuffers() {
-    runTest(UnconfinedTestDispatcher()) {
+    runBlockingTest {
       val variableCapacityChannel = VariableCapacityChannel<String>(1)
       val upstream = variableCapacityChannel.upstream()
       assertThat(upstream.trySend("test").isSuccess).isFalse()
@@ -48,7 +47,7 @@ class VariableCapacityChannelTest {
 
   @Test
   fun receiveUnblocksSend() {
-    runTest(UnconfinedTestDispatcher()) {
+    runBlockingTest {
       val variableCapacityChannel = VariableCapacityChannel<String>(1)
       val upstream = variableCapacityChannel.upstream()
       launch {
@@ -69,7 +68,7 @@ class VariableCapacityChannelTest {
 
   @Test
   fun increaseCapacityUnblocksAfterRead() {
-    runTest(UnconfinedTestDispatcher()) {
+    runBlockingTest {
       val variableCapacityChannel = VariableCapacityChannel<String>(1)
       val upstream = variableCapacityChannel.upstream()
       launch {
@@ -96,7 +95,7 @@ class VariableCapacityChannelTest {
 
   @Test
   fun decreaseCapacity() {
-    runTest(UnconfinedTestDispatcher()) {
+    runBlockingTest {
       val variableCapacityChannel = VariableCapacityChannel<String>(2)
       val upstream = variableCapacityChannel.upstream()
       launch {
@@ -126,7 +125,7 @@ class VariableCapacityChannelTest {
   }
 
   @Test fun closeUpstream() {
-    runTest(UnconfinedTestDispatcher()) {
+    runBlockingTest {
       val variableCapacityChannel = VariableCapacityChannel<String>(1)
       val upstream = variableCapacityChannel.upstream()
       launch {
@@ -146,7 +145,7 @@ class VariableCapacityChannelTest {
 
   @Test
   fun cancelUpstream() {
-    runTest(UnconfinedTestDispatcher()) {
+    runBlockingTest {
       val variableCapacityChannel = VariableCapacityChannel<String>(1)
       val upstream = variableCapacityChannel.upstream()
       launch {
@@ -166,7 +165,7 @@ class VariableCapacityChannelTest {
 
   @Test
   fun closeDownstream() {
-    runTest(UnconfinedTestDispatcher()) {
+    runBlockingTest {
       val variableCapacityChannel = VariableCapacityChannel<String>(1)
       val upstream = variableCapacityChannel.upstream()
       launch {
@@ -185,7 +184,7 @@ class VariableCapacityChannelTest {
 
   @Test
   fun cancelDownstream() {
-    runTest(UnconfinedTestDispatcher()) {
+    runBlockingTest {
       val variableCapacityChannel = VariableCapacityChannel<String>(1)
       val upstream = variableCapacityChannel.upstream()
       launch {
@@ -205,7 +204,7 @@ class VariableCapacityChannelTest {
   @Test
   fun `listener is called`() {
     val size = AtomicInteger()
-    runTest(UnconfinedTestDispatcher()) {
+    runBlockingTest {
       val variableCapacityChannel = VariableCapacityChannel<String>(
         capacity = 3,
         queueSizeChangeListener = size::set,

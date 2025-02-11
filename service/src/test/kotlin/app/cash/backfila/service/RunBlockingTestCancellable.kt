@@ -1,9 +1,8 @@
 package app.cash.backfila.service
 
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.TestCoroutineScope
+import kotlinx.coroutines.test.runBlockingTest
 
 /**
  * Same as runBlocking but cancels the coroutines if an exception is thrown.
@@ -12,9 +11,9 @@ import kotlinx.coroutines.test.runTest
  */
 @Suppress("EXPERIMENTAL_API_USAGE")
 internal fun runBlockingTestCancellable(
-  testBody: suspend TestScope.() -> Unit,
+  testBody: suspend TestCoroutineScope.() -> Unit,
 ) {
-  runTest(UnconfinedTestDispatcher()) {
+  runBlockingTest {
     try {
       this.testBody()
     } catch (t: Throwable) {

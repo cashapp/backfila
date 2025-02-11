@@ -1,8 +1,8 @@
 [versions]
 jooq = "3.18.25"
-kotlin = "2.1.10"
+kotlin = "1.9.23"
 ktlint = "0.47.1"
-misk = "2025.01.29.125750-6f470ec"
+misk = "2025.01.09.184726-680bca2"
 okhttp = "5.0.0-alpha.14"
 sqldelight = "2.0.2"
 wire = "5.2.1"
@@ -63,9 +63,9 @@ kotlinPoet = { module = "com.squareup:kotlinpoet", version = "1.18.1" }
 kotlinReflection = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 kotlinStdLib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 kotlinTest = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
-kotlinxCoroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version = "1.9.0" }
-kotlinxCoroutinesLogging = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-slf4j", version = "1.9.0" }
-kotlinxCoroutinesTest = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version = "1.9.0" }
+kotlinxCoroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version = "1.6.3" }
+kotlinxCoroutinesLogging = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-slf4j", version = "1.6.3" }
+kotlinxCoroutinesTest = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version = "1.6.3" }
 kotlinxHtml = { module = "org.jetbrains.kotlinx:kotlinx-html-jvm", version = "0.12.0" }
 misk = { module = "com.squareup.misk:misk", version.ref = "misk" }
 miskActions = { module = "com.squareup.misk:misk-actions", version.ref = "misk" }
