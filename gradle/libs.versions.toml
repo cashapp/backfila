@@ -1,11 +1,11 @@
 [versions]
-jooq = "3.18.1"
-ktlint = "0.47.1"
+jooq = "3.18.25"
 kotlin = "1.9.23"
+ktlint = "0.47.1"
 misk = "2025.01.09.184726-680bca2"
 okhttp = "5.0.0-alpha.14"
-wire = "5.0.0"
 sqldelight = "2.0.2"
+wire = "5.2.1"
 
 [libraries]
 apacheCommonsLang3 = { module = "org.apache.commons:commons-lang3", version = "3.12.0" }
@@ -40,15 +40,15 @@ moshiKotlin = { module = "com.squareup.moshi:moshi-kotlin", version = "1.13.0" }
 mysql = { module = "mysql:mysql-connector-java", version = "8.0.30" }
 okHttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 okHttpMockWebServer = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "okhttp" }
-okio = { module = "com.squareup.okio:okio", version = "3.9.0" }
+okio = { module = "com.squareup.okio:okio", version = "3.9.1" }
 openTracing = { module = "io.opentracing:opentracing-api", version = "0.33.0" }
 openTracingMock = { module = "io.opentracing:opentracing-mock", version = "0.33.0" }
 openTracingOkHttp = { module = "io.opentracing.contrib:opentracing-okhttp3", version = "3.0.0" }
-retrofit = { module = "com.squareup.retrofit2:retrofit", version = "2.9.0" }
-retrofitGuavaAdapter = { module = "com.squareup.retrofit2:adapter-guava", version = "2.9.0" }
-retrofitMock = { module = "com.squareup.retrofit2:retrofit-mock", version = "2.9.0" }
-retrofitMoshi = { module = "com.squareup.retrofit2:converter-moshi", version = "2.9.0" }
-retrofitWire = { module = "com.squareup.retrofit2:converter-wire", version = "2.9.0" }
+retrofit = { module = "com.squareup.retrofit2:retrofit", version = "2.11.0" }
+retrofitGuavaAdapter = { module = "com.squareup.retrofit2:adapter-guava", version = "2.11.0" }
+retrofitMock = { module = "com.squareup.retrofit2:retrofit-mock", version = "2.11.0" }
+retrofitMoshi = { module = "com.squareup.retrofit2:converter-moshi", version = "2.11.0" }
+retrofitWire = { module = "com.squareup.retrofit2:converter-wire", version = "2.11.0" }
 shadowJarPlugin = { module = "gradle.plugin.com.github.johnrengelman:shadow", version = "7.1.2" }
 slf4jApi = { module = "org.slf4j:slf4j-api", version = "2.0.3" }
 sqldelightGradlePlugin = { module = "app.cash.sqldelight:gradle-plugin", version.ref = "sqldelight" }

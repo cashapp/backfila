@@ -12,7 +12,7 @@ sqldelight {
       dialect(libs.sqldelightMysqlDialect)
       srcDirs.setFrom(listOf("src/main/sqldelight", "src/main/resources/migrations"))
       deriveSchemaFromMigrations.set(true)
-      migrationOutputDirectory.set(file("$buildDir/resources/main/migrations"))
+      migrationOutputDirectory.set(layout.buildDirectory.dir("resources/main/migrations"))
       verifyMigrations.set(true)
     }
   }
