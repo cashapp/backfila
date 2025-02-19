@@ -1,7 +1,8 @@
 package app.cash.backfila.ui.components
 
 import kotlinx.html.TagConsumer
+import misk.tailwind.components.AlertInfo
 
 fun TagConsumer<*>.UseOldUIAlert() {
-  AlertError("The new Backfila UI is not ready yet. It has bugs and missing functionality. Please use the old UI for now.", "Go to Old UI", "/app/")
+  AlertInfo("The new Backfila UI is in Beta. Please report any bugs or missing functionality to #backfila-discuss. The old UI will remain available during the testing period.", "Go to Old UI", "/app/")
 }
