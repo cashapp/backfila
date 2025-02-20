@@ -193,6 +193,7 @@ class VariableCapacityChannelTest {
         assertThat(size.get()).isEqualTo(0)
 
         upstream.send("test")
+        assertThat(size.get()).isEqualTo(1)
         upstream.send("test")
         upstream.send("test")
 
