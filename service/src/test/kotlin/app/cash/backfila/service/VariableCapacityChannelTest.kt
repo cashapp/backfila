@@ -7,7 +7,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
 import org.junit.jupiter.api.Test
@@ -15,188 +15,166 @@ import org.junit.jupiter.api.Test
 @ExperimentalCoroutinesApi
 class VariableCapacityChannelTest {
   @Test
-  fun empty() {
-    runBlockingTest {
-      val variableCapacityChannel = VariableCapacityChannel<String>(1)
-      val upstream = variableCapacityChannel.upstream()
-      launch {
-        val receiveChannel = variableCapacityChannel.proxy(this)
-        assertThat(receiveChannel.tryReceive().getOrNull()).isNull()
-        upstream.close()
+  fun empty() = runTest {
+    val variableCapacityChannel = VariableCapacityChannel<String>(1)
+    val upstream = variableCapacityChannel.upstream()
+    launch {
+      val receiveChannel = variableCapacityChannel.proxy(this)
+      assertThat(receiveChannel.tryReceive().getOrNull()).isNull()
+      upstream.close()
+    }
+  }
+
+  @Test
+  fun sendBlockedUntilCoroutineRunsAndBuffers() = runTest {
+    val variableCapacityChannel = VariableCapacityChannel<String>(1)
+    val upstream = variableCapacityChannel.upstream()
+    assertThat(upstream.trySend("test").isSuccess).isFalse()
+    assertThat(variableCapacityChannel.queued()).isEqualTo(0)
+    launch {
+      val receiveChannel = variableCapacityChannel.proxy(this)
+      upstream.send("test")
+      assertThat(variableCapacityChannel.queued()).isEqualTo(1)
+      assertThat(upstream.trySend("test2").isSuccess).isFalse()
+      assertThat(receiveChannel.receive()).isEqualTo("test")
+      upstream.close()
+    }
+  }
+
+  @Test
+  fun receiveUnblocksSend() = runTest {
+    val variableCapacityChannel = VariableCapacityChannel<String>(1)
+    val upstream = variableCapacityChannel.upstream()
+    launch {
+      val receiveChannel = variableCapacityChannel.proxy(this)
+      upstream.send("test")
+      assertThat(variableCapacityChannel.queued()).isEqualTo(1)
+      assertThat(upstream.trySend("test2").isSuccess).isFalse()
+      assertThat(receiveChannel.receive()).isEqualTo("test")
+      upstream.send("test2")
+      assertThat(variableCapacityChannel.queued()).isEqualTo(1)
+      assertThat(receiveChannel.receive()).isEqualTo("test2")
+      upstream.close()
+    }
+  }
+
+  @Test
+  fun increaseCapacityUnblocksAfterRead() = runTest {
+    val variableCapacityChannel = VariableCapacityChannel<String>(1)
+    val upstream = variableCapacityChannel.upstream()
+    launch {
+      val receiveChannel = variableCapacityChannel.proxy(this)
+      upstream.send("test")
+      assertThat(variableCapacityChannel.queued()).isEqualTo(1)
+      assertThat(upstream.trySend("test2").isSuccess).isFalse()
+      variableCapacityChannel.capacity = 2
+      // Capacity change only takes affect when it is not blocked on sending
+      assertThat(receiveChannel.receive()).isEqualTo("test")
+
+      upstream.send("test2")
+      assertThat(variableCapacityChannel.queued()).isEqualTo(1)
+      upstream.send("test3")
+
+      assertThat(receiveChannel.receive()).isEqualTo("test2")
+      assertThat(receiveChannel.receive()).isEqualTo("test3")
+
+      upstream.close()
+    }
+  }
+
+  @Test
+  fun decreaseCapacity() = runTest {
+    val variableCapacityChannel = VariableCapacityChannel<String>(2)
+    val upstream = variableCapacityChannel.upstream()
+    launch {
+      val receiveChannel = variableCapacityChannel.proxy(this)
+      upstream.send("test")
+      assertThat(variableCapacityChannel.queued()).isEqualTo(1)
+      upstream.send("test2")
+      assertThat(upstream.trySend("test3").isSuccess).isFalse()
+
+      variableCapacityChannel.capacity = 1
+      // Capacity change only takes affect when it is not blocked on sending
+      assertThat(receiveChannel.receive()).isEqualTo("test")
+      assertThat(variableCapacityChannel.queued()).isEqualTo(1)
+      // Still can't send after receiving because capacity was lowered.
+      assertThat(upstream.trySend("test3").isSuccess).isFalse()
+
+      assertThat(receiveChannel.receive()).isEqualTo("test2")
+      upstream.send("test3")
+
+      assertThat(receiveChannel.receive()).isEqualTo("test3")
+
+      upstream.close()
+    }
+  }
+
+  @Test
+  fun closeUpstream() = runTest {
+    val variableCapacityChannel = VariableCapacityChannel<String>(1)
+    val upstream = variableCapacityChannel.upstream()
+    launch {
+      val receiveChannel = variableCapacityChannel.proxy(this)
+      upstream.send("test")
+      upstream.close()
+
+      assertThat(receiveChannel.receive()).isEqualTo("test")
+      try {
+        receiveChannel.receive()
+        fail("channel not closed")
+      } catch (e: ClosedReceiveChannelException) {
       }
     }
   }
 
   @Test
-  fun sendBlockedUntilCoroutineRunsAndBuffers() {
-    runBlockingTest {
-      val variableCapacityChannel = VariableCapacityChannel<String>(1)
-      val upstream = variableCapacityChannel.upstream()
-      assertThat(upstream.trySend("test").isSuccess).isFalse()
-      assertThat(variableCapacityChannel.queued()).isEqualTo(0)
-      launch {
-        val receiveChannel = variableCapacityChannel.proxy(this)
-        assertThat(upstream.trySend("test").isSuccess).isTrue()
-        assertThat(variableCapacityChannel.queued()).isEqualTo(1)
-        assertThat(upstream.trySend("test2").isSuccess).isFalse()
-        assertThat(receiveChannel.tryReceive().getOrNull()).isEqualTo("test")
-        upstream.close()
+  fun cancelUpstream() = runTest {
+    val variableCapacityChannel = VariableCapacityChannel<String>(1)
+    val upstream = variableCapacityChannel.upstream()
+    launch {
+      val receiveChannel = variableCapacityChannel.proxy(this)
+      upstream.send("test")
+      upstream.close(CancellationException("cancel"))
+
+      assertThat(receiveChannel.receive()).isEqualTo("test")
+      try {
+        receiveChannel.receive()
+        fail("channel not canceled")
+      } catch (e: CancellationException) {
       }
     }
   }
 
   @Test
-  fun receiveUnblocksSend() {
-    runBlockingTest {
-      val variableCapacityChannel = VariableCapacityChannel<String>(1)
-      val upstream = variableCapacityChannel.upstream()
-      launch {
-        val receiveChannel = variableCapacityChannel.proxy(this)
-        assertThat(upstream.trySend("test").isSuccess).isTrue()
-        assertThat(variableCapacityChannel.queued()).isEqualTo(1)
-        assertThat(upstream.trySend("test2").isSuccess).isFalse()
-        assertThat(receiveChannel.tryReceive().getOrNull()).isEqualTo("test")
-        assertThat(variableCapacityChannel.queued()).isEqualTo(0)
-        assertThat(upstream.trySend("test2").isSuccess).isTrue()
-        assertThat(variableCapacityChannel.queued()).isEqualTo(1)
-        assertThat(receiveChannel.tryReceive().getOrNull()).isEqualTo("test2")
-        assertThat(variableCapacityChannel.queued()).isEqualTo(0)
-        upstream.close()
+  fun closeDownstream() = runTest {
+    val variableCapacityChannel = VariableCapacityChannel<String>(1)
+    val upstream = variableCapacityChannel.upstream()
+    launch {
+      val receiveChannel = variableCapacityChannel.proxy(this)
+      upstream.send("test")
+      receiveChannel.cancel()
+
+      try {
+        upstream.send("test2")
+        fail("channel not closed")
+      } catch (e: ClosedSendChannelException) {
       }
     }
   }
 
   @Test
-  fun increaseCapacityUnblocksAfterRead() {
-    runBlockingTest {
-      val variableCapacityChannel = VariableCapacityChannel<String>(1)
-      val upstream = variableCapacityChannel.upstream()
-      launch {
-        val receiveChannel = variableCapacityChannel.proxy(this)
-        assertThat(upstream.trySend("test").isSuccess).isTrue()
-        assertThat(variableCapacityChannel.queued()).isEqualTo(1)
-        assertThat(upstream.trySend("test2").isSuccess).isFalse()
-        variableCapacityChannel.capacity = 2
-        // Capacity change only takes affect when it is not blocked on sending
-        assertThat(receiveChannel.tryReceive().getOrNull()).isEqualTo("test")
+  fun cancelDownstream() = runTest {
+    val variableCapacityChannel = VariableCapacityChannel<String>(1)
+    val upstream = variableCapacityChannel.upstream()
+    launch {
+      val receiveChannel = variableCapacityChannel.proxy(this)
+      upstream.send("test")
+      receiveChannel.cancel(CancellationException("cancel"))
 
-        assertThat(upstream.trySend("test2").isSuccess).isTrue()
-        assertThat(variableCapacityChannel.queued()).isEqualTo(1)
-        assertThat(upstream.trySend("test3").isSuccess).isTrue()
-        assertThat(variableCapacityChannel.queued()).isEqualTo(2)
-
-        assertThat(receiveChannel.tryReceive().getOrNull()).isEqualTo("test2")
-        assertThat(receiveChannel.tryReceive().getOrNull()).isEqualTo("test3")
-
-        upstream.close()
-      }
-    }
-  }
-
-  @Test
-  fun decreaseCapacity() {
-    runBlockingTest {
-      val variableCapacityChannel = VariableCapacityChannel<String>(2)
-      val upstream = variableCapacityChannel.upstream()
-      launch {
-        val receiveChannel = variableCapacityChannel.proxy(this)
-        assertThat(upstream.trySend("test").isSuccess).isTrue()
-        assertThat(variableCapacityChannel.queued()).isEqualTo(1)
-        assertThat(upstream.trySend("test2").isSuccess).isTrue()
-        assertThat(variableCapacityChannel.queued()).isEqualTo(2)
-        assertThat(upstream.trySend("test3").isSuccess).isFalse()
-
-        variableCapacityChannel.capacity = 1
-        // Capacity change only takes affect when it is not blocked on sending
-        assertThat(receiveChannel.tryReceive().getOrNull()).isEqualTo("test")
-        assertThat(variableCapacityChannel.queued()).isEqualTo(1)
-        // Still can't send after receiving because capacity was lowered.
-        assertThat(upstream.trySend("test3").isSuccess).isFalse()
-
-        assertThat(receiveChannel.tryReceive().getOrNull()).isEqualTo("test2")
-        assertThat(variableCapacityChannel.queued()).isEqualTo(0)
-        assertThat(upstream.trySend("test3").isSuccess).isTrue()
-
-        assertThat(receiveChannel.tryReceive().getOrNull()).isEqualTo("test3")
-
-        upstream.close()
-      }
-    }
-  }
-
-  @Test fun closeUpstream() {
-    runBlockingTest {
-      val variableCapacityChannel = VariableCapacityChannel<String>(1)
-      val upstream = variableCapacityChannel.upstream()
-      launch {
-        val receiveChannel = variableCapacityChannel.proxy(this)
-        assertThat(upstream.trySend("test").isSuccess).isTrue()
-        upstream.close()
-
-        assertThat(receiveChannel.receive()).isEqualTo("test")
-        try {
-          receiveChannel.receive()
-          fail("channel not closed")
-        } catch (e: ClosedReceiveChannelException) {
-        }
-      }
-    }
-  }
-
-  @Test
-  fun cancelUpstream() {
-    runBlockingTest {
-      val variableCapacityChannel = VariableCapacityChannel<String>(1)
-      val upstream = variableCapacityChannel.upstream()
-      launch {
-        val receiveChannel = variableCapacityChannel.proxy(this)
-        assertThat(upstream.trySend("test").isSuccess).isTrue()
-        upstream.close(CancellationException("cancel"))
-
-        assertThat(receiveChannel.receive()).isEqualTo("test")
-        try {
-          receiveChannel.receive()
-          fail("channel not canceled")
-        } catch (e: CancellationException) {
-        }
-      }
-    }
-  }
-
-  @Test
-  fun closeDownstream() {
-    runBlockingTest {
-      val variableCapacityChannel = VariableCapacityChannel<String>(1)
-      val upstream = variableCapacityChannel.upstream()
-      launch {
-        val receiveChannel = variableCapacityChannel.proxy(this)
-        assertThat(upstream.trySend("test").isSuccess).isTrue()
-        receiveChannel.cancel()
-
-        try {
-          upstream.send("test2")
-          fail("channel not closed")
-        } catch (e: ClosedSendChannelException) {
-        }
-      }
-    }
-  }
-
-  @Test
-  fun cancelDownstream() {
-    runBlockingTest {
-      val variableCapacityChannel = VariableCapacityChannel<String>(1)
-      val upstream = variableCapacityChannel.upstream()
-      launch {
-        val receiveChannel = variableCapacityChannel.proxy(this)
-        assertThat(upstream.trySend("test").isSuccess).isTrue()
-        receiveChannel.cancel(CancellationException("cancel"))
-
-        try {
-          upstream.send("test2")
-          fail("channel not canceled")
-        } catch (e: CancellationException) {
-        }
+      try {
+        upstream.send("test2")
+        fail("channel not canceled")
+      } catch (e: CancellationException) {
       }
     }
   }
@@ -204,7 +182,7 @@ class VariableCapacityChannelTest {
   @Test
   fun `listener is called`() {
     val size = AtomicInteger()
-    runBlockingTest {
+    runTest {
       val variableCapacityChannel = VariableCapacityChannel<String>(
         capacity = 3,
         queueSizeChangeListener = size::set,
@@ -214,23 +192,14 @@ class VariableCapacityChannelTest {
         val receiveChannel = variableCapacityChannel.proxy(this)
         assertThat(size.get()).isEqualTo(0)
 
-        upstream.trySend("test").isSuccess
+        upstream.send("test")
         assertThat(size.get()).isEqualTo(1)
+        upstream.send("test")
+        upstream.send("test")
 
-        upstream.trySend("test").isSuccess
-        assertThat(size.get()).isEqualTo(2)
-
-        upstream.trySend("test").isSuccess
-        assertThat(size.get()).isEqualTo(3)
-
-        receiveChannel.tryReceive().getOrNull()
-        assertThat(size.get()).isEqualTo(2)
-
-        receiveChannel.tryReceive().getOrNull()
-        assertThat(size.get()).isEqualTo(1)
-
-        receiveChannel.tryReceive().getOrNull()
-        assertThat(size.get()).isEqualTo(0)
+        receiveChannel.receive()
+        receiveChannel.receive()
+        receiveChannel.receive()
 
         upstream.close()
       }

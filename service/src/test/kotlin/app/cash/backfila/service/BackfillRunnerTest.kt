@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runTest
 import misk.hibernate.Transacter
 import misk.hibernate.load
 import misk.scope.ActionScope
@@ -84,7 +85,7 @@ class BackfillRunnerTest {
       assertThat(partition.run_state).isEqualTo(BackfillState.RUNNING)
     }
 
-    runBlockingTestCancellable {
+    runTest {
       runner.start(this)
     }
 
@@ -111,7 +112,7 @@ class BackfillRunnerTest {
     assertThat(partition.pkey_cursor).isNull()
     assertThat(partition.state).isEqualTo(BackfillState.RUNNING)
 
-    runBlockingTestCancellable {
+    runTest {
       runner.start(this)
     }
 
@@ -147,7 +148,7 @@ class BackfillRunnerTest {
     fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
     val runner = startBackfill(numThreads = 1)
 
-    runBlockingTestCancellable {
+    runTest {
       runner.start(this)
 
       // We should only get numthreads=1 calls in parallel, then it must wait for more room.
@@ -170,7 +171,7 @@ class BackfillRunnerTest {
     fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
     val runner = startBackfill(numThreads = 1)
 
-    runBlockingTestCancellable {
+    runTest {
       runner.start(this)
       val firstRequest = fakeBackfilaClientServiceClient.runBatchRequests.receive()
       assertThat(firstRequest.parameters).containsEntry("cheese", "cheddar".encodeUtf8())
@@ -188,7 +189,7 @@ class BackfillRunnerTest {
       )
     }
 
-    runBlockingTestCancellable {
+    runTest {
       runner.start(this)
 
       val firstRequest = fakeBackfilaClientServiceClient.runBatchRequests.receive()
@@ -201,7 +202,7 @@ class BackfillRunnerTest {
     fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
     val runner = startBackfill(numThreads = 3)
 
-    runBlockingTestCancellable {
+    runTest {
       runner.start(this)
 
       // We should only get numthreads=3 calls in parallel, then it must wait for more room.
@@ -256,7 +257,7 @@ class BackfillRunnerTest {
       partition.precomputing_done = true
     }
 
-    runBlockingTestCancellable {
+    runTest {
       runner.start(this)
 
       assertThat(fakeBackfilaClientServiceClient.getNextBatchRangeRequests.receive()).isNotNull()
@@ -296,7 +297,7 @@ class BackfillRunnerTest {
       partition.precomputing_done = true
     }
 
-    runBlockingTestCancellable {
+    runTest {
       launch { runner.start(this) }
 
       // Process 4 getNextBatchRangeRequests
@@ -376,7 +377,7 @@ class BackfillRunnerTest {
     fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
     val runner = startBackfill(numThreads = 1)
 
-    runBlockingTestCancellable {
+    runTest {
       launch { runner.start(this) }
       // Leave awaiting run batch response
       fakeBackfilaClientServiceClient.runBatchRequests.receive()
@@ -407,7 +408,7 @@ class BackfillRunnerTest {
     fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
     val runner = startBackfill(numThreads = 2)
 
-    runBlockingTestCancellable {
+    runTest {
       launch { runner.start(this) }
 
       val firstRequest = fakeBackfilaClientServiceClient.runBatchRequests.receive()
@@ -451,7 +452,7 @@ class BackfillRunnerTest {
     fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
     val runner = startBackfill(numThreads = 1)
 
-    runBlockingTestCancellable {
+    runTest {
       launch { runner.start(this) }
 
       val firstRequest = fakeBackfilaClientServiceClient.runBatchRequests.receive()
@@ -492,7 +493,7 @@ class BackfillRunnerTest {
     fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
     val runner = startBackfill(numThreads = 2)
 
-    runBlockingTestCancellable {
+    runTest {
       launch { runner.start(this) }
 
       val firstRequest = fakeBackfilaClientServiceClient.runBatchRequests.receive()
@@ -550,7 +551,7 @@ class BackfillRunnerTest {
       partition.precomputing_done = true
     }
 
-    runBlockingTestCancellable {
+    runTest {
       launch { runner.start(this) }
 
       assertThat(fakeBackfilaClientServiceClient.getNextBatchRangeRequests.receive()).isNotNull()
@@ -576,7 +577,7 @@ class BackfillRunnerTest {
     fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
     val runner = startBackfill(numThreads = 1)
 
-    runBlockingTestCancellable {
+    runTest {
       launch { runner.start(this) }
 
       fakeBackfilaClientServiceClient.runBatchRequests.receive()
@@ -591,7 +592,7 @@ class BackfillRunnerTest {
       // Nothing sent yet - the backoff is 1000ms
       assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNull()
       delay(500)
-      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNotNull()
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
       fakeBackfilaClientServiceClient.runBatchResponses.send(
         Result.success(RunBatchResponse.Builder().build()),
       )
@@ -609,7 +610,7 @@ class BackfillRunnerTest {
     fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
     val runner = startBackfill(numThreads = 1, extraSleepMs = 1000L)
 
-    runBlockingTestCancellable {
+    runTest {
       launch { runner.start(this) }
 
       fakeBackfilaClientServiceClient.runBatchRequests.receive()
@@ -621,7 +622,7 @@ class BackfillRunnerTest {
       // Nothing sent yet - the backoff is 1000ms
       assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNull()
       delay(500)
-      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNotNull()
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
       fakeBackfilaClientServiceClient.runBatchResponses.send(
         Result.success(RunBatchResponse.Builder().build()),
       )
@@ -639,7 +640,7 @@ class BackfillRunnerTest {
     fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
     val runner = startBackfill(numThreads = 2, extraSleepMs = 1000L)
 
-    runBlockingTestCancellable {
+    runTest {
       launch { runner.start(this) }
 
       fakeBackfilaClientServiceClient.runBatchRequests.receive()
@@ -655,7 +656,7 @@ class BackfillRunnerTest {
       // Nothing sent yet - the backoff is 1000ms
       assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNull()
       delay(500)
-      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNotNull()
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
       fakeBackfilaClientServiceClient.runBatchResponses.send(
         Result.success(RunBatchResponse.Builder().build()),
       )
@@ -678,7 +679,7 @@ class BackfillRunnerTest {
       partition.precomputing_done = true
     }
 
-    runBlockingTestCancellable {
+    runTest {
       launch { runner.start(this) }
 
       assertThat(fakeBackfilaClientServiceClient.getNextBatchRangeRequests.receive()).isNotNull()
@@ -697,9 +698,9 @@ class BackfillRunnerTest {
       // The first batch has no matching records, so no delay is added.
       // The second batch, with nonzero matching count, gets run immediately.
       val runBatchRequest =
-        fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()
+        fakeBackfilaClientServiceClient.runBatchRequests.receive()
       assertThat(runBatchRequest).isNotNull()
-      assertThat(runBatchRequest!!.batch_range).isEqualTo(
+      assertThat(runBatchRequest.batch_range).isEqualTo(
         KeyRange("100".encodeUtf8(), "199".encodeUtf8()),
       )
       runner.stop()
@@ -710,13 +711,13 @@ class BackfillRunnerTest {
     fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
     val runner = startBackfill(numThreads = 3)
 
-    runBlockingTestCancellable {
+    runTest {
       launch { runner.start(this) }
 
       // We should only get numthreads=3 calls in parallel, then it must wait for more room.
-      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNotNull()
-      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNotNull()
-      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNotNull()
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
       assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNull()
 
       scope.fakeCaller(user = "molly") {
@@ -735,9 +736,9 @@ class BackfillRunnerTest {
       fakeBackfilaClientServiceClient.runBatchResponses.send(
         Result.success(RunBatchResponse.Builder().build()),
       )
-      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNotNull()
-      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNotNull()
-      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNotNull()
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
+      assertThat(fakeBackfilaClientServiceClient.runBatchRequests.receive()).isNotNull()
       assertThat(fakeBackfilaClientServiceClient.runBatchRequests.tryReceive().getOrNull()).isNull()
       runner.stop()
     }
@@ -753,7 +754,7 @@ class BackfillRunnerTest {
     fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
     val runner = startBackfill(numThreads = 1)
 
-    runBlockingTestCancellable {
+    runTest {
       launch { runner.start(this) }
 
       val initialRequest = fakeBackfilaClientServiceClient.runBatchRequests.receive()
@@ -834,7 +835,7 @@ class BackfillRunnerTest {
     fakeBackfilaClientServiceClient.dontBlockGetNextBatch()
     val runner = startBackfill(numThreads = 3)
 
-    runBlockingTestCancellable {
+    runTest {
       launch { runner.start(this) }
 
       // We should only get numthreads=3 calls in parallel, then it must wait for more room.
