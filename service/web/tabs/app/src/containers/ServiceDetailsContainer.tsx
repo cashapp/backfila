@@ -26,6 +26,8 @@ import { Link } from "react-router-dom"
 import { LayoutContainer } from "."
 import { RESERVED_VARIANT } from "../utilities"
 
+type IProps = IState & IDispatchProps
+
 interface BackfillSearchState {
   loading: boolean
   errorText?: string
@@ -36,7 +38,7 @@ interface BackfillSearchState {
 
 class ServiceDetailsContainer extends React.Component<
   IState & IDispatchProps,
-  IState & BackfillSearchState
+  BackfillSearchState
 > {
   private service: string = (this.props as any).match.params.service
   private variant: string =
@@ -44,18 +46,21 @@ class ServiceDetailsContainer extends React.Component<
   private backfillRunsTag: string = `${this.service}::${this.variant}::BackfillRuns`
   private registeredBackfills: string = `${this.service}::BackfillRuns`
 
+  constructor(props: IProps) {
+    super(props)
+    this.state = {
+      loading: false,
+      errorText: null,
+      backfillName: null,
+      createdBy: null
+    }
+  }
+
   componentDidMount() {
     this.props.simpleNetworkGet(
       this.registeredBackfills,
       `/services/${this.service}/variants/${this.variant}/registered-backfills`
     )
-
-    this.setState({
-      loading: false,
-      errorText: null,
-      backfillName: null,
-      createdBy: null
-    })
 
     this.fetchBackfillRuns()
   }
