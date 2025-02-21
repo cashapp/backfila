@@ -13,9 +13,14 @@ import app.cash.backfila.dashboard.StopBackfillRequest
 import app.cash.backfila.fakeCaller
 import app.cash.backfila.protos.service.ConfigureServiceRequest
 import app.cash.backfila.protos.service.CreateBackfillRequest
+import app.cash.backfila.service.persistence.BackfilaDb
+import app.cash.backfila.service.persistence.RegisteredBackfillQuery
 import com.google.inject.Module
 import java.time.Duration
 import javax.inject.Inject
+import misk.hibernate.Query
+import misk.hibernate.Transacter
+import misk.hibernate.newQuery
 import misk.scope.ActionScope
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -51,6 +56,13 @@ class GetBackfillRunsActionFilteredTest {
   @Inject
   lateinit var clock: FakeClock
 
+  @Inject
+  lateinit var queryFactory: Query.Factory
+
+  @Inject
+  @BackfilaDb
+  lateinit var transacter: Transacter
+
   @BeforeEach
   fun setup() {
     scope.fakeCaller(service = "deep-fryer") {
@@ -81,9 +93,74 @@ class GetBackfillRunsActionFilteredTest {
   @Test
   fun `search by backfill name`() {
     scope.fakeCaller(user = "molly") {
-      val response = createBackfillAction.create(
+      val createBackfillResponse = createBackfillAction.create(
         "deep-fryer",
-        ConfigureServiceAction.RESERVED_VARIANT,
+        RESERVED_VARIANT,
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .build(),
+      )
+      val backfillId = createBackfillResponse.backfill_run_id
+
+      var backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer", RESERVED_VARIANT)
+      with(backfillRuns) {
+        assertThat(running_backfills).hasSize(0)
+        assertThat(paused_backfills.single().id).isEqualTo(backfillId.toString())
+      }
+
+      startBackfillAction.start(backfillId, StartBackfillRequest())
+
+      backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer", RESERVED_VARIANT)
+      with(backfillRuns) {
+        assertThat(running_backfills.single().id).isEqualTo(backfillId.toString())
+        assertThat(paused_backfills).hasSize(0)
+      }
+
+      var backfillSearchResults = getBackfillRunsAction.backfillRuns(
+        service = "deep-fryer",
+        variant = RESERVED_VARIANT,
+        backfill_name = "ChickenSandwich",
+      )
+      assertThat(backfillSearchResults.running_backfills).hasSize(1)
+
+      backfillSearchResults = getBackfillRunsAction.backfillRuns(
+        service = "deep-fryer",
+        variant = RESERVED_VARIANT,
+        backfill_name = "Chicken",
+      )
+      assertThat(backfillSearchResults.running_backfills).hasSize(1)
+
+      backfillSearchResults = getBackfillRunsAction.backfillRuns(
+        service = "deep-fryer",
+        variant = RESERVED_VARIANT,
+        backfill_name = "Sandwich",
+      )
+      assertThat(backfillSearchResults.running_backfills).hasSize(1)
+
+      backfillSearchResults = getBackfillRunsAction.backfillRuns(
+        service = "deep-fryer",
+        variant = RESERVED_VARIANT,
+        backfill_name = "nonexistingname",
+      )
+      assertThat(backfillSearchResults.running_backfills).hasSize(0)
+
+      stopBackfillAction.stop(backfillId, StopBackfillRequest())
+      backfillSearchResults = getBackfillRunsAction.backfillRuns(
+        service = "deep-fryer",
+        variant = RESERVED_VARIANT,
+        backfill_name = "ChickenSandwich",
+      )
+      assertThat(backfillSearchResults.running_backfills).hasSize(0)
+      assertThat(backfillSearchResults.paused_backfills).hasSize(1)
+    }
+  }
+
+  @Test
+  fun `search for deactivated backfill name`() {
+    scope.fakeCaller(user = "molly") {
+      createBackfillAction.create(
+        "deep-fryer",
+        RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
@@ -93,39 +170,23 @@ class GetBackfillRunsActionFilteredTest {
       assertThat(backfillRuns.paused_backfills).hasSize(1)
       assertThat(backfillRuns.running_backfills).hasSize(0)
 
-      val id = response.backfill_run_id
-      assertThat(backfillRuns.paused_backfills[0].id).isEqualTo(id.toString())
-      startBackfillAction.start(id, StartBackfillRequest())
+      // deactivate backfill
+      transacter.transaction { session ->
+        val registeredBackfill = queryFactory.newQuery<RegisteredBackfillQuery>()
+          .name("ChickenSandwich")
+          .list(session)
+          .first()
+        registeredBackfill.deactivate(clock)
+        session.save(registeredBackfill)
+      }
 
-      backfillRuns = getBackfillRunsAction.backfillRuns("deep-fryer", RESERVED_VARIANT)
-      assertThat(backfillRuns.paused_backfills).hasSize(0)
-      assertThat(backfillRuns.running_backfills).hasSize(1)
-
+      // search for deactivated backfill
       var backfillSearchResults = getBackfillRunsAction.backfillRuns(
         service = "deep-fryer",
         variant = RESERVED_VARIANT,
         pagination_token = null,
         backfill_name = "ChickenSandwich",
       )
-      assertThat(backfillSearchResults.running_backfills).hasSize(1)
-
-      backfillSearchResults = getBackfillRunsAction.backfillRuns(
-        service = "deep-fryer",
-        variant = RESERVED_VARIANT,
-        pagination_token = null,
-        backfill_name = "nonexistingname",
-      )
-      assertThat(backfillSearchResults.running_backfills).hasSize(0)
-
-      stopBackfillAction.stop(id, StopBackfillRequest())
-
-      backfillSearchResults = getBackfillRunsAction.backfillRuns(
-        service = "deep-fryer",
-        variant = RESERVED_VARIANT,
-        pagination_token = null,
-        backfill_name = "ChickenSandwich",
-      )
-      assertThat(backfillSearchResults.running_backfills).hasSize(0)
       assertThat(backfillSearchResults.paused_backfills).hasSize(1)
     }
   }
@@ -133,9 +194,9 @@ class GetBackfillRunsActionFilteredTest {
   @Test
   fun `search by author`() {
     scope.fakeCaller(user = "molly") {
-      val response = createBackfillAction.create(
+      createBackfillAction.create(
         "deep-fryer",
-        ConfigureServiceAction.RESERVED_VARIANT,
+        RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
@@ -144,7 +205,6 @@ class GetBackfillRunsActionFilteredTest {
       var backfillSearchResults = getBackfillRunsAction.backfillRuns(
         service = "deep-fryer",
         variant = RESERVED_VARIANT,
-        pagination_token = null,
         created_by_user = "molly",
       )
       assertThat(backfillSearchResults.running_backfills).hasSize(0)
@@ -153,7 +213,6 @@ class GetBackfillRunsActionFilteredTest {
       backfillSearchResults = getBackfillRunsAction.backfillRuns(
         service = "deep-fryer",
         variant = RESERVED_VARIANT,
-        pagination_token = null,
         created_by_user = "fakeUserName",
       )
       assertThat(backfillSearchResults.running_backfills).hasSize(0)
@@ -231,7 +290,7 @@ class GetBackfillRunsActionFilteredTest {
     scope.fakeCaller(user = "diana") {
       val response = createBackfillAction.create(
         "deep-fryer",
-        ConfigureServiceAction.RESERVED_VARIANT,
+        RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
@@ -240,21 +299,21 @@ class GetBackfillRunsActionFilteredTest {
     scope.fakeCaller(user = "molly") {
       createBackfillAction.create(
         "deep-fryer",
-        ConfigureServiceAction.RESERVED_VARIANT,
+        RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
       )
       createBackfillAction.create(
         "deep-fryer",
-        ConfigureServiceAction.RESERVED_VARIANT,
+        RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("FrenchFries")
           .build(),
       )
       createBackfillAction.create(
         "deep-fryer",
-        ConfigureServiceAction.RESERVED_VARIANT,
+        RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("FrenchFries")
           .build(),
@@ -299,14 +358,14 @@ class GetBackfillRunsActionFilteredTest {
     scope.fakeCaller(user = "molly.baker") {
       createBackfillAction.create(
         "deep-fryer",
-        ConfigureServiceAction.RESERVED_VARIANT,
+        RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
       )
       createBackfillAction.create(
         "deep-fryer",
-        ConfigureServiceAction.RESERVED_VARIANT,
+        RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("TurkeySandwich")
           .build(),
@@ -315,21 +374,21 @@ class GetBackfillRunsActionFilteredTest {
     scope.fakeCaller(user = "molly.chen") {
       createBackfillAction.create(
         "deep-fryer",
-        ConfigureServiceAction.RESERVED_VARIANT,
+        RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),
       )
       createBackfillAction.create(
         "deep-fryer",
-        ConfigureServiceAction.RESERVED_VARIANT,
+        RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("FrenchFries")
           .build(),
       )
       createBackfillAction.create(
         "deep-fryer",
-        ConfigureServiceAction.RESERVED_VARIANT,
+        RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("FrenchFries")
           .build(),
@@ -380,7 +439,7 @@ class GetBackfillRunsActionFilteredTest {
 
       createBackfillAction.create(
         "deep-fryer",
-        ConfigureServiceAction.RESERVED_VARIANT,
+        RESERVED_VARIANT,
         CreateBackfillRequest.Builder()
           .backfill_name("ChickenSandwich")
           .build(),

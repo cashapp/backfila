@@ -16,6 +16,7 @@ export interface IBackfillSelectorProps {
   selected_item?: IBackfill
 
   onValueChange?(value: IBackfill): void
+  onQueryChange?(query: string): void
 }
 
 export default class BackfillSelector extends React.PureComponent<
@@ -36,11 +37,12 @@ export default class BackfillSelector extends React.PureComponent<
           popoverProps={{ minimal: true }}
           inputValueRenderer={this.renderInputValue}
           items={this.props.backfills}
-          noResults={<MenuItem disabled={true} text="No backfills." />}
+          noResults={<MenuItem disabled={true} text="No active backfills." />}
           onItemSelect={this.props.onValueChange}
           itemPredicate={this.filterBackfill}
           itemRenderer={this.renderBackfill}
           selectedItem={this.props.selected_item}
+          onQueryChange={this.props.onQueryChange}
         />
       </div>
     )

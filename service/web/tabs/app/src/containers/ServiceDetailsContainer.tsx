@@ -19,8 +19,7 @@ import {
 import {
   BackfillRunsTable,
   ServiceHeader,
-  BackfillSelector,
-  IBackfill
+  BackfillSelector
 } from "../components"
 import { simpleSelectorGet } from "@misk/simpleredux"
 import { Link } from "react-router-dom"
@@ -31,7 +30,7 @@ interface BackfillSearchState {
   loading: boolean
   errorText?: string
 
-  backfill?: IBackfill
+  backfillName?: string
   createdBy?: string
 }
 
@@ -54,7 +53,7 @@ class ServiceDetailsContainer extends React.Component<
     this.setState({
       loading: false,
       errorText: null,
-      backfill: null,
+      backfillName: null,
       createdBy: null
     })
 
@@ -62,7 +61,7 @@ class ServiceDetailsContainer extends React.Component<
   }
 
   fetchBackfillRuns(
-    backfill?: IBackfill,
+    backfillName?: string,
     createdBy?: string,
     next_pagination_token?: string
   ) {
@@ -75,8 +74,8 @@ class ServiceDetailsContainer extends React.Component<
     if (next_pagination_token) {
       params.append("pagination_token", next_pagination_token)
     }
-    if (backfill) {
-      params.append("backfill_name", backfill.name)
+    if (backfillName) {
+      params.append("backfill_name", backfillName)
     }
     if (createdBy) {
       params.append("created_by_user", createdBy)
@@ -92,7 +91,7 @@ class ServiceDetailsContainer extends React.Component<
 
   fetchNextPage(pagination_token: string) {
     this.fetchBackfillRuns(
-      this.state.backfill,
+      this.state.backfillName,
       this.state.createdBy,
       pagination_token
     )
@@ -100,7 +99,7 @@ class ServiceDetailsContainer extends React.Component<
 
   filterBackfills = () => {
     this.setState({ loading: true })
-    this.fetchBackfillRuns(this.state.backfill, this.state.createdBy)
+    this.fetchBackfillRuns(this.state.backfillName, this.state.createdBy)
   }
 
   handleKeyPress = (event: React.KeyboardEvent<HTMLElement>) => {
@@ -111,7 +110,7 @@ class ServiceDetailsContainer extends React.Component<
 
   handleClearFilters = () => {
     this.setState({
-      backfill: null,
+      backfillName: null,
       createdBy: ""
     })
     this.fetchBackfillRuns()
@@ -146,17 +145,15 @@ class ServiceDetailsContainer extends React.Component<
             >
               <AnchorButton text={"Create"} intent={Intent.PRIMARY} />
             </Link>
-
           </div>
-          ) : (
-            <div>
+        ) : (
+          <div>
             <ServiceHeader serviceName={this.service} variant={this.variant} />
             <Link to={`/app/services/${this.service}/create`}>
               <AnchorButton text={"Create"} intent={Intent.PRIMARY} />
             </Link>
-            </div>
-          )
-        }
+          </div>
+        )}
         <br />
         <br />
         <FormGroup>
@@ -166,9 +163,13 @@ class ServiceDetailsContainer extends React.Component<
               <BackfillSelector
                 backfills={registeredBackfills.backfills}
                 onValueChange={selectedBackfill =>
-                  this.setState({ backfill: selectedBackfill })
+                  this.setState({ backfillName: selectedBackfill.name })
                 }
-                selected_item={this.state.backfill}
+                selected_item={{
+                  name: this.state.backfillName ?? "",
+                  parameterNames: []
+                }}
+                onQueryChange={query => this.setState({ backfillName: query })}
               />
             </div>
             <div style={{ flex: 1 }}>
@@ -195,14 +196,14 @@ class ServiceDetailsContainer extends React.Component<
                 intent={Intent.NONE}
                 minimal={true}
                 loading={this.state.loading}
-                disabled={!this.state.backfill && !this.state.createdBy}
+                disabled={!this.state.backfillName && !this.state.createdBy}
               />
               <Button
                 text={"Clear filters"}
                 onClick={this.handleClearFilters}
                 intent={Intent.PRIMARY}
                 minimal={true}
-                disabled={!this.state.backfill && !this.state.createdBy}
+                disabled={!this.state.backfillName && !this.state.createdBy}
               />
             </div>
           </div>
@@ -212,7 +213,7 @@ class ServiceDetailsContainer extends React.Component<
         <H3>Paused Backfills</H3>
         <BackfillRunsTable backfillRuns={result.paused_backfills} />
         {result.next_pagination_token && (
-          <div style= {{paddingBottom: "100px"}}>
+          <div style={{ paddingBottom: "100px" }}>
             <Button
               text={"Next"}
               onClick={() => {

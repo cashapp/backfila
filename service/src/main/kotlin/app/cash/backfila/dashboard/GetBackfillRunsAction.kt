@@ -197,7 +197,10 @@ class GetBackfillRunsAction @Inject constructor(
     return if (backfillName.isNullOrEmpty()) {
       this
     } else {
-      this.backfillName(backfillName)
+      this.constraint { backfillRunRoot ->
+        val registeredBackfillJoin = backfillRunRoot.join<DbBackfillRun, DbRegisteredBackfill>("registered_backfill")
+        like(registeredBackfillJoin.get("name"), "%$backfillName%")
+      }
     }
   }
 
