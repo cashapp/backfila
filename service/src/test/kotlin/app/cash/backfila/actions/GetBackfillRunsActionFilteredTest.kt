@@ -16,7 +16,6 @@ import app.cash.backfila.protos.service.CreateBackfillRequest
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.RegisteredBackfillQuery
 import com.google.inject.Module
-import java.time.Duration
 import javax.inject.Inject
 import misk.hibernate.Query
 import misk.hibernate.Transacter
@@ -217,71 +216,6 @@ class GetBackfillRunsActionFilteredTest {
       )
       assertThat(backfillSearchResults.running_backfills).hasSize(0)
       assertThat(backfillSearchResults.paused_backfills).hasSize(0)
-    }
-  }
-
-  @Test
-  fun `search by date`() {
-    scope.fakeCaller(user = "molly") {
-      val backfillStartTime1 = clock.instant()
-
-      createBackfillAction.create(
-        "deep-fryer",
-        ConfigureServiceAction.RESERVED_VARIANT,
-        CreateBackfillRequest.Builder()
-          .backfill_name("ChickenSandwich")
-          .build(),
-      )
-
-      clock.add(Duration.ofDays(1))
-      val backfillStartTime2 = clock.instant()
-      createBackfillAction.create(
-        "deep-fryer",
-        ConfigureServiceAction.RESERVED_VARIANT,
-        CreateBackfillRequest.Builder()
-          .backfill_name("FrenchFries")
-          .build(),
-      )
-      createBackfillAction.create(
-        "deep-fryer",
-        ConfigureServiceAction.RESERVED_VARIANT,
-        CreateBackfillRequest.Builder()
-          .backfill_name("FrenchFries")
-          .build(),
-      )
-      var backfillSearchResults = getBackfillRunsAction.backfillRuns(
-        service = "deep-fryer",
-        variant = RESERVED_VARIANT,
-        pagination_token = null,
-        created_start_date = backfillStartTime1,
-        created_end_date = backfillStartTime1.plus(Duration.ofSeconds(1)),
-      )
-      assertThat(backfillSearchResults.paused_backfills).hasSize(1)
-
-      backfillSearchResults = getBackfillRunsAction.backfillRuns(
-        service = "deep-fryer",
-        variant = RESERVED_VARIANT,
-        pagination_token = null,
-        created_start_date = backfillStartTime1 + Duration.ofSeconds(1),
-        created_end_date = backfillStartTime2,
-      )
-      assertThat(backfillSearchResults.paused_backfills).hasSize(2)
-
-      backfillSearchResults = getBackfillRunsAction.backfillRuns(
-        service = "deep-fryer",
-        variant = RESERVED_VARIANT,
-        pagination_token = null,
-        created_start_date = backfillStartTime1,
-      )
-      assertThat(backfillSearchResults.paused_backfills).hasSize(3)
-
-      backfillSearchResults = getBackfillRunsAction.backfillRuns(
-        service = "deep-fryer",
-        variant = RESERVED_VARIANT,
-        pagination_token = null,
-        created_end_date = backfillStartTime1,
-      )
-      assertThat(backfillSearchResults.paused_backfills).hasSize(1)
     }
   }
 

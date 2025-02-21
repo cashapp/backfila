@@ -60,14 +60,10 @@ class GetBackfillRunsAction @Inject constructor(
     @QueryParam pagination_token: String? = null,
     @QueryParam backfill_name: String? = null,
     @QueryParam created_by_user: String? = null,
-    @QueryParam created_start_date: Instant? = null,
-    @QueryParam created_end_date: Instant? = null,
   ): GetBackfillRunsResponse {
     val filterArgs = FilterArgs(
       backfillName = backfill_name,
       createdByUser = created_by_user,
-      createdStartDate = created_start_date,
-      createdEndDate = created_end_date,
     )
     return search(service, variant, pagination_token, filterArgs)
   }
@@ -214,33 +210,13 @@ class GetBackfillRunsAction @Inject constructor(
     }
   }
 
-  private fun BackfillRunQuery.filterByStartDate(startDate: Instant?): BackfillRunQuery {
-    return if (startDate == null) {
-      this
-    } else {
-      this.createdAfter(startDate)
-    }
-  }
-
-  private fun BackfillRunQuery.filterByEndDate(endDate: Instant?): BackfillRunQuery {
-    return if (endDate == null) {
-      this
-    } else {
-      this.createdBefore(endDate)
-    }
-  }
-
   private fun BackfillRunQuery.filterByArgs(filterArgs: FilterArgs): BackfillRunQuery {
     return this.filterByUserCreatedIfPresent(filterArgs.createdByUser)
       .filterByBackfillNameIfPresent(filterArgs.backfillName)
-      .filterByStartDate(filterArgs.createdStartDate)
-      .filterByEndDate(filterArgs.createdEndDate)
   }
 
   private data class FilterArgs(
     val backfillName: String? = null,
     val createdByUser: String? = null,
-    val createdStartDate: Instant? = null,
-    val createdEndDate: Instant? = null,
   )
 }
