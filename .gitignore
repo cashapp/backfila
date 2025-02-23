@@ -17,8 +17,3 @@ local.settings.gradle
 
 .DS_Store
 .hermit
-
-gradle/wrapper/
-gradlew
-gradlew.bat
-package-lock.json

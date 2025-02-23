@@ -1,6 +1,5 @@
 package app.cash.backfila.service.persistence
 
-import java.time.Instant
 import misk.hibernate.Constraint
 import misk.hibernate.Id
 import misk.hibernate.Operator
@@ -19,9 +18,6 @@ interface BackfillRunQuery : Query<DbBackfillRun> {
 
   @Constraint("state")
   fun state(state: BackfillState): BackfillRunQuery
-
-  @Constraint("registered_backfill.name")
-  fun backfillName(name: String): BackfillRunQuery
 
   @Constraint("state", Operator.NE)
   fun stateNot(state: BackfillState): BackfillRunQuery
