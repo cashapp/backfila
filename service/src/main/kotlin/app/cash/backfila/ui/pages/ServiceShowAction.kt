@@ -5,9 +5,7 @@ import app.cash.backfila.ui.components.AutoReload
 import app.cash.backfila.ui.components.BackfillsTable
 import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.components.PageTitle
-import java.net.HttpURLConnection
-import javax.inject.Inject
-import javax.inject.Singleton
+import app.cash.backfila.ui.components.Pagination
 import kotlinx.html.ButtonType
 import kotlinx.html.a
 import kotlinx.html.button
@@ -17,6 +15,7 @@ import misk.tailwind.Link
 import misk.web.Get
 import misk.web.HttpCall
 import misk.web.PathParam
+import misk.web.QueryParam
 import misk.web.Response
 import misk.web.ResponseBody
 import misk.web.ResponseContentType
@@ -24,6 +23,9 @@ import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import okhttp3.Headers
+import java.net.HttpURLConnection
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class ServiceShowAction @Inject constructor(
@@ -41,6 +43,8 @@ class ServiceShowAction @Inject constructor(
   fun get(
     @PathParam service: String?,
     @PathParam variantOrBlank: String? = "",
+    @QueryParam offset: String? = null,
+    @QueryParam lastOffset: String? = null,
   ): Response<ResponseBody> {
     if (service.isNullOrBlank()) {
       return Response(
@@ -51,7 +55,7 @@ class ServiceShowAction @Inject constructor(
     }
     val variant = variantOrBlank.orEmpty().ifBlank { "default" }
 
-    val backfillRuns = getBackfillRunsAction.backfillRuns(service, variant)
+    val backfillRuns = getBackfillRunsAction.backfillRuns(service, variant, offset)
 
     // TODO show default if other variants and probably link to a switcher
     val label = if (variant == "default") service else "$service ($variant)"
@@ -76,6 +80,7 @@ class ServiceShowAction @Inject constructor(
 
           BackfillsTable(true, backfillRuns.running_backfills)
           BackfillsTable(false, backfillRuns.paused_backfills)
+          Pagination(backfillRuns.next_pagination_token, offset, lastOffset, path(service, variantOrBlank))
         }
       }
 

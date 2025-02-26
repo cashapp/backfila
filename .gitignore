@@ -5,6 +5,7 @@ build/
 *.iml
 *.swp
 service/web/**/lib/
+**/.kotlin
 
 **/site/
 docs/0.x/*

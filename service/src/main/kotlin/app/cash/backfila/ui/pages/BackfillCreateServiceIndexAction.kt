@@ -85,7 +85,7 @@ class BackfillCreateServiceIndexAction @Inject constructor(
           AlertError("No backfills registered for this service. Check docs for how to register backfills.")
         } else {
           // If service + variant is set and valid, show registered backfills drop down
-          div("py-10") {
+          div("py-5") {
             ul("grid grid-cols-1 gap-6") {
               role = "list"
 

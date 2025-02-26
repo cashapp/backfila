@@ -31,7 +31,7 @@ fun TagConsumer<*>.ServiceSelect(
         placeholder = "Search"
       }
     }
-    div("py-10") {
+    div("py-5") {
       ul("grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3") {
         role = "list"
 
