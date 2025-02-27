@@ -6,6 +6,9 @@ import app.cash.backfila.ui.components.BackfillsTable
 import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.components.PageTitle
 import app.cash.backfila.ui.components.Pagination
+import java.net.HttpURLConnection
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.html.ButtonType
 import kotlinx.html.a
 import kotlinx.html.button
@@ -23,9 +26,6 @@ import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import okhttp3.Headers
-import java.net.HttpURLConnection
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class ServiceShowAction @Inject constructor(
