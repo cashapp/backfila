@@ -43,7 +43,7 @@ class IndexAction @Inject constructor(
 
       // Stats
 
-      div("py-10") {
+      div("py-5") {
         h3("text-base font-semibold text-gray-900") { +"""Last 30 days""" }
         dl("mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3") {
           div("overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6") {

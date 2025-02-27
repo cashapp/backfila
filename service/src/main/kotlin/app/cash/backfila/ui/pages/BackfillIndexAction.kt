@@ -5,6 +5,7 @@ import app.cash.backfila.service.persistence.BackfillRunQuery
 import app.cash.backfila.service.persistence.ServiceQuery
 import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.components.PageTitle
+import app.cash.backfila.ui.components.Pagination
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.html.ButtonType
@@ -19,8 +20,13 @@ import kotlinx.html.ul
 import misk.hibernate.Query
 import misk.hibernate.Transacter
 import misk.hibernate.newQuery
+import misk.hibernate.pagination.Offset
+import misk.hibernate.pagination.Page
+import misk.hibernate.pagination.idDescPaginator
+import misk.hibernate.pagination.newPager
 import misk.security.authz.Authenticated
 import misk.web.Get
+import misk.web.QueryParam
 import misk.web.Response
 import misk.web.ResponseBody
 import misk.web.ResponseContentType
@@ -36,14 +42,18 @@ class BackfillIndexAction @Inject constructor(
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
   @Authenticated(capabilities = ["users"])
-  fun get(): Response<ResponseBody> {
-    val backfills = transacter.transaction { session ->
+  fun get(
+    @QueryParam offset: String? = null,
+    @QueryParam lastOffset: String? = null,
+  ): Response<ResponseBody> {
+    val (backfills, nextOffset) = transacter.transaction { session ->
       queryFactory.newQuery<BackfillRunQuery>()
-        .orderByUpdatedAtDesc()
-        .apply {
-          maxRows = 10
-        }
-        .list(session)
+        .newPager(
+          idDescPaginator(),
+          initialOffset = offset?.let { Offset(it) },
+          pageSize = 12,
+        )
+        .nextPage(session) ?: Page.empty()
     }
 
     return Response(
@@ -62,7 +72,7 @@ class BackfillIndexAction @Inject constructor(
           }
 
           // List of Services
-          div("py-10") {
+          div("py-5") {
             ul("grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3") {
               role = "list"
 
@@ -98,6 +108,8 @@ class BackfillIndexAction @Inject constructor(
                 }
               }
             }
+
+            Pagination(nextOffset?.offset, offset, lastOffset, PATH)
           }
         },
     )
