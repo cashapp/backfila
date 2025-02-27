@@ -33,6 +33,7 @@ import { LayoutContainer } from "../containers"
 interface CloneFormState {
   loading: boolean
   errorText?: string
+  cloneButtonDisabled: boolean
 
   statusResponse: any
 
@@ -61,6 +62,7 @@ class CloneFormContainer extends React.Component<
     this.setState({
       loading: false,
       errorText: null,
+      cloneButtonDisabled: false,
 
       statusResponse: null,
 
@@ -129,6 +131,35 @@ class CloneFormContainer extends React.Component<
       .catch(error => {
         console.log(error)
       })
+  }
+
+  async handleClick() {
+    this.setState({ cloneButtonDisabled: true })
+    try {
+      const response = await Axios.post(`/backfills/${this.id}/clone`, {
+        dry_run: this.state.dry_run,
+        scan_size: this.state.scan_size,
+        batch_size: this.state.batch_size,
+        num_threads: this.state.num_threads,
+        range_clone_type: this.state.range_clone_type,
+        pkey_range_start: this.nullIfEmpty(this.state.pkey_range_start),
+        pkey_range_end: this.nullIfEmpty(this.state.pkey_range_end),
+        backoff_schedule: this.nullIfEmpty(this.state.backoff_schedule),
+        extra_sleep_ms: this.state.extra_sleep_ms,
+        parameter_map: this.state.parameters
+      })
+      let id = response.data.id
+      let history = (this.props as any).history
+      history.push(`/app/backfills/${id}`)
+    } catch (error) {
+      console.log(error)
+      this.setState({
+        loading: false,
+        errorText: error.response.data
+      })
+    } finally {
+      this.setState({ cloneButtonDisabled: false })
+    }
   }
 
   render() {
@@ -320,34 +351,7 @@ class CloneFormContainer extends React.Component<
               )}
               <Button
                 onClick={() => {
-                  Axios.post(`/backfills/${this.id}/clone`, {
-                    dry_run: this.state.dry_run,
-                    scan_size: this.state.scan_size,
-                    batch_size: this.state.batch_size,
-                    num_threads: this.state.num_threads,
-                    range_clone_type: this.state.range_clone_type,
-                    pkey_range_start: this.nullIfEmpty(
-                      this.state.pkey_range_start
-                    ),
-                    pkey_range_end: this.nullIfEmpty(this.state.pkey_range_end),
-                    backoff_schedule: this.nullIfEmpty(
-                      this.state.backoff_schedule
-                    ),
-                    extra_sleep_ms: this.state.extra_sleep_ms,
-                    parameter_map: this.state.parameters
-                  })
-                    .then(response => {
-                      let id = response.data.id
-                      let history = (this.props as any).history
-                      history.push(`/app/backfills/${id}`)
-                    })
-                    .catch(error => {
-                      console.log(error)
-                      this.setState({
-                        loading: false,
-                        errorText: error.response.data
-                      })
-                    })
+                  this.handleClick()
                 }}
                 intent={Intent.PRIMARY}
                 loading={this.state.loading}

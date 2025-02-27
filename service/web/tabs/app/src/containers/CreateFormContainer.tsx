@@ -32,6 +32,7 @@ import { RESERVED_VARIANT } from "../utilities"
 interface CreateFormState {
   loading: boolean
   errorText?: string
+  createButtonDisabled: boolean
   backfill?: IBackfill
   dry_run: boolean
 
@@ -62,6 +63,7 @@ class CreateFormContainer extends React.Component<
     this.setState({
       loading: false,
       errorText: null,
+      createButtonDisabled: false,
       backfill: null,
       dry_run: true,
       scan_size: 10000,
@@ -73,6 +75,45 @@ class CreateFormContainer extends React.Component<
       extra_sleep_ms: 0,
       parameters: {}
     })
+  }
+
+  async handleClick() {
+    this.setState({ createButtonDisabled: true })
+
+    try {
+      await new Promise(resolve => { setTimeout(resolve, 10000) })
+      const response = await Axios.post(
+        `/services/${this.service}/variants/${this.variant}/create`,
+        {
+          backfill_name: this.state.backfill.name,
+          dry_run: this.state.dry_run,
+          scan_size: this.state.scan_size,
+          batch_size: this.state.batch_size,
+          num_threads: this.state.num_threads,
+          pkey_range_start: this.nullIfEmpty(
+            this.base64(this.state.pkey_range_start)
+          ),
+          pkey_range_end: this.nullIfEmpty(
+            this.base64(this.state.pkey_range_end)
+          ),
+          backoff_schedule: this.nullIfEmpty(this.state.backoff_schedule),
+          extra_sleep_ms: this.state.extra_sleep_ms,
+          parameter_map: this.state.parameters
+        }
+      )
+
+      let id = response.data.backfill_run_id
+      let history = (this.props as any).history
+      history.push(`/app/backfills/${id}`)
+    } catch (error) {
+      console.log(error)
+      this.setState({
+        loading: false,
+        errorText: error.response.data
+      })
+    } finally {
+      this.setState({ createButtonDisabled: false })
+    }
   }
 
   render() {
@@ -246,43 +287,13 @@ class CreateFormContainer extends React.Component<
               )}
               <Button
                 onClick={() => {
-                  Axios.post(
-                    `/services/${this.service}/variants/${this.variant}/create`,
-                    {
-                      backfill_name: this.state.backfill.name,
-                      dry_run: this.state.dry_run,
-                      scan_size: this.state.scan_size,
-                      batch_size: this.state.batch_size,
-                      num_threads: this.state.num_threads,
-                      pkey_range_start: this.nullIfEmpty(
-                        this.base64(this.state.pkey_range_start)
-                      ),
-                      pkey_range_end: this.nullIfEmpty(
-                        this.base64(this.state.pkey_range_end)
-                      ),
-                      backoff_schedule: this.nullIfEmpty(
-                        this.state.backoff_schedule
-                      ),
-                      extra_sleep_ms: this.state.extra_sleep_ms,
-                      parameter_map: this.state.parameters
-                    }
-                  )
-                    .then(response => {
-                      let id = response.data.backfill_run_id
-                      let history = (this.props as any).history
-                      history.push(`/app/backfills/${id}`)
-                    })
-                    .catch(error => {
-                      console.log(error)
-                      this.setState({
-                        loading: false,
-                        errorText: error.response.data
-                      })
-                    })
+                  this.handleClick()
                 }}
                 intent={Intent.PRIMARY}
                 loading={this.state.loading}
-                disabled={!this.state.backfill}
+                disabled={
+                  this.state.createButtonDisabled || !this.state.backfill
+                }
                 text={"Create"}
               />
             </div>
