@@ -6,7 +6,6 @@ import {
   CreateFormContainer,
   HomeContainer,
   ServiceDetailsContainer,
-  ServiceRunsContainer,
   ServiceVariantsContainer,
   LayoutContainer
 } from "../containers"
@@ -23,15 +22,7 @@ const routes = (
         path="/app/services/:service/create"
         component={CreateFormContainer}
       />
-      <Route
-        path="/app/services/:service/variants/:variant/runs/:offset"
-        component={ServiceRunsContainer}
-      />
       {/* Maintain compatibility for services that do not need variant functionality */}
-      <Route
-        path="/app/services/:service/runs/:offset"
-        component={ServiceRunsContainer}
-      />
       <Route
         path="/app/services/:service/variants/:variant/"
         component={ServiceDetailsContainer}
