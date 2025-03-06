@@ -66,7 +66,7 @@ class BackfilaSqlDelightGradlePlugin : Plugin<Project> {
         it.dependsOn(sqlTask)
         it.backfill.set(backfill.backfill)
         it.packageName.set(packageProvider)
-        it.kotlinDirectory.set(baseKotlinDirectory.map { baseDir -> baseDir.dir(packageProvider.get()) })
+        it.kotlinDirectory.set(baseKotlinDirectory.map { baseDir -> baseDir })
       }
 
       target.kotlinExtension.sourceSets.getByName("main").kotlin.srcDir(kotlinTask)
