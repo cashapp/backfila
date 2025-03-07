@@ -26,8 +26,9 @@ abstract class GenerateBackfilaRecordSourceSqlTask : DefaultTask() {
     val where = backfillConfig.whereClause
     val recordColumns = backfillConfig.recordColumns
     val name = backfillConfig.name.replaceFirstChar { it.uppercase() }
+    val packageDirs = packageName.get().replace('.', File.separatorChar)
 
-    val sqlFile = File(sqlDirectory.get().asFile, "${packageName.get()}/$name.sq")
+    val sqlFile = File(sqlDirectory.get().asFile, "$packageDirs/$name.sq")
     sqlFile.parentFile.mkdirs()
     sqlFile.writeText(
       """
