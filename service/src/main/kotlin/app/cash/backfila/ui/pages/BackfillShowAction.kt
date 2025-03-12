@@ -81,7 +81,7 @@ class BackfillShowAction @Inject constructor(
       )
       .buildHtmlResponseBody {
         AutoReload {
-          PageTitle("Backfill", id.toString()) {
+          PageTitle("${backfill.service_name} Backfill Run", "#$id", backfill.name) {
             a {
               href = BackfillCreateAction.path(
                 service = backfill.service_name,
