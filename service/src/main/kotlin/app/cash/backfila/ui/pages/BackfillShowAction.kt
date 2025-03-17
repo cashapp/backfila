@@ -162,7 +162,7 @@ class BackfillShowAction @Inject constructor(
               tbody {
                 backfill.partitions.map { partition ->
                   tr("border-b border-gray-100") {
-                    td("max-w-[24px] px-0 py-5 align-top") {
+                    td("max-w-[50%] px-0 py-5 align-top") {
                       div("truncate font-medium text-gray-900") { +partition.name }
                     }
                     td("hidden py-5 pl-8 pr-0 text-right align-top text-gray-700 sm:table-cell") { +partition.state.name }
