@@ -71,6 +71,7 @@ kotlinxHtml = { module = "org.jetbrains.kotlinx:kotlinx-html-jvm", version = "0.
 misk = { module = "com.squareup.misk:misk", version.ref = "misk" }
 miskActions = { module = "com.squareup.misk:misk-actions", version.ref = "misk" }
 miskAdmin = { module = "com.squareup.misk:misk-admin", version.ref = "misk" }
+miskAuditClient = { module = "com.squareup.misk:misk-audit-client", version.ref = "misk" }
 miskAwsDynamodb = { module = "com.squareup.misk:misk-aws-dynamodb", version.ref = "misk" }
 miskAws2Dynamodb = { module = "com.squareup.misk:misk-aws2-dynamodb", version.ref = "misk" }
 miskCore = { module = "com.squareup.misk:misk-core", version.ref = "misk" }

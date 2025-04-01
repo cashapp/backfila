@@ -3,6 +3,7 @@ package app.cash.backfila.ui.actions
 import app.cash.backfila.dashboard.CreateBackfillAction
 import app.cash.backfila.protos.service.CreateBackfillRequest
 import app.cash.backfila.ui.pages.BackfillCreateAction.BackfillCreateField
+import app.cash.backfila.ui.pages.BackfillShowAction
 import javax.inject.Inject
 import javax.inject.Singleton
 import misk.scope.ActionScoped
@@ -63,9 +64,9 @@ class BackfillCreateHandlerAction @Inject constructor(
     val id = response.backfill_run_id
 
     return Response(
-      body = "go to /backfills/$id".toResponseBody(),
+      body = "go to ${BackfillShowAction.path(id)}".toResponseBody(),
       statusCode = 303,
-      headers = Headers.headersOf("Location", "/backfills/$id"),
+      headers = Headers.headersOf("Location", BackfillShowAction.path(id)),
     )
   }
 

@@ -20,7 +20,9 @@ import app.cash.backfila.service.persistence.RunPartitionQuery
 import app.cash.backfila.service.persistence.ServiceQuery
 import com.google.inject.Module
 import javax.inject.Inject
+import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import misk.audit.FakeAuditClient
 import misk.exceptions.BadRequestException
 import misk.hibernate.Query
 import misk.hibernate.Transacter
@@ -57,6 +59,9 @@ class CreateBackfillActionTest {
 
   @Inject
   lateinit var fakeBackfilaClientServiceClient: FakeBackfilaCallbackConnector
+
+  @Inject
+  lateinit var fakeAuditClient: FakeAuditClient
 
   @Test
   fun serviceDoesntExist() {
@@ -98,6 +103,8 @@ class CreateBackfillActionTest {
 
   @Test
   fun created() {
+    assertEquals(0, fakeAuditClient.sentEvents.size)
+
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(
         ConfigureServiceRequest.Builder()
@@ -144,6 +151,25 @@ class CreateBackfillActionTest {
         assertThat(partitions[1].lease_token).isNull()
         assertThat(partitions[1].run_state).isEqualTo(BackfillState.PAUSED)
       }
+
+      assertEquals(1, fakeAuditClient.sentEvents.size)
+      assertEquals(
+        FakeAuditClient.FakeAuditEvent(
+          eventSource = "backfila",
+          eventTarget = "ChickenSandwich",
+          timestampSent = 2147483647,
+          applicationName = "deep-fryer",
+          approverLDAP = "molly",
+          automatedChange = false,
+          description = "Backfill Created",
+          richDescription = null,
+          environment = "testing",
+          detailURL = "/backfills/${response.backfill_run_id}",
+          region = "us-west-2",
+          requestorLDAP = "molly",
+        ),
+        fakeAuditClient.sentEvents.single(),
+      )
     }
   }
 

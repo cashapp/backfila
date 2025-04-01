@@ -21,6 +21,8 @@ import java.util.concurrent.Executors
 import javax.inject.Singleton
 import misk.MiskCaller
 import misk.MiskTestingServiceModule
+import misk.audit.FakeAuditClientModule
+import misk.config.AppNameModule
 import misk.environment.DeploymentModule
 import misk.hibernate.HibernateTestingModule
 import misk.inject.KAbstractModule
@@ -54,12 +56,13 @@ internal class BackfilaTestingModule : KAbstractModule() {
     bind<BackfilaConfig>().toInstance(config)
 
     newMultibinder<BackfillRunListener>()
-      .addBinding()
-      .to(SlackHelper::class.java)
+    multibind<BackfillRunListener>().to<SlackHelper>()
 
     install(DeploymentModule(wisp.deployment.TESTING))
     install(LogCollectorModule())
     install(MiskTestingServiceModule())
+    install(AppNameModule("backfila"))
+    install(FakeAuditClientModule())
 
     install(HibernateTestingModule(BackfilaDb::class))
     install(BackfilaPersistenceModule(config))

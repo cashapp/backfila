@@ -50,8 +50,8 @@ class SelfBackfillTestingModule : KAbstractModule() {
       slack = null,
     )
     newMultibinder<BackfillRunListener>()
-      .addBinding()
-      .to(SlackHelper::class.java)
+    multibind<BackfillRunListener>().to<SlackHelper>()
+
     bind<BackfilaConfig>().toInstance(config)
     install(DeploymentModule(TESTING))
     install(LogCollectorModule())
