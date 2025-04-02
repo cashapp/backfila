@@ -1,5 +1,6 @@
-package app.cash.backfila.service
+package app.cash.backfila.service.listener
 
+import app.cash.backfila.service.BackfilaConfig
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.DbBackfillRun
 import javax.inject.Inject

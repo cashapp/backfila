@@ -59,7 +59,7 @@ fun main(args: Array<String>) {
     DevelopmentAdminDashboardModule(),
     MiskRealServiceModule(),
     NoOpAuditClientModule(),
-    ).run(args)
+  ).run(args)
 }
 
 data class FineDiningConfig(

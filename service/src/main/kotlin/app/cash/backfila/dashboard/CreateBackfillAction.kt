@@ -3,10 +3,8 @@ package app.cash.backfila.dashboard
 import app.cash.backfila.BackfillCreator
 import app.cash.backfila.protos.service.CreateBackfillRequest
 import app.cash.backfila.protos.service.CreateBackfillResponse
-import app.cash.backfila.ui.pages.BackfillShowAction
 import javax.inject.Inject
 import misk.MiskCaller
-import misk.audit.AuditClient
 import misk.scope.ActionScoped
 import misk.security.authz.Authenticated
 import misk.web.PathParam
@@ -20,7 +18,6 @@ import misk.web.mediatype.MediaTypes
 class CreateBackfillAction @Inject constructor(
   private val callerProvider: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
   private val backfillCreator: BackfillCreator,
-  private val auditClient: AuditClient,
 ) : WebAction {
   @Post("/services/{service}/variants/{variant}/create")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
@@ -41,13 +38,6 @@ class CreateBackfillAction @Inject constructor(
   ): CreateBackfillResponse {
     // TODO check user has permissions for this service with access api
     val id = backfillCreator.create(callerProvider.get()!!.user!!, service, variant, request)
-
-    auditClient.logEvent(
-      target = request.backfill_name,
-      description = "Backfill Created",
-      applicationName = if (variant != "default") "$service/$variant" else service,
-      detailURL = BackfillShowAction.path(id.id),
-    )
 
     return CreateBackfillResponse(id.id)
   }

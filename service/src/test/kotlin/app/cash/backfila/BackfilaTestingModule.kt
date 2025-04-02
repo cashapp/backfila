@@ -6,8 +6,7 @@ import app.cash.backfila.client.Connectors
 import app.cash.backfila.client.FakeBackfilaCallbackConnectorProvider
 import app.cash.backfila.client.ForConnectors
 import app.cash.backfila.service.BackfilaConfig
-import app.cash.backfila.service.BackfillRunListener
-import app.cash.backfila.service.SlackHelper
+import app.cash.backfila.service.listener.BackfilaListenerModule
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfilaPersistenceModule
 import app.cash.backfila.service.runner.BackfillRunnerLoggingSetupProvider
@@ -55,8 +54,7 @@ internal class BackfilaTestingModule : KAbstractModule() {
     )
     bind<BackfilaConfig>().toInstance(config)
 
-    newMultibinder<BackfillRunListener>()
-    multibind<BackfillRunListener>().to<SlackHelper>()
+    install(BackfilaListenerModule())
 
     install(DeploymentModule(wisp.deployment.TESTING))
     install(LogCollectorModule())

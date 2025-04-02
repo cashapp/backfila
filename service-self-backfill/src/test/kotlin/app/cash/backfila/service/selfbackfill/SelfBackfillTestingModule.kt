@@ -10,8 +10,7 @@ import app.cash.backfila.client.misk.MiskBackfillModule
 import app.cash.backfila.client.misk.hibernate.HibernateBackfillModule
 import app.cash.backfila.embedded.EmbeddedBackfilaModule
 import app.cash.backfila.service.BackfilaConfig
-import app.cash.backfila.service.BackfillRunListener
-import app.cash.backfila.service.SlackHelper
+import app.cash.backfila.service.listener.BackfilaListenerModule
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfilaPersistenceModule
 import app.cash.backfila.service.runner.BackfillRunnerLoggingSetupProvider
@@ -49,8 +48,8 @@ class SelfBackfillTestingModule : KAbstractModule() {
       web_url_root = "",
       slack = null,
     )
-    newMultibinder<BackfillRunListener>()
-    multibind<BackfillRunListener>().to<SlackHelper>()
+
+    install(BackfilaListenerModule())
 
     bind<BackfilaConfig>().toInstance(config)
     install(DeploymentModule(TESTING))

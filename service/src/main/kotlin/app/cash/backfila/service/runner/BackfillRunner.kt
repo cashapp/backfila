@@ -8,7 +8,7 @@ import app.cash.backfila.protos.clientservice.RunBatchRequest
 import app.cash.backfila.protos.clientservice.RunBatchResponse
 import app.cash.backfila.service.BackfilaConfig
 import app.cash.backfila.service.BackfilaMetrics
-import app.cash.backfila.service.BackfillRunListener
+import app.cash.backfila.service.listener.BackfillRunListener
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.DbBackfillRun
