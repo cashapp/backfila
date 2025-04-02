@@ -16,7 +16,7 @@ import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 
 class CreateBackfillAction @Inject constructor(
-  private val callerProvider: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
+  private val caller: @JvmSuppressWildcards ActionScoped<MiskCaller?>,
   private val backfillCreator: BackfillCreator,
 ) : WebAction {
   @Post("/services/{service}/variants/{variant}/create")
@@ -37,7 +37,7 @@ class CreateBackfillAction @Inject constructor(
     request: CreateBackfillRequest,
   ): CreateBackfillResponse {
     // TODO check user has permissions for this service with access api
-    val id = backfillCreator.create(callerProvider.get()!!.user!!, service, variant, request)
+    val id = backfillCreator.create(caller.get()!!.user!!, service, variant, request)
 
     return CreateBackfillResponse(id.id)
   }

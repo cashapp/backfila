@@ -156,7 +156,7 @@ class AuditClientListenerTest {
           applicationName = "deep-fryer",
           approverLDAP = "molly",
           automatedChange = true,
-          description = "Backfill started by molly [dryRun=true][service=deep-fryer][backfill=ChickenSandwich][id=${response.backfill_run_id}]",
+          description = "Backfill paused due to error [dryRun=true][service=deep-fryer][backfill=ChickenSandwich][id=${response.backfill_run_id}]",
           richDescription = null,
           environment = "testing",
           detailURL = "/backfills/${response.backfill_run_id}",
@@ -168,6 +168,23 @@ class AuditClientListenerTest {
 
       auditClientListener.runCompleted(Id(response.backfill_run_id))
       assertEquals(4, fakeAuditClient.sentEvents.size)
+      assertEquals(
+        FakeAuditClient.FakeAuditEvent(
+          eventSource = "backfila",
+          eventTarget = "ChickenSandwich",
+          timestampSent = 2147483647,
+          applicationName = "deep-fryer",
+          approverLDAP = "molly",
+          automatedChange = true,
+          description = "Backfill completed [dryRun=true][service=deep-fryer][backfill=ChickenSandwich][id=${response.backfill_run_id}]",
+          richDescription = null,
+          environment = "testing",
+          detailURL = "/backfills/${response.backfill_run_id}",
+          region = "us-west-2",
+          requestorLDAP = "molly",
+        ),
+        fakeAuditClient.sentEvents.last(),
+      )
     }
   }
 }
