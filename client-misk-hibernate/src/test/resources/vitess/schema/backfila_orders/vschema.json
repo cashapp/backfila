@@ -6,18 +6,6 @@
     }
   },
   "tables": {
-    "restaurants": {
-      "column_vindexes": [
-        {
-          "column": "id",
-          "name": "hash"
-        }
-      ],
-      "auto_increment": {
-        "column": "id",
-        "sequence": "restaurants"
-      }
-    },
     "orders": {
       "column_vindexes": [
         {
@@ -28,6 +16,18 @@
       "auto_increment": {
         "column": "id",
         "sequence": "orders_seq"
+      }
+    },
+    "restaurants": {
+      "column_vindexes": [
+        {
+          "column": "id",
+          "name": "hash"
+        }
+      ],
+      "auto_increment": {
+        "column": "id",
+        "sequence": "restaurants_seq"
       }
     }
   }

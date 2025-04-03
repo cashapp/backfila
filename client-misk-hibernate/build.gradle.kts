@@ -35,6 +35,7 @@ dependencies {
   testImplementation(libs.miskTesting)
   testImplementation(testFixtures(libs.miskJdbc))
   testImplementation(libs.miskHibernateTesting)
+  testImplementation(testFixtures(libs.miskVitess))
   testImplementation(project(":client-misk"))
   testImplementation(libs.kotlinTest)
   testImplementation(libs.junitEngine)

@@ -30,14 +30,13 @@ internal class ClientMiskTestingModule(
       useVitess -> DataSourceConfig(
         type = DataSourceType.VITESS_MYSQL,
         username = "root",
-        migrations_resource = "classpath:/schema",
-        vitess_schema_resource_root = "classpath:/schema",
+        vitess_schema_resource_root = "classpath:/vitess/schema",
       )
       else -> DataSourceConfig(
         type = DataSourceType.MYSQL,
         database = "backfila_clientmiskservice_test",
         username = "root",
-        migrations_resource = "classpath:/schema",
+        migrations_resource = "classpath:/vitess/schema",
       )
     }
     install(HibernateModule(ClientMiskService::class, dataSourceConfig))
