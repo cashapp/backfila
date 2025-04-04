@@ -28,7 +28,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 @MiskTest(startService = true)
-class AuditClientListenerTest {
+internal class AuditClientListenerTest {
   @Suppress("unused")
   @MiskTestModule
   val module: Module = BackfilaTestingModule()
@@ -114,7 +114,7 @@ class AuditClientListenerTest {
           timestampSent = 2147483647,
           applicationName = "deep-fryer",
           // Fix fake client to not provide approver unless explicitly present
-          approverLDAP = "molly",
+          approverLDAP = null,
           automatedChange = false,
           description = "Backfill started by molly [dryRun=true][service=deep-fryer][backfill=ChickenSandwich][id=${response.backfill_run_id}]",
           richDescription = null,
@@ -134,7 +134,7 @@ class AuditClientListenerTest {
           eventTarget = "ChickenSandwich",
           timestampSent = 2147483647,
           applicationName = "deep-fryer",
-          approverLDAP = "molly",
+          approverLDAP = null,
           automatedChange = false,
           description = "Backfill paused by molly [dryRun=true][service=deep-fryer][backfill=ChickenSandwich][id=${response.backfill_run_id}]",
           richDescription = null,
@@ -154,14 +154,14 @@ class AuditClientListenerTest {
           eventTarget = "ChickenSandwich",
           timestampSent = 2147483647,
           applicationName = "deep-fryer",
-          approverLDAP = "molly",
+          approverLDAP = null,
           automatedChange = true,
           description = "Backfill paused due to error [dryRun=true][service=deep-fryer][backfill=ChickenSandwich][id=${response.backfill_run_id}]",
           richDescription = null,
           environment = "testing",
           detailURL = "/backfills/${response.backfill_run_id}",
           region = "us-west-2",
-          requestorLDAP = "molly",
+          requestorLDAP = null,
         ),
         fakeAuditClient.sentEvents.last(),
       )
@@ -174,14 +174,14 @@ class AuditClientListenerTest {
           eventTarget = "ChickenSandwich",
           timestampSent = 2147483647,
           applicationName = "deep-fryer",
-          approverLDAP = "molly",
+          approverLDAP = null,
           automatedChange = true,
           description = "Backfill completed [dryRun=true][service=deep-fryer][backfill=ChickenSandwich][id=${response.backfill_run_id}]",
           richDescription = null,
           environment = "testing",
           detailURL = "/backfills/${response.backfill_run_id}",
           region = "us-west-2",
-          requestorLDAP = "molly",
+          requestorLDAP = null,
         ),
         fakeAuditClient.sentEvents.last(),
       )

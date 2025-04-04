@@ -61,6 +61,7 @@ dependencies {
   implementation(project(":client-misk-hibernate"))
   implementation(project(":service"))
 
+  testImplementation(testFixtures(libs.miskAuditClient))
   testImplementation(libs.miskTesting)
   testImplementation(libs.miskHibernateTesting)
   testImplementation(libs.junitApi)

@@ -55,12 +55,12 @@ internal class BackfilaTestingModule : KAbstractModule() {
     bind<BackfilaConfig>().toInstance(config)
 
     install(BackfilaListenerModule())
+    install(AppNameModule("backfila"))
+    install(FakeAuditClientModule())
 
     install(DeploymentModule(wisp.deployment.TESTING))
     install(LogCollectorModule())
     install(MiskTestingServiceModule())
-    install(AppNameModule("backfila"))
-    install(FakeAuditClientModule())
 
     install(HibernateTestingModule(BackfilaDb::class))
     install(BackfilaPersistenceModule(config))

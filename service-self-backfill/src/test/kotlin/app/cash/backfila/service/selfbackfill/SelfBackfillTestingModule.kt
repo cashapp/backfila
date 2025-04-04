@@ -17,6 +17,8 @@ import app.cash.backfila.service.runner.BackfillRunnerLoggingSetupProvider
 import app.cash.backfila.service.runner.BackfillRunnerNoLoggingSetupProvider
 import misk.MiskCaller
 import misk.MiskTestingServiceModule
+import misk.audit.FakeAuditClientModule
+import misk.config.AppNameModule
 import misk.environment.DeploymentModule
 import misk.hibernate.HibernateTestingModule
 import misk.inject.KAbstractModule
@@ -50,6 +52,8 @@ class SelfBackfillTestingModule : KAbstractModule() {
     )
 
     install(BackfilaListenerModule())
+    install(AppNameModule("self-backfila"))
+    install(FakeAuditClientModule())
 
     bind<BackfilaConfig>().toInstance(config)
     install(DeploymentModule(TESTING))

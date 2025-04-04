@@ -10,63 +10,63 @@ import misk.hibernate.Id
 import misk.hibernate.Transacter
 import misk.hibernate.load
 
-class AuditClientListener @Inject constructor(
+internal class AuditClientListener @Inject constructor(
   @BackfilaDb private val transacter: Transacter,
   private val auditClient: AuditClient,
   private val backfilaConfig: BackfilaConfig,
 ) : BackfillRunListener {
   override fun runStarted(id: Id<DbBackfillRun>, user: String) {
-    val (backfillName, run, description) = transacter.transaction { session ->
+    val (backfillName, serviceName, description) = transacter.transaction { session ->
       val run = session.load<DbBackfillRun>(id)
-      AuditEvent(run.registered_backfill.name, run, "Backfill started by $user ${dryRunPrefix(run)}${nameAndId(run)}")
+      AuditEventInputs(run.registered_backfill.name, serviceName(run), "Backfill started by $user ${dryRunPrefix(run)}${nameAndId(run)}")
     }
     auditClient.logEvent(
       target = backfillName,
       description = description,
       requestorLDAP = user,
-      applicationName = serviceName(run),
+      applicationName = serviceName,
       detailURL = idUrl(id),
     )
   }
 
   override fun runPaused(id: Id<DbBackfillRun>, user: String) {
-    val (backfillName, run, description) = transacter.transaction { session ->
+    val (backfillName, serviceName, description) = transacter.transaction { session ->
       val run = session.load<DbBackfillRun>(id)
-      AuditEvent(run.registered_backfill.name, run, "Backfill paused by $user ${dryRunPrefix(run)}${nameAndId(run)}")
+      AuditEventInputs(run.registered_backfill.name, serviceName(run), "Backfill paused by $user ${dryRunPrefix(run)}${nameAndId(run)}")
     }
     auditClient.logEvent(
       target = backfillName,
       description = description,
       requestorLDAP = user,
-      applicationName = serviceName(run),
+      applicationName = serviceName,
       detailURL = idUrl(id),
     )
   }
 
   override fun runErrored(id: Id<DbBackfillRun>) {
-    val (backfillName, run, description) = transacter.transaction { session ->
+    val (backfillName, serviceName, description) = transacter.transaction { session ->
       val run = session.load<DbBackfillRun>(id)
-      AuditEvent(run.registered_backfill.name, run, "Backfill paused due to error ${dryRunPrefix(run)}${nameAndId(run)}")
+      AuditEventInputs(run.registered_backfill.name, serviceName(run), "Backfill paused due to error ${dryRunPrefix(run)}${nameAndId(run)}")
     }
     auditClient.logEvent(
       target = backfillName,
       description = description,
       automatedChange = true,
-      applicationName = serviceName(run),
+      applicationName = serviceName,
       detailURL = idUrl(id),
     )
   }
 
   override fun runCompleted(id: Id<DbBackfillRun>) {
-    val (backfillName, run, description) = transacter.transaction { session ->
+    val (backfillName, serviceName, description) = transacter.transaction { session ->
       val run = session.load<DbBackfillRun>(id)
-      AuditEvent(run.registered_backfill.name, run, "Backfill completed ${dryRunPrefix(run)}${nameAndId(run)}")
+      AuditEventInputs(run.registered_backfill.name, serviceName(run), "Backfill completed ${dryRunPrefix(run)}${nameAndId(run)}")
     }
     auditClient.logEvent(
       target = backfillName,
       description = description,
       automatedChange = true,
-      applicationName = serviceName(run),
+      applicationName = serviceName,
       detailURL = idUrl(id),
     )
   }
@@ -94,9 +94,9 @@ class AuditClientListener @Inject constructor(
 
   private fun idUrl(id: Id<DbBackfillRun>): String = backfilaConfig.web_url_root + BackfillShowAction.path(id.id)
 
-  private data class AuditEvent(
+  private data class AuditEventInputs(
     val backfillName: String,
-    val run: DbBackfillRun,
+    val serviceName: String,
     val description: String,
   )
 }
