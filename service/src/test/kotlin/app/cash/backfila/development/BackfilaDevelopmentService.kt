@@ -18,6 +18,7 @@ import app.cash.backfila.service.BackfilaServiceModule
 import app.cash.backfila.service.persistence.DbBackfillRun
 import misk.MiskApplication
 import misk.MiskRealServiceModule
+import misk.audit.NoOpAuditClientModule
 import misk.environment.DeploymentModule
 import misk.hibernate.Session
 import misk.inject.KAbstractModule
@@ -124,6 +125,7 @@ fun main(args: Array<String>) {
     DevelopmentAdminDashboardModule(),
     BackfilaDefaultEndpointConfigModule(),
     MiskRealServiceModule(),
+    NoOpAuditClientModule(),
   ).run(args)
 }
 

@@ -9,6 +9,7 @@ import app.cash.backfila.client.GrpcCallbackConnectorProvider
 import app.cash.backfila.client.HttpCallbackConnectorProvider
 import app.cash.backfila.dashboard.BackfilaDashboardModule
 import app.cash.backfila.dashboard.BackfilaWebActionsModule
+import app.cash.backfila.service.listener.BackfilaListenerModule
 import app.cash.backfila.service.persistence.BackfilaPersistenceModule
 import app.cash.backfila.service.runner.BackfillRunnerLoggingSetupProvider
 import app.cash.backfila.service.runner.BackfillRunnerNoLoggingSetupProvider
@@ -43,9 +44,7 @@ class BackfilaServiceModule(
       AccessAnnotationEntry<AdminDashboardAccess>(capabilities = listOf("backfila--owners")),
     )
 
-    newMultibinder<BackfillRunListener>()
-      .addBinding()
-      .to(SlackHelper::class.java)
+    install(BackfilaListenerModule())
 
     install(ConfigModule.create("backfila", config))
     install(BackfilaPersistenceModule(config))

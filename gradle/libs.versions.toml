@@ -3,7 +3,7 @@ jooq = "3.18.25"
 kotlin = "2.0.21"
 kotlinxCoroutines = "1.10.1"
 ktlint = "0.47.1"
-misk = "2025.04.01.184033-1915641"
+misk = "2025.04.04.132805-43bcba0"
 okhttp = "5.0.0-alpha.14"
 sqldelight = "2.0.2"
 wire = "5.2.1"
@@ -71,6 +71,7 @@ kotlinxHtml = { module = "org.jetbrains.kotlinx:kotlinx-html-jvm", version = "0.
 misk = { module = "com.squareup.misk:misk", version.ref = "misk" }
 miskActions = { module = "com.squareup.misk:misk-actions", version.ref = "misk" }
 miskAdmin = { module = "com.squareup.misk:misk-admin", version.ref = "misk" }
+miskAuditClient = { module = "com.squareup.misk:misk-audit-client", version.ref = "misk" }
 miskAwsDynamodb = { module = "com.squareup.misk:misk-aws-dynamodb", version.ref = "misk" }
 miskAws2Dynamodb = { module = "com.squareup.misk:misk-aws2-dynamodb", version.ref = "misk" }
 miskCore = { module = "com.squareup.misk:misk-core", version.ref = "misk" }

@@ -6,8 +6,7 @@ import app.cash.backfila.client.Connectors
 import app.cash.backfila.client.FakeBackfilaCallbackConnectorProvider
 import app.cash.backfila.client.ForConnectors
 import app.cash.backfila.service.BackfilaConfig
-import app.cash.backfila.service.BackfillRunListener
-import app.cash.backfila.service.SlackHelper
+import app.cash.backfila.service.listener.BackfilaListenerModule
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfilaPersistenceModule
 import app.cash.backfila.service.runner.BackfillRunnerLoggingSetupProvider
@@ -21,6 +20,8 @@ import java.util.concurrent.Executors
 import javax.inject.Singleton
 import misk.MiskCaller
 import misk.MiskTestingServiceModule
+import misk.audit.FakeAuditClientModule
+import misk.config.AppNameModule
 import misk.environment.DeploymentModule
 import misk.hibernate.HibernateTestingModule
 import misk.inject.KAbstractModule
@@ -53,9 +54,9 @@ internal class BackfilaTestingModule : KAbstractModule() {
     )
     bind<BackfilaConfig>().toInstance(config)
 
-    newMultibinder<BackfillRunListener>()
-      .addBinding()
-      .to(SlackHelper::class.java)
+    install(BackfilaListenerModule())
+    install(AppNameModule("backfila"))
+    install(FakeAuditClientModule())
 
     install(DeploymentModule(wisp.deployment.TESTING))
     install(LogCollectorModule())

@@ -7,6 +7,7 @@ import app.cash.backfila.development.DevelopmentAdminDashboardModule
 import app.cash.backfila.development.ServiceHeaderInterceptor
 import misk.MiskApplication
 import misk.MiskRealServiceModule
+import misk.audit.NoOpAuditClientModule
 import misk.client.HttpClientEndpointConfig
 import misk.client.HttpClientsConfig
 import misk.client.HttpClientsConfigModule
@@ -57,6 +58,7 @@ fun main(args: Array<String>) {
     FineDiningServiceModule(),
     DevelopmentAdminDashboardModule(),
     MiskRealServiceModule(),
+    NoOpAuditClientModule(),
   ).run(args)
 }
 

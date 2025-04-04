@@ -46,6 +46,7 @@ dependencies {
   implementation(libs.misk)
   implementation(libs.miskActions)
   implementation(libs.miskAdmin)
+  implementation(libs.miskAuditClient)
   implementation(libs.miskCore)
   implementation(libs.miskHibernate)
   implementation(libs.miskHotwire)
@@ -77,6 +78,7 @@ dependencies {
 
   testImplementation(libs.miskTesting)
   testImplementation(libs.miskHibernateTesting)
+  testImplementation(testFixtures(libs.miskAuditClient))
   testImplementation(libs.junitApi)
   testImplementation(libs.junitParams)
   testImplementation(libs.junitEngine)
