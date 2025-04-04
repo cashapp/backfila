@@ -1,0 +1,12 @@
+{
+  "tables": {
+    "coupons": {},
+    "menu": {},
+    "orders_seq": {
+        "type": "sequence"
+    },
+    "restaurants_seq": {
+      "type": "sequence"
+    }
+  }
+}
