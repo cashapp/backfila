@@ -18,7 +18,7 @@ class AuditClientListener @Inject constructor(
   override fun runStarted(id: Id<DbBackfillRun>, user: String) {
     val (backfillName, run, description) = transacter.transaction { session ->
       val run = session.load<DbBackfillRun>(id)
-      Triple(run.registered_backfill.name, run, "Backfill started by $user ${dryRunPrefix(run)}${nameAndId(run)}")
+      AuditEvent(run.registered_backfill.name, run, "Backfill started by $user ${dryRunPrefix(run)}${nameAndId(run)}")
     }
     auditClient.logEvent(
       target = backfillName,
@@ -32,7 +32,7 @@ class AuditClientListener @Inject constructor(
   override fun runPaused(id: Id<DbBackfillRun>, user: String) {
     val (backfillName, run, description) = transacter.transaction { session ->
       val run = session.load<DbBackfillRun>(id)
-      Triple(run.registered_backfill.name, run, "Backfill paused by $user ${dryRunPrefix(run)}${nameAndId(run)}")
+      AuditEvent(run.registered_backfill.name, run, "Backfill paused by $user ${dryRunPrefix(run)}${nameAndId(run)}")
     }
     auditClient.logEvent(
       target = backfillName,
@@ -46,7 +46,7 @@ class AuditClientListener @Inject constructor(
   override fun runErrored(id: Id<DbBackfillRun>) {
     val (backfillName, run, description) = transacter.transaction { session ->
       val run = session.load<DbBackfillRun>(id)
-      Triple(run.registered_backfill.name, run, "Backfill paused due to error ${dryRunPrefix(run)}${nameAndId(run)}")
+      AuditEvent(run.registered_backfill.name, run, "Backfill paused due to error ${dryRunPrefix(run)}${nameAndId(run)}")
     }
     auditClient.logEvent(
       target = backfillName,
@@ -60,7 +60,7 @@ class AuditClientListener @Inject constructor(
   override fun runCompleted(id: Id<DbBackfillRun>) {
     val (backfillName, run, description) = transacter.transaction { session ->
       val run = session.load<DbBackfillRun>(id)
-      Triple(run.registered_backfill.name, run, "Backfill completed ${dryRunPrefix(run)}${nameAndId(run)}")
+      AuditEvent(run.registered_backfill.name, run, "Backfill completed ${dryRunPrefix(run)}${nameAndId(run)}")
     }
     auditClient.logEvent(
       target = backfillName,
@@ -93,4 +93,10 @@ class AuditClientListener @Inject constructor(
     }
 
   private fun idUrl(id: Id<DbBackfillRun>): String = backfilaConfig.web_url_root + BackfillShowAction.path(id.id)
+
+  private data class AuditEvent(
+    val backfillName: String,
+    val run: DbBackfillRun,
+    val description: String,
+  )
 }
