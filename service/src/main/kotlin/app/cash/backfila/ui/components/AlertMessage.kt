@@ -31,6 +31,8 @@ fun TagConsumer<*>.Alert(
   linkInNewTab: Boolean = false,
   spaceAbove: Boolean = false,
   spaceBelow: Boolean = true,
+  dataAction: String? = null,
+  onClick: String? = null,
 ) {
   if (!message.isNullOrBlank()) {
     val topSpacer = if (spaceAbove) "mt-4" else ""
@@ -90,6 +92,16 @@ fun TagConsumer<*>.Alert(
                 }
               }
 
+              dataAction?.let {
+                href = "#"
+                attributes["data-action"] = it
+              }
+
+              onClick?.let {
+                href = "#"
+                attributes["onclick"] = it
+              }
+
               label?.let {
                 +it
                 span {
@@ -122,7 +134,9 @@ fun TagConsumer<*>.AlertError(
   linkInNewTab: Boolean = false,
   spaceAbove: Boolean = false,
   spaceBelow: Boolean = true,
-) = Alert(AlertTheme.RED, message, label, link, linkInNewTab, spaceAbove, spaceBelow)
+  dataAction: String? = null,
+  onClick: String? = null,
+) = Alert(AlertTheme.RED, message, label, link, linkInNewTab, spaceAbove, spaceBelow, dataAction, onClick)
 
 fun TagConsumer<*>.AlertInfo(
   message: String?,
