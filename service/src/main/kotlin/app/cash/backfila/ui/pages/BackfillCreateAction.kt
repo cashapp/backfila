@@ -4,7 +4,6 @@ import app.cash.backfila.dashboard.GetBackfillRunsAction
 import app.cash.backfila.dashboard.GetBackfillStatusAction
 import app.cash.backfila.dashboard.GetRegisteredBackfillsAction
 import app.cash.backfila.ui.actions.BackfillCreateHandlerAction
-import app.cash.backfila.ui.actions.ServiceDataHelper
 import app.cash.backfila.ui.components.AlertError
 import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.components.PageTitle
@@ -34,7 +33,6 @@ import misk.web.mediatype.MediaTypes
 
 @Singleton
 class BackfillCreateAction @Inject constructor(
-  private val serviceDataHelper: ServiceDataHelper,
   private val getBackfillStatusAction: GetBackfillStatusAction,
   private val getRegisteredBackfillsAction: GetRegisteredBackfillsAction,
   private val getBackfillRunsAction: GetBackfillRunsAction,
