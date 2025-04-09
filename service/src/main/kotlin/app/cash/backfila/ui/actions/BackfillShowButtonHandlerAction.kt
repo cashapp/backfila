@@ -7,8 +7,9 @@ import app.cash.backfila.dashboard.StopBackfillRequest
 import app.cash.backfila.dashboard.UpdateBackfillAction
 import app.cash.backfila.dashboard.UpdateBackfillRequest
 import app.cash.backfila.service.persistence.BackfillState
-import javax.inject.Inject
-import javax.inject.Singleton
+import app.cash.backfila.ui.components.AlertError
+import app.cash.backfila.ui.components.DashboardPageLayout
+import kotlinx.html.div
 import misk.security.authz.Authenticated
 import misk.web.Get
 import misk.web.PathParam
@@ -20,9 +21,12 @@ import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import okhttp3.Headers
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class BackfillShowButtonHandlerAction @Inject constructor(
+  private val dashboardPageLayout: DashboardPageLayout,
   private val startBackfillAction: StartBackfillAction,
   private val stopBackfillAction: StopBackfillAction,
   private val updateBackfillAction: UpdateBackfillAction,
@@ -35,43 +39,63 @@ class BackfillShowButtonHandlerAction @Inject constructor(
     @QueryParam field_id: String?,
     @QueryParam field_value: String?,
   ): Response<ResponseBody> {
-    if (!field_id.isNullOrBlank()) {
-      when (field_id) {
-        "state" -> {
-          if (field_value == BackfillState.PAUSED.name) {
-            stopBackfillAction.stop(id.toLong(), StopBackfillRequest())
-          } else if (field_value == BackfillState.RUNNING.name) {
-            startBackfillAction.start(id.toLong(), StartBackfillRequest())
+    try {
+      if (!field_id.isNullOrBlank()) {
+        when (field_id) {
+          "state" -> {
+            if (field_value == BackfillState.PAUSED.name) {
+              stopBackfillAction.stop(id.toLong(), StopBackfillRequest())
+            } else if (field_value == BackfillState.RUNNING.name) {
+              startBackfillAction.start(id.toLong(), StartBackfillRequest())
+            }
           }
-        }
-        "num_threads" -> {
-          val numThreads = field_value?.toIntOrNull()
-          if (numThreads != null) {
-            updateBackfillAction.update(id.toLong(), UpdateBackfillRequest(num_threads = numThreads))
+
+          "num_threads" -> {
+            val numThreads = field_value?.toIntOrNull()
+            if (numThreads != null) {
+              updateBackfillAction.update(id.toLong(), UpdateBackfillRequest(num_threads = numThreads))
+            }
           }
-        }
-        "scan_size" -> {
-          val scanSize = field_value?.toLongOrNull()
-          if (scanSize != null) {
-            updateBackfillAction.update(id.toLong(), UpdateBackfillRequest(scan_size = scanSize))
+
+          "scan_size" -> {
+            val scanSize = field_value?.toLongOrNull()
+            if (scanSize != null) {
+              updateBackfillAction.update(id.toLong(), UpdateBackfillRequest(scan_size = scanSize))
+            }
           }
-        }
-        "batch_size" -> {
-          val batchSize = field_value?.toLongOrNull()
-          if (batchSize != null) {
-            updateBackfillAction.update(id.toLong(), UpdateBackfillRequest(batch_size = batchSize))
+
+          "batch_size" -> {
+            val batchSize = field_value?.toLongOrNull()
+            if (batchSize != null) {
+              updateBackfillAction.update(id.toLong(), UpdateBackfillRequest(batch_size = batchSize))
+            }
           }
-        }
-        "extra_sleep_ms" -> {
-          val extraSleepMs = field_value?.toLongOrNull()
-          if (extraSleepMs != null) {
-            updateBackfillAction.update(id.toLong(), UpdateBackfillRequest(extra_sleep_ms = extraSleepMs))
+
+          "extra_sleep_ms" -> {
+            val extraSleepMs = field_value?.toLongOrNull()
+            if (extraSleepMs != null) {
+              updateBackfillAction.update(id.toLong(), UpdateBackfillRequest(extra_sleep_ms = extraSleepMs))
+            }
           }
-        }
-        "backoff_schedule" -> {
-          updateBackfillAction.update(id.toLong(), UpdateBackfillRequest(backoff_schedule = field_value))
+
+          "backoff_schedule" -> {
+            updateBackfillAction.update(id.toLong(), UpdateBackfillRequest(backoff_schedule = field_value))
+          }
         }
       }
+    } catch (e: Exception) {
+      // Since this action is only hit from the UI, catch any validation errors and show them to the user
+      val errorHtmlResponseBody = dashboardPageLayout.newBuilder()
+        .buildHtmlResponseBody {
+          div("py-20") {
+            AlertError(message = "Update backfill field failed: $e", label = "Try Again", onClick = "history.back(); return false;")
+          }
+        }
+      return Response(
+        body = errorHtmlResponseBody,
+        statusCode = 200,
+        headers = Headers.headersOf("Content-Type", MediaTypes.TEXT_HTML),
+      )
     }
 
     return Response(
