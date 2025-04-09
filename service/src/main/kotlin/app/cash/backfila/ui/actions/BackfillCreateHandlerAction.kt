@@ -71,7 +71,7 @@ class BackfillCreateHandlerAction @Inject constructor(
       val errorHtmlResponseBody = dashboardPageLayout.newBuilder()
         .buildHtmlResponseBody {
           div("py-20") {
-            AlertError(message = "Backfill Create Failed: $e", label = "Try Again", onClick = "history.back(); return false;")
+            AlertError(message = "Backfill create or clone failed: $e", label = "Try Again", onClick = "history.back(); return false;")
           }
         }
       return Response(
