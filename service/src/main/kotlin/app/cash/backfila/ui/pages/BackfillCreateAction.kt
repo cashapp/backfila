@@ -56,7 +56,7 @@ class BackfillCreateAction @Inject constructor(
     val variant = variantOrBlank.orEmpty().ifBlank { "default" }
     val label = if (variant == "default") service else "$service ($variant)"
     val backfillName: String? =
-      listOf(variantOrBackfillNameOrId, backfillNameOrId).firstOrNull { it?.contains(".") == true }
+      listOf(variantOrBackfillNameOrId, backfillNameOrId).firstOrNull { it?.toIntOrNull() == null }
     val backfillIdToClone: String? =
       listOf(variantOrBackfillNameOrId, backfillNameOrId).firstOrNull { it?.toIntOrNull() != null }
 
