@@ -16,6 +16,7 @@ import app.cash.backfila.protos.clientservice.RunBatchResponse
 import app.cash.backfila.service.BackfilaConfig
 import app.cash.backfila.service.BackfilaServiceModule
 import app.cash.backfila.service.persistence.DbBackfillRun
+import app.cash.backfila.ui.BackfilaDashboard
 import misk.MiskApplication
 import misk.MiskRealServiceModule
 import misk.audit.NoOpAuditClientModule
@@ -28,8 +29,10 @@ import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.security.authz.FakeCallerAuthenticator
 import misk.security.authz.MiskCallerAuthenticator
+import misk.security.authz.Unauthenticated
 import misk.web.MiskWebModule
 import misk.web.WebConfig
+import misk.web.dashboard.DashboardModule
 import okio.ByteString.Companion.encodeUtf8
 import wisp.deployment.Deployment
 
@@ -53,6 +56,22 @@ fun main(args: Array<String>) {
         install(MiskWebModule(webConfig))
         multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
         bind<ViewLogsUrlProvider>().to<DevelopmentViewLogsUrlProvider>()
+
+        // Example custom link that shows up in navbar
+        install(
+          DashboardModule.createMenuLink<BackfilaDashboard, Unauthenticated>(
+            label = "Go to Repo",
+            url = "https://github.com/cashapp/backfila",
+            category = "Backfila",
+          ),
+        )
+        install(
+          DashboardModule.createMenuLink<BackfilaDashboard, Unauthenticated>(
+            label = "Test other link",
+            url = "https://github.com/cashapp/backfila",
+            category = "Alpha",
+          ),
+        )
 
         newMapBinder<String, BackfilaCallbackConnectorProvider>(ForConnectors::class)
           .permitDuplicates().addBinding("DEV")

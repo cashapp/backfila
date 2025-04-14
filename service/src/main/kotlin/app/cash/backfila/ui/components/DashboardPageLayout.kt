@@ -5,6 +5,7 @@ import app.cash.backfila.service.BackfilaConfig
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillRunQuery
 import app.cash.backfila.service.persistence.BackfillState
+import app.cash.backfila.ui.BackfilaDashboard
 import app.cash.backfila.ui.pages.IndexAction
 import jakarta.inject.Inject
 import kotlinx.html.TagConsumer
@@ -30,6 +31,7 @@ import misk.tailwind.pages.MenuSection
 import misk.tailwind.pages.Navbar
 import misk.web.HttpCall
 import misk.web.ResponseBody
+import misk.web.dashboard.DashboardTab
 import misk.web.dashboard.HtmlLayout
 import okio.BufferedSink
 import wisp.deployment.Deployment
@@ -47,6 +49,7 @@ class DashboardPageLayout @Inject constructor(
   private val getBackfillRunsAction: GetBackfillRunsAction,
   @BackfilaDb private val transacter: Transacter,
   private val queryFactory: Query.Factory,
+  private val allTabs: List<DashboardTab>,
 ) {
   private var newBuilder = false
   private var headBlock: TagConsumer<*>.() -> Unit = {}
@@ -55,6 +58,10 @@ class DashboardPageLayout @Inject constructor(
 
   private val path by lazy {
     clientHttpCall.get().url.encodedPath
+  }
+
+  private val backfilaLinks by lazy {
+    allTabs.filter { it.dashboardAnnotationKClass == BackfilaDashboard::class }
   }
 
   private fun setNewBuilder() = apply { newBuilder = true }
@@ -67,6 +74,7 @@ class DashboardPageLayout @Inject constructor(
     getBackfillRunsAction = getBackfillRunsAction,
     transacter = transacter,
     queryFactory = queryFactory,
+    allTabs = allTabs,
   ).setNewBuilder()
 
   fun title(title: String) = apply {
@@ -181,9 +189,30 @@ class DashboardPageLayout @Inject constructor(
               href = "/backfills/",
               isSelected = currentPath == "/backfills/",
             ),
-          ),
+          ) + backfilaLinks.filter { it.menuCategory == "Backfila" }.map { tab ->
+            Link(
+              label = tab.menuLabel,
+              href = tab.menuUrl,
+              isSelected = currentPath.startsWith(tab.menuUrl),
+            )
+          },
         ),
-      ) + if (services.isNotEmpty()) {
+      ) + if (backfilaLinks.filterNot { it.menuCategory == "Backfila" }.isNotEmpty()) {
+        backfilaLinks.filterNot { it.menuCategory == "Backfila" }.groupBy { it.menuCategory }.map { (category, tabs) ->
+          MenuSection(
+            title = category,
+            links = tabs.map { tab ->
+              Link(
+                label = tab.menuLabel,
+                href = tab.menuUrl,
+                isSelected = currentPath.startsWith(tab.menuUrl),
+              )
+            },
+          )
+        }
+      } else {
+        listOf()
+      } + if (services.isNotEmpty()) {
         listOf(
           MenuSection(
             title = "Your Services",
