@@ -30,3 +30,10 @@ class UiModule : KAbstractModule() {
     install(WebActionModule.create<BackfillShowButtonHandlerAction>())
   }
 }
+
+/**
+ * Identifies the Misk dashboard for Backfila so dashboard links and other customization can be added.
+ */
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.FUNCTION)
+annotation class BackfilaDashboard
