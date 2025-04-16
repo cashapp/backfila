@@ -1,10 +1,12 @@
 package app.cash.backfila.ui.actions
 
 import app.cash.backfila.dashboard.CreateBackfillAction
+import app.cash.backfila.dashboard.GetBackfillStatusAction
 import app.cash.backfila.protos.service.CreateBackfillRequest
 import app.cash.backfila.ui.components.AlertError
 import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.pages.BackfillCreateAction.BackfillCreateField
+import app.cash.backfila.ui.pages.BackfillCreateAction.RangeOption
 import app.cash.backfila.ui.pages.BackfillShowAction
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -26,6 +28,7 @@ import wisp.logging.getLogger
 @Singleton
 class BackfillCreateHandlerAction @Inject constructor(
   private val createBackfillAction: CreateBackfillAction,
+  private val getBackfillStatusAction: GetBackfillStatusAction,
   private val dashboardPageLayout: DashboardPageLayout,
   private val httpCall: ActionScoped<HttpCall>,
 ) : WebAction {
@@ -48,8 +51,39 @@ class BackfillCreateHandlerAction @Inject constructor(
           else -> true
         },
       )
-      formFields[BackfillCreateField.RANGE_START.fieldId]?.ifNotBlank { createRequestBuilder.pkey_range_start(it.encodeUtf8()) }
-      formFields[BackfillCreateField.RANGE_END.fieldId]?.ifNotBlank { createRequestBuilder.pkey_range_end(it.encodeUtf8()) }
+
+      // Handle range options for cloned backfills
+      when (formFields[BackfillCreateField.RANGE_OPTION.fieldId]) {
+        RangeOption.CONTINUE.value -> {
+          // Get the last processed position from the original backfill
+          val backfillId = formFields[BackfillCreateField.BACKFILL_NAME.fieldId]?.toLongOrNull()
+          backfillId?.let { id ->
+            val status = getBackfillStatusAction.status(id)
+            status.partitions.firstOrNull()?.let { partition ->
+              // Use cursor if available, otherwise use start
+              val startValue = partition.pkey_cursor ?: partition.pkey_start
+              startValue?.let { createRequestBuilder.pkey_range_start(it.encodeUtf8()) }
+              partition.pkey_end?.let { createRequestBuilder.pkey_range_end(it.encodeUtf8()) }
+            }
+          }
+        }
+        RangeOption.RESTART.value -> {
+          // Use the original range but start from beginning
+          val backfillId = formFields[BackfillCreateField.BACKFILL_NAME.fieldId]?.toLongOrNull()
+          backfillId?.let { id ->
+            val status = getBackfillStatusAction.status(id)
+            status.partitions.firstOrNull()?.let { partition ->
+              partition.pkey_start?.let { createRequestBuilder.pkey_range_start(it.encodeUtf8()) }
+              partition.pkey_end?.let { createRequestBuilder.pkey_range_end(it.encodeUtf8()) }
+            }
+          }
+        }
+        else -> {
+          // For new range or non-clone cases, use the form values
+          formFields[BackfillCreateField.RANGE_START.fieldId]?.ifNotBlank { createRequestBuilder.pkey_range_start(it.encodeUtf8()) }
+          formFields[BackfillCreateField.RANGE_END.fieldId]?.ifNotBlank { createRequestBuilder.pkey_range_end(it.encodeUtf8()) }
+        }
+      }
       formFields[BackfillCreateField.BATCH_SIZE.fieldId]?.ifNotBlank { createRequestBuilder.batch_size(it.toLongOrNull()) }
       formFields[BackfillCreateField.SCAN_SIZE.fieldId]?.ifNotBlank { createRequestBuilder.scan_size(it.toLongOrNull()) }
       formFields[BackfillCreateField.THREADS_PER_PARTITION.fieldId]?.ifNotBlank { createRequestBuilder.num_threads(it.toIntOrNull()) }
@@ -97,5 +131,9 @@ class BackfillCreateHandlerAction @Inject constructor(
     const val PATH = "/api/backfill/create"
 
     private fun <T>String?.ifNotBlank(block: (String) -> T) = if (this.isNullOrBlank()) null else block(this)
+
+    private fun getBackfillIdFromName(name: String): Long? {
+      return name.toLongOrNull()
+    }
   }
 }
