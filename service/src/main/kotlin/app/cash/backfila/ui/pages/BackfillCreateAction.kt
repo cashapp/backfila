@@ -260,9 +260,6 @@ class BackfillCreateAction @Inject constructor(
                                     name = field
                                     id = field
                                     attributes["autocomplete"] = field
-                                    backfillToCloneStatus?.partitions?.firstOrNull()?.pkey_start?.let {
-                                      value = it
-                                    }
                                   }
                                 }
                               }
@@ -280,9 +277,6 @@ class BackfillCreateAction @Inject constructor(
                                     name = field
                                     id = field
                                     attributes["autocomplete"] = field
-                                    backfillToCloneStatus?.partitions?.firstOrNull()?.pkey_end?.let {
-                                      value = it
-                                    }
                                   }
                                 }
                               }
