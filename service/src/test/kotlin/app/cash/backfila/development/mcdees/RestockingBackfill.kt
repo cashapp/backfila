@@ -21,13 +21,14 @@ class RestockingBackfill @Inject constructor() : S3DatasourceBackfill<String, Re
 
   override val recordStrategy: RecordStrategy<String> = Utf8StringNewlineStrategy(ignoreBlankLines = false)
 
-  data class RestockingAttributes(
-    val restockingType: String,
-    val particularSupplier: String?,
-  ) {
+  class RestockingAttributes(restockingType: String, val particularSupplier: String?) {
+    val restockingType: RestockingType;
+    init {
+      this.restockingType = RestockingType.valueOf(restockingType)
+    }
+
     fun getPrefix() {
-      val restockingTypeEnum = RestockingType.valueOf(restockingType)
-      when (restockingTypeEnum) {
+      when (restockingType) {
         RestockingType.All -> ""
         RestockingType.FOOD -> "food"
         RestockingType.HARD_GOODS -> "hardgoods"
