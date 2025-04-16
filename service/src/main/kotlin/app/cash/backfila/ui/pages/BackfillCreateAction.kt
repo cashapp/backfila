@@ -150,6 +150,12 @@ class BackfillCreateAction @Inject constructor(
                 value = resolvedBackfillName
               }
 
+              input {
+                type = InputType.hidden
+                name = BackfillCreateField.CLONE_BACKFILL_ID.fieldId
+                value = backfillIdToClone ?: ""
+              }
+
               div("space-y-12") {
                 div("border-b border-gray-900/10 pb-12") {
                   h2("text-base/7 font-semibold text-gray-900") { +"""Immutable Options""" }
@@ -227,6 +233,19 @@ class BackfillCreateAction @Inject constructor(
                           label("ml-3 block text-sm font-medium leading-6 text-gray-900") {
                             htmlFor = "range-option-continue"
                             +"""Same range, continue from last processed"""
+                          }
+                        }
+
+                        div("flex items-center") {
+                          input(classes = "h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600") {
+                            id = "range-option-no-range"
+                            name = BackfillCreateField.RANGE_OPTION.fieldId
+                            type = InputType.radio
+                            value = RangeOption.NO_RANGE.value
+                          }
+                          label("ml-3 block text-sm font-medium leading-6 text-gray-900") {
+                            htmlFor = "range-option-no-range"
+                            +"""No range"""
                           }
                         }
 
@@ -484,6 +503,7 @@ class BackfillCreateAction @Inject constructor(
     SERVICE("service"),
     VARIANT("variant"),
     BACKFILL_NAME("backfillName"),
+    CLONE_BACKFILL_ID("cloneBackfillId"),
     DRY_RUN("dryRun"),
     RANGE_OPTION("rangeOption"),
     RANGE_START("rangeStart"),
@@ -500,6 +520,7 @@ class BackfillCreateAction @Inject constructor(
     RESTART("restart"),
     CONTINUE("continue"),
     NEW("new"),
+    NO_RANGE("no_range"),
   }
 
   companion object {

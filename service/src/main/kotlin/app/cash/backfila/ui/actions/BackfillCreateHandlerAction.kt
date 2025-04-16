@@ -56,7 +56,7 @@ class BackfillCreateHandlerAction @Inject constructor(
       when (formFields[BackfillCreateField.RANGE_OPTION.fieldId]) {
         RangeOption.CONTINUE.value -> {
           // Get the last processed position from the original backfill
-          val backfillId = formFields[BackfillCreateField.BACKFILL_NAME.fieldId]?.toLongOrNull()
+          val backfillId = formFields[BackfillCreateField.CLONE_BACKFILL_ID.fieldId]?.toLongOrNull()
           backfillId?.let { id ->
             val status = getBackfillStatusAction.status(id)
             status.partitions.firstOrNull()?.let { partition ->
@@ -69,7 +69,7 @@ class BackfillCreateHandlerAction @Inject constructor(
         }
         RangeOption.RESTART.value -> {
           // Use the original range but start from beginning
-          val backfillId = formFields[BackfillCreateField.BACKFILL_NAME.fieldId]?.toLongOrNull()
+          val backfillId = formFields[BackfillCreateField.CLONE_BACKFILL_ID.fieldId]?.toLongOrNull()
           backfillId?.let { id ->
             val status = getBackfillStatusAction.status(id)
             status.partitions.firstOrNull()?.let { partition ->
@@ -77,6 +77,10 @@ class BackfillCreateHandlerAction @Inject constructor(
               partition.pkey_end?.let { createRequestBuilder.pkey_range_end(it.encodeUtf8()) }
             }
           }
+        }
+        RangeOption.NO_RANGE.value -> {
+          createRequestBuilder.pkey_range_start(null)
+          createRequestBuilder.pkey_range_end(null)
         }
         else -> {
           // For new range or non-clone cases, use the form values
