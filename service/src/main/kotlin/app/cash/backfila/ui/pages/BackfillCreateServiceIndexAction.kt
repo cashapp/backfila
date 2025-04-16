@@ -44,7 +44,7 @@ class BackfillCreateServiceIndexAction @Inject constructor(
       val newPath = BackfillCreateAction.path(
         service = service,
         variantOrBackfillNameOrId = variantOrBlank.orEmpty(),
-        backfillNameOrId = "",
+        backfillNameOrIdOrBlank = "",
       )
       return Response(
         body = "go to $newPath".toResponseBody(),
@@ -95,7 +95,7 @@ class BackfillCreateServiceIndexAction @Inject constructor(
                   href = BackfillCreateAction.path(
                     service = service,
                     variantOrBackfillNameOrId = variantOrBackfillNameOrId,
-                    backfillNameOrId = if (variantOrBackfillNameOrId == it.name) "" else it.name,
+                    backfillNameOrIdOrBlank = if (variantOrBackfillNameOrId == it.name) "" else it.name,
                   )
 
                   this@ul.li("registration col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow") {
