@@ -505,7 +505,7 @@ class BackfillCreateAction @Inject constructor(
   enum class RangeOption(val value: String) {
     RESTART("restart"),
     CONTINUE("continue"),
-    NEW("new");
+    NEW("new"),
   }
 
   companion object {
