@@ -86,7 +86,7 @@ class BackfillShowAction @Inject constructor(
               href = BackfillCreateAction.path(
                 service = backfill.service_name,
                 variantOrBackfillNameOrId = if (backfill.variant != "default") backfill.variant else id.toString(),
-                backfillNameOrId = if (backfill.variant != "default") id.toString() else "",
+                backfillNameOrIdOrBlank = if (backfill.variant != "default") id.toString() else "",
               )
 
               button(classes = "rounded-full bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600") {

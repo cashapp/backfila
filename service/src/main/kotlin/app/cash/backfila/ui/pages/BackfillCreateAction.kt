@@ -44,21 +44,32 @@ class BackfillCreateAction @Inject constructor(
   fun get(
     @PathParam service: String,
     @PathParam variantOrBackfillNameOrId: String,
-    @PathParam backfillNameOrId: String? = "",
+    @PathParam backfillNameOrIdOrBlank: String? = "",
   ): Response<ResponseBody> {
-    val variantOrBlank = if (backfillNameOrId.isNullOrBlank()) {
+    val variant: String
+    val variantOrBlank: String?
+    val backfillNameOrId: String
+    if (backfillNameOrIdOrBlank.isNullOrBlank()) {
       // This means variant is null or default
-      null
+      variant = "default"
+      variantOrBlank = null
+      backfillNameOrId = variantOrBackfillNameOrId
     } else {
-      variantOrBackfillNameOrId
+      variant = variantOrBackfillNameOrId.orEmpty().ifBlank { "default" }
+      variantOrBlank = variantOrBackfillNameOrId
+      backfillNameOrId = backfillNameOrIdOrBlank
     }
-
-    val variant = variantOrBlank.orEmpty().ifBlank { "default" }
     val label = if (variant == "default") service else "$service ($variant)"
-    val backfillName: String? =
-      listOf(variantOrBackfillNameOrId, backfillNameOrId).firstOrNull { it?.toIntOrNull() == null }
-    val backfillIdToClone: String? =
-      listOf(variantOrBackfillNameOrId, backfillNameOrId).firstOrNull { it?.toIntOrNull() != null }
+
+    val backfillIdToClone: String?
+    val backfillName: String?
+    if (backfillNameOrId.toIntOrNull() != null) {
+      backfillIdToClone = backfillNameOrId
+      backfillName = null
+    } else {
+      backfillName = backfillNameOrId
+      backfillIdToClone = null
+    }
 
     // If service + variant + backfill id to clone are valid, pre-fill form with backfill details
     val backfillRuns = getBackfillRunsAction.backfillRuns(service, variant)
@@ -96,10 +107,7 @@ class BackfillCreateAction @Inject constructor(
         if ((backfillToClone?.id ?: registeredBackfill?.name) != null) {
           Link(
             backfillToClone?.id?.let { "Clone" } ?: registeredBackfill?.name ?: "",
-            PATH
-              .replace("{service}", service)
-              .replace("{variantOrBackfillNameOrId}", variantOrBackfillNameOrId)
-              .replace("{backfillNameOrId}", backfillNameOrId ?: ""),
+            BackfillCreateAction.path(service, variantOrBackfillNameOrId, backfillNameOrIdOrBlank ?: ""),
           )
         } else {
           null
@@ -398,10 +406,10 @@ class BackfillCreateAction @Inject constructor(
   }
 
   companion object {
-    private const val PATH = "/backfills/create/{service}/{variantOrBackfillNameOrId}/{backfillNameOrId}"
-    fun path(service: String, variantOrBackfillNameOrId: String, backfillNameOrId: String) = PATH
+    private const val PATH = "/backfills/create/{service}/{variantOrBackfillNameOrId}/{backfillNameOrIdOrBlank}"
+    fun path(service: String, variantOrBackfillNameOrId: String, backfillNameOrIdOrBlank: String) = PATH
       .replace("{service}", service)
       .replace("{variantOrBackfillNameOrId}", variantOrBackfillNameOrId)
-      .replace("{backfillNameOrId}", backfillNameOrId)
+      .replace("{backfillNameOrIdOrBlank}", backfillNameOrIdOrBlank)
   }
 }
