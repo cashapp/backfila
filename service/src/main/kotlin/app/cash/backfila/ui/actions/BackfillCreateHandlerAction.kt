@@ -9,7 +9,6 @@ import app.cash.backfila.ui.pages.BackfillShowAction
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.html.div
-import misk.exceptions.BadRequestException
 import misk.scope.ActionScoped
 import misk.security.authz.Authenticated
 import misk.web.Get
@@ -22,6 +21,7 @@ import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import okhttp3.Headers
 import okio.ByteString.Companion.encodeUtf8
+import wisp.logging.getLogger
 
 @Singleton
 class BackfillCreateHandlerAction @Inject constructor(
@@ -74,6 +74,7 @@ class BackfillCreateHandlerAction @Inject constructor(
             AlertError(message = "Backfill create or clone failed: $e", label = "Try Again", onClick = "history.back(); return false;")
           }
         }
+      logger.error(e) { "Backfill create or clone failed $e" }
       return Response(
         body = errorHtmlResponseBody,
         statusCode = 200,
@@ -91,6 +92,8 @@ class BackfillCreateHandlerAction @Inject constructor(
   }
 
   companion object {
+    private val logger = getLogger<BackfillCreateHandlerAction>()
+
     const val PATH = "/api/backfill/create"
 
     private fun <T>String?.ifNotBlank(block: (String) -> T) = if (this.isNullOrBlank()) null else block(this)

@@ -9,6 +9,8 @@ import app.cash.backfila.dashboard.UpdateBackfillRequest
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.ui.components.AlertError
 import app.cash.backfila.ui.components.DashboardPageLayout
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.html.div
 import misk.security.authz.Authenticated
 import misk.web.Get
@@ -21,8 +23,7 @@ import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import okhttp3.Headers
-import javax.inject.Inject
-import javax.inject.Singleton
+import wisp.logging.getLogger
 
 @Singleton
 class BackfillShowButtonHandlerAction @Inject constructor(
@@ -91,6 +92,7 @@ class BackfillShowButtonHandlerAction @Inject constructor(
             AlertError(message = "Update backfill field failed: $e", label = "Try Again", onClick = "history.back(); return false;")
           }
         }
+      logger.error(e) { "Update backfill field failed $e" }
       return Response(
         body = errorHtmlResponseBody,
         statusCode = 200,
@@ -106,6 +108,8 @@ class BackfillShowButtonHandlerAction @Inject constructor(
   }
 
   companion object {
+    private val logger = getLogger<BackfillShowButtonHandlerAction>()
+
     const val PATH = "/api/backfill/{id}/update"
     fun path(id: String) = PATH.replace("{id}", id)
     fun path(id: Long) = path(id.toString())
