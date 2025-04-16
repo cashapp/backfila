@@ -1,25 +1,44 @@
 package app.cash.backfila.development.mcdees
 
 import app.cash.backfila.client.BackfillConfig
-import app.cash.backfila.client.stat.StaticDatasourceBackfill
+import app.cash.backfila.client.PrepareBackfillConfig
+import app.cash.backfila.client.s3.S3DatasourceBackfill
+import app.cash.backfila.client.s3.record.RecordStrategy
+import app.cash.backfila.client.s3.record.Utf8StringNewlineStrategy
 import javax.inject.Inject
 import wisp.logging.getLogger
 
-class BurgerFlippingBackfill @Inject constructor() : StaticDatasourceBackfill<String, BurgerFlippingBackfill.SlowMealsAttributes>() {
-  override fun runOne(item: String, config: BackfillConfig<SlowMealsAttributes>) {
-    Thread.sleep(config.parameters.waitBetweenFlipsMs())
+class RestockingBackfill @Inject constructor() : S3DatasourceBackfill<String, RestockingBackfill.RestockingAttributes>() {
+  override fun runOne(item: String, config: BackfillConfig<RestockingAttributes>) {
     logger.info { "Finished flipping $item" }
   }
 
-  data class SlowMealsAttributes(
-    val flipsPerMinute: Long = 5L,
-  ) {
-    fun waitBetweenFlipsMs() = (1000L * 60L) / flipsPerMinute
+  override fun getBucket(config: PrepareBackfillConfig<RestockingAttributes>): String {
+    return "mcdees/" + config.parameters.getPrefix()
   }
 
-  override val staticDatasource: List<String> = (1..10000).map { i -> "burger $i" }
+  override val staticPrefix = ""
+
+  override val recordStrategy: RecordStrategy<String> = Utf8StringNewlineStrategy(ignoreBlankLines = false)
+
+  data class RestockingAttributes(
+    val restockingType: String,
+    val particularSupplier: String?,
+  ) {
+    fun getPrefix() {
+      val restockingTypeEnum = RestockingType.valueOf(restockingType)
+      when (restockingTypeEnum) {
+        RestockingType.All -> ""
+        RestockingType.FOOD -> "food"
+        RestockingType.HARD_GOODS -> "hardgoods"
+        RestockingType.SPECIFIC_SUPPLIER -> ""
+      }
+    }
+  }
+
+  enum class RestockingType { All, FOOD, HARD_GOODS, SPECIFIC_SUPPLIER }
 
   companion object {
-    private val logger = getLogger<BurgerFlippingBackfill>()
+    private val logger = getLogger<RestockingBackfill>()
   }
 }
