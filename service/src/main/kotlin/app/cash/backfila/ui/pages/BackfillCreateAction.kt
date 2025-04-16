@@ -152,7 +152,7 @@ class BackfillCreateAction @Inject constructor(
 
               input {
                 type = InputType.hidden
-                name = BackfillCreateField.CLONE_BACKFILL_ID.fieldId
+                name = BackfillCreateField.BACKFILL_ID_TO_CLONE.fieldId
                 value = backfillIdToClone ?: ""
               }
 
@@ -503,7 +503,7 @@ class BackfillCreateAction @Inject constructor(
     SERVICE("service"),
     VARIANT("variant"),
     BACKFILL_NAME("backfillName"),
-    CLONE_BACKFILL_ID("cloneBackfillId"),
+    BACKFILL_ID_TO_CLONE("backfillIdToClone"),
     DRY_RUN("dryRun"),
     RANGE_OPTION("rangeOption"),
     RANGE_START("rangeStart"),
