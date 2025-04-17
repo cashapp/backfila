@@ -33,7 +33,7 @@ class S3DatasourceBackfillOperator<R : Any, P : Any>(
       // This would mean we would need to support some kind of seek forward or seek back for record start.
       // That or perhaps we only support it for single file?
       // In any case, we are not implementing this now.
-      "Ranges are not currently supported for S3 Backfills. Additionally, cloning an S3 backfill requires using a new empty range."
+      "Only full ranges are currently supported for S3 Backfills."
     }
 
     val pathPrefix = backfill.getPrefix(config)
