@@ -78,10 +78,6 @@ class BackfillCreateHandlerAction @Inject constructor(
             }
           }
         }
-        RangeOption.NO_RANGE.value -> {
-          createRequestBuilder.pkey_range_start(null)
-          createRequestBuilder.pkey_range_end(null)
-        }
         else -> {
           // For new range or non-clone cases, use the form values
           formFields[BackfillCreateField.RANGE_START.fieldId]?.ifNotBlank { createRequestBuilder.pkey_range_start(it.encodeUtf8()) }

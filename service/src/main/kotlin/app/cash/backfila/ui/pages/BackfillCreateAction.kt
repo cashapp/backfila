@@ -236,19 +236,6 @@ class BackfillCreateAction @Inject constructor(
                           }
                         }
 
-                        div("flex items-center") {
-                          input(classes = "h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600") {
-                            id = "range-option-no-range"
-                            name = BackfillCreateField.RANGE_OPTION.fieldId
-                            type = InputType.radio
-                            value = RangeOption.NO_RANGE.value
-                          }
-                          label("ml-3 block text-sm font-medium leading-6 text-gray-900") {
-                            htmlFor = "range-option-no-range"
-                            +"""No range"""
-                          }
-                        }
-
                         // New range with embedded range fields
                         div("flex items-center") {
                           input(classes = "peer/new h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600") {
@@ -520,7 +507,6 @@ class BackfillCreateAction @Inject constructor(
     RESTART("restart"),
     CONTINUE("continue"),
     NEW("new"),
-    NO_RANGE("no_range"),
   }
 
   companion object {
