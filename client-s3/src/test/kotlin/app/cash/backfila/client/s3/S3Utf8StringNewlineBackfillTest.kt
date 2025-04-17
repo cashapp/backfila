@@ -112,12 +112,12 @@ class S3Utf8StringNewlineBackfillTest {
       this.assertThatCode {
         backfila.createWetRun<BreakfastBackfill>(rangeStart = "a start")
         fail("invalid range must fail")
-      }.hasMessageContaining("Range is currently unsupported")
+      }.hasMessageContaining("Ranges are not currently supported for S3 Backfills. Additionally, cloning an S3 backfill requires using a new empty range.")
 
       this.assertThatCode {
         backfila.createWetRun<BreakfastBackfill>(rangeEnd = "a end")
         fail("invalid range must fail")
-      }.hasMessageContaining("Range is currently unsupported")
+      }.hasMessageContaining("Ranges are not currently supported for S3 Backfills. Additionally, cloning an S3 backfill requires using a new empty range.")
 
       this.assertThatCode {
         backfila.createWetRun<BrunchBackfill>()
