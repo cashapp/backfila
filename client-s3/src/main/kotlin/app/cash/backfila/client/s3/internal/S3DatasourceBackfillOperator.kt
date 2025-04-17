@@ -27,13 +27,13 @@ class S3DatasourceBackfillOperator<R : Any, P : Any>(
   override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
     val config = parametersOperator.constructBackfillConfig(request)
     backfill.validate(config)
-
-    require(request.range?.start == null && request.range?.end == null) {
+    val isRangeValid = (request.range?.start?.utf8() == "0" || request.range?.start == null) && request.range?.end == null
+    require(isRangeValid) {
       // We could think about supporting this later by making the range mean a byte seek into all S3 files.
       // This would mean we would need to support some kind of seek forward or seek back for record start.
       // That or perhaps we only support it for single file?
       // In any case, we are not implementing this now.
-      "Range is currently unsupported for S3 Backfils"
+      "Only full ranges are currently supported for S3 Backfills."
     }
 
     val pathPrefix = backfill.getPrefix(config)
