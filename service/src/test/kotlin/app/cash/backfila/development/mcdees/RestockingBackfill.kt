@@ -22,7 +22,7 @@ class RestockingBackfill @Inject constructor() : S3DatasourceBackfill<String, Re
   override val recordStrategy: RecordStrategy<String> = Utf8StringNewlineStrategy(ignoreBlankLines = false)
 
   class RestockingAttributes(restockingType: String, val particularSupplier: String?) {
-    val restockingType: RestockingType;
+    val restockingType: RestockingType
     init {
       this.restockingType = RestockingType.valueOf(restockingType)
     }
