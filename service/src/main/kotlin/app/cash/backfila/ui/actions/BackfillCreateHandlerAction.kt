@@ -131,9 +131,5 @@ class BackfillCreateHandlerAction @Inject constructor(
     const val PATH = "/api/backfill/create"
 
     private fun <T>String?.ifNotBlank(block: (String) -> T) = if (this.isNullOrBlank()) null else block(this)
-
-    private fun getBackfillIdFromName(name: String): Long? {
-      return name.toLongOrNull()
-    }
   }
 }
