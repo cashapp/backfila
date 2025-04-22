@@ -181,7 +181,7 @@ class BackfillShowAction @Inject constructor(
                     td("py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700") {
                       when {
                         partition.state != BackfillState.RUNNING -> +"-"
-                        !partition.precomputing_done -> +"Computing size..."
+                        !partition.precomputing_done -> +"Computing..."
                         partition.matching_records_per_minute == null || partition.matching_records_per_minute <= 0 ||
                           partition.computed_matching_record_count <= 0 -> +"Calculating..."
                         else -> {
