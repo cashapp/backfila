@@ -177,7 +177,15 @@ class BackfillShowAction @Inject constructor(
                         partition.computed_matching_record_count,
                       )
                     }
-                    td("hidden py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700 sm:table-cell") { +"""${partition.matching_records_per_minute} #/m""" }
+                    td("hidden py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700 sm:table-cell") {
+                      when {
+                        partition.state != BackfillState.RUNNING -> +"-"
+                        !partition.precomputing_done -> +"Computing..."
+                        partition.matching_records_per_minute == null ||
+                          partition.matching_records_per_minute <= 0 -> +"Calculating..."
+                        else -> +"""${partition.matching_records_per_minute} #/m"""
+                      }
+                    }
                     // TODO properly calculate the ETA until finished
                     td("py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700") { +"""ETA TODO""" }
                   }
