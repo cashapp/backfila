@@ -186,8 +186,18 @@ class BackfillShowAction @Inject constructor(
                         else -> +"""${partition.matching_records_per_minute} #/m"""
                       }
                     }
-                    // TODO properly calculate the ETA until finished
-                    td("py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700") { +"""ETA TODO""" }
+                    td("py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700") {
+                      when {
+                        partition.state != BackfillState.RUNNING -> +"-"
+                        !partition.precomputing_done -> +"Computing..."
+                        partition.matching_records_per_minute == null || partition.matching_records_per_minute <= 0 ||
+                          partition.computed_matching_record_count <= 0 -> +"Calculating..."
+                        else -> {
+                          val etaSeconds = (partition.computed_matching_record_count - partition.backfilled_matching_record_count).toDouble() / (partition.matching_records_per_minute / 60.0)
+                          +formatEta(etaSeconds * 1000)
+                        }
+                      }
+                    }
                   }
                 }
               }
@@ -482,6 +492,43 @@ class BackfillShowAction @Inject constructor(
         }
       }
     }
+  }
+
+  private fun formatEta(etaMillis: Double): String {
+    val durationSeconds = etaMillis / 1000
+    var temp = durationSeconds.toLong()
+    val sb = StringBuilder()
+
+    val years = temp / 31536000
+    if (years > 0) {
+      sb.append("${years}y")
+      temp %= 31536000
+    }
+
+    val days = temp / 86400
+    if (days > 0) {
+      sb.append("${days}d")
+      temp %= 86400
+    }
+
+    val hours = temp / 3600
+    if (hours > 0) {
+      sb.append("${hours}h")
+      temp %= 3600
+    }
+
+    val minutes = temp / 60
+    if (minutes > 0) {
+      sb.append("${minutes}m")
+      temp %= 60
+    }
+
+    val seconds = temp
+    if (seconds > 0) {
+      sb.append("${seconds}s")
+    }
+
+    return if (sb.isEmpty()) "< 1s" else sb.toString()
   }
 
   companion object {
