@@ -283,10 +283,6 @@ class BackfillShowAction @Inject constructor(
         label = CANCEL_STATE_BUTTON_LABEL,
         href = BackfillState.CANCELLED.name,
       )
-      BackfillState.COMPLETE -> Link(
-        label = CANCEL_STATE_BUTTON_LABEL,
-        href = BackfillState.CANCELLED.name,
-      )
       else -> null
     }
   }
@@ -504,7 +500,7 @@ class BackfillShowAction @Inject constructor(
                 }
               }
 
-              // Add secondary button if present
+              // Add cancel button if present
               it.cancelButton?.let { cancelButton ->
                 span("ml-2") {
                   form {
