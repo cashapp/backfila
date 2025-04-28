@@ -516,7 +516,7 @@ class BackfillShowAction @Inject constructor(
                 }
               }
 
-              // Add secondary button if present
+              // Add cancel button if present
               it.cancelButton?.let { cancelButton ->
                 span("ml-2") {
                   form {
