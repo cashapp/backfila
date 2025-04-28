@@ -52,6 +52,15 @@ class SlackHelper @Inject constructor(
     slackClient.postMessage("Backfila", ":backfila:", message, channel)
   }
 
+  override fun runCancelled(id: Id<DbBackfillRun>, user: String) {
+    val (message, channel) = transacter.transaction { session ->
+      val run = session.load(id)
+      val message = ":backfila_cancel:${dryRunEmoji(run)} ${nameAndId(run)} canceled by @$user"
+      message to run.service.slack_channel
+    }
+    slackClient.postMessage("Backfila", ":backfila:", message, channel)
+  }
+
   private fun nameAndId(run: DbBackfillRun) =
     "[${deployment.name}] ${run.service.registry_name} (${run.service.variant}) `${run.registered_backfill.name}` " +
       "(${idLink(run.id)})"

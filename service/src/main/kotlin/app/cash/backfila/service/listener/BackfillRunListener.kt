@@ -8,4 +8,5 @@ interface BackfillRunListener {
   fun runPaused(id: Id<DbBackfillRun>, user: String)
   fun runErrored(id: Id<DbBackfillRun>)
   fun runCompleted(id: Id<DbBackfillRun>)
+  fun runCancelled(id: Id<DbBackfillRun>, user: String)
 }

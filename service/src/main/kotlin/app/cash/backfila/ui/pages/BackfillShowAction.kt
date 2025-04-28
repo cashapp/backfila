@@ -259,6 +259,7 @@ class BackfillShowAction @Inject constructor(
     /* Value of the button click is provided through the button.href field. */
     val button: Link? = null,
     val updateFieldId: String? = null,
+    val secondaryButton: Link? = null,
   )
 
   private fun getStateButton(state: BackfillState): Link? {
@@ -267,12 +268,26 @@ class BackfillShowAction @Inject constructor(
         label = START_STATE_BUTTON_LABEL,
         href = BackfillState.RUNNING.name,
       )
-
       BackfillState.COMPLETE -> null
+      BackfillState.CANCELLED -> null
       else -> Link(
         label = PAUSE_STATE_BUTTON_LABEL,
         href = BackfillState.PAUSED.name,
       )
+    }
+  }
+
+  private fun getCancelButton(state: BackfillState): Link? {
+    return when (state) {
+      BackfillState.PAUSED -> Link(
+        label = CANCEL_STATE_BUTTON_LABEL,
+        href = BackfillState.CANCELLED.name,
+      )
+      BackfillState.COMPLETE -> Link(
+        label = CANCEL_STATE_BUTTON_LABEL,
+        href = BackfillState.CANCELLED.name,
+      )
+      else -> null
     }
   }
 
@@ -282,6 +297,7 @@ class BackfillShowAction @Inject constructor(
       description = state.name,
       button = getStateButton(state),
       updateFieldId = "state",
+      secondaryButton = getCancelButton(state),
     ),
     DescriptionListRow(
       label = "Dry Run",
@@ -490,6 +506,35 @@ class BackfillShowAction @Inject constructor(
             }
           }
         }
+        // Add secondary button if present
+        it.secondaryButton?.let { secondaryButton ->
+          span("ml-2") {
+            form {
+              action = BackfillShowButtonHandlerAction.path(id)
+
+              it.updateFieldId?.let {
+                input {
+                  type = InputType.hidden
+                  name = "field_id"
+                  value = it
+                }
+
+                input {
+                  type = InputType.hidden
+                  name = "field_value"
+                  value = secondaryButton.href
+                }
+              }
+
+              button(
+                classes = "rounded-full bg-red-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600",
+              ) {
+                type = ButtonType.submit
+                +secondaryButton.label
+              }
+            }
+          }
+        }
       }
     }
   }
@@ -538,6 +583,7 @@ class BackfillShowAction @Inject constructor(
 
     const val START_STATE_BUTTON_LABEL = "Start"
     const val PAUSE_STATE_BUTTON_LABEL = "Pause"
+    const val CANCEL_STATE_BUTTON_LABEL = "Cancel"
     const val UPDATE_BUTTON_LABEL = "Update"
     const val VIEW_LOGS_BUTTON_LABEL = "View Logs"
   }
