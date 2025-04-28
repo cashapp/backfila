@@ -45,6 +45,7 @@ class ServiceShowAction @Inject constructor(
     @PathParam variantOrBlank: String? = "",
     @QueryParam offset: String? = null,
     @QueryParam lastOffset: String? = null,
+    @QueryParam showDeleted: Boolean = false,
   ): Response<ResponseBody> {
     if (service.isNullOrBlank()) {
       return Response(
@@ -55,7 +56,12 @@ class ServiceShowAction @Inject constructor(
     }
     val variant = variantOrBlank.orEmpty().ifBlank { "default" }
 
-    val backfillRuns = getBackfillRunsAction.backfillRuns(service, variant, offset)
+    val backfillRuns = getBackfillRunsAction.backfillRuns(
+      service = service,
+      variant = variant,
+      pagination_token = offset,
+      show_deleted = showDeleted,
+    )
 
     // TODO show default if other variants and probably link to a switcher
     val label = if (variant == "default") service else "$service ($variant)"
@@ -70,7 +76,6 @@ class ServiceShowAction @Inject constructor(
           PageTitle("Service", label) {
             a {
               href = BackfillCreateServiceIndexAction.path(service, variantOrBlank)
-
               button(classes = "rounded-full bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600") {
                 type = ButtonType.button
                 +"""Create"""
@@ -78,8 +83,8 @@ class ServiceShowAction @Inject constructor(
             }
           }
 
-          BackfillsTable(true, backfillRuns.running_backfills)
-          BackfillsTable(false, backfillRuns.paused_backfills)
+          BackfillsTable(true, backfillRuns.running_backfills, showDeleted)
+          BackfillsTable(false, backfillRuns.paused_backfills, showDeleted)
           Pagination(backfillRuns.next_pagination_token, offset, lastOffset, path(service, variantOrBlank))
         }
       }

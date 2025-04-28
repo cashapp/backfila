@@ -60,10 +60,12 @@ class GetBackfillRunsAction @Inject constructor(
     @QueryParam pagination_token: String? = null,
     @QueryParam backfill_name: String? = null,
     @QueryParam created_by_user: String? = null,
+    @QueryParam show_deleted: Boolean = false,
   ): GetBackfillRunsResponse {
     val filterArgs = FilterArgs(
       backfillName = backfill_name,
       createdByUser = created_by_user,
+      showDeleted = show_deleted,
     )
     return search(service, variant, pagination_token, filterArgs)
   }
@@ -83,7 +85,7 @@ class GetBackfillRunsAction @Inject constructor(
       val runningBackfills = queryFactory.newQuery<BackfillRunQuery>()
         .serviceId(dbService.id)
         .state(BackfillState.RUNNING)
-        .notSoftDeleted()
+        .apply { if (!filterArgs.showDeleted) notSoftDeleted() }
         .orderByIdDesc()
         .filterByArgs(filterArgs)
         .list(session)
@@ -103,7 +105,7 @@ class GetBackfillRunsAction @Inject constructor(
       val (pausedBackfills, nextOffset) = queryFactory.newQuery<BackfillRunQuery>()
         .serviceId(dbService.id)
         .stateNot(BackfillState.RUNNING)
-        .notSoftDeleted()
+        .apply { if (!filterArgs.showDeleted) notSoftDeleted() }
         .filterByArgs(filterArgs)
         .newPager(
           idDescPaginator(),
@@ -220,5 +222,6 @@ class GetBackfillRunsAction @Inject constructor(
   private data class FilterArgs(
     val backfillName: String? = null,
     val createdByUser: String? = null,
+    val showDeleted: Boolean = false,
   )
 }
