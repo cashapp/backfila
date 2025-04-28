@@ -259,7 +259,7 @@ class BackfillShowAction @Inject constructor(
     /* Value of the button click is provided through the button.href field. */
     val button: Link? = null,
     val updateFieldId: String? = null,
-    val secondaryButton: Link? = null,
+    val cancelButton: Link? = null,
   )
 
   private fun getStateButton(state: BackfillState): Link? {
@@ -297,7 +297,7 @@ class BackfillShowAction @Inject constructor(
       description = state.name,
       button = getStateButton(state),
       updateFieldId = "state",
-      secondaryButton = getCancelButton(state),
+      cancelButton = getCancelButton(state),
     ),
     DescriptionListRow(
       label = "Dry Run",
@@ -505,7 +505,7 @@ class BackfillShowAction @Inject constructor(
               }
 
               // Add secondary button if present
-              it.secondaryButton?.let { secondaryButton ->
+              it.cancelButton?.let { cancelButton ->
                 span("ml-2") {
                   form {
                     action = BackfillShowButtonHandlerAction.path(id)
@@ -520,7 +520,7 @@ class BackfillShowAction @Inject constructor(
                       input {
                         type = InputType.hidden
                         name = "field_value"
-                        value = secondaryButton.href
+                        value = cancelButton.href
                       }
                     }
 
@@ -528,7 +528,7 @@ class BackfillShowAction @Inject constructor(
                       classes = "rounded-full bg-red-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600",
                     ) {
                       type = ButtonType.submit
-                      +secondaryButton.label
+                      +cancelButton.label
                     }
                   }
                 }
