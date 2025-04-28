@@ -90,6 +90,9 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
   @Column(nullable = false)
   var dry_run: Boolean = false
 
+  @Column(nullable = false)
+  var soft_deleted: Boolean = false
+
   /** Comma separated list of delays for consecutive retries in milliseconds, e.g. 1000,2000 */
   @Column
   var backoff_schedule: String? = null
