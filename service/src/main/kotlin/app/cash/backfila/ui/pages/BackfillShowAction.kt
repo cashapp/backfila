@@ -3,6 +3,7 @@ package app.cash.backfila.ui.pages
 import app.cash.backfila.dashboard.GetBackfillStatusAction
 import app.cash.backfila.dashboard.GetBackfillStatusResponse
 import app.cash.backfila.dashboard.ViewLogsAction
+import app.cash.backfila.service.persistence.BackfillSoftDelete
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.ui.actions.BackfillShowButtonHandlerAction
 import app.cash.backfila.ui.components.AutoReload
@@ -260,6 +261,7 @@ class BackfillShowAction @Inject constructor(
     val button: Link? = null,
     val updateFieldId: String? = null,
     val cancelButton: Link? = null,
+    val deleteButton: Link? = null,
   )
 
   private fun getStateButton(state: BackfillState): Link? {
@@ -283,9 +285,18 @@ class BackfillShowAction @Inject constructor(
         label = CANCEL_STATE_BUTTON_LABEL,
         href = BackfillState.CANCELLED.name,
       )
-      BackfillState.COMPLETE -> Link(
-        label = CANCEL_STATE_BUTTON_LABEL,
-        href = BackfillState.CANCELLED.name,
+      else -> null
+    }
+  }
+
+  private fun getDeleteButton(state: BackfillState, softDeleted: Boolean): Link? {
+    if (softDeleted) {
+      return null
+    }
+    return when (state) {
+      BackfillState.COMPLETE, BackfillState.CANCELLED -> Link(
+        label = DELETE_STATE_BUTTON_LABEL,
+        href = BackfillSoftDelete.SOFT_DELETED.name,
       )
       else -> null
     }
@@ -298,6 +309,7 @@ class BackfillShowAction @Inject constructor(
       button = getStateButton(state),
       updateFieldId = "state",
       cancelButton = getCancelButton(state),
+      deleteButton = getDeleteButton(state, soft_deleted),
     ),
     DescriptionListRow(
       label = "Dry Run",
@@ -536,6 +548,35 @@ class BackfillShowAction @Inject constructor(
             }
           }
         }
+
+        it.deleteButton?.let { deleteButton ->
+          span("ml-2") {
+            form {
+              action = BackfillShowButtonHandlerAction.path(id)
+
+              it.updateFieldId?.let {
+                input {
+                  type = InputType.hidden
+                  name = "field_id"
+                  value = it
+                }
+
+                input {
+                  type = InputType.hidden
+                  name = "field_value"
+                  value = deleteButton.href
+                }
+              }
+
+              button(
+                classes = "rounded-full bg-gray-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600",
+              ) {
+                type = ButtonType.submit
+                +deleteButton.label
+              }
+            }
+          }
+        }
       }
     }
   }
@@ -585,6 +626,7 @@ class BackfillShowAction @Inject constructor(
     const val START_STATE_BUTTON_LABEL = "Start"
     const val PAUSE_STATE_BUTTON_LABEL = "Pause"
     const val CANCEL_STATE_BUTTON_LABEL = "Cancel"
+    const val DELETE_STATE_BUTTON_LABEL = "Delete"
     const val UPDATE_BUTTON_LABEL = "Update"
     const val VIEW_LOGS_BUTTON_LABEL = "View Logs"
   }

@@ -1,12 +1,14 @@
 package app.cash.backfila.ui.actions
 
 import app.cash.backfila.dashboard.CancelBackfillAction
+import app.cash.backfila.dashboard.SoftDeleteBackfillAction
 import app.cash.backfila.dashboard.StartBackfillAction
 import app.cash.backfila.dashboard.StartBackfillRequest
 import app.cash.backfila.dashboard.StopBackfillAction
 import app.cash.backfila.dashboard.StopBackfillRequest
 import app.cash.backfila.dashboard.UpdateBackfillAction
 import app.cash.backfila.dashboard.UpdateBackfillRequest
+import app.cash.backfila.service.persistence.BackfillSoftDelete
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.ui.components.AlertError
 import app.cash.backfila.ui.components.DashboardPageLayout
@@ -33,6 +35,7 @@ class BackfillShowButtonHandlerAction @Inject constructor(
   private val stopBackfillAction: StopBackfillAction,
   private val updateBackfillAction: UpdateBackfillAction,
   private val cancelBackfillAction: CancelBackfillAction,
+  private val softDeleteBackfillAction: SoftDeleteBackfillAction,
 ) : WebAction {
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
@@ -55,6 +58,9 @@ class BackfillShowButtonHandlerAction @Inject constructor(
               }
               BackfillState.CANCELLED.name -> {
                 cancelBackfillAction.cancel(id.toLong())
+              }
+              BackfillSoftDelete.SOFT_DELETED.name -> {
+                softDeleteBackfillAction.softDelete(id.toLong())
               }
             }
           }
