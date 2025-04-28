@@ -1,5 +1,6 @@
 package app.cash.backfila.service.persistence
 
+import com.google.common.base.Preconditions.checkState
 import java.time.Instant
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -133,9 +134,7 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
 
   fun setState(session: Session, queryFactory: Query.Factory, state: BackfillState) {
     // State can't be changed after being completed.
-    if (this.state == BackfillState.COMPLETE) {
-      return
-    }
+    checkState(this.state != BackfillState.COMPLETE)
 
     this.state = state
     // Set the state of all the partitions that are not complete
