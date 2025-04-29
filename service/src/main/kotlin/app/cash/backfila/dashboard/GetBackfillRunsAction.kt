@@ -83,7 +83,6 @@ class GetBackfillRunsAction @Inject constructor(
       val runningBackfills = queryFactory.newQuery<BackfillRunQuery>()
         .serviceId(dbService.id)
         .state(BackfillState.RUNNING)
-        .notSoftDeleted()
         .orderByIdDesc()
         .filterByArgs(filterArgs)
         .list(session)

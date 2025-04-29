@@ -12,6 +12,7 @@ import app.cash.backfila.ui.components.PageTitle
 import app.cash.backfila.ui.components.Pagination
 import app.cash.backfila.ui.components.ProgressBar
 import app.cash.backfila.ui.pages.BackfillCreateAction.BackfillCreateField.CUSTOM_PARAMETER_PREFIX
+import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.html.ButtonType
@@ -298,8 +299,8 @@ class BackfillShowAction @Inject constructor(
     }
   }
 
-  private fun getDeleteButton(state: BackfillState, softDeleted: Boolean): Link? {
-    if (softDeleted) {
+  private fun getDeleteButton(state: BackfillState, deletedAt: Instant?): Link? {
+    if (deletedAt != null) {
       return null
     }
     return when (state) {
@@ -318,7 +319,7 @@ class BackfillShowAction @Inject constructor(
       button = getStateButton(state),
       updateFieldId = "state",
       cancelButton = getCancelButton(state),
-      deleteButton = getDeleteButton(state, soft_deleted),
+      deleteButton = getDeleteButton(state, deleted_at),
     ),
     DescriptionListRow(
       label = "Dry Run",
