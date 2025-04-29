@@ -26,7 +26,7 @@ class SoftDeleteBackfillAction @Inject constructor(
   @Post("/backfill/delete/{id}")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
-  @Authenticated
+  @Authenticated(capabilities = ["users"])
   fun softDelete(
     @PathParam id: Long,
   ) {
