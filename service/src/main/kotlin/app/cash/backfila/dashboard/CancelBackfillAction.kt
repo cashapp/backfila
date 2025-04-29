@@ -30,7 +30,7 @@ class CancelBackfillAction @Inject constructor(
   @Post("/backfill/cancel/{id}")
   @RequestContentType(MediaTypes.APPLICATION_JSON)
   @ResponseContentType(MediaTypes.APPLICATION_JSON)
-  @Authenticated
+  @Authenticated(capabilities = ["users"])
   fun cancel(
     @PathParam id: Long,
   ) {
