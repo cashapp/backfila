@@ -85,7 +85,6 @@ class GetBackfillRunsAction @Inject constructor(
       val runningBackfills = queryFactory.newQuery<BackfillRunQuery>()
         .serviceId(dbService.id)
         .state(BackfillState.RUNNING)
-        .notSoftDeleted()
         .orderByIdDesc()
         .filterByArgs(filterArgs)
         .list(session)
@@ -105,7 +104,7 @@ class GetBackfillRunsAction @Inject constructor(
       val (pausedBackfills, nextOffset) = queryFactory.newQuery<BackfillRunQuery>()
         .serviceId(dbService.id)
         .stateNot(BackfillState.RUNNING)
-        .notSoftDeleted()
+        .apply { if (!filterArgs.showDeleted) notSoftDeleted() }
         .filterByArgs(filterArgs)
         .newPager(
           idDescPaginator(),
