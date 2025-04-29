@@ -83,7 +83,7 @@ class ServiceShowAction @Inject constructor(
             }
           }
 
-          BackfillsTable(true, backfillRuns.running_backfills, showDeleted)
+          BackfillsTable(true, backfillRuns.running_backfills)
           BackfillsTable(false, backfillRuns.paused_backfills, showDeleted)
           Pagination(backfillRuns.next_pagination_token, offset, lastOffset, path(service, variantOrBlank))
         }
