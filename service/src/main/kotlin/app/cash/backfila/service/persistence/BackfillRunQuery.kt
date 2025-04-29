@@ -31,6 +31,6 @@ interface BackfillRunQuery : Query<DbBackfillRun> {
   @Order("updated_at", asc = false)
   fun orderByUpdatedAtDesc(): BackfillRunQuery
 
-  @Constraint("soft_deleted", Operator.EQ)
-  fun notSoftDeleted(softDeleted: Boolean = false): BackfillRunQuery
+  @Constraint("deleted_at", Operator.IS_NULL)
+  fun notSoftDeleted(): BackfillRunQuery
 }

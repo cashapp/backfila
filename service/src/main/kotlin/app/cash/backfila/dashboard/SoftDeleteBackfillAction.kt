@@ -38,7 +38,7 @@ class SoftDeleteBackfillAction @Inject constructor(
         throw BadRequestException("Can only delete completed or cancelled backfills")
       }
 
-      backfillRun.soft_deleted = true
+      backfillRun.deleted_at = java.time.Instant.now()
 
       // Log the deletion event
       session.save(
