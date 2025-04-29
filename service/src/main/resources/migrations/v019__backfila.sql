@@ -1,0 +1,2 @@
+ALTER TABLE backfill_runs
+    ADD COLUMN `deleted_at` TIMESTAMP NULL DEFAULT NULL;
