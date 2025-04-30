@@ -3,7 +3,6 @@ package app.cash.backfila.ui.pages
 import app.cash.backfila.dashboard.GetBackfillStatusAction
 import app.cash.backfila.dashboard.GetBackfillStatusResponse
 import app.cash.backfila.dashboard.ViewLogsAction
-import app.cash.backfila.service.persistence.BackfillSoftDelete
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.ui.actions.BackfillShowButtonHandlerAction
 import app.cash.backfila.ui.components.AutoReload
@@ -298,7 +297,7 @@ class BackfillShowAction @Inject constructor(
     return when (state) {
       BackfillState.COMPLETE, BackfillState.CANCELLED -> Link(
         label = DELETE_STATE_BUTTON_LABEL,
-        href = BackfillSoftDelete.SOFT_DELETED.name,
+        href = "soft_delete",
       )
       else -> null
     }
