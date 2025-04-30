@@ -37,8 +37,7 @@ class CancelBackfillAction @Inject constructor(
     transacter.transaction { session ->
       val backfillRun = session.load<DbBackfillRun>(Id(id))
 
-      // Check if backfill can be cancelled
-      if (backfillRun.state == BackfillState.CANCELLED) {
+      if (backfillRun.state != BackfillState.PAUSED) {
         throw BadRequestException("Cannot cancel a ${backfillRun.state.name.lowercase()} backfill")
       }
 
