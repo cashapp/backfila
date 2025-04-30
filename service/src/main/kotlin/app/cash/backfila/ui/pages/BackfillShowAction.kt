@@ -271,6 +271,7 @@ class BackfillShowAction @Inject constructor(
         label = START_STATE_BUTTON_LABEL,
         href = BackfillState.RUNNING.name,
       )
+      // COMPLETE and CANCELLED represent final states.
       BackfillState.COMPLETE -> null
       BackfillState.CANCELLED -> null
       else -> Link(
