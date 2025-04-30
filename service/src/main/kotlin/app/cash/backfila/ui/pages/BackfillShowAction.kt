@@ -207,77 +207,80 @@ class BackfillShowAction @Inject constructor(
           }
 
           Card {
-            // Logs
-            h2("text-base font-semibold leading-6 text-gray-900") { +"""Events""" }
-            table("my-8 text-left text-sm leading-6") {
-              thead("border-b border-gray-200 text-gray-900") {
-                tr {
-                  th(classes = "px-0 py-3 font-semibold") {
-                    scope = ThScope.col
-                    +"""Time"""
-                  }
-                  th(classes = "hidden py-3 pl-8 pr-0 font-semibold sm:table-cell") {
-                    scope = ThScope.col
-                    +"""User"""
-                  }
-                  th(classes = "hidden py-3 pl-8 pr-0 font-semibold sm:table-cell") {
-                    scope = ThScope.col
-                    +"""Partition"""
-                  }
-                  th(classes = "py-3 pl-8 pr-0 font-semibold") {
-                    scope = ThScope.col
-                    +"""Event"""
-                  }
-                  th(classes = "py-3 pl-8 pr-0 font-semibold") {
-                    scope = ThScope.col
-                    +"""More Data"""
-                  }
-                }
-              }
-              tbody {
-                val logsPerPage = 10
-                val currentPage = page ?: 1
-                val paginatedLogs = backfill.event_logs.drop((currentPage - 1) * logsPerPage).take(logsPerPage)
-                val totalPages = (backfill.event_logs.size + logsPerPage - 1) / logsPerPage
-
-                paginatedLogs.map { log ->
-                  tr("border-b border-gray-100") {
-                    td("hidden py-5 pl-8 pr-0 align-top text-wrap text-gray-700 sm:table-cell") {
-                      +log.occurred_at.toString().replace("T", " ").dropLast(5)
+            // Events
+            div {
+              h2("text-base font-semibold leading-6 text-gray-900") { +"""Events""" }
+              table("my-8 text-left text-sm leading-6") {
+                thead("border-b border-gray-200 text-gray-900") {
+                  tr {
+                    th(classes = "px-0 py-3 font-semibold") {
+                      scope = ThScope.col
+                      +"""Time"""
                     }
-                    td("hidden py-5 pl-8 pr-0 align-top text-gray-700 sm:table-cell") { log.user?.let { +it } }
-                    td("hidden py-5 pl-8 pr-0 align-top text-gray-700 sm:table-cell") { log.partition_name?.let { +it } }
-                    td("hidden py-5 pl-8 pr-0 align-top max-w-2 text-wrap text-gray-700 sm:table-cell") { +log.message }
-                    td("hidden py-5 pl-8 pr-0 align-top max-w-2 text-wrap text-gray-700 sm:table-cell") { log.extra_data?.let { +it } }
+                    th(classes = "hidden py-3 pl-8 pr-0 font-semibold sm:table-cell") {
+                      scope = ThScope.col
+                      +"""User"""
+                    }
+                    th(classes = "hidden py-3 pl-8 pr-0 font-semibold sm:table-cell") {
+                      scope = ThScope.col
+                      +"""Partition"""
+                    }
+                    th(classes = "py-3 pl-8 pr-0 font-semibold") {
+                      scope = ThScope.col
+                      +"""Event"""
+                    }
+                    th(classes = "py-3 pl-8 pr-0 font-semibold") {
+                      scope = ThScope.col
+                      +"""More Data"""
+                    }
                   }
                 }
+                tbody {
+                  val logsPerPage = 10
+                  val currentPage = page ?: 1
+                  val paginatedLogs = backfill.event_logs.drop((currentPage - 1) * logsPerPage).take(logsPerPage)
+                  val totalPages = (backfill.event_logs.size + logsPerPage - 1) / logsPerPage
 
-                // Pagination controls
-                tr {
-                  td(classes = "text-center py-4") {
-                    attributes["colspan"] = "5"
-                    div("flex items-center justify-center gap-2") {
-                      if (currentPage > 1) {
-                        a(href = "${path(id)}?page=${currentPage - 1}", classes = "rounded-md px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50") {
-                          +"Previous"
-                        }
-                      } else {
-                        span(classes = "rounded-md px-3 py-2 text-sm font-semibold text-gray-400 ring-1 ring-inset ring-gray-300") {
-                          +"Previous"
-                        }
+                  paginatedLogs.map { log ->
+                    tr("border-b border-gray-100") {
+                      td("hidden py-5 pl-8 pr-0 align-top text-wrap text-gray-700 sm:table-cell") {
+                        +log.occurred_at.toString().replace("T", " ").dropLast(5)
                       }
+                      td("hidden py-5 pl-8 pr-0 align-top text-gray-700 sm:table-cell") { log.user?.let { +it } }
+                      td("hidden py-5 pl-8 pr-0 align-top text-gray-700 sm:table-cell") { log.partition_name?.let { +it } }
+                      td("hidden py-5 pl-8 pr-0 align-top max-w-2 text-wrap text-gray-700 sm:table-cell") { +log.message }
+                      td("hidden py-5 pl-8 pr-0 align-top max-w-2 text-wrap text-gray-700 sm:table-cell") { log.extra_data?.let { +it } }
+                    }
+                  }
 
-                      span("text-sm text-gray-700") {
-                        +"Page $currentPage of $totalPages"
-                      }
-
-                      if (currentPage < totalPages) {
-                        a(href = "${path(id)}?page=${currentPage + 1}", classes = "rounded-md px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50") {
-                          +"Next"
+                  // Pagination controls
+                  tr {
+                    td(classes = "text-center py-4") {
+                      attributes["colspan"] = "5"
+                      attributes["id"] = "events-section"
+                      div("flex items-center justify-center gap-2") {
+                        if (currentPage > 1) {
+                          a(href = "${path(id)}?page=${currentPage - 1}#events-section", classes = "rounded-md px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50") {
+                            +"Previous"
+                          }
+                        } else {
+                          span(classes = "rounded-md px-3 py-2 text-sm font-semibold text-gray-400 ring-1 ring-inset ring-gray-300") {
+                            +"Previous"
+                          }
                         }
-                      } else {
-                        span(classes = "rounded-md px-3 py-2 text-sm font-semibold text-gray-400 ring-1 ring-inset ring-gray-300") {
-                          +"Next"
+
+                        span("text-sm text-gray-700") {
+                          +"Page $currentPage of $totalPages"
+                        }
+
+                        if (currentPage < totalPages) {
+                          a(href = "${path(id)}?page=${currentPage + 1}#events-section", classes = "rounded-md px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50") {
+                            +"Next"
+                          }
+                        } else {
+                          span(classes = "rounded-md px-3 py-2 text-sm font-semibold text-gray-400 ring-1 ring-inset ring-gray-300") {
+                            +"Next"
+                          }
                         }
                       }
                     }
