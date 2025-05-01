@@ -1,5 +1,7 @@
 package app.cash.backfila.dashboard
 
+import app.cash.backfila.ui.pages.EditPartitionCursorAction
+import app.cash.backfila.ui.pages.EditPartitionCursorHandlerAction
 import misk.inject.KAbstractModule
 import misk.web.WebActionModule
 
@@ -17,5 +19,7 @@ class BackfilaWebActionsModule() : KAbstractModule() {
     install(WebActionModule.create<GetBackfillStatusAction>())
     install(WebActionModule.create<UpdateBackfillAction>())
     install(WebActionModule.create<ViewLogsAction>())
+    install(WebActionModule.create<EditPartitionCursorAction>())
+    install(WebActionModule.create<EditPartitionCursorHandlerAction>())
   }
 }

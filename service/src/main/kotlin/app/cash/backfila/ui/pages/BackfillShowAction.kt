@@ -157,6 +157,12 @@ class BackfillShowAction @Inject constructor(
                     scope = ThScope.col
                     +"""ETA"""
                   }
+                  if (backfill.state == BackfillState.PAUSED) {
+                    th(classes = "py-3 pl-8 pr-0 text-right font-semibold") {
+                      scope = ThScope.col
+                      +"""Actions"""
+                    }
+                  }
                 }
               }
               tbody {
@@ -195,6 +201,16 @@ class BackfillShowAction @Inject constructor(
                         else -> {
                           val etaSeconds = (partition.computed_matching_record_count - partition.backfilled_matching_record_count).toDouble() / (partition.matching_records_per_minute / 60.0)
                           +formatEta(etaSeconds * 1000)
+                        }
+                      }
+                    }
+                    if (backfill.state == BackfillState.PAUSED) {
+                      td("py-5 pl-8 pr-0 text-right align-top") {
+                        a(
+                          href = EditPartitionCursorAction.path(id, partition.name),
+                          classes = "text-indigo-600 hover:text-indigo-900",
+                        ) {
+                          +"Edit Cursor"
                         }
                       }
                     }
