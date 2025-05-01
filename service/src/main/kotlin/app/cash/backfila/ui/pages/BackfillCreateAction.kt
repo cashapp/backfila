@@ -193,7 +193,7 @@ class BackfillCreateAction @Inject constructor(
                           }
                           p("text-gray-500") {
                             id = "dry-run-description"
-                            +"""Anything within your not Dry Run block will not be run."""
+                            +"""Only code in your Dry Run block will be run. Any code outside will not be run."""
                           }
                         }
                       }
