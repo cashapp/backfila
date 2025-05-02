@@ -11,13 +11,17 @@ import javax.inject.Inject
 import misk.exceptions.BadRequestException
 import misk.hibernate.Id
 import misk.hibernate.Query
-import misk.hibernate.Session
 import misk.hibernate.Transacter
 import misk.hibernate.loadOrNull
 import misk.hibernate.newQuery
+import misk.hibernate.pagination.Offset
+import misk.hibernate.pagination.Page
+import misk.hibernate.pagination.idDescPaginator
+import misk.hibernate.pagination.newPager
 import misk.security.authz.Authenticated
 import misk.web.Get
 import misk.web.PathParam
+import misk.web.QueryParam
 import misk.web.RequestContentType
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
@@ -65,6 +69,7 @@ data class GetBackfillStatusResponse(
   val backoff_schedule: String?,
   val partitions: List<UiPartition>,
   val event_logs: List<UiEventLog>,
+  val next_offset: String?,
 )
 
 class GetBackfillStatusAction @Inject constructor(
@@ -77,11 +82,23 @@ class GetBackfillStatusAction @Inject constructor(
   @Authenticated(allowAnyUser = true)
   fun status(
     @PathParam id: Long,
+    @QueryParam offset: String? = null,
   ): GetBackfillStatusResponse {
     return transacter.transaction { session ->
       val run = session.loadOrNull<DbBackfillRun>(Id(id))
         ?: throw BadRequestException("backfill $id doesn't exist")
       val partitions = run.partitions(session, queryFactory)
+      val partitionsById = partitions.associateBy { it.id }
+
+      val (events, nextOffset) = queryFactory.newQuery<EventLogQuery>()
+        .backfillRunId(run.id)
+        .newPager(
+          idDescPaginator(),
+          initialOffset = offset?.let { Offset(it) },
+          pageSize = 10,
+        )
+        .nextPage(session) ?: Page.empty()
+
       GetBackfillStatusResponse(
         run.service.registry_name,
         run.service.variant,
@@ -97,7 +114,17 @@ class GetBackfillStatusAction @Inject constructor(
         run.extra_sleep_ms,
         run.backoff_schedule,
         partitions.map { dbToUi(it) },
-        events(session, run, partitions),
+        events.map { event ->
+          UiEventLog(
+            event.created_at,
+            event.type,
+            event.user,
+            partitionsById[event.partition_id]?.partition_name,
+            event.message,
+            event.extra_data,
+          )
+        },
+        nextOffset?.offset,
       )
     }
   }
@@ -119,27 +146,4 @@ class GetBackfillStatusAction @Inject constructor(
       partition.scanned_records_per_minute,
       partition.matching_records_per_minute,
     )
-
-  private fun events(
-    session: Session,
-    run: DbBackfillRun,
-    partitions: List<DbRunPartition>,
-  ): List<UiEventLog> {
-    val partitionsById = partitions.associateBy { it.id }
-    return queryFactory.newQuery<EventLogQuery>()
-      .backfillRunId(run.id)
-      .orderByIdDesc()
-      .apply { maxRows = 50 }
-      .list(session)
-      .map {
-        UiEventLog(
-          it.created_at,
-          it.type,
-          it.user,
-          partitionsById[it.partition_id]?.partition_name,
-          it.message,
-          it.extra_data,
-        )
-      }
-  }
 }

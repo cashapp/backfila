@@ -8,6 +8,7 @@ import app.cash.backfila.ui.actions.BackfillShowButtonHandlerAction
 import app.cash.backfila.ui.components.AutoReload
 import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.components.PageTitle
+import app.cash.backfila.ui.components.Pagination
 import app.cash.backfila.ui.components.ProgressBar
 import app.cash.backfila.ui.pages.BackfillCreateAction.BackfillCreateField.CUSTOM_PARAMETER_PREFIX
 import javax.inject.Inject
@@ -54,9 +55,10 @@ class BackfillShowAction @Inject constructor(
   @Authenticated(capabilities = ["users"])
   fun get(
     @PathParam id: Long,
-    @QueryParam page: Int? = 1,
+    @QueryParam offset: String? = null,
+    @QueryParam lastOffset: String? = null,
   ): Response<ResponseBody> {
-    val backfill = getBackfillStatusAction.status(id)
+    val backfill = getBackfillStatusAction.status(id, offset)
     val label =
       if (backfill.variant == "default") backfill.service_name else "${backfill.service_name} (${backfill.variant})"
 
@@ -236,12 +238,7 @@ class BackfillShowAction @Inject constructor(
                   }
                 }
                 tbody {
-                  val logsPerPage = 10
-                  val currentPage = page ?: 1
-                  val paginatedLogs = backfill.event_logs.drop((currentPage - 1) * logsPerPage).take(logsPerPage)
-                  val totalPages = (backfill.event_logs.size + logsPerPage - 1) / logsPerPage
-
-                  paginatedLogs.map { log ->
+                  backfill.event_logs.map { log ->
                     tr("border-b border-gray-100") {
                       td("hidden py-5 pl-8 pr-0 align-top text-wrap text-gray-700 sm:table-cell") {
                         +log.occurred_at.toString().replace("T", " ").dropLast(5)
@@ -252,41 +249,10 @@ class BackfillShowAction @Inject constructor(
                       td("hidden py-5 pl-8 pr-0 align-top max-w-2 text-wrap text-gray-700 sm:table-cell") { log.extra_data?.let { +it } }
                     }
                   }
-
-                  // Pagination controls
-                  tr {
-                    td(classes = "text-center py-4") {
-                      attributes["colspan"] = "5"
-                      attributes["id"] = "events-section"
-                      div("flex items-center justify-center gap-2") {
-                        if (currentPage > 1) {
-                          a(href = "${path(id)}?page=${currentPage - 1}#events-section", classes = "rounded-md px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50") {
-                            +"Previous"
-                          }
-                        } else {
-                          span(classes = "rounded-md px-3 py-2 text-sm font-semibold text-gray-400 ring-1 ring-inset ring-gray-300") {
-                            +"Previous"
-                          }
-                        }
-
-                        span("text-sm text-gray-700") {
-                          +"Page $currentPage of $totalPages"
-                        }
-
-                        if (currentPage < totalPages) {
-                          a(href = "${path(id)}?page=${currentPage + 1}#events-section", classes = "rounded-md px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50") {
-                            +"Next"
-                          }
-                        } else {
-                          span(classes = "rounded-md px-3 py-2 text-sm font-semibold text-gray-400 ring-1 ring-inset ring-gray-300") {
-                            +"Next"
-                          }
-                        }
-                      }
-                    }
-                  }
                 }
               }
+
+              Pagination(backfill.next_offset, offset, lastOffset, path(id))
             }
           }
         }
