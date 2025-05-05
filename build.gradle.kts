@@ -63,8 +63,6 @@ subprojects {
           "**/node_modules/**", 
           "**/build/**", 
           "**/.gradle/**",
-          "web/**",
-          "**/web/**"
       )
       ktlint(libs.versions.ktlint.get()).editorConfigOverride(
           mapOf(
