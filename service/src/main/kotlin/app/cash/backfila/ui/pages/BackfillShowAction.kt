@@ -8,6 +8,7 @@ import app.cash.backfila.ui.actions.BackfillShowButtonHandlerAction
 import app.cash.backfila.ui.components.AutoReload
 import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.components.PageTitle
+import app.cash.backfila.ui.components.Pagination
 import app.cash.backfila.ui.components.ProgressBar
 import app.cash.backfila.ui.pages.BackfillCreateAction.BackfillCreateField.CUSTOM_PARAMETER_PREFIX
 import javax.inject.Inject
@@ -36,6 +37,7 @@ import misk.security.authz.Authenticated
 import misk.tailwind.Link
 import misk.web.Get
 import misk.web.PathParam
+import misk.web.QueryParam
 import misk.web.Response
 import misk.web.ResponseBody
 import misk.web.ResponseContentType
@@ -53,8 +55,10 @@ class BackfillShowAction @Inject constructor(
   @Authenticated(capabilities = ["users"])
   fun get(
     @PathParam id: Long,
+    @QueryParam offset: String? = null,
+    @QueryParam lastOffset: String? = null,
   ): Response<ResponseBody> {
-    val backfill = getBackfillStatusAction.status(id)
+    val backfill = getBackfillStatusAction.status(id, offset)
     val label =
       if (backfill.variant == "default") backfill.service_name else "${backfill.service_name} (${backfill.variant})"
 
@@ -205,46 +209,50 @@ class BackfillShowAction @Inject constructor(
           }
 
           Card {
-            // Logs
-            h2("text-base font-semibold leading-6 text-gray-900") { +"""Logs""" }
-            table("my-8 text-left text-sm leading-6") {
-              thead("border-b border-gray-200 text-gray-900") {
-                tr {
-                  th(classes = "px-0 py-3 font-semibold") {
-                    scope = ThScope.col
-                    +"""Time"""
-                  }
-                  th(classes = "hidden py-3 pl-8 pr-0 font-semibold sm:table-cell") {
-                    scope = ThScope.col
-                    +"""User"""
-                  }
-                  th(classes = "hidden py-3 pl-8 pr-0 font-semibold sm:table-cell") {
-                    scope = ThScope.col
-                    +"""Partition"""
-                  }
-                  th(classes = "py-3 pl-8 pr-0 font-semibold") {
-                    scope = ThScope.col
-                    +"""Event"""
-                  }
-                  th(classes = "py-3 pl-8 pr-0 font-semibold") {
-                    scope = ThScope.col
-                    +"""More Data"""
-                  }
-                }
-              }
-              tbody {
-                backfill.event_logs.map { log ->
-                  tr("border-b border-gray-100") {
-                    td("hidden py-5 pl-8 pr-0 align-top text-wrap text-gray-700 sm:table-cell") {
-                      +log.occurred_at.toString().replace("T", " ").dropLast(5)
+            // Events
+            div {
+              h2("text-base font-semibold leading-6 text-gray-900") { +"""Events""" }
+              table("my-8 text-left text-sm leading-6") {
+                thead("border-b border-gray-200 text-gray-900") {
+                  tr {
+                    th(classes = "px-0 py-3 font-semibold") {
+                      scope = ThScope.col
+                      +"""Time"""
                     }
-                    td("hidden py-5 pl-8 pr-0 align-top text-gray-700 sm:table-cell") { log.user?.let { +it } }
-                    td("hidden py-5 pl-8 pr-0 align-top text-gray-700 sm:table-cell") { log.partition_name?.let { +it } }
-                    td("hidden py-5 pl-8 pr-0 align-top max-w-2 text-wrap text-gray-700 sm:table-cell") { +log.message }
-                    td("hidden py-5 pl-8 pr-0 align-top max-w-2 text-wrap text-gray-700 sm:table-cell") { log.extra_data?.let { +it } }
+                    th(classes = "hidden py-3 pl-8 pr-0 font-semibold sm:table-cell") {
+                      scope = ThScope.col
+                      +"""User"""
+                    }
+                    th(classes = "hidden py-3 pl-8 pr-0 font-semibold sm:table-cell") {
+                      scope = ThScope.col
+                      +"""Partition"""
+                    }
+                    th(classes = "py-3 pl-8 pr-0 font-semibold") {
+                      scope = ThScope.col
+                      +"""Event"""
+                    }
+                    th(classes = "py-3 pl-8 pr-0 font-semibold") {
+                      scope = ThScope.col
+                      +"""More Data"""
+                    }
+                  }
+                }
+                tbody {
+                  backfill.event_logs.map { log ->
+                    tr("border-b border-gray-100") {
+                      td("hidden py-5 pl-8 pr-0 align-top text-wrap text-gray-700 sm:table-cell") {
+                        +log.occurred_at.toString().replace("T", " ").dropLast(5)
+                      }
+                      td("hidden py-5 pl-8 pr-0 align-top text-gray-700 sm:table-cell") { log.user?.let { +it } }
+                      td("hidden py-5 pl-8 pr-0 align-top text-gray-700 sm:table-cell") { log.partition_name?.let { +it } }
+                      td("hidden py-5 pl-8 pr-0 align-top max-w-2 text-wrap text-gray-700 sm:table-cell") { +log.message }
+                      td("hidden py-5 pl-8 pr-0 align-top max-w-2 text-wrap text-gray-700 sm:table-cell") { log.extra_data?.let { +it } }
+                    }
                   }
                 }
               }
+
+              Pagination(backfill.next_offset, offset, lastOffset, path(id))
             }
           }
         }
