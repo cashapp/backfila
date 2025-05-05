@@ -1,7 +1,5 @@
 package app.cash.backfila.dashboard
 
-import app.cash.backfila.ui.pages.EditPartitionCursorAction
-import app.cash.backfila.ui.pages.EditPartitionCursorHandlerAction
 import misk.inject.KAbstractModule
 import misk.web.WebActionModule
 
