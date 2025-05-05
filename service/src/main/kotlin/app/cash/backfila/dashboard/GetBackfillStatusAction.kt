@@ -65,6 +65,7 @@ data class GetBackfillStatusResponse(
   val backoff_schedule: String?,
   val partitions: List<UiPartition>,
   val event_logs: List<UiEventLog>,
+  val deleted_at: Instant?,
 )
 
 class GetBackfillStatusAction @Inject constructor(
@@ -98,6 +99,7 @@ class GetBackfillStatusAction @Inject constructor(
         run.backoff_schedule,
         partitions.map { dbToUi(it) },
         events(session, run, partitions),
+        run.deleted_at,
       )
     }
   }

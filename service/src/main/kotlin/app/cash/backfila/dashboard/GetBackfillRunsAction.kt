@@ -102,6 +102,7 @@ class GetBackfillRunsAction @Inject constructor(
       val (pausedBackfills, nextOffset) = queryFactory.newQuery<BackfillRunQuery>()
         .serviceId(dbService.id)
         .stateNot(BackfillState.RUNNING)
+        .notSoftDeleted()
         .filterByArgs(filterArgs)
         .newPager(
           idDescPaginator(),
