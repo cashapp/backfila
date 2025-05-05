@@ -135,6 +135,7 @@ class DbBackfillRun() : DbUnsharded<DbBackfillRun>, DbTimestampedEntity {
   fun setState(session: Session, queryFactory: Query.Factory, state: BackfillState) {
     // State can't be changed after being completed.
     checkState(this.state != BackfillState.COMPLETE)
+
     this.state = state
     // Set the state of all the partitions that are not complete
     val query = session.hibernateSession.createQuery(

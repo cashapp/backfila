@@ -1,5 +1,6 @@
 package app.cash.backfila.ui.actions
 
+import app.cash.backfila.dashboard.CancelBackfillAction
 import app.cash.backfila.dashboard.StartBackfillAction
 import app.cash.backfila.dashboard.StartBackfillRequest
 import app.cash.backfila.dashboard.StopBackfillAction
@@ -31,6 +32,7 @@ class BackfillShowButtonHandlerAction @Inject constructor(
   private val startBackfillAction: StartBackfillAction,
   private val stopBackfillAction: StopBackfillAction,
   private val updateBackfillAction: UpdateBackfillAction,
+  private val cancelBackfillAction: CancelBackfillAction,
 ) : WebAction {
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
@@ -44,10 +46,16 @@ class BackfillShowButtonHandlerAction @Inject constructor(
       if (!field_id.isNullOrBlank()) {
         when (field_id) {
           "state" -> {
-            if (field_value == BackfillState.PAUSED.name) {
-              stopBackfillAction.stop(id.toLong(), StopBackfillRequest())
-            } else if (field_value == BackfillState.RUNNING.name) {
-              startBackfillAction.start(id.toLong(), StartBackfillRequest())
+            when (field_value) {
+              BackfillState.PAUSED.name -> {
+                stopBackfillAction.stop(id.toLong(), StopBackfillRequest())
+              }
+              BackfillState.RUNNING.name -> {
+                startBackfillAction.start(id.toLong(), StartBackfillRequest())
+              }
+              BackfillState.CANCELLED.name -> {
+                cancelBackfillAction.cancel(id.toLong())
+              }
             }
           }
 

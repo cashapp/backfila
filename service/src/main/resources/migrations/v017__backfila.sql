@@ -1,0 +1,2 @@
+ALTER TABLE backfill_runs
+    MODIFY COLUMN `state` enum('PAUSED','RUNNING','COMPLETE','CANCELLED') NOT NULL;

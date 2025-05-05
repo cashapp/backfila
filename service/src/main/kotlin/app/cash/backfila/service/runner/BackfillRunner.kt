@@ -171,7 +171,12 @@ class BackfillRunner private constructor(
 
       // Now that state is stored, check if we should exit.
       if (dbRunPartition.run_state != BackfillState.RUNNING) {
-        logger.info { "Backfill is no longer in RUNNING state, stopping runner ${logLabel()}" }
+        val stateChange = when (dbRunPartition.run_state) {
+          BackfillState.PAUSED -> "paused"
+          BackfillState.CANCELLED -> "cancelled"
+          else -> dbRunPartition.run_state.name.lowercase()
+        }
+        logger.info { "Backfill is no longer in RUNNING state (now $stateChange), stopping runner ${logLabel()}" }
         running = false
         return@transaction
       }

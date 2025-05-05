@@ -71,6 +71,20 @@ internal class AuditClientListener @Inject constructor(
     )
   }
 
+  override fun runCancelled(id: Id<DbBackfillRun>, user: String) {
+    val (backfillName, serviceName, description) = transacter.transaction { session ->
+      val run = session.load<DbBackfillRun>(id)
+      AuditEventInputs(run.registered_backfill.name, serviceName(run), "Backfill cancelled by $user ${dryRunPrefix(run)}${nameAndId(run)}")
+    }
+    auditClient.logEvent(
+      target = backfillName,
+      description = description,
+      requestorLDAP = user,
+      applicationName = serviceName,
+      detailURL = idUrl(id),
+    )
+  }
+
   private fun serviceName(run: DbBackfillRun) = if (run.service.variant == "default") {
     run.service.registry_name
   } else {

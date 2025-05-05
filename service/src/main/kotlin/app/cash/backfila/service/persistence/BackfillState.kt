@@ -4,4 +4,5 @@ enum class BackfillState {
   PAUSED,
   RUNNING,
   COMPLETE,
+  CANCELLED,
 }
