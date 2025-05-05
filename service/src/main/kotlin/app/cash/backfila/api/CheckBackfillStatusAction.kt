@@ -37,6 +37,7 @@ class CheckBackfillStatusAction @Inject constructor(
       BackfillState.PAUSED -> Status.PAUSED
       BackfillState.RUNNING -> Status.RUNNING
       BackfillState.COMPLETE -> Status.COMPLETE
+      BackfillState.CANCELLED -> Status.CANCELLED
     }
   }
 }

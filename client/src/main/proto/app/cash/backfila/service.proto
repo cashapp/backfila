@@ -102,5 +102,6 @@ message CheckBackfillStatusResponse {
     PAUSED = 1;
     RUNNING = 2;
     COMPLETE = 3;
+    CANCELLED = 4;
   }
 }
