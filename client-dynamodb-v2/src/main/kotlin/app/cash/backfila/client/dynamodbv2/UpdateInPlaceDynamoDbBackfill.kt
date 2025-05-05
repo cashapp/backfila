@@ -16,6 +16,11 @@ abstract class UpdateInPlaceDynamoDbBackfill<I : Any, P : Any>(
   val dynamoDbClient: DynamoDbClient,
 
 ) : DynamoDbBackfill<I, P>() {
+  companion object {
+    // DynamoDB BatchWriteItem API has a limit of 25 items per request
+    private const val BATCH_SIZE_LIMIT = 25
+  }
+
   override fun runBatch(items: List<@JvmSuppressWildcards I>, config: BackfillConfig<P>) {
     val itemsToSave = mutableListOf<I>()
     for (item in items) {
@@ -24,22 +29,27 @@ abstract class UpdateInPlaceDynamoDbBackfill<I : Any, P : Any>(
         itemsToSave += item
       }
     }
+    
     if (itemsToSave.isNotEmpty()) {
-      val batchRequest = BatchWriteItemRequest.builder()
-        .requestItems(
-          mapOf(
-            dynamoDbTable.tableName() to itemsToSave.map {
-              WriteRequest.builder().putRequest(
-                PutRequest.builder().item(
-                  dynamoDbTable.tableSchema().itemToMap(it, true),
-                ).build(),
-              ).build()
-            },
-          ),
-        ).build()
-      val failedBatch = dynamoDbClient.batchWriteItem(batchRequest)
-      require(!failedBatch.hasUnprocessedItems() || !failedBatch.unprocessedItems().isNotEmpty()) {
-        "failed to save items: $failedBatch"
+      // Process items in chunks of 25 or less
+      itemsToSave.chunked(BATCH_SIZE_LIMIT).forEach { chunk ->
+        val batchRequest = BatchWriteItemRequest.builder()
+          .requestItems(
+            mapOf(
+              dynamoDbTable.tableName() to chunk.map {
+                WriteRequest.builder().putRequest(
+                  PutRequest.builder().item(
+                    dynamoDbTable.tableSchema().itemToMap(it, true),
+                  ).build(),
+                ).build()
+              },
+            ),
+          ).build()
+        
+        val failedBatch = dynamoDbClient.batchWriteItem(batchRequest)
+        require(!failedBatch.hasUnprocessedItems() || !failedBatch.unprocessedItems().isNotEmpty()) {
+          "failed to save items: $failedBatch"
+        }
       }
     }
   }
