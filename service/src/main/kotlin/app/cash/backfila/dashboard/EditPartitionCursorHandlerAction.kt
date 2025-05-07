@@ -7,16 +7,12 @@ import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.pages.BackfillShowAction
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.html.div
-import kotlinx.html.h1
-import kotlinx.html.p
 import misk.exceptions.BadRequestException
 import misk.hibernate.Query
 import misk.hibernate.Transacter
 import misk.hibernate.newQuery
 import misk.scope.ActionScoped
 import misk.security.authz.Authenticated
-import misk.tailwind.Link
 import misk.web.Get
 import misk.web.HttpCall
 import misk.web.PathParam
@@ -25,6 +21,8 @@ import misk.web.ResponseBody
 import misk.web.ResponseContentType
 import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
+import misk.web.toResponseBody
+import okhttp3.Headers
 import okio.ByteString.Companion.encodeUtf8
 
 @Singleton
@@ -44,7 +42,7 @@ class EditPartitionCursorHandlerAction @Inject constructor(
     @PathParam partitionName: String,
   ): Response<ResponseBody> {
     val request = httpCall.get().asOkHttpRequest()
-    val cursorSnapshot = request.url.queryParameter("cursor_snapshot")
+    val cursorSnapshot = request.url.queryParameter("cursor_snapshot")?.takeIf { it.isNotBlank() }
     val newCursor = request.url.queryParameter("new_cursor")
 
     // Validate UTF-8
@@ -78,39 +76,11 @@ class EditPartitionCursorHandlerAction @Inject constructor(
         } ?: throw BadRequestException("Partition not found")
     }
 
-    // Return success page with updated form
+    // Redirect to backfill page
     return Response(
-      dashboardPageLayout.newBuilder()
-        .title("Edit Cursor - Partition $partitionName")
-        .breadcrumbLinks(
-          Link("Backfill #$id", BackfillShowAction.path(id)),
-          Link("Edit Cursor", path(id, partitionName)),
-        )
-        .buildHtmlResponseBody {
-          div("space-y-6 max-w-2xl mx-auto py-8") {
-            // Success message
-            div("rounded-md bg-green-50 p-4 mb-6") {
-              div("flex") {
-                div("flex-shrink-0") {
-                  // Success icon (checkmark)
-                  div("h-5 w-5 text-green-400") {
-                    +"✓"
-                  }
-                }
-                div("ml-3") {
-                  h1("text-sm font-medium text-green-800") {
-                    +"Success"
-                  }
-                  div("mt-2 text-sm text-green-700") {
-                    p {
-                      +"Cursor has been updated successfully."
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
+      body = "go to ${BackfillShowAction.path(id)}".toResponseBody(),
+      statusCode = 303,
+      headers = Headers.headersOf("Location", BackfillShowAction.path(id)),
     )
   }
 
