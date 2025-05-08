@@ -69,6 +69,7 @@ data class GetBackfillStatusResponse(
   val backoff_schedule: String?,
   val partitions: List<UiPartition>,
   val event_logs: List<UiEventLog>,
+  val deleted_at: Instant?,
   val next_offset: String?,
 )
 
@@ -124,6 +125,7 @@ class GetBackfillStatusAction @Inject constructor(
             event.extra_data,
           )
         },
+        run.deleted_at,
         nextOffset?.offset,
       )
     }

@@ -2,10 +2,15 @@ package app.cash.backfila.ui.components
 
 import app.cash.backfila.dashboard.UiBackfillRun
 import app.cash.backfila.ui.pages.BackfillShowAction
+import kotlinx.html.InputType
 import kotlinx.html.TagConsumer
 import kotlinx.html.a
 import kotlinx.html.div
+import kotlinx.html.form
 import kotlinx.html.h1
+import kotlinx.html.input
+import kotlinx.html.label
+import kotlinx.html.section
 import kotlinx.html.table
 import kotlinx.html.tbody
 import kotlinx.html.td
@@ -13,13 +18,30 @@ import kotlinx.html.th
 import kotlinx.html.thead
 import kotlinx.html.tr
 
-fun TagConsumer<*>.BackfillsTable(running: Boolean, backfills: List<UiBackfillRun>) {
+fun TagConsumer<*>.BackfillsTable(
+  running: Boolean,
+  backfills: List<UiBackfillRun>,
+  showDeleted: Boolean = false,
+) {
   val title = if (running) "Running" else "Paused"
 
   div("px-4 sm:px-6 lg:px-8 py-5") {
-    div("sm:flex sm:items-center") {
-      div("sm:flex-auto") {
-        h1("text-base font-semibold leading-6 text-gray-900") { +"""Backfills ($title)""" }
+    section("sm:flex sm:items-center justify-between") {
+      h1("text-base font-semibold leading-6 text-gray-900") { +"""Backfills ($title)""" }
+
+      if (!running) { // Only show toggle for Paused backfills
+        form {
+          label("text-sm font-medium text-gray-600 flex items-center") {
+            +"Show deleted"
+            input(classes = "ml-2 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600") {
+              type = InputType.checkBox
+              name = "showDeleted"
+              value = "true"
+              if (showDeleted) attributes["checked"] = "checked"
+              attributes["onchange"] = "this.form.submit()"
+            }
+          }
+        }
       }
     }
     div("mt-8 flow-root") {
