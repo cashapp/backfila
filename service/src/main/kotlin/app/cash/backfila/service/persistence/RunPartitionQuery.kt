@@ -22,4 +22,7 @@ interface RunPartitionQuery : Query<DbRunPartition> {
 
   @Order("partition_name")
   fun orderByName(): RunPartitionQuery
+
+  @Constraint("id", Operator.EQ)
+  fun partitionId(partitionId: Long): RunPartitionQuery
 }
