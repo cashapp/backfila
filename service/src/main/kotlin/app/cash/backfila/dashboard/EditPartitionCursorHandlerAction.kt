@@ -3,7 +3,6 @@ package app.cash.backfila.dashboard
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.RunPartitionQuery
-import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.pages.BackfillShowAction
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -31,7 +30,6 @@ class EditPartitionCursorHandlerAction @Inject constructor(
   @BackfilaDb private val transacter: Transacter,
   private val queryFactory: Query.Factory,
   private val httpCall: ActionScoped<HttpCall>,
-  private val dashboardPageLayout: DashboardPageLayout,
 ) : WebAction {
 
   @Get(PATH)
