@@ -15,6 +15,7 @@ import app.cash.backfila.service.runner.BackfillRunnerLoggingSetupProvider
 import app.cash.backfila.service.runner.BackfillRunnerNoLoggingSetupProvider
 import app.cash.backfila.service.scheduler.ForBackfilaScheduler
 import app.cash.backfila.service.scheduler.RunnerSchedulerServiceModule
+import app.cash.backfila.service.deletion.DeleteByNotificationModule
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import com.google.common.util.concurrent.ThreadFactoryBuilder
@@ -53,6 +54,7 @@ class BackfilaServiceModule(
     install(ServiceWebActionsModule())
 
     install(RunnerSchedulerServiceModule())
+    install(DeleteByNotificationModule())
 
     newMapBinder<String, BackfilaCallbackConnectorProvider>(ForConnectors::class)
       .addBinding(Connectors.HTTP)

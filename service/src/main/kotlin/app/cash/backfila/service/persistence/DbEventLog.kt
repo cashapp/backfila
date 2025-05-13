@@ -19,6 +19,7 @@ class DbEventLog() : DbUnsharded<DbEventLog>, DbTimestampedEntity {
     STATE_CHANGE,
     CONFIG_CHANGE,
     ERROR,
+    NOTIFICATION,
   }
 
   @javax.persistence.Id

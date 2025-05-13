@@ -3,6 +3,7 @@ package app.cash.backfila.service
 import misk.config.Config
 import misk.jdbc.DataSourceClustersConfig
 import misk.slack.SlackConfig
+import app.cash.backfila.service.deletion.DeleteByNotificationConfig
 
 data class BackfilaConfig(
   val backfill_runner_threads: Int?,
@@ -19,4 +20,6 @@ data class BackfilaConfig(
   val support_button_label: String? = null,
   /** Support banner shows up on all pages and can point to a Slack channel or other support method, if null banner not shown. */
   val support_button_url: String? = null,
+  /** Configuration for delete-by notification system */
+  val delete_by_notification: DeleteByNotificationConfig = DeleteByNotificationConfig()
 ) : Config

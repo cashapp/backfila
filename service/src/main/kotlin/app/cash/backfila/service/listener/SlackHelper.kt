@@ -76,4 +76,17 @@ class SlackHelper @Inject constructor(
     val url = "${backfilaConfig.web_url_root}backfills/$id"
     return "<$url|$id>"
   }
+
+  /**
+   * Sends a deletion notification message to a specified Slack channel.
+   * This method is used by the DeleteByNotificationService to send scheduled deletion reminders.
+   */
+  fun sendDeletionNotification(message: String, channel: String) {
+    slackClient.postMessage(
+      username = "Backfila Deletion Reminder",
+      iconEmoji = ":backfila_cleanup:",  // TODO: Add this emoji to Slack
+      message = message,
+      channel = channel
+    )
+  }
 }
