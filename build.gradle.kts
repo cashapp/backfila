@@ -133,7 +133,7 @@ allprojects {
       }
     }
     configure<MavenPublishBaseExtension> {
-      publishToMavenCentral(SonatypeHost.DEFAULT, automaticRelease = true)
+      publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, automaticRelease = true)
       signAllPublications()
       pom {
         description.set("Backfila is a service that manages backfill state, calling into other services to do batched work.")
