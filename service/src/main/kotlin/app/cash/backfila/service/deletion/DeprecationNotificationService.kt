@@ -4,7 +4,7 @@ import app.cash.backfila.service.persistence.DbRegisteredBackfill
 import com.google.common.util.concurrent.AbstractExecutionThreadService
 import java.time.Clock
 import java.time.DayOfWeek
-import java.time.ZoneId
+import java.time.ZoneOffset
 import java.util.Random
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -36,7 +36,7 @@ class DeprecationNotificationService @Inject constructor(
       }
 
       // Sleep for an hour plus random jitter to avoid clustering
-      Thread.sleep(HOUR_IN_MILLIS + random.nextInt(JITTER_RANGE_MILLIS))
+      Thread.sleep(FOUR_HOURS_IN_MILLIS + random.nextInt(JITTER_RANGE_MILLIS))
     }
   }
 
@@ -67,18 +67,25 @@ class DeprecationNotificationService @Inject constructor(
   }
 
   private fun isBusinessHours(registeredBackfill: DbRegisteredBackfill): Boolean {
-    val timeZone = ZoneId.of("America/Los_Angeles")
+    val creationTime = registeredBackfill.created_at
+    val currentTime = clock.instant()
 
-    val localTime = clock.instant().atZone(timeZone)
-    val hour = localTime.hour
+    // Avoid weekends in UTC
+    if (currentTime.atZone(ZoneOffset.UTC).dayOfWeek !in listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)) {
+      return false
+    }
 
-    return hour in 9..17 && // 9 AM to 5 PM
-      localTime.dayOfWeek !in listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)
+    // Keep the same hour of day as when the backfill was created
+    val creationHour = creationTime.atZone(ZoneOffset.UTC).hour
+    val currentHour = currentTime.atZone(ZoneOffset.UTC).hour
+
+    // Check if current hour is within +/- 2 hour of creation time
+    return currentHour in (creationHour - 2)..(creationHour + 2)
   }
 
   companion object {
     private val logger = getLogger<DeprecationNotificationService>()
-    private const val HOUR_IN_MILLIS = 10_800_000L // 3 hours
+    private const val FOUR_HOURS_IN_MILLIS = 14_400_000L // 4 hours
     private const val JITTER_RANGE_MILLIS = 300_000 // 5 minutes
   }
 }
