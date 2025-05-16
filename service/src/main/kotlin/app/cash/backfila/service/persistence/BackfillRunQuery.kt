@@ -13,6 +13,9 @@ interface BackfillRunQuery : Query<DbBackfillRun> {
   @Constraint("service_id")
   fun serviceId(serviceId: Id<DbService>): BackfillRunQuery
 
+  @Constraint("registered_backfill_id")
+  fun registeredBackfillId(registeredBackfillId: Id<DbRegisteredBackfill>): BackfillRunQuery
+
   @Constraint("service_id", Operator.IN)
   fun serviceIdIn(serviceIds: Collection<Id<DbService>>): BackfillRunQuery
 
