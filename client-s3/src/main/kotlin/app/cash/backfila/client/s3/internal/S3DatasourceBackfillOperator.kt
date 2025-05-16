@@ -43,6 +43,7 @@ class S3DatasourceBackfillOperator<R : Any, P : Any>(
     require(fileKeys.isNotEmpty()) {
       "No files found for bucket:${backfill.getBucket(config)} prefix:$pathPrefix. At least one file must exist."
     }
+    // We limit to 100 files since each file is run in parallel.
     require(fileKeys.size <= 100) {
       "Listing files matching the prefix contains ${fileKeys.size} which is more than 100 files. " +
         "Check your prefix. First 3 file keys ${fileKeys.slice(0..2)}"
