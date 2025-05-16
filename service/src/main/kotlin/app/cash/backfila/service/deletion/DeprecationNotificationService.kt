@@ -1,10 +1,7 @@
 package app.cash.backfila.service.deletion
 
-import app.cash.backfila.service.persistence.DbRegisteredBackfill
 import com.google.common.util.concurrent.AbstractExecutionThreadService
 import java.time.Clock
-import java.time.DayOfWeek
-import java.time.ZoneId
 import java.util.Random
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -36,7 +33,7 @@ class DeprecationNotificationService @Inject constructor(
       }
 
       // Sleep for an hour plus random jitter to avoid clustering
-      Thread.sleep(HOUR_IN_MILLIS + random.nextInt(JITTER_RANGE_MILLIS))
+      Thread.sleep(FOUR_HOURS_IN_MILLIS + random.nextInt(JITTER_RANGE_MILLIS))
     }
   }
 
@@ -46,39 +43,13 @@ class DeprecationNotificationService @Inject constructor(
 
   private fun checkBackfills() {
     notificationHelper.getRegisteredBackfillsForNotification().forEach { registeredBackfill ->
-      val decision = notificationHelper.evaluateRegisteredBackfill(registeredBackfill)
-
-      if (decision != NotificationDecision.NONE && registeredBackfill.service.slack_channel != null) {
-        if (isBusinessHours(registeredBackfill)) {
-          try {
-            notificationHelper.sendNotification(
-              decision = decision,
-              channel = registeredBackfill.service.slack_channel!!,
-            )
-            logger.info { "Sent deletion notification for backfill: ${registeredBackfill.name}" }
-          } catch (e: Exception) {
-            logger.error(e) { "Failed to send notification for backfill: ${registeredBackfill.name}" }
-          }
-        } else {
-          logger.info { "Skipping notification for ${registeredBackfill.name} outside business hours" }
-        }
-      }
+      notificationHelper.notifyRegisteredBackfill(registeredBackfill)
     }
-  }
-
-  private fun isBusinessHours(registeredBackfill: DbRegisteredBackfill): Boolean {
-    val timeZone = ZoneId.of("America/Los_Angeles")
-
-    val localTime = clock.instant().atZone(timeZone)
-    val hour = localTime.hour
-
-    return hour in 9..17 && // 9 AM to 5 PM
-      localTime.dayOfWeek !in listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)
   }
 
   companion object {
     private val logger = getLogger<DeprecationNotificationService>()
-    private const val HOUR_IN_MILLIS = 10_800_000L // 3 hours
+    private const val FOUR_HOURS_IN_MILLIS = 14_400_000L // 4 hours
     private const val JITTER_RANGE_MILLIS = 300_000 // 5 minutes
   }
 }

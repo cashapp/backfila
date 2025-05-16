@@ -84,7 +84,7 @@ class SlackHelper @Inject constructor(
   fun sendDeletionNotification(message: String, channel: String) {
     slackClient.postMessage(
       username = "Backfila Deletion Reminder",
-      iconEmoji = ":backfila_cleanup:", // TODO: Add this emoji to Slack
+      iconEmoji = ":backfila_cleanup:",
       message = message,
       channel = channel,
     )

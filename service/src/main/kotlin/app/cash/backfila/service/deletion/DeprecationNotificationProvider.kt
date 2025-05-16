@@ -2,14 +2,25 @@ package app.cash.backfila.service.deletion
 
 import java.time.Duration
 
-interface DeprecationNotificationProvider {
-  fun getNotificationConfig(): DeprecationNotificationConfig
+enum class NotificationDecision {
+  EXPLICIT_DELETE_BY,
+  COMPLETE_RUN,
+  PAUSED_RUN,
+  DEFAULT_CREATION,
 }
 
-data class DeprecationNotificationConfig(
-  val defaultDeleteByDuration: Duration,
-  val completeRunRetention: Duration,
-  val pausedRunRetention: Duration,
-  val registerRetention: Duration,
-  val monthlyRemindersPhase: Duration,
+data class DeprecationMessage(
+  val delay: Duration,
+  val message: String,
+  val messageLastUser: Boolean = false,
+  val repeated: Boolean = false,
 )
+
+interface DeprecationMessageBuilder {
+  val notifications: Map<NotificationDecision, List<DeprecationMessage>>
+  val defaultDelayDays: Map<NotificationDecision, Duration>
+}
+
+interface DeprecationNotificationProvider {
+  fun getNotificationConfig(): DeprecationMessageBuilder
+}

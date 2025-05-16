@@ -4,15 +4,15 @@ import app.cash.backfila.service.listener.SlackHelper
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillRunQuery
 import app.cash.backfila.service.persistence.BackfillState
-import app.cash.backfila.service.persistence.DbBackfillRun
-import app.cash.backfila.service.persistence.DbEventLog
+import app.cash.backfila.service.persistence.DbDeprecationReminder
 import app.cash.backfila.service.persistence.DbRegisteredBackfill
-import app.cash.backfila.service.persistence.EventLogQuery
+import app.cash.backfila.service.persistence.DeprecationReminderQuery
 import app.cash.backfila.service.persistence.RegisteredBackfillQuery
 import java.time.Clock
+import java.time.DayOfWeek
 import java.time.Duration
 import java.time.Instant
-import java.time.temporal.ChronoUnit
+import java.time.ZoneOffset
 import javax.inject.Inject
 import javax.inject.Singleton
 import misk.hibernate.Query
@@ -27,21 +27,7 @@ class DeprecationNotificationHelper @Inject constructor(
   private val notificationProvider: DeprecationNotificationProvider,
   private val clock: Clock,
 ) {
-  // Data class to hold all the info needed for message generation
-  data class NotificationContext(
-    val backfill: DbRegisteredBackfill,
-    val latestRun: DbBackfillRun?,
-    val effectiveDeleteBy: Instant,
-    val deleteByReason: DeleteByReason,
-  )
-
-  // Enum to clearly indicate why a date was chosen
-  enum class DeleteByReason {
-    EXPLICIT_DELETE_BY,
-    SUCCESSFUL_RUN,
-    PAUSED_RUN,
-    DEFAULT_CREATION,
-  }
+  private val daysInMonth = 30L
 
   fun getRegisteredBackfillsForNotification(): List<DbRegisteredBackfill> {
     return transacter.transaction { session ->
@@ -51,7 +37,7 @@ class DeprecationNotificationHelper @Inject constructor(
     }
   }
 
-  fun evaluateRegisteredBackfill(registeredBackfill: DbRegisteredBackfill): NotificationDecision {
+  fun notifyRegisteredBackfill(registeredBackfill: DbRegisteredBackfill): NotificationDecision? {
     return transacter.transaction { session ->
       val now = clock.instant()
       val config = notificationProvider.getNotificationConfig()
@@ -60,12 +46,26 @@ class DeprecationNotificationHelper @Inject constructor(
       val service = registeredBackfill.service // This should be loaded due to JPA relationship
       val lastRegisteredAt = service.last_registered_at
       if (lastRegisteredAt != null &&
-        Duration.between(lastRegisteredAt, now) > config.registerRetention
+        Duration.between(lastRegisteredAt, now) > Duration.ofDays(daysInMonth * 3)
       ) {
-        return@transaction NotificationDecision.NONE
+        return@transaction null
       }
 
-      val defaultDeleteBy = registeredBackfill.created_at.plus(config.defaultDeleteByDuration)
+      if (!isBusinessHours(registeredBackfill)) {
+        return@transaction null
+      }
+
+      val deleteByDates = mutableListOf<Pair<NotificationDecision, Instant>>()
+
+      // Explicit delete-by date
+      registeredBackfill.delete_by?.let { deleteBy ->
+        deleteByDates.add(NotificationDecision.EXPLICIT_DELETE_BY to deleteBy)
+      }
+
+      // Default creation-based delete-by
+      val defaultDeleteBy = registeredBackfill.created_at
+        .plus(config.defaultDelayDays[NotificationDecision.DEFAULT_CREATION]!!)
+      deleteByDates.add(NotificationDecision.DEFAULT_CREATION to defaultDeleteBy)
 
       // Get the latest run and its status
       val latestRun = queryFactory.newQuery<BackfillRunQuery>()
@@ -77,166 +77,134 @@ class DeprecationNotificationHelper @Inject constructor(
         .list(session)
         .firstOrNull()
 
-      // Calculate delete_by date based on latest run
-      val runBasedDeleteBy = latestRun?.let {
+      // Add run-based delete_by dates to deleteByDates
+      latestRun?.let {
         val runDate = it.created_at
         when (it.state) {
-          BackfillState.COMPLETE -> runDate.plus(config.completeRunRetention)
-          BackfillState.PAUSED -> runDate.plus(config.pausedRunRetention)
+          BackfillState.COMPLETE -> deleteByDates.add(
+            NotificationDecision.COMPLETE_RUN to runDate.plus(config.defaultDelayDays[NotificationDecision.COMPLETE_RUN]!!),
+          )
+          BackfillState.PAUSED -> deleteByDates.add(
+            NotificationDecision.PAUSED_RUN to runDate.plus(config.defaultDelayDays[NotificationDecision.PAUSED_RUN]!!),
+          )
           else -> null
         }
       }
 
-      // Determine the maximum date to use and why
-      val (effectiveDeleteBy, deleteByReason) = when {
-        registeredBackfill.delete_by != null &&
-          (registeredBackfill.delete_by == listOfNotNull(registeredBackfill.delete_by, defaultDeleteBy, runBasedDeleteBy).maxOrNull()) ->
-          registeredBackfill.delete_by!! to DeleteByReason.EXPLICIT_DELETE_BY
-
-        runBasedDeleteBy != null &&
-          (runBasedDeleteBy == listOfNotNull(registeredBackfill.delete_by, defaultDeleteBy, runBasedDeleteBy).maxOrNull()) ->
-          if (latestRun.state == BackfillState.COMPLETE) {
-            runBasedDeleteBy to DeleteByReason.SUCCESSFUL_RUN
-          } else {
-            runBasedDeleteBy to DeleteByReason.PAUSED_RUN
-          }
-
-        else -> defaultDeleteBy to DeleteByReason.DEFAULT_CREATION
-      }
+      // Find the latest delete-by date and its associated decision
+      val (effectiveDecision, effectiveDeleteBy) = deleteByDates.maxByOrNull { it.second }
+        ?: return@transaction null
 
       // Don't send notifications before the delete_by date
       val timeUntilDeletion = Duration.between(now, effectiveDeleteBy)
       if (!timeUntilDeletion.isNegative) {
-        return@transaction NotificationDecision.NONE
+        return@transaction null
       }
 
       // We're past the delete_by date, determine notification frequency
       val timeSinceDeletion = Duration.between(effectiveDeleteBy, now)
+      val notifications = config.notifications[effectiveDecision] ?: emptyList()
+
+      // Find the appropriate notification based on timeSinceDeletion
+      val appropriateNotification = notifications
+        .sortedBy { it.delay } // Sort by delay to get earliest first
+        .findLast { notification ->
+          // Find the last notification whose delay is less than or equal to timeSinceDeletion
+          timeSinceDeletion >= notification.delay
+        } ?: return@transaction null
 
       // Get the last notification sent
-      // First get all backfill run IDs for this registered backfill
-      val backfillRunIds = queryFactory.newQuery<BackfillRunQuery>()
+      val lastReminder = queryFactory.newQuery<DeprecationReminderQuery>()
         .registeredBackfillId(registeredBackfill.id)
+        .orderByCreatedAtDesc()
+        .apply { maxRows = 1 }
         .list(session)
-        .map { it.id }
+        .firstOrNull()
 
-      // Then if we have any runs, query event logs for notifications across all these runs
-      val lastNotification = if (backfillRunIds.isNotEmpty()) {
-        queryFactory.newQuery<EventLogQuery>()
-          .backfillRunIdIn(backfillRunIds) // We'd need to add this method to EventLogQuery
-          .type(DbEventLog.Type.NOTIFICATION)
-          .orderByUpdatedAtDesc()
-          .apply {
-            maxRows = 1
-          }
-          .list(session)
-          .firstOrNull()
-      } else {
-        null
-      }
-
-      // First 3 months: monthly reminders
-      if (timeSinceDeletion <= config.monthlyRemindersPhase) {
-        val shouldSendMonthly = lastNotification?.let {
-          Duration.between(it.created_at, now) >= Duration.ofDays(30)
-        } ?: true
-
-        if (shouldSendMonthly) {
-          val context = NotificationContext(
-            backfill = registeredBackfill,
-            latestRun = latestRun,
-            effectiveDeleteBy = effectiveDeleteBy,
-            deleteByReason = deleteByReason,
-          )
-
-          currentNotificationContext = context
-          return@transaction NotificationDecision.NOTIFY_EXPIRED
+      // Check if we should send this notification
+      val shouldSendNotification = when {
+        lastReminder == null -> {
+          // No previous reminder, should send
+          true
         }
-      }
-      // After 3 months: weekly reminders
-      else {
-        val shouldSendWeekly = lastNotification?.let {
-          Duration.between(it.created_at, now) >= Duration.ofDays(7)
-        } ?: true
-
-        if (shouldSendWeekly) {
-          val context = NotificationContext(
-            backfill = registeredBackfill,
-            latestRun = latestRun,
-            effectiveDeleteBy = effectiveDeleteBy,
-            deleteByReason = deleteByReason,
-          )
-
-          currentNotificationContext = context
-          return@transaction NotificationDecision.NOTIFY_EXPIRED
+        appropriateNotification.repeated -> {
+          // For repeated notifications, check if enough time has passed since last reminder
+          Duration.between(lastReminder.created_at, now) >= appropriateNotification.delay
+        }
+        else -> {
+          // For non-repeated notifications, check if this specific type hasn't been sent
+          !(lastReminder.message_last_user == appropriateNotification.messageLastUser && !lastReminder.repeated)
         }
       }
 
-      NotificationDecision.NONE
+      if (shouldSendNotification) {
+        val message = generateNotificationMessage(appropriateNotification, registeredBackfill)
+        sendNotification(message, registeredBackfill.service.slack_channel)
+        // Log to deprecation reminder table
+        val reminder = DbDeprecationReminder(
+          registeredBackfill.id,
+          appropriateNotification.messageLastUser, appropriateNotification.repeated,
+          now,
+        )
+        session.save(reminder)
+        return@transaction effectiveDecision
+      }
+
+      return@transaction null
     }
   }
 
   // Separate message generation function that doesn't need DB access
   private fun generateNotificationMessage(
-    decision: NotificationDecision,
-    context: NotificationContext,
+    notification: DeprecationMessage,
+    registeredBackfill: DbRegisteredBackfill,
   ): String {
-    val now = clock.instant()
-    val daysSinceDeletion = ChronoUnit.DAYS.between(context.effectiveDeleteBy, now)
+    // Use the configured message directly
+    val baseMessage = notification.message
 
-    val deleteByReasonMessage = when (context.deleteByReason) {
-      DeleteByReason.EXPLICIT_DELETE_BY -> "explicitly set delete_by date"
-      DeleteByReason.SUCCESSFUL_RUN -> "30 days after last successful run"
-      DeleteByReason.PAUSED_RUN -> "90 days after last failed run"
-      DeleteByReason.DEFAULT_CREATION -> "6 months after creation"
+    // Add metadata about the backfill
+    val metadata = buildString {
+      appendLine()
+      appendLine("*Additional Information:*")
+      appendLine("• Backfill: `${registeredBackfill.name}`")
+
+      // Add action items
+      appendLine()
+      appendLine("*Actions Required:*")
+      appendLine("1. Review if this backfill is still needed")
+      appendLine("2. Update the `@DeleteBy` annotation with a new date")
+      appendLine("3. Or run the backfill again to extend its lifetime")
     }
 
-    return """
-        |${decision.emoji} *Backfill Deletion Reminder*
-        |Backfill `${context.backfill.name}` was due for deletion on ${context.effectiveDeleteBy}.
-        |
-        |• Days since deletion date: $daysSinceDeletion
-        |• Deletion date determined by: $deleteByReasonMessage
-        |${context.latestRun?.let { "• Last run status: ${it.state} on ${it.created_at}" } ?: "• No runs found"}
-        |
-        |To keep this backfill:
-        |1. Review if this backfill is still needed
-        |2. Update the `@DeleteBy` annotation with a new date
-        |3. Or run the backfill again to extend its lifetime
-        |
-        |_This reminder will be sent monthly for 3 months, then weekly until action is taken._
-    """.trimMargin()
+    return baseMessage + metadata
   }
 
   // Update send notification to use the new message generation
   fun sendNotification(
-    decision: NotificationDecision,
-    channel: String,
+    message: String,
+    channel: String?,
   ) {
-    val message = generateNotificationMessage(decision, currentNotificationContext!!)
-
+    if (channel == null) {
+      // logger.warn { "No Slack channel specified for notification. Skipping." }
+      return
+    }
     // Send to Slack
     slackHelper.sendDeletionNotification(message, channel)
-
-    // Record notification in event_logs for the latest run if it exists
-    currentNotificationContext?.latestRun?.let { latestRun ->
-      transacter.transaction { session ->
-        session.save(
-          DbEventLog(
-            backfill_run_id = latestRun.id,
-            partition_id = null,
-            type = DbEventLog.Type.NOTIFICATION,
-            message = "Deletion notification sent to $channel",
-            extra_data = message,
-          ),
-        )
-      }
-    }
-
-    // Clear the context after use
-    currentNotificationContext = null
   }
 
-  // Add property to store context between evaluate and send
-  private var currentNotificationContext: NotificationContext? = null
+  private fun isBusinessHours(registeredBackfill: DbRegisteredBackfill): Boolean {
+    val creationTime = registeredBackfill.created_at
+    val currentTime = clock.instant()
+
+    // Avoid weekends in UTC
+    if (currentTime.atZone(ZoneOffset.UTC).dayOfWeek !in listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)) {
+      return false
+    }
+
+    // Keep the same hour of day as when the backfill was created
+    val creationHour = creationTime.atZone(ZoneOffset.UTC).hour
+    val currentHour = currentTime.atZone(ZoneOffset.UTC).hour
+
+    return creationHour == currentHour
+  }
 }
