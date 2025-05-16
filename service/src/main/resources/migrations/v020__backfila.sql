@@ -1,2 +1,2 @@
 ALTER TABLE services
-ADD COLUMN last_registered_at timestamp NULL;
+ADD COLUMN last_registered_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3);
