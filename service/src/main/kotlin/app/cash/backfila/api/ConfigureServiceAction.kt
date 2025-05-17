@@ -68,6 +68,7 @@ class ConfigureServiceAction @Inject constructor(
           request.connector_extra_data,
           request.slack_channel,
           variant,
+          clock.instant(),
         )
         session.save(dbService)
       } else {
@@ -75,6 +76,7 @@ class ConfigureServiceAction @Inject constructor(
         dbService.connector_extra_data = request.connector_extra_data
         dbService.slack_channel = request.slack_channel
         dbService.variant = variant
+        dbService.last_registered_at = clock.instant()
       }
 
       // Add any missing backfills, update modified ones, and mark missing ones as deleted.
