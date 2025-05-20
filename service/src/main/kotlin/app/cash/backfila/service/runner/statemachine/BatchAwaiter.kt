@@ -75,6 +75,10 @@ class BatchAwaiter(
           }
 
           if (response.remaining_batch_range != null) {
+            // A successfully processed range within a batch counts as a successful RPC for the
+            // purposes of resetting the count of consecutive failures.
+            backfillRunner.onRpcSuccess()
+
             // We have a remaining_batch_range, continue the batch.
             remainingBatch = initialBatch.newBuilder()
               .batch_range(response.remaining_batch_range)
