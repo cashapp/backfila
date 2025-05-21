@@ -1,5 +1,6 @@
 package app.cash.backfila.client.fixedset
 
+import app.cash.backfila.client.BackfillUnit
 import app.cash.backfila.client.DeleteBy
 import app.cash.backfila.client.Description
 import app.cash.backfila.client.parseDeleteByDate
@@ -59,6 +60,7 @@ class FixedSetBackend @Inject constructor(
         description = it.value.findAnnotation<Description>()?.text,
         parametersClass = parametersClass(it.value as KClass<FixedSetBackfill<Any>>),
         deleteBy = it.value.findAnnotation<DeleteBy>()?.parseDeleteByDate(),
+        unit = BackfillUnit.RECORDS.displayName,
       )
     }.toSet()
   }

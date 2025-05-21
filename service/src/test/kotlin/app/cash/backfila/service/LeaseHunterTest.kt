@@ -52,7 +52,7 @@ class LeaseHunterTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "ChickenSandwich", "Description", listOf(), null,
-                null, false, null,
+                null, false, null, null,
               ),
             ),
           )
@@ -81,7 +81,7 @@ class LeaseHunterTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "ChickenSandwich", "Description", listOf(), null,
-                null, false, null,
+                null, false, null, null,
               ),
             ),
           )
@@ -123,7 +123,7 @@ class LeaseHunterTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "ChickenSandwich", "Description", listOf(), null,
-                null, false, null,
+                null, false, null, null,
               ),
             ),
           )

@@ -54,7 +54,7 @@ class BackfillRegisteredParametersTest {
                 listOf(
                   Parameter("name", "desc", false),
                 ),
-                null, null, false, null,
+                null, null, false, null, null,
               ),
             ),
           )
@@ -100,7 +100,7 @@ class BackfillRegisteredParametersTest {
                   Parameter("abc", "desc1", false),
                   Parameter("def", "desc2", false),
                 ),
-                null, null, false, null,
+                null, null, false, null, null,
               ),
             ),
           )
@@ -144,7 +144,7 @@ class BackfillRegisteredParametersTest {
                 "ChickenSandwich", "Description",
                 listOf(),
                 null,
-                null, false, null,
+                null, false, null, null,
               ),
             ),
           )
