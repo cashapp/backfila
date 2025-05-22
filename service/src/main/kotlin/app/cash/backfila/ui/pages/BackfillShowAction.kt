@@ -149,11 +149,11 @@ class BackfillShowAction @Inject constructor(
                   }
                   th(classes = "py-3 pl-8 pr-0 text-right font-semibold") {
                     scope = ThScope.col
-                    +"""# of ${"units (records, segments, bytes)"} Precomputed"""
+                    +"""# Precomputed"""
                   }
                   th(classes = "py-3 pl-8 pr-0 text-right font-semibold") {
                     scope = ThScope.col
-                    +"""# of ${"units (records, segments, bytes)"} Completed"""
+                    +"""# Completed"""
                   }
                   th(classes = "py-3 pl-8 pr-0 text-right font-semibold") {
                     scope = ThScope.col
@@ -186,8 +186,8 @@ class BackfillShowAction @Inject constructor(
                       +(partition.pkey_cursor ?: "")
                     }
                     td("hidden py-5 pl-8 pr-0 text-right align-top text-gray-700 sm:table-cell") { +"""${partition.pkey_start} to ${partition.pkey_end}""" }
-                    td("hidden py-5 pl-8 pr-0 text-right align-top text-gray-700 sm:table-cell") { +"""${partition.computed_matching_record_count}""" }
-                    td("hidden py-5 pl-8 pr-0 text-right align-top text-gray-700 sm:table-cell") { +"""${partition.backfilled_matching_record_count}""" }
+                    td("hidden py-5 pl-8 pr-0 text-right align-top text-gray-700 sm:table-cell") { +"""${partition.computed_matching_record_count} ${backfill.unit ?: "units (records, segments, bytes)"}""" }
+                    td("hidden py-5 pl-8 pr-0 text-right align-top text-gray-700 sm:table-cell") { +"""${partition.backfilled_matching_record_count} ${backfill.unit ?: "units (records, segments, bytes)"}""" }
                     td("hidden py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700 sm:table-cell") {
                       ProgressBar(
                         partition.backfilled_matching_record_count,
