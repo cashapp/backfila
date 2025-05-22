@@ -21,7 +21,7 @@ fun TagConsumer<*>.ProgressBar(
     if (percentComplete == null) {
       div("animate-pulse bg-gray-300 text-xs font-medium text-center p-0.5 leading-none rounded-full") {
         style = "width: 100%"
-        +"Computing..."
+        +"..."
       }
     } else {
       // Don't show blue sliver for 0%, just show the gray empty bar
