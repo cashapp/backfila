@@ -194,8 +194,7 @@ class BackfillShowAction @Inject constructor(
                         partition.state != BackfillState.RUNNING -> +"-"
                         partition.matching_records_per_minute == null ||
                           partition.matching_records_per_minute <= 0 -> {
-                            if (!partition.precomputing_done) +"Computing..."
-                            else +"Calculating..."
+                          if (!partition.precomputing_done) { +"Computing..." } else { +"Calculating..." }
                         }
                         else -> +"""${partition.matching_records_per_minute} #/m"""
                       }
