@@ -80,7 +80,7 @@ fun TagConsumer<*>.BackfillsTable(
                   td(
                     "whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0",
                   ) {
-                    ProgressBar(it.backfilled_matching_record_count, it.computed_matching_record_count)
+                    ProgressBar(it.backfilled_matching_record_count, it.computed_matching_record_count, it.precomputing_done)
                   }
                   listOf(it.created_by_user, it.created_at, it.last_active_at).map {
                     td(

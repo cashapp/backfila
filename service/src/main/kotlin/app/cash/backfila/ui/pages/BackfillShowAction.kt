@@ -187,6 +187,7 @@ class BackfillShowAction @Inject constructor(
                       ProgressBar(
                         partition.backfilled_matching_record_count,
                         partition.computed_matching_record_count,
+                        partition.precomputing_done,
                       )
                     }
                     td("hidden py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700 sm:table-cell") {
