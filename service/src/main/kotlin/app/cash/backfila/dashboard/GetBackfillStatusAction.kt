@@ -71,6 +71,7 @@ data class GetBackfillStatusResponse(
   val event_logs: List<UiEventLog>,
   val deleted_at: Instant?,
   val next_offset: String?,
+  val unit: String?,
 )
 
 class GetBackfillStatusAction @Inject constructor(
@@ -127,6 +128,7 @@ class GetBackfillStatusAction @Inject constructor(
         },
         run.deleted_at,
         nextOffset?.offset,
+        run.registered_backfill.unit,
       )
     }
   }

@@ -1,5 +1,6 @@
 package app.cash.backfila.client.s3.internal
 
+import app.cash.backfila.client.BackfillUnit
 import app.cash.backfila.client.DeleteBy
 import app.cash.backfila.client.Description
 import app.cash.backfila.client.parseDeleteByDate
@@ -56,6 +57,7 @@ class S3DatasourceBackend @Inject constructor(
         description = it.value.findAnnotation<Description>()?.text,
         parametersClass = parametersClass(it.value as KClass<S3DatasourceBackfill<Any, Any>>),
         deleteBy = it.value.findAnnotation<DeleteBy>()?.parseDeleteByDate(),
+        unit = BackfillUnit.BYTES.displayName,
       )
     }.toSet()
   }

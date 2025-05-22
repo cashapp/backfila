@@ -1,5 +1,6 @@
 package app.cash.backfila.client.stat.internal
 
+import app.cash.backfila.client.BackfillUnit
 import app.cash.backfila.client.DeleteBy
 import app.cash.backfila.client.Description
 import app.cash.backfila.client.parseDeleteByDate
@@ -59,6 +60,7 @@ class StaticDatasourceBackend @Inject constructor(
         description = it.value.findAnnotation<Description>()?.text,
         parametersClass = parametersClass(it.value as KClass<StaticDatasourceBackfillBase<Any, Any>>),
         deleteBy = it.value.findAnnotation<DeleteBy>()?.parseDeleteByDate(),
+        unit = BackfillUnit.RECORDS.displayName,
       )
     }.toSet()
   }

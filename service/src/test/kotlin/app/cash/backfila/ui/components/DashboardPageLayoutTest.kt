@@ -3,6 +3,9 @@ package app.cash.backfila.ui.components
 import app.cash.backfila.BackfilaTestingModule
 import com.google.inject.Provider
 import jakarta.inject.Inject
+import javax.servlet.http.HttpServletRequest
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import misk.Action
 import misk.MiskCaller
 import misk.api.HttpRequest
@@ -19,9 +22,6 @@ import misk.web.dashboard.BaseDashboardModule
 import misk.web.v2.DashboardPageLayout
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.junit.jupiter.api.Test
-import javax.servlet.http.HttpServletRequest
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 
 @MiskTest
 class DashboardPageLayoutTest {
@@ -42,8 +42,8 @@ class DashboardPageLayoutTest {
     actionScope.enter(
       mapOf(
         HttpCall::class.toKey() to fakeHttpCall,
-        MiskCaller::class.toKey() to fakeMiskCaller
-      )
+        MiskCaller::class.toKey() to fakeMiskCaller,
+      ),
     ).use {
       // No exception thrown on correct usage
       layout.get().newBuilder().build()

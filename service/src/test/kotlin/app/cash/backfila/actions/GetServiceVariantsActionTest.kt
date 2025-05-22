@@ -57,7 +57,7 @@ class GetServiceVariantsActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "ChickenSandwich", "Description", listOf(), null, "String",
-                false, null,
+                false, null, null,
               ),
             ),
           )
@@ -72,7 +72,7 @@ class GetServiceVariantsActionTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "ChickenSandwich", "Description", listOf(), null, "String",
-                false, null,
+                false, null, null,
               ),
             ),
           )

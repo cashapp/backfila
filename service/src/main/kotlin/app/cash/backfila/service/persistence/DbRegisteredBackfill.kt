@@ -82,6 +82,9 @@ class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimestampedE
   @Column
   var delete_by: Instant? = null
 
+  @Column(nullable = true)
+  var unit: String? = null
+
   constructor(
     service_id: Id<DbService>,
     name: String,
@@ -90,6 +93,7 @@ class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimestampedE
     type_consumed: String?,
     requires_approval: Boolean,
     delete_by: Instant?,
+    unit: String? = null,
   ) : this() {
     this.service_id = service_id
     this.name = name
@@ -101,6 +105,7 @@ class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimestampedE
     this.active = true
     this.requires_approval = requires_approval
     this.delete_by = delete_by
+    this.unit = unit
 
     parameters.forEach {
       this.parameters.add(
@@ -121,6 +126,7 @@ class DbRegisteredBackfill() : DbUnsharded<DbRegisteredBackfill>, DbTimestampedE
     if (type_consumed != other.type_consumed) return false
     if (requires_approval != other.requires_approval) return false
     if (delete_by != other.delete_by) return false
+    if (unit != other.unit) return false
 
     val ourParams = parameters.map { Parameter(it.name, it.description, it.required) }
     val otherParams = other.parameters.map { Parameter(it.name, it.description, it.required) }

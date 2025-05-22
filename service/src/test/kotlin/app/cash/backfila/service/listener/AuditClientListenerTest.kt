@@ -64,7 +64,7 @@ internal class AuditClientListenerTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "ChickenSandwich", "Description", listOf(), null,
-                null, false, null,
+                null, false, null, null,
               ),
             ),
           )

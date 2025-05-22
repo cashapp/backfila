@@ -34,6 +34,9 @@ message ConfigureServiceRequest {
     // be used to power removal reminders. It will guarantee that reminders will not occur until
     // after this date. This defaults to as soon as possible if it is missing.
     optional uint64 delete_by = 7;
+
+    // The unit of measurement for the backfill (e.g., "records", "bytes", "segments").
+    optional string unit = 8;
   }
 
   // List of all available backfills in this service

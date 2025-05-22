@@ -75,6 +75,7 @@ class BackfilaStartupConfigurator @Inject constructor(
             .description(registration.description)
             .parameters(parameters)
             .delete_by(registration.deleteBy?.toEpochMilli())
+            .unit(registration.unit)
             .build()
         },
       )
