@@ -1,7 +1,7 @@
 package app.cash.backfila.client
 
 enum class BackfillUnit(val displayName: String) {
-  RECORDS("Records"),
+  ITEMS("Items"),
   BYTES("Bytes"),
   SEGMENTS("Segments"),
 }

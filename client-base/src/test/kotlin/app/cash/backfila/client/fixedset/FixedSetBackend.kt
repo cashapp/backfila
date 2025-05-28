@@ -60,7 +60,7 @@ class FixedSetBackend @Inject constructor(
         description = it.value.findAnnotation<Description>()?.text,
         parametersClass = parametersClass(it.value as KClass<FixedSetBackfill<Any>>),
         deleteBy = it.value.findAnnotation<DeleteBy>()?.parseDeleteByDate(),
-        unit = BackfillUnit.RECORDS.displayName,
+        unit = BackfillUnit.ITEMS.displayName,
       )
     }.toSet()
   }

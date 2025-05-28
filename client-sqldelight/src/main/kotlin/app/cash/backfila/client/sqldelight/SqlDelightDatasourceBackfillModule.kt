@@ -29,7 +29,7 @@ class SqlDelightDatasourceBackfillModule<T : SqlDelightDatasourceBackfill<*, *, 
     description = backfillClass.findAnnotation<Description>()?.text,
     parametersClass = parametersClass(),
     deleteBy = backfillClass.findAnnotation<DeleteBy>()?.parseDeleteByDate(),
-    unit = BackfillUnit.RECORDS.displayName,
+    unit = BackfillUnit.ITEMS.displayName,
   )
 
   override fun configure() {

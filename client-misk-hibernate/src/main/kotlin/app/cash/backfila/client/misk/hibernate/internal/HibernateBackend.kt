@@ -58,7 +58,7 @@ internal class HibernateBackend @Inject constructor(
         description = it.value.findAnnotation<Description>()?.text,
         parametersClass = parametersClass(it.value as KClass<HibernateBackfill<*, *, Any>>),
         deleteBy = it.value.findAnnotation<DeleteBy>()?.parseDeleteByDate(),
-        unit = BackfillUnit.RECORDS.displayName,
+        unit = BackfillUnit.ITEMS.displayName,
       )
     }.toSet()
   }

@@ -38,7 +38,7 @@ class JooqBackend @Inject constructor(
         description = it.value.findAnnotation<Description>()?.text,
         parametersClass = parametersClass(it.value as KClass<JooqBackfill<*, Any>>),
         deleteBy = it.value.findAnnotation<DeleteBy>()?.parseDeleteByDate(),
-        unit = BackfillUnit.RECORDS.displayName,
+        unit = BackfillUnit.ITEMS.displayName,
       )
     }.toSet()
   }
