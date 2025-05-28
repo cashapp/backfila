@@ -14,7 +14,7 @@ class BurgerFlippingBackfill @Inject constructor() : StaticDatasourceBackfill<St
   data class SlowMealsAttributes(
     val flipsPerMinute: Long = 5L,
   ) {
-    fun waitBetweenFlipsMs() = (1000L * 30L) / flipsPerMinute
+    fun waitBetweenFlipsMs() = (1000L * 60L) / flipsPerMinute
   }
 
   override val staticDatasource: List<String> = (1..10000).map { i -> "burger $i" }
