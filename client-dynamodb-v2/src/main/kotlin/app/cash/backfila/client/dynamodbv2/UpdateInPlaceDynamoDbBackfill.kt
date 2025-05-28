@@ -16,9 +16,9 @@ import software.amazon.awssdk.services.dynamodb.model.WriteRequest
  * Implements retry logic with exponential backoff for:
  * - Unprocessed items from BatchWriteItem operations
  * - API timeouts
- * * The retry counter for unprocessed items only starts when we stop making progress * (no items processed in a round). The timeout counter only increments when all chunks
+ * The retry counter for unprocessed items only starts when we stop making progress * (no items processed in a round). The timeout counter only increments when all chunks
  * in an iteration timeout.
- * * Implementations must be idempotent as items may be retried multiple times.
+ * Implementations must be idempotent as items may be retried multiple times.
  */
 abstract class UpdateInPlaceDynamoDbBackfill<I : Any, P : Any>(
   val dynamoDbClient: DynamoDbClient,

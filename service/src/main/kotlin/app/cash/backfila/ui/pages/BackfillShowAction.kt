@@ -192,14 +192,16 @@ class BackfillShowAction @Inject constructor(
                       ProgressBar(
                         partition.backfilled_matching_record_count,
                         partition.computed_matching_record_count,
+                        partition.precomputing_done,
                       )
                     }
                     td("hidden py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700 sm:table-cell") {
                       when {
                         partition.state != BackfillState.RUNNING -> +"-"
-                        !partition.precomputing_done -> +"Computing..."
                         partition.matching_records_per_minute == null ||
-                          partition.matching_records_per_minute <= 0 -> +"Calculating..."
+                          partition.matching_records_per_minute <= 0 -> {
+                          if (!partition.precomputing_done) { +"Computing..." } else { +"Calculating..." }
+                        }
                         else -> +"""${partition.matching_records_per_minute} #/m"""
                       }
                     }
