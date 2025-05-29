@@ -71,15 +71,15 @@ class GetBackfillRunsActionFilteredTest {
             listOf(
               ConfigureServiceRequest.BackfillData(
                 "ChickenSandwich", "Description", listOf(), null,
-                null, false, null,
+                null, false, null, null,
               ),
               ConfigureServiceRequest.BackfillData(
                 "TurkeySandwich", "Description", listOf(), null,
-                null, false, null,
+                null, false, null, null,
               ),
               ConfigureServiceRequest.BackfillData(
                 "FrenchFries", "Description", listOf(), null,
-                null, false, null,
+                null, false, null, null,
               ),
             ),
           )

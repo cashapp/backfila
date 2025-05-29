@@ -1,5 +1,6 @@
 package app.cash.backfila.client.sqldelight
 
+import app.cash.backfila.client.BackfillUnit
 import app.cash.backfila.client.DeleteBy
 import app.cash.backfila.client.Description
 import app.cash.backfila.client.parseDeleteByDate
@@ -28,6 +29,7 @@ class SqlDelightDatasourceBackfillModule<T : SqlDelightDatasourceBackfill<*, *, 
     description = backfillClass.findAnnotation<Description>()?.text,
     parametersClass = parametersClass(),
     deleteBy = backfillClass.findAnnotation<DeleteBy>()?.parseDeleteByDate(),
+    unit = BackfillUnit.ITEMS.displayName,
   )
 
   override fun configure() {

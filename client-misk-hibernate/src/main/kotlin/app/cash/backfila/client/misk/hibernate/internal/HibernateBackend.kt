@@ -1,5 +1,6 @@
 package app.cash.backfila.client.misk.hibernate.internal
 
+import app.cash.backfila.client.BackfillUnit
 import app.cash.backfila.client.DeleteBy
 import app.cash.backfila.client.Description
 import app.cash.backfila.client.misk.hibernate.ForHibernateBackend
@@ -57,6 +58,7 @@ internal class HibernateBackend @Inject constructor(
         description = it.value.findAnnotation<Description>()?.text,
         parametersClass = parametersClass(it.value as KClass<HibernateBackfill<*, *, Any>>),
         deleteBy = it.value.findAnnotation<DeleteBy>()?.parseDeleteByDate(),
+        unit = BackfillUnit.ITEMS.displayName,
       )
     }.toSet()
   }
