@@ -14,5 +14,5 @@ class VitessUnshardedHibernateBackfillTest : SinglePartitionHibernateBackfillTes
   val module: Module = ClientMiskTestingModule(true)
 
   @MiskExternalDependency
-  private val dockerVitess = DockerVitess
+  private val dockerVitess = DockerVitess()
 }
