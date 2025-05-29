@@ -8,5 +8,5 @@ data class BackfillRegistration(
   val description: String?,
   val parametersClass: KClass<Any>,
   val deleteBy: Instant?,
-  val unit: String?,
+  val unit: String? = null,
 )
