@@ -16,7 +16,6 @@ Stimulus.register("auto-reload", class extends Controller {
 
   startReloading() {
     this.interval = setInterval(() => {
-      console.log("auto-reload triggered...");
       const pathname = window.location.pathname
       const url = new URL(pathname, window.location.origin)
       url.searchParams.set('frame', 'true')
