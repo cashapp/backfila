@@ -86,45 +86,47 @@ class BackfillShowAction @Inject constructor(
         Link("Backfill #$id", path(id)),
       )
       .buildHtmlResponseBody {
-        AutoReload {
-          PageTitle("${backfill.service_name} Backfill Run", "#$id", backfill.name) {
-            a {
-              href = BackfillCreateAction.path(
-                service = backfill.service_name,
-                variantOrBackfillNameOrId = if (backfill.variant != "default") backfill.variant else id.toString(),
-                backfillNameOrIdOrBlank = if (backfill.variant != "default") id.toString() else "",
-              )
+        // Configuration section - outside AutoReload
+        PageTitle("${backfill.service_name} Backfill Run", "#$id", backfill.name) {
+          a {
+            href = BackfillCreateAction.path(
+              service = backfill.service_name,
+              variantOrBackfillNameOrId = if (backfill.variant != "default") backfill.variant else id.toString(),
+              backfillNameOrIdOrBlank = if (backfill.variant != "default") id.toString() else "",
+            )
 
-              button(classes = "rounded-full bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600") {
-                type = ButtonType.button
-                +"""Clone"""
-              }
+            button(classes = "rounded-full bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600") {
+              type = ButtonType.button
+              +"""Clone"""
             }
           }
+        }
 
-          Card {
-            div("mx-auto grid max-w-2xl grid-cols-1 grid-rows-1 items-start gap-x-24 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-2") {
-              // <!-- Left Column -->"""
-              div("") {
-                h2("text-base font-semibold leading-6 text-gray-900") { +"""Configuration""" }
-                dl("divide-y divide-gray-100") {
-                  leftColumnConfigurationRows.map {
-                    ConfigurationRows(id, it)
-                  }
-                }
-              }
-
-              // <!-- Right Column -->"""
-              div("divide-x divide-gray-100") {
-                dl("divide-y divide-gray-100") {
-                  rightColumnConfigurationRows.map {
-                    ConfigurationRows(id, it)
-                  }
+        Card {
+          div("mx-auto grid max-w-2xl grid-cols-1 grid-rows-1 items-start gap-x-24 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-2") {
+            // <!-- Left Column -->"""
+            div("") {
+              h2("text-base font-semibold leading-6 text-gray-900") { +"""Configuration""" }
+              dl("divide-y divide-gray-100") {
+                leftColumnConfigurationRows.map {
+                  ConfigurationRows(id, it)
                 }
               }
             }
-          }
 
+            // <!-- Right Column -->"""
+            div("divide-x divide-gray-100") {
+              dl("divide-y divide-gray-100") {
+                rightColumnConfigurationRows.map {
+                  ConfigurationRows(id, it)
+                }
+              }
+            }
+          }
+        }
+
+        // Auto-reload section for Partitions and Events
+        AutoReload(frameId = "backfill-$id-status") {
           Card {
             // Partitions
             h2("text-base font-semibold leading-6 text-gray-900") { +"""Partitions""" }

@@ -72,7 +72,7 @@ class ServiceShowAction @Inject constructor(
         Link(label, path),
       )
       .buildHtmlResponseBody {
-        AutoReload {
+        AutoReload(frameId = "backfill-$service-status") {
           PageTitle("Service", label) {
             a {
               href = BackfillCreateServiceIndexAction.path(service, variantOrBlank)
