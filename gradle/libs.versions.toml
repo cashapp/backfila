@@ -33,7 +33,7 @@ junitEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version = "5.
 junitParams = { module = "org.junit.jupiter:junit-jupiter-params", version = "5.9.1" }
 logbackClassic = { module = "ch.qos.logback:logback-classic", version = "1.4.11" }
 loggingApi = { module = "io.github.microutils:kotlin-logging", version = "2.1.23" }
-mavenPublishGradlePlugin = { module = "com.vanniktech:gradle-maven-publish-plugin", version = "0.25.2" }
+mavenPublishGradlePlugin = { module = "com.vanniktech:gradle-maven-publish-plugin", version = "0.31.0" }
 metricsCore = { module = "io.dropwizard.metrics:metrics-core", version = "4.0.2" }
 metricsParent = { module = "io.dropwizard.metrics:metrics-parent", version = "4.0.2" }
 moshiCore = { module = "com.squareup.moshi:moshi", version = "1.13.0" }
