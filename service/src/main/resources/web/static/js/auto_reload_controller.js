@@ -19,7 +19,7 @@ Stimulus.register("auto-reload", class extends Controller {
       const pathname = window.location.pathname
       const url = new URL(pathname, window.location.origin)
       url.searchParams.set('frame', 'true')
-      
+
       Turbo.visit(url.toString(), { frame: this.frameTarget.id })
     }, 10000)
   }

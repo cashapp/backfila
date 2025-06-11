@@ -12,7 +12,6 @@ import app.cash.backfila.ui.components.PageTitle
 import app.cash.backfila.ui.components.Pagination
 import app.cash.backfila.ui.components.ProgressBar
 import app.cash.backfila.ui.pages.BackfillCreateAction.BackfillCreateField.CUSTOM_PARAMETER_PREFIX
-import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.html.ButtonType
@@ -37,6 +36,7 @@ import kotlinx.html.thead
 import kotlinx.html.tr
 import misk.security.authz.Authenticated
 import misk.tailwind.Link
+import misk.turbo.turbo_frame
 import misk.web.Get
 import misk.web.PathParam
 import misk.web.QueryParam
@@ -51,6 +51,7 @@ class BackfillShowAction @Inject constructor(
   private val getBackfillStatusAction: GetBackfillStatusAction,
   private val dashboardPageLayout: DashboardPageLayout,
   private val viewLogsAction: ViewLogsAction,
+  private val backfillShowButtonHandlerAction: BackfillShowButtonHandlerAction,
 ) : WebAction {
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
@@ -102,6 +103,24 @@ class BackfillShowAction @Inject constructor(
           }
         }
 
+        // State section with its own auto-reload
+        AutoReload(frameId = "backfill-$id-state") {
+          Card {
+            turbo_frame("backfill-$id-state") {
+              div("flex justify-between items-center") {
+                h2("text-base font-semibold leading-6 text-gray-900") { +"State" }
+                div("flex gap-2") {
+                  span("text-gray-700") { +backfill.state.name }
+                  with(backfillShowButtonHandlerAction) {
+                    renderStateButtons(id.toString(), backfill.state, backfill.deleted_at)
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        // Configuration section
         Card {
           div("mx-auto grid max-w-2xl grid-cols-1 grid-rows-1 items-start gap-x-24 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-2") {
             // <!-- Left Column -->"""
@@ -298,54 +317,7 @@ class BackfillShowAction @Inject constructor(
     val deleteButton: Link? = null,
   )
 
-  private fun getStateButton(state: BackfillState): Link? {
-    return when (state) {
-      BackfillState.PAUSED -> Link(
-        label = START_STATE_BUTTON_LABEL,
-        href = BackfillState.RUNNING.name,
-      )
-      // COMPLETE and CANCELLED represent final states.
-      BackfillState.COMPLETE -> null
-      BackfillState.CANCELLED -> null
-      else -> Link(
-        label = PAUSE_STATE_BUTTON_LABEL,
-        href = BackfillState.PAUSED.name,
-      )
-    }
-  }
-
-  private fun getCancelButton(state: BackfillState): Link? {
-    return when (state) {
-      BackfillState.PAUSED -> Link(
-        label = CANCEL_STATE_BUTTON_LABEL,
-        href = BackfillState.CANCELLED.name,
-      )
-      else -> null
-    }
-  }
-
-  private fun getDeleteButton(state: BackfillState, deletedAt: Instant?): Link? {
-    if (deletedAt != null) {
-      return null
-    }
-    return when (state) {
-      BackfillState.COMPLETE, BackfillState.CANCELLED -> Link(
-        label = DELETE_STATE_BUTTON_LABEL,
-        href = "soft_delete",
-      )
-      else -> null
-    }
-  }
-
   private fun GetBackfillStatusResponse.toConfigurationRows(id: Long) = listOf(
-    DescriptionListRow(
-      label = "State",
-      description = state.name,
-      button = getStateButton(state),
-      updateFieldId = "state",
-      cancelButton = getCancelButton(state),
-      deleteButton = getDeleteButton(state, deleted_at),
-    ),
     DescriptionListRow(
       label = "Dry Run",
       description = if (dry_run) "dry run" else "wet run",
