@@ -27,6 +27,7 @@ import kotlinx.html.dt
 import kotlinx.html.form
 import kotlinx.html.h2
 import kotlinx.html.input
+import kotlinx.html.pre
 import kotlinx.html.span
 import kotlinx.html.table
 import kotlinx.html.tbody
@@ -292,7 +293,46 @@ class BackfillShowAction @Inject constructor(
                       td("hidden py-5 pl-8 pr-0 align-top text-gray-700 sm:table-cell") { log.user?.let { +it } }
                       td("hidden py-5 pl-8 pr-0 align-top text-gray-700 sm:table-cell") { log.partition_name?.let { +it } }
                       td("hidden py-5 pl-8 pr-0 align-top max-w-2 text-wrap text-gray-700 sm:table-cell") { +log.message }
-                      td("hidden py-5 pl-8 pr-0 align-top max-w-2 text-wrap text-gray-700 sm:table-cell") { log.extra_data?.let { +it } }
+                      td("hidden py-5 pl-8 pr-0 align-top max-w-2 text-wrap text-gray-700 sm:table-cell") {
+                        val maxLength = 100
+                        log.extra_data?.let { extraData ->
+                          if (extraData.length > maxLength) {
+                            div("mb-2") {
+                              attributes["data-controller"] = "toggle"
+
+                              // Short version with expand button
+                              div {
+                                attributes["data-toggle-target"] = "toggleable"
+                                attributes["data-css-class"] = "hidden"
+                                span { +"${extraData.take(maxLength)}..." }
+                                button(
+                                  classes = "ml-2 text-sm text-indigo-600 hover:text-indigo-500",
+                                ) {
+                                  type = ButtonType.button
+                                  attributes["data-action"] = "toggle#toggle"
+                                  +"Show More"
+                                }
+                              }
+
+                              // Full version (hidden initially)
+                              div("hidden") {
+                                attributes["data-toggle-target"] = "toggleable"
+                                attributes["data-css-class"] = "hidden"
+                                pre("whitespace-pre-wrap") { +extraData }
+                                button(
+                                  classes = "mt-2 text-sm text-indigo-600 hover:text-indigo-500",
+                                ) {
+                                  type = ButtonType.button
+                                  attributes["data-action"] = "toggle#toggle"
+                                  +"Show Less"
+                                }
+                              }
+                            }
+                          } else {
+                            span { +extraData }
+                          }
+                        }
+                      }
                     }
                   }
                 }
