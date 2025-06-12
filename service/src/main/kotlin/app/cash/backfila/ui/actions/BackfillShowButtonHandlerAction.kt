@@ -127,13 +127,13 @@ class BackfillShowButtonHandlerAction @Inject constructor(
     val frameContent = dashboardPageLayout.newBuilder()
       .buildHtmlResponseBody {
         turbo_frame("backfill-$id-state") {
-          div("flex flex-col items-end gap-2") {
+          div("flex items-start gap-3") {
+            div("flex flex-col") {
+              renderStateButtons(id, currentState)
+            }
             div("flex items-center gap-2") {
               span("text-sm font-medium text-gray-500") { +"State:" }
               span("text-sm font-semibold text-gray-900") { +currentState.name }
-            }
-            div("flex items-center gap-2") {
-              renderStateButtons(id, currentState)
             }
           }
         }
@@ -159,7 +159,7 @@ class BackfillShowButtonHandlerAction @Inject constructor(
   }
 
   fun TagConsumer<*>.renderButton(id: String, fieldId: String, button: Link, color: String) {
-    form {
+    form(classes = "m-0 pb-1") {
       action = path(id)
       input {
         type = InputType.hidden

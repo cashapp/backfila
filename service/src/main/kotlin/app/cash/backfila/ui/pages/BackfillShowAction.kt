@@ -90,7 +90,7 @@ class BackfillShowAction @Inject constructor(
       .buildHtmlResponseBody {
         // Configuration section - outside AutoReload
         PageTitle("${backfill.service_name} Backfill Run", "#$id", backfill.name) {
-          div("flex items-center gap-6") {
+          div("flex items-start gap-3") {
             a {
               href = BackfillCreateAction.path(
                 service = backfill.service_name,
@@ -107,15 +107,15 @@ class BackfillShowAction @Inject constructor(
             // State section with its own auto-reload
             AutoReload(frameId = "backfill-$id-state") {
               turbo_frame("backfill-$id-state") {
-                div("flex flex-col items-end gap-2") {
-                  div("flex items-center gap-2") {
-                    span("text-sm font-bold text-gray-500") { +"State:" }
-                    span("text-sm font-semibold text-gray-900") { +backfill.state.name }
-                  }
-                  div("flex items-center gap-2") {
+                div("flex items-start gap-2") {
+                  div("flex flex-col") {
                     with(backfillShowButtonHandlerAction) {
                       renderStateButtons(id.toString(), backfill.state, backfill.deleted_at)
                     }
+                  }
+                  div("flex items-center gap-2") {
+                    span("text-sm font-bold text-gray-500") { +"State:" }
+                    span("text-sm font-semibold text-gray-900") { +backfill.state.name }
                   }
                 }
               }
