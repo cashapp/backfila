@@ -24,7 +24,6 @@ import kotlinx.html.TagConsumer
 import kotlinx.html.button
 import kotlinx.html.div
 import kotlinx.html.form
-import kotlinx.html.h2
 import kotlinx.html.input
 import kotlinx.html.span
 import misk.security.authz.Authenticated
@@ -128,10 +127,12 @@ class BackfillShowButtonHandlerAction @Inject constructor(
     val frameContent = dashboardPageLayout.newBuilder()
       .buildHtmlResponseBody {
         turbo_frame("backfill-$id-state") {
-          div("flex justify-between items-center") {
-            h2("text-base font-semibold leading-6 text-gray-900") { +"State" }
-            div("flex gap-2") {
-              span("text-gray-700") { +currentState.name }
+          div("flex flex-col items-end gap-2") {
+            div("flex items-center gap-2") {
+              span("text-sm font-medium text-gray-500") { +"State:" }
+              span("text-sm font-semibold text-gray-900") { +currentState.name }
+            }
+            div("flex items-center gap-2") {
               renderStateButtons(id, currentState)
             }
           }

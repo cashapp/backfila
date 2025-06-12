@@ -90,30 +90,32 @@ class BackfillShowAction @Inject constructor(
       .buildHtmlResponseBody {
         // Configuration section - outside AutoReload
         PageTitle("${backfill.service_name} Backfill Run", "#$id", backfill.name) {
-          a {
-            href = BackfillCreateAction.path(
-              service = backfill.service_name,
-              variantOrBackfillNameOrId = if (backfill.variant != "default") backfill.variant else id.toString(),
-              backfillNameOrIdOrBlank = if (backfill.variant != "default") id.toString() else "",
-            )
+          div("flex items-center gap-6") {
+            a {
+              href = BackfillCreateAction.path(
+                service = backfill.service_name,
+                variantOrBackfillNameOrId = if (backfill.variant != "default") backfill.variant else id.toString(),
+                backfillNameOrIdOrBlank = if (backfill.variant != "default") id.toString() else "",
+              )
 
-            button(classes = "rounded-full bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600") {
-              type = ButtonType.button
-              +"""Clone"""
+              button(classes = "rounded-full bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600") {
+                type = ButtonType.button
+                +"""Clone"""
+              }
             }
-          }
-        }
 
-        // State section with its own auto-reload
-        AutoReload(frameId = "backfill-$id-state") {
-          Card {
-            turbo_frame("backfill-$id-state") {
-              div("flex justify-between items-center") {
-                h2("text-base font-semibold leading-6 text-gray-900") { +"State" }
-                div("flex gap-2") {
-                  span("text-gray-700") { +backfill.state.name }
-                  with(backfillShowButtonHandlerAction) {
-                    renderStateButtons(id.toString(), backfill.state, backfill.deleted_at)
+            // State section with its own auto-reload
+            AutoReload(frameId = "backfill-$id-state") {
+              turbo_frame("backfill-$id-state") {
+                div("flex flex-col items-end gap-2") {
+                  div("flex items-center gap-2") {
+                    span("text-sm font-medium text-gray-500") { +"State:" }
+                    span("text-sm font-semibold text-gray-900") { +backfill.state.name }
+                  }
+                  div("flex items-center gap-2") {
+                    with(backfillShowButtonHandlerAction) {
+                      renderStateButtons(id.toString(), backfill.state, backfill.deleted_at)
+                    }
                   }
                 }
               }
