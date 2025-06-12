@@ -109,7 +109,7 @@ class BackfillShowAction @Inject constructor(
               turbo_frame("backfill-$id-state") {
                 div("flex flex-col items-end gap-2") {
                   div("flex items-center gap-2") {
-                    span("text-sm font-medium text-gray-500") { +"State:" }
+                    span("text-sm font-semibold text-gray-500") { +"State:" }
                     span("text-sm font-semibold text-gray-900") { +backfill.state.name }
                   }
                   div("flex items-center gap-2") {
