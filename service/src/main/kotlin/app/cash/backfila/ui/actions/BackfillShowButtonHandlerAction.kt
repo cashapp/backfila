@@ -1,6 +1,7 @@
 package app.cash.backfila.ui.actions
 
 import app.cash.backfila.dashboard.CancelBackfillAction
+import app.cash.backfila.dashboard.GetBackfillStatusAction
 import app.cash.backfila.dashboard.SoftDeleteBackfillAction
 import app.cash.backfila.dashboard.StartBackfillAction
 import app.cash.backfila.dashboard.StartBackfillRequest
@@ -49,6 +50,7 @@ class BackfillShowButtonHandlerAction @Inject constructor(
   private val updateBackfillAction: UpdateBackfillAction,
   private val cancelBackfillAction: CancelBackfillAction,
   private val softDeleteBackfillAction: SoftDeleteBackfillAction,
+  private val getBackfillStatusAction: GetBackfillStatusAction,
 ) : WebAction {
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
@@ -67,7 +69,7 @@ class BackfillShowButtonHandlerAction @Inject constructor(
     }
 
     return when (field_id) {
-      "state" -> handleStateFrameResponse(id, field_value)
+      "state" -> handleStateFrameResponse(id)
       else -> handleRedirectResponse(id)
     }
   }
@@ -115,24 +117,20 @@ class BackfillShowButtonHandlerAction @Inject constructor(
     )
   }
 
-  private fun handleStateFrameResponse(id: String, fieldValue: String?): Response<ResponseBody> {
-    val currentState = when (fieldValue) {
-      BackfillState.PAUSED.name -> BackfillState.PAUSED
-      BackfillState.RUNNING.name -> BackfillState.RUNNING
-      BackfillState.CANCELLED.name -> BackfillState.CANCELLED
-      "soft_delete" -> BackfillState.COMPLETE
-      else -> BackfillState.RUNNING
-    }
+  private fun handleStateFrameResponse(id: String): Response<ResponseBody> {
+    val backfillStatus = getBackfillStatusAction.status(id.toLong())
+    val currentState = backfillStatus.state
+    val deletedAt = backfillStatus.deleted_at
 
     val frameContent = dashboardPageLayout.newBuilder()
       .buildHtmlResponseBody {
         turbo_frame("backfill-$id-state") {
-          div("flex items-start gap-3") {
+          div("flex items-start gap-2") {
             div("flex flex-col") {
-              renderStateButtons(id, currentState)
+              renderStateButtons(id, currentState, deletedAt)
             }
             div("flex items-center gap-2") {
-              span("text-sm font-medium text-gray-500") { +"State:" }
+              span("text-sm font-bold text-gray-500") { +"State:" }
               span("text-sm font-semibold text-gray-900") { +currentState.name }
             }
           }
