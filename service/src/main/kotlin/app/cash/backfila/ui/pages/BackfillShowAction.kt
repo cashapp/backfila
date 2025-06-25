@@ -392,7 +392,7 @@ class BackfillShowAction @Inject constructor(
       updateFieldId = "batch_size",
     ),
     DescriptionListRow(
-      label = "Sleep betweeen batches (ms)",
+      label = "Sleep between batches (ms)",
       description = extra_sleep_ms.toString(),
       button = Link(
         label = UPDATE_BUTTON_LABEL,
