@@ -59,6 +59,13 @@ subprojects {
   configure<SpotlessExtension> {
     kotlin {
       target("**/*.kt")
+      targetExclude(
+          "**/node_modules/**", 
+          "**/build/**", 
+          "**/.gradle/**",
+          "web/**",
+          "**/web/**"
+      )
       ktlint(libs.versions.ktlint.get()).editorConfigOverride(
           mapOf(
               "indent_size" to "2",
