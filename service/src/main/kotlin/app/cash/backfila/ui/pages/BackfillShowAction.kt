@@ -150,6 +150,61 @@ class BackfillShowAction @Inject constructor(
         // Auto-reload section for Partitions and Events
         AutoReload(frameId = "backfill-$id-status") {
           Card {
+            // Overall Statistics
+            h2("text-base font-semibold leading-6 text-gray-900") { +"""Overall Progress""" }
+
+            val totalBackfilledItems = backfill.partitions.sumOf { it.backfilled_matching_record_count }
+            val totalItemsToRun = backfill.partitions.sumOf { it.computed_matching_record_count }
+            val allPrecomputingDone = backfill.partitions.all { it.precomputing_done }
+            val totalRate = backfill.partitions.sumOf { it.matching_records_per_minute ?: 0 }
+
+            div("my-6 space-y-4") {
+              div("text-sm text-gray-700") {
+                span("font-medium") { +"""Total backfilled ${backfill.unit ?: "units (records, segments, bytes)"}: """ }
+                span("font-semibold text-gray-900") { +"""${totalBackfilledItems.toString().replace(Regex("(\\d)(?=(\\d{3})+(?!\\d))"), "$1,")}""" }
+              }
+              div("text-sm text-gray-700") {
+                span("font-medium") { +"""Total ${backfill.unit ?: "units (records, segments, bytes)"} to run: """ }
+                if (allPrecomputingDone) {
+                  span("font-semibold text-gray-900") { +"""${totalItemsToRun.toString().replace(Regex("(\\d)(?=(\\d{3})+(?!\\d))"), "$1,")}""" }
+                } else {
+                  span("font-semibold text-gray-900") { +"""at least ${totalItemsToRun.toString().replace(Regex("(\\d)(?=(\\d{3})+(?!\\d))"), "$1,")} (still computing)""" }
+                }
+              }
+              div("text-sm text-gray-700") {
+                span("font-medium") { +"""Overall Rate: """ }
+                if (totalRate > 0) {
+                  span("font-semibold text-gray-900") { +"""${totalRate.toString().replace(Regex("(\\d)(?=(\\d{3})+(?!\\d))"), "$1,")} #/m""" }
+                } else {
+                  span("font-semibold text-gray-900") { +"""N/A""" }
+                }
+              }
+
+              // Overall Progress Bar
+              div("mt-4") {
+                div("flex items-center justify-between text-sm text-gray-700 mb-2") {
+                  span("font-medium") { +"""Overall Progress""" }
+                  span("font-semibold text-gray-900") {
+                    if (allPrecomputingDone && totalItemsToRun > 0) {
+                      val percentage = (totalBackfilledItems.toDouble() / totalItemsToRun * 100).let {
+                        if (it.isNaN()) 0.0 else it
+                      }
+                      +"""${String.format("%.1f", percentage)}%"""
+                    } else {
+                      +"""Computing..."""
+                    }
+                  }
+                }
+                ProgressBar(
+                  totalBackfilledItems,
+                  totalItemsToRun,
+                  allPrecomputingDone,
+                )
+              }
+            }
+          }
+
+          Card {
             // Partitions
             h2("text-base font-semibold leading-6 text-gray-900") { +"""Partitions""" }
             table("my-8 whitespace-nowrap text-left text-sm leading-6") {
