@@ -171,18 +171,8 @@ class BackfillCreateAction @Inject constructor(
                               attributes["aria-describedby"] = "dry-run-description"
                               name = field
                               type = InputType.checkBox
-                              // Checked by default to force user to opt-in to non-dry-run
-                              checked = true
-                              placeholder = "on"
-                              backfillToCloneStatus?.let {
-                                if (it.dry_run) {
-                                  value = "on"
-                                  checked = true
-                                } else {
-                                  value = "off"
-                                  checked = false
-                                }
-                              }
+                              // Set checkbox state based on cloned backfill or default to checked
+                              checked = backfillToCloneStatus?.dry_run ?: true
                             }
                           }
                         }
