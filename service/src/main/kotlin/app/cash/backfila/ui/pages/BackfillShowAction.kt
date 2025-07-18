@@ -352,7 +352,6 @@ class BackfillShowAction @Inject constructor(
                   backfill.event_logs.map { log ->
                     tr("border-b border-gray-100") {
                       td("hidden py-5 pl-8 pr-0 align-top text-wrap text-gray-700 sm:table-cell") {
-                        // Use a data attribute to store the ISO timestamp and let JavaScript format it
                         span {
                           attributes["data-timestamp"] = log.occurred_at.toString()
                           attributes["class"] = "localized-time"
@@ -757,7 +756,6 @@ class BackfillShowAction @Inject constructor(
             if (!isNaN(date.getTime())) {
               let formatted;
               try {
-                // First try with en-CA locale (same as old UI)
                 formatted = date.toLocaleString('en-CA', {
                   timeZoneName: 'short',
                   year: 'numeric',
@@ -781,8 +779,7 @@ class BackfillShowAction @Inject constructor(
                   hour12: true
                 });
               }
-              
-              // Clean up the formatting to match old UI
+
               formatted = formatted.replace(',', '').replace(/\.m\./g, 'm');
               element.textContent = formatted;
             }
@@ -793,16 +790,10 @@ class BackfillShowAction @Inject constructor(
       });
     }
     
-    // Run immediately when script loads
     formatTimestamps();
-    
-    // Run on initial page load
+
     document.addEventListener('DOMContentLoaded', formatTimestamps);
-    
-    // Also run after turbo frame loads (for auto-reload)
     document.addEventListener('turbo:frame-load', formatTimestamps);
-    
-    // Run after a short delay to ensure everything is loaded
     setTimeout(formatTimestamps, 100);
     
     // Run periodically to catch any missed updates
