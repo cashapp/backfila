@@ -5,22 +5,42 @@ Stimulus.register("auto-reload", class extends Controller {
   static targets = ["frame"]
 
   connect() {
-    console.log("Auto-reload connected...");
     this.startReloading()
   }
 
   disconnect() {
-    console.log("Clearing auto-reload interval...");
     if (this.interval) clearInterval(this.interval)
   }
 
   startReloading() {
     this.interval = setInterval(() => {
-      const pathname = window.location.pathname
-      const url = new URL(pathname, window.location.origin)
-      url.searchParams.set('frame', 'true')
-
-      Turbo.visit(url.toString(), { frame: this.frameTarget.id })
+      // Get the clean base URL without any frame parameters
+      const baseUrl = window.location.origin + window.location.pathname
+      const currentParams = new URLSearchParams(window.location.search)
+      
+      // Remove frame parameter if it exists
+      currentParams.delete('frame')
+      
+      // Build target URL
+      const targetUrl = baseUrl + (currentParams.toString() ? '?' + currentParams.toString() : '')
+      
+      fetch(targetUrl)
+        .then(response => response.text())
+        .then(html => {
+          const parser = new DOMParser()
+          const doc = parser.parseFromString(html, 'text/html')
+          const newFrameContent = doc.querySelector(`#${this.frameTarget.id}`)
+          
+          if (newFrameContent) {
+            // Clear the src attribute to prevent any URL references
+            this.frameTarget.removeAttribute('src')
+            // Update the content
+            this.frameTarget.innerHTML = newFrameContent.innerHTML
+          }
+        })
+        .catch(error => {
+          console.error("Auto-reload error:", error)
+        })
     }, 10000)
   }
 });
