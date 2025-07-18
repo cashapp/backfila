@@ -80,7 +80,7 @@ class BackfillShowAction @Inject constructor(
       .headBlock {
         // Add JavaScript to format timestamps in user's timezone
         script {
-          +formatTimestampsScript()
+          +formatToLocalTimestampsScript()
         }
       }
       .breadcrumbLinks(
@@ -355,7 +355,6 @@ class BackfillShowAction @Inject constructor(
                         span {
                           attributes["data-timestamp"] = log.occurred_at.toString()
                           attributes["class"] = "localized-time"
-                          // Fallback display (will be replaced by JavaScript)
                           +log.occurred_at.toString().replace("T", " ").dropLast(5)
                         }
                       }
@@ -526,7 +525,6 @@ class BackfillShowAction @Inject constructor(
             span {
               attributes["data-timestamp"] = backfill.created_at.toString()
               attributes["class"] = "localized-time"
-              // Fallback display (will be replaced by JavaScript)
               +backfill.created_at.toString().replace("T", " ").dropLast(5)
             }
             +" ${it.description}"
@@ -745,7 +743,7 @@ class BackfillShowAction @Inject constructor(
     return if (sb.isEmpty()) "< 1s" else sb.toString()
   }
 
-  private fun formatTimestampsScript(): String = """
+  private fun formatToLocalTimestampsScript(): String = """
     function formatTimestamps() {
       document.querySelectorAll('.localized-time').forEach(function(element) {
         const timestamp = element.getAttribute('data-timestamp');
