@@ -127,7 +127,7 @@ class DashboardPageLayout @Inject constructor(
           ) {
             div("py-10") {
               main {
-                div("mx-auto w-[90%] px-4 sm:px-6 lg:px-8") {
+                div("mx-auto w-full px-4 sm:px-6 lg:px-8") {
                   // TODO remove when new UI is stable and preferred
                   UseOldUIAlert()
 
