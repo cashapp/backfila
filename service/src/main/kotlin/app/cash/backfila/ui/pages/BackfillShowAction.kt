@@ -28,6 +28,7 @@ import kotlinx.html.form
 import kotlinx.html.h2
 import kotlinx.html.input
 import kotlinx.html.pre
+import kotlinx.html.script
 import kotlinx.html.span
 import kotlinx.html.table
 import kotlinx.html.tbody
@@ -76,6 +77,12 @@ class BackfillShowAction @Inject constructor(
 
     val htmlResponseBody = dashboardPageLayout.newBuilder()
       .title("Backfill $id | Backfila")
+      .headBlock {
+        // Add JavaScript to format timestamps in user's timezone
+        script {
+          +formatToLocalTimestampsScript()
+        }
+      }
       .breadcrumbLinks(
         Link("Services", ServiceIndexAction.PATH),
         Link(
@@ -131,7 +138,7 @@ class BackfillShowAction @Inject constructor(
               h2("text-base font-semibold leading-6 text-gray-900") { +"""Configuration""" }
               dl("divide-y divide-gray-100") {
                 leftColumnConfigurationRows.map {
-                  ConfigurationRows(id, it)
+                  ConfigurationRows(id, it, backfill)
                 }
               }
             }
@@ -140,7 +147,7 @@ class BackfillShowAction @Inject constructor(
             div("divide-x divide-gray-100") {
               dl("divide-y divide-gray-100") {
                 rightColumnConfigurationRows.map {
-                  ConfigurationRows(id, it)
+                  ConfigurationRows(id, it, backfill)
                 }
               }
             }
@@ -348,7 +355,11 @@ class BackfillShowAction @Inject constructor(
                   backfill.event_logs.map { log ->
                     tr("border-b border-gray-100") {
                       td("hidden py-5 pl-8 pr-0 align-top text-wrap text-gray-700 sm:table-cell") {
-                        +log.occurred_at.toString().replace("T", " ").dropLast(5)
+                        span {
+                          attributes["data-timestamp"] = log.occurred_at.toString()
+                          attributes["class"] = "localized-time"
+                          +log.occurred_at.toString().replace("T", " ").dropLast(5)
+                        }
                       }
                       td("hidden py-5 pl-8 pr-0 align-top text-gray-700 sm:table-cell") { log.user?.let { +it } }
                       td("hidden py-5 pl-8 pr-0 align-top text-gray-700 sm:table-cell") { log.partition_name?.let { +it } }
@@ -472,7 +483,7 @@ class BackfillShowAction @Inject constructor(
     ),
     DescriptionListRow(
       label = "Created",
-      description = "$created_at by $created_by_user",
+      description = "by $created_by_user",
     ),
     DescriptionListRow(
       label = "Logs",
@@ -505,7 +516,7 @@ class BackfillShowAction @Inject constructor(
     }
   }
 
-  private fun TagConsumer<*>.ConfigurationRows(id: Long, it: DescriptionListRow) {
+  private fun TagConsumer<*>.ConfigurationRows(id: Long, it: DescriptionListRow, backfill: GetBackfillStatusResponse) {
     div("px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0") {
       attributes["data-controller"] = "toggle"
 
@@ -515,7 +526,17 @@ class BackfillShowAction @Inject constructor(
           attributes["data-toggle-target"] = "toggleable"
           attributes["data-css-class"] = "hidden"
 
-          +it.description
+          // Special handling for "Created" field to add timestamp formatting
+          if (it.label == "Created") {
+            span {
+              attributes["data-timestamp"] = backfill.created_at.toString()
+              attributes["class"] = "localized-time"
+              +backfill.created_at.toString().replace("T", " ").dropLast(5)
+            }
+            +" ${it.description}"
+          } else {
+            +it.description
+          }
         }
         it.button?.let { button ->
           if (button.label == UPDATE_BUTTON_LABEL) {
@@ -727,6 +748,61 @@ class BackfillShowAction @Inject constructor(
 
     return if (sb.isEmpty()) "< 1s" else sb.toString()
   }
+
+  private fun formatToLocalTimestampsScript(): String = """
+    function formatTimestamps() {
+      document.querySelectorAll('.localized-time').forEach(function(element) {
+        const timestamp = element.getAttribute('data-timestamp');
+        if (timestamp) {
+          try {
+            const date = new Date(timestamp);
+            
+            if (!isNaN(date.getTime())) {
+              let formatted;
+              try {
+                formatted = date.toLocaleString('en-CA', {
+                  timeZoneName: 'short',
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit',
+                  hour12: true
+                });
+              } catch (e1) {
+                // Fallback to default locale
+                formatted = date.toLocaleString(undefined, {
+                  timeZoneName: 'short',
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit',
+                  hour12: true
+                });
+              }
+
+              formatted = formatted.replace(',', '').replace(/\.m\./g, 'm');
+              element.textContent = formatted;
+            }
+          } catch (e) {
+            console.error('Failed to format timestamp:', timestamp, e);
+          }
+        }
+      });
+    }
+    
+    formatTimestamps();
+
+    document.addEventListener('DOMContentLoaded', formatTimestamps);
+    document.addEventListener('turbo:frame-load', formatTimestamps);
+    setTimeout(formatTimestamps, 100);
+    
+    // Run periodically to catch any missed updates
+    setInterval(formatTimestamps, 1000);
+  """.trimIndent()
 
   companion object {
     private const val PATH = "/backfills/{id}"
