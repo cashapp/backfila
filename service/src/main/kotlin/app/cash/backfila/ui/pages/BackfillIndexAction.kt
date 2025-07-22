@@ -5,7 +5,6 @@ import app.cash.backfila.service.persistence.BackfillRunQuery
 import app.cash.backfila.service.persistence.ServiceQuery
 import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.components.PageTitle
-import app.cash.backfila.ui.components.Pagination
 import app.cash.backfila.ui.components.PaginationWithHistory
 import javax.inject.Inject
 import javax.inject.Singleton
