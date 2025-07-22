@@ -147,8 +147,8 @@ class BackfillShowAction @Inject constructor(
           }
         }
 
-        // Auto-reload section for Partitions and Events
-        AutoReload(frameId = "backfill-$id-status") {
+        // Auto-reload section for Partitions and Overall Progress
+        AutoReload(frameId = "backfill-$id-partitions") {
           Card {
             // Overall Statistics
             h2("text-base font-semibold leading-6 text-gray-900") { +"""Overall Progress""" }
@@ -311,7 +311,10 @@ class BackfillShowAction @Inject constructor(
               }
             }
           }
+        }
 
+        // Smart auto-reload section for Events (preserves expanded state)
+        AutoReload(frameId = "backfill-$id-events") {
           Card {
             // Events
             div {
