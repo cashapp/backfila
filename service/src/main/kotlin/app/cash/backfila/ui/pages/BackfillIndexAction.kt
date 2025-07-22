@@ -6,6 +6,7 @@ import app.cash.backfila.service.persistence.ServiceQuery
 import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.components.PageTitle
 import app.cash.backfila.ui.components.Pagination
+import app.cash.backfila.ui.components.PaginationWithHistory
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.html.ButtonType
@@ -45,6 +46,7 @@ class BackfillIndexAction @Inject constructor(
   fun get(
     @QueryParam offset: String? = null,
     @QueryParam lastOffset: String? = null,
+    @QueryParam history: String? = null,
   ): Response<ResponseBody> {
     val (backfills, nextOffset) = transacter.transaction { session ->
       queryFactory.newQuery<BackfillRunQuery>()
@@ -109,7 +111,7 @@ class BackfillIndexAction @Inject constructor(
               }
             }
 
-            Pagination(nextOffset?.offset, offset, lastOffset, PATH)
+            PaginationWithHistory(nextOffset?.offset, offset, history, PATH)
           }
         },
     )

@@ -9,7 +9,7 @@ import app.cash.backfila.ui.actions.BackfillShowButtonHandlerAction
 import app.cash.backfila.ui.components.AutoReload
 import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.components.PageTitle
-import app.cash.backfila.ui.components.Pagination
+import app.cash.backfila.ui.components.PaginationWithHistory
 import app.cash.backfila.ui.components.ProgressBar
 import app.cash.backfila.ui.pages.BackfillCreateAction.BackfillCreateField.CUSTOM_PARAMETER_PREFIX
 import javax.inject.Inject
@@ -61,6 +61,7 @@ class BackfillShowAction @Inject constructor(
     @PathParam id: Long,
     @QueryParam offset: String? = null,
     @QueryParam lastOffset: String? = null,
+    @QueryParam history: String? = null,
   ): Response<ResponseBody> {
     val backfill = getBackfillStatusAction.status(id, offset)
     val label =
@@ -395,7 +396,7 @@ class BackfillShowAction @Inject constructor(
                 }
               }
 
-              Pagination(backfill.next_offset, offset, lastOffset, path(id))
+              PaginationWithHistory(backfill.next_offset, offset, history, path(id))
             }
           }
         }
