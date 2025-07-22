@@ -360,6 +360,9 @@ class BackfillShowAction @Inject constructor(
                             div("mb-2") {
                               attributes["data-controller"] = "toggle"
 
+                              // Add unique ID for state preservation
+                              attributes["data-event-id"] = log.occurred_at.toString()
+
                               // Short version with expand button
                               div {
                                 attributes["data-toggle-target"] = "toggleable"
