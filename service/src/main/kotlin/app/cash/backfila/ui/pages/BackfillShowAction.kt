@@ -755,7 +755,7 @@ class BackfillShowAction @Inject constructor(
 
   private fun formatToLocalTimestampsScript(): String = """
     function formatTimestamps() {
-      document.querySelectorAll('.localized-time').forEach(function(element) {
+      document.querySelectorAll('.localized-time:not([data-formatted])').forEach(function(element) {
         const timestamp = element.getAttribute('data-timestamp');
         if (timestamp) {
           try {
@@ -790,6 +790,9 @@ class BackfillShowAction @Inject constructor(
 
               formatted = formatted.replace(',', '').replace(/\.m\./g, 'm');
               element.textContent = formatted;
+              
+              // Mark as formatted to prevent re-processing
+              element.setAttribute('data-formatted', 'true');
             }
           } catch (e) {
             console.error('Failed to format timestamp:', timestamp, e);
@@ -804,7 +807,7 @@ class BackfillShowAction @Inject constructor(
     document.addEventListener('turbo:frame-load', formatTimestamps);
     setTimeout(formatTimestamps, 100);
     
-    // Run periodically to catch any missed updates
+    // Run periodically to catch any missed updates (only processes new elements)
     setInterval(formatTimestamps, 1000);
   """.trimIndent()
 
