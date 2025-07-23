@@ -154,8 +154,8 @@ class BackfillShowAction @Inject constructor(
           }
         }
 
-        // Auto-reload section for Partitions and Events
-        AutoReload(frameId = "backfill-$id-status") {
+        // Auto-reload section for Partitions and Overall Progress
+        AutoReload(frameId = "backfill-$id-partitions") {
           Card {
             // Overall Statistics
             h2("text-base font-semibold leading-6 text-gray-900") { +"""Overall Progress""" }
@@ -318,27 +318,30 @@ class BackfillShowAction @Inject constructor(
               }
             }
           }
+        }
 
+        // Smart auto-reload section for Events (preserves expanded state)
+        AutoReload(frameId = "backfill-$id-events") {
           Card {
             // Events
             div {
               h2("text-base font-semibold leading-6 text-gray-900") { +"""Events""" }
-              table("my-8 text-left text-sm leading-6") {
+              table("my-8 text-left text-sm leading-6 table-fixed w-full") {
                 thead("border-b border-gray-200 text-gray-900") {
                   tr {
-                    th(classes = "px-0 py-3 font-semibold") {
+                    th(classes = "px-0 py-3 font-semibold w-40") {
                       scope = ThScope.col
                       +"""Time"""
                     }
-                    th(classes = "hidden py-3 pl-8 pr-0 font-semibold sm:table-cell") {
+                    th(classes = "hidden py-3 pl-8 pr-0 font-semibold w-24 sm:table-cell") {
                       scope = ThScope.col
                       +"""User"""
                     }
-                    th(classes = "hidden py-3 pl-8 pr-0 font-semibold sm:table-cell") {
+                    th(classes = "hidden py-3 pl-8 pr-0 font-semibold w-32 sm:table-cell") {
                       scope = ThScope.col
                       +"""Partition"""
                     }
-                    th(classes = "py-3 pl-8 pr-0 font-semibold") {
+                    th(classes = "py-3 pl-8 pr-0 font-semibold w-80") {
                       scope = ThScope.col
                       +"""Event"""
                     }
@@ -360,44 +363,51 @@ class BackfillShowAction @Inject constructor(
                       }
                       td("hidden py-5 pl-8 pr-0 align-top text-gray-700 sm:table-cell") { log.user?.let { +it } }
                       td("hidden py-5 pl-8 pr-0 align-top text-gray-700 sm:table-cell") { log.partition_name?.let { +it } }
-                      td("hidden py-5 pl-8 pr-0 align-top max-w-2 text-wrap text-gray-700 sm:table-cell") { +log.message }
-                      td("hidden py-5 pl-8 pr-0 align-top max-w-2 text-wrap text-gray-700 sm:table-cell") {
-                        val maxLength = 100
-                        log.extra_data?.let { extraData ->
-                          if (extraData.length > maxLength) {
-                            div("mb-2") {
-                              attributes["data-controller"] = "toggle"
+                      td("py-5 pl-8 pr-0 align-top text-wrap text-gray-700 break-words") {
+                        div("max-w-80") { +log.message }
+                      }
+                      td("py-5 pl-8 pr-0 align-top text-gray-700 sm:table-cell") {
+                        div("min-w-0 max-w-md") {
+                          val maxLength = 100
+                          log.extra_data?.let { extraData ->
+                            if (extraData.length > maxLength) {
+                              div("mb-2") {
+                                attributes["data-controller"] = "toggle"
 
-                              // Short version with expand button
-                              div {
-                                attributes["data-toggle-target"] = "toggleable"
-                                attributes["data-css-class"] = "hidden"
-                                span { +"${extraData.take(maxLength)}..." }
-                                button(
-                                  classes = "ml-2 text-sm text-indigo-600 hover:text-indigo-500",
-                                ) {
-                                  type = ButtonType.button
-                                  attributes["data-action"] = "toggle#toggle"
-                                  +"Show More"
+                                // Add unique ID for state preservation
+                                attributes["data-event-id"] = log.occurred_at.toString()
+
+                                // Short version with expand button
+                                div {
+                                  attributes["data-toggle-target"] = "toggleable"
+                                  attributes["data-css-class"] = "hidden"
+                                  span { +"${extraData.take(maxLength)}..." }
+                                  button(
+                                    classes = "ml-2 text-sm text-indigo-600 hover:text-indigo-500",
+                                  ) {
+                                    type = ButtonType.button
+                                    attributes["data-action"] = "toggle#toggle"
+                                    +"Show More"
+                                  }
+                                }
+
+                                // Full version (hidden initially)
+                                div("hidden") {
+                                  attributes["data-toggle-target"] = "toggleable"
+                                  attributes["data-css-class"] = "hidden"
+                                  pre("whitespace-pre-wrap") { +extraData }
+                                  button(
+                                    classes = "mt-2 text-sm text-indigo-600 hover:text-indigo-500",
+                                  ) {
+                                    type = ButtonType.button
+                                    attributes["data-action"] = "toggle#toggle"
+                                    +"Show Less"
+                                  }
                                 }
                               }
-
-                              // Full version (hidden initially)
-                              div("hidden") {
-                                attributes["data-toggle-target"] = "toggleable"
-                                attributes["data-css-class"] = "hidden"
-                                pre("whitespace-pre-wrap") { +extraData }
-                                button(
-                                  classes = "mt-2 text-sm text-indigo-600 hover:text-indigo-500",
-                                ) {
-                                  type = ButtonType.button
-                                  attributes["data-action"] = "toggle#toggle"
-                                  +"Show Less"
-                                }
-                              }
+                            } else {
+                              span { +extraData }
                             }
-                          } else {
-                            span { +extraData }
                           }
                         }
                       }
