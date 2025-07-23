@@ -5,7 +5,7 @@ import app.cash.backfila.ui.components.AutoReload
 import app.cash.backfila.ui.components.BackfillsTable
 import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.components.PageTitle
-import app.cash.backfila.ui.components.Pagination
+import app.cash.backfila.ui.components.PaginationWithHistory
 import java.net.HttpURLConnection
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -45,6 +45,7 @@ class ServiceShowAction @Inject constructor(
     @PathParam variantOrBlank: String? = "",
     @QueryParam offset: String? = null,
     @QueryParam lastOffset: String? = null,
+    @QueryParam history: String? = null,
     @QueryParam showDeleted: Boolean = false,
   ): Response<ResponseBody> {
     if (service.isNullOrBlank()) {
@@ -86,7 +87,7 @@ class ServiceShowAction @Inject constructor(
 
           BackfillsTable(true, backfillRuns.running_backfills)
           BackfillsTable(false, backfillRuns.paused_backfills, showDeleted)
-          Pagination(backfillRuns.next_pagination_token, offset, lastOffset, path(service, variantOrBlank))
+          PaginationWithHistory(backfillRuns.next_pagination_token, offset, history, path(service, variantOrBlank))
         }
       }
 
