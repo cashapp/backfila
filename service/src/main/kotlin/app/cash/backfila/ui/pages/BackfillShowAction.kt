@@ -216,7 +216,7 @@ class BackfillShowAction @Inject constructor(
             }
           }
 
-          Card {
+          FullWidthCard {
             // Partitions
             div("mx-auto max-w-7xl sm:px-6 lg:px-8") {
               h2("text-base font-semibold leading-6 text-gray-900") { +"""Partitions""" }
@@ -329,7 +329,7 @@ class BackfillShowAction @Inject constructor(
 
         // Smart auto-reload section for Events (preserves expanded state)
         AutoReload(frameId = "backfill-$id-events") {
-          Card {
+          FullWidthCard {
             // Events
             div("mx-auto max-w-7xl sm:px-6 lg:px-8") {
               h2("text-base font-semibold leading-6 text-gray-900") { +"""Events""" }
@@ -523,6 +523,12 @@ class BackfillShowAction @Inject constructor(
 
   private fun TagConsumer<*>.Card(block: TagConsumer<*>.() -> Unit) {
     div("-mx-4 mb-8 px-4 py-8 overflow-x-auto shadow-sm ring-1 ring-gray-900/5 sm:mx-0 sm:rounded-lg sm:px-8 lg:col-span-2 lg:row-span-2 lg:row-end-2") {
+      block()
+    }
+  }
+
+  private fun TagConsumer<*>.FullWidthCard(block: TagConsumer<*>.() -> Unit) {
+    div("-mx-2 mb-8 py-8 overflow-x-auto shadow-sm ring-1 ring-gray-900/5 sm:-mx-3 lg:-mx-4 sm:rounded-lg") {
       block()
     }
   }
