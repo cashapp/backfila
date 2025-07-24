@@ -132,23 +132,25 @@ class BackfillShowAction @Inject constructor(
         }
 
         // Configuration section
-        Card {
-          div("mx-auto grid max-w-2xl grid-cols-1 grid-rows-1 items-start gap-x-24 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-2") {
-            // <!-- Left Column -->"""
-            div("") {
-              h2("text-base font-semibold leading-6 text-gray-900") { +"""Configuration""" }
-              dl("divide-y divide-gray-100") {
-                leftColumnConfigurationRows.map {
-                  ConfigurationRows(id, it, backfill)
+        div("mx-auto max-w-7xl sm:px-6 lg:px-8") {
+          Card {
+            div("mx-auto grid max-w-2xl grid-cols-1 grid-rows-1 items-start gap-x-24 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-2") {
+              // <!-- Left Column -->"""
+              div("") {
+                h2("text-base font-semibold leading-6 text-gray-900") { +"""Configuration""" }
+                dl("divide-y divide-gray-100") {
+                  leftColumnConfigurationRows.map {
+                    ConfigurationRows(id, it, backfill)
+                  }
                 }
               }
-            }
 
-            // <!-- Right Column -->"""
-            div("divide-x divide-gray-100") {
-              dl("divide-y divide-gray-100") {
-                rightColumnConfigurationRows.map {
-                  ConfigurationRows(id, it, backfill)
+              // <!-- Right Column -->"""
+              div("divide-x divide-gray-100") {
+                dl("divide-y divide-gray-100") {
+                  rightColumnConfigurationRows.map {
+                    ConfigurationRows(id, it, backfill)
+                  }
                 }
               }
             }
@@ -157,160 +159,164 @@ class BackfillShowAction @Inject constructor(
 
         // Auto-reload section for Partitions and Overall Progress
         AutoReload(frameId = "backfill-$id-partitions") {
-          Card {
-            // Overall Statistics
-            h2("text-base font-semibold leading-6 text-gray-900") { +"""Overall Progress""" }
+          div("mx-auto max-w-7xl sm:px-6 lg:px-8") {
+            Card {
+              // Overall Statistics
+              h2("text-base font-semibold leading-6 text-gray-900") { +"""Overall Progress""" }
 
-            val totalBackfilledItems = backfill.partitions.sumOf { it.backfilled_matching_record_count }
-            val totalItemsToRun = backfill.partitions.sumOf { it.computed_matching_record_count }
-            val allPrecomputingDone = backfill.partitions.all { it.precomputing_done }
-            val totalRate = backfill.partitions.sumOf { it.matching_records_per_minute ?: 0 }
+              val totalBackfilledItems = backfill.partitions.sumOf { it.backfilled_matching_record_count }
+              val totalItemsToRun = backfill.partitions.sumOf { it.computed_matching_record_count }
+              val allPrecomputingDone = backfill.partitions.all { it.precomputing_done }
+              val totalRate = backfill.partitions.sumOf { it.matching_records_per_minute ?: 0 }
 
-            div("my-6 space-y-4") {
-              div("text-sm text-gray-700") {
-                span("font-medium") { +"""Total backfilled ${backfill.unit ?: "units (records, segments, bytes)"}: """ }
-                span("font-semibold text-gray-900") { +"""${totalBackfilledItems.toString().replace(Regex("(\\d)(?=(\\d{3})+(?!\\d))"), "$1,")}""" }
-              }
-              div("text-sm text-gray-700") {
-                span("font-medium") { +"""Total ${backfill.unit ?: "units (records, segments, bytes)"} to run: """ }
-                if (allPrecomputingDone) {
-                  span("font-semibold text-gray-900") { +"""${totalItemsToRun.toString().replace(Regex("(\\d)(?=(\\d{3})+(?!\\d))"), "$1,")}""" }
-                } else {
-                  span("font-semibold text-gray-900") { +"""at least ${totalItemsToRun.toString().replace(Regex("(\\d)(?=(\\d{3})+(?!\\d))"), "$1,")} (still computing)""" }
+              div("my-6 space-y-4") {
+                div("text-sm text-gray-700") {
+                  span("font-medium") { +"""Total backfilled ${backfill.unit ?: "units (records, segments, bytes)"}: """ }
+                  span("font-semibold text-gray-900") { +"""${totalBackfilledItems.toString().replace(Regex("(\\d)(?=(\\d{3})+(?!\\d))"), "$1,")}""" }
                 }
-              }
-              div("text-sm text-gray-700") {
-                span("font-medium") { +"""Overall Rate: """ }
-                if (totalRate > 0) {
-                  span("font-semibold text-gray-900") { +"""${totalRate.toString().replace(Regex("(\\d)(?=(\\d{3})+(?!\\d))"), "$1,")} #/m""" }
-                } else {
-                  span("font-semibold text-gray-900") { +"""N/A""" }
-                }
-              }
-
-              // Overall Progress Bar
-              div("mt-4") {
-                div("flex items-center justify-between text-sm text-gray-700 mb-2") {
-                  span("font-medium") { +"""Overall Progress""" }
-                  span("font-semibold text-gray-900") {
-                    if (allPrecomputingDone && totalItemsToRun > 0) {
-                      val percentage = (totalBackfilledItems.toDouble() / totalItemsToRun * 100).let {
-                        if (it.isNaN()) 0.0 else it
-                      }
-                      +"""${String.format("%.1f", percentage)}%"""
-                    } else {
-                      +"""Computing..."""
-                    }
+                div("text-sm text-gray-700") {
+                  span("font-medium") { +"""Total ${backfill.unit ?: "units (records, segments, bytes)"} to run: """ }
+                  if (allPrecomputingDone) {
+                    span("font-semibold text-gray-900") { +"""${totalItemsToRun.toString().replace(Regex("(\\d)(?=(\\d{3})+(?!\\d))"), "$1,")}""" }
+                  } else {
+                    span("font-semibold text-gray-900") { +"""at least ${totalItemsToRun.toString().replace(Regex("(\\d)(?=(\\d{3})+(?!\\d))"), "$1,")} (still computing)""" }
                   }
                 }
-                ProgressBar(
-                  totalBackfilledItems,
-                  totalItemsToRun,
-                  allPrecomputingDone,
-                )
+                div("text-sm text-gray-700") {
+                  span("font-medium") { +"""Overall Rate: """ }
+                  if (totalRate > 0) {
+                    span("font-semibold text-gray-900") { +"""${totalRate.toString().replace(Regex("(\\d)(?=(\\d{3})+(?!\\d))"), "$1,")} #/m""" }
+                  } else {
+                    span("font-semibold text-gray-900") { +"""N/A""" }
+                  }
+                }
+
+                // Overall Progress Bar
+                div("mt-4") {
+                  div("flex items-center justify-between text-sm text-gray-700 mb-2") {
+                    span("font-medium") { +"""Overall Progress""" }
+                    span("font-semibold text-gray-900") {
+                      if (allPrecomputingDone && totalItemsToRun > 0) {
+                        val percentage = (totalBackfilledItems.toDouble() / totalItemsToRun * 100).let {
+                          if (it.isNaN()) 0.0 else it
+                        }
+                        +"""${String.format("%.1f", percentage)}%"""
+                      } else {
+                        +"""Computing..."""
+                      }
+                    }
+                  }
+                  ProgressBar(
+                    totalBackfilledItems,
+                    totalItemsToRun,
+                    allPrecomputingDone,
+                  )
+                }
               }
             }
           }
 
           Card {
             // Partitions
-            h2("text-base font-semibold leading-6 text-gray-900") { +"""Partitions""" }
-            table("my-8 whitespace-nowrap text-left text-sm leading-6") {
-              thead("border-b border-gray-200 text-gray-900") {
-                tr {
-                  th(classes = "px-0 py-3 font-semibold") {
-                    scope = ThScope.col
-                    +"""Name"""
-                  }
-                  th(classes = "hidden py-3 pl-8 pr-0 text-right font-semibold sm:table-cell") {
-                    scope = ThScope.col
-                    +"""State"""
-                  }
-                  th(classes = "hidden py-3 pl-8 pr-0 text-right font-semibold sm:table-cell") {
-                    scope = ThScope.col
-                    +"""Cursor"""
-                  }
-                  th(classes = "py-3 pl-8 pr-0 text-right font-semibold") {
-                    scope = ThScope.col
-                    +"""Range"""
-                  }
-                  th(classes = "py-3 pl-8 pr-0 text-right font-semibold") {
-                    scope = ThScope.col
-                    +"""# Precomputed"""
-                  }
-                  th(classes = "py-3 pl-8 pr-0 text-right font-semibold") {
-                    scope = ThScope.col
-                    +"""# Completed"""
-                  }
-                  th(classes = "py-3 pl-8 pr-0 text-right font-semibold") {
-                    scope = ThScope.col
-                    +"""Progress (%)"""
-                  }
-                  th(classes = "py-3 pl-8 pr-0 text-right font-semibold") {
-                    scope = ThScope.col
-                    +"""Rate"""
-                  }
-                  th(classes = "py-3 pl-8 pr-0 text-right font-semibold") {
-                    scope = ThScope.col
-                    +"""ETA"""
-                  }
-                  if (backfill.state == BackfillState.PAUSED) {
+            div("mx-auto max-w-7xl sm:px-6 lg:px-8") {
+              h2("text-base font-semibold leading-6 text-gray-900") { +"""Partitions""" }
+              table("my-8 whitespace-nowrap text-left text-sm leading-6") {
+                thead("border-b border-gray-200 text-gray-900") {
+                  tr {
+                    th(classes = "px-0 py-3 font-semibold") {
+                      scope = ThScope.col
+                      +"""Name"""
+                    }
+                    th(classes = "hidden py-3 pl-8 pr-0 text-right font-semibold sm:table-cell") {
+                      scope = ThScope.col
+                      +"""State"""
+                    }
+                    th(classes = "hidden py-3 pl-8 pr-0 text-right font-semibold sm:table-cell") {
+                      scope = ThScope.col
+                      +"""Cursor"""
+                    }
                     th(classes = "py-3 pl-8 pr-0 text-right font-semibold") {
                       scope = ThScope.col
-                      +"""Actions"""
+                      +"""Range"""
+                    }
+                    th(classes = "py-3 pl-8 pr-0 text-right font-semibold") {
+                      scope = ThScope.col
+                      +"""# Precomputed"""
+                    }
+                    th(classes = "py-3 pl-8 pr-0 text-right font-semibold") {
+                      scope = ThScope.col
+                      +"""# Completed"""
+                    }
+                    th(classes = "py-3 pl-8 pr-0 text-right font-semibold") {
+                      scope = ThScope.col
+                      +"""Progress (%)"""
+                    }
+                    th(classes = "py-3 pl-8 pr-0 text-right font-semibold") {
+                      scope = ThScope.col
+                      +"""Rate"""
+                    }
+                    th(classes = "py-3 pl-8 pr-0 text-right font-semibold") {
+                      scope = ThScope.col
+                      +"""ETA"""
+                    }
+                    if (backfill.state == BackfillState.PAUSED) {
+                      th(classes = "py-3 pl-8 pr-0 text-right font-semibold") {
+                        scope = ThScope.col
+                        +"""Actions"""
+                      }
                     }
                   }
                 }
-              }
-              tbody {
-                backfill.partitions.map { partition ->
-                  tr("border-b border-gray-100") {
-                    td("max-w-[50%] px-0 py-5 align-top") {
-                      div("truncate font-medium text-gray-900") { +partition.name }
-                    }
-                    td("hidden py-5 pl-8 pr-0 text-right align-top text-gray-700 sm:table-cell") { +partition.state.name }
-                    td("hidden py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700 sm:table-cell") {
-                      +(partition.pkey_cursor ?: "")
-                    }
-                    td("hidden py-5 pl-8 pr-0 text-right align-top text-gray-700 sm:table-cell") { +"""${partition.pkey_start} to ${partition.pkey_end}""" }
-                    td("hidden py-5 pl-8 pr-0 text-right align-top text-gray-700 sm:table-cell") { +"""${partition.computed_matching_record_count} ${backfill.unit ?: "units (records, segments, bytes)"}""" }
-                    td("hidden py-5 pl-8 pr-0 text-right align-top text-gray-700 sm:table-cell") { +"""${partition.backfilled_matching_record_count} ${backfill.unit ?: "units (records, segments, bytes)"}""" }
-                    td("hidden py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700 sm:table-cell") {
-                      ProgressBar(
-                        partition.backfilled_matching_record_count,
-                        partition.computed_matching_record_count,
-                        partition.precomputing_done,
-                      )
-                    }
-                    td("hidden py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700 sm:table-cell") {
-                      when {
-                        partition.state != BackfillState.RUNNING -> +"-"
-                        partition.matching_records_per_minute == null ||
-                          partition.matching_records_per_minute <= 0 -> {
-                          if (!partition.precomputing_done) { +"Computing..." } else { +"Calculating..." }
-                        }
-                        else -> +"""${partition.matching_records_per_minute} #/m"""
+                tbody {
+                  backfill.partitions.map { partition ->
+                    tr("border-b border-gray-100") {
+                      td("max-w-[50%] px-0 py-5 align-top") {
+                        div("truncate font-medium text-gray-900") { +partition.name }
                       }
-                    }
-                    td("py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700") {
-                      when {
-                        partition.state != BackfillState.RUNNING -> +"-"
-                        !partition.precomputing_done -> +"Computing..."
-                        partition.matching_records_per_minute == null || partition.matching_records_per_minute <= 0 ||
-                          partition.computed_matching_record_count <= 0 -> +"Calculating..."
-                        else -> {
-                          val etaSeconds = (partition.computed_matching_record_count - partition.backfilled_matching_record_count).toDouble() / (partition.matching_records_per_minute / 60.0)
-                          +formatEta(etaSeconds * 1000)
+                      td("hidden py-5 pl-8 pr-0 text-right align-top text-gray-700 sm:table-cell") { +partition.state.name }
+                      td("hidden py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700 sm:table-cell") {
+                        +(partition.pkey_cursor ?: "")
+                      }
+                      td("hidden py-5 pl-8 pr-0 text-right align-top text-gray-700 sm:table-cell") { +"""${partition.pkey_start} to ${partition.pkey_end}""" }
+                      td("hidden py-5 pl-8 pr-0 text-right align-top text-gray-700 sm:table-cell") { +"""${partition.computed_matching_record_count} ${backfill.unit ?: "units (records, segments, bytes)"}""" }
+                      td("hidden py-5 pl-8 pr-0 text-right align-top text-gray-700 sm:table-cell") { +"""${partition.backfilled_matching_record_count} ${backfill.unit ?: "units (records, segments, bytes)"}""" }
+                      td("hidden py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700 sm:table-cell") {
+                        ProgressBar(
+                          partition.backfilled_matching_record_count,
+                          partition.computed_matching_record_count,
+                          partition.precomputing_done,
+                        )
+                      }
+                      td("hidden py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700 sm:table-cell") {
+                        when {
+                          partition.state != BackfillState.RUNNING -> +"-"
+                          partition.matching_records_per_minute == null ||
+                            partition.matching_records_per_minute <= 0 -> {
+                            if (!partition.precomputing_done) { +"Computing..." } else { +"Calculating..." }
+                          }
+                          else -> +"""${partition.matching_records_per_minute} #/m"""
                         }
                       }
-                    }
-                    if (backfill.state == BackfillState.PAUSED) {
-                      td("py-5 pl-8 pr-0 text-right align-top") {
-                        a(
-                          href = EditPartitionCursorAction.path(id, partition.name),
-                          classes = "text-indigo-600 hover:text-indigo-900",
-                        ) {
-                          +"Edit Cursor"
+                      td("py-5 pl-8 pr-0 text-right align-top tabular-nums text-gray-700") {
+                        when {
+                          partition.state != BackfillState.RUNNING -> +"-"
+                          !partition.precomputing_done -> +"Computing..."
+                          partition.matching_records_per_minute == null || partition.matching_records_per_minute <= 0 ||
+                            partition.computed_matching_record_count <= 0 -> +"Calculating..."
+                          else -> {
+                            val etaSeconds = (partition.computed_matching_record_count - partition.backfilled_matching_record_count).toDouble() / (partition.matching_records_per_minute / 60.0)
+                            +formatEta(etaSeconds * 1000)
+                          }
+                        }
+                      }
+                      if (backfill.state == BackfillState.PAUSED) {
+                        td("py-5 pl-8 pr-0 text-right align-top") {
+                          a(
+                            href = EditPartitionCursorAction.path(id, partition.name),
+                            classes = "text-indigo-600 hover:text-indigo-900",
+                          ) {
+                            +"Edit Cursor"
+                          }
                         }
                       }
                     }
@@ -325,7 +331,7 @@ class BackfillShowAction @Inject constructor(
         AutoReload(frameId = "backfill-$id-events") {
           Card {
             // Events
-            div {
+            div("mx-auto max-w-7xl sm:px-6 lg:px-8") {
               h2("text-base font-semibold leading-6 text-gray-900") { +"""Events""" }
               table("my-8 text-left text-sm leading-6 table-fixed w-full") {
                 thead("border-b border-gray-200 text-gray-900") {
