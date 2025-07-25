@@ -1,12 +1,12 @@
 [versions]
 jooq = "3.18.25"
-kotlin = "2.0.21"
+kotlin = "2.1.20"
 kotlinxCoroutines = "1.10.1"
 ktlint = "0.47.1"
-misk = "2025.05.27.200112-a38c925"
-okhttp = "5.0.0-alpha.14"
-sqldelight = "2.0.2"
-wire = "5.2.1"
+misk = "2025.07.28.164255-11cc719"
+okhttp = "5.1.0"
+sqldelight = "2.1.0"
+wire = "5.3.5"
 
 [libraries]
 apacheCommonsLang3 = { module = "org.apache.commons:commons-lang3", version = "3.12.0" }
@@ -17,17 +17,17 @@ awsDynamodb = { module = "com.amazonaws:aws-java-sdk-dynamodb", version = "1.11.
 awsS3 = { module = "com.amazonaws:aws-java-sdk-s3", version = "1.12.231" }
 buildConfigPlugin = { module = "com.github.gmazzo:gradle-buildconfig-plugin", version = "3.1.0" }
 dokkaGradlePlugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version = "1.9.20" }
-guava = { module = "com.google.guava:guava", version = "31.1-jre" }
-guice = { module = "com.google.inject:guice", version = "5.1.0" }
+guava = { module = "com.google.guava:guava", version = "33.4.8-jre" }
+guice = { module = "com.google.inject:guice", version = "6.0.0" }
 jCommander = { module = "com.beust:jcommander", version = "1.72" }
 jacksonDatabind = { module = "com.fasterxml.jackson.core:jackson-databind", version = "2.13.3" }
 jacksonDataformatYaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version = "2.13.3" }
 jacksonJsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version = "2.13.3" }
 jacksonKotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version = "2.13.3" }
-jettyServer = { module = "org.eclipse.jetty:jetty-server", version = "10.0.11" }
-jettyServlet = { module = "org.eclipse.jetty:jetty-servlet", version = "10.0.11" }
-jettyWebsocketServer = { module = "org.eclipse.jetty.websocket:websocket-jetty-server", version = "10.0.11" }
-jettyWebsocketServlet = { module = "org.eclipse.jetty.websocket:websocket-servlet", version = "10.0.11" }
+jettyServer = { module = "org.eclipse.jetty:jetty-server", version = "10.0.24" }
+jettyServlet = { module = "org.eclipse.jetty:jetty-servlet", version = "10.0.24" }
+jettyWebsocketServer = { module = "org.eclipse.jetty.websocket:websocket-jetty-server", version = "10.0.24" }
+jettyWebsocketServlet = { module = "org.eclipse.jetty.websocket:websocket-servlet", version = "10.0.24" }
 junitApi = { module = "org.junit.jupiter:junit-jupiter-api", version = "5.9.1" }
 junitEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version = "5.9.1" }
 junitParams = { module = "org.junit.jupiter:junit-jupiter-params", version = "5.9.1" }
@@ -45,11 +45,11 @@ okio = { module = "com.squareup.okio:okio", version = "3.9.1" }
 openTracing = { module = "io.opentracing:opentracing-api", version = "0.33.0" }
 openTracingMock = { module = "io.opentracing:opentracing-mock", version = "0.33.0" }
 openTracingOkHttp = { module = "io.opentracing.contrib:opentracing-okhttp3", version = "3.0.0" }
-retrofit = { module = "com.squareup.retrofit2:retrofit", version = "2.11.0" }
-retrofitGuavaAdapter = { module = "com.squareup.retrofit2:adapter-guava", version = "2.11.0" }
-retrofitMock = { module = "com.squareup.retrofit2:retrofit-mock", version = "2.11.0" }
-retrofitMoshi = { module = "com.squareup.retrofit2:converter-moshi", version = "2.11.0" }
-retrofitWire = { module = "com.squareup.retrofit2:converter-wire", version = "2.11.0" }
+retrofit = { module = "com.squareup.retrofit2:retrofit", version = "3.0.0" }
+retrofitGuavaAdapter = { module = "com.squareup.retrofit2:adapter-guava", version = "3.0.0" }
+retrofitMock = { module = "com.squareup.retrofit2:retrofit-mock", version = "3.0.0" }
+retrofitMoshi = { module = "com.squareup.retrofit2:converter-moshi", version = "3.0.0" }
+retrofitWire = { module = "com.squareup.retrofit2:converter-wire", version = "3.0.0" }
 shadowJarPlugin = { module = "gradle.plugin.com.github.johnrengelman:shadow", version = "7.1.2" }
 slf4jApi = { module = "org.slf4j:slf4j-api", version = "2.0.3" }
 sqldelightGradlePlugin = { module = "app.cash.sqldelight:gradle-plugin", version.ref = "sqldelight" }
