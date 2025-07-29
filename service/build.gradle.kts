@@ -48,6 +48,7 @@ dependencies {
   implementation(libs.miskAdmin)
   implementation(libs.miskAuditClient)
   implementation(libs.miskCore)
+  implementation(libs.miskGrpcReflect)
   implementation(libs.miskHibernate)
   implementation(libs.miskHotwire)
   implementation(libs.miskInject)
