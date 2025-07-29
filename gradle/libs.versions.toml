@@ -85,6 +85,7 @@ miskService = { module = "com.squareup.misk:misk-service", version.ref = "misk" 
 miskSlack = { module = "com.squareup.misk:misk-slack", version.ref = "misk" }
 miskTailwind = { module = "com.squareup.misk:misk-tailwind", version.ref = "misk" }
 miskTesting = { module = "com.squareup.misk:misk-testing", version.ref = "misk" }
+miskGrpcReflect = { module = "com.squareup.misk:misk-grpc-reflect", version.ref = "misk" }
 miskVitess = { module = "com.squareup.misk:misk-vitess" }
 wireCompiler = { module = "com.squareup.wire:wire-compiler", version.ref = "wire" }
 wireGradlePlugin = { module = "com.squareup.wire:wire-gradle-plugin", version.ref = "wire" }
