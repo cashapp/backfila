@@ -12,6 +12,10 @@ import app.cash.backfila.ui.components.PageTitle
 import app.cash.backfila.ui.components.PaginationWithHistory
 import app.cash.backfila.ui.components.ProgressBar
 import app.cash.backfila.ui.pages.BackfillCreateAction.BackfillCreateField.CUSTOM_PARAMETER_PREFIX
+import java.net.URLDecoder
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.html.ButtonType
@@ -36,10 +40,12 @@ import kotlinx.html.td
 import kotlinx.html.th
 import kotlinx.html.thead
 import kotlinx.html.tr
+import misk.scope.ActionScoped
 import misk.security.authz.Authenticated
 import misk.tailwind.Link
 import misk.turbo.turbo_frame
 import misk.web.Get
+import misk.web.HttpCall
 import misk.web.PathParam
 import misk.web.QueryParam
 import misk.web.Response
@@ -54,6 +60,7 @@ class BackfillShowAction @Inject constructor(
   private val dashboardPageLayout: DashboardPageLayout,
   private val viewLogsAction: ViewLogsAction,
   private val backfillShowButtonHandlerAction: BackfillShowButtonHandlerAction,
+  private val httpCall: ActionScoped<HttpCall>,
 ) : WebAction {
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
@@ -68,6 +75,9 @@ class BackfillShowAction @Inject constructor(
     val label =
       if (backfill.variant == "default") backfill.service_name else "${backfill.service_name} (${backfill.variant})"
 
+    // Get user's timezone from cookie
+    val userTimezone = getUserTimezone()
+
     val configurationRows = backfill.toConfigurationRows(id)
     val leftColumnConfigurationRows = configurationRows.take(
       configurationRows.size / 2 +
@@ -79,9 +89,8 @@ class BackfillShowAction @Inject constructor(
     val htmlResponseBody = dashboardPageLayout.newBuilder()
       .title("Backfill $id | Backfila")
       .headBlock {
-        // Add JavaScript to format timestamps in user's timezone
         script {
-          +formatToLocalTimestampsScript()
+          +timezoneDetectionScript()
         }
       }
       .breadcrumbLinks(
@@ -140,7 +149,7 @@ class BackfillShowAction @Inject constructor(
                 h2("text-base font-semibold leading-6 text-gray-900") { +"""Configuration""" }
                 dl("divide-y divide-gray-100") {
                   leftColumnConfigurationRows.map {
-                    ConfigurationRows(id, it, backfill)
+                    ConfigurationRows(id, it, backfill, userTimezone)
                   }
                 }
               }
@@ -149,7 +158,7 @@ class BackfillShowAction @Inject constructor(
               div("divide-x divide-gray-100") {
                 dl("divide-y divide-gray-100") {
                   rightColumnConfigurationRows.map {
-                    ConfigurationRows(id, it, backfill)
+                    ConfigurationRows(id, it, backfill, userTimezone)
                   }
                 }
               }
@@ -172,20 +181,20 @@ class BackfillShowAction @Inject constructor(
               div("my-6 space-y-4") {
                 div("text-sm text-gray-700") {
                   span("font-medium") { +"""Total backfilled ${backfill.unit ?: "units (records, segments, bytes)"}: """ }
-                  span("font-semibold text-gray-900") { +"""${totalBackfilledItems.toString().replace(Regex("(\\d)(?=(\\d{3})+(?!\\d))"), "$1,")}""" }
+                  span("font-semibold text-gray-900") { +formatNumber(totalBackfilledItems) }
                 }
                 div("text-sm text-gray-700") {
                   span("font-medium") { +"""Total ${backfill.unit ?: "units (records, segments, bytes)"} to run: """ }
                   if (allPrecomputingDone) {
-                    span("font-semibold text-gray-900") { +"""${totalItemsToRun.toString().replace(Regex("(\\d)(?=(\\d{3})+(?!\\d))"), "$1,")}""" }
+                    span("font-semibold text-gray-900") { +formatNumber(totalItemsToRun) }
                   } else {
-                    span("font-semibold text-gray-900") { +"""at least ${totalItemsToRun.toString().replace(Regex("(\\d)(?=(\\d{3})+(?!\\d))"), "$1,")} (still computing)""" }
+                    span("font-semibold text-gray-900") { +"""at least ${formatNumber(totalItemsToRun)} (still computing)""" }
                   }
                 }
                 div("text-sm text-gray-700") {
                   span("font-medium") { +"""Overall Rate: """ }
                   if (totalRate > 0) {
-                    span("font-semibold text-gray-900") { +"""${totalRate.toString().replace(Regex("(\\d)(?=(\\d{3})+(?!\\d))"), "$1,")} #/m""" }
+                    span("font-semibold text-gray-900") { +"""${formatNumber(totalRate.toLong())} #/m""" }
                   } else {
                     span("font-semibold text-gray-900") { +"""N/A""" }
                   }
@@ -362,11 +371,7 @@ class BackfillShowAction @Inject constructor(
                   backfill.event_logs.map { log ->
                     tr("border-b border-gray-100") {
                       td("hidden py-5 pl-8 pr-0 align-top text-wrap text-gray-700 sm:table-cell") {
-                        span {
-                          attributes["data-timestamp"] = log.occurred_at.toString()
-                          attributes["class"] = "localized-time"
-                          +log.occurred_at.toString().replace("T", " ").dropLast(5)
-                        }
+                        +formatTimestampForDisplay(log.occurred_at, userTimezone)
                       }
                       td("hidden py-5 pl-8 pr-0 align-top text-gray-700 sm:table-cell") { log.user?.let { +it } }
                       td("hidden py-5 pl-8 pr-0 align-top text-gray-700 sm:table-cell") { log.partition_name?.let { +it } }
@@ -533,7 +538,7 @@ class BackfillShowAction @Inject constructor(
     }
   }
 
-  private fun TagConsumer<*>.ConfigurationRows(id: Long, it: DescriptionListRow, backfill: GetBackfillStatusResponse) {
+  private fun TagConsumer<*>.ConfigurationRows(id: Long, it: DescriptionListRow, backfill: GetBackfillStatusResponse, userTimezone: ZoneId?) {
     div("px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0") {
       attributes["data-controller"] = "toggle"
 
@@ -545,11 +550,7 @@ class BackfillShowAction @Inject constructor(
 
           // Special handling for "Created" field to add timestamp formatting
           if (it.label == "Created") {
-            span {
-              attributes["data-timestamp"] = backfill.created_at.toString()
-              attributes["class"] = "localized-time"
-              +backfill.created_at.toString().replace("T", " ").dropLast(5)
-            }
+            +formatTimestampForDisplay(backfill.created_at, userTimezone)
             +" ${it.description}"
           } else {
             +it.description
@@ -729,6 +730,22 @@ class BackfillShowAction @Inject constructor(
     }
   }
 
+  private fun formatTimestampForDisplay(timestamp: Any, userTimezone: ZoneId?): String {
+    return try {
+      if (userTimezone != null) {
+        val instant = Instant.parse(timestamp.toString())
+        val zonedDateTime = instant.atZone(userTimezone)
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z")
+        zonedDateTime.format(formatter)
+      } else {
+        timestamp.toString().replace("T", " ").dropLast(5)
+      }
+    } catch (e: Exception) {
+      // Fall back to original format if parsing fails
+      timestamp.toString().replace("T", " ").dropLast(5)
+    }
+  }
+
   private fun formatEta(etaMillis: Double): String {
     val durationSeconds = etaMillis / 1000
     var temp = durationSeconds.toLong()
@@ -766,60 +783,42 @@ class BackfillShowAction @Inject constructor(
     return if (sb.isEmpty()) "< 1s" else sb.toString()
   }
 
-  private fun formatToLocalTimestampsScript(): String = """
-    function formatTimestamps() {
-      document.querySelectorAll('.localized-time').forEach(function(element) {
-        const timestamp = element.getAttribute('data-timestamp');
-        if (timestamp) {
-          try {
-            const date = new Date(timestamp);
-            
-            if (!isNaN(date.getTime())) {
-              let formatted;
-              try {
-                formatted = date.toLocaleString('en-CA', {
-                  timeZoneName: 'short',
-                  year: 'numeric',
-                  month: '2-digit',
-                  day: '2-digit',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  second: '2-digit',
-                  hour12: true
-                });
-              } catch (e1) {
-                // Fallback to default locale
-                formatted = date.toLocaleString(undefined, {
-                  timeZoneName: 'short',
-                  year: 'numeric',
-                  month: '2-digit',
-                  day: '2-digit',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  second: '2-digit',
-                  hour12: true
-                });
-              }
-
-              formatted = formatted.replace(',', '').replace(/\.m\./g, 'm');
-              element.textContent = formatted;
-            }
-          } catch (e) {
-            console.error('Failed to format timestamp:', timestamp, e);
-          }
-        }
-      });
-    }
-    
-    formatTimestamps();
-
-    document.addEventListener('DOMContentLoaded', formatTimestamps);
-    document.addEventListener('turbo:frame-load', formatTimestamps);
-    setTimeout(formatTimestamps, 100);
-    
-    // Run periodically to catch any missed updates
-    setInterval(formatTimestamps, 1000);
+  private fun timezoneDetectionScript(): String = """
+    (function() {
+      try {
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        document.cookie = 'user_timezone=' + encodeURIComponent(timezone) + '; path=/; max-age=31536000';
+      } catch (e) {
+        // Silently fail
+      }
+    })();
   """.trimIndent()
+
+  private fun formatNumber(number: Long): String {
+    return number.toString().replace(Regex("(\\d)(?=(\\d{3})+(?!\\d))"), "$1,")
+  }
+
+  private fun getUserTimezone(): ZoneId? {
+    return try {
+      val request = httpCall.get().asOkHttpRequest()
+      val cookieHeader = request.header("Cookie")
+
+      cookieHeader?.let { cookies ->
+        val userTimezoneCookie = cookies.split(";")
+          .map { it.trim() }
+          .find { it.startsWith("user_timezone=") }
+          ?.substringAfter("user_timezone=")
+          ?.let { URLDecoder.decode(it, "UTF-8") }
+
+        userTimezoneCookie?.let { timezoneString ->
+          ZoneId.of(timezoneString)
+        }
+      }
+    } catch (e: Exception) {
+      // Fall back to UTC if there's any issue
+      null
+    }
+  }
 
   companion object {
     private const val PATH = "/backfills/{id}"
