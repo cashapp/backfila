@@ -130,9 +130,6 @@ class DashboardPageLayout @Inject constructor(
             div("py-10") {
               main {
                 div("mx-auto w-full px-4 sm:px-6 lg:px-8") {
-                  // TODO remove when new UI is stable and preferred
-                  UseOldUIAlert()
-
                   if (breadcrumbLinks.isNotEmpty()) {
                     Breadcrumbs(breadcrumbLinks)
                   }
