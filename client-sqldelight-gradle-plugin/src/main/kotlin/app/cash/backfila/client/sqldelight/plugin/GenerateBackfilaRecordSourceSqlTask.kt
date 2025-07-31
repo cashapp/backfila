@@ -26,17 +26,18 @@ abstract class GenerateBackfilaRecordSourceSqlTask : DefaultTask() {
     val where = backfillConfig.whereClause
     val recordColumns = backfillConfig.recordColumns
     val name = backfillConfig.name.replaceFirstChar { it.uppercase() }
+    val lowerName = backfillConfig.name.replaceFirstChar { it.lowercase() }
     val packageDirs = packageName.get().replace('.', File.separatorChar)
 
     val sqlFile = File(sqlDirectory.get().asFile, "$packageDirs/$name.sq")
     sqlFile.parentFile.mkdirs()
     sqlFile.writeText(
       """
-    selectAbsoluteRange:
+    ${lowerName}SelectAbsoluteRange:
     SELECT min($key), max($key)
     FROM $table;
 
-    selectInitialMaxBound:
+    ${lowerName}SelectInitialMaxBound:
     SELECT MAX($key) FROM
      (SELECT DISTINCT $key FROM $table
       WHERE $key >= :backfillRangeStart
@@ -44,7 +45,7 @@ abstract class GenerateBackfilaRecordSourceSqlTask : DefaultTask() {
       ORDER BY $key ASC
       LIMIT :scanSize) AS subquery;
 
-    selectNextMaxBound:
+    ${lowerName}SelectNextMaxBound:
     SELECT MAX($key) FROM
      (SELECT DISTINCT $key FROM $table
       WHERE $key > :previousEndKey
@@ -52,17 +53,17 @@ abstract class GenerateBackfilaRecordSourceSqlTask : DefaultTask() {
       ORDER BY $key ASC
       LIMIT :scanSize) AS subquery;
 
-    getInitialStartKeyAndScanCount:
+    ${lowerName}GetInitialStartKeyAndScanCount:
     SELECT MIN($key), COUNT(*) FROM $table
     WHERE $key >= :backfillRangeStart
       AND $key <= :batchEnd;
 
-    getNextStartKeyAndScanCount:
+    ${lowerName}GetNextStartKeyAndScanCount:
     SELECT MIN($key), COUNT(*) FROM $table
     WHERE $key > :previousEndKey
       AND $key <= :batchEnd;
 
-    produceInitialBatchFromRange:
+    ${lowerName}ProduceInitialBatchFromRange:
     SELECT $key FROM $table
     WHERE $key >= :backfillRangeStart
       AND $key <= :boundingMax
@@ -71,7 +72,7 @@ abstract class GenerateBackfilaRecordSourceSqlTask : DefaultTask() {
     LIMIT 1
     OFFSET :offset;
 
-    produceNextBatchFromRange:
+    ${lowerName}ProduceNextBatchFromRange:
     SELECT $key FROM $table
     WHERE $key > :previousEndKey
       AND $key <= :boundingMax
@@ -80,19 +81,19 @@ abstract class GenerateBackfilaRecordSourceSqlTask : DefaultTask() {
     LIMIT 1
     OFFSET :offset;
 
-    countInitialBatchMatches:
+    ${lowerName}CountInitialBatchMatches:
     SELECT COUNT(DISTINCT $key) FROM $table
     WHERE $key >= :backfillRangeStart
       AND $key <= :boundingMax
       AND ( $where );
 
-    countNextBatchMatches:
+    ${lowerName}CountNextBatchMatches:
     SELECT COUNT(DISTINCT $key) FROM $table
     WHERE $key > :previousEndKey
       AND $key <= :boundingMax
       AND ( $where );
 
-    getBatch:
+    ${lowerName}GetBatch:
     SELECT $recordColumns FROM $table
     WHERE $key >= :start
       AND $key <= :end
