@@ -30,6 +30,27 @@ backfilaSqlDelight {
     recordColumns = "*",
     recordType = "app.cash.backfila.client.sqldelight.hockeydata.HockeyPlayer"
   )
+  addRecordSource(
+    name = "hockeyPlayerWithHeights",
+    database = "app.cash.backfila.client.sqldelight.hockeydata.HockeyDataDatabase",
+    tableName = "hockeyPlayer",
+    keyName = "player_number",
+    keyType = "kotlin.Int",
+    keyEncoder = "app.cash.backfila.client.sqldelight.IntKeyEncoder",
+    recordColumns = "*",
+    recordType = "app.cash.backfila.client.sqldelight.hockeydata.HockeyPlayerWithHeightsGetBatch",
+    whereClause = "height IS NOT NULL"
+  )
+  addRecordSource(
+    name = "hockeyPlayerNumbers",
+    database = "app.cash.backfila.client.sqldelight.hockeydata.HockeyDataDatabase",
+    tableName = "hockeyPlayer",
+    keyName = "player_number",
+    keyType = "kotlin.Int",
+    keyEncoder = "app.cash.backfila.client.sqldelight.IntKeyEncoder",
+    recordColumns = "player_number, full_name",
+    recordType = "app.cash.backfila.client.sqldelight.hockeydata.HockeyPlayerNumbersGetBatch"
+  )
 }
 
 dependencies {
