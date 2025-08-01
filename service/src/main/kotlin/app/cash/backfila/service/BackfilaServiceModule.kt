@@ -49,7 +49,7 @@ class BackfilaServiceModule(
     install(ConfigModule.create("backfila", config))
     install(BackfilaPersistenceModule(config))
     install(BackfilaWebActionsModule())
-    install(BackfilaDashboardModule(deployment))
+    install(BackfilaDashboardModule())
     install(ServiceWebActionsModule())
 
     install(RunnerSchedulerServiceModule())

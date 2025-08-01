@@ -4,7 +4,6 @@
 build/
 *.iml
 *.swp
-service/web/**/lib/
 **/.kotlin
 
 **/site/

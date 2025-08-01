@@ -10,18 +10,6 @@ plugins {
   id("com.squareup.wire")
 }
 
-sourceSets {
-  val main by getting {
-    resources.srcDir(listOf(
-      "web/tabs/app/lib"
-    ))
-    resources.srcDir(listOf(
-      "web/static/"
-    ))
-    resources.exclude("**/node_modules")
-  }
-}
-
 dependencies {
   implementation(libs.apacheCommonsLang3)
   implementation(libs.guava)
