@@ -84,7 +84,7 @@ abstract class GenerateBackfilaRecordSourceQueriesTask : DefaultTask() {
           ).addFunction(
             FunSpec.builder("selectAbsoluteRange")
               .returns(minMaxQueryType)
-              .addStatement("return database.%L.${lowerName}SelectAbsoluteRange { min, max -> %T(min, max) }", queriesFunctionName, minMaxType)
+              .addStatement("return database.%L.%LSelectAbsoluteRange { min, max -> %T(min, max) }", queriesFunctionName, lowerName, minMaxType)
               .addModifiers(OVERRIDE)
               .build(),
           ).addFunction(
@@ -93,7 +93,7 @@ abstract class GenerateBackfilaRecordSourceQueriesTask : DefaultTask() {
               .addParameter("rangeEnd", keyType)
               .addParameter("scanSize", LONG)
               .returns(nullKeyContainerQueryType)
-              .addStatement("return database.%L.${lowerName}SelectInitialMaxBound(rangeStart, rangeEnd, scanSize) { %T(it) }", queriesFunctionName, nullKeyContainerType)
+              .addStatement("return database.%L.%LSelectInitialMaxBound(rangeStart, rangeEnd, scanSize) { %T(it) }", queriesFunctionName, lowerName, nullKeyContainerType)
               .addModifiers(OVERRIDE)
               .build(),
           ).addFunction(
@@ -102,7 +102,7 @@ abstract class GenerateBackfilaRecordSourceQueriesTask : DefaultTask() {
               .addParameter("rangeEnd", keyType)
               .addParameter("scanSize", LONG)
               .returns(nullKeyContainerQueryType)
-              .addStatement("return database.%L.${lowerName}SelectNextMaxBound(previousEndKey, rangeEnd, scanSize) { %T(it) }", queriesFunctionName, nullKeyContainerType)
+              .addStatement("return database.%L.%LSelectNextMaxBound(previousEndKey, rangeEnd, scanSize) { %T(it) }", queriesFunctionName, lowerName, nullKeyContainerType)
               .addModifiers(OVERRIDE)
               .build(),
           ).addFunction(
@@ -111,7 +111,7 @@ abstract class GenerateBackfilaRecordSourceQueriesTask : DefaultTask() {
               .addParameter("boundingMax", keyType)
               .addParameter("offset", LONG)
               .returns(keyQueryType)
-              .addStatement("return database.%L.${lowerName}ProduceInitialBatchFromRange(rangeStart, boundingMax, offset)", queriesFunctionName)
+              .addStatement("return database.%L.%LProduceInitialBatchFromRange(rangeStart, boundingMax, offset)", queriesFunctionName, lowerName)
               .addModifiers(OVERRIDE)
               .build(),
           ).addFunction(
@@ -120,7 +120,7 @@ abstract class GenerateBackfilaRecordSourceQueriesTask : DefaultTask() {
               .addParameter("boundingMax", keyType)
               .addParameter("offset", LONG)
               .returns(keyQueryType)
-              .addStatement("return database.%L.${lowerName}ProduceNextBatchFromRange(previousEndKey, boundingMax, offset)", queriesFunctionName)
+              .addStatement("return database.%L.%LProduceNextBatchFromRange(previousEndKey, boundingMax, offset)", queriesFunctionName, lowerName)
               .addModifiers(OVERRIDE)
               .build(),
           ).addFunction(
@@ -128,7 +128,7 @@ abstract class GenerateBackfilaRecordSourceQueriesTask : DefaultTask() {
               .addParameter("rangeStart", keyType)
               .addParameter("boundingMax", keyType)
               .returns(longQueryType)
-              .addStatement("return database.%L.${lowerName}CountInitialBatchMatches(rangeStart, boundingMax)", queriesFunctionName)
+              .addStatement("return database.%L.%LCountInitialBatchMatches(rangeStart, boundingMax)", queriesFunctionName, lowerName)
               .addModifiers(OVERRIDE)
               .build(),
           ).addFunction(
@@ -136,7 +136,7 @@ abstract class GenerateBackfilaRecordSourceQueriesTask : DefaultTask() {
               .addParameter("previousEndKey", keyType)
               .addParameter("boundingMax", keyType)
               .returns(longQueryType)
-              .addStatement("return database.%L.${lowerName}CountNextBatchMatches(previousEndKey, boundingMax)", queriesFunctionName)
+              .addStatement("return database.%L.%LCountNextBatchMatches(previousEndKey, boundingMax)", queriesFunctionName, lowerName)
               .addModifiers(OVERRIDE)
               .build(),
           ).addFunction(
@@ -144,7 +144,7 @@ abstract class GenerateBackfilaRecordSourceQueriesTask : DefaultTask() {
               .addParameter("rangeStart", keyType)
               .addParameter("batchEnd", keyType)
               .returns(minAndCountQueryType)
-              .addStatement("return database.%L.${lowerName}GetInitialStartKeyAndScanCount(rangeStart, batchEnd) { min, count -> %T(min, count) }", queriesFunctionName, minAndCountType)
+              .addStatement("return database.%L.%LGetInitialStartKeyAndScanCount(rangeStart, batchEnd) { min, count -> %T(min, count) }", queriesFunctionName, lowerName, minAndCountType)
               .addModifiers(OVERRIDE)
               .build(),
           ).addFunction(
@@ -152,7 +152,7 @@ abstract class GenerateBackfilaRecordSourceQueriesTask : DefaultTask() {
               .addParameter("previousEndKey", keyType)
               .addParameter("batchEnd", keyType)
               .returns(minAndCountQueryType)
-              .addStatement("return database.%L.${lowerName}GetNextStartKeyAndScanCount(previousEndKey, batchEnd) { min, count -> %T(min, count) }", queriesFunctionName, minAndCountType)
+              .addStatement("return database.%L.%LGetNextStartKeyAndScanCount(previousEndKey, batchEnd) { min, count -> %T(min, count) }", queriesFunctionName, lowerName, minAndCountType)
               .addModifiers(OVERRIDE)
               .build(),
           ).addFunction(
@@ -160,7 +160,7 @@ abstract class GenerateBackfilaRecordSourceQueriesTask : DefaultTask() {
               .addParameter("start", keyType)
               .addParameter("end", keyType)
               .returns(recordQueryType)
-              .addStatement("return database.%L.${lowerName}GetBatch(start, end)", queriesFunctionName)
+              .addStatement("return database.%L.%LGetBatch(start, end)", queriesFunctionName, lowerName)
               .addModifiers(OVERRIDE)
               .build(),
           ).build(),
