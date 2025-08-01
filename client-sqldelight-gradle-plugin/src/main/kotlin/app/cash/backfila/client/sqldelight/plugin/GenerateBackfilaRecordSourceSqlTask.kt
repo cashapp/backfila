@@ -33,11 +33,11 @@ abstract class GenerateBackfilaRecordSourceSqlTask : DefaultTask() {
     sqlFile.parentFile.mkdirs()
     sqlFile.writeText(
       """
-    ${lowerName}SelectAbsoluteRange:
+    selectAbsoluteRange:
     SELECT min($key), max($key)
     FROM $table;
 
-    ${lowerName}SelectInitialMaxBound:
+    selectInitialMaxBound:
     SELECT MAX($key) FROM
      (SELECT DISTINCT $key FROM $table
       WHERE $key >= :backfillRangeStart
@@ -45,7 +45,7 @@ abstract class GenerateBackfilaRecordSourceSqlTask : DefaultTask() {
       ORDER BY $key ASC
       LIMIT :scanSize) AS subquery;
 
-    ${lowerName}SelectNextMaxBound:
+    selectNextMaxBound:
     SELECT MAX($key) FROM
      (SELECT DISTINCT $key FROM $table
       WHERE $key > :previousEndKey
@@ -53,17 +53,17 @@ abstract class GenerateBackfilaRecordSourceSqlTask : DefaultTask() {
       ORDER BY $key ASC
       LIMIT :scanSize) AS subquery;
 
-    ${lowerName}GetInitialStartKeyAndScanCount:
+    getInitialStartKeyAndScanCount:
     SELECT MIN($key), COUNT(*) FROM $table
     WHERE $key >= :backfillRangeStart
       AND $key <= :batchEnd;
 
-    ${lowerName}GetNextStartKeyAndScanCount:
+    getNextStartKeyAndScanCount:
     SELECT MIN($key), COUNT(*) FROM $table
     WHERE $key > :previousEndKey
       AND $key <= :batchEnd;
 
-    ${lowerName}ProduceInitialBatchFromRange:
+    produceInitialBatchFromRange:
     SELECT $key FROM $table
     WHERE $key >= :backfillRangeStart
       AND $key <= :boundingMax
@@ -72,7 +72,7 @@ abstract class GenerateBackfilaRecordSourceSqlTask : DefaultTask() {
     LIMIT 1
     OFFSET :offset;
 
-    ${lowerName}ProduceNextBatchFromRange:
+    produceNextBatchFromRange:
     SELECT $key FROM $table
     WHERE $key > :previousEndKey
       AND $key <= :boundingMax
@@ -81,13 +81,13 @@ abstract class GenerateBackfilaRecordSourceSqlTask : DefaultTask() {
     LIMIT 1
     OFFSET :offset;
 
-    ${lowerName}CountInitialBatchMatches:
+    countInitialBatchMatches:
     SELECT COUNT(DISTINCT $key) FROM $table
     WHERE $key >= :backfillRangeStart
       AND $key <= :boundingMax
       AND ( $where );
 
-    ${lowerName}CountNextBatchMatches:
+    countNextBatchMatches:
     SELECT COUNT(DISTINCT $key) FROM $table
     WHERE $key > :previousEndKey
       AND $key <= :boundingMax
