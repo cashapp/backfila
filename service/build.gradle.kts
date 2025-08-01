@@ -94,6 +94,7 @@ dependencies {
   // Dependencies for fake development services ONLY.
   testImplementation(project(":client-base"))
   testImplementation(project(":client-misk"))
+  testImplementation(project(":client-s3"))
   testImplementation(project(":client-static"))
 }
 
