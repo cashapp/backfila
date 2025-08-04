@@ -59,7 +59,6 @@ class EnvoyCallbackConnectorProvider @Inject constructor(
       URL(envoyClientEndpointProvider!!.url(envoyConfig))
     } else {
       // Fallback: construct a basic URL when EnvoyClientEndpointProvider is not available
-      // This typically happens in development/testing environments
       URL("http://localhost:8080/")
     }
     val httpClientEndpointConfig = httpClientsConfig[baseUrl]
