@@ -22,7 +22,7 @@ class EnvoyCallbackConnectorProvider @Inject constructor(
   private val moshi: Moshi,
 ) : BackfilaCallbackConnectorProvider {
   @com.google.inject.Inject(optional = true)
-  lateinit var envoyClientEndpointProvider: EnvoyClientEndpointProvider
+  var envoyClientEndpointProvider: EnvoyClientEndpointProvider? = null
 
   override fun validateExtraData(connectorExtraData: String?) {
     connectorExtraData?.let {
@@ -54,7 +54,14 @@ class EnvoyCallbackConnectorProvider @Inject constructor(
       app = serviceName,
       env = env,
     )
-    val baseUrl = URL(envoyClientEndpointProvider.url(envoyConfig))
+
+    val baseUrl = if (envoyClientEndpointProvider != null) {
+      URL(envoyClientEndpointProvider!!.url(envoyConfig))
+    } else {
+      // Fallback: construct a basic URL when EnvoyClientEndpointProvider is not available
+      // This typically happens in development/testing environments
+      URL("http://localhost:8080/")
+    }
     val httpClientEndpointConfig = httpClientsConfig[baseUrl]
 
     var okHttpClient = httpClientFactory.create(httpClientEndpointConfig)
