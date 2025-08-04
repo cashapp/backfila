@@ -12,8 +12,8 @@ import misk.moshi.adapter
 import retrofit2.Retrofit
 import retrofit2.adapter.guava.GuavaCallAdapterFactory
 import retrofit2.converter.wire.WireConverterFactory
-import wisp.client.EnvoyClientEndpointProvider
-import wisp.client.HttpClientEnvoyConfig
+import misk.client.EnvoyClientEndpointProvider
+import misk.client.HttpClientEnvoyConfig
 
 @Singleton
 class EnvoyCallbackConnectorProvider @Inject constructor(
@@ -22,7 +22,7 @@ class EnvoyCallbackConnectorProvider @Inject constructor(
   private val moshi: Moshi,
 ) : BackfilaCallbackConnectorProvider {
   @com.google.inject.Inject(optional = true)
-  var envoyClientEndpointProvider: EnvoyClientEndpointProvider? = null
+  private lateinit var envoyClientEndpointProvider: EnvoyClientEndpointProvider
 
   override fun validateExtraData(connectorExtraData: String?) {
     connectorExtraData?.let {
@@ -54,13 +54,7 @@ class EnvoyCallbackConnectorProvider @Inject constructor(
       app = serviceName,
       env = env,
     )
-
-    val baseUrl = if (envoyClientEndpointProvider != null) {
-      URL(envoyClientEndpointProvider!!.url(envoyConfig))
-    } else {
-      // Fallback: construct a basic URL when EnvoyClientEndpointProvider is not available
-      URL("http://localhost:8080/")
-    }
+    val baseUrl = URL(envoyClientEndpointProvider.url(envoyConfig))
     val httpClientEndpointConfig = httpClientsConfig[baseUrl]
 
     var okHttpClient = httpClientFactory.create(httpClientEndpointConfig)
