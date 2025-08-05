@@ -12,8 +12,8 @@ import misk.moshi.adapter
 import retrofit2.Retrofit
 import retrofit2.adapter.guava.GuavaCallAdapterFactory
 import retrofit2.converter.wire.WireConverterFactory
-import wisp.client.EnvoyClientEndpointProvider
-import wisp.client.HttpClientEnvoyConfig
+import misk.client.EnvoyClientEndpointProvider
+import misk.client.HttpClientEnvoyConfig
 
 @Singleton
 class EnvoyCallbackConnectorProvider @Inject constructor(
@@ -22,7 +22,7 @@ class EnvoyCallbackConnectorProvider @Inject constructor(
   private val moshi: Moshi,
 ) : BackfilaCallbackConnectorProvider {
   @com.google.inject.Inject(optional = true)
-  lateinit var envoyClientEndpointProvider: EnvoyClientEndpointProvider
+  private lateinit var envoyClientEndpointProvider: EnvoyClientEndpointProvider
 
   override fun validateExtraData(connectorExtraData: String?) {
     connectorExtraData?.let {
