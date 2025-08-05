@@ -30,6 +30,7 @@ abstract class GenerateBackfilaRecordSourceQueriesTask : DefaultTask() {
   fun execute() {
     val backfillConfig = backfill.get()
     val name = backfillConfig.name.replaceFirstChar { it.uppercase() }
+    val lowerName = backfillConfig.name.replaceFirstChar { it.lowercase() }
     val packageName = packageName.get()
     val className = "${name}RecordSourceConfig"
     val targetDirectory = kotlinDirectory.asFile.get()
@@ -159,7 +160,7 @@ abstract class GenerateBackfilaRecordSourceQueriesTask : DefaultTask() {
               .addParameter("start", keyType)
               .addParameter("end", keyType)
               .returns(recordQueryType)
-              .addStatement("return database.%L.getBatch(start, end)", queriesFunctionName)
+              .addStatement("return database.%L.%LGetBatch(start, end)", queriesFunctionName, lowerName)
               .addModifiers(OVERRIDE)
               .build(),
           ).build(),

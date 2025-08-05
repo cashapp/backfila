@@ -26,6 +26,7 @@ abstract class GenerateBackfilaRecordSourceSqlTask : DefaultTask() {
     val where = backfillConfig.whereClause
     val recordColumns = backfillConfig.recordColumns
     val name = backfillConfig.name.replaceFirstChar { it.uppercase() }
+    val lowerName = backfillConfig.name.replaceFirstChar { it.lowercase() }
     val packageDirs = packageName.get().replace('.', File.separatorChar)
 
     val sqlFile = File(sqlDirectory.get().asFile, "$packageDirs/$name.sq")
@@ -92,7 +93,7 @@ abstract class GenerateBackfilaRecordSourceSqlTask : DefaultTask() {
       AND $key <= :boundingMax
       AND ( $where );
 
-    getBatch:
+    ${lowerName}GetBatch:
     SELECT $recordColumns FROM $table
     WHERE $key >= :start
       AND $key <= :end
