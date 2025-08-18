@@ -206,10 +206,14 @@ class BackfillShowAction @Inject constructor(
                     span("font-medium") { +"""Overall Progress""" }
                     span("font-semibold text-gray-900") {
                       if (allPrecomputingDone && totalItemsToRun > 0) {
-                        val percentage = (totalBackfilledItems.toDouble() / totalItemsToRun * 100).let {
-                          if (it.isNaN()) 0.0 else it
-                        }
+                        val percentage =
+                          (totalBackfilledItems.toDouble() / totalItemsToRun * 100).let {
+                            if (it.isNaN()) 0.0 else it
+                          }
                         +"""${String.format("%.1f", percentage)}%"""
+                      } else
+                        if (backfill.state == BackfillState.COMPLETE) {
+                        +"""Complete"""
                       } else {
                         +"""Computing..."""
                       }
