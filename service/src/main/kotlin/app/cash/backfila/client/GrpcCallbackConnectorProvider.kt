@@ -53,6 +53,8 @@ class GrpcCallbackConnectorProvider @Inject constructor(
     val baseUrl = httpClientConfigUrlProvider.getUrl(httpClientEndpointConfig)
 
     val okHttpClientBuilder = httpClientFactory.create(httpClientEndpointConfig).newBuilder()
+
+    okHttpClientBuilder.addInterceptor(ServiceNameHeaderInterceptor(serviceName))
     if (!headers.isNullOrEmpty()) {
       okHttpClientBuilder.addInterceptor(OkHttpClientSpecifiedHeadersInterceptor(headers))
     }

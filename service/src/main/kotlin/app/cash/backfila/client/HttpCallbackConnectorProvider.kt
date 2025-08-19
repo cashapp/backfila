@@ -57,6 +57,7 @@ class HttpCallbackConnectorProvider @Inject constructor(
           addNetworkInterceptor(it)
         }
       }
+    okHttpClientBuilder.addInterceptor(ServiceNameHeaderInterceptor(serviceName))
     if (!headers.isNullOrEmpty()) {
       okHttpClientBuilder.addInterceptor(OkHttpClientSpecifiedHeadersInterceptor(headers))
     }

@@ -58,11 +58,12 @@ class EnvoyCallbackConnectorProvider @Inject constructor(
     val httpClientEndpointConfig = httpClientsConfig[baseUrl]
 
     var okHttpClient = httpClientFactory.create(httpClientEndpointConfig)
+    val okHttpClientBuilder = okHttpClient.newBuilder()
+    okHttpClientBuilder.addInterceptor(ServiceNameHeaderInterceptor(serviceName))
     if (!headers.isNullOrEmpty()) {
-      okHttpClient = okHttpClient.newBuilder()
-        .addInterceptor(OkHttpClientSpecifiedHeadersInterceptor(headers))
-        .build()
+      okHttpClientBuilder.addInterceptor(OkHttpClientSpecifiedHeadersInterceptor(headers))
     }
+    okHttpClient = okHttpClientBuilder.build()
 
     val retrofit = Retrofit.Builder()
       .baseUrl(baseUrl)
