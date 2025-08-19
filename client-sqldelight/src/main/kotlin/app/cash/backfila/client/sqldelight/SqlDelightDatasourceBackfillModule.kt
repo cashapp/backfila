@@ -34,11 +34,11 @@ class SqlDelightDatasourceBackfillModule<T : SqlDelightDatasourceBackfill<*, *, 
 
   override fun configure() {
     install(SqlDelightDatasourceBackfillBackendModule)
-    backfillBinder().addBinding(backfillClass.jvmName).to(backfillClass.java as Class<SqlDelightDatasourceBackfill<*, *, *>>)
+    backfillBinder().addBinding(backfillClass.jvmName).to(backfillClass.java)
     backfillRegistrationBinder().addBinding(backfillClass.jvmName).toInstance(registration)
   }
 
-  private fun parametersClass(): KClass<Any> {
+  private fun parametersClass(): KClass<out Any> {
     // Like MyBackfill.
     val thisType = TypeLiteral.get(backfillClass.java)
 
@@ -48,7 +48,7 @@ class SqlDelightDatasourceBackfillModule<T : SqlDelightDatasourceBackfill<*, *, 
     ).type as ParameterizedType
 
     // Like MyParameterClass
-    return (Types.getRawType(supertype.actualTypeArguments[2]) as Class<Any>).kotlin
+    return (Types.getRawType(supertype.actualTypeArguments[2])).kotlin
   }
 
   companion object {

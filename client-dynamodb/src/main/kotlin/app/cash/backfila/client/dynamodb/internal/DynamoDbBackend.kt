@@ -21,13 +21,14 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
 
 @Singleton
-class DynamoDbBackend @Inject constructor(
+class DynamoDbBackend
+@Inject
+constructor(
   private val injector: Injector,
   @ForDynamoDbBackend private val backfills: MutableMap<String, KClass<out DynamoDbBackfill<*, *>>>,
   val dynamoDb: DynamoDBMapper,
   val keyRangeCodec: DynamoDbKeyRangeCodec,
 ) : BackfillBackend {
-
   /** Creates Backfill instances. Each backfill ID gets a new Backfill instance. */
   private fun getBackfill(name: String): DynamoDbBackfill<*, *>? {
     val backfillClass = backfills[name]
@@ -38,14 +39,16 @@ class DynamoDbBackend @Inject constructor(
     }
   }
 
-  private fun <E : Any, Param : Any> createDynamoDbOperator(
-    backfill: DynamoDbBackfill<E, Param>,
-  ) = DynamoDbBackfillOperator(
-    dynamoDb,
-    backfill,
-    BackfilaParametersOperator(parametersClass(backfill::class)),
-    keyRangeCodec,
-  )
+  @Suppress("UNCHECKED_CAST")
+  private fun <E : Any, Param : Any> createDynamoDbOperator(backfill: DynamoDbBackfill<E, Param>) =
+    DynamoDbBackfillOperator(
+      dynamoDb,
+      backfill,
+      BackfilaParametersOperator(
+        parametersClass(backfill::class),
+      ) as BackfilaParametersOperator<Param>,
+      keyRangeCodec,
+    )
 
   override fun create(backfillName: String): BackfillOperator? {
     val backfill = getBackfill(backfillName)
@@ -58,19 +61,19 @@ class DynamoDbBackend @Inject constructor(
     return null
   }
 
-  override fun backfills(): Set<BackfillRegistration> {
-    return backfills.map {
-      BackfillRegistration(
-        name = it.key,
-        description = it.value.findAnnotation<Description>()?.text,
-        parametersClass = parametersClass(it.value as KClass<DynamoDbBackfill<Any, Any>>),
-        deleteBy = it.value.findAnnotation<DeleteBy>()?.parseDeleteByDate(),
-        unit = BackfillUnit.SEGMENTS.displayName,
-      )
-    }.toSet()
-  }
+  override fun backfills(): Set<BackfillRegistration> =
+    backfills
+      .map {
+        BackfillRegistration(
+          name = it.key,
+          description = it.value.findAnnotation<Description>()?.text,
+          parametersClass = parametersClass(it.value),
+          deleteBy = it.value.findAnnotation<DeleteBy>()?.parseDeleteByDate(),
+          unit = BackfillUnit.SEGMENTS.displayName,
+        )
+      }.toSet()
 
-  private fun <P : Any> parametersClass(backfillClass: KClass<out DynamoDbBackfill<*, P>>): KClass<P> {
+  private fun parametersClass(backfillClass: KClass<out DynamoDbBackfill<*, *>>): KClass<*> {
     // Like MyBackfill.
     val thisType = TypeLiteral.get(backfillClass.java)
 
@@ -78,6 +81,6 @@ class DynamoDbBackend @Inject constructor(
     val supertype = thisType.getSupertype(DynamoDbBackfill::class.java).type as ParameterizedType
 
     // Like MyParameterClass
-    return (Types.getRawType(supertype.actualTypeArguments[1]) as Class<P>).kotlin
+    return (Types.getRawType(supertype.actualTypeArguments[1])).kotlin
   }
 }
