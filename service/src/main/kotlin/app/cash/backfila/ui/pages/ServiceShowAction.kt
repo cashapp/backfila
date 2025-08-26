@@ -2,6 +2,7 @@ package app.cash.backfila.ui.pages
 
 import app.cash.backfila.dashboard.GetBackfillRunsAction
 import app.cash.backfila.ui.components.AutoReload
+import app.cash.backfila.ui.components.BackfillSearchForm
 import app.cash.backfila.ui.components.BackfillsTable
 import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.components.PageTitle
@@ -47,6 +48,8 @@ class ServiceShowAction @Inject constructor(
     @QueryParam lastOffset: String? = null,
     @QueryParam history: String? = null,
     @QueryParam showDeleted: Boolean = false,
+    @QueryParam backfill_name: String? = null,
+    @QueryParam created_by_user: String? = null,
   ): Response<ResponseBody> {
     if (service.isNullOrBlank()) {
       return Response(
@@ -62,6 +65,8 @@ class ServiceShowAction @Inject constructor(
       variant = variant,
       pagination_token = offset,
       show_deleted = showDeleted,
+      backfill_name = backfill_name,
+      created_by_user = created_by_user,
     )
 
     // TODO show default if other variants and probably link to a switcher
@@ -85,6 +90,7 @@ class ServiceShowAction @Inject constructor(
             }
           }
 
+          BackfillSearchForm(backfill_name, created_by_user, service, variant)
           BackfillsTable(true, backfillRuns.running_backfills)
           BackfillsTable(false, backfillRuns.paused_backfills, showDeleted)
           PaginationWithHistory(backfillRuns.next_pagination_token, offset, history, path(service, variantOrBlank))
