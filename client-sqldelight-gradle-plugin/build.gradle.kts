@@ -45,8 +45,7 @@ dependencies {
 }
 
 tasks.withType<JavaCompile> {
-  sourceCompatibility = JavaVersion.VERSION_17.toString()
-  targetCompatibility = JavaVersion.VERSION_17.toString()
+  options.release.set(17)
 }
 
 tasks.withType(KotlinJvmCompile::class.java).configureEach {

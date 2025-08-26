@@ -211,11 +211,12 @@ class BackfillShowAction @Inject constructor(
                             if (it.isNaN()) 0.0 else it
                           }
                         +"""${String.format("%.1f", percentage)}%"""
-                      } else
-                        if (backfill.state == BackfillState.COMPLETE) {
-                        +"""Complete"""
                       } else {
-                        +"""Computing..."""
+                        if (backfill.state == BackfillState.COMPLETE) {
+                          +"""Complete"""
+                        } else {
+                          +"""Computing..."""
+                        }
                       }
                     }
                   }
