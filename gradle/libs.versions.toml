@@ -50,7 +50,7 @@ retrofitGuavaAdapter = { module = "com.squareup.retrofit2:adapter-guava", versio
 retrofitMock = { module = "com.squareup.retrofit2:retrofit-mock", version = "3.0.0" }
 retrofitMoshi = { module = "com.squareup.retrofit2:converter-moshi", version = "3.0.0" }
 retrofitWire = { module = "com.squareup.retrofit2:converter-wire", version = "3.0.0" }
-shadowJarPlugin = { module = "com.gradleup.shadow:shadow-gradle-plugin", version = "9.0.2" }
+shadowJarPlugin = { module = "com.gradleup.shadow:shadow-gradle-plugin", version = "8.3.9" }
 slf4jApi = { module = "org.slf4j:slf4j-api", version = "2.0.3" }
 sqldelightGradlePlugin = { module = "app.cash.sqldelight:gradle-plugin", version.ref = "sqldelight" }
 sqldelightJdbcDriver = { module = "app.cash.sqldelight:jdbc-driver", version.ref = "sqldelight" }
