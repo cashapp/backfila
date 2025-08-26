@@ -3,6 +3,7 @@ package app.cash.backfila.client.misk.hibernate.internal
 import app.cash.backfila.client.misk.hibernate.HibernateBackfill
 import app.cash.backfila.client.misk.hibernate.PartitionProvider
 import com.google.common.collect.Ordering
+import java.util.stream.Collectors
 import javax.persistence.Table
 import misk.hibernate.DbEntity
 import misk.hibernate.Session
@@ -229,7 +230,7 @@ class VitessSingleCursorBoundingRangeStrategy<E : DbEntity<E>, Pkey : Any>(
           scanSize = scanSize,
         )
       }
-    }.toList()
+    }.collect(Collectors.toList())
       .filterNotNull()
       // Pkey must have a natural ordering
       .minWithOrNull(Ordering.natural<Comparable<Pkey>>() as Comparator<Pkey>)
