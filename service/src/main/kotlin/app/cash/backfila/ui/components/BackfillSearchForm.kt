@@ -83,30 +83,25 @@ fun TagConsumer<*>.BackfillSearchForm(
           
           if (!datalist) return;
           
-          // Check if datalist is already populated to avoid duplicate fetches
-          if (datalist.children.length > 0) return;
-          
           // Fetch and populate backfill names
-          function loadBackfillNames() {
-            const url = '/services/$serviceName/variants/$variantName/backfill-names';
-            
-            fetch(url)
-              .then(response => response.json())
-              .then(data => {
-                datalist.innerHTML = '';
-                if (data.backfill_names) {
-                  data.backfill_names.forEach(name => {
-                    const option = document.createElement('option');
-                    option.value = name;
-                    datalist.appendChild(option);
-                  });
-                }
-              })
-              .catch(err => console.error('Error loading backfill names:', err));
-          }
+          const url = '/services/$serviceName/variants/$variantName/backfill-names';
+          fetch(url)
+            .then(response => response.json())
+            .then(data => {
+              datalist.innerHTML = '';
+              if (data.backfill_names) {
+                data.backfill_names.forEach(name => {
+                  const option = document.createElement('option');
+                  option.value = name;
+                  datalist.appendChild(option);
+                });
+              }
+            })
+            .catch(err => console.error('Error loading backfill names:', err));
           
           // Clear filters button handler
-          if (clearFiltersBtn) {
+          if (clearFiltersBtn && !clearFiltersBtn.hasAttribute('data-initialized')) {
+            clearFiltersBtn.setAttribute('data-initialized', 'true');
             clearFiltersBtn.addEventListener('click', function() {
               let baseUrl = '/services/$serviceName';
               if ('$variantName' !== 'default') {
@@ -115,19 +110,44 @@ fun TagConsumer<*>.BackfillSearchForm(
               window.location.href = baseUrl;
             });
           }
-          
-          loadBackfillNames();
         }
         
         // Run on initial page load
         if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', initBackfillForm);
+          document.addEventListener('DOMContentLoaded', function() {
+            initBackfillForm();
+            setupAutoReloadWatcher();
+          });
         } else {
           initBackfillForm();
+          setupAutoReloadWatcher();
         }
         
-        // Simple periodic check to ensure dropdown stays populated after AutoReload
-        setInterval(initBackfillForm, 5000); // Check every 5 seconds
+        function setupAutoReloadWatcher() {
+          // Watch for when the datalist gets replaced/removed by AutoReload
+          const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+              if (mutation.type === 'childList') {
+                // Check if nodes were added that contain our datalist
+                mutation.addedNodes.forEach(function(node) {
+                  if (node.nodeType === Node.ELEMENT_NODE) {
+                    if (node.id === 'backfill-names' || 
+                        (node.querySelector && node.querySelector('#backfill-names'))) {
+                      // Datalist was re-added, initialize it
+                      setTimeout(initBackfillForm, 10);
+                    }
+                  }
+                });
+              }
+            });
+          });
+          
+          // Start observing the entire document for changes
+          observer.observe(document.body, {
+            childList: true,
+            subtree: true
+          });
+        }
         """.trimIndent()
       }
     }
