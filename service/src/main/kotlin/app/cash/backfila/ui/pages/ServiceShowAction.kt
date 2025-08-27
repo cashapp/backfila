@@ -78,19 +78,20 @@ class ServiceShowAction @Inject constructor(
         Link(label, path),
       )
       .buildHtmlResponseBody {
-        AutoReload(frameId = "backfill-$service-status") {
-          PageTitle("Service", label) {
-            a {
-              href = BackfillCreateServiceIndexAction.path(service, variantOrBlank)
+        PageTitle("Service", label) {
+          a {
+            href = BackfillCreateServiceIndexAction.path(service, variantOrBlank)
 
-              button(classes = "rounded-full bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600") {
-                type = ButtonType.button
-                +"""Create"""
-              }
+            button(classes = "rounded-full bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600") {
+              type = ButtonType.button
+              +"""Create"""
             }
           }
+        }
 
-          BackfillSearchForm(backfill_name, created_by_user, service, variant)
+        BackfillSearchForm(backfill_name, created_by_user, service, variant)
+
+        AutoReload(frameId = "backfill-$service-status") {
           BackfillsTable(true, backfillRuns.running_backfills)
           BackfillsTable(false, backfillRuns.paused_backfills, showDeleted)
           PaginationWithHistory(backfillRuns.next_pagination_token, offset, history, path(service, variantOrBlank))

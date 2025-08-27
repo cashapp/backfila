@@ -112,41 +112,11 @@ fun TagConsumer<*>.BackfillSearchForm(
           }
         }
         
-        // Run on initial page load
+        // Run on page load
         if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', function() {
-            initBackfillForm();
-            setupAutoReloadWatcher();
-          });
+          document.addEventListener('DOMContentLoaded', initBackfillForm);
         } else {
           initBackfillForm();
-          setupAutoReloadWatcher();
-        }
-        
-        function setupAutoReloadWatcher() {
-          // Watch for when the datalist gets replaced/removed by AutoReload
-          const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-              if (mutation.type === 'childList') {
-                // Check if nodes were added that contain our datalist
-                mutation.addedNodes.forEach(function(node) {
-                  if (node.nodeType === Node.ELEMENT_NODE) {
-                    if (node.id === 'backfill-names' || 
-                        (node.querySelector && node.querySelector('#backfill-names'))) {
-                      // Datalist was re-added, initialize it
-                      setTimeout(initBackfillForm, 10);
-                    }
-                  }
-                });
-              }
-            });
-          });
-          
-          // Start observing the entire document for changes
-          observer.observe(document.body, {
-            childList: true,
-            subtree: true
-          });
         }
         """.trimIndent()
       }
