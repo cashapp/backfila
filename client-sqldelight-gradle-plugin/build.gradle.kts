@@ -1,6 +1,8 @@
 import com.vanniktech.maven.publish.GradlePlugin
 import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
@@ -49,8 +51,10 @@ tasks.withType<JavaCompile> {
 }
 
 tasks.withType(KotlinJvmCompile::class.java).configureEach {
-  kotlinOptions {
-    jvmTarget = "17"
+  compilerOptions{
+    jvmTarget = JvmTarget.JVM_17
+    // We don't want to specify a release version for the gradle plugin.
+    freeCompilerArgs.empty()
   }
 }
 
