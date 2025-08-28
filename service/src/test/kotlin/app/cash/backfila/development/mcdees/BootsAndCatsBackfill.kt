@@ -8,14 +8,14 @@ import wisp.logging.getLogger
 /**
  * Inspired by https://www.youtube.com/watch?v=Nni0rTLg5B8
  */
-class BootsAndCatsBackfill @Inject constructor() : StaticDatasourceBackfill<String, BootsAndCatsBackfill.SlowMealsAttributes>() {
-  override fun runOne(item: String, config: BackfillConfig<SlowMealsAttributes>) {
+class BootsAndCatsBackfill @Inject constructor() : StaticDatasourceBackfill<String, BootsAndCatsBackfill.BootsAndCatsAttributes>() {
+  override fun runOne(item: String, config: BackfillConfig<BootsAndCatsAttributes>) {
     if (config.parameters.eatMoreChikin and item.contains("beef", true)) throw RuntimeException("Eat More Chikin")
     Thread.sleep(config.parameters.waitBetweenHalfBeatsMs())
     logger.info { "Rocking to $item" }
   }
 
-  data class SlowMealsAttributes(
+  data class BootsAndCatsAttributes(
     val beatsPerMinute: Long = 120L,
     val eatMoreChikin: Boolean = false,
   ) {
