@@ -21,6 +21,7 @@ fun TagConsumer<*>.BackfillSearchForm(
     form(classes = "flex flex-wrap gap-4 items-end") {
       method = kotlinx.html.FormMethod.get
       attributes["data-turbo-frame"] = "_top"
+      action = "/services/$serviceName/" + if (variantName != "default") variantName else ""
 
       // Backfill Name Search with datalist (native autocomplete)
       div("flex-1 min-w-0") {
