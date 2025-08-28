@@ -4,6 +4,7 @@ import app.cash.backfila.client.BackfillConfig
 import app.cash.backfila.client.misk.TestingModule
 import app.cash.backfila.embedded.Backfila
 import app.cash.backfila.embedded.createWetRun
+import java.util.stream.Collectors
 import javax.inject.Inject
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -66,7 +67,7 @@ class DynamoDbIndexTest {
     val scanRequest = ScanEnhancedRequest.builder()
       .limit(10000)
       .build()
-    return dynamoDb.index("trackTitleIndex").scan(scanRequest).stream().flatMap { it.items().stream() }.toList()
+    return dynamoDb.index("trackTitleIndex").scan(scanRequest).stream().flatMap { it.items().stream() }.collect(Collectors.toList())
   }
 
   class MakeTracksAsSinglesBackfill @Inject constructor(

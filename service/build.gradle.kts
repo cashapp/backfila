@@ -3,7 +3,7 @@ import com.vanniktech.maven.publish.KotlinJvm
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
-  id("com.github.johnrengelman.shadow")
+  id("com.gradleup.shadow")
   kotlin("jvm")
   id("com.diffplug.spotless")
   id("com.vanniktech.maven.publish.base")

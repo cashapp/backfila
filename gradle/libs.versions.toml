@@ -3,7 +3,7 @@ jooq = "3.18.25"
 kotlin = "2.1.20"
 kotlinxCoroutines = "1.10.1"
 ktlint = "0.47.1"
-misk = "2025.08.01.102836-90afb48"
+misk = "2025.08.25.022850-c468bd2"
 okhttp = "5.1.0"
 sqldelight = "2.1.0"
 wire = "5.3.5"
@@ -50,7 +50,7 @@ retrofitGuavaAdapter = { module = "com.squareup.retrofit2:adapter-guava", versio
 retrofitMock = { module = "com.squareup.retrofit2:retrofit-mock", version = "3.0.0" }
 retrofitMoshi = { module = "com.squareup.retrofit2:converter-moshi", version = "3.0.0" }
 retrofitWire = { module = "com.squareup.retrofit2:converter-wire", version = "3.0.0" }
-shadowJarPlugin = { module = "gradle.plugin.com.github.johnrengelman:shadow", version = "7.1.2" }
+shadowJarPlugin = { module = "com.gradleup.shadow:shadow-gradle-plugin", version = "8.3.9" }
 slf4jApi = { module = "org.slf4j:slf4j-api", version = "2.0.3" }
 sqldelightGradlePlugin = { module = "app.cash.sqldelight:gradle-plugin", version.ref = "sqldelight" }
 sqldelightJdbcDriver = { module = "app.cash.sqldelight:jdbc-driver", version.ref = "sqldelight" }

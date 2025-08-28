@@ -18,7 +18,7 @@ plugins {
   kotlin("jvm")
   `java-library`
   id("org.flywaydb.flyway") version "7.15.0"
-  id("nu.studer.jooq") version "8.1"
+  id("nu.studer.jooq") version "10.1.1"
   id("com.vanniktech.maven.publish.base")
 }
 
