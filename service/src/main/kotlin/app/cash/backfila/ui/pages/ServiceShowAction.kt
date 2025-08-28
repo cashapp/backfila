@@ -7,6 +7,7 @@ import app.cash.backfila.ui.components.BackfillsTable
 import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.components.PageTitle
 import app.cash.backfila.ui.components.PaginationWithHistory
+import app.cash.backfila.ui.components.ServiceInfoModal
 import java.net.HttpURLConnection
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -79,6 +80,14 @@ class ServiceShowAction @Inject constructor(
       )
       .buildHtmlResponseBody {
         PageTitle("Service", label) {
+          // Service info button
+          button(classes = "rounded-full bg-gray-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600 mr-2") {
+            type = ButtonType.button
+            attributes["onclick"] = "window.openServiceInfoModal && window.openServiceInfoModal()"
+            +"""Info"""
+          }
+
+          // Create button
           a {
             href = BackfillCreateServiceIndexAction.path(service, variantOrBlank)
 
@@ -90,6 +99,9 @@ class ServiceShowAction @Inject constructor(
         }
 
         BackfillSearchForm(backfill_name, created_by_user, service, variant)
+
+        // Add the service info modal
+        ServiceInfoModal(service, variant)
 
         AutoReload(frameId = "backfill-$service-status") {
           BackfillsTable(true, backfillRuns.running_backfills)
