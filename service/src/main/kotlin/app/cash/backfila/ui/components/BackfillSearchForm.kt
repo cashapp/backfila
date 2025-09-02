@@ -29,12 +29,7 @@ fun TagConsumer<*>.BackfillSearchForm(
     form(classes = "flex flex-wrap gap-4 items-end") {
       method = kotlinx.html.FormMethod.get
       attributes["data-turbo-frame"] = "_top"
-<<<<<<< Updated upstream
-||||||| Stash base
-      action = "/services/$serviceName/" + if (variantName != "default") variantName else ""
-=======
       action = buildActionUrl(serviceName, variantName)
->>>>>>> Stashed changes
 
       // Backfill Name Search
       autocompleteField(
@@ -70,101 +65,6 @@ fun TagConsumer<*>.BackfillSearchForm(
   }
 }
 
-<<<<<<< Updated upstream
-    // JavaScript to populate datalist and handle clear filters
-    script {
-      unsafe {
-        +"""
-        function initBackfillForm() {
-          const datalist = document.getElementById('backfill-names');
-          const clearFiltersBtn = document.getElementById('clear_filters_btn');
-          
-          if (!datalist) return;
-          
-          // Fetch and populate backfill names
-          const url = '/services/$serviceName/variants/$variantName/backfill-names';
-          fetch(url)
-            .then(response => response.json())
-            .then(data => {
-              datalist.innerHTML = '';
-              if (data.backfill_names) {
-                data.backfill_names.forEach(name => {
-                  const option = document.createElement('option');
-                  option.value = name;
-                  datalist.appendChild(option);
-                });
-              }
-            })
-            .catch(err => console.error('Error loading backfill names:', err));
-          
-          // Clear filters button handler
-          if (clearFiltersBtn && !clearFiltersBtn.hasAttribute('data-initialized')) {
-            clearFiltersBtn.setAttribute('data-initialized', 'true');
-            clearFiltersBtn.addEventListener('click', function() {
-              let baseUrl = '/services/$serviceName/';
-              if ('$variantName' !== 'default') {
-                baseUrl += '$variantName';
-              }
-              window.location.href = baseUrl;
-            });
-          }
-        }
-        
-        // Run on page load
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', initBackfillForm);
-        } else {
-          initBackfillForm();
-        }
-        """.trimIndent()
-||||||| Stash base
-    // JavaScript to populate datalist and handle clear filters
-    script {
-      unsafe {
-        +"""
-        function initBackfillForm() {
-          const datalist = document.getElementById('backfill-names');
-          const clearFiltersBtn = document.getElementById('clear_filters_btn');
-          
-          if (!datalist) return;
-          
-          // Fetch and populate backfill names
-          const url = '/services/$serviceName/variants/$variantName/backfill-names';
-          fetch(url)
-            .then(response => response.json())
-            .then(data => {
-              datalist.innerHTML = '';
-              if (data.backfill_names) {
-                data.backfill_names.forEach(name => {
-                  const option = document.createElement('option');
-                  option.value = name;
-                  datalist.appendChild(option);
-                });
-              }
-            })
-            .catch(err => console.error('Error loading backfill names:', err));
-          
-          // Clear filters button handler
-          if (clearFiltersBtn && !clearFiltersBtn.hasAttribute('data-initialized')) {
-            clearFiltersBtn.setAttribute('data-initialized', 'true');
-            clearFiltersBtn.addEventListener('click', function() {
-              let baseUrl = '/services/$serviceName';
-              if ('$variantName' !== 'default') {
-                baseUrl += '/$variantName';
-              }
-              window.location.href = baseUrl;
-            });
-          }
-        }
-        
-        // Run on page load
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', initBackfillForm);
-        } else {
-          initBackfillForm();
-        }
-        """.trimIndent()
-=======
 private fun buildActionUrl(serviceName: String, variantName: String): String {
   return "/services/$serviceName" + if (variantName != "default") "/$variantName" else ""
 }
@@ -204,7 +104,6 @@ private fun TagConsumer<*>.autocompleteField(
         attributes["role"] = "listbox"
         attributes["id"] = "$id-results"
         style = "display: none;"
->>>>>>> Stashed changes
       }
     }
   }
