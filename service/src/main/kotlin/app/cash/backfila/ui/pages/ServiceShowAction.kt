@@ -79,6 +79,17 @@ class ServiceShowAction @Inject constructor(
       )
       .buildHtmlResponseBody {
         PageTitle("Service", label) {
+          // Service info button - now links to dedicated page
+          a {
+            href = ServiceInfoAction.path(service, variantOrBlank)
+
+            button(classes = "rounded-full bg-gray-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600 mr-2") {
+              type = ButtonType.button
+              +"""Info"""
+            }
+          }
+
+          // Create button
           a {
             href = BackfillCreateServiceIndexAction.path(service, variantOrBlank)
 
