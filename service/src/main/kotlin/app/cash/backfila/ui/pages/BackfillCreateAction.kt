@@ -73,8 +73,18 @@ class BackfillCreateAction @Inject constructor(
 
     // If service + variant + backfill id to clone are valid, pre-fill form with backfill details
     val backfillRuns = getBackfillRunsAction.backfillRuns(service, variant)
-    val backfillToClone =
+    var backfillToClone =
       (backfillRuns.paused_backfills + backfillRuns.running_backfills).firstOrNull { it.id == backfillIdToClone }
+
+    // If not found in first page, search through all pages for completed backfills
+    if (backfillToClone == null && backfillIdToClone != null) {
+      var paginationToken = backfillRuns.next_pagination_token
+      while (paginationToken != null && backfillToClone == null) {
+        val nextPage = getBackfillRunsAction.backfillRuns(service, variant, paginationToken)
+        backfillToClone = nextPage.paused_backfills.firstOrNull { it.id == backfillIdToClone }
+        paginationToken = nextPage.next_pagination_token
+      }
+    }
     val backfillToCloneStatus = backfillToClone?.id?.toLongOrNull()?.let { getBackfillStatusAction.status(it) }
 
     val registeredBackfills = getRegisteredBackfillsAction.backfills(service, variant)
