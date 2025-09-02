@@ -1,6 +1,5 @@
 package app.cash.backfila.ui
 
-import app.cash.backfila.dashboard.GetBackfillNamesAction
 import app.cash.backfila.ui.actions.BackfillCreateHandlerAction
 import app.cash.backfila.ui.actions.BackfillShowButtonHandlerAction
 import app.cash.backfila.ui.pages.BackfillCreateAction
@@ -31,7 +30,6 @@ class UiModule : KAbstractModule() {
     // Other
     install(WebActionModule.create<BackfillCreateHandlerAction>())
     install(WebActionModule.create<BackfillShowButtonHandlerAction>())
-    install(WebActionModule.create<GetBackfillNamesAction>())
   }
 }
 
