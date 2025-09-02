@@ -75,7 +75,7 @@ class BackfillCreateAction @Inject constructor(
     val backfillRuns = getBackfillRunsAction.backfillRuns(service, variant)
     var backfillToClone =
       (backfillRuns.paused_backfills + backfillRuns.running_backfills).firstOrNull { it.id == backfillIdToClone }
-    
+
     // If not found in first page, search through all pages for completed backfills
     if (backfillToClone == null && backfillIdToClone != null) {
       var paginationToken = backfillRuns.next_pagination_token
