@@ -20,5 +20,7 @@ class BackfilaWebActionsModule() : KAbstractModule() {
     install(WebActionModule.create<ViewLogsAction>())
     install(WebActionModule.create<EditPartitionCursorAction>())
     install(WebActionModule.create<EditPartitionCursorHandlerAction>())
+    install(WebActionModule.create<SearchBackfillNamesAction>())
+    install(WebActionModule.create<SearchUsersAction>())
   }
 }
