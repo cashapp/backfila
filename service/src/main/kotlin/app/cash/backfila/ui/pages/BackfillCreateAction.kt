@@ -21,6 +21,7 @@ import kotlinx.html.label
 import kotlinx.html.legend
 import kotlinx.html.p
 import kotlinx.html.span
+import kotlinx.html.strong
 import misk.security.authz.Authenticated
 import misk.tailwind.Link
 import misk.web.Get
@@ -208,81 +209,100 @@ class BackfillCreateAction @Inject constructor(
                       }
                       div("space-y-4") {
                         // Same range, restart from beginning
-                        div("flex items-center") {
-                          input(classes = "h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600") {
+                        div("flex items-start") {
+                          input(classes = "h-4 w-4 mt-1 border-gray-300 text-indigo-600 focus:ring-indigo-600") {
                             id = "range-option-restart"
                             name = BackfillCreateField.RANGE_OPTION.fieldId
                             type = InputType.radio
                             value = RangeOption.RESTART.value
                             checked = true // Default option
                           }
-                          label("ml-3 block text-sm font-medium leading-6 text-gray-900") {
-                            htmlFor = "range-option-restart"
-                            +"""Same range, restart from beginning"""
+                          div("ml-3") {
+                            label("block text-sm font-medium leading-6 text-gray-900") {
+                              htmlFor = "range-option-restart"
+                              +"""Same range, restart from beginning"""
+                            }
+                            p("text-xs text-gray-500 mt-1") {
+                              +"""Use the """
+                              strong("font-semibold text-gray-700") { +"""exact""" }
+                              +""" same range as the cloned backfill but start processing from the beginning."""
+                            }
                           }
                         }
 
                         // Same range, continue from last processed
-                        div("flex items-center") {
-                          input(classes = "h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600") {
+                        div("flex items-start") {
+                          input(classes = "h-4 w-4 mt-1 border-gray-300 text-indigo-600 focus:ring-indigo-600") {
                             id = "range-option-continue"
                             name = BackfillCreateField.RANGE_OPTION.fieldId
                             type = InputType.radio
                             value = RangeOption.CONTINUE.value
                           }
-                          label("ml-3 block text-sm font-medium leading-6 text-gray-900") {
-                            htmlFor = "range-option-continue"
-                            +"""Same range, continue from last processed"""
+                          div("ml-3") {
+                            label("block text-sm font-medium leading-6 text-gray-900") {
+                              htmlFor = "range-option-continue"
+                              +"""Same range, continue from last processed"""
+                            }
+                            p("text-xs text-gray-500 mt-1") {
+                              +"""Use the """
+                              strong("font-semibold text-gray-700") { +"""exact""" }
+                              +""" same range as the cloned backfill but continue processing where the cloned backfill left off. Useful when you don't want to reprocess past items but need to change some of the backfill parameters."""
+                            }
                           }
                         }
 
                         // New range with embedded range fields
-                        div("flex items-center") {
-                          input(classes = "peer/new h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600") {
+                        div("flex items-start") {
+                          input(classes = "peer/new h-4 w-4 mt-1 border-gray-300 text-indigo-600 focus:ring-indigo-600") {
                             id = "range-option-new"
                             name = BackfillCreateField.RANGE_OPTION.fieldId
                             type = InputType.radio
                             value = RangeOption.NEW.value
                           }
-                          label("ml-3 block text-sm font-medium leading-6 text-gray-900") {
-                            htmlFor = "range-option-new"
-                            +"""New range"""
-                          }
+                          div("ml-3 flex-1") {
+                            label("block text-sm font-medium leading-6 text-gray-900") {
+                              htmlFor = "range-option-new"
+                              +"""New range"""
+                            }
+                            p("text-xs text-gray-500 mt-1") {
+                              +"""A completely new range, either by manually inputting a new range or automatically calculating a brand new range when creating the backfill."""
+                            }
 
-                          // Range input fields - shown when "New range" is selected
-                          div("mt-4 ml-7 hidden peer-checked/new:block") {
-                            div("grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6") {
-                              div("sm:col-span-3") {
-                                val field = BackfillCreateField.RANGE_START.fieldId
-                                label("block text-sm/6 font-medium text-gray-900") {
-                                  htmlFor = field
-                                  +"""Range Start (optional)"""
-                                }
-                                div("mt-2") {
-                                  input(
-                                    classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6",
-                                  ) {
-                                    type = InputType.text
-                                    name = field
-                                    id = field
-                                    attributes["autocomplete"] = field
+                            // Range input fields - shown when "New range" is selected
+                            div("mt-4 hidden peer-checked/new:block") {
+                              div("grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6") {
+                                div("sm:col-span-3") {
+                                  val field = BackfillCreateField.RANGE_START.fieldId
+                                  label("block text-sm/6 font-medium text-gray-900") {
+                                    htmlFor = field
+                                    +"""Range Start (optional)"""
+                                  }
+                                  div("mt-2") {
+                                    input(
+                                      classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6",
+                                    ) {
+                                      type = InputType.text
+                                      name = field
+                                      id = field
+                                      attributes["autocomplete"] = field
+                                    }
                                   }
                                 }
-                              }
-                              div("sm:col-span-3") {
-                                val field = BackfillCreateField.RANGE_END.fieldId
-                                label("block text-sm/6 font-medium text-gray-900") {
-                                  htmlFor = field
-                                  +"""Range End (optional)"""
-                                }
-                                div("mt-2") {
-                                  input(
-                                    classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6",
-                                  ) {
-                                    type = InputType.text
-                                    name = field
-                                    id = field
-                                    attributes["autocomplete"] = field
+                                div("sm:col-span-3") {
+                                  val field = BackfillCreateField.RANGE_END.fieldId
+                                  label("block text-sm/6 font-medium text-gray-900") {
+                                    htmlFor = field
+                                    +"""Range End (optional)"""
+                                  }
+                                  div("mt-2") {
+                                    input(
+                                      classes = "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6",
+                                    ) {
+                                      type = InputType.text
+                                      name = field
+                                      id = field
+                                      attributes["autocomplete"] = field
+                                    }
                                   }
                                 }
                               }
