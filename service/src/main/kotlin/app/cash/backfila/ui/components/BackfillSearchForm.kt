@@ -66,7 +66,7 @@ fun TagConsumer<*>.BackfillSearchForm(
 }
 
 private fun buildActionUrl(serviceName: String, variantName: String): String {
-  return "/services/$serviceName" + if (variantName != "default") "/$variantName" else ""
+  return "/services/$serviceName" + if (variantName != "default") "/$variantName" else "/"
 }
 
 private fun TagConsumer<*>.autocompleteField(
