@@ -6,6 +6,7 @@ import app.cash.backfila.client.BackfilaHttpClientConfig
 import app.cash.backfila.client.misk.hibernate.ActiveCouponBackfill
 import app.cash.backfila.client.misk.hibernate.ChickenToBeefBackfill
 import app.cash.backfila.client.misk.hibernate.HibernateBackfillModule
+import app.cash.backfila.client.misk.hibernate.LargeMenuNameBackfill
 import app.cash.backfila.client.misk.hibernate.NullableParameterBackfill
 import app.cash.backfila.client.misk.hibernate.RecordNoParametersConfigValuesBackfill
 import app.cash.backfila.client.misk.hibernate.SinglePartitionHibernateTestBackfill
@@ -75,6 +76,7 @@ internal class ClientMiskTestingModule(
     install(HibernateBackfillModule.create<StringKeyBackfill>())
     install(HibernateBackfillModule.create<NullableParameterBackfill>())
     install(HibernateBackfillModule.create<ActiveCouponBackfill>())
+    install(HibernateBackfillModule.create<LargeMenuNameBackfill>())
 
     install(MenuStackModule())
   }
