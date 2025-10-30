@@ -18,6 +18,7 @@ import misk.hibernate.Query
 import misk.hibernate.Transacter
 import misk.hibernate.load
 import misk.hibernate.loadOrNull
+import misk.logging.getLogger
 import misk.scope.ActionScoped
 import misk.security.authz.Authenticated
 import misk.web.PathParam
@@ -29,7 +30,6 @@ import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
-import wisp.logging.getLogger
 
 enum class RangeCloneType {
   RESTART,

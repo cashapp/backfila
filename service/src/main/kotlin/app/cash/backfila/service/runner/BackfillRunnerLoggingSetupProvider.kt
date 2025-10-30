@@ -3,8 +3,8 @@ package app.cash.backfila.service.runner
 import app.cash.backfila.service.persistence.DbBackfillRun
 import javax.inject.Inject
 import misk.hibernate.Id
+import misk.logging.getLogger
 import org.slf4j.MDC
-import wisp.logging.getLogger
 
 interface BackfillRunnerLoggingSetupProvider {
   fun <T> withLogging(backfillName: String, backfillId: Id<DbBackfillRun>, partitionName: String, wrapped: () -> T): T

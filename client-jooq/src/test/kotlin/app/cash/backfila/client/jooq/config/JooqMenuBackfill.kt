@@ -8,11 +8,11 @@ import app.cash.backfila.client.jooq.ByteStringSerializer
 import app.cash.backfila.client.jooq.JooqBackfill
 import app.cash.backfila.client.jooq.gen.tables.references.MENU
 import javax.inject.Inject
+import misk.logging.getLogger
 import org.jooq.Condition
 import org.jooq.DSLContext
 import org.jooq.Field
 import org.jooq.TableLike
-import wisp.logging.getLogger
 
 @Description("So we can backfill menus.")
 class JooqMenuTestBackfill @Inject constructor(

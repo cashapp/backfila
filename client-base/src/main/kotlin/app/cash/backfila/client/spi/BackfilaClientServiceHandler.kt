@@ -12,8 +12,8 @@ import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
 import app.cash.backfila.protos.clientservice.RunBatchRequest
 import app.cash.backfila.protos.clientservice.RunBatchResponse
 import javax.inject.Inject
+import misk.logging.getLogger
 import org.apache.commons.lang3.exception.ExceptionUtils
-import wisp.logging.getLogger
 
 /**
  * The various Backfila ClientService implementations invoke this from their service handlers to get

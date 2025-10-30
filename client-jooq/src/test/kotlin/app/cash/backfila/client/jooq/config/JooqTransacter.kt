@@ -1,9 +1,9 @@
 package app.cash.backfila.client.jooq.config
 
 import app.cash.backfila.client.jooq.BackfillJooqTransacter
+import misk.logging.getLogger
 import org.jooq.DSLContext
 import org.jooq.impl.DSL
-import wisp.logging.getLogger
 
 class JooqTransacter(
   private val dslContext: DSLContext,

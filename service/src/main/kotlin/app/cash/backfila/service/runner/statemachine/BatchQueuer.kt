@@ -11,7 +11,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import wisp.logging.getLogger
+import misk.logging.getLogger
 
 /**
  * Sends RPCs to the client service to compute batch ranges and sends them along a channel to the

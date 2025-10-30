@@ -1,10 +1,10 @@
 package app.cash.backfila.client.jooq.config
 
+import misk.logging.getLogger
 import org.jooq.ExecuteContext
 import org.jooq.ExecuteListener
 import org.jooq.conf.Settings
 import org.jooq.impl.DSL
-import wisp.logging.getLogger
 
 class JooqSqlLogger : ExecuteListener {
   /**
