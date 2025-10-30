@@ -5,7 +5,7 @@ import app.cash.backfila.client.Description
 import app.cash.backfila.client.PrepareBackfillConfig
 import app.cash.backfila.client.stat.StaticDatasourceBackfill
 import javax.inject.Inject
-import wisp.logging.getLogger
+import misk.logging.getLogger
 
 class ClumsyMealsBackfill @Inject constructor() : StaticDatasourceBackfill<String, ClumsyMealsBackfill.ClumsyMealsAttributes>() {
   var servedPlates = 0 // Keeps track of the number of successfully served plates.

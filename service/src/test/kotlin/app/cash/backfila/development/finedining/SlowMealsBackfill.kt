@@ -3,7 +3,7 @@ package app.cash.backfila.development.finedining
 import app.cash.backfila.client.BackfillConfig
 import app.cash.backfila.client.stat.StaticDatasourceBackfill
 import javax.inject.Inject
-import wisp.logging.getLogger
+import misk.logging.getLogger
 
 class SlowMealsBackfill @Inject constructor() : StaticDatasourceBackfill<String, SlowMealsBackfill.SlowMealsAttributes>() {
   override fun runOne(item: String, config: BackfillConfig<SlowMealsAttributes>) {

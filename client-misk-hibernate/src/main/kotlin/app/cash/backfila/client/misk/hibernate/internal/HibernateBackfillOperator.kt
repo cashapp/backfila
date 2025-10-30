@@ -27,7 +27,7 @@ import misk.hibernate.Operator.GE
 import misk.hibernate.Operator.GT
 import misk.hibernate.Operator.LE
 import misk.hibernate.Query
-import wisp.logging.getLogger
+import misk.logging.getLogger
 
 /**
  * Operates on a backfill using Hibernate 5.x entities. Create instances with [BackfillOperatorFactory].

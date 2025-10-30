@@ -14,7 +14,7 @@ import misk.hibernate.Id
 import misk.hibernate.Query
 import misk.hibernate.Transacter
 import misk.hibernate.loadOrNull
-import wisp.logging.getLogger
+import misk.logging.getLogger
 
 class BackfillStateToggler @Inject constructor(
   @BackfilaDb private val transacter: Transacter,

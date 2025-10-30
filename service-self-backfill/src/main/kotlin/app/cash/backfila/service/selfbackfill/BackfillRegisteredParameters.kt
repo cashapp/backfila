@@ -15,7 +15,7 @@ import misk.hibernate.Query
 import misk.hibernate.Transacter
 import misk.hibernate.load
 import misk.hibernate.newQuery
-import wisp.logging.getLogger
+import misk.logging.getLogger
 
 internal class BackfillRegisteredParameters @Inject constructor(
   @BackfilaDb private val transacter: Transacter,

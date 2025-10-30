@@ -13,7 +13,7 @@ import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import wisp.logging.getLogger
+import misk.logging.getLogger
 
 /**
  * Receives batch ranges from the BatchQueuer and starts RPCs to the client service to run batches.

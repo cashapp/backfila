@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.jvm.Throws
-import wisp.logging.getLogger
+import misk.logging.getLogger
 
 /**
  * Creates BackfillOperators using the registered Backends.

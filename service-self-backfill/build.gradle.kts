@@ -51,9 +51,8 @@ dependencies {
   implementation(libs.wireCompiler)
   implementation(libs.wireSchema)
   implementation(libs.wispClient)
-  implementation(libs.wispConfig)
   implementation(libs.wispDeployment)
-  implementation(libs.wispLogging)
+  implementation(libs.miskLogging)
 
   implementation(project(":client"))
   implementation(project(":client-base"))

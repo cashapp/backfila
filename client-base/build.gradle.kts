@@ -22,7 +22,7 @@ dependencies {
   implementation(libs.okio)
   implementation(libs.kotlinStdLib)
   implementation(libs.wireMoshiAdapter)
-  implementation(libs.wispLogging)
+  implementation(libs.miskLogging)
 
   // "client" is an implementation not an api dependency because client implementations MUST
   // expose "client" as an explicit api dependency so that customers of that client have access to

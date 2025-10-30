@@ -47,7 +47,7 @@ dependencies {
   testImplementation(libs.junitParams)
   testImplementation(libs.okHttp)
   testImplementation(libs.mysql)
-  testImplementation(libs.wispLogging)
+  testImplementation(libs.miskLogging)
 
   testImplementation(project(":backfila-embedded"))
   testImplementation(project(":client-testing"))

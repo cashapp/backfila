@@ -7,7 +7,7 @@ import app.cash.backfila.client.spi.BackfillRegistration
 import app.cash.backfila.protos.service.ConfigureServiceRequest
 import javax.inject.Inject
 import javax.inject.Singleton
-import wisp.logging.getLogger
+import misk.logging.getLogger
 
 /**
  * Sends backfill metadata to Backfila at application startup. If Backfila is unreachable then
