@@ -3,7 +3,7 @@ jooq = "3.18.25"
 kotlin = "2.1.20"
 kotlinxCoroutines = "1.10.1"
 ktlint = "0.47.1"
-misk = "2025.10.30.161505-1b86e2a"
+misk = "2025.10.30.215657-dfc49f0"
 okhttp = "5.1.0"
 sqldelight = "2.1.0"
 wire = "5.3.5"
@@ -80,7 +80,6 @@ miskHibernateTesting = { module = "com.squareup.misk:misk-hibernate-testing", ve
 miskHotwire = { module = "com.squareup.misk:misk-hotwire", version.ref = "misk" }
 miskJdbc = { module = "com.squareup.misk:misk-jdbc", version.ref = "misk" }
 miskInject = { module = "com.squareup.misk:misk-inject", version.ref = "misk" }
-miskLogging = { module = "com.squareup.misk:misk-logging", version.ref = "misk" }
 miskMetrics = { module = "com.squareup.misk:misk-metrics", version.ref = "misk" }
 miskService = { module = "com.squareup.misk:misk-service", version.ref = "misk" }
 miskSlack = { module = "com.squareup.misk:misk-slack", version.ref = "misk" }
