@@ -3,7 +3,7 @@ jooq = "3.18.25"
 kotlin = "2.1.20"
 kotlinxCoroutines = "1.10.1"
 ktlint = "0.47.1"
-misk = "2025.10.30.161505-1b86e2a"
+misk = "2025.10.30.215657-dfc49f0"
 okhttp = "5.1.0"
 sqldelight = "2.1.0"
 wire = "5.3.5"
@@ -94,8 +94,5 @@ wireGrpcClient = { module = "com.squareup.wire:wire-grpc-client", version.ref = 
 wireMoshiAdapter = { module = "com.squareup.wire:wire-moshi-adapter", version.ref = "wire" }
 wireRuntime = { module = "com.squareup.wire:wire-runtime", version.ref = "wire" }
 wireSchema = { module = "com.squareup.wire:wire-schema", version.ref = "wire" }
-wispClient = { module = "app.cash.wisp:wisp-client", version.ref = "misk" }
-wispConfig = { module = "app.cash.wisp:wisp-config", version.ref = "misk" }
 wispDeployment = { module = "app.cash.wisp:wisp-deployment", version.ref = "misk" }
-wispLogging = { module = "app.cash.wisp:wisp-logging", version.ref = "misk" }
 wispMoshi = { module = "app.cash.wisp:wisp-moshi", version.ref = "misk" }
