@@ -58,7 +58,6 @@ dependencies {
   implementation(libs.wireRuntime)
   implementation(libs.wireCompiler)
   implementation(libs.wireSchema)
-  implementation(libs.wispClient)
   implementation(libs.wispDeployment)
   implementation(libs.miskLogging)
 
