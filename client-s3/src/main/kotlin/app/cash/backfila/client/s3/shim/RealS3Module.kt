@@ -9,6 +9,6 @@ import com.google.inject.Key
 class RealS3Module : AbstractModule() {
   override fun configure() {
     requireBinding(Key.get(AmazonS3::class.java).withAnnotation(ForS3Backend::class.java))
-    bind(S3Service::class.java).to(RealS3Service::class.java)
+    bind(S3Service::class.java).annotatedWith(ForS3Backend::class.java).to(RealS3Service::class.java)
   }
 }

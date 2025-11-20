@@ -57,5 +57,5 @@ private fun mapBinder(binder: Binder) = MapBinder.newMapBinder(
   ForS3Backend::class.java,
 )
 
-/** Annotation for specifying dependencies specifically for this Backend. */
+/** Annotation for specifying dependencies specifically for AWS SDK V1 Backend. */
 @Qualifier annotation class ForS3Backend
