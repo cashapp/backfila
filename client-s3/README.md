@@ -23,7 +23,7 @@ You have two options, either add each file in code or point `FakeS3Service` to a
 Use `RealS3Module` in real instances and provide an `AmazonS3` annotated with `@ForS3Backend`.
 
 ### AWS SDK V2
-Use `RealS3V2Module` in real instances and provide an `S3Client` annotated with `@ForS3BackendV2`.
+Use `RealS3V2Module` in real instances and provide an `S3Client` annotated with `@ForS3Backend`.
 
 The code is the source of truth for this client. 
 Keep that in mind. 

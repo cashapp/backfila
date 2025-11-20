@@ -17,13 +17,13 @@ class BackfillsModuleV2 : KAbstractModule() {
         ),
       ),
     )
-    install(S3DatasourceBackfillModuleV2.create<S3Utf8StringNewlineBackfillTestV2.BreakfastBackfill>())
-    install(S3DatasourceBackfillModuleV2.create<S3Utf8StringNewlineBackfillTestV2.BrunchBackfill>())
-    install(S3DatasourceBackfillModuleV2.create<S3Utf8StringNewlineBackfillTestV2.LunchBackfill>())
-    install(S3DatasourceBackfillModuleV2.create<S3Utf8StringNewlineBackfillTestV2.DinnerBackfill>())
-    install(S3DatasourceBackfillModuleV2.create<S3Utf8StringNewlineBackfillTestV2.OptimizedLunchBackfill>())
-    install(S3DatasourceBackfillModuleV2.create<S3Utf8StringNewlineBackfillTestV2.OptimizedDinnerBackfill>())
+    install(S3DatasourceBackfillModule.create<S3Utf8StringNewlineBackfillTestV2.BreakfastBackfill>())
+    install(S3DatasourceBackfillModule.create<S3Utf8StringNewlineBackfillTestV2.BrunchBackfill>())
+    install(S3DatasourceBackfillModule.create<S3Utf8StringNewlineBackfillTestV2.LunchBackfill>())
+    install(S3DatasourceBackfillModule.create<S3Utf8StringNewlineBackfillTestV2.DinnerBackfill>())
+    install(S3DatasourceBackfillModule.create<S3Utf8StringNewlineBackfillTestV2.OptimizedLunchBackfill>())
+    install(S3DatasourceBackfillModule.create<S3Utf8StringNewlineBackfillTestV2.OptimizedDinnerBackfill>())
 
-    install(S3DatasourceBackfillModuleV2.create<RecordStrategyBackfillTestV2.BrokenBreakfastBackfill>())
+    install(S3DatasourceBackfillModule.create<RecordStrategyBackfillTestV2.BrokenBreakfastBackfill>())
   }
 }

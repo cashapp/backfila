@@ -1,6 +1,6 @@
 package app.cash.backfila.client.s3.internal
 
-import app.cash.backfila.client.s3.ForS3BackendV2
+import app.cash.backfila.client.s3.ForS3Backend
 import app.cash.backfila.client.s3.shim.S3Service
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -16,7 +16,7 @@ import software.amazon.awssdk.services.s3.model.ListObjectsV2Request
 
 @Singleton
 class RealS3ServiceV2 @Inject constructor(
-  @ForS3BackendV2 private val client: S3Client,
+  @ForS3Backend private val client: S3Client,
 ) : S3Service {
 
   override fun listFiles(bucket: String, keyPrefix: String): List<String> {
