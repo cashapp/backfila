@@ -18,7 +18,11 @@ Scan size is also in bytes.
 
 In tests install the `FakeS3Module` and fill `FakeS3Service` with your test files. 
 You have two options, either add each file in code or point `FakeS3Service` to a resource path and it will load everything under that path.
-Use `S3CdnModule` in real instances and provide an `AmazonS3` annotated with `@ForS3Backend`.
+### AWS SDK V1
+Use `RealS3Module` in real instances and provide an `AmazonS3` annotated with `@ForS3Backend`.
+
+### AWS SDK V2
+Use `RealS3AwsV2Module` in real instances and provide an `S3Client` annotated with `@ForS3Backend`.
 
 The code is the source of truth for this client. 
 Keep that in mind. 
