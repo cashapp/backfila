@@ -13,6 +13,7 @@ import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.GetObjectAttributesRequest
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import software.amazon.awssdk.services.s3.model.ListObjectsRequest
+import software.amazon.awssdk.services.s3.model.ObjectAttributes
 
 @Singleton
 class RealS3AwsV2Service @Inject constructor(
@@ -33,6 +34,7 @@ class RealS3AwsV2Service @Inject constructor(
     val request = GetObjectAttributesRequest.builder()
       .bucket(bucket)
       .key(key)
+      .objectAttributes(ObjectAttributes.OBJECT_SIZE)
       .build()
     val objectMetadata = s3Client.getObjectAttributes(request)
     return objectMetadata.objectSize()
