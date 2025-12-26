@@ -67,7 +67,7 @@ fun TagConsumer<*>.PaginationWithHistory(
             }
 
             if (remainingHistory?.isNotBlank() == true) {
-              "$basePath?offset=$previousOffset&history=$remainingHistory"
+              basePath.appendOffsetsWithHistory(previousOffset, null, remainingHistory)
             } else {
               basePath.appendOffsets(previousOffset)
             }
@@ -94,27 +94,29 @@ fun TagConsumer<*>.PaginationWithHistory(
 }
 
 fun String.appendOffsets(nextOffset: String? = null, lastOffset: String? = null): String {
-  val pathBuilder = StringBuilder(this)
+  val (basePath, existingParams) = parseUrlAndParams(this)
+  val allParams = existingParams.toMutableMap()
+
   if (nextOffset?.isNotBlank() == true) {
-    pathBuilder.append("?offset=").append(nextOffset)
+    allParams["offset"] = nextOffset
   }
 
   if (lastOffset?.isNotBlank() == true) {
-    if (pathBuilder.contains("?")) {
-      pathBuilder.append("&")
-    } else {
-      pathBuilder.append("?")
-    }
-    pathBuilder.append("lastOffset=").append(lastOffset)
+    allParams["lastOffset"] = lastOffset
   }
-  return pathBuilder.toString()
+  return if (allParams.isEmpty()) {
+    basePath
+  } else {
+    "$basePath?${allParams.entries.joinToString("&") { "${it.key}=${it.value}" }}"
+  }
 }
 
 fun String.appendOffsetsWithHistory(nextOffset: String? = null, currentOffset: String? = null, historyChain: String? = null): String {
-  val pathBuilder = StringBuilder(this)
+  val (basePath, existingParams) = parseUrlAndParams(this)
+  val allParams = existingParams.toMutableMap()
 
   if (nextOffset?.isNotBlank() == true) {
-    pathBuilder.append("?offset=").append(nextOffset)
+    allParams["offset"] = nextOffset
 
     // Build history chain: add current offset to existing history
     val newHistory = if (currentOffset?.isNotBlank() == true) {
@@ -128,9 +130,35 @@ fun String.appendOffsetsWithHistory(nextOffset: String? = null, currentOffset: S
     }
 
     if (newHistory?.isNotBlank() == true) {
-      pathBuilder.append("&history=").append(newHistory)
+      allParams["history"] = newHistory
     }
   }
-  val result = pathBuilder.toString()
-  return result
+
+  return if (allParams.isEmpty()) {
+    basePath
+  } else {
+    "$basePath?${allParams.entries.joinToString("&") { "${it.key}=${it.value}" }}"
+  }
+}
+
+private fun parseUrlAndParams(url: String): Pair<String, Map<String, String>> {
+  val parts = url.split("?", limit = 2)
+  val basePath = parts[0]
+
+  if (parts.size < 2) {
+    return Pair(basePath, emptyMap())
+  }
+
+  val params = parts[1].split("&")
+    .mapNotNull { param ->
+      val keyValue = param.split("=", limit = 2)
+      if (keyValue.size == 2) {
+        keyValue[0] to keyValue[1]
+      } else {
+        null
+      }
+    }
+    .toMap()
+
+  return Pair(basePath, params)
 }
