@@ -10,6 +10,9 @@ import com.squareup.moshi.Types
 import java.lang.reflect.ParameterizedType
 import kotlin.reflect.KClass
 
+@Deprecated(
+  message = "AWS V1 SDK is deprecated, use the `client-dynamodb-v2` client instead.",
+)
 abstract class DynamoDbBackfill<I : Any, P : Any> : Backfill {
   val itemType: KClass<I>
 

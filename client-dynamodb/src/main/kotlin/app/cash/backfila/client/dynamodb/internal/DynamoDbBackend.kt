@@ -20,6 +20,9 @@ import javax.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
 
+@Deprecated(
+  message = "AWS V1 SDK is deprecated, use the `client-dynamodb-v2` client instead.",
+)
 @Singleton
 class DynamoDbBackend @Inject constructor(
   private val injector: Injector,

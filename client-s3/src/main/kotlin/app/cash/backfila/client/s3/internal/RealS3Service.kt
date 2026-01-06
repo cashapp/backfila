@@ -12,6 +12,10 @@ import okio.ByteString
 import okio.buffer
 import okio.source
 
+@Deprecated(
+  message = "AWS V1 SDK is deprecated, use RealS3AwsV2Service instead. Why aren't you using RealS3Module?",
+  level = DeprecationLevel.WARNING,
+)
 @Singleton
 class RealS3Service @Inject constructor(
   @ForS3Backend private val amazonS3: AmazonS3,

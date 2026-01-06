@@ -16,6 +16,9 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.google.common.base.Stopwatch
 import java.time.Duration
 
+@Deprecated(
+  message = "AWS V1 SDK is deprecated, use the `client-dynamodb-v2` client instead.",
+)
 class DynamoDbBackfillOperator<I : Any, P : Any>(
   val dynamoDb: DynamoDBMapper,
   override val backfill: DynamoDbBackfill<I, P>,
