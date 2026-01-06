@@ -105,11 +105,32 @@ class ServiceShowAction @Inject constructor(
         AutoReload(frameId = "backfill-$service-status") {
           BackfillsTable(true, backfillRuns.running_backfills)
           BackfillsTable(false, backfillRuns.paused_backfills, showDeleted)
-          PaginationWithHistory(backfillRuns.next_pagination_token, offset, history, path(service, variantOrBlank))
+          PaginationWithHistory(backfillRuns.next_pagination_token, offset, history, buildCurrentUrl(service, variantOrBlank, backfill_name, created_by_user, showDeleted))
         }
       }
 
     return Response(htmlResponseBody)
+  }
+
+  private fun buildCurrentUrl(
+    service: String,
+    variantOrBlank: String?,
+    backfill_name: String?,
+    created_by_user: String?,
+    showDeleted: Boolean,
+  ): String {
+    val basePath = path(service, variantOrBlank)
+    val params = mutableListOf<String>()
+
+    backfill_name?.takeIf { it.isNotBlank() }?.let { params.add("backfill_name=$it") }
+    created_by_user?.takeIf { it.isNotBlank() }?.let { params.add("created_by_user=$it") }
+    if (showDeleted) { params.add("showDeleted=true") }
+
+    return if (params.isEmpty()) {
+      basePath
+    } else {
+      "$basePath?${params.joinToString("&")}"
+    }
   }
 
   companion object {
