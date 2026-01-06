@@ -17,6 +17,9 @@ import okio.ByteString.Companion.toByteString
  * With DynamoDB each run selects the number of segments so we need begin, end, and count to
  * uniquely identify a range.
  */
+@Deprecated(
+  message = "AWS V1 SDK is deprecated, use the `client-dynamodb-v2` client instead.",
+)
 internal data class DynamoDbKeyRange(
   val start: Int,
   val end: Int,
@@ -37,6 +40,9 @@ internal data class DynamoDbKeyRange(
  * start = "v2:<segment_offset>/<segment_count>:<last_evaluated_key_json>"
  * end = "v2:<segment_offset>/<segment_count>"
  */
+@Deprecated(
+  message = "AWS V1 SDK is deprecated, use the `client-dynamodb-v2` client instead.",
+)
 @Singleton
 class DynamoDbKeyRangeCodec @Inject constructor(
   @ForDynamoDbBackend moshi: Moshi,

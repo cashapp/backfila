@@ -1,5 +1,8 @@
 # client-dynamodb
 
+##  **!!! DEPRECATED !!! The AWS V1 API is no longer supported!**
+##  **USE the `client-dynamodb-v2` client instead.**
+
 Backfila backend client implementation to backfill a DynamoDB datastore.
 
 There are a couple features that help keep the costs down when performing a DynamoDB datastore backfill.

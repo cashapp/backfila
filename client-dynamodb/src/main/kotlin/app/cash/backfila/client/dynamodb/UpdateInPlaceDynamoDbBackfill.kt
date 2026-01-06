@@ -9,6 +9,9 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
  * If saving fails the batch will fail. If succeeded rows are part of a failed batch they will be
  * retried so implementations must be idempotent.
  */
+@Deprecated(
+  message = "AWS V1 SDK is deprecated, use the `client-dynamodb-v2` client instead.",
+)
 abstract class UpdateInPlaceDynamoDbBackfill<I : Any, P : Any>(
   val dynamoDb: DynamoDBMapper,
 ) : DynamoDbBackfill<I, P>() {

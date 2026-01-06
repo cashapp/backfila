@@ -16,6 +16,9 @@ import javax.inject.Qualifier
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
 
+@Deprecated(
+  message = "AWS V1 SDK is deprecated, use the `client-dynamodb-v2` client instead.",
+)
 class DynamoDbBackfillModule<T : DynamoDbBackfill<*, *>> private constructor(
   private val backfillClass: KClass<T>,
 ) : AbstractModule() {
