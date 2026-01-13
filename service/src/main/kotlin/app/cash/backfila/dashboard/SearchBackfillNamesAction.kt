@@ -37,16 +37,10 @@ class SearchBackfillNamesAction @Inject constructor(
     }
 
     return transacter.transaction { session ->
-      val dbService = if (variant == "default") {
-        queryFactory.newQuery<ServiceQuery>()
-          .registryName(service)
-          .uniqueResult(session) ?: throw BadRequestException("`$service` doesn't exist")
-      } else {
-        queryFactory.newQuery<ServiceQuery>()
-          .registryName(service)
-          .variant(variant)
-          .uniqueResult(session) ?: throw BadRequestException("`$service`-`$variant` doesn't exist")
-      }
+      val dbService = queryFactory.newQuery<ServiceQuery>()
+        .registryName(service)
+        .variant(variant)
+        .uniqueResult(session) ?: throw BadRequestException("`$service`-`$variant` doesn't exist")
 
       queryFactory.newQuery<RegisteredBackfillQuery>()
         .serviceId(dbService.id)
