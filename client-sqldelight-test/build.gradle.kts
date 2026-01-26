@@ -70,6 +70,8 @@ dependencies {
   testImplementation(libs.miskInject)
   testImplementation(libs.miskJdbc)
   testImplementation(testFixtures(libs.miskJdbc))
+  testImplementation(libs.miskVitess)
+  testImplementation(testFixtures(libs.miskVitess))
   testImplementation(libs.miskTesting)
   testImplementation(project(":client-misk"))
 }

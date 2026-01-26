@@ -12,7 +12,9 @@ import wisp.deployment.TESTING
 /**
  * Simulates a specific service implementation module
  */
-class TestingModule : KAbstractModule() {
+class TestingModule(
+  private val useVitess: Boolean = false,
+) : KAbstractModule() {
   override fun configure() {
     install(DeploymentModule(TESTING))
     install(LogCollectorModule())
@@ -21,6 +23,6 @@ class TestingModule : KAbstractModule() {
 
     install(EmbeddedBackfilaModule())
 
-    install(TestBackfillsModule())
+    install(TestBackfillsModule(useVitess))
   }
 }

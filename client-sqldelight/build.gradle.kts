@@ -24,6 +24,10 @@ dependencies {
   implementation(libs.retrofitWire)
   implementation(libs.wireMoshiAdapter)
 
+  // Misk dependencies for Vitess support
+  implementation(libs.miskJdbc)
+  implementation(libs.miskVitess)
+
   api(project(":client"))
   // We do not want to leak client-base implementation details to customers.
   implementation(project(":client-base"))
