@@ -14,6 +14,7 @@ import wisp.deployment.TESTING
  */
 class TestingModule(
   private val useVitess: Boolean = false,
+  private val vitessPort: Int = 27003,
 ) : KAbstractModule() {
   override fun configure() {
     install(DeploymentModule(TESTING))
@@ -23,6 +24,6 @@ class TestingModule(
 
     install(EmbeddedBackfilaModule())
 
-    install(TestBackfillsModule(useVitess))
+    install(TestBackfillsModule(useVitess, vitessPort))
   }
 }

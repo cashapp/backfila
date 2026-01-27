@@ -21,13 +21,20 @@ import org.junit.jupiter.api.Test
  */
 @MiskTest(startService = true)
 class VitessUnshardedSqlDelightBackfillTest {
+  companion object {
+    private const val VITESS_PORT = 27603
+  }
+
   @Suppress("unused")
   @MiskTestModule
-  val module = TestingModule(useVitess = true)
+  val module = TestingModule(useVitess = true, vitessPort = VITESS_PORT)
 
   @Suppress("unused")
   @MiskExternalDependency
-  private val dockerVitess = DockerVitess()
+  private val dockerVitess = DockerVitess(
+    containerName = "vitess_sqldelight_test_db",
+    port = VITESS_PORT,
+  )
 
   @Inject lateinit var backfila: Backfila
 

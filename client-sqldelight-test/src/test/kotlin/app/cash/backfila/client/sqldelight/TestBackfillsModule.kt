@@ -24,12 +24,14 @@ import misk.jdbc.JdbcModule
  */
 class TestBackfillsModule(
   private val useVitess: Boolean = false,
+  private val vitessPort: Int = 27003,
 ) : KAbstractModule() {
   override fun configure() {
     val dataSourceConfig = if (useVitess) {
       DataSourceConfig(
         type = DataSourceType.VITESS_MYSQL,
         username = "root",
+        port = vitessPort,
         vitess_schema_resource_root = "classpath:/vitess/schema",
       )
     } else {
