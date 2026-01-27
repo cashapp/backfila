@@ -1,6 +1,10 @@
 package app.cash.backfila.client.sqldelight
 
 import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
+import com.google.common.base.Supplier
+import com.google.common.base.Suppliers
+import com.google.inject.Provider
+import javax.sql.DataSource
 import misk.jdbc.DataSourceService
 import misk.vitess.Keyspace
 import misk.vitess.Shard
@@ -15,7 +19,7 @@ import misk.vitess.ShardsLoader
  * backfill slower than one thread per shard, consider using [VitessSingleCursorPartitionProvider]
  * instead.
  *
- * Usage:
+ * Usage with DataSourceService (services using misk JdbcModule):
  * ```kotlin
  * class MyBackfill @Inject constructor(
  *   myDatabase: MyDatabase,
@@ -30,14 +34,79 @@ import misk.vitess.ShardsLoader
  * }
  * ```
  *
- * @param dataSourceService The Misk DataSourceService for the database
- * @param keyspace The Vitess keyspace to get shards from
+ * Usage with DataSource (services using VitessJdbcModule):
+ * ```kotlin
+ * class MyBackfill @Inject constructor(
+ *   myDatabase: MyDatabase,
+ *   @MyDb dataSource: Provider<DataSource>,
+ * ) : SqlDelightDatasourceBackfill<Long, MyRecord, NoParameters>(
+ *   MyRecordSourceConfig(myDatabase),
+ * ) {
+ *   override fun partitionProvider() = VitessShardedPartitionProvider(
+ *     dataSource,
+ *     Keyspace("my_keyspace"),
+ *   )
+ * }
+ * ```
  */
-class VitessShardedPartitionProvider(
-  private val dataSourceService: DataSourceService,
-  private val keyspace: Keyspace,
-) : PartitionProvider {
-  private val shardsSupplier = ShardsLoader.shards(dataSourceService)
+class VitessShardedPartitionProvider : PartitionProvider {
+  private val dataSourceProvider: Provider<DataSource>
+  private val keyspace: Keyspace
+  private val shardsSupplier: Supplier<Set<Shard>>
+
+  /**
+   * Creates a partition provider using a DataSourceService.
+   * Use this constructor for services using misk's JdbcModule.
+   *
+   * @param dataSourceService The Misk DataSourceService for the database
+   * @param keyspace The Vitess keyspace to get shards from
+   */
+  constructor(
+    dataSourceService: DataSourceService,
+    keyspace: Keyspace,
+  ) {
+    this.dataSourceProvider = Provider { dataSourceService.dataSource }
+    this.keyspace = keyspace
+    this.shardsSupplier = ShardsLoader.shards(dataSourceService)
+  }
+
+  /**
+   * Creates a partition provider using a raw DataSource.
+   * Use this constructor for services using VitessJdbcModule or similar.
+   *
+   * @param dataSource Provider for the DataSource
+   * @param keyspace The Vitess keyspace to get shards from
+   */
+  constructor(
+    dataSource: Provider<DataSource>,
+    keyspace: Keyspace,
+  ) {
+    this.dataSourceProvider = dataSource
+    this.keyspace = keyspace
+    // Memoize the shard loading since it requires a database query
+    this.shardsSupplier = Suppliers.memoize { loadShardsFromDataSource() }
+  }
+
+  private fun loadShardsFromDataSource(): Set<Shard> {
+    return dataSourceProvider.get().connection.use { conn ->
+      conn.createStatement().use { stmt ->
+        stmt.executeQuery("SHOW VITESS_SHARDS").use { rs ->
+          val shards = mutableSetOf<Shard>()
+          while (rs.next()) {
+            val shardName = rs.getString(1) // e.g., "my_keyspace/-40"
+            val parts = shardName.split("/")
+            if (parts.size == 2) {
+              val shardKeyspace = Keyspace(parts[0])
+              if (shardKeyspace == keyspace) {
+                shards.add(Shard(keyspace, parts[1]))
+              }
+            }
+          }
+          shards
+        }
+      }
+    }
+  }
 
   override fun names(request: PrepareBackfillRequest): List<String> =
     shardsSupplier.get()
@@ -59,7 +128,7 @@ class VitessShardedPartitionProvider(
   override fun <K : Any> boundingRangeStrategy(): BoundingRangeStrategy<K> {
     // Vitess strategies require Comparable keys for min/max operations.
     // This cast is safe because primary keys are always comparable.
-    return VitessShardedBoundingRangeStrategy<Nothing>(dataSourceService, keyspace) as BoundingRangeStrategy<K>
+    return VitessShardedBoundingRangeStrategy<Nothing>(dataSourceProvider, keyspace) as BoundingRangeStrategy<K>
   }
 
   /**
@@ -82,7 +151,7 @@ class VitessShardedPartitionProvider(
  * The disadvantage is less efficient concurrency, since batches are computed by scanning all shards
  * each time, rather than splitting the work by shard.
  *
- * Usage:
+ * Usage with DataSourceService (services using misk JdbcModule):
  * ```kotlin
  * class MyBackfill @Inject constructor(
  *   myDatabase: MyDatabase,
@@ -97,14 +166,79 @@ class VitessShardedPartitionProvider(
  * }
  * ```
  *
- * @param dataSourceService The Misk DataSourceService for the database
- * @param keyspace The Vitess keyspace
+ * Usage with DataSource (services using VitessJdbcModule):
+ * ```kotlin
+ * class MyBackfill @Inject constructor(
+ *   myDatabase: MyDatabase,
+ *   @MyDb dataSource: Provider<DataSource>,
+ * ) : SqlDelightDatasourceBackfill<Long, MyRecord, NoParameters>(
+ *   MyRecordSourceConfig(myDatabase),
+ * ) {
+ *   override fun partitionProvider() = VitessSingleCursorPartitionProvider(
+ *     dataSource,
+ *     Keyspace("my_keyspace"),
+ *   )
+ * }
+ * ```
  */
-class VitessSingleCursorPartitionProvider(
-  private val dataSourceService: DataSourceService,
-  private val keyspace: Keyspace,
-) : PartitionProvider {
-  private val shardsSupplier = ShardsLoader.shards(dataSourceService)
+class VitessSingleCursorPartitionProvider : PartitionProvider {
+  private val dataSourceProvider: Provider<DataSource>
+  private val keyspace: Keyspace
+  private val shardsSupplier: Supplier<Set<Shard>>
+
+  /**
+   * Creates a partition provider using a DataSourceService.
+   * Use this constructor for services using misk's JdbcModule.
+   *
+   * @param dataSourceService The Misk DataSourceService for the database
+   * @param keyspace The Vitess keyspace
+   */
+  constructor(
+    dataSourceService: DataSourceService,
+    keyspace: Keyspace,
+  ) {
+    this.dataSourceProvider = Provider { dataSourceService.dataSource }
+    this.keyspace = keyspace
+    this.shardsSupplier = ShardsLoader.shards(dataSourceService)
+  }
+
+  /**
+   * Creates a partition provider using a raw DataSource.
+   * Use this constructor for services using VitessJdbcModule or similar.
+   *
+   * @param dataSource Provider for the DataSource
+   * @param keyspace The Vitess keyspace
+   */
+  constructor(
+    dataSource: Provider<DataSource>,
+    keyspace: Keyspace,
+  ) {
+    this.dataSourceProvider = dataSource
+    this.keyspace = keyspace
+    // Memoize the shard loading since it requires a database query
+    this.shardsSupplier = Suppliers.memoize { loadShardsFromDataSource() }
+  }
+
+  private fun loadShardsFromDataSource(): Set<Shard> {
+    return dataSourceProvider.get().connection.use { conn ->
+      conn.createStatement().use { stmt ->
+        stmt.executeQuery("SHOW VITESS_SHARDS").use { rs ->
+          val shards = mutableSetOf<Shard>()
+          while (rs.next()) {
+            val shardName = rs.getString(1) // e.g., "my_keyspace/-40"
+            val parts = shardName.split("/")
+            if (parts.size == 2) {
+              val shardKeyspace = Keyspace(parts[0])
+              if (shardKeyspace == keyspace) {
+                shards.add(Shard(keyspace, parts[1]))
+              }
+            }
+          }
+          shards
+        }
+      }
+    }
+  }
 
   override fun names(request: PrepareBackfillRequest) = listOf("only")
 
@@ -114,7 +248,7 @@ class VitessSingleCursorPartitionProvider(
   override fun <K : Any> boundingRangeStrategy(): BoundingRangeStrategy<K> {
     // Vitess strategies require Comparable keys for min/max operations.
     // This cast is safe because primary keys are always comparable.
-    return VitessSingleCursorBoundingRangeStrategy<Nothing>(dataSourceService, keyspace) as BoundingRangeStrategy<K>
+    return VitessSingleCursorBoundingRangeStrategy<Nothing>(dataSourceProvider, keyspace, shardsSupplier) as BoundingRangeStrategy<K>
   }
 
   /**

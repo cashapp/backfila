@@ -1,8 +1,11 @@
 package app.cash.backfila.client.sqldelight
 
+import com.google.common.base.Supplier
+import com.google.inject.Provider
 import java.sql.Connection
 import java.sql.PreparedStatement
 import java.util.stream.Collectors
+import javax.sql.DataSource
 import misk.jdbc.DataSourceService
 import misk.vitess.Keyspace
 import misk.vitess.Shard
@@ -15,14 +18,40 @@ import misk.vitess.ShardsLoader
  * row scan limit by ensuring each query only scans rows on a single shard.
  *
  * Use with [VitessShardedPartitionProvider].
- *
- * @param dataSourceService The Misk DataSourceService for the database
- * @param keyspace The Vitess keyspace
  */
-class VitessShardedBoundingRangeStrategy<K : Any>(
-  private val dataSourceService: DataSourceService,
-  private val keyspace: Keyspace,
-) : BoundingRangeStrategy<K> {
+class VitessShardedBoundingRangeStrategy<K : Any> : BoundingRangeStrategy<K> {
+  private val dataSourceProvider: Provider<DataSource>
+  private val keyspace: Keyspace
+
+  /**
+   * Creates a strategy using a DataSourceService.
+   * Use this constructor for services using misk's JdbcModule.
+   *
+   * @param dataSourceService The Misk DataSourceService for the database
+   * @param keyspace The Vitess keyspace
+   */
+  constructor(
+    dataSourceService: DataSourceService,
+    keyspace: Keyspace,
+  ) {
+    this.dataSourceProvider = Provider { dataSourceService.dataSource }
+    this.keyspace = keyspace
+  }
+
+  /**
+   * Creates a strategy using a raw DataSource.
+   * Use this constructor for services using VitessJdbcModule or similar.
+   *
+   * @param dataSource Provider for the DataSource
+   * @param keyspace The Vitess keyspace
+   */
+  constructor(
+    dataSource: Provider<DataSource>,
+    keyspace: Keyspace,
+  ) {
+    this.dataSourceProvider = dataSource
+    this.keyspace = keyspace
+  }
 
   override fun computeAbsoluteRange(
     partitionName: String,
@@ -35,7 +64,7 @@ class VitessShardedBoundingRangeStrategy<K : Any>(
       "primaryKeyColumn() must be implemented in SqlDelightRecordSourceConfig for Vitess strategies"
     }
 
-    return dataSourceService.dataSource.connection.use { connection ->
+    return dataSourceProvider.get().connection.use { connection ->
       // Target the specific shard
       targetShard(connection, partitionName)
       selectMinAndMax(connection, tableName, pkeyColumn)
@@ -57,7 +86,7 @@ class VitessShardedBoundingRangeStrategy<K : Any>(
       "primaryKeyColumn() must be implemented in SqlDelightRecordSourceConfig for Vitess strategies"
     }
 
-    return dataSourceService.dataSource.connection.use { connection ->
+    return dataSourceProvider.get().connection.use { connection ->
       // Target the specific shard
       targetShard(connection, partitionName)
       selectMaxBound(connection, tableName, pkeyColumn, previousEndKey, rangeStart, rangeEnd, scanSize)
@@ -153,15 +182,45 @@ class VitessShardedBoundingRangeStrategy<K : Any>(
  *
  * Note: The key type K must be Comparable in practice (e.g., Long, Int, String) for the
  * min operation to work correctly. Primary keys are always comparable.
- *
- * @param dataSourceService The Misk DataSourceService for the database
- * @param keyspace The Vitess keyspace
  */
-class VitessSingleCursorBoundingRangeStrategy<K : Any>(
-  private val dataSourceService: DataSourceService,
-  private val keyspace: Keyspace,
-) : BoundingRangeStrategy<K> {
-  private val shardsSupplier = ShardsLoader.shards(dataSourceService)
+class VitessSingleCursorBoundingRangeStrategy<K : Any> : BoundingRangeStrategy<K> {
+  private val dataSourceProvider: Provider<DataSource>
+  private val keyspace: Keyspace
+  private val shardsSupplier: Supplier<Set<Shard>>
+
+  /**
+   * Creates a strategy using a DataSourceService.
+   * Use this constructor for services using misk's JdbcModule.
+   *
+   * @param dataSourceService The Misk DataSourceService for the database
+   * @param keyspace The Vitess keyspace
+   */
+  constructor(
+    dataSourceService: DataSourceService,
+    keyspace: Keyspace,
+  ) {
+    this.dataSourceProvider = Provider { dataSourceService.dataSource }
+    this.keyspace = keyspace
+    this.shardsSupplier = ShardsLoader.shards(dataSourceService)
+  }
+
+  /**
+   * Creates a strategy using a raw DataSource and a pre-loaded shards supplier.
+   * Use this constructor for services using VitessJdbcModule or similar.
+   *
+   * @param dataSource Provider for the DataSource
+   * @param keyspace The Vitess keyspace
+   * @param shardsSupplier Supplier that returns the set of shards for this keyspace
+   */
+  constructor(
+    dataSource: Provider<DataSource>,
+    keyspace: Keyspace,
+    shardsSupplier: Supplier<Set<Shard>>,
+  ) {
+    this.dataSourceProvider = dataSource
+    this.keyspace = keyspace
+    this.shardsSupplier = shardsSupplier
+  }
 
   override fun computeAbsoluteRange(
     partitionName: String,
@@ -190,7 +249,7 @@ class VitessSingleCursorBoundingRangeStrategy<K : Any>(
 
     // Query each shard in parallel and take the minimum
     val results = shards.parallelStream().map { shard ->
-      dataSourceService.dataSource.connection.use { connection ->
+      dataSourceProvider.get().connection.use { connection ->
         targetShard(connection, shard)
         selectMaxBound(connection, tableName, pkeyColumn, previousEndKey, rangeStart, rangeEnd, scanSize)
       }
