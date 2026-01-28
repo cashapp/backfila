@@ -4,6 +4,7 @@ import app.cash.backfila.client.BackfilaCallbackConnector
 import app.cash.backfila.client.BackfilaCallbackConnectorProvider
 import app.cash.backfila.client.BackfilaDefaultEndpointConfigModule
 import app.cash.backfila.client.ForConnectors
+import app.cash.backfila.dashboard.ViewDashboardUrlProvider
 import app.cash.backfila.dashboard.ViewLogsUrlProvider
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse
@@ -52,6 +53,7 @@ internal fun main(args: Array<String>) {
         bind<MiskCaller>().annotatedWith<DevelopmentOnly>()
           .toInstance(MiskCaller(user = "testfila"))
         bind<ViewLogsUrlProvider>().to<DevelopmentViewLogsUrlProvider>()
+        bind<ViewDashboardUrlProvider>().to<DevelopmentViewDashboardUrlProvider>()
 
         newMapBinder<String, BackfilaCallbackConnectorProvider>(ForConnectors::class)
           .permitDuplicates().addBinding("DEV")
@@ -126,6 +128,12 @@ internal fun main(args: Array<String>) {
 }
 
 internal class DevelopmentViewLogsUrlProvider : ViewLogsUrlProvider {
+  override fun getUrl(session: Session, backfillRun: DbBackfillRun): String {
+    return "/"
+  }
+}
+
+internal class DevelopmentViewDashboardUrlProvider : ViewDashboardUrlProvider {
   override fun getUrl(session: Session, backfillRun: DbBackfillRun): String {
     return "/"
   }
