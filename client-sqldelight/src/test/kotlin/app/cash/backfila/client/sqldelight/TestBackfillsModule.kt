@@ -15,9 +15,6 @@ import javax.inject.Provider
 import javax.inject.Singleton
 import javax.sql.DataSource
 import misk.inject.KAbstractModule
-import misk.jdbc.DataSourceConfig
-import misk.jdbc.DataSourceType
-import misk.jdbc.JdbcModule
 
 /**
  * Simulates a Backfills module where all the relevant backfills are registered.
@@ -27,24 +24,6 @@ class TestBackfillsModule(
   private val vitessPort: Int = 27003,
 ) : KAbstractModule() {
   override fun configure() {
-    val dataSourceConfig = if (useVitess) {
-      DataSourceConfig(
-        type = DataSourceType.VITESS_MYSQL,
-        username = "root",
-        port = vitessPort,
-        vitess_schema_resource_root = "classpath:/vitess/schema",
-      )
-    } else {
-      DataSourceConfig(
-        type = DataSourceType.MYSQL,
-        username = "root",
-        password = "",
-        database = "hockeydata_testing",
-        migrations_resource = "classpath:/migrations",
-      )
-    }
-    install(JdbcModule(HockeyDataDb::class, dataSourceConfig))
-
     install(
       MiskBackfillModule(
         BackfilaHttpClientConfig(
