@@ -18,6 +18,7 @@ class BackfilaWebActionsModule() : KAbstractModule() {
     install(WebActionModule.create<GetBackfillStatusAction>())
     install(WebActionModule.create<UpdateBackfillAction>())
     install(WebActionModule.create<ViewLogsAction>())
+    install(WebActionModule.create<ViewDashboardAction>())
     install(WebActionModule.create<EditPartitionCursorAction>())
     install(WebActionModule.create<EditPartitionCursorHandlerAction>())
     install(WebActionModule.create<SearchBackfillNamesAction>())

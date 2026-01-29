@@ -3,6 +3,7 @@ package app.cash.backfila.ui.pages
 import app.cash.backfila.dashboard.EditPartitionCursorAction
 import app.cash.backfila.dashboard.GetBackfillStatusAction
 import app.cash.backfila.dashboard.GetBackfillStatusResponse
+import app.cash.backfila.dashboard.ViewDashboardAction
 import app.cash.backfila.dashboard.ViewLogsAction
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.ui.actions.BackfillShowButtonHandlerAction
@@ -59,6 +60,7 @@ class BackfillShowAction @Inject constructor(
   private val getBackfillStatusAction: GetBackfillStatusAction,
   private val dashboardPageLayout: DashboardPageLayout,
   private val viewLogsAction: ViewLogsAction,
+  private val viewDashboardAction: ViewDashboardAction,
   private val backfillShowButtonHandlerAction: BackfillShowButtonHandlerAction,
   private val httpCall: ActionScoped<HttpCall>,
 ) : WebAction {
@@ -514,6 +516,14 @@ class BackfillShowAction @Inject constructor(
         href = viewLogsAction.getUrl(id),
       ),
     ),
+    DescriptionListRow(
+      label = "Dashboard",
+      description = "",
+      button = Link(
+        label = VIEW_DASHBOARD_BUTTON_LABEL,
+        href = viewDashboardAction.getUrl(id),
+      ),
+    ),
   ) + if (parameters?.isNotEmpty() == true) {
     listOf(
       DescriptionListRow(
@@ -624,6 +634,21 @@ class BackfillShowAction @Inject constructor(
           } else if (button.label == VIEW_LOGS_BUTTON_LABEL) {
             span("ml-4 flex-shrink-0") {
               // View logs button will link to external logs provider
+              a {
+                href = button.href
+                target = "_blank"
+
+                button(
+                  classes = "rounded-md font-medium text-indigo-600 hover:text-indigo-500",
+                ) {
+                  type = ButtonType.submit
+                  +button.label
+                }
+              }
+            }
+          } else if (button.label == VIEW_DASHBOARD_BUTTON_LABEL) {
+            span("ml-4 flex-shrink-0") {
+              // View dashboard button will link to external dashboard provider
               a {
                 href = button.href
                 target = "_blank"
@@ -836,5 +861,6 @@ class BackfillShowAction @Inject constructor(
     const val DELETE_STATE_BUTTON_LABEL = "Delete"
     const val UPDATE_BUTTON_LABEL = "Update"
     const val VIEW_LOGS_BUTTON_LABEL = "View Logs"
+    const val VIEW_DASHBOARD_BUTTON_LABEL = "View Dashboard"
   }
 }
