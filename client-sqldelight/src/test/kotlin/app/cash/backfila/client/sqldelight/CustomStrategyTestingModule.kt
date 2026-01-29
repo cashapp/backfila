@@ -2,10 +2,10 @@ package app.cash.backfila.client.sqldelight
 
 import app.cash.backfila.client.BackfilaHttpClientConfig
 import app.cash.backfila.client.misk.MiskBackfillModule
-import app.cash.backfila.client.sqldelight.SqlDelightDatasourceBackfillModule.Companion.create
 import app.cash.backfila.client.sqldelight.hockeydata.HockeyDataDatabase
 import app.cash.backfila.client.sqldelight.hockeydata.HockeyPlayer
 import app.cash.backfila.client.sqldelight.persistence.HockeyDataDb
+import app.cash.backfila.embedded.EmbeddedBackfilaModule
 import app.cash.sqldelight.EnumColumnAdapter
 import app.cash.sqldelight.Query
 import app.cash.sqldelight.driver.jdbc.JdbcDriver
@@ -14,16 +14,26 @@ import java.sql.Connection
 import javax.inject.Provider
 import javax.inject.Singleton
 import javax.sql.DataSource
+import misk.MiskTestingServiceModule
+import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.jdbc.JdbcModule
+import misk.jdbc.JdbcTestingModule
+import misk.logging.LogCollectorModule
+import wisp.deployment.TESTING
 
 /**
- * Simulates a Backfills module where all the relevant backfills are registered.
+ * Testing module for custom strategy backfill tests.
  */
-class TestBackfillsModule : KAbstractModule() {
+class CustomStrategyTestingModule : KAbstractModule() {
   override fun configure() {
+    install(DeploymentModule(TESTING))
+    install(LogCollectorModule())
+    install(MiskTestingServiceModule())
+    install(JdbcTestingModule(HockeyDataDb::class))
+
     install(
       JdbcModule(
         HockeyDataDb::class,
@@ -37,6 +47,8 @@ class TestBackfillsModule : KAbstractModule() {
       ),
     )
 
+    install(EmbeddedBackfilaModule())
+
     install(
       MiskBackfillModule(
         BackfilaHttpClientConfig(
@@ -44,7 +56,9 @@ class TestBackfillsModule : KAbstractModule() {
         ),
       ),
     )
-    install(create<PlayerOriginBackfill>())
+
+    // Register the custom strategy backfill
+    install(SqlDelightDatasourceBackfillModule.create<CustomStrategyBackfill>())
   }
 
   @Provides

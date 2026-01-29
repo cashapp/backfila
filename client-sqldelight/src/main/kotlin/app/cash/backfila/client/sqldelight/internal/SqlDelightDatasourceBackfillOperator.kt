@@ -20,7 +20,9 @@ class SqlDelightDatasourceBackfillOperator<K : Any, R : Any, P : Any>(
   private val parametersOperator: BackfilaParametersOperator<P>,
 ) : BackfillOperator {
   private val recSourceConfig = backfill.recordSourceConfig
-  private val recordSource = SqlDelightRecordSource(recSourceConfig)
+  private val partitionProvider = backfill.partitionProvider()
+  private val boundingRangeStrategy = partitionProvider.boundingRangeStrategy<K>()
+  private val recordSource = SqlDelightRecordSource(recSourceConfig, boundingRangeStrategy)
 
   override fun name(): String = backfill.javaClass.toString()
 
@@ -31,16 +33,14 @@ class SqlDelightDatasourceBackfillOperator<K : Any, R : Any, P : Any>(
       parametersOperator.constructBackfillConfig(request),
     )
 
-    // TODO(mikepaw) What is the sharding strategy here? How to have more than just `only`?
-    // partitionProvider.names(request).map { partitionForShard(it, request.range) }
+    // Use the partition provider to get partition names (shard names for Vitess)
+    val partitionNames = partitionProvider.names(request)
 
-    val partitionMap = mapOf("only" to "transacter or what to do with SqlDelight when there are multiple?")
-
-    val partitions = partitionMap.map {
+    val partitions = partitionNames.map { partitionName ->
       PrepareBackfillResponse.Partition.Builder()
-        .partition_name(it.key)
+        .partition_name(partitionName)
         .backfill_range(
-          recordSource.computeOverallRange(request.range),
+          recordSource.computeOverallRange(partitionName, request.range),
         ).build()
     }
     return PrepareBackfillResponse.Builder()

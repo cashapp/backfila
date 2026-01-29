@@ -33,6 +33,30 @@ class BackfilaSqlDelightGradlePluginTest {
       .contains(result.task(taskName)!!.outcome)
   }
 
+  @Test
+  fun `generated config includes tableName and primaryKeyColumn methods`() {
+    val projectDir = File("src/test/projects/happyPath")
+
+    // Build the project
+    val taskName = ":lib:compileKotlin"
+    createRunner(projectDir, "clean", taskName).build()
+
+    // Check the generated file contains the expected methods
+    val generatedFile = File(
+      projectDir,
+      "lib/build/backfilaSqlDelight/hockeyPlayerOrigin/kotlin/app/cash/backfila/client/sqldelight/hockeydata/HockeyPlayerOriginRecordSourceConfig.kt",
+    )
+    assertThat(generatedFile).exists()
+
+    val content = generatedFile.readText()
+
+    // Verify tableName() method is generated with correct value
+    assertThat(content).contains("override fun tableName(): String = \"hockeyPlayer\"")
+
+    // Verify primaryKeyColumn() method is generated with correct value
+    assertThat(content).contains("override fun primaryKeyColumn(): String = \"player_number\"")
+  }
+
   private fun createRunner(
     projectDir: File,
     vararg taskNames: String,
