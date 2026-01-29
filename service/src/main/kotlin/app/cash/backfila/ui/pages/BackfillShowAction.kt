@@ -547,9 +547,9 @@ class BackfillShowAction @Inject constructor(
     div("px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0") {
       attributes["data-controller"] = "toggle"
 
-      dt("text-sm font-medium leading-6 text-gray-900") { +it.label }
+      dt("text-sm font-medium leading-6 text-gray-900 break-words overflow-wrap-anywhere min-w-0") { +it.label }
       dd("mt-1 flex text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0") {
-        span("flex-grow") {
+        span("flex-grow break-words") {
           attributes["data-toggle-target"] = "toggleable"
           attributes["data-css-class"] = "hidden"
 

@@ -42,6 +42,7 @@ dependencies {
   implementation(libs.miskInject)
   implementation(libs.miskJdbc)
   implementation(libs.miskMetrics)
+  implementation(libs.miskMetricsPrometheus)
   implementation(libs.miskService)
   implementation(libs.miskSlack)
   implementation(libs.miskTailwind)
