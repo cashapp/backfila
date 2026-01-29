@@ -83,6 +83,7 @@ miskJdbc = { module = "com.squareup.misk:misk-jdbc", version.ref = "misk" }
 miskInject = { module = "com.squareup.misk:misk-inject", version.ref = "misk" }
 miskLogging = { module = "com.squareup.misk:misk-logging", version.ref = "misk" }
 miskMetrics = { module = "com.squareup.misk:misk-metrics", version.ref = "misk" }
+miskMetricsPrometheus = { module = "com.squareup.misk:misk-prometheus", version.ref = "misk" }
 miskService = { module = "com.squareup.misk:misk-service", version.ref = "misk" }
 miskSlack = { module = "com.squareup.misk:misk-slack", version.ref = "misk" }
 miskTailwind = { module = "com.squareup.misk:misk-tailwind", version.ref = "misk" }
