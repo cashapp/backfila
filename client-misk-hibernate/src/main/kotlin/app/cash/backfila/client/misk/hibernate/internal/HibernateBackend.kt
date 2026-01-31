@@ -36,11 +36,14 @@ internal class HibernateBackend @Inject constructor(
     return injector.getInstance(backfillClass.java) as HibernateBackfill<*, *, *>
   }
 
+  @Suppress("UNCHECKED_CAST")
   private fun <E : DbEntity<E>, Pkey : Any, Param : Any> createHibernateOperator(
     backfill: HibernateBackfill<E, Pkey, Param>,
   ) = HibernateBackfillOperator(
     backfill,
-    BackfilaParametersOperator(parametersClass(backfill::class)),
+    BackfilaParametersOperator(
+      parametersClass(backfill::class),
+    ) as BackfilaParametersOperator<Param>,
     this,
   )
 
@@ -56,14 +59,14 @@ internal class HibernateBackend @Inject constructor(
       BackfillRegistration(
         name = it.key,
         description = it.value.findAnnotation<Description>()?.text,
-        parametersClass = parametersClass(it.value as KClass<HibernateBackfill<*, *, Any>>),
+        parametersClass = parametersClass(it.value),
         deleteBy = it.value.findAnnotation<DeleteBy>()?.parseDeleteByDate(),
         unit = BackfillUnit.ITEMS.displayName,
       )
     }.toSet()
   }
 
-  private fun <T : Any> parametersClass(backfillClass: KClass<out HibernateBackfill<*, *, T>>): KClass<T> {
+  private fun parametersClass(backfillClass: KClass<out HibernateBackfill<*, *, *>>): KClass<*> {
     // Like MyBackfill.
     val thisType = TypeLiteral.get(backfillClass.java)
 
@@ -71,7 +74,7 @@ internal class HibernateBackend @Inject constructor(
     val supertype = thisType.getSupertype(HibernateBackfill::class.java).type as ParameterizedType
 
     // Like MyDataClass
-    return (Types.getRawType(supertype.actualTypeArguments[2]) as Class<T>).kotlin
+    return (Types.getRawType(supertype.actualTypeArguments[2])).kotlin
   }
 
   /** This placeholder exists so we can create a backfill without a type parameter. */

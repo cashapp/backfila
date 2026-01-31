@@ -36,18 +36,21 @@ class JooqBackend @Inject constructor(
       BackfillRegistration(
         name = it.key,
         description = it.value.findAnnotation<Description>()?.text,
-        parametersClass = parametersClass(it.value as KClass<JooqBackfill<*, Any>>),
+        parametersClass = parametersClass(it.value),
         deleteBy = it.value.findAnnotation<DeleteBy>()?.parseDeleteByDate(),
         unit = BackfillUnit.ITEMS.displayName,
       )
     }.toSet()
   }
 
+  @Suppress("UNCHECKED_CAST")
   private fun <K : Any, Param : Any> createJooqOperator(
     backfill: JooqBackfill<K, Param>,
   ) = JooqBackfillOperator(
     backfill,
-    BackfilaParametersOperator(parametersClass(backfill::class)),
+    BackfilaParametersOperator(
+      parametersClass(backfill::class),
+    ) as BackfilaParametersOperator<Param>,
   )
 
   /** Creates Backfill instances. Each backfill ID gets a new Backfill instance. */
@@ -60,7 +63,7 @@ class JooqBackend @Inject constructor(
     }
   }
 
-  private fun <T : Any> parametersClass(backfillClass: KClass<out JooqBackfill<*, T>>): KClass<T> {
+  private fun parametersClass(backfillClass: KClass<out JooqBackfill<*, *>>): KClass<*> {
     // Like MyBackfill.
     val thisType = TypeLiteral.get(backfillClass.java)
 
@@ -68,6 +71,6 @@ class JooqBackend @Inject constructor(
     val supertype = thisType.getSupertype(JooqBackfill::class.java).type as ParameterizedType
 
     // Like MyDataClass
-    return (Types.getRawType(supertype.actualTypeArguments[1]) as Class<T>).kotlin
+    return (Types.getRawType(supertype.actualTypeArguments[1])).kotlin
   }
 }
