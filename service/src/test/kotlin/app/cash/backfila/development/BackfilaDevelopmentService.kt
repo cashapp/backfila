@@ -4,6 +4,7 @@ import app.cash.backfila.client.BackfilaCallbackConnector
 import app.cash.backfila.client.BackfilaCallbackConnectorProvider
 import app.cash.backfila.client.BackfilaDefaultEndpointConfigModule
 import app.cash.backfila.client.ForConnectors
+import app.cash.backfila.dashboard.ViewDashboardUrlProvider
 import app.cash.backfila.dashboard.ViewLogsUrlProvider
 import app.cash.backfila.development.DevServiceConstants.Companion.BACKFILA_PORT
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
@@ -56,6 +57,7 @@ fun main(args: Array<String>) {
         install(MiskWebModule(webConfig))
         multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
         bind<ViewLogsUrlProvider>().to<DevelopmentViewLogsUrlProvider>()
+        bind<ViewDashboardUrlProvider>().to<DevelopmentViewDashboardUrlProvider>()
 
         // Example custom link that shows up in navbar
         install(
@@ -151,6 +153,12 @@ fun main(args: Array<String>) {
 internal class DevelopmentViewLogsUrlProvider : ViewLogsUrlProvider {
   override fun getUrl(session: Session, backfillRun: DbBackfillRun): String {
     return "/${backfillRun.service.registry_name}/${backfillRun.service.variant}/${backfillRun.id}/logs"
+  }
+}
+
+internal class DevelopmentViewDashboardUrlProvider : ViewDashboardUrlProvider {
+  override fun getUrl(session: Session, backfillRun: DbBackfillRun): String {
+    return "/${backfillRun.service.registry_name}/${backfillRun.service.variant}/${backfillRun.id}/dashboard"
   }
 }
 
