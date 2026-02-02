@@ -1,5 +1,7 @@
 package app.cash.backfila.client.sqldelight.internal
 
+import app.cash.backfila.client.sqldelight.BoundingRangeStrategy
+import app.cash.backfila.client.sqldelight.DefaultBoundingRangeStrategy
 import app.cash.backfila.client.sqldelight.KeyEncoder
 import app.cash.backfila.client.sqldelight.SqlDelightRecordSourceConfig
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
@@ -10,6 +12,7 @@ import com.google.common.base.Stopwatch
 
 class SqlDelightRecordSource<K : Any, R : Any>(
   private val recordSourceQueries: SqlDelightRecordSourceConfig<K, R>,
+  private val boundingRangeStrategy: BoundingRangeStrategy<K> = DefaultBoundingRangeStrategy(),
 ) {
   val keyEncoder = recordSourceQueries.keyEncoder
 
@@ -17,18 +20,18 @@ class SqlDelightRecordSource<K : Any, R : Any>(
     range.validate(keyEncoder)
   }
 
-  fun computeOverallRange(requestedRange: KeyRange): KeyRange {
+  fun computeOverallRange(partitionName: String, requestedRange: KeyRange): KeyRange {
     if (requestedRange.start != null && requestedRange.end != null) {
       return requestedRange
     }
 
-    val minMax = recordSourceQueries.selectAbsoluteRange().executeAsOneOrNull()
-    return if (minMax?.min == null && minMax?.max == null) {
+    val minMax = boundingRangeStrategy.computeAbsoluteRange(partitionName, recordSourceQueries)
+    return if (minMax.min == null && minMax.max == null) {
       // Both are null so it is an empty table, no work to do for this partition.
       KeyRange.Builder().build()
     } else {
       require(minMax.min != null && minMax.max != null) {
-        "selectAbsoluteRange query failed to return a min or a max. minMax $minMax"
+        "computeAbsoluteRange failed to return a min or a max. minMax $minMax"
       }
       KeyRange.Builder()
         .start(requestedRange.start ?: keyEncoder.encode(minMax.min))
@@ -59,21 +62,21 @@ class SqlDelightRecordSource<K : Any, R : Any>(
       var batchBoundingMax = boundingMax
       if (batchBoundingMax == null) {
         val stopwatch = Stopwatch.createStarted()
-        batchBoundingMax = if (previousEndKey == null) {
-          recordSourceQueries.selectInitialMaxBound(rangeStart, rangeEnd, scanSize).executeAsOne().key
-        } else {
-          recordSourceQueries.selectNextMaxBound(previousEndKey!!, rangeEnd, scanSize).executeAsOne().key
-        }
+        // Use the bounding range strategy to compute the max bound.
+        // For Vitess, this may query shards in parallel to avoid the 100k row limit.
+        batchBoundingMax = boundingRangeStrategy.computeBoundingRangeMax(
+          partitionName = partitionName,
+          previousEndKey = previousEndKey,
+          rangeStart = rangeStart,
+          rangeEnd = rangeEnd,
+          scanSize = scanSize,
+          queries = recordSourceQueries,
+        )
 
         if (batchBoundingMax == null) {
-          // Bounding range returned no records, done computing batches. TODO: Log this?
+          // Bounding range returned no records, done computing batches.
           return null
         }
-        /*  TODO: Log this?
-        logger.info(
-          "Computed scan bound for next batch: [$previousEndKey, $boundingMax]. " +
-            "Took $stopwatch"
-        )*/
       }
 
       val txResult = produceBatch(batchBoundingMax) // TODO create a transaction and deal with sharding.
