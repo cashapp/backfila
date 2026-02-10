@@ -137,7 +137,7 @@ class ConfigureServiceAction @Inject constructor(
   companion object {
     private val logger = getLogger<ConfigureServiceAction>()
     const val RESERVED_VARIANT = "default"
-    const val MAX_VARIANTS = 10
+    const val MAX_VARIANTS = 100
     private val WHITESPACE_REGEX = Regex("\\s")
   }
 }
