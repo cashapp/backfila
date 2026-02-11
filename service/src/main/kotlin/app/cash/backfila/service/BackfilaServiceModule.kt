@@ -9,8 +9,11 @@ import app.cash.backfila.client.GrpcCallbackConnectorProvider
 import app.cash.backfila.client.HttpCallbackConnectorProvider
 import app.cash.backfila.dashboard.BackfilaDashboardModule
 import app.cash.backfila.dashboard.BackfilaWebActionsModule
+import app.cash.backfila.dashboard.ViewDashboardUrlProvider
+import app.cash.backfila.dashboard.ViewLogsUrlProvider
 import app.cash.backfila.service.listener.BackfilaListenerModule
 import app.cash.backfila.service.persistence.BackfilaPersistenceModule
+import app.cash.backfila.service.persistence.DbBackfillRun
 import app.cash.backfila.service.runner.BackfillRunnerLoggingSetupProvider
 import app.cash.backfila.service.runner.BackfillRunnerNoLoggingSetupProvider
 import app.cash.backfila.service.scheduler.ForBackfilaScheduler
@@ -23,6 +26,7 @@ import java.util.concurrent.Executors
 import javax.inject.Qualifier
 import javax.inject.Singleton
 import misk.config.ConfigModule
+import misk.hibernate.Session
 import misk.inject.KAbstractModule
 import misk.security.authz.AccessAnnotationEntry
 import misk.slack.SlackModule
@@ -68,6 +72,11 @@ class BackfilaServiceModule(
 
     bind<BackfillRunnerLoggingSetupProvider>().to(runnerLoggingSetupProvider)
 
+    // Provide default no-op implementations for URL providers
+    // Deployments should override these with real implementations
+    bind<ViewLogsUrlProvider>().to<NoOpViewLogsUrlProvider>()
+    bind<ViewDashboardUrlProvider>().to<NoOpViewDashboardUrlProvider>()
+
     if (config.slack != null) {
       install(SlackModule(config.slack))
     }
@@ -86,5 +95,27 @@ class BackfilaServiceModule(
           .build(),
       ),
     )
+  }
+}
+
+/**
+ * Default no-op implementation for ViewLogsUrlProvider.
+ * Deployments should override this binding with a real implementation that provides
+ * links to their logging infrastructure.
+ */
+internal class NoOpViewLogsUrlProvider : ViewLogsUrlProvider {
+  override fun getUrl(session: Session, backfillRun: DbBackfillRun): String {
+    return "#" // Return a no-op URL
+  }
+}
+
+/**
+ * Default no-op implementation for ViewDashboardUrlProvider.
+ * Deployments should override this binding with a real implementation that provides
+ * links to their dashboard/monitoring infrastructure.
+ */
+internal class NoOpViewDashboardUrlProvider : ViewDashboardUrlProvider {
+  override fun getUrl(session: Session, backfillRun: DbBackfillRun): String {
+    return "#" // Return a no-op URL
   }
 }
