@@ -2,6 +2,7 @@ package app.cash.backfila.client.dynamodbv2
 
 import app.cash.backfila.client.BackfilaHttpClientConfig
 import app.cash.backfila.client.misk.MiskBackfillModule
+import app.cash.backfila.client.monitor.ServiceWideCapacityMonitorModule
 import misk.aws2.dynamodb.DynamoDbService
 import misk.inject.KAbstractModule
 import misk.inject.toKey
@@ -21,6 +22,7 @@ class BackfillsModule : KAbstractModule() {
         dependsOn = dependsOn,
       ),
     )
+    install(DynamoDbBackfillModule.addCapacityMonitor<DynamoCapacityMonitor>())
     install(DynamoDbBackfillModule.create<DynamoDbBackfillTest.MakeTracksExplicitBackfill>())
     install(DynamoDbBackfillModule.create<DynamoDbFilteringTest.FilteredMakeTracksExplicitBackfill>())
     install(DynamoDbBackfillModule.create<DynamoDbFilteringTest.DynamoFilterMakeTracksExplicitBackfill>())

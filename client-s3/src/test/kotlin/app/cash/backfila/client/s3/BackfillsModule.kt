@@ -17,6 +17,7 @@ class BackfillsModule : KAbstractModule() {
         ),
       ),
     )
+    install()
     install(S3DatasourceBackfillModule.create<S3Utf8StringNewlineBackfillTest.BreakfastBackfill>())
     install(S3DatasourceBackfillModule.create<S3Utf8StringNewlineBackfillTest.BrunchBackfill>())
     install(S3DatasourceBackfillModule.create<S3Utf8StringNewlineBackfillTest.LunchBackfill>())

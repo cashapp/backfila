@@ -54,6 +54,8 @@ abstract class DynamoDbBackfill<I : Any, P : Any> : Backfill {
    */
   abstract fun runBatch(items: List<@JvmSuppressWildcards I>, config: BackfillConfig<P>)
 
+  open fun dataDef: DataDefinition = LegacyDataDefinition(this)
+
   /**
    * Override this to force Backfila to run this number of batches in total, divided among the
    * partitions.
@@ -80,6 +82,7 @@ abstract class DynamoDbBackfill<I : Any, P : Any> : Backfill {
   open fun mustHaveProvisionedBillingMode(): Boolean = true
 
   /** See [ScanRequest.setFilterExpression]. */
+  @Deprecated
   open fun filterExpression(config: BackfillConfig<P>): String? = null
 
   /** See [ScanRequest.setExpressionAttributeValues]. */
@@ -90,4 +93,8 @@ abstract class DynamoDbBackfill<I : Any, P : Any> : Backfill {
 
   /** See [ScanRequest.setIndexName]. */
   open fun indexName(config: BackfillConfig<P>): String? = null
+}
+
+LegacyDataDefinition(val backfill: _root_ide_package_.app.cash.backfila.client.dynamodbv2.DynamoDbBackfill) {
+  override fun filterExpression(config: BackfillConfig<P>): String? = backfill.filterExpression(config)
 }

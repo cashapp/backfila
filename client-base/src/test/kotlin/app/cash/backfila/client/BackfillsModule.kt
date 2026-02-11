@@ -2,6 +2,8 @@ package app.cash.backfila.client
 
 import app.cash.backfila.client.fixedset.FixedSetBackfillModule
 import app.cash.backfila.client.misk.MiskBackfillModule
+import app.cash.backfila.client.monitor.ServiceWideCapacityMonitorModule
+import app.cash.backfila.client.monitors.SingletonToggledCapacityMonitor
 import misk.inject.KAbstractModule
 
 class BackfillsModule : KAbstractModule() {
@@ -14,6 +16,7 @@ class BackfillsModule : KAbstractModule() {
         ),
       ),
     )
+    install(ServiceWideCapacityMonitorModule.create<SingletonToggledCapacityMonitor>())
     install(FixedSetBackfillModule.create<ToUpperCaseBackfill>())
     install(FixedSetBackfillModule.create<ToLowerCaseBackfill>())
     install(FixedSetBackfillModule.create<DeleteBackfillByTest.TenYearBackfill>())
