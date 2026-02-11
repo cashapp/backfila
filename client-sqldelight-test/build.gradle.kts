@@ -57,4 +57,19 @@ dependencies {
   testImplementation(libs.assertj)
   testImplementation(libs.junitEngine)
   testImplementation(libs.kotlinTest)
+
+  testImplementation(project(":backfila-embedded"))
+  testImplementation(project(":client-testing"))
+
+  // ****************************************
+  // For TESTING purposes only. We only want Misk for easy testing.
+  // DO NOT turn these into regular dependencies.
+  // ****************************************
+  testImplementation(libs.misk)
+  testImplementation(libs.miskActions)
+  testImplementation(libs.miskInject)
+  testImplementation(libs.miskJdbc)
+  testImplementation(testFixtures(libs.miskJdbc))
+  testImplementation(libs.miskTesting)
+  testImplementation(project(":client-misk"))
 }

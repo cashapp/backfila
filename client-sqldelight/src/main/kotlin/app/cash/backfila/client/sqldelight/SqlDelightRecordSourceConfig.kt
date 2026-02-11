@@ -4,19 +4,6 @@ import app.cash.sqldelight.Query
 
 interface SqlDelightRecordSourceConfig<K : Any, R : Any> {
   val keyEncoder: KeyEncoder<K>
-
-  /**
-   * Returns the table name for raw SQL queries. Required for Vitess strategies.
-   * Override this to enable Vitess support.
-   */
-  fun tableName(): String? = null
-
-  /**
-   * Returns the primary key column name for raw SQL queries. Required for Vitess strategies.
-   * Override this to enable Vitess support.
-   */
-  fun primaryKeyColumn(): String? = null
-
   fun selectAbsoluteRange(): Query<MinMax<K>>
   fun selectInitialMaxBound(rangeStart: K, rangeEnd: K, scanSize: Long): Query<NullKeyContainer<K>>
   fun selectNextMaxBound(previousEndKey: K, rangeEnd: K, scanSize: Long): Query<NullKeyContainer<K>>
