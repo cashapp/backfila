@@ -163,18 +163,6 @@ abstract class GenerateBackfilaRecordSourceQueriesTask : DefaultTask() {
               .addStatement("return database.%L.%LGetBatch(start, end)", queriesFunctionName, lowerName)
               .addModifiers(OVERRIDE)
               .build(),
-          ).addFunction(
-            FunSpec.builder("tableName")
-              .returns(String::class)
-              .addStatement("return %S", backfillConfig.tableName)
-              .addModifiers(OVERRIDE)
-              .build(),
-          ).addFunction(
-            FunSpec.builder("primaryKeyColumn")
-              .returns(String::class)
-              .addStatement("return %S", backfillConfig.keyName)
-              .addModifiers(OVERRIDE)
-              .build(),
           ).build(),
       ).build()
 
