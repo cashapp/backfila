@@ -17,12 +17,15 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import software.amazon.awssdk.services.dynamodb.model.BillingMode
 import software.amazon.awssdk.services.dynamodb.model.ScanRequest
 
+@Suppress("DEPRECATION")
 class DynamoDbBackfillOperator<I : Any, P : Any>(
   private val dynamoDbClient: DynamoDbClient,
   override val backfill: DynamoDbBackfill<I, P>,
   private val parametersOperator: BackfilaParametersOperator<P>,
   private val keyRangeCodec: DynamoDbKeyRangeCodec,
 ) : BackfillOperator {
+  private val dynamoDbTable get() = backfill.dataDefinition?.dynamoDbTable ?: backfill.dynamoDbTable
+
   override fun name(): String = backfill.javaClass.toString()
 
   override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
@@ -35,7 +38,7 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
     ) { "Range is not supported for this Dynamo Backfila client" }
 
     var table = dynamoDbClient.describeTable {
-      it.tableName(backfill.dynamoDbTable.tableName())
+      it.tableName(dynamoDbTable.tableName())
     }.table()
 
     val mustHaveProvisionedBillingMode = backfill.operatorStrategy?.mustHaveProvisionedBillingMode
@@ -48,9 +51,9 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
         billingModeSummary == null ||
           billingModeSummary.billingMode() == BillingMode.PROVISIONED,
       ) {
-        "Trying to prepare a backfill on a Dynamo table named ${backfill.dynamoDbTable.tableName()} " +
+        "Trying to prepare a backfill on a Dynamo table named ${dynamoDbTable.tableName()} " +
           "with a billing mode that is not PROVISIONED, it is " +
-          "${backfill.dynamoDbTable.tableName()}. This can get very expensive. " +
+          "${billingModeSummary?.billingMode()}. This can get very expensive. " +
           "Please provision your dynamo capacity for this table and try again."
       }
     }
@@ -144,12 +147,12 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
       ?: backfill.indexName(config)
 
     val checkpointDuration = backfill.operatorStrategy?.checkpointSegmentProgressAfter
-      ?: Duration.ofMillis(1_000L)
+      ?: Duration.ofSeconds(2)
 
     val stopwatch = Stopwatch.createStarted()
     do {
       val scanRequest = ScanRequest.builder()
-        .tableName(backfill.dynamoDbTable.tableName())
+        .tableName(dynamoDbTable.tableName())
         .segment(keyRange.start)
         .totalSegments(keyRange.count)
         .limit(request.batch_size.toInt())
@@ -170,7 +173,7 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
 
       backfill.runBatch(
         result.items().map {
-          backfill.dynamoDbTable.tableSchema().mapToItem(it)
+          dynamoDbTable.tableSchema().mapToItem(it)
         },
         config,
       )
