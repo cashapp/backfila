@@ -37,7 +37,11 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
     var table = dynamoDbClient.describeTable {
       it.tableName(backfill.dynamoDbTable.tableName())
     }.table()
-    if (backfill.mustHaveProvisionedBillingMode()) {
+
+    val mustHaveProvisionedBillingMode = backfill.operatorStrategy?.mustHaveProvisionedBillingMode
+      ?: backfill.mustHaveProvisionedBillingMode()
+
+    if (mustHaveProvisionedBillingMode) {
       var billingModeSummary = table.billingModeSummary()
       // It's odd but a null billingModeSummary implies "PROVISIONED"
       require(
@@ -50,11 +54,17 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
           "Please provision your dynamo capacity for this table and try again."
       }
     }
-    val partitionCount = backfill.partitionCount(config)
+
+    val partitionCount = backfill.operatorStrategy?.partitionCount
+      ?: backfill.partitionCount(config)
+
     // We will assume the batch size is the default of 100. We are aiming for a batch per segment.
     val desiredSegmentCount = (table.itemCount() / 100L).coerceIn(partitionCount.toLong(), 524288L)
     val defaultSegmentCount = desiredSegmentCount.takeHighestOneBit().toInt() // closest power of 2
-    val segmentCount = backfill.fixedSegmentCount(config) ?: defaultSegmentCount
+
+    val segmentCount = backfill.operatorStrategy?.fixedSegmentCount
+      ?: backfill.fixedSegmentCount(config)
+      ?: defaultSegmentCount
     require(
       partitionCount in 1..segmentCount &&
         Integer.bitCount(partitionCount) == 1 &&
@@ -121,6 +131,21 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
 
     var lastEvaluatedKey: Map<String, AttributeValue>? = keyRange.lastEvaluatedKey
 
+    val filterExpression = backfill.dataDefinition?.filterExpression
+      ?: backfill.filterExpression(config)
+
+    val expressionAttributeValues = backfill.dataDefinition?.expressionAttributeValues
+      ?: backfill.expressionAttributeValues(config)
+
+    val expressionAttributeNames = backfill.dataDefinition?.expressionAttributeNames
+      ?: backfill.expressionAttributeNames(config)
+
+    val indexName = backfill.dataDefinition?.indexName
+      ?: backfill.indexName(config)
+
+    val checkpointDuration = backfill.operatorStrategy?.checkpointSegmentProgressAfter
+      ?: Duration.ofMillis(1_000L)
+
     val stopwatch = Stopwatch.createStarted()
     do {
       val scanRequest = ScanRequest.builder()
@@ -135,10 +160,10 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
             it
           }
         }
-        .filterExpression(backfill.filterExpression(config))
-        .expressionAttributeValues(backfill.expressionAttributeValues(config))
-        .expressionAttributeNames(backfill.expressionAttributeNames(config))
-        .indexName(backfill.indexName(config))
+        .filterExpression(filterExpression)
+        .expressionAttributeValues(expressionAttributeValues)
+        .expressionAttributeNames(expressionAttributeNames)
+        .indexName(indexName)
         .build()
 
       val result = dynamoDbClient.scan(scanRequest)
@@ -150,7 +175,7 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
         config,
       )
       lastEvaluatedKey = result.lastEvaluatedKey()
-      if (stopwatch.elapsed() > Duration.ofMillis(1_000L)) {
+      if (stopwatch.elapsed() > checkpointDuration) {
         break
       }
     } while (lastEvaluatedKey != null && lastEvaluatedKey.isNotEmpty())

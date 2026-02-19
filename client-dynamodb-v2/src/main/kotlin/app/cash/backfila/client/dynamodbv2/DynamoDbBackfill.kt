@@ -43,6 +43,18 @@ abstract class DynamoDbBackfill<I : Any, P : Any> : Backfill {
   abstract fun dynamoDbTable(): DynamoDbTable<I>
 
   /**
+   * The DynamoDB data definition describes the exact set of DynamoDB data to process.
+   * If not provided, the open function overrides (filterExpression, indexName, etc.) will be used.
+   */
+  open val dataDefinition: DynamoDbDataDefinition<I>? = null
+
+  /**
+   * The DynamoDB operator strategy describes how to operate and execute the backfill.
+   * If not provided, the open function overrides (partitionCount, mustHaveProvisionedBillingMode, etc.) will be used.
+   */
+  open val operatorStrategy: DynamoDbOperatorStrategy? = null
+
+  /**
    * Override this and throw an exception to prevent the backfill from being created.
    * This is also a good place to do any prep work before batches are run.
    */
