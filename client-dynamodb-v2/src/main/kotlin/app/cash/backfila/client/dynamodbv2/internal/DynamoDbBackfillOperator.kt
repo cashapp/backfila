@@ -17,12 +17,15 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import software.amazon.awssdk.services.dynamodb.model.BillingMode
 import software.amazon.awssdk.services.dynamodb.model.ScanRequest
 
+@Suppress("DEPRECATION")
 class DynamoDbBackfillOperator<I : Any, P : Any>(
   private val dynamoDbClient: DynamoDbClient,
   override val backfill: DynamoDbBackfill<I, P>,
   private val parametersOperator: BackfilaParametersOperator<P>,
   private val keyRangeCodec: DynamoDbKeyRangeCodec,
 ) : BackfillOperator {
+  private val dynamoDbTable get() = backfill.dataDefinition?.dynamoDbTable ?: backfill.dynamoDbTable
+
   override fun name(): String = backfill.javaClass.toString()
 
   override fun prepareBackfill(request: PrepareBackfillRequest): PrepareBackfillResponse {
@@ -35,26 +38,36 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
     ) { "Range is not supported for this Dynamo Backfila client" }
 
     var table = dynamoDbClient.describeTable {
-      it.tableName(backfill.dynamoDbTable.tableName())
+      it.tableName(dynamoDbTable.tableName())
     }.table()
-    if (backfill.mustHaveProvisionedBillingMode()) {
+
+    val mustHaveProvisionedBillingMode = backfill.operatorStrategy?.mustHaveProvisionedBillingMode
+      ?: backfill.mustHaveProvisionedBillingMode()
+
+    if (mustHaveProvisionedBillingMode) {
       var billingModeSummary = table.billingModeSummary()
       // It's odd but a null billingModeSummary implies "PROVISIONED"
       require(
         billingModeSummary == null ||
           billingModeSummary.billingMode() == BillingMode.PROVISIONED,
       ) {
-        "Trying to prepare a backfill on a Dynamo table named ${backfill.dynamoDbTable.tableName()} " +
+        "Trying to prepare a backfill on a Dynamo table named ${dynamoDbTable.tableName()} " +
           "with a billing mode that is not PROVISIONED, it is " +
-          "${backfill.dynamoDbTable.tableName()}. This can get very expensive. " +
+          "${billingModeSummary?.billingMode()}. This can get very expensive. " +
           "Please provision your dynamo capacity for this table and try again."
       }
     }
-    val partitionCount = backfill.partitionCount(config)
+
+    val partitionCount = backfill.operatorStrategy?.partitionCount
+      ?: backfill.partitionCount(config)
+
     // We will assume the batch size is the default of 100. We are aiming for a batch per segment.
     val desiredSegmentCount = (table.itemCount() / 100L).coerceIn(partitionCount.toLong(), 524288L)
     val defaultSegmentCount = desiredSegmentCount.takeHighestOneBit().toInt() // closest power of 2
-    val segmentCount = backfill.fixedSegmentCount(config) ?: defaultSegmentCount
+
+    val segmentCount = backfill.operatorStrategy?.fixedSegmentCount
+      ?: backfill.fixedSegmentCount(config)
+      ?: defaultSegmentCount
     require(
       partitionCount in 1..segmentCount &&
         Integer.bitCount(partitionCount) == 1 &&
@@ -121,10 +134,25 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
 
     var lastEvaluatedKey: Map<String, AttributeValue>? = keyRange.lastEvaluatedKey
 
+    val filterExpression = backfill.dataDefinition?.filterExpression
+      ?: backfill.filterExpression(config)
+
+    val expressionAttributeValues = backfill.dataDefinition?.expressionAttributeValues
+      ?: backfill.expressionAttributeValues(config)
+
+    val expressionAttributeNames = backfill.dataDefinition?.expressionAttributeNames
+      ?: backfill.expressionAttributeNames(config)
+
+    val indexName = backfill.dataDefinition?.indexName
+      ?: backfill.indexName(config)
+
+    val checkpointDuration = backfill.operatorStrategy?.checkpointSegmentProgressAfter
+      ?: Duration.ofSeconds(2)
+
     val stopwatch = Stopwatch.createStarted()
     do {
       val scanRequest = ScanRequest.builder()
-        .tableName(backfill.dynamoDbTable.tableName())
+        .tableName(dynamoDbTable.tableName())
         .segment(keyRange.start)
         .totalSegments(keyRange.count)
         .limit(request.batch_size.toInt())
@@ -135,22 +163,22 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
             it
           }
         }
-        .filterExpression(backfill.filterExpression(config))
-        .expressionAttributeValues(backfill.expressionAttributeValues(config))
-        .expressionAttributeNames(backfill.expressionAttributeNames(config))
-        .indexName(backfill.indexName(config))
+        .filterExpression(filterExpression)
+        .expressionAttributeValues(expressionAttributeValues)
+        .expressionAttributeNames(expressionAttributeNames)
+        .indexName(indexName)
         .build()
 
       val result = dynamoDbClient.scan(scanRequest)
 
       backfill.runBatch(
         result.items().map {
-          backfill.dynamoDbTable.tableSchema().mapToItem(it)
+          dynamoDbTable.tableSchema().mapToItem(it)
         },
         config,
       )
       lastEvaluatedKey = result.lastEvaluatedKey()
-      if (stopwatch.elapsed() > Duration.ofMillis(1_000L)) {
+      if (stopwatch.elapsed() > checkpointDuration) {
         break
       }
     } while (lastEvaluatedKey != null && lastEvaluatedKey.isNotEmpty())

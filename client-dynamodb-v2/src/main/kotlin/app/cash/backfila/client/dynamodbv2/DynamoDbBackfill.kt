@@ -43,6 +43,18 @@ abstract class DynamoDbBackfill<I : Any, P : Any> : Backfill {
   abstract fun dynamoDbTable(): DynamoDbTable<I>
 
   /**
+   * The DynamoDB data definition describes the exact set of DynamoDB data to process.
+   * If not provided, the open function overrides (filterExpression, indexName, etc.) will be used.
+   */
+  open val dataDefinition: DynamoDbDataDefinition<I>? = null
+
+  /**
+   * The DynamoDB operator strategy describes how to operate and execute the backfill.
+   * If not provided, the open function overrides (partitionCount, mustHaveProvisionedBillingMode, etc.) will be used.
+   */
+  open val operatorStrategy: DynamoDbOperatorStrategy? = null
+
+  /**
    * Override this and throw an exception to prevent the backfill from being created.
    * This is also a good place to do any prep work before batches are run.
    */
@@ -62,6 +74,7 @@ abstract class DynamoDbBackfill<I : Any, P : Any> : Backfill {
    * count to fit the requested batch size. Override this if the guess is bad, such as when your
    * data is not uniformly distributed.
    */
+  @Deprecated("Use app.cash.backfila.client.dynamodbv2.DynamoDbOperatorStrategy instead.")
   open fun fixedSegmentCount(config: PrepareBackfillConfig<P>): Int? = null
 
   /**
@@ -70,6 +83,7 @@ abstract class DynamoDbBackfill<I : Any, P : Any> : Backfill {
    * overhead in Backfila; set a higher number for more concurrency. The default of 8 means that
    * the Backfill will run at least 8 batches concurrently.
    */
+  @Deprecated("Use app.cash.backfila.client.dynamodbv2.DynamoDbOperatorStrategy instead.")
   open fun partitionCount(config: PrepareBackfillConfig<P>): Int = 8
 
   /**
@@ -77,17 +91,22 @@ abstract class DynamoDbBackfill<I : Any, P : Any> : Backfill {
    * Update dynamo so the billing mode is PROVISIONED rather than PAY_PER_REQUEST as the latter can
    * be very expensive.
    */
+  @Deprecated("Use app.cash.backfila.client.dynamodbv2.DynamoDbOperatorStrategy instead.")
   open fun mustHaveProvisionedBillingMode(): Boolean = true
 
   /** See [ScanRequest.setFilterExpression]. */
+  @Deprecated("Use app.cash.backfila.client.dynamodbv2.DynamoDbDataDefinition instead.")
   open fun filterExpression(config: BackfillConfig<P>): String? = null
 
   /** See [ScanRequest.setExpressionAttributeValues]. */
+  @Deprecated("Use app.cash.backfila.client.dynamodbv2.DynamoDbDataDefinition instead.")
   open fun expressionAttributeValues(config: BackfillConfig<P>): Map<String, AttributeValue>? = null
 
   /** See [ScanRequest.setExpressionAttributeNames]. */
+  @Deprecated("Use app.cash.backfila.client.dynamodbv2.DynamoDbDataDefinition instead.")
   open fun expressionAttributeNames(config: BackfillConfig<P>): Map<String, String>? = null
 
   /** See [ScanRequest.setIndexName]. */
+  @Deprecated("Use app.cash.backfila.client.dynamodbv2.DynamoDbDataDefinition instead.")
   open fun indexName(config: BackfillConfig<P>): String? = null
 }
