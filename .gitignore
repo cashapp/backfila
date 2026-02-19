@@ -17,3 +17,23 @@ local.settings.gradle
 
 .DS_Store
 .hermit
+
+# Claude local settings
+**/.claude/settings.local.json
+CLAUDE.local.md
+
+# AI Rules - Generated Files
+/.clinerules/
+/.cursor/mcp.json
+/.cursor/rules/
+/.kilocode/rules/
+/.mcp.json
+/.roo/mcp.json
+/.roo/rules/
+/ai-rules/.generated-ai-rules
+/firebender.json
+!**/ai-rules/AGENTS.md
+# End AI Rules
+
+# Thoughts directory for AI processing
+thoughts/
