@@ -35,11 +35,14 @@ class StaticDatasourceBackend @Inject constructor(
     }
   }
 
+  @Suppress("UNCHECKED_CAST")
   private fun <E : Any, Param : Any> createStaticDatasourceOperator(
     backfill: StaticDatasourceBackfillBase<E, Param>,
   ) = StaticDatasourceBackfillOperator(
     backfill,
-    BackfilaParametersOperator(parametersClass(backfill::class)),
+    BackfilaParametersOperator(
+      parametersClass(backfill::class),
+    ) as BackfilaParametersOperator<Param>,
   )
 
   override fun create(backfillName: String): BackfillOperator? {
@@ -58,14 +61,14 @@ class StaticDatasourceBackend @Inject constructor(
       BackfillRegistration(
         name = it.key,
         description = it.value.findAnnotation<Description>()?.text,
-        parametersClass = parametersClass(it.value as KClass<StaticDatasourceBackfillBase<Any, Any>>),
+        parametersClass = parametersClass(it.value),
         deleteBy = it.value.findAnnotation<DeleteBy>()?.parseDeleteByDate(),
         unit = BackfillUnit.ITEMS.displayName,
       )
     }.toSet()
   }
 
-  private fun <P : Any> parametersClass(backfillClass: KClass<out StaticDatasourceBackfillBase<*, P>>): KClass<P> {
+  private fun parametersClass(backfillClass: KClass<out StaticDatasourceBackfillBase<*, *>>): KClass<*> {
     // Like MyBackfill.
     val thisType = TypeLiteral.get(backfillClass.java)
 
@@ -73,6 +76,6 @@ class StaticDatasourceBackend @Inject constructor(
     val supertype = thisType.getSupertype(StaticDatasourceBackfillBase::class.java).type as ParameterizedType
 
     // Like MyParameterClass
-    return (Types.getRawType(supertype.actualTypeArguments[1]) as Class<P>).kotlin
+    return (Types.getRawType(supertype.actualTypeArguments[1])).kotlin
   }
 }
