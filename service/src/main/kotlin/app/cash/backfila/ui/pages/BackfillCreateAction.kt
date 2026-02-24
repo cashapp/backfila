@@ -222,12 +222,12 @@ class BackfillCreateAction @Inject constructor(
                           div("ml-3") {
                             label("block text-sm font-medium leading-6 text-gray-900") {
                               htmlFor = "range-option-restart"
-                              +"""Same range, restart from beginning"""
+                              +"""Same key boundaries, restart from beginning"""
                             }
                             p("text-xs text-gray-500 mt-1") {
                               +"""Use the """
-                              strong("font-semibold text-gray-700") { +"""exact""" }
-                              +""" same range as the cloned backfill but start processing from the beginning."""
+                              strong("font-semibold text-gray-700") { +"""exact same start/end key boundaries""" }
+                              +""" as the original backfill (locked to original table size). Good for reprocessing the same data with different parameters."""
                             }
                           }
                         }
@@ -244,12 +244,12 @@ class BackfillCreateAction @Inject constructor(
                           div("ml-3") {
                             label("block text-sm font-medium leading-6 text-gray-900") {
                               htmlFor = "range-option-continue"
-                              +"""Same range, continue from last processed"""
+                              +"""Same key boundaries, continue from last processed"""
                             }
                             p("text-xs text-gray-500 mt-1") {
                               +"""Use the """
-                              strong("font-semibold text-gray-700") { +"""exact""" }
-                              +""" same range as the cloned backfill but continue processing where the cloned backfill left off. Useful when you don't want to reprocess past items but need to change some of the backfill parameters."""
+                              strong("font-semibold text-gray-700") { +"""exact same start/end key boundaries""" }
+                              +""" as the original backfill but resume from where it left off. Useful when you don't want to reprocess completed items but need to change parameters."""
                             }
                           }
                         }
@@ -270,7 +270,7 @@ class BackfillCreateAction @Inject constructor(
                                 +"""New range"""
                               }
                               p("text-xs text-gray-500 mt-1") {
-                                +"""A completely new range, either by manually inputting a new range or automatically calculating a brand new range when creating the backfill."""
+                                +"""Calculate fresh key boundaries over the current table. Use this to include data added since the original backfill was created."""
                               }
                             }
                           }
@@ -314,6 +314,51 @@ class BackfillCreateAction @Inject constructor(
                                     attributes["autocomplete"] = field
                                   }
                                 }
+                              }
+                            }
+                          }
+                        }
+                      }
+
+                      // Range boundary preview
+                      backfillToCloneStatus?.partitions?.firstOrNull()?.let { partition ->
+                        div("mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md") {
+                          p("text-sm text-blue-800") {
+                            +"📋 "
+                            strong("font-semibold") { +"Key boundaries from original backfill:" }
+                          }
+                          div("mt-2 font-mono text-xs text-blue-700 bg-blue-100 p-2 rounded border") {
+                            div {
+                              +"Start: "
+                              span("font-semibold") { +(partition.pkey_start ?: "null") }
+                            }
+                            div("mt-1") {
+                              +"End: "
+                              span("font-semibold") { +(partition.pkey_end ?: "null") }
+                            }
+                          }
+                          p("text-xs text-blue-600 mt-2") {
+                            +"Created: ${backfillToCloneStatus.created_at} • "
+                            +"Choose 'New range' to include data added since then"
+                          }
+                        }
+                      }
+
+                      // Age-based warning for stale backfills
+                      backfillToCloneStatus?.let { status ->
+                        val now = java.time.Instant.now()
+                        val ageInDays = java.time.Duration.between(status.created_at, now).toDays()
+                        if (ageInDays >= 7) {
+                          div("mt-4 p-3 bg-orange-50 border border-orange-200 rounded-md") {
+                            p("text-sm text-orange-800") {
+                              +"⚠️ "
+                              strong("font-semibold") { +"This backfill is $ageInDays days old." }
+                              +" Your table may have grown since then."
+                            }
+                            p("text-xs text-orange-700 mt-1") {
+                              +"Consider selecting 'New range' to include data added after "
+                              span("font-mono bg-orange-100 px-1 rounded") {
+                                +java.time.format.DateTimeFormatter.ISO_LOCAL_DATE.format(status.created_at.atZone(java.time.ZoneOffset.UTC))
                               }
                             }
                           }
