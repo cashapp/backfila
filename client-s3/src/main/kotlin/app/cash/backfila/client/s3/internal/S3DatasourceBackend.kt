@@ -35,18 +35,20 @@ class S3DatasourceBackend @Inject constructor(
     }
   }
 
+  @Suppress("UNCHECKED_CAST")
   private fun <R : Any, Param : Any> createS3DatasourceOperator(
     backfill: S3DatasourceBackfill<R, Param>,
   ) = S3DatasourceBackfillOperator(
     backfill,
-    BackfilaParametersOperator(parametersClass(backfill::class)),
+    BackfilaParametersOperator(
+      parametersClass(backfill::class),
+    ) as BackfilaParametersOperator<Param>,
     s3Service,
   )
 
   override fun create(backfillName: String): BackfillOperator? {
     return getBackfill(backfillName)?.let { backfill ->
-      @Suppress("UNCHECKED_CAST") // We don't know the types statically, so fake them.
-      return createS3DatasourceOperator(backfill as S3DatasourceBackfill<Any, Any>)
+      return createS3DatasourceOperator(backfill)
     }
   }
 
@@ -55,14 +57,14 @@ class S3DatasourceBackend @Inject constructor(
       BackfillRegistration(
         name = it.key,
         description = it.value.findAnnotation<Description>()?.text,
-        parametersClass = parametersClass(it.value as KClass<S3DatasourceBackfill<Any, Any>>),
+        parametersClass = parametersClass(it.value),
         deleteBy = it.value.findAnnotation<DeleteBy>()?.parseDeleteByDate(),
         unit = BackfillUnit.BYTES.displayName,
       )
     }.toSet()
   }
 
-  private fun <R : Any, P : Any> parametersClass(backfillClass: KClass<out S3DatasourceBackfill<R, P>>): KClass<P> {
+  private fun parametersClass(backfillClass: KClass<out S3DatasourceBackfill<*, *>>): KClass<*> {
     // Like MyBackfill.
     val thisType = TypeLiteral.get(backfillClass.java)
 
@@ -70,6 +72,6 @@ class S3DatasourceBackend @Inject constructor(
     val supertype = thisType.getSupertype(S3DatasourceBackfill::class.java).type as ParameterizedType
 
     // Like MyParameterClass
-    return (Types.getRawType(supertype.actualTypeArguments[1]) as Class<P>).kotlin
+    return (Types.getRawType(supertype.actualTypeArguments[1])).kotlin
   }
 }
