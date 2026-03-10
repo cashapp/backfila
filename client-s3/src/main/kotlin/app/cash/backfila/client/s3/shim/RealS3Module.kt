@@ -10,7 +10,7 @@ import com.google.inject.Key
   message = "AWS V1 SDK is deprecated, use RealS3AwsV2Module instead.",
   replaceWith = ReplaceWith(
     expression = "RealS3AwsV2Module",
-    imports =  ["app.cash.backfila.client.s3.shim.RealS3AwsV2Module"],
+    imports = ["app.cash.backfila.client.s3.shim.RealS3AwsV2Module"],
   ),
   level = DeprecationLevel.WARNING,
 )

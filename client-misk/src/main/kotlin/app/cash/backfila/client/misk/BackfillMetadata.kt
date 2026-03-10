@@ -3,10 +3,10 @@ package app.cash.backfila.client.misk
 import app.cash.backfila.client.spi.BackfillBackend
 import app.cash.backfila.client.spi.BackfillRegistration
 import jakarta.inject.Inject
+import misk.moshi.adapter
 import misk.web.metadata.Metadata
 import misk.web.metadata.MetadataProvider
 import misk.web.metadata.toFormattedJson
-import wisp.moshi.adapter
 import wisp.moshi.defaultKotlinMoshi
 
 internal data class BackfillMetadata(

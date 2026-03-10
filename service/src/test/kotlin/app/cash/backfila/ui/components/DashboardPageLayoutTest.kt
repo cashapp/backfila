@@ -39,12 +39,12 @@ class DashboardPageLayoutTest {
 
   @Test
   fun `happy path`() {
-    actionScope.enter(
+    actionScope.create(
       mapOf(
         HttpCall::class.toKey() to fakeHttpCall,
         MiskCaller::class.toKey() to fakeMiskCaller,
       ),
-    ).use {
+    ).inScope {
       // No exception thrown on correct usage
       layout.get().newBuilder().build()
     }
@@ -52,12 +52,12 @@ class DashboardPageLayoutTest {
 
   @Test
   fun `no builder reuse permitted`() {
-    actionScope.enter(
+    actionScope.create(
       mapOf(
         HttpCall::class.toKey() to fakeHttpCall,
         MiskCaller::class.toKey() to MiskCaller(user = "test-user"),
       ),
-    ).use {
+    ).inScope {
       // Fresh builder must have newBuilder() called
       val e1 = assertFailsWith<IllegalStateException> { layout.get().build() }
       assertEquals(

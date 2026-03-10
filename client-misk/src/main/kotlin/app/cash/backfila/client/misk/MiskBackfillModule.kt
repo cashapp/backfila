@@ -10,7 +10,6 @@ import com.google.inject.Key
 import kotlin.reflect.KClass
 import misk.ServiceModule
 import misk.inject.KAbstractModule
-import misk.inject.toKey
 import misk.web.metadata.MetadataModule
 
 /**
@@ -31,10 +30,8 @@ class MiskBackfillModule @JvmOverloads constructor(
     install(RealBackfillModule(config.toBackfilaClientConfig(), loggingSetupProvider))
 
     install(
-      ServiceModule(
-        key = BackfilaStartupService::class.toKey(),
-        dependsOn = dependsOn,
-      ),
+      ServiceModule<BackfilaStartupService>()
+        .dependsOn(dependsOn),
     )
 
     install(MetadataModule(BackfillMetadataProvider()))
