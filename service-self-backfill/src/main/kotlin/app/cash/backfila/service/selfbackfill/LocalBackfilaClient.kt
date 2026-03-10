@@ -18,12 +18,12 @@ internal class LocalBackfilaClient @Inject constructor(
   private val actionScope: ActionScope,
 ) : BackfilaClient {
   override fun configureService(request: ConfigureServiceRequest): ConfigureServiceResponse {
-    actionScope.enter(
+    return actionScope.create(
       mapOf(
         keyOf<MiskCaller>() to MiskCaller(service = "backfila"),
       ),
-    ).use {
-      return configureServiceAction.configureService(request)
+    ).inScope {
+      configureServiceAction.configureService(request)
     }
   }
 

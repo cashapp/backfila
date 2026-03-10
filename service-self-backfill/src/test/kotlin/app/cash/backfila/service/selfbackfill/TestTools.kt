@@ -9,6 +9,6 @@ fun <T> ActionScope.fakeCaller(
   user: String? = null,
   function: () -> T,
 ): T {
-  return enter(mapOf(keyOf<MiskCaller>() to MiskCaller(service = service, user = user)))
-    .use { function() }
+  return create(mapOf(keyOf<MiskCaller>() to MiskCaller(service = service, user = user)))
+    .inScope { function() }
 }

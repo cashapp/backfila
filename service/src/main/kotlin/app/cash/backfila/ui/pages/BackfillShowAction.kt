@@ -41,6 +41,7 @@ import kotlinx.html.td
 import kotlinx.html.th
 import kotlinx.html.thead
 import kotlinx.html.tr
+import kotlinx.html.unsafe
 import misk.scope.ActionScoped
 import misk.security.authz.Authenticated
 import misk.tailwind.Link
@@ -92,7 +93,7 @@ class BackfillShowAction @Inject constructor(
       .title("Backfill $id | Backfila")
       .headBlock {
         script {
-          +timezoneDetectionScript()
+          unsafe { +timezoneDetectionScript() }
         }
       }
       .breadcrumbLinks(
