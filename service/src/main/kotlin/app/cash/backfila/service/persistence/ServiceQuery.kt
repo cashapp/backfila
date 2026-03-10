@@ -2,6 +2,7 @@ package app.cash.backfila.service.persistence
 
 import misk.hibernate.Constraint
 import misk.hibernate.Id
+import misk.hibernate.Operator
 import misk.hibernate.Order
 import misk.hibernate.Query
 
@@ -20,4 +21,10 @@ interface ServiceQuery : Query<DbService> {
 
   @Constraint("id")
   fun id(id: Id<DbService>): ServiceQuery
+
+  @Constraint("deleted_at", Operator.IS_NULL)
+  fun notDeleted(): ServiceQuery
+
+  @Constraint("deleted_at", Operator.IS_NOT_NULL)
+  fun deleted(): ServiceQuery
 }
