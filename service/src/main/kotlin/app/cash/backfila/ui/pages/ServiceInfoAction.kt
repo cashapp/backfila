@@ -8,7 +8,11 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.html.ButtonType
+import kotlinx.html.FormMethod
+import kotlinx.html.button
 import kotlinx.html.div
+import kotlinx.html.form
 import kotlinx.html.pre
 import kotlinx.html.span
 import misk.security.authz.Authenticated
@@ -136,6 +140,20 @@ class ServiceInfoAction @Inject constructor(
                           span("text-red-600 font-medium") { +"Never registered" }
                         }
                       }
+                    }
+                  }
+                }
+
+                // Danger zone
+                div("border-t border-red-200 pt-6") {
+                  span("text-sm font-medium text-red-600 block mb-4") { +"Danger Zone" }
+                  form {
+                    action = "/services/$service/variants/$variant/delete"
+                    method = FormMethod.post
+                    button(classes = "inline-flex items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50") {
+                      type = ButtonType.submit
+                      onClick = "return confirm('Are you sure you want to delete the $service ($variant) service variant? This cannot be undone.')"
+                      +"Delete Variant"
                     }
                   }
                 }
