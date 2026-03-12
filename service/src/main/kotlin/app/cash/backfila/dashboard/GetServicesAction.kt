@@ -38,6 +38,7 @@ class GetServicesAction @Inject constructor(
 
     val services = transacter.transaction { session ->
       val variantsByService = queryFactory.newQuery<ServiceQuery>()
+        .notDeleted()
         .orderByName()
         .list(session)
         .groupBy { it.registry_name }
