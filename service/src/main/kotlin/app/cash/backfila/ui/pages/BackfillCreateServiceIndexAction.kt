@@ -66,7 +66,7 @@ class BackfillCreateServiceIndexAction @Inject constructor(
         Link(
           "Create",
           PATH
-            .replace("{service}", service)
+            .replace("{service}", java.net.URLEncoder.encode(service, "UTF-8"))
             .replace("{variantOrBlank}", variantOrBlank ?: ""),
         ),
       )
@@ -127,7 +127,7 @@ class BackfillCreateServiceIndexAction @Inject constructor(
   companion object {
     private const val PATH = "/backfills/create/{service}/{variantOrBlank}"
     fun path(service: String, variantOrBlank: String?) = PATH
-      .replace("{service}", service)
+      .replace("{service}", java.net.URLEncoder.encode(service, "UTF-8"))
       .replace("{variantOrBlank}", variantOrBlank ?: "")
   }
 }

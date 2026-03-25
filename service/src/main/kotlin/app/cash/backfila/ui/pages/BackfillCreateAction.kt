@@ -586,7 +586,7 @@ class BackfillCreateAction @Inject constructor(
   companion object {
     private const val PATH = "/backfills/create/{service}/{variantOrBackfillNameOrId}/{backfillNameOrIdOrBlank}"
     fun path(service: String, variantOrBackfillNameOrId: String, backfillNameOrIdOrBlank: String) = PATH
-      .replace("{service}", service)
+      .replace("{service}", java.net.URLEncoder.encode(service, "UTF-8"))
       .replace("{variantOrBackfillNameOrId}", variantOrBackfillNameOrId)
       .replace("{backfillNameOrIdOrBlank}", backfillNameOrIdOrBlank)
   }

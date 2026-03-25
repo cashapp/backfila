@@ -218,8 +218,8 @@ class DashboardPageLayout @Inject constructor(
               val variant = if (service.variant == "default") "" else service.variant
               Link(
                 label = service.registry_name,
-                href = "/services/${service.registry_name}/$variant",
-                isSelected = currentPath.startsWith("/services/${service.registry_name}/$variant"),
+                href = "/services/${java.net.URLEncoder.encode(service.registry_name, "UTF-8")}/$variant",
+                isSelected = currentPath.startsWith("/services/${java.net.URLEncoder.encode(service.registry_name, "UTF-8")}/$variant"),
               )
             },
           ),

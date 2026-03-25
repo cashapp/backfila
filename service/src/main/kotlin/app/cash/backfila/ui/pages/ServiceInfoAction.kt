@@ -173,7 +173,7 @@ class ServiceInfoAction @Inject constructor(
   companion object {
     private const val PATH = "/services/{service}/{variantOrBlank}/info"
     fun path(service: String, variantOrBlank: String?) = PATH
-      .replace("{service}", service)
+      .replace("{service}", java.net.URLEncoder.encode(service, "UTF-8"))
       .replace("{variantOrBlank}", variantOrBlank ?: "")
   }
 }
