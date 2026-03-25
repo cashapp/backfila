@@ -38,7 +38,7 @@ class ConfigureServiceAction @Inject constructor(
   // TODO authenticate but any service
   @Unauthenticated
   fun configureService(@RequestBody request: ConfigureServiceRequest): ConfigureServiceResponse {
-    val service = caller.get()!!.service!!
+    val service = caller.get()!!.service!!.replace("/", "-")
 
     logger.info { "Configuring service `$service` with ${request.backfills.size} backfills" }
 
