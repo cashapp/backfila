@@ -18,12 +18,13 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
 
 @Singleton
-class FixedSetBackend @Inject constructor(
+class FixedSetBackend
+@Inject
+constructor(
   private val injector: Injector,
   @ForFixedSetBackend private val backfills: MutableMap<String, KClass<out FixedSetBackfill<*>>>,
   private val datastore: FixedSetDatastore,
 ) : BackfillBackend {
-
   /** Creates Backfill instances. Each backfill ID gets a new Backfill instance. */
   private fun getBackfill(name: String): FixedSetBackfill<*>? {
     val backfillClass = backfills[name]
@@ -34,13 +35,16 @@ class FixedSetBackend @Inject constructor(
     }
   }
 
-  private fun <Param : Any> createOperator(
-    backfill: FixedSetBackfill<Param>,
-  ) = FixedSetBackfillOperator(
-    backfill = backfill,
-    datastore = datastore,
-    parametersOperator = BackfilaParametersOperator(parametersClass(backfill::class)),
-  )
+  @Suppress("UNCHECKED_CAST")
+  private fun <Param : Any> createOperator(backfill: FixedSetBackfill<Param>) =
+    FixedSetBackfillOperator(
+      backfill = backfill,
+      datastore = datastore,
+      parametersOperator =
+      BackfilaParametersOperator(
+        parametersClass(backfill::class),
+      ) as BackfilaParametersOperator<Param>,
+    )
 
   override fun create(backfillName: String): BackfillOperator? {
     val backfill = getBackfill(backfillName)
@@ -53,19 +57,19 @@ class FixedSetBackend @Inject constructor(
     return null
   }
 
-  override fun backfills(): Set<BackfillRegistration> {
-    return backfills.map {
-      BackfillRegistration(
-        name = it.key,
-        description = it.value.findAnnotation<Description>()?.text,
-        parametersClass = parametersClass(it.value as KClass<FixedSetBackfill<Any>>),
-        deleteBy = it.value.findAnnotation<DeleteBy>()?.parseDeleteByDate(),
-        unit = BackfillUnit.ITEMS.displayName,
-      )
-    }.toSet()
-  }
+  override fun backfills(): Set<BackfillRegistration> =
+    backfills
+      .map {
+        BackfillRegistration(
+          name = it.key,
+          description = it.value.findAnnotation<Description>()?.text,
+          parametersClass = parametersClass(it.value),
+          deleteBy = it.value.findAnnotation<DeleteBy>()?.parseDeleteByDate(),
+          unit = BackfillUnit.ITEMS.displayName,
+        )
+      }.toSet()
 
-  private fun <T : Any> parametersClass(backfillClass: KClass<out FixedSetBackfill<T>>): KClass<T> {
+  private fun parametersClass(backfillClass: KClass<out FixedSetBackfill<*>>): KClass<*> {
     // Like MyBackfill.
     val thisType = TypeLiteral.get(backfillClass.java)
 
@@ -73,6 +77,6 @@ class FixedSetBackend @Inject constructor(
     val supertype = thisType.getSupertype(FixedSetBackfill::class.java).type as ParameterizedType
 
     // Like MyDataClass
-    return (Types.getRawType(supertype.actualTypeArguments[0]) as Class<T>).kotlin
+    return (Types.getRawType(supertype.actualTypeArguments[0])).kotlin
   }
 }
