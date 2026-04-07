@@ -180,6 +180,7 @@ class BackfillShowAction @Inject constructor(
               val totalItemsToRun = backfill.partitions.sumOf { it.computed_matching_record_count }
               val allPrecomputingDone = backfill.partitions.all { it.precomputing_done }
               val totalRate = backfill.partitions.sumOf { it.matching_records_per_minute ?: 0 }
+              val isComplete = backfill.state == BackfillState.COMPLETE
 
               div("my-6 space-y-4") {
                 div("text-sm text-gray-700") {
@@ -208,7 +209,9 @@ class BackfillShowAction @Inject constructor(
                   div("flex items-center justify-between text-sm text-gray-700 mb-2") {
                     span("font-medium") { +"""Overall Progress""" }
                     span("font-semibold text-gray-900") {
-                      if (allPrecomputingDone && totalItemsToRun > 0) {
+                      if (isComplete) {
+                        +"""100.0%"""
+                      } else if (allPrecomputingDone && totalItemsToRun > 0) {
                         val percentage =
                           (totalBackfilledItems.toDouble() / totalItemsToRun * 100).let {
                             if (it.isNaN()) 0.0 else it
@@ -223,11 +226,15 @@ class BackfillShowAction @Inject constructor(
                       }
                     }
                   }
-                  ProgressBar(
-                    totalBackfilledItems,
-                    totalItemsToRun,
-                    allPrecomputingDone,
-                  )
+                  if (isComplete) {
+                    ProgressBar(100, 100, true)
+                  } else {
+                    ProgressBar(
+                      totalBackfilledItems,
+                      totalItemsToRun,
+                      allPrecomputingDone,
+                    )
+                  }
                 }
               }
             }

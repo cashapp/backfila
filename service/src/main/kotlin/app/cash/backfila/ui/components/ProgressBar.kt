@@ -14,7 +14,7 @@ fun TagConsumer<*>.ProgressBar(
     val percentComplete = when {
       !precomputingDone -> null // Show indeterminate during precomputing
       denominator.toDouble() <= 0 -> 0.0 // Handle zero denominator
-      else -> round((numerator.toDouble() / denominator.toDouble()) * 100)
+      else -> round((numerator.toDouble() / denominator.toDouble()) * 100).coerceIn(0.0, 100.0)
     }
 
     // Show indeterminate progress bar during precomputing
