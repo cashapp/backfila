@@ -32,8 +32,11 @@ import kotlinx.html.dt
 import kotlinx.html.form
 import kotlinx.html.h2
 import kotlinx.html.input
+import kotlinx.html.label
+import kotlinx.html.option
 import kotlinx.html.pre
 import kotlinx.html.script
+import kotlinx.html.select
 import kotlinx.html.span
 import kotlinx.html.table
 import kotlinx.html.tbody
@@ -236,7 +239,39 @@ class BackfillShowAction @Inject constructor(
           FullWidthCard {
             // Partitions
             div("mx-auto max-w-7xl sm:px-6 lg:px-8") {
+              attributes["data-controller"] = "partitions-table"
               h2("text-base font-semibold leading-6 text-gray-900") { +"""Partitions""" }
+              div("mt-4 flex items-center gap-2") {
+                label(classes = "text-sm font-medium text-gray-700") {
+                  attributes["for"] = "partition-state-filter"
+                  +"""Filter by state:"""
+                }
+                select(classes = "rounded-md border border-gray-300 px-2 py-1 text-sm") {
+                  attributes["id"] = "partition-state-filter"
+                  attributes["data-partitions-table-target"] = "filter"
+                  attributes["data-action"] = "change->partitions-table#onFilterChange"
+                  option {
+                    attributes["value"] = "ALL"
+                    +"All"
+                  }
+                  option {
+                    attributes["value"] = "RUNNING"
+                    +"Running"
+                  }
+                  option {
+                    attributes["value"] = "PAUSED"
+                    +"Paused"
+                  }
+                  option {
+                    attributes["value"] = "COMPLETE"
+                    +"Complete"
+                  }
+                  option {
+                    attributes["value"] = "CANCELLED"
+                    +"Cancelled"
+                  }
+                }
+              }
               table("my-8 whitespace-nowrap text-left text-sm leading-6") {
                 thead("border-b border-gray-200 text-gray-900") {
                   tr {
@@ -266,7 +301,15 @@ class BackfillShowAction @Inject constructor(
                     }
                     th(classes = "py-3 pl-8 pr-0 text-right font-semibold") {
                       scope = ThScope.col
-                      +"""Progress (%)"""
+                      button(classes = "ml-auto inline-flex items-center gap-1 font-semibold hover:text-indigo-600") {
+                        type = ButtonType.button
+                        attributes["data-action"] = "click->partitions-table#toggleSort"
+                        +"""Progress (%)"""
+                        span("text-xs") {
+                          attributes["data-partitions-table-target"] = "sortIndicator"
+                          +"""↕"""
+                        }
+                      }
                     }
                     th(classes = "py-3 pl-8 pr-0 text-right font-semibold") {
                       scope = ThScope.col
@@ -285,8 +328,17 @@ class BackfillShowAction @Inject constructor(
                   }
                 }
                 tbody {
+                  attributes["data-partitions-table-target"] = "tbody"
                   backfill.partitions.map { partition ->
+                    val progressPct = if (partition.precomputing_done && partition.computed_matching_record_count > 0) {
+                      (partition.backfilled_matching_record_count.toDouble() / partition.computed_matching_record_count) * 100.0
+                    } else {
+                      -1.0
+                    }
                     tr("border-b border-gray-100") {
+                      attributes["data-partition-row"] = ""
+                      attributes["data-partition-state"] = partition.state.name
+                      attributes["data-progress-pct"] = progressPct.toString()
                       td("max-w-[50%] px-0 py-5 align-top") {
                         div("truncate font-medium text-gray-900") { +partition.name }
                       }
