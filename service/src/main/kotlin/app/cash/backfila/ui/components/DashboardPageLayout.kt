@@ -112,6 +112,10 @@ class DashboardPageLayout @Inject constructor(
             type = "module"
             src = "/static/js/search_bar_controller.js"
           }
+          script {
+            type = "module"
+            src = "/static/js/partitions_table_controller.js"
+          }
           // Include any custom head block content
           headBlock()
         },
