@@ -9,12 +9,6 @@ plugins {
   id("com.vanniktech.maven.publish.base")
 }
 
-sourceSets {
-  val main by getting {
-    java.srcDir(layout.buildDirectory.dir("generated/source/wire"))
-  }
-}
-
 dependencies {
   implementation(libs.moshiCore)
   implementation(libs.moshiKotlin)
