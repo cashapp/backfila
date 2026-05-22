@@ -1,12 +1,14 @@
 [versions]
+jackson = "2.21.3"
+jetty = "10.0.26"
 jooq = "3.18.25"
-kotlin = "2.1.20"
-kotlinxCoroutines = "1.10.1"
+kotlin = "2.2.21"
+kotlinxCoroutines = "1.11.0"
 ktlint = "0.47.1"
-misk = "2026.03.25.123043-1c0b0d9"
-okhttp = "5.1.0"
-sqldelight = "2.1.0"
-wire = "5.3.5"
+misk = "2026.05.19.041518-a638b03"
+okhttp = "5.3.2"
+sqldelight = "2.2.1"
+wire = "6.4.0"
 
 [libraries]
 apacheCommonsLang3 = { module = "org.apache.commons:commons-lang3", version = "3.12.0" }
@@ -21,28 +23,28 @@ dokkaGradlePlugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", versio
 guava = { module = "com.google.guava:guava", version = "33.4.8-jre" }
 guice = { module = "com.google.inject:guice", version = "6.0.0" }
 jCommander = { module = "com.beust:jcommander", version = "1.72" }
-jacksonDatabind = { module = "com.fasterxml.jackson.core:jackson-databind", version = "2.13.3" }
-jacksonDataformatYaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version = "2.13.3" }
-jacksonJsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version = "2.13.3" }
-jacksonKotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version = "2.13.3" }
-jettyServer = { module = "org.eclipse.jetty:jetty-server", version = "10.0.24" }
-jettyServlet = { module = "org.eclipse.jetty:jetty-servlet", version = "10.0.24" }
-jettyWebsocketServer = { module = "org.eclipse.jetty.websocket:websocket-jetty-server", version = "10.0.24" }
-jettyWebsocketServlet = { module = "org.eclipse.jetty.websocket:websocket-servlet", version = "10.0.24" }
-junitApi = { module = "org.junit.jupiter:junit-jupiter-api", version = "5.9.1" }
-junitEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version = "5.9.1" }
-junitParams = { module = "org.junit.jupiter:junit-jupiter-params", version = "5.9.1" }
-logbackClassic = { module = "ch.qos.logback:logback-classic", version = "1.4.11" }
+jacksonDatabind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+jacksonDataformatYaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
+jacksonJsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson" }
+jacksonKotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
+jettyServer = { module = "org.eclipse.jetty:jetty-server", version.ref = "jetty" }
+jettyServlet = { module = "org.eclipse.jetty:jetty-servlet", version.ref = "jetty" }
+jettyWebsocketServer = { module = "org.eclipse.jetty.websocket:websocket-jetty-server", version.ref = "jetty" }
+jettyWebsocketServlet = { module = "org.eclipse.jetty.websocket:websocket-servlet", version.ref = "jetty" }
+junitApi = { module = "org.junit.jupiter:junit-jupiter-api", version = "5.14.4" }
+junitEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version = "5.14.4" }
+junitParams = { module = "org.junit.jupiter:junit-jupiter-params", version = "5.14.4" }
+logbackClassic = { module = "ch.qos.logback:logback-classic", version = "1.5.32" }
 loggingApi = { module = "io.github.microutils:kotlin-logging", version = "2.1.23" }
 mavenPublishGradlePlugin = { module = "com.vanniktech:gradle-maven-publish-plugin", version = "0.31.0" }
 metricsCore = { module = "io.dropwizard.metrics:metrics-core", version = "4.0.2" }
 metricsParent = { module = "io.dropwizard.metrics:metrics-parent", version = "4.0.2" }
-moshiCore = { module = "com.squareup.moshi:moshi", version = "1.13.0" }
-moshiKotlin = { module = "com.squareup.moshi:moshi-kotlin", version = "1.13.0" }
+moshiCore = { module = "com.squareup.moshi:moshi", version = "1.15.2" }
+moshiKotlin = { module = "com.squareup.moshi:moshi-kotlin", version = "1.15.2" }
 mysql = { module = "mysql:mysql-connector-java", version = "8.0.30" }
 okHttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 okHttpMockWebServer = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "okhttp" }
-okio = { module = "com.squareup.okio:okio", version = "3.9.1" }
+okio = { module = "com.squareup.okio:okio", version = "3.17.0" }
 openTracing = { module = "io.opentracing:opentracing-api", version = "0.33.0" }
 openTracingMock = { module = "io.opentracing:opentracing-mock", version = "0.33.0" }
 openTracingOkHttp = { module = "io.opentracing.contrib:opentracing-okhttp3", version = "3.0.0" }
@@ -52,7 +54,7 @@ retrofitMock = { module = "com.squareup.retrofit2:retrofit-mock", version = "3.0
 retrofitMoshi = { module = "com.squareup.retrofit2:converter-moshi", version = "3.0.0" }
 retrofitWire = { module = "com.squareup.retrofit2:converter-wire", version = "3.0.0" }
 shadowJarPlugin = { module = "com.gradleup.shadow:shadow-gradle-plugin", version = "8.3.9" }
-slf4jApi = { module = "org.slf4j:slf4j-api", version = "2.0.3" }
+slf4jApi = { module = "org.slf4j:slf4j-api", version = "2.0.18" }
 sqldelightGradlePlugin = { module = "app.cash.sqldelight:gradle-plugin", version.ref = "sqldelight" }
 sqldelightJdbcDriver = { module = "app.cash.sqldelight:jdbc-driver", version.ref = "sqldelight" }
 sqldelightMysqlDialect = { module = "app.cash.sqldelight:mysql-dialect", version.ref = "sqldelight" }
@@ -89,7 +91,7 @@ miskSlack = { module = "com.squareup.misk:misk-slack", version.ref = "misk" }
 miskTailwind = { module = "com.squareup.misk:misk-tailwind", version.ref = "misk" }
 miskTesting = { module = "com.squareup.misk:misk-testing", version.ref = "misk" }
 miskGrpcReflect = { module = "com.squareup.misk:misk-grpc-reflect", version.ref = "misk" }
-miskVitess = { module = "com.squareup.misk:misk-vitess" }
+miskVitess = { module = "com.squareup.misk:misk-vitess", version.ref = "misk" }
 wireCompiler = { module = "com.squareup.wire:wire-compiler", version.ref = "wire" }
 wireGradlePlugin = { module = "com.squareup.wire:wire-gradle-plugin", version.ref = "wire" }
 wireGrpcClient = { module = "com.squareup.wire:wire-grpc-client", version.ref = "wire" }
