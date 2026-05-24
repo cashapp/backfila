@@ -1,6 +1,6 @@
 package app.cash.backfila.ui.components
 
-import kotlin.math.round
+import kotlin.math.floor
 import kotlinx.html.TagConsumer
 import kotlinx.html.div
 import kotlinx.html.style
@@ -14,7 +14,7 @@ fun TagConsumer<*>.ProgressBar(
     val percentComplete = when {
       !precomputingDone -> null // Show indeterminate during precomputing
       denominator.toDouble() <= 0 -> 0.0 // Handle zero denominator
-      else -> round((numerator.toDouble() / denominator.toDouble()) * 100)
+      else -> (numerator.toDouble() / denominator.toDouble()) * 100
     }
 
     // Show indeterminate progress bar during precomputing
@@ -24,11 +24,13 @@ fun TagConsumer<*>.ProgressBar(
         +"..."
       }
     } else {
+      // Floor to 1 decimal so the rendered width never overstates progress (e.g. 99.6% must not fill to 100%).
+      val displayPercent = floor(percentComplete * 10) / 10
       // Don't show blue sliver for 0%, just show the gray empty bar
-      val showPartialBarStyle = if (percentComplete > 0) "bg-blue-600" else ""
+      val showPartialBarStyle = if (displayPercent > 0) "bg-blue-600" else ""
       div("$showPartialBarStyle text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full") {
-        style = "width: $percentComplete%"
-        +"${percentComplete.toInt()}%"
+        style = "width: $displayPercent%"
+        +"${"%.1f".format(displayPercent)}%"
       }
     }
   }
