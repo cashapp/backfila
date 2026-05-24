@@ -1,5 +1,6 @@
 package app.cash.backfila.service.persistence
 
+import java.time.Clock
 import java.time.Instant
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -39,6 +40,13 @@ class DbService() : DbUnsharded<DbService>, DbTimestampedEntity {
 
   @Column(nullable = true)
   var last_registered_at: Instant? = null
+
+  @Column(nullable = true)
+  var deleted_at: Instant? = null
+
+  fun softDelete(clock: Clock) {
+    deleted_at = clock.instant()
+  }
 
   constructor(
     registry_name: String,

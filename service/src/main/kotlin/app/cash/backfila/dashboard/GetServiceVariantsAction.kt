@@ -37,6 +37,7 @@ class GetServiceVariantsAction @Inject constructor(
     val variants = transacter.transaction { session ->
       val variantsForService = queryFactory.newQuery<ServiceQuery>()
         .registryName(service)
+        .notDeleted()
         .orderByVariant()
         .list(session)
 

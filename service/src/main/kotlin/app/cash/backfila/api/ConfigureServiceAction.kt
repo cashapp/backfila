@@ -55,6 +55,7 @@ class ConfigureServiceAction @Inject constructor(
     transacter.transaction { session ->
       val variantsForService = queryFactory.newQuery<ServiceQuery>()
         .registryName(service)
+        .notDeleted()
         .list(session)
 
       var dbService = variantsForService.firstOrNull() { it.variant == variant }
