@@ -29,8 +29,6 @@ dependencies {
   implementation(libs.kotlinxCoroutinesLogging)
   implementation(libs.kotlinxHtml)
   implementation(libs.loggingApi)
-  implementation(libs.metricsCore)
-  implementation(libs.metricsParent)
   implementation(libs.misk)
   implementation(libs.miskActions)
   implementation(libs.miskAdmin)
