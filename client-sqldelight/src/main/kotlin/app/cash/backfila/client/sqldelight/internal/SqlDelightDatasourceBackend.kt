@@ -6,9 +6,9 @@ import app.cash.backfila.client.spi.BackfillOperator
 import app.cash.backfila.client.spi.BackfillRegistration
 import app.cash.backfila.client.sqldelight.ForSqlDelightBackend
 import app.cash.backfila.client.sqldelight.SqlDelightDatasourceBackfill
-import javax.inject.Inject
-import javax.inject.Provider
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Provider
+import jakarta.inject.Singleton
 
 @Singleton
 class SqlDelightDatasourceBackend @Inject constructor(

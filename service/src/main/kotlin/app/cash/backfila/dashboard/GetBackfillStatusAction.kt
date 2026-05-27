@@ -6,8 +6,8 @@ import app.cash.backfila.service.persistence.DbBackfillRun
 import app.cash.backfila.service.persistence.DbEventLog
 import app.cash.backfila.service.persistence.DbRunPartition
 import app.cash.backfila.service.persistence.EventLogQuery
+import jakarta.inject.Inject
 import java.time.Instant
-import javax.inject.Inject
 import misk.exceptions.BadRequestException
 import misk.hibernate.Id
 import misk.hibernate.Query

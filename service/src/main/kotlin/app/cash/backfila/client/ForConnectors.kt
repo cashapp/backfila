@@ -1,6 +1,6 @@
 package app.cash.backfila.client
 
-import javax.inject.Qualifier
+import jakarta.inject.Qualifier
 
 @Qualifier
 annotation class ForConnectors

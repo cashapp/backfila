@@ -5,7 +5,7 @@ import app.cash.backfila.client.BackfilaRequired;
 import app.cash.backfila.client.BackfillConfig;
 import app.cash.backfila.client.fixedset.FixedSetBackfill;
 import app.cash.backfila.client.fixedset.FixedSetRow;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import org.jetbrains.annotations.NotNull;
 
 /**

@@ -3,7 +3,7 @@ package app.cash.backfila.ui.pages
 import app.cash.backfila.service.BackfilaConfig
 import app.cash.backfila.ui.actions.ServiceDataHelper
 import app.cash.backfila.ui.components.DashboardPageLayout
-import javax.inject.Inject
+import jakarta.inject.Inject
 import kotlinx.html.dd
 import kotlinx.html.div
 import kotlinx.html.dl

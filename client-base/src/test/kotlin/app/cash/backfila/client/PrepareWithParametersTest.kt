@@ -6,7 +6,7 @@ import app.cash.backfila.client.fixedset.FixedSetRow
 import app.cash.backfila.embedded.Backfila
 import app.cash.backfila.embedded.createWetRun
 import com.google.inject.Module
-import javax.inject.Inject
+import jakarta.inject.Inject
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okio.ByteString.Companion.encodeUtf8

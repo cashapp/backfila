@@ -8,7 +8,7 @@ import app.cash.backfila.embedded.Backfila
 import app.cash.backfila.embedded.createWetRun
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
-import javax.inject.Inject
+import jakarta.inject.Inject
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat

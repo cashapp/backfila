@@ -1,7 +1,7 @@
 package app.cash.backfila.dashboard
 
 import app.cash.backfila.service.persistence.BackfillState
-import javax.inject.Inject
+import jakarta.inject.Inject
 import misk.MiskCaller
 import misk.logging.getLogger
 import misk.scope.ActionScoped

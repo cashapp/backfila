@@ -3,7 +3,7 @@ package app.cash.backfila.service.listener
 import app.cash.backfila.service.BackfilaConfig
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.DbBackfillRun
-import javax.inject.Inject
+import jakarta.inject.Inject
 import misk.hibernate.Id
 import misk.hibernate.Transacter
 import misk.hibernate.load

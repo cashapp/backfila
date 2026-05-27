@@ -3,11 +3,11 @@ package app.cash.backfila.ui.pages
 import app.cash.backfila.dashboard.GetServiceDetailsAction
 import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.components.PageTitle
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import java.net.HttpURLConnection
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.html.div
 import kotlinx.html.pre
 import kotlinx.html.span

@@ -2,8 +2,8 @@ package app.cash.backfila.client
 
 import app.cash.backfila.client.fixedset.FixedSetBackfill
 import app.cash.backfila.client.fixedset.FixedSetRow
+import jakarta.inject.Inject
 import java.util.Locale
-import javax.inject.Inject
 
 /**
  * Simple backfills to be used in tests.

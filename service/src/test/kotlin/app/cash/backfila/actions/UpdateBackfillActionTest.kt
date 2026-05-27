@@ -11,7 +11,7 @@ import app.cash.backfila.fakeCaller
 import app.cash.backfila.protos.service.ConfigureServiceRequest
 import app.cash.backfila.protos.service.CreateBackfillRequest
 import com.google.inject.Module
-import javax.inject.Inject
+import jakarta.inject.Inject
 import misk.exceptions.BadRequestException
 import misk.scope.ActionScope
 import misk.testing.MiskTest

@@ -5,8 +5,8 @@ import app.cash.backfila.client.spi.BackfilaParametersOperator.Companion.backfil
 import app.cash.backfila.client.spi.BackfillBackend
 import app.cash.backfila.client.spi.BackfillRegistration
 import app.cash.backfila.protos.service.ConfigureServiceRequest
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.logging.getLogger
 
 /**

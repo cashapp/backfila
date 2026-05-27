@@ -16,8 +16,8 @@ import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import com.google.inject.Provides
+import jakarta.inject.Singleton
 import java.util.concurrent.Executors
-import javax.inject.Singleton
 import misk.MiskCaller
 import misk.MiskTestingServiceModule
 import misk.audit.FakeAuditClientModule

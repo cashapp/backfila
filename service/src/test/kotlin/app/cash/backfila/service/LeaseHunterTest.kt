@@ -12,7 +12,7 @@ import app.cash.backfila.protos.service.ConfigureServiceRequest
 import app.cash.backfila.protos.service.CreateBackfillRequest
 import app.cash.backfila.service.scheduler.LeaseHunter
 import com.google.inject.Module
-import javax.inject.Inject
+import jakarta.inject.Inject
 import misk.scope.ActionScope
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule

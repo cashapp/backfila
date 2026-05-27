@@ -9,8 +9,8 @@ import app.cash.backfila.client.misk.hibernate.HibernateBackfill
 import app.cash.backfila.client.misk.hibernate.UnshardedPartitionProvider
 import app.cash.backfila.client.stat.parameters.DatasourceParameters
 import app.cash.backfila.client.stat.parameters.ParametersDatasourceBackfill
+import jakarta.inject.Inject
 import java.util.concurrent.BlockingDeque
-import javax.inject.Inject
 import misk.hibernate.Id
 import misk.hibernate.Query
 import misk.hibernate.Transacter

@@ -9,7 +9,7 @@ import app.cash.backfila.client.misk.MenuQuery
 import app.cash.backfila.embedded.Backfila
 import app.cash.backfila.embedded.createDryRun
 import com.google.inject.Module
-import javax.inject.Inject
+import jakarta.inject.Inject
 import misk.hibernate.Id
 import misk.hibernate.Query
 import misk.hibernate.Transacter

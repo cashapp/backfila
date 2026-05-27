@@ -1,7 +1,7 @@
 package app.cash.backfila.service
 
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import misk.metrics.v2.Metrics
 
 @Singleton

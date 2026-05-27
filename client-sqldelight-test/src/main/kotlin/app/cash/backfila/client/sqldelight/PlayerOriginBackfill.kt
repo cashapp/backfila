@@ -5,7 +5,7 @@ import app.cash.backfila.client.PrepareBackfillConfig
 import app.cash.backfila.client.sqldelight.hockeydata.HockeyDataDatabase
 import app.cash.backfila.client.sqldelight.hockeydata.HockeyPlayer
 import app.cash.backfila.client.sqldelight.hockeydata.HockeyPlayersBackfillRecordSourceConfig
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 class PlayerOriginBackfill @Inject constructor(
   hockeyDataDatabase: HockeyDataDatabase,

@@ -12,8 +12,8 @@ import com.google.inject.TypeLiteral
 import com.google.inject.multibindings.MapBinder
 import com.google.inject.multibindings.Multibinder
 import com.squareup.moshi.Types
+import jakarta.inject.Qualifier
 import java.lang.reflect.ParameterizedType
-import javax.inject.Qualifier
 import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.jvm.jvmName

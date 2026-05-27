@@ -4,9 +4,9 @@ import app.cash.backfila.client.misk.MenuItem
 import app.cash.backfila.client.misk.hibernate.HibernateBackfillModule
 import app.cash.backfila.client.stat.StaticDatasourceBackfillModule
 import com.google.inject.Provides
+import jakarta.inject.Singleton
 import java.util.concurrent.BlockingDeque
 import java.util.concurrent.LinkedBlockingDeque
-import javax.inject.Singleton
 import misk.inject.KAbstractModule
 
 class MenuStackModule : KAbstractModule() {

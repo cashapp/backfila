@@ -4,7 +4,7 @@ import app.cash.backfila.client.fixedset.FixedSetDatastore;
 import app.cash.backfila.protos.service.Parameter;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import misk.testing.MiskTest;
 import misk.testing.MiskTestModule;
 import okio.ByteString;

@@ -11,7 +11,7 @@ import app.cash.backfila.client.jooq.JooqBackfill
 import app.cash.backfila.client.jooq.gen.tables.records.WidgetsRecord
 import app.cash.backfila.client.jooq.gen.tables.references.WIDGETS
 import com.google.common.base.CharMatcher
-import javax.inject.Inject
+import jakarta.inject.Inject
 import org.jooq.Condition
 import org.jooq.Field
 import org.jooq.Record

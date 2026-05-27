@@ -2,8 +2,8 @@ package app.cash.backfila.client.misk.internal
 
 import app.cash.backfila.client.internal.BackfilaStartupConfigurator
 import com.google.common.util.concurrent.AbstractIdleService
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @Singleton
 class BackfilaStartupService @Inject constructor(

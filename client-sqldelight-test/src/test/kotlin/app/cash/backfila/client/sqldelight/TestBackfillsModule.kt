@@ -10,9 +10,9 @@ import app.cash.sqldelight.EnumColumnAdapter
 import app.cash.sqldelight.Query
 import app.cash.sqldelight.driver.jdbc.JdbcDriver
 import com.google.inject.Provides
+import jakarta.inject.Provider
+import jakarta.inject.Singleton
 import java.sql.Connection
-import javax.inject.Provider
-import javax.inject.Singleton
 import javax.sql.DataSource
 import misk.inject.KAbstractModule
 import misk.jdbc.DataSourceConfig

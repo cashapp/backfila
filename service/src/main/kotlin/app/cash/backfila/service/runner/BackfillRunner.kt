@@ -22,10 +22,10 @@ import app.cash.backfila.service.runner.statemachine.RunBatchException
 import app.cash.backfila.service.scheduler.LeaseHunter
 import com.google.common.annotations.VisibleForTesting
 import com.google.common.base.Stopwatch
+import jakarta.inject.Inject
 import java.net.SocketTimeoutException
 import java.time.Clock
 import java.time.Duration
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred

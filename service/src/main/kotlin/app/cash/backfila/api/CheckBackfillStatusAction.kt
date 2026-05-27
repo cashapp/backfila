@@ -5,7 +5,7 @@ import app.cash.backfila.protos.service.CheckBackfillStatusRequest
 import app.cash.backfila.protos.service.CheckBackfillStatusResponse
 import app.cash.backfila.protos.service.CheckBackfillStatusResponse.Status
 import app.cash.backfila.service.persistence.BackfillState
-import javax.inject.Inject
+import jakarta.inject.Inject
 import misk.MiskCaller
 import misk.scope.ActionScoped
 import misk.security.authz.Unauthenticated

@@ -1,8 +1,8 @@
 package app.cash.backfila.client.s3.shim
 
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import java.io.File
-import javax.inject.Inject
-import javax.inject.Singleton
 import okio.Buffer
 import okio.BufferedSource
 import okio.ByteString

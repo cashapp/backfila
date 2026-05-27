@@ -16,9 +16,9 @@ import app.cash.backfila.ui.pages.BackfillShowAction.Companion.CANCEL_STATE_BUTT
 import app.cash.backfila.ui.pages.BackfillShowAction.Companion.DELETE_STATE_BUTTON_LABEL
 import app.cash.backfila.ui.pages.BackfillShowAction.Companion.PAUSE_STATE_BUTTON_LABEL
 import app.cash.backfila.ui.pages.BackfillShowAction.Companion.START_STATE_BUTTON_LABEL
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import java.time.Instant
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.html.ButtonType
 import kotlinx.html.InputType
 import kotlinx.html.TagConsumer

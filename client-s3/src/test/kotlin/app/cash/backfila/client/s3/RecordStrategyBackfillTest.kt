@@ -6,7 +6,7 @@ import app.cash.backfila.client.s3.record.RecordStrategy
 import app.cash.backfila.client.s3.shim.FakeS3Service
 import app.cash.backfila.embedded.Backfila
 import app.cash.backfila.embedded.createWetRun
-import javax.inject.Inject
+import jakarta.inject.Inject
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okio.BufferedSource
