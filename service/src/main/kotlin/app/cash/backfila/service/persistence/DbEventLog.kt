@@ -39,7 +39,7 @@ class DbEventLog() : DbUnsharded<DbEventLog>, DbTimestampedEntity {
   var partition_id: Id<DbRunPartition>? = null
 
   /** User that triggered the event, null when the event was triggered by the service. */
-  @Column
+  @Column(name = "`user`")
   var user: String? = null
 
   @Column
