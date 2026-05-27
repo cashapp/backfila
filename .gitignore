@@ -37,3 +37,7 @@ CLAUDE.local.md
 
 # Thoughts directory for AI processing
 thoughts/
+gradlew
+gradlew.bat
+gradle/wrapper/gradle-wrapper.jar
+gradle/wrapper/gradle-wrapper.properties
