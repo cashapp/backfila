@@ -3,6 +3,7 @@ package app.cash.backfila.client.misk
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
 import javax.persistence.Table
 import misk.hibernate.Constraint
 import misk.hibernate.DbUnsharded
@@ -14,7 +15,7 @@ import misk.hibernate.Query
 @Table(name = "menu")
 class DbMenu() : DbUnsharded<DbMenu> {
   @javax.persistence.Id
-  @GeneratedValue
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   override lateinit var id: Id<DbMenu>
 
   @Column(nullable = false)

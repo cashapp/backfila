@@ -8,6 +8,7 @@ import javax.persistence.EnumType
 import javax.persistence.Enumerated
 import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
 import javax.persistence.Table
@@ -26,7 +27,7 @@ import okio.ByteString
 @Table(name = "run_partitions")
 class DbRunPartition() : DbUnsharded<DbRunPartition>, DbTimestampedEntity {
   @javax.persistence.Id
-  @GeneratedValue
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   override lateinit var id: Id<DbRunPartition>
 
   @Column(nullable = false)

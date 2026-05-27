@@ -4,6 +4,7 @@ import java.time.Instant
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
 import javax.persistence.Table
 import misk.hibernate.Constraint
 import misk.hibernate.DbUnsharded
@@ -17,7 +18,7 @@ import org.hibernate.annotations.Where
 @Where(clause = "expired_at IS NULL")
 class DbActiveCoupon() : DbUnsharded<DbActiveCoupon> {
   @javax.persistence.Id
-  @GeneratedValue
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   override lateinit var id: Id<DbActiveCoupon>
 
   @Column
