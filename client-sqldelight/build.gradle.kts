@@ -1,11 +1,7 @@
-import com.vanniktech.maven.publish.JavadocJar.Dokka
-import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
-
 plugins {
   kotlin("jvm")
   `java-library`
-  id("com.vanniktech.maven.publish.base")
+  id("kotlin-publishing-convention")
 }
 
 dependencies {
@@ -27,10 +23,4 @@ dependencies {
   api(project(":client"))
   // We do not want to leak client-base implementation details to customers.
   implementation(project(":client-base"))
-}
-
-configure<MavenPublishBaseExtension> {
-  configure(
-    KotlinJvm(javadocJar = Dokka("dokkaGeneratePublicationMarkdown"))
-  )
 }

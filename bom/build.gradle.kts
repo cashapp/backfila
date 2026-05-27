@@ -1,12 +1,12 @@
 plugins {
   `java-platform`
-  id("com.vanniktech.maven.publish.base")
+  id("publishing-convention")
 }
 
 dependencies {
   constraints {
     project.rootProject.subprojects.forEach { subproject ->
-      if (subproject.name != "bom") {
+      if (subproject.name !in listOf("bom", "client-sqldelight-test")) {
         api(subproject)
       }
     }

@@ -1,5 +1,4 @@
 import com.diffplug.gradle.spotless.SpotlessExtension
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.kotlin.allopen.gradle.AllOpenExtension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -23,8 +22,6 @@ buildscript {
     classpath("app.cash.backfila:client-sqldelight-gradle-plugin")
   }
 }
-
-apply(plugin = "com.vanniktech.maven.publish.base")
 
 allprojects {
   group = project.property("GROUP") as String
@@ -104,48 +101,6 @@ subprojects {
   configurations.all {
     if (name.contains("kapt") || name.contains("wire") || name.contains("proto")) {
       attributes.attribute(Usage.USAGE_ATTRIBUTE, this@subprojects.objects.named(Usage::class, Usage.JAVA_RUNTIME))
-    }
-  }
-}
-
-
-allprojects {
-  plugins.withId("com.vanniktech.maven.publish.base") {
-    configure<PublishingExtension> {
-      // For the Gradle plugin's tests.
-      repositories {
-        maven {
-          name = "testMaven"
-          url = rootProject.layout.buildDirectory.dir("testMaven").get().asFile.toURI()
-        }
-      }
-    }
-    configure<MavenPublishBaseExtension> {
-      publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, automaticRelease = true)
-      signAllPublications()
-      pom {
-        description.set("Backfila is a service that manages backfill state, calling into other services to do batched work.")
-        name.set(project.name)
-        url.set("https://github.com/cashapp/backfila/")
-        licenses {
-          license {
-            name.set("The Apache Software License, Version 2.0")
-            url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-            distribution.set("repo")
-          }
-        }
-        scm {
-          url.set("https://github.com/cashapp/backfila/")
-          connection.set("scm:git:git://github.com/cashapp/backfila.git")
-          developerConnection.set("scm:git:ssh://git@github.com/cashapp/backfila.git")
-        }
-        developers {
-          developer {
-            id.set("square")
-            name.set("Square, Inc.")
-          }
-        }
-      }
     }
   }
 }

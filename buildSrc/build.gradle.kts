@@ -10,4 +10,5 @@ repositories {
 dependencies {
   implementation(libs.dokkaGradlePlugin)
   implementation(libs.kotlinGradlePlugin)
+  implementation(libs.mavenPublishGradlePlugin)
 }

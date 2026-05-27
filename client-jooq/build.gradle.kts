@@ -1,6 +1,3 @@
-import com.vanniktech.maven.publish.JavadocJar.Dokka
-import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import nu.studer.gradle.jooq.JooqEdition
 import nu.studer.gradle.jooq.JooqGenerate
 
@@ -19,7 +16,7 @@ plugins {
   `java-library`
   id("org.flywaydb.flyway") version "7.15.0"
   id("nu.studer.jooq") version "10.1.1"
-  id("com.vanniktech.maven.publish.base")
+  id("kotlin-publishing-convention")
 }
 
 dependencies {
@@ -123,9 +120,3 @@ tasks {
 }
 
 tasks.named<JooqGenerate>("generateJooq") { allInputsDeclared.set(true) }
-
-configure<MavenPublishBaseExtension> {
-  configure(
-    KotlinJvm(javadocJar = Dokka("dokkaGeneratePublicationMarkdown"))
-  )
-}

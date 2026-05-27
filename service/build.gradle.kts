@@ -1,12 +1,8 @@
-import com.vanniktech.maven.publish.JavadocJar.Dokka
-import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
-
 plugins {
   id("com.gradleup.shadow")
   kotlin("jvm")
   id("com.diffplug.spotless")
-  id("com.vanniktech.maven.publish.base")
+  id("kotlin-publishing-convention")
   id("com.squareup.wire")
 }
 
@@ -105,10 +101,4 @@ val shadowJar by tasks.getting(com.github.jengelman.gradle.plugins.shadow.tasks.
   mergeServiceFiles()
   isZip64 = true
   archiveClassifier.set("shaded")
-}
-
-configure<MavenPublishBaseExtension> {
-  configure(
-    KotlinJvm(javadocJar = Dokka("dokkaGeneratePublicationMarkdown"))
-  )
 }

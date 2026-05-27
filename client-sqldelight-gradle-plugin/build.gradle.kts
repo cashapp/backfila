@@ -1,15 +1,10 @@
-import com.vanniktech.maven.publish.GradlePlugin
-import com.vanniktech.maven.publish.JavadocJar
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
   id("java-gradle-plugin")
   kotlin("jvm")
   id("com.github.gmazzo.buildconfig")
-  id("com.vanniktech.maven.publish.base")
 }
 
 // This module is used in two places:
@@ -23,13 +18,7 @@ plugins {
 //
 // We only want to publish when it's being built in the root project.
 if (rootProject.name == "backfila") {
-  configure<MavenPublishBaseExtension> {
-    configure(
-      GradlePlugin(
-        javadocJar = JavadocJar.Empty()
-      )
-    )
-  }
+  apply(plugin = "kotlin-publishing-convention")
 } else {
   // Move the build directory when included in build-support so as to not poison the real build.
   // If we don't there's a chance incorrect build config values (configured below) will be used.
@@ -69,28 +58,30 @@ gradlePlugin {
   }
 }
 
-tasks {
-  test {
-    // We do not want the tests to run within build-support.
-    // Note that by default intellij may still try to run them through build support.
-    if (rootProject.name != "backfila") {
-      onlyIf { false }
-      return@test
-    }
+// We do not want the tests to run within build-support.
+// Note that by default intellij may still try to run them through build support.
+if (rootProject.name == "backfila") {
+  tasks {
+    test {
 
-    useJUnitPlatform()
-    // The test in 'src/test/projects/android' needs Java 17+.
-    javaLauncher.set(
-      project.javaToolchains.launcherFor {
-        languageVersion.set(JavaLanguageVersion.of(17))
+      useJUnitPlatform()
+      // The test in 'src/test/projects/android' needs Java 17+.
+      javaLauncher.set(
+        project.javaToolchains.launcherFor {
+          languageVersion.set(JavaLanguageVersion.of(17))
+        }
+      )
+      systemProperty("backfilaVersion", rootProject.findProperty("VERSION_NAME") ?: "0.0-SNAPSHOT")
+      for (project in listOf(
+        ":client",
+        ":client-base",
+        ":client-sqldelight",
+        ":client-sqldelight-gradle-plugin"
+      )) {
+        dependsOn(project(project).getTasksByName("publishAllPublicationsToTestMavenRepository", false))
       }
-    )
-    systemProperty("backfilaVersion", rootProject.findProperty("VERSION_NAME") ?: "0.0-SNAPSHOT")
 
-    dependsOn(":client:publishAllPublicationsToTestMavenRepository")
-    dependsOn(":client-base:publishAllPublicationsToTestMavenRepository")
-    dependsOn(":client-sqldelight:publishAllPublicationsToTestMavenRepository")
-    dependsOn(":client-sqldelight-gradle-plugin:publishAllPublicationsToTestMavenRepository")
+    }
   }
 }
 

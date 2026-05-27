@@ -1,12 +1,7 @@
-import com.vanniktech.maven.publish.JavadocJar.Dokka
-import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
-
 plugins {
   kotlin("jvm")
   `java-library`
   id("com.squareup.wire")
-  id("com.vanniktech.maven.publish.base")
 }
 
 dependencies {
@@ -46,10 +41,4 @@ tasks.named("kotlinSourcesJar") {
 
 tasks.named("dokkaGeneratePublicationMarkdown") {
   dependsOn("generateMainProtos")
-}
-
-configure<MavenPublishBaseExtension> {
-  configure(
-    KotlinJvm(javadocJar = Dokka("dokkaGeneratePublicationMarkdown"))
-  )
 }

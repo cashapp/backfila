@@ -36,7 +36,7 @@ junitEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version = "5.
 junitParams = { module = "org.junit.jupiter:junit-jupiter-params", version = "5.14.4" }
 logbackClassic = { module = "ch.qos.logback:logback-classic", version = "1.5.32" }
 loggingApi = { module = "io.github.microutils:kotlin-logging", version = "2.1.23" }
-mavenPublishGradlePlugin = { module = "com.vanniktech:gradle-maven-publish-plugin", version = "0.31.0" }
+mavenPublishGradlePlugin = { module = "com.vanniktech:gradle-maven-publish-plugin", version = "0.36.0" }
 moshiCore = { module = "com.squareup.moshi:moshi", version = "1.15.2" }
 moshiKotlin = { module = "com.squareup.moshi:moshi-kotlin", version = "1.15.2" }
 mysql = { module = "mysql:mysql-connector-java", version = "8.0.30" }
