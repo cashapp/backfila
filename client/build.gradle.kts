@@ -44,12 +44,12 @@ tasks.named("kotlinSourcesJar") {
   dependsOn("generateMainProtos")
 }
 
-tasks.named("dokkaGfm") {
+tasks.named("dokkaGeneratePublicationMarkdown") {
   dependsOn("generateMainProtos")
 }
 
 configure<MavenPublishBaseExtension> {
   configure(
-    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+    KotlinJvm(javadocJar = Dokka("dokkaGeneratePublicationMarkdown"))
   )
 }

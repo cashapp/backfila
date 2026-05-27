@@ -2,7 +2,6 @@ import com.diffplug.gradle.spotless.SpotlessExtension
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import com.vanniktech.maven.publish.SonatypeHost
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.allopen.gradle.AllOpenExtension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -35,7 +34,7 @@ allprojects {
 
 subprojects {
   apply(plugin = "com.diffplug.spotless")
-  apply(plugin = "org.jetbrains.dokka")
+  apply(plugin = "dokka-convention")
   apply(plugin = "org.jetbrains.kotlin.plugin.allopen")
 
   tasks.withType<KotlinCompile> {
@@ -106,21 +105,6 @@ subprojects {
   configurations.all {
     if (name.contains("kapt") || name.contains("wire") || name.contains("proto")) {
       attributes.attribute(Usage.USAGE_ATTRIBUTE, this@subprojects.objects.named(Usage::class, Usage.JAVA_RUNTIME))
-    }
-  }
-
-  // We have to set the dokka configuration after evaluation since the com.vanniktech.maven.publish
-  // plugin overwrites our dokka configuration on projects where it's applied.
-  afterEvaluate {
-    tasks.withType(DokkaTask::class).configureEach {
-      dokkaSourceSets.configureEach {
-        reportUndocumented.set(false)
-        skipDeprecated.set(true)
-        jdkVersion.set(8)
-        if (name == "dokkaGfm") {
-          outputDirectory.set(project.file("$rootDir/docs/0.x"))
-        }
-      }
     }
   }
 }

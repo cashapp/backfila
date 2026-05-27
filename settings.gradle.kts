@@ -21,6 +21,7 @@ include("client-sqldelight-gradle-plugin")
 include("client-sqldelight-test")
 include("client-static")
 include("client-testing")
+include("docs")
 include("service")
 include("service-self-backfill")
 
