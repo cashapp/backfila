@@ -2,8 +2,8 @@ package app.cash.backfila.dashboard
 
 import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.pages.BackfillShowAction
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlinx.html.ButtonType
 import kotlinx.html.FormMethod
 import kotlinx.html.InputType

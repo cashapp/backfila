@@ -7,7 +7,7 @@ import app.cash.backfila.client.stat.parameters.ParametersDatasourceBackfill
 import app.cash.backfila.embedded.Backfila
 import app.cash.backfila.embedded.createDryRun
 import app.cash.backfila.embedded.createWetRun
-import javax.inject.Inject
+import jakarta.inject.Inject
 import kotlin.test.assertFails
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule

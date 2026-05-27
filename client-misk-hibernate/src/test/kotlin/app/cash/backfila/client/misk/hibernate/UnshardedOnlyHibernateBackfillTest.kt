@@ -10,8 +10,8 @@ import app.cash.backfila.embedded.Backfila
 import app.cash.backfila.embedded.BackfillRun
 import app.cash.backfila.embedded.createWetRun
 import com.google.inject.Module
+import jakarta.inject.Inject
 import java.time.Instant
-import javax.inject.Inject
 import misk.hibernate.Id
 import misk.hibernate.Query
 import misk.hibernate.Transacter

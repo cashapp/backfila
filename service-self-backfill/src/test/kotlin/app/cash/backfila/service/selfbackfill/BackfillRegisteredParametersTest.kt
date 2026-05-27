@@ -10,7 +10,7 @@ import app.cash.backfila.protos.service.Parameter
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.RegisteredBackfillQuery
 import com.google.inject.Module
-import javax.inject.Inject
+import jakarta.inject.Inject
 import misk.hibernate.Query
 import misk.hibernate.Transacter
 import misk.hibernate.newQuery

@@ -8,8 +8,8 @@ import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.pages.BackfillCreateAction.BackfillCreateField
 import app.cash.backfila.ui.pages.BackfillCreateAction.RangeOption
 import app.cash.backfila.ui.pages.BackfillShowAction
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlinx.html.div
 import misk.logging.getLogger
 import misk.scope.ActionScoped

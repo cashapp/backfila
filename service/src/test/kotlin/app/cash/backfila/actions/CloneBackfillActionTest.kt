@@ -21,7 +21,7 @@ import app.cash.backfila.service.persistence.BackfillRunQuery
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.RunPartitionQuery
 import com.google.inject.Module
-import javax.inject.Inject
+import jakarta.inject.Inject
 import misk.exceptions.BadRequestException
 import misk.hibernate.Query
 import misk.hibernate.Transacter

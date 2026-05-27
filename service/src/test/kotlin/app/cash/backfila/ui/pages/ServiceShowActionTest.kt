@@ -7,7 +7,7 @@ import app.cash.backfila.dashboard.GetBackfillRunsAction
 import app.cash.backfila.fakeCaller
 import app.cash.backfila.protos.service.ConfigureServiceRequest
 import com.google.inject.Module
-import javax.inject.Inject
+import jakarta.inject.Inject
 import misk.scope.ActionScope
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule

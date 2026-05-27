@@ -6,8 +6,8 @@ import app.cash.backfila.service.persistence.ServiceQuery
 import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.components.PageTitle
 import app.cash.backfila.ui.components.PaginationWithHistory
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlinx.html.ButtonType
 import kotlinx.html.a
 import kotlinx.html.button

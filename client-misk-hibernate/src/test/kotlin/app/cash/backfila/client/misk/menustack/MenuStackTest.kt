@@ -9,8 +9,8 @@ import app.cash.backfila.embedded.Backfila
 import app.cash.backfila.embedded.createDryRun
 import app.cash.backfila.embedded.createWetRun
 import com.google.inject.Module
+import jakarta.inject.Inject
 import java.util.concurrent.BlockingDeque
-import javax.inject.Inject
 import misk.hibernate.Query
 import misk.hibernate.Session
 import misk.hibernate.Transacter

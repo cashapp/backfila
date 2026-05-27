@@ -7,8 +7,8 @@ import com.google.inject.util.Types
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.ToJson
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import okio.Buffer
 import okio.ByteString
 import okio.ByteString.Companion.toByteString

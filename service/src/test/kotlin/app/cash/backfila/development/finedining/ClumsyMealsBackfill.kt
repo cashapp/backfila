@@ -4,7 +4,7 @@ import app.cash.backfila.client.BackfillConfig
 import app.cash.backfila.client.Description
 import app.cash.backfila.client.PrepareBackfillConfig
 import app.cash.backfila.client.stat.StaticDatasourceBackfill
-import javax.inject.Inject
+import jakarta.inject.Inject
 import misk.logging.getLogger
 
 class ClumsyMealsBackfill @Inject constructor() : StaticDatasourceBackfill<String, ClumsyMealsBackfill.ClumsyMealsAttributes>() {

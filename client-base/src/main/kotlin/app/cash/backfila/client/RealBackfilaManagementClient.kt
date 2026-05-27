@@ -6,7 +6,7 @@ import app.cash.backfila.protos.service.CheckBackfillStatusRequest
 import app.cash.backfila.protos.service.CheckBackfillStatusResponse
 import app.cash.backfila.protos.service.CreateAndStartBackfillRequest
 import app.cash.backfila.protos.service.CreateBackfillRequest
-import javax.inject.Inject
+import jakarta.inject.Inject
 import okio.ByteString
 
 // TODO(mikepaw) - add parameter_map method for Java uses.

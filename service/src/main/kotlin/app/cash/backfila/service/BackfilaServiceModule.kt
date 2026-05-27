@@ -19,9 +19,9 @@ import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import com.google.inject.Provides
+import jakarta.inject.Qualifier
+import jakarta.inject.Singleton
 import java.util.concurrent.Executors
-import javax.inject.Qualifier
-import javax.inject.Singleton
 import misk.config.ConfigModule
 import misk.inject.KAbstractModule
 import misk.security.authz.AccessAnnotationEntry

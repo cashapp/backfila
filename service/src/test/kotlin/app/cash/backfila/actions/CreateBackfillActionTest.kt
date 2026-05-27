@@ -19,7 +19,7 @@ import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.RunPartitionQuery
 import app.cash.backfila.service.persistence.ServiceQuery
 import com.google.inject.Module
-import javax.inject.Inject
+import jakarta.inject.Inject
 import kotlin.test.assertNotNull
 import misk.exceptions.BadRequestException
 import misk.hibernate.Query

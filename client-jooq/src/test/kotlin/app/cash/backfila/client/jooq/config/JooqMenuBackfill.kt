@@ -7,7 +7,7 @@ import app.cash.backfila.client.jooq.BackfillJooqTransacter
 import app.cash.backfila.client.jooq.ByteStringSerializer
 import app.cash.backfila.client.jooq.JooqBackfill
 import app.cash.backfila.client.jooq.gen.tables.references.MENU
-import javax.inject.Inject
+import jakarta.inject.Inject
 import misk.logging.getLogger
 import org.jooq.Condition
 import org.jooq.DSLContext

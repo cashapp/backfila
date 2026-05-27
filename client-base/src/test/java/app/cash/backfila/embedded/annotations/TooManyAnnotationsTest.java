@@ -7,7 +7,7 @@ import app.cash.backfila.embedded.JavaBackfila;
 import app.cash.backfila.protos.service.ConfigureServiceRequest;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import kotlin.jvm.JvmClassMappingKt;
 import misk.testing.MiskTest;
 import misk.testing.MiskTestModule;

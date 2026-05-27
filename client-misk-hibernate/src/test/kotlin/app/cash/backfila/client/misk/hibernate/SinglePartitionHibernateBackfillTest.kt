@@ -7,7 +7,7 @@ import app.cash.backfila.embedded.Backfila
 import app.cash.backfila.embedded.BackfillRun
 import app.cash.backfila.embedded.createDryRun
 import app.cash.backfila.embedded.createWetRun
-import javax.inject.Inject
+import jakarta.inject.Inject
 import misk.hibernate.Id
 import misk.hibernate.Session
 import misk.hibernate.Transacter

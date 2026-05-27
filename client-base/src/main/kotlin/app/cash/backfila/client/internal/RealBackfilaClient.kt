@@ -8,10 +8,10 @@ import app.cash.backfila.protos.service.ConfigureServiceRequest
 import app.cash.backfila.protos.service.ConfigureServiceResponse
 import app.cash.backfila.protos.service.CreateAndStartBackfillRequest
 import app.cash.backfila.protos.service.CreateAndStartBackfillResponse
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import java.io.IOException
 import java.io.UncheckedIOException
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class RealBackfilaClient @Inject internal constructor(

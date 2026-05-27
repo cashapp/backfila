@@ -1,6 +1,6 @@
 package app.cash.backfila.client.dynamodbv2
 
-import javax.inject.Inject
+import jakarta.inject.Inject
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema

@@ -1,7 +1,7 @@
 package app.cash.backfila.embedded
 
 import app.cash.backfila.client.Backfill
-import javax.inject.Inject
+import jakarta.inject.Inject
 import okio.ByteString
 
 /**

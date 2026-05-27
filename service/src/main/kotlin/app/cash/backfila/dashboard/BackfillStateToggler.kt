@@ -7,7 +7,7 @@ import app.cash.backfila.service.persistence.BackfillState.PAUSED
 import app.cash.backfila.service.persistence.BackfillState.RUNNING
 import app.cash.backfila.service.persistence.DbBackfillRun
 import app.cash.backfila.service.persistence.DbEventLog
-import javax.inject.Inject
+import jakarta.inject.Inject
 import misk.MiskCaller
 import misk.exceptions.BadRequestException
 import misk.hibernate.Id

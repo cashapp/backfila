@@ -8,7 +8,7 @@ import app.cash.backfila.protos.service.ConfigureServiceRequest
 import app.cash.backfila.protos.service.ConfigureServiceResponse
 import app.cash.backfila.protos.service.CreateAndStartBackfillRequest
 import app.cash.backfila.protos.service.CreateAndStartBackfillResponse
-import javax.inject.Inject
+import jakarta.inject.Inject
 import misk.MiskCaller
 import misk.inject.keyOf
 import misk.scope.ActionScope

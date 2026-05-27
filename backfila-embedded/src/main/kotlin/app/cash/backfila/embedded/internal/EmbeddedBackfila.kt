@@ -16,9 +16,9 @@ import app.cash.backfila.protos.service.CreateAndStartBackfillRequest
 import app.cash.backfila.protos.service.CreateAndStartBackfillResponse
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import java.util.concurrent.atomic.AtomicInteger
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
 import okio.ByteString

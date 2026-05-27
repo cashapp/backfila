@@ -2,8 +2,8 @@ package app.cash.backfila.client.s3.internal
 
 import app.cash.backfila.client.s3.ForS3Backend
 import app.cash.backfila.client.s3.shim.S3Service
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import okio.Buffer
 import okio.BufferedSource
 import okio.ByteString

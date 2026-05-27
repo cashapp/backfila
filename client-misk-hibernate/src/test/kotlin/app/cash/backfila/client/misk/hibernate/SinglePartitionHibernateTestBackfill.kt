@@ -5,7 +5,7 @@ import app.cash.backfila.client.Description
 import app.cash.backfila.client.misk.ClientMiskService
 import app.cash.backfila.client.misk.DbMenu
 import app.cash.backfila.client.misk.MenuQuery
-import javax.inject.Inject
+import jakarta.inject.Inject
 import misk.hibernate.Id
 import misk.hibernate.Query
 import misk.hibernate.Transacter

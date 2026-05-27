@@ -13,7 +13,7 @@ import app.cash.backfila.service.persistence.DbRunPartition
 import app.cash.backfila.service.persistence.DbService
 import app.cash.backfila.service.persistence.RegisteredBackfillQuery
 import app.cash.backfila.service.persistence.ServiceQuery
-import javax.inject.Inject
+import jakarta.inject.Inject
 import misk.exceptions.BadRequestException
 import misk.hibernate.Id
 import misk.hibernate.Query

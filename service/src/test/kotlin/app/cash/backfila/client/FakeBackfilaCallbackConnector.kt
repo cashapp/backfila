@@ -7,9 +7,9 @@ import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
 import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
 import app.cash.backfila.protos.clientservice.RunBatchRequest
 import app.cash.backfila.protos.clientservice.RunBatchResponse
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import java.util.LinkedList
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.channels.Channel
 import okio.ByteString.Companion.encodeUtf8
 

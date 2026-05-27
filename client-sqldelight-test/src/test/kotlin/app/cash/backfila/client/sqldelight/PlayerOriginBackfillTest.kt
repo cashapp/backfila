@@ -7,7 +7,7 @@ import app.cash.backfila.client.testing.assertThat
 import app.cash.backfila.embedded.Backfila
 import app.cash.backfila.embedded.BackfillRun
 import app.cash.backfila.embedded.createWetRun
-import javax.inject.Inject
+import jakarta.inject.Inject
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import okio.ByteString.Companion.encodeUtf8

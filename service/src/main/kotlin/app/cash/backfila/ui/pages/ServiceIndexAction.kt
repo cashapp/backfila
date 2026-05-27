@@ -5,7 +5,7 @@ import app.cash.backfila.ui.actions.ServiceDataHelper
 import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.components.PageTitle
 import app.cash.backfila.ui.components.ServiceSelect
-import javax.inject.Inject
+import jakarta.inject.Inject
 import misk.security.authz.Authenticated
 import misk.web.Get
 import misk.web.ResponseContentType

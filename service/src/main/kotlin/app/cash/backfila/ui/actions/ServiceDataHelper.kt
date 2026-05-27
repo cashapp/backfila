@@ -1,8 +1,8 @@
 package app.cash.backfila.ui.actions
 
 import app.cash.backfila.dashboard.GetServicesAction
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @Singleton
 class ServiceDataHelper @Inject constructor(

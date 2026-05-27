@@ -8,7 +8,7 @@ import com.google.inject.Binder
 import com.google.inject.TypeLiteral
 import com.google.inject.multibindings.MapBinder
 import com.google.inject.multibindings.Multibinder
-import javax.inject.Qualifier
+import jakarta.inject.Qualifier
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
 

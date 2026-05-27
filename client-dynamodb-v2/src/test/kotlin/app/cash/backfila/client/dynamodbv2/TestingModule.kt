@@ -4,7 +4,7 @@ import app.cash.backfila.client.dynamodbv2.BackfillsModule
 import app.cash.backfila.client.dynamodbv2.TrackItem
 import app.cash.backfila.embedded.EmbeddedBackfilaModule
 import com.google.inject.Provides
-import javax.inject.Singleton
+import jakarta.inject.Singleton
 import misk.MiskTestingServiceModule
 import misk.aws2.dynamodb.testing.DynamoDbTable
 import misk.aws2.dynamodb.testing.InProcessDynamoDbModule
