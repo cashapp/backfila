@@ -8,10 +8,9 @@ import app.cash.backfila.client.ForConnectors
 import app.cash.backfila.client.internal.BackfilaClient
 import app.cash.backfila.client.misk.hibernate.HibernateBackfillModule
 import app.cash.backfila.client.misk.internal.BackfilaStartupService
-import app.cash.backfila.service.persistence.BackfilaDb
+import misk.ReadyService
 import misk.ServiceModule
 import misk.inject.KAbstractModule
-import misk.jdbc.SchemaMigratorService
 
 // Connector type used only by backfila to backfill itself.
 private const val LOCAL = "LOCAL"
@@ -20,7 +19,7 @@ class LocalBackfillingModule : KAbstractModule() {
   override fun configure() {
     install(
       ServiceModule<BackfilaStartupService>()
-        .dependsOn<SchemaMigratorService>(BackfilaDb::class),
+        .dependsOn<ReadyService>(),
     )
 
     bind(BackfilaClientConfig::class.java).toInstance(
