@@ -1,6 +1,5 @@
-import com.vanniktech.maven.publish.JavadocJar.Dokka
-import com.vanniktech.maven.publish.KotlinJvm
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import com.vanniktech.maven.publish.tasks.JavadocJar
 
 plugins {
   id("com.gradleup.shadow")
@@ -96,10 +95,9 @@ val jar by tasks.getting(Jar::class) {
     attributes("Main-Class" to "app.cash.backfila.service.BackfilaDevelopmentServiceKt")
   }
   isZip64 = true
-  archiveClassifier.set("unshaded")
 }
 
-val shadowJar by tasks.getting(com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar::class) {
+val shadowJar by tasks.getting(ShadowJar::class) {
   exclude("module-info.class") // https://github.com/johnrengelman/shadow/issues/352
   // https://youtrack.jetbrains.com/issue/KT-25709
   exclude("**/*.kotlin_metadata")
@@ -109,8 +107,46 @@ val shadowJar by tasks.getting(com.github.jengelman.gradle.plugins.shadow.tasks.
   archiveClassifier.set("shaded")
 }
 
-configure<MavenPublishBaseExtension> {
-  configure(
-    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
-  )
+// create a copy of the regular jar and add the classifier of unshaded so as to not break anyone without a migration
+// period. This is apparently well off the paved road for the publishing plugin and gradle, so there is a lot to
+// recreate by hand.
+val unshadedJar by tasks.register<Jar>("unshadedJar") {
+  // get the original jar files
+  from(project.tasks.named<Jar>("jar").get().source)
+  // don't want the one from the original jar, as it ends up in the root and this task makes another manifest anyway
+  exclude("MANIFEST.MF")
+  manifest {
+    attributes("Main-Class" to "app.cash.backfila.service.BackfilaDevelopmentServiceKt")
+  }
+  description =
+    "the unshaded jar, published without a classifier to be consistent with how sources and javadoc is published"
+  archiveClassifier.set("unshaded")
+
+  isZip64 = true
 }
+val unshadedArtifact = artifacts.add("runtimeClasspath",unshadedJar)
+
+// we are not using the kotlin-publishing-convention here because we need to declare the unshaded artifact, but
+// apparently you can't modify the MavenPublication instance once it's created. We've instead reverse engineered what
+// it does and added our extra bit. Once we're in the clear about removing the unshaded jar we can switch to what
+// every other subproject does for publication
+
+tasks.register("dokkaJavadocJar", JavadocJar::class) {
+  val dokkaTask = project.tasks.named("dokkaGfm")
+  dependsOn(dokkaTask)
+  from(dokkaTask)
+
+}
+project.extensions.getByType(JavaPluginExtension::class.java).withSourcesJar()
+
+
+publishing {
+  publications {
+    create<MavenPublication>("maven") {
+      from(components["java"])
+      artifact(unshadedArtifact)
+      artifact(project.tasks.named("dokkaJavadocJar"))
+    }
+  }
+}
+
