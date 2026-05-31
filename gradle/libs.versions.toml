@@ -39,7 +39,7 @@ loggingApi = { module = "io.github.microutils:kotlin-logging", version = "2.1.23
 mavenPublishGradlePlugin = { module = "com.vanniktech:gradle-maven-publish-plugin", version = "0.31.0" }
 moshiCore = { module = "com.squareup.moshi:moshi", version = "1.15.2" }
 moshiKotlin = { module = "com.squareup.moshi:moshi-kotlin", version = "1.15.2" }
-mysql = { module = "mysql:mysql-connector-java", version = "8.0.30" }
+mysql = { module = "mysql:mysql-connector-java", version = "8.0.33" }
 okHttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 okHttpMockWebServer = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "okhttp" }
 okio = { module = "com.squareup.okio:okio", version = "3.17.0" }
