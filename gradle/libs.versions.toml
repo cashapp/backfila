@@ -12,7 +12,7 @@ wire = "6.4.0"
 
 [libraries]
 apacheCommonsLang3 = { module = "org.apache.commons:commons-lang3", version = "3.12.0" }
-assertj = { module = "org.assertj:assertj-core", version = "3.25.3" }
+assertj = { module = "org.assertj:assertj-core", version = "3.27.7" }
 aws2Dynamodb = { module = "software.amazon.awssdk:dynamodb", version = "2.44.9" }
 aws2DynamodbEnhanced = { module = "software.amazon.awssdk:dynamodb-enhanced", version = "2.44.9" }
 awsDynamodb = { module = "com.amazonaws:aws-java-sdk-dynamodb", version = "1.11.960" }
