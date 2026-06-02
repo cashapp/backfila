@@ -44,7 +44,6 @@ dependencies {
   implementation(libs.retrofit)
   implementation(libs.retrofitGuavaAdapter)
   implementation(libs.retrofitWire)
-  implementation(libs.tracingJaeger)
   implementation(libs.wireRuntime)
   implementation(libs.wireCompiler)
   implementation(libs.wireSchema)
