@@ -1,8 +1,5 @@
 import com.diffplug.gradle.spotless.SpotlessExtension
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
-import com.vanniktech.maven.publish.SonatypeHost
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.allopen.gradle.AllOpenExtension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -26,8 +23,6 @@ buildscript {
   }
 }
 
-apply(plugin = "com.vanniktech.maven.publish.base")
-
 allprojects {
   group = project.property("GROUP") as String
   version = project.findProperty("VERSION_NAME") as? String ?: "0.0-SNAPSHOT"
@@ -35,7 +30,7 @@ allprojects {
 
 subprojects {
   apply(plugin = "com.diffplug.spotless")
-  apply(plugin = "org.jetbrains.dokka")
+  apply(plugin = "dokka-convention")
   apply(plugin = "org.jetbrains.kotlin.plugin.allopen")
 
   tasks.withType<KotlinCompile> {
@@ -106,63 +101,6 @@ subprojects {
   configurations.all {
     if (name.contains("kapt") || name.contains("wire") || name.contains("proto")) {
       attributes.attribute(Usage.USAGE_ATTRIBUTE, this@subprojects.objects.named(Usage::class, Usage.JAVA_RUNTIME))
-    }
-  }
-
-  // We have to set the dokka configuration after evaluation since the com.vanniktech.maven.publish
-  // plugin overwrites our dokka configuration on projects where it's applied.
-  afterEvaluate {
-    tasks.withType(DokkaTask::class).configureEach {
-      dokkaSourceSets.configureEach {
-        reportUndocumented.set(false)
-        skipDeprecated.set(true)
-        jdkVersion.set(8)
-        if (name == "dokkaGfm") {
-          outputDirectory.set(project.file("$rootDir/docs/0.x"))
-        }
-      }
-    }
-  }
-}
-
-
-allprojects {
-  plugins.withId("com.vanniktech.maven.publish.base") {
-    configure<PublishingExtension> {
-      // For the Gradle plugin's tests.
-      repositories {
-        maven {
-          name = "testMaven"
-          url = rootProject.layout.buildDirectory.dir("testMaven").get().asFile.toURI()
-        }
-      }
-    }
-    configure<MavenPublishBaseExtension> {
-      publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, automaticRelease = true)
-      signAllPublications()
-      pom {
-        description.set("Backfila is a service that manages backfill state, calling into other services to do batched work.")
-        name.set(project.name)
-        url.set("https://github.com/cashapp/backfila/")
-        licenses {
-          license {
-            name.set("The Apache Software License, Version 2.0")
-            url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-            distribution.set("repo")
-          }
-        }
-        scm {
-          url.set("https://github.com/cashapp/backfila/")
-          connection.set("scm:git:git://github.com/cashapp/backfila.git")
-          developerConnection.set("scm:git:ssh://git@github.com/cashapp/backfila.git")
-        }
-        developers {
-          developer {
-            id.set("square")
-            name.set("Square, Inc.")
-          }
-        }
-      }
     }
   }
 }

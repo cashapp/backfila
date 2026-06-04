@@ -46,7 +46,7 @@ Right-click on `BackfilaDevelopmentService.kt` and select `Run`
 Build a Docker image of backfila:
 
 ```
-$ docker build -t backfila-0.0.1
+$ docker build -t backfila-0.0.1 .
 ```
 
 #### Running locally

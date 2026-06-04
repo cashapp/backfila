@@ -19,7 +19,7 @@ awsDynamodb = { module = "com.amazonaws:aws-java-sdk-dynamodb", version = "1.11.
 awsS3 = { module = "com.amazonaws:aws-java-sdk-s3", version = "1.12.231" }
 aws2S3 = { module = "software.amazon.awssdk:s3", version = "2.44.9" }
 buildConfigPlugin = { module = "com.github.gmazzo:gradle-buildconfig-plugin", version = "3.1.0" }
-dokkaGradlePlugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version = "2.0.0" }
+dokkaGradlePlugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version = "2.2.0" }
 guava = { module = "com.google.guava:guava", version = "33.6.0-jre" }
 guice = { module = "com.google.inject:guice", version = "6.0.0" }
 jCommander = { module = "com.beust:jcommander", version = "1.72" }
@@ -36,7 +36,7 @@ junitEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version = "5.
 junitParams = { module = "org.junit.jupiter:junit-jupiter-params", version = "5.14.4" }
 logbackClassic = { module = "ch.qos.logback:logback-classic", version = "1.5.32" }
 loggingApi = { module = "io.github.microutils:kotlin-logging", version = "2.1.23" }
-mavenPublishGradlePlugin = { module = "com.vanniktech:gradle-maven-publish-plugin", version = "0.31.0" }
+mavenPublishGradlePlugin = { module = "com.vanniktech:gradle-maven-publish-plugin", version = "0.36.0" }
 moshiCore = { module = "com.squareup.moshi:moshi", version = "1.15.2" }
 moshiKotlin = { module = "com.squareup.moshi:moshi-kotlin", version = "1.15.2" }
 mysql = { module = "mysql:mysql-connector-java", version = "8.0.30" }

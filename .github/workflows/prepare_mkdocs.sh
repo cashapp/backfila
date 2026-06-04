@@ -9,7 +9,7 @@
 set -ex
 
 # Generate the API docs
-gradle dokkaGfm
+gradle :docs:dokkaGenerateMarkdown
 
 # Dokka filenames like `-http-url/index.md` don't work well with MkDocs <title> tags.
 # Assign metadata to the file's first Markdown heading.
@@ -25,7 +25,7 @@ title_markdown_file() {
 }
 
 set +x
-for MARKDOWN_FILE in $(find docs/0.x/ -name '*.md'); do
+for MARKDOWN_FILE in $(find docs/build/dokka/markdown -name '*.md'); do
   echo $MARKDOWN_FILE
   title_markdown_file $MARKDOWN_FILE
 done
