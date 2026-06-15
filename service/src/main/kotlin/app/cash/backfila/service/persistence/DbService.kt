@@ -4,6 +4,7 @@ import java.time.Instant
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
 import javax.persistence.Table
 import misk.hibernate.DbTimestampedEntity
 import misk.hibernate.DbUnsharded
@@ -13,7 +14,7 @@ import misk.hibernate.Id
 @Table(name = "services")
 class DbService() : DbUnsharded<DbService>, DbTimestampedEntity {
   @javax.persistence.Id
-  @GeneratedValue
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   override lateinit var id: Id<DbService>
 
   @Column(nullable = false)

@@ -3,6 +3,7 @@ package app.cash.backfila.client.misk
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
 import javax.persistence.Table
 import misk.hibernate.DbRoot
 import misk.hibernate.Id
@@ -13,7 +14,7 @@ import misk.hibernate.annotation.Keyspace
 @Table(name = "restaurants")
 class DbRestaurant private constructor() : DbRoot<DbRestaurant> {
   @javax.persistence.Id
-  @GeneratedValue
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   override lateinit var id: Id<DbRestaurant>
 
   @Column(nullable = false)

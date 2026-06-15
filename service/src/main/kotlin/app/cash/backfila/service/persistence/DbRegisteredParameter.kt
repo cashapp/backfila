@@ -5,6 +5,7 @@ import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
 import javax.persistence.Table
@@ -16,7 +17,7 @@ import misk.hibernate.Id
 @Table(name = "registered_parameters")
 class DbRegisteredParameter() : DbUnsharded<DbRegisteredParameter>, DbTimestampedEntity {
   @javax.persistence.Id
-  @GeneratedValue
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   override lateinit var id: Id<DbRegisteredParameter>
 
   @ManyToOne(fetch = FetchType.LAZY)
