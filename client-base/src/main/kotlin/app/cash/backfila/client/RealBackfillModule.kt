@@ -31,6 +31,17 @@ constructor(
   ) : this(Provider { config }, loggingSetupProvider)
 
   /**
+   * This constructor preserves the Guice 6 / javax.inject Kotlin call site.
+   */
+  @Suppress("unused")
+  @Deprecated("Providing an instance is preferred over a provider", replaceWith = ReplaceWith("RealBackfillModule(config,loggingSetupProvider)"))
+  constructor(
+    configProvider: JavaxProvider<BackfilaClientConfig>,
+    loggingSetupProvider: KClass<out BackfilaClientLoggingSetupProvider> =
+      BackfilaClientNoLoggingSetupProvider::class,
+  ) : this(Providers.guicify(configProvider), loggingSetupProvider)
+
+  /**
    * This constructor is used for java land.
    */
   @Suppress("unused")
@@ -43,9 +54,20 @@ constructor(
   ) : this(Providers.guicify(configProvider), loggingSetupProvider.kotlin)
 
   /**
-   * This constructor is used for guice 7 compatibility
+   * This constructor preserves the Guice 7 / jakarta.inject Kotlin call site.
    */
   @Suppress("unused")
+  @Deprecated("Providing an instance is preferred over a provider", replaceWith = ReplaceWith("RealBackfillModule(config,loggingSetupProvider)"))
+  constructor(
+    configProvider: JakartaProvider<BackfilaClientConfig>,
+    loggingSetupProvider: KClass<out BackfilaClientLoggingSetupProvider>,
+  ) : this(Providers.guicify(configProvider), loggingSetupProvider)
+
+  /**
+   * This constructor is used for guice 7 compatibility.
+   */
+  @Suppress("unused")
+  @JvmOverloads
   @Deprecated("Providing an instance is preferred over a provider", replaceWith = ReplaceWith("RealBackfillModule(config,loggingSetupProvider)"))
   constructor(
     configProvider: JakartaProvider<BackfilaClientConfig>,

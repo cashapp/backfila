@@ -9,6 +9,9 @@ plugins {
 }
 
 dependencies {
+  api(libs.jakartaInject)
+  api(libs.javaxInject)
+
   implementation(libs.aws2Dynamodb)
   implementation(libs.aws2DynamodbEnhanced)
   implementation(libs.kotlinReflection)

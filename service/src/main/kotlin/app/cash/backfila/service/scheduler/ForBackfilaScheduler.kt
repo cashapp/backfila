@@ -1,6 +1,5 @@
 package app.cash.backfila.service.scheduler
 
-import jakarta.inject.Qualifier
-
-@Qualifier
+@jakarta.inject.Qualifier
+@javax.inject.Qualifier
 annotation class ForBackfilaScheduler

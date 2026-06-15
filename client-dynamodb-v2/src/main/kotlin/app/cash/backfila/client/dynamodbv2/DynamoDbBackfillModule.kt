@@ -12,7 +12,6 @@ import com.google.inject.multibindings.MapBinder
 import com.google.inject.multibindings.Multibinder
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import jakarta.inject.Qualifier
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
 
@@ -70,4 +69,6 @@ private fun mapBinder(binder: Binder) = MapBinder.newMapBinder(
 )
 
 /** Annotation for specifying dependencies specifically for this Backend. */
-@Qualifier annotation class ForDynamoDbBackend
+@jakarta.inject.Qualifier
+@javax.inject.Qualifier
+annotation class ForDynamoDbBackend
