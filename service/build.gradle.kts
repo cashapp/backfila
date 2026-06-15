@@ -108,6 +108,6 @@ val shadowJar by tasks.getting(com.github.jengelman.gradle.plugins.shadow.tasks.
 
 configure<MavenPublishBaseExtension> {
   configure(
-    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+    KotlinJvm(javadocJar = Dokka("dokkaGeneratePublicationMarkdown"))
   )
 }

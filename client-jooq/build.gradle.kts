@@ -126,6 +126,6 @@ tasks.named<JooqGenerate>("generateJooq") { allInputsDeclared.set(true) }
 
 configure<MavenPublishBaseExtension> {
   configure(
-    KotlinJvm(javadocJar = Dokka("dokkaGfm"))
+    KotlinJvm(javadocJar = Dokka("dokkaGeneratePublicationMarkdown"))
   )
 }

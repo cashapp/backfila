@@ -21,8 +21,8 @@ git clone $REPO $DIR
 cd $DIR
 
 # Generate the API docs
-GRADLE_TASKS=$(ls -d misk*/ | cut -f1 -d'/' | awk '{ printf ":%s:dokkaGfm ", $1 }')
-gradle dokkaGfm
+GRADLE_TASKS=$(ls -d misk*/ | cut -f1 -d'/' | awk '{ printf ":%s:dokkaGenerateMarkdown ", $1 }')
+gradle dokkaGenerateMarkdown
 
 # Copy in special files that GitHub wants in the project root.
 cat README.md | grep -v 'project website' > docs/index.md
