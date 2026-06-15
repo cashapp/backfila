@@ -1,0 +1,936 @@
+public final class app/cash/backfila/client/BackfilaClientConfig {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lapp/cash/backfila/client/BackfilaClientConfig;
+	public static synthetic fun copy$default (Lapp/cash/backfila/client/BackfilaClientConfig;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lapp/cash/backfila/client/BackfilaClientConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getConnector_extra_data ()Ljava/lang/String;
+	public final fun getConnector_type ()Ljava/lang/String;
+	public final fun getSlack_channel ()Ljava/lang/String;
+	public final fun getVariant ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class app/cash/backfila/client/BackfilaClientLoggingSetupProvider {
+	public abstract fun withBackfillPartitionLogging (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public abstract fun withBackfillRunLogging (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+}
+
+public final class app/cash/backfila/client/BackfilaClientNoLoggingSetupProvider : app/cash/backfila/client/BackfilaClientLoggingSetupProvider {
+	public fun <init> ()V
+	public fun withBackfillPartitionLogging (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public fun withBackfillRunLogging (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+}
+
+public abstract interface annotation class app/cash/backfila/client/BackfilaDefault : java/lang/annotation/Annotation {
+	public abstract fun name ()Ljava/lang/String;
+	public abstract fun nullDefault ()Z
+	public abstract fun value ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/client/BackfilaHttpClientConfig {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lapp/cash/backfila/client/BackfilaHttpClientConfig;
+	public static synthetic fun copy$default (Lapp/cash/backfila/client/BackfilaHttpClientConfig;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lapp/cash/backfila/client/BackfilaHttpClientConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getSlack_channel ()Ljava/lang/String;
+	public final fun getUrl ()Ljava/lang/String;
+	public final fun getVariant ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun toBackfilaClientConfig ()Lapp/cash/backfila/client/BackfilaClientConfig;
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class app/cash/backfila/client/BackfilaManagementClient {
+	public abstract fun checkBackfillStatus (J)Lapp/cash/backfila/protos/service/CheckBackfillStatusResponse$Status;
+	public abstract fun createAndStart (Ljava/lang/Class;ZLjava/lang/Integer;Ljava/lang/Object;Ljava/lang/Long;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lokio/ByteString;Lokio/ByteString;)J
+	public static synthetic fun createAndStart$default (Lapp/cash/backfila/client/BackfilaManagementClient;Ljava/lang/Class;ZLjava/lang/Integer;Ljava/lang/Object;Ljava/lang/Long;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lokio/ByteString;Lokio/ByteString;ILjava/lang/Object;)J
+}
+
+public final class app/cash/backfila/client/BackfilaManagementClient$DefaultImpls {
+	public static synthetic fun createAndStart$default (Lapp/cash/backfila/client/BackfilaManagementClient;Ljava/lang/Class;ZLjava/lang/Integer;Ljava/lang/Object;Ljava/lang/Long;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lokio/ByteString;Lokio/ByteString;ILjava/lang/Object;)J
+}
+
+public abstract interface annotation class app/cash/backfila/client/BackfilaRequired : java/lang/annotation/Annotation {
+	public abstract fun name ()Ljava/lang/String;
+}
+
+public abstract interface class app/cash/backfila/client/Backfill {
+}
+
+public final class app/cash/backfila/client/BackfillConfig {
+	public fun <init> (Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;Z)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Z
+	public final fun copy (Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;Z)Lapp/cash/backfila/client/BackfillConfig;
+	public static synthetic fun copy$default (Lapp/cash/backfila/client/BackfillConfig;Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)Lapp/cash/backfila/client/BackfillConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBackfillId ()Ljava/lang/String;
+	public final fun getDryRun ()Z
+	public final fun getParameters ()Ljava/lang/Object;
+	public final fun getPartitionName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun prepareConfig ()Lapp/cash/backfila/client/PrepareBackfillConfig;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/client/BackfillUnit : java/lang/Enum {
+	public static final field BYTES Lapp/cash/backfila/client/BackfillUnit;
+	public static final field ITEMS Lapp/cash/backfila/client/BackfillUnit;
+	public static final field SEGMENTS Lapp/cash/backfila/client/BackfillUnit;
+	public final fun getDisplayName ()Ljava/lang/String;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lapp/cash/backfila/client/BackfillUnit;
+	public static fun values ()[Lapp/cash/backfila/client/BackfillUnit;
+}
+
+public final class app/cash/backfila/client/Connectors {
+	public static final field ENVOY Ljava/lang/String;
+	public static final field GRPC Ljava/lang/String;
+	public static final field HTTP Ljava/lang/String;
+	public static final field INSTANCE Lapp/cash/backfila/client/Connectors;
+}
+
+public abstract interface annotation class app/cash/backfila/client/DeleteBy : java/lang/annotation/Annotation {
+	public abstract fun deleteBy ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/client/DeleteByKt {
+	public static final fun parseDeleteByDate (Lapp/cash/backfila/client/DeleteBy;)Ljava/time/Instant;
+}
+
+public abstract interface annotation class app/cash/backfila/client/Description : java/lang/annotation/Annotation {
+	public abstract fun text ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/client/EnvoyConnectorData {
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/util/List;)Lapp/cash/backfila/client/EnvoyConnectorData;
+	public static synthetic fun copy$default (Lapp/cash/backfila/client/EnvoyConnectorData;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lapp/cash/backfila/client/EnvoyConnectorData;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getClusterType ()Ljava/lang/String;
+	public final fun getHeaders ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface annotation class app/cash/backfila/client/ForBackfila : java/lang/annotation/Annotation {
+}
+
+public final class app/cash/backfila/client/GrpcConnectorData {
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/util/List;)Lapp/cash/backfila/client/GrpcConnectorData;
+	public static synthetic fun copy$default (Lapp/cash/backfila/client/GrpcConnectorData;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lapp/cash/backfila/client/GrpcConnectorData;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getHeaders ()Ljava/util/List;
+	public final fun getUrl ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/client/HttpConnectorData {
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/util/List;)Lapp/cash/backfila/client/HttpConnectorData;
+	public static synthetic fun copy$default (Lapp/cash/backfila/client/HttpConnectorData;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lapp/cash/backfila/client/HttpConnectorData;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getHeaders ()Ljava/util/List;
+	public final fun getUrl ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/client/HttpHeader {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lapp/cash/backfila/client/HttpHeader;
+	public static synthetic fun copy$default (Lapp/cash/backfila/client/HttpHeader;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lapp/cash/backfila/client/HttpHeader;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getName ()Ljava/lang/String;
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/client/NoParameters {
+	public fun <init> ()V
+}
+
+public final class app/cash/backfila/client/PrepareBackfillConfig {
+	public fun <init> (Ljava/lang/Object;Z)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun component2 ()Z
+	public final fun copy (Ljava/lang/Object;Z)Lapp/cash/backfila/client/PrepareBackfillConfig;
+	public static synthetic fun copy$default (Lapp/cash/backfila/client/PrepareBackfillConfig;Ljava/lang/Object;ZILjava/lang/Object;)Lapp/cash/backfila/client/PrepareBackfillConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDryRun ()Z
+	public final fun getParameters ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/client/ValidateResult {
+	public fun <init> (Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;)Lapp/cash/backfila/client/ValidateResult;
+	public static synthetic fun copy$default (Lapp/cash/backfila/client/ValidateResult;Ljava/lang/Object;ILjava/lang/Object;)Lapp/cash/backfila/client/ValidateResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getParameters ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class app/cash/backfila/protos/clientservice/BackfilaClientServiceClient : com/squareup/wire/Service {
+	public abstract fun FinalizeBackfill ()Lcom/squareup/wire/GrpcCall;
+	public abstract fun GetNextBatchRange ()Lcom/squareup/wire/GrpcCall;
+	public abstract fun PrepareBackfill ()Lcom/squareup/wire/GrpcCall;
+	public abstract fun RunBatch ()Lcom/squareup/wire/GrpcCall;
+}
+
+public final class app/cash/backfila/protos/clientservice/FinalizeBackfillRequest : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_BACKFILL_ID Ljava/lang/String;
+	public static final field DEFAULT_BACKFILL_NAME Ljava/lang/String;
+	public static final field DEFAULT_DRY_RUN Ljava/lang/Boolean;
+	public static final field DEFAULT_FINALIZE_STATE Lapp/cash/backfila/protos/clientservice/FinalizeBackfillRequest$FinalizeState;
+	public final field backfill_id Ljava/lang/String;
+	public final field backfill_name Ljava/lang/String;
+	public final field dry_run Ljava/lang/Boolean;
+	public final field finalize_state Lapp/cash/backfila/protos/clientservice/FinalizeBackfillRequest$FinalizeState;
+	public final field parameters Ljava/util/Map;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/lang/Boolean;Lapp/cash/backfila/protos/clientservice/FinalizeBackfillRequest$FinalizeState;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/lang/Boolean;Lapp/cash/backfila/protos/clientservice/FinalizeBackfillRequest$FinalizeState;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lapp/cash/backfila/protos/clientservice/FinalizeBackfillRequest$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/protos/clientservice/FinalizeBackfillRequest$Builder : com/squareup/wire/Message$Builder {
+	public field backfill_id Ljava/lang/String;
+	public field backfill_name Ljava/lang/String;
+	public field dry_run Ljava/lang/Boolean;
+	public field finalize_state Lapp/cash/backfila/protos/clientservice/FinalizeBackfillRequest$FinalizeState;
+	public field parameters Ljava/util/Map;
+	public fun <init> ()V
+	public fun backfill_id (Ljava/lang/String;)Lapp/cash/backfila/protos/clientservice/FinalizeBackfillRequest$Builder;
+	public fun backfill_name (Ljava/lang/String;)Lapp/cash/backfila/protos/clientservice/FinalizeBackfillRequest$Builder;
+	public fun build ()Lapp/cash/backfila/protos/clientservice/FinalizeBackfillRequest;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun dry_run (Ljava/lang/Boolean;)Lapp/cash/backfila/protos/clientservice/FinalizeBackfillRequest$Builder;
+	public fun finalize_state (Lapp/cash/backfila/protos/clientservice/FinalizeBackfillRequest$FinalizeState;)Lapp/cash/backfila/protos/clientservice/FinalizeBackfillRequest$Builder;
+	public fun parameters (Ljava/util/Map;)Lapp/cash/backfila/protos/clientservice/FinalizeBackfillRequest$Builder;
+}
+
+public final class app/cash/backfila/protos/clientservice/FinalizeBackfillRequest$FinalizeState : java/lang/Enum, com/squareup/wire/WireEnum {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field COMPLETED Lapp/cash/backfila/protos/clientservice/FinalizeBackfillRequest$FinalizeState;
+	public static final field FAILED Lapp/cash/backfila/protos/clientservice/FinalizeBackfillRequest$FinalizeState;
+	public static fun fromValue (I)Lapp/cash/backfila/protos/clientservice/FinalizeBackfillRequest$FinalizeState;
+	public fun getValue ()I
+	public static fun valueOf (Ljava/lang/String;)Lapp/cash/backfila/protos/clientservice/FinalizeBackfillRequest$FinalizeState;
+	public static fun values ()[Lapp/cash/backfila/protos/clientservice/FinalizeBackfillRequest$FinalizeState;
+}
+
+public final class app/cash/backfila/protos/clientservice/FinalizeBackfillResponse : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public fun <init> ()V
+	public fun <init> (Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lapp/cash/backfila/protos/clientservice/FinalizeBackfillResponse$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/protos/clientservice/FinalizeBackfillResponse$Builder : com/squareup/wire/Message$Builder {
+	public fun <init> ()V
+	public fun build ()Lapp/cash/backfila/protos/clientservice/FinalizeBackfillResponse;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+}
+
+public final class app/cash/backfila/protos/clientservice/GetNextBatchRangeRequest : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_BACKFILL_ID Ljava/lang/String;
+	public static final field DEFAULT_BACKFILL_NAME Ljava/lang/String;
+	public static final field DEFAULT_BATCH_SIZE Ljava/lang/Long;
+	public static final field DEFAULT_COMPUTE_COUNT_LIMIT Ljava/lang/Long;
+	public static final field DEFAULT_COMPUTE_TIME_LIMIT_MS Ljava/lang/Long;
+	public static final field DEFAULT_DRY_RUN Ljava/lang/Boolean;
+	public static final field DEFAULT_PARTITION_NAME Ljava/lang/String;
+	public static final field DEFAULT_PRECOMPUTING Ljava/lang/Boolean;
+	public static final field DEFAULT_PREVIOUS_END_KEY Lokio/ByteString;
+	public static final field DEFAULT_SCAN_SIZE Ljava/lang/Long;
+	public final field backfill_id Ljava/lang/String;
+	public final field backfill_name Ljava/lang/String;
+	public final field backfill_range Lapp/cash/backfila/protos/clientservice/KeyRange;
+	public final field batch_size Ljava/lang/Long;
+	public final field compute_count_limit Ljava/lang/Long;
+	public final field compute_time_limit_ms Ljava/lang/Long;
+	public final field dry_run Ljava/lang/Boolean;
+	public final field parameters Ljava/util/Map;
+	public final field partition_name Ljava/lang/String;
+	public final field precomputing Ljava/lang/Boolean;
+	public final field previous_end_key Lokio/ByteString;
+	public final field scan_size Ljava/lang/Long;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lokio/ByteString;Lapp/cash/backfila/protos/clientservice/KeyRange;Ljava/util/Map;Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Boolean;Ljava/lang/Boolean;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lokio/ByteString;Lapp/cash/backfila/protos/clientservice/KeyRange;Ljava/util/Map;Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Boolean;Ljava/lang/Boolean;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeRequest$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/protos/clientservice/GetNextBatchRangeRequest$Builder : com/squareup/wire/Message$Builder {
+	public field backfill_id Ljava/lang/String;
+	public field backfill_name Ljava/lang/String;
+	public field backfill_range Lapp/cash/backfila/protos/clientservice/KeyRange;
+	public field batch_size Ljava/lang/Long;
+	public field compute_count_limit Ljava/lang/Long;
+	public field compute_time_limit_ms Ljava/lang/Long;
+	public field dry_run Ljava/lang/Boolean;
+	public field parameters Ljava/util/Map;
+	public field partition_name Ljava/lang/String;
+	public field precomputing Ljava/lang/Boolean;
+	public field previous_end_key Lokio/ByteString;
+	public field scan_size Ljava/lang/Long;
+	public fun <init> ()V
+	public fun backfill_id (Ljava/lang/String;)Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeRequest$Builder;
+	public fun backfill_name (Ljava/lang/String;)Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeRequest$Builder;
+	public fun backfill_range (Lapp/cash/backfila/protos/clientservice/KeyRange;)Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeRequest$Builder;
+	public fun batch_size (Ljava/lang/Long;)Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeRequest$Builder;
+	public fun build ()Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeRequest;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun compute_count_limit (Ljava/lang/Long;)Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeRequest$Builder;
+	public fun compute_time_limit_ms (Ljava/lang/Long;)Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeRequest$Builder;
+	public fun dry_run (Ljava/lang/Boolean;)Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeRequest$Builder;
+	public fun parameters (Ljava/util/Map;)Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeRequest$Builder;
+	public fun partition_name (Ljava/lang/String;)Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeRequest$Builder;
+	public fun precomputing (Ljava/lang/Boolean;)Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeRequest$Builder;
+	public fun previous_end_key (Lokio/ByteString;)Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeRequest$Builder;
+	public fun scan_size (Ljava/lang/Long;)Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeRequest$Builder;
+}
+
+public final class app/cash/backfila/protos/clientservice/GetNextBatchRangeResponse : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public final field batches Ljava/util/List;
+	public fun <init> (Ljava/util/List;)V
+	public fun <init> (Ljava/util/List;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeResponse$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/protos/clientservice/GetNextBatchRangeResponse$Batch : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_MATCHING_RECORD_COUNT Ljava/lang/Long;
+	public static final field DEFAULT_SCANNED_RECORD_COUNT Ljava/lang/Long;
+	public final field batch_range Lapp/cash/backfila/protos/clientservice/KeyRange;
+	public final field matching_record_count Ljava/lang/Long;
+	public final field scanned_record_count Ljava/lang/Long;
+	public fun <init> (Lapp/cash/backfila/protos/clientservice/KeyRange;Ljava/lang/Long;Ljava/lang/Long;)V
+	public fun <init> (Lapp/cash/backfila/protos/clientservice/KeyRange;Ljava/lang/Long;Ljava/lang/Long;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeResponse$Batch$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/protos/clientservice/GetNextBatchRangeResponse$Batch$Builder : com/squareup/wire/Message$Builder {
+	public field batch_range Lapp/cash/backfila/protos/clientservice/KeyRange;
+	public field matching_record_count Ljava/lang/Long;
+	public field scanned_record_count Ljava/lang/Long;
+	public fun <init> ()V
+	public fun batch_range (Lapp/cash/backfila/protos/clientservice/KeyRange;)Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeResponse$Batch$Builder;
+	public fun build ()Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeResponse$Batch;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun matching_record_count (Ljava/lang/Long;)Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeResponse$Batch$Builder;
+	public fun scanned_record_count (Ljava/lang/Long;)Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeResponse$Batch$Builder;
+}
+
+public final class app/cash/backfila/protos/clientservice/GetNextBatchRangeResponse$Builder : com/squareup/wire/Message$Builder {
+	public field batches Ljava/util/List;
+	public fun <init> ()V
+	public fun batches (Ljava/util/List;)Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeResponse$Builder;
+	public fun build ()Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeResponse;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+}
+
+public final class app/cash/backfila/protos/clientservice/GrpcBackfilaClientServiceClient : app/cash/backfila/protos/clientservice/BackfilaClientServiceClient {
+	public fun <init> (Lcom/squareup/wire/GrpcClient;)V
+	public fun FinalizeBackfill ()Lcom/squareup/wire/GrpcCall;
+	public fun GetNextBatchRange ()Lcom/squareup/wire/GrpcCall;
+	public fun PrepareBackfill ()Lcom/squareup/wire/GrpcCall;
+	public fun RunBatch ()Lcom/squareup/wire/GrpcCall;
+}
+
+public final class app/cash/backfila/protos/clientservice/KeyRange : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_END Lokio/ByteString;
+	public static final field DEFAULT_START Lokio/ByteString;
+	public final field end Lokio/ByteString;
+	public final field start Lokio/ByteString;
+	public fun <init> (Lokio/ByteString;Lokio/ByteString;)V
+	public fun <init> (Lokio/ByteString;Lokio/ByteString;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lapp/cash/backfila/protos/clientservice/KeyRange$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/protos/clientservice/KeyRange$Builder : com/squareup/wire/Message$Builder {
+	public field end Lokio/ByteString;
+	public field start Lokio/ByteString;
+	public fun <init> ()V
+	public fun build ()Lapp/cash/backfila/protos/clientservice/KeyRange;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun end (Lokio/ByteString;)Lapp/cash/backfila/protos/clientservice/KeyRange$Builder;
+	public fun start (Lokio/ByteString;)Lapp/cash/backfila/protos/clientservice/KeyRange$Builder;
+}
+
+public final class app/cash/backfila/protos/clientservice/PipelinedData : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public final field metadata Ljava/util/List;
+	public final field records Ljava/util/List;
+	public fun <init> (Ljava/util/List;Ljava/util/List;)V
+	public fun <init> (Ljava/util/List;Ljava/util/List;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lapp/cash/backfila/protos/clientservice/PipelinedData$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/protos/clientservice/PipelinedData$Builder : com/squareup/wire/Message$Builder {
+	public field metadata Ljava/util/List;
+	public field records Ljava/util/List;
+	public fun <init> ()V
+	public fun build ()Lapp/cash/backfila/protos/clientservice/PipelinedData;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun metadata (Ljava/util/List;)Lapp/cash/backfila/protos/clientservice/PipelinedData$Builder;
+	public fun records (Ljava/util/List;)Lapp/cash/backfila/protos/clientservice/PipelinedData$Builder;
+}
+
+public final class app/cash/backfila/protos/clientservice/PipelinedRecord : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_DATA Lokio/ByteString;
+	public final field data Lokio/ByteString;
+	public fun <init> (Lokio/ByteString;)V
+	public fun <init> (Lokio/ByteString;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lapp/cash/backfila/protos/clientservice/PipelinedRecord$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/protos/clientservice/PipelinedRecord$Builder : com/squareup/wire/Message$Builder {
+	public field data Lokio/ByteString;
+	public fun <init> ()V
+	public fun build ()Lapp/cash/backfila/protos/clientservice/PipelinedRecord;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun data (Lokio/ByteString;)Lapp/cash/backfila/protos/clientservice/PipelinedRecord$Builder;
+}
+
+public final class app/cash/backfila/protos/clientservice/PrepareBackfillRequest : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_BACKFILL_ID Ljava/lang/String;
+	public static final field DEFAULT_BACKFILL_NAME Ljava/lang/String;
+	public static final field DEFAULT_DRY_RUN Ljava/lang/Boolean;
+	public final field backfill_id Ljava/lang/String;
+	public final field backfill_name Ljava/lang/String;
+	public final field dry_run Ljava/lang/Boolean;
+	public final field parameters Ljava/util/Map;
+	public final field range Lapp/cash/backfila/protos/clientservice/KeyRange;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lapp/cash/backfila/protos/clientservice/KeyRange;Ljava/util/Map;Ljava/lang/Boolean;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lapp/cash/backfila/protos/clientservice/KeyRange;Ljava/util/Map;Ljava/lang/Boolean;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lapp/cash/backfila/protos/clientservice/PrepareBackfillRequest$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/protos/clientservice/PrepareBackfillRequest$Builder : com/squareup/wire/Message$Builder {
+	public field backfill_id Ljava/lang/String;
+	public field backfill_name Ljava/lang/String;
+	public field dry_run Ljava/lang/Boolean;
+	public field parameters Ljava/util/Map;
+	public field range Lapp/cash/backfila/protos/clientservice/KeyRange;
+	public fun <init> ()V
+	public fun backfill_id (Ljava/lang/String;)Lapp/cash/backfila/protos/clientservice/PrepareBackfillRequest$Builder;
+	public fun backfill_name (Ljava/lang/String;)Lapp/cash/backfila/protos/clientservice/PrepareBackfillRequest$Builder;
+	public fun build ()Lapp/cash/backfila/protos/clientservice/PrepareBackfillRequest;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun dry_run (Ljava/lang/Boolean;)Lapp/cash/backfila/protos/clientservice/PrepareBackfillRequest$Builder;
+	public fun parameters (Ljava/util/Map;)Lapp/cash/backfila/protos/clientservice/PrepareBackfillRequest$Builder;
+	public fun range (Lapp/cash/backfila/protos/clientservice/KeyRange;)Lapp/cash/backfila/protos/clientservice/PrepareBackfillRequest$Builder;
+}
+
+public final class app/cash/backfila/protos/clientservice/PrepareBackfillResponse : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_ERROR_MESSAGE Ljava/lang/String;
+	public final field error_message Ljava/lang/String;
+	public final field parameters Ljava/util/Map;
+	public final field partitions Ljava/util/List;
+	public fun <init> (Ljava/util/List;Ljava/util/Map;Ljava/lang/String;)V
+	public fun <init> (Ljava/util/List;Ljava/util/Map;Ljava/lang/String;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lapp/cash/backfila/protos/clientservice/PrepareBackfillResponse$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/protos/clientservice/PrepareBackfillResponse$Builder : com/squareup/wire/Message$Builder {
+	public field error_message Ljava/lang/String;
+	public field parameters Ljava/util/Map;
+	public field partitions Ljava/util/List;
+	public fun <init> ()V
+	public fun build ()Lapp/cash/backfila/protos/clientservice/PrepareBackfillResponse;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun error_message (Ljava/lang/String;)Lapp/cash/backfila/protos/clientservice/PrepareBackfillResponse$Builder;
+	public fun parameters (Ljava/util/Map;)Lapp/cash/backfila/protos/clientservice/PrepareBackfillResponse$Builder;
+	public fun partitions (Ljava/util/List;)Lapp/cash/backfila/protos/clientservice/PrepareBackfillResponse$Builder;
+}
+
+public final class app/cash/backfila/protos/clientservice/PrepareBackfillResponse$Partition : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_ESTIMATED_RECORD_COUNT Ljava/lang/Long;
+	public static final field DEFAULT_PARTITION_NAME Ljava/lang/String;
+	public final field backfill_range Lapp/cash/backfila/protos/clientservice/KeyRange;
+	public final field estimated_record_count Ljava/lang/Long;
+	public final field partition_name Ljava/lang/String;
+	public fun <init> (Ljava/lang/String;Lapp/cash/backfila/protos/clientservice/KeyRange;Ljava/lang/Long;)V
+	public fun <init> (Ljava/lang/String;Lapp/cash/backfila/protos/clientservice/KeyRange;Ljava/lang/Long;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lapp/cash/backfila/protos/clientservice/PrepareBackfillResponse$Partition$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/protos/clientservice/PrepareBackfillResponse$Partition$Builder : com/squareup/wire/Message$Builder {
+	public field backfill_range Lapp/cash/backfila/protos/clientservice/KeyRange;
+	public field estimated_record_count Ljava/lang/Long;
+	public field partition_name Ljava/lang/String;
+	public fun <init> ()V
+	public fun backfill_range (Lapp/cash/backfila/protos/clientservice/KeyRange;)Lapp/cash/backfila/protos/clientservice/PrepareBackfillResponse$Partition$Builder;
+	public fun build ()Lapp/cash/backfila/protos/clientservice/PrepareBackfillResponse$Partition;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun estimated_record_count (Ljava/lang/Long;)Lapp/cash/backfila/protos/clientservice/PrepareBackfillResponse$Partition$Builder;
+	public fun partition_name (Ljava/lang/String;)Lapp/cash/backfila/protos/clientservice/PrepareBackfillResponse$Partition$Builder;
+}
+
+public final class app/cash/backfila/protos/clientservice/RunBatchRequest : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_BACKFILL_ID Ljava/lang/String;
+	public static final field DEFAULT_BACKFILL_NAME Ljava/lang/String;
+	public static final field DEFAULT_BATCH_SIZE Ljava/lang/Long;
+	public static final field DEFAULT_DRY_RUN Ljava/lang/Boolean;
+	public static final field DEFAULT_PARTITION_NAME Ljava/lang/String;
+	public final field backfill_id Ljava/lang/String;
+	public final field backfill_name Ljava/lang/String;
+	public final field batch_range Lapp/cash/backfila/protos/clientservice/KeyRange;
+	public final field batch_size Ljava/lang/Long;
+	public final field dry_run Ljava/lang/Boolean;
+	public final field parameters Ljava/util/Map;
+	public final field partition_name Ljava/lang/String;
+	public final field pipelined_data Lapp/cash/backfila/protos/clientservice/PipelinedData;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lapp/cash/backfila/protos/clientservice/KeyRange;Ljava/util/Map;Ljava/lang/Boolean;Lapp/cash/backfila/protos/clientservice/PipelinedData;Ljava/lang/Long;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lapp/cash/backfila/protos/clientservice/KeyRange;Ljava/util/Map;Ljava/lang/Boolean;Lapp/cash/backfila/protos/clientservice/PipelinedData;Ljava/lang/Long;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lapp/cash/backfila/protos/clientservice/RunBatchRequest$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/protos/clientservice/RunBatchRequest$Builder : com/squareup/wire/Message$Builder {
+	public field backfill_id Ljava/lang/String;
+	public field backfill_name Ljava/lang/String;
+	public field batch_range Lapp/cash/backfila/protos/clientservice/KeyRange;
+	public field batch_size Ljava/lang/Long;
+	public field dry_run Ljava/lang/Boolean;
+	public field parameters Ljava/util/Map;
+	public field partition_name Ljava/lang/String;
+	public field pipelined_data Lapp/cash/backfila/protos/clientservice/PipelinedData;
+	public fun <init> ()V
+	public fun backfill_id (Ljava/lang/String;)Lapp/cash/backfila/protos/clientservice/RunBatchRequest$Builder;
+	public fun backfill_name (Ljava/lang/String;)Lapp/cash/backfila/protos/clientservice/RunBatchRequest$Builder;
+	public fun batch_range (Lapp/cash/backfila/protos/clientservice/KeyRange;)Lapp/cash/backfila/protos/clientservice/RunBatchRequest$Builder;
+	public fun batch_size (Ljava/lang/Long;)Lapp/cash/backfila/protos/clientservice/RunBatchRequest$Builder;
+	public fun build ()Lapp/cash/backfila/protos/clientservice/RunBatchRequest;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun dry_run (Ljava/lang/Boolean;)Lapp/cash/backfila/protos/clientservice/RunBatchRequest$Builder;
+	public fun parameters (Ljava/util/Map;)Lapp/cash/backfila/protos/clientservice/RunBatchRequest$Builder;
+	public fun partition_name (Ljava/lang/String;)Lapp/cash/backfila/protos/clientservice/RunBatchRequest$Builder;
+	public fun pipelined_data (Lapp/cash/backfila/protos/clientservice/PipelinedData;)Lapp/cash/backfila/protos/clientservice/RunBatchRequest$Builder;
+}
+
+public final class app/cash/backfila/protos/clientservice/RunBatchResponse : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_BACKOFF_MS Ljava/lang/Long;
+	public static final field DEFAULT_EXCEPTION_STACK_TRACE Ljava/lang/String;
+	public final field backoff_ms Ljava/lang/Long;
+	public final field exception_stack_trace Ljava/lang/String;
+	public final field pipelined_data Lapp/cash/backfila/protos/clientservice/PipelinedData;
+	public final field remaining_batch_range Lapp/cash/backfila/protos/clientservice/KeyRange;
+	public fun <init> (Ljava/lang/Long;Lapp/cash/backfila/protos/clientservice/PipelinedData;Ljava/lang/String;Lapp/cash/backfila/protos/clientservice/KeyRange;)V
+	public fun <init> (Ljava/lang/Long;Lapp/cash/backfila/protos/clientservice/PipelinedData;Ljava/lang/String;Lapp/cash/backfila/protos/clientservice/KeyRange;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lapp/cash/backfila/protos/clientservice/RunBatchResponse$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/protos/clientservice/RunBatchResponse$Builder : com/squareup/wire/Message$Builder {
+	public field backoff_ms Ljava/lang/Long;
+	public field exception_stack_trace Ljava/lang/String;
+	public field pipelined_data Lapp/cash/backfila/protos/clientservice/PipelinedData;
+	public field remaining_batch_range Lapp/cash/backfila/protos/clientservice/KeyRange;
+	public fun <init> ()V
+	public fun backoff_ms (Ljava/lang/Long;)Lapp/cash/backfila/protos/clientservice/RunBatchResponse$Builder;
+	public fun build ()Lapp/cash/backfila/protos/clientservice/RunBatchResponse;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun exception_stack_trace (Ljava/lang/String;)Lapp/cash/backfila/protos/clientservice/RunBatchResponse$Builder;
+	public fun pipelined_data (Lapp/cash/backfila/protos/clientservice/PipelinedData;)Lapp/cash/backfila/protos/clientservice/RunBatchResponse$Builder;
+	public fun remaining_batch_range (Lapp/cash/backfila/protos/clientservice/KeyRange;)Lapp/cash/backfila/protos/clientservice/RunBatchResponse$Builder;
+}
+
+public final class app/cash/backfila/protos/service/CheckBackfillStatusRequest : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_BACKFILL_RUN_ID Ljava/lang/Long;
+	public final field backfill_run_id Ljava/lang/Long;
+	public fun <init> (Ljava/lang/Long;)V
+	public fun <init> (Ljava/lang/Long;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lapp/cash/backfila/protos/service/CheckBackfillStatusRequest$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/protos/service/CheckBackfillStatusRequest$Builder : com/squareup/wire/Message$Builder {
+	public field backfill_run_id Ljava/lang/Long;
+	public fun <init> ()V
+	public fun backfill_run_id (Ljava/lang/Long;)Lapp/cash/backfila/protos/service/CheckBackfillStatusRequest$Builder;
+	public fun build ()Lapp/cash/backfila/protos/service/CheckBackfillStatusRequest;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+}
+
+public final class app/cash/backfila/protos/service/CheckBackfillStatusResponse : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_STATUS Lapp/cash/backfila/protos/service/CheckBackfillStatusResponse$Status;
+	public final field status Lapp/cash/backfila/protos/service/CheckBackfillStatusResponse$Status;
+	public fun <init> (Lapp/cash/backfila/protos/service/CheckBackfillStatusResponse$Status;)V
+	public fun <init> (Lapp/cash/backfila/protos/service/CheckBackfillStatusResponse$Status;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lapp/cash/backfila/protos/service/CheckBackfillStatusResponse$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/protos/service/CheckBackfillStatusResponse$Builder : com/squareup/wire/Message$Builder {
+	public field status Lapp/cash/backfila/protos/service/CheckBackfillStatusResponse$Status;
+	public fun <init> ()V
+	public fun build ()Lapp/cash/backfila/protos/service/CheckBackfillStatusResponse;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun status (Lapp/cash/backfila/protos/service/CheckBackfillStatusResponse$Status;)Lapp/cash/backfila/protos/service/CheckBackfillStatusResponse$Builder;
+}
+
+public final class app/cash/backfila/protos/service/CheckBackfillStatusResponse$Status : java/lang/Enum, com/squareup/wire/WireEnum {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field CANCELLED Lapp/cash/backfila/protos/service/CheckBackfillStatusResponse$Status;
+	public static final field COMPLETE Lapp/cash/backfila/protos/service/CheckBackfillStatusResponse$Status;
+	public static final field PAUSED Lapp/cash/backfila/protos/service/CheckBackfillStatusResponse$Status;
+	public static final field RUNNING Lapp/cash/backfila/protos/service/CheckBackfillStatusResponse$Status;
+	public static fun fromValue (I)Lapp/cash/backfila/protos/service/CheckBackfillStatusResponse$Status;
+	public fun getValue ()I
+	public static fun valueOf (Ljava/lang/String;)Lapp/cash/backfila/protos/service/CheckBackfillStatusResponse$Status;
+	public static fun values ()[Lapp/cash/backfila/protos/service/CheckBackfillStatusResponse$Status;
+}
+
+public final class app/cash/backfila/protos/service/ConfigureServiceRequest : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_CONNECTOR_EXTRA_DATA Ljava/lang/String;
+	public static final field DEFAULT_CONNECTOR_TYPE Ljava/lang/String;
+	public static final field DEFAULT_SLACK_CHANNEL Ljava/lang/String;
+	public static final field DEFAULT_VARIANT Ljava/lang/String;
+	public final field backfills Ljava/util/List;
+	public final field connector_extra_data Ljava/lang/String;
+	public final field connector_type Ljava/lang/String;
+	public final field slack_channel Ljava/lang/String;
+	public final field variant Ljava/lang/String;
+	public fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lapp/cash/backfila/protos/service/ConfigureServiceRequest$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/protos/service/ConfigureServiceRequest$BackfillData : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_DELETE_BY Ljava/lang/Long;
+	public static final field DEFAULT_DESCRIPTION Ljava/lang/String;
+	public static final field DEFAULT_NAME Ljava/lang/String;
+	public static final field DEFAULT_REQUIRES_APPROVAL Ljava/lang/Boolean;
+	public static final field DEFAULT_TYPE_CONSUMED Ljava/lang/String;
+	public static final field DEFAULT_TYPE_PROVIDED Ljava/lang/String;
+	public static final field DEFAULT_UNIT Ljava/lang/String;
+	public final field delete_by Ljava/lang/Long;
+	public final field description Ljava/lang/String;
+	public final field name Ljava/lang/String;
+	public final field parameters Ljava/util/List;
+	public final field requires_approval Ljava/lang/Boolean;
+	public final field type_consumed Ljava/lang/String;
+	public final field type_provided Ljava/lang/String;
+	public final field unit Ljava/lang/String;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Long;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Long;Ljava/lang/String;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lapp/cash/backfila/protos/service/ConfigureServiceRequest$BackfillData$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/protos/service/ConfigureServiceRequest$BackfillData$Builder : com/squareup/wire/Message$Builder {
+	public field delete_by Ljava/lang/Long;
+	public field description Ljava/lang/String;
+	public field name Ljava/lang/String;
+	public field parameters Ljava/util/List;
+	public field requires_approval Ljava/lang/Boolean;
+	public field type_consumed Ljava/lang/String;
+	public field type_provided Ljava/lang/String;
+	public field unit Ljava/lang/String;
+	public fun <init> ()V
+	public fun build ()Lapp/cash/backfila/protos/service/ConfigureServiceRequest$BackfillData;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun delete_by (Ljava/lang/Long;)Lapp/cash/backfila/protos/service/ConfigureServiceRequest$BackfillData$Builder;
+	public fun description (Ljava/lang/String;)Lapp/cash/backfila/protos/service/ConfigureServiceRequest$BackfillData$Builder;
+	public fun name (Ljava/lang/String;)Lapp/cash/backfila/protos/service/ConfigureServiceRequest$BackfillData$Builder;
+	public fun parameters (Ljava/util/List;)Lapp/cash/backfila/protos/service/ConfigureServiceRequest$BackfillData$Builder;
+	public fun requires_approval (Ljava/lang/Boolean;)Lapp/cash/backfila/protos/service/ConfigureServiceRequest$BackfillData$Builder;
+	public fun type_consumed (Ljava/lang/String;)Lapp/cash/backfila/protos/service/ConfigureServiceRequest$BackfillData$Builder;
+	public fun type_provided (Ljava/lang/String;)Lapp/cash/backfila/protos/service/ConfigureServiceRequest$BackfillData$Builder;
+	public fun unit (Ljava/lang/String;)Lapp/cash/backfila/protos/service/ConfigureServiceRequest$BackfillData$Builder;
+}
+
+public final class app/cash/backfila/protos/service/ConfigureServiceRequest$Builder : com/squareup/wire/Message$Builder {
+	public field backfills Ljava/util/List;
+	public field connector_extra_data Ljava/lang/String;
+	public field connector_type Ljava/lang/String;
+	public field slack_channel Ljava/lang/String;
+	public field variant Ljava/lang/String;
+	public fun <init> ()V
+	public fun backfills (Ljava/util/List;)Lapp/cash/backfila/protos/service/ConfigureServiceRequest$Builder;
+	public fun build ()Lapp/cash/backfila/protos/service/ConfigureServiceRequest;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun connector_extra_data (Ljava/lang/String;)Lapp/cash/backfila/protos/service/ConfigureServiceRequest$Builder;
+	public fun connector_type (Ljava/lang/String;)Lapp/cash/backfila/protos/service/ConfigureServiceRequest$Builder;
+	public fun slack_channel (Ljava/lang/String;)Lapp/cash/backfila/protos/service/ConfigureServiceRequest$Builder;
+	public fun variant (Ljava/lang/String;)Lapp/cash/backfila/protos/service/ConfigureServiceRequest$Builder;
+}
+
+public final class app/cash/backfila/protos/service/ConfigureServiceResponse : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public fun <init> ()V
+	public fun <init> (Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lapp/cash/backfila/protos/service/ConfigureServiceResponse$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/protos/service/ConfigureServiceResponse$Builder : com/squareup/wire/Message$Builder {
+	public fun <init> ()V
+	public fun build ()Lapp/cash/backfila/protos/service/ConfigureServiceResponse;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+}
+
+public final class app/cash/backfila/protos/service/CreateAndStartBackfillRequest : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_VARIANT Ljava/lang/String;
+	public final field create_request Lapp/cash/backfila/protos/service/CreateBackfillRequest;
+	public final field variant Ljava/lang/String;
+	public fun <init> (Lapp/cash/backfila/protos/service/CreateBackfillRequest;Ljava/lang/String;)V
+	public fun <init> (Lapp/cash/backfila/protos/service/CreateBackfillRequest;Ljava/lang/String;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lapp/cash/backfila/protos/service/CreateAndStartBackfillRequest$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/protos/service/CreateAndStartBackfillRequest$Builder : com/squareup/wire/Message$Builder {
+	public field create_request Lapp/cash/backfila/protos/service/CreateBackfillRequest;
+	public field variant Ljava/lang/String;
+	public fun <init> ()V
+	public fun build ()Lapp/cash/backfila/protos/service/CreateAndStartBackfillRequest;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun create_request (Lapp/cash/backfila/protos/service/CreateBackfillRequest;)Lapp/cash/backfila/protos/service/CreateAndStartBackfillRequest$Builder;
+	public fun variant (Ljava/lang/String;)Lapp/cash/backfila/protos/service/CreateAndStartBackfillRequest$Builder;
+}
+
+public final class app/cash/backfila/protos/service/CreateAndStartBackfillResponse : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_BACKFILL_RUN_ID Ljava/lang/Long;
+	public final field backfill_run_id Ljava/lang/Long;
+	public fun <init> (Ljava/lang/Long;)V
+	public fun <init> (Ljava/lang/Long;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lapp/cash/backfila/protos/service/CreateAndStartBackfillResponse$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/protos/service/CreateAndStartBackfillResponse$Builder : com/squareup/wire/Message$Builder {
+	public field backfill_run_id Ljava/lang/Long;
+	public fun <init> ()V
+	public fun backfill_run_id (Ljava/lang/Long;)Lapp/cash/backfila/protos/service/CreateAndStartBackfillResponse$Builder;
+	public fun build ()Lapp/cash/backfila/protos/service/CreateAndStartBackfillResponse;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+}
+
+public final class app/cash/backfila/protos/service/CreateBackfillRequest : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_BACKFILL_NAME Ljava/lang/String;
+	public static final field DEFAULT_BACKOFF_SCHEDULE Ljava/lang/String;
+	public static final field DEFAULT_BATCH_SIZE Ljava/lang/Long;
+	public static final field DEFAULT_DRY_RUN Ljava/lang/Boolean;
+	public static final field DEFAULT_EXTRA_SLEEP_MS Ljava/lang/Long;
+	public static final field DEFAULT_NUM_THREADS Ljava/lang/Integer;
+	public static final field DEFAULT_PKEY_RANGE_END Lokio/ByteString;
+	public static final field DEFAULT_PKEY_RANGE_START Lokio/ByteString;
+	public static final field DEFAULT_SCAN_SIZE Ljava/lang/Long;
+	public final field backfill_name Ljava/lang/String;
+	public final field backoff_schedule Ljava/lang/String;
+	public final field batch_size Ljava/lang/Long;
+	public final field dry_run Ljava/lang/Boolean;
+	public final field extra_sleep_ms Ljava/lang/Long;
+	public final field num_threads Ljava/lang/Integer;
+	public final field parameter_map Ljava/util/Map;
+	public final field pkey_range_end Lokio/ByteString;
+	public final field pkey_range_start Lokio/ByteString;
+	public final field scan_size Ljava/lang/Long;
+	public fun <init> (Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Integer;Lokio/ByteString;Lokio/ByteString;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Long;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Integer;Lokio/ByteString;Lokio/ByteString;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Long;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lapp/cash/backfila/protos/service/CreateBackfillRequest$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/protos/service/CreateBackfillRequest$Builder : com/squareup/wire/Message$Builder {
+	public field backfill_name Ljava/lang/String;
+	public field backoff_schedule Ljava/lang/String;
+	public field batch_size Ljava/lang/Long;
+	public field dry_run Ljava/lang/Boolean;
+	public field extra_sleep_ms Ljava/lang/Long;
+	public field num_threads Ljava/lang/Integer;
+	public field parameter_map Ljava/util/Map;
+	public field pkey_range_end Lokio/ByteString;
+	public field pkey_range_start Lokio/ByteString;
+	public field scan_size Ljava/lang/Long;
+	public fun <init> ()V
+	public fun backfill_name (Ljava/lang/String;)Lapp/cash/backfila/protos/service/CreateBackfillRequest$Builder;
+	public fun backoff_schedule (Ljava/lang/String;)Lapp/cash/backfila/protos/service/CreateBackfillRequest$Builder;
+	public fun batch_size (Ljava/lang/Long;)Lapp/cash/backfila/protos/service/CreateBackfillRequest$Builder;
+	public fun build ()Lapp/cash/backfila/protos/service/CreateBackfillRequest;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun dry_run (Ljava/lang/Boolean;)Lapp/cash/backfila/protos/service/CreateBackfillRequest$Builder;
+	public fun extra_sleep_ms (Ljava/lang/Long;)Lapp/cash/backfila/protos/service/CreateBackfillRequest$Builder;
+	public fun num_threads (Ljava/lang/Integer;)Lapp/cash/backfila/protos/service/CreateBackfillRequest$Builder;
+	public fun parameter_map (Ljava/util/Map;)Lapp/cash/backfila/protos/service/CreateBackfillRequest$Builder;
+	public fun pkey_range_end (Lokio/ByteString;)Lapp/cash/backfila/protos/service/CreateBackfillRequest$Builder;
+	public fun pkey_range_start (Lokio/ByteString;)Lapp/cash/backfila/protos/service/CreateBackfillRequest$Builder;
+	public fun scan_size (Ljava/lang/Long;)Lapp/cash/backfila/protos/service/CreateBackfillRequest$Builder;
+}
+
+public final class app/cash/backfila/protos/service/CreateBackfillResponse : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_BACKFILL_RUN_ID Ljava/lang/Long;
+	public final field backfill_run_id Ljava/lang/Long;
+	public fun <init> (Ljava/lang/Long;)V
+	public fun <init> (Ljava/lang/Long;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lapp/cash/backfila/protos/service/CreateBackfillResponse$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/protos/service/CreateBackfillResponse$Builder : com/squareup/wire/Message$Builder {
+	public field backfill_run_id Ljava/lang/Long;
+	public fun <init> ()V
+	public fun backfill_run_id (Ljava/lang/Long;)Lapp/cash/backfila/protos/service/CreateBackfillResponse$Builder;
+	public fun build ()Lapp/cash/backfila/protos/service/CreateBackfillResponse;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+}
+
+public final class app/cash/backfila/protos/service/Parameter : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field DEFAULT_DESCRIPTION Ljava/lang/String;
+	public static final field DEFAULT_NAME Ljava/lang/String;
+	public static final field DEFAULT_REQUIRED Ljava/lang/Boolean;
+	public final field description Ljava/lang/String;
+	public final field name Ljava/lang/String;
+	public final field required Ljava/lang/Boolean;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lokio/ByteString;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun newBuilder ()Lapp/cash/backfila/protos/service/Parameter$Builder;
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/protos/service/Parameter$Builder : com/squareup/wire/Message$Builder {
+	public field description Ljava/lang/String;
+	public field name Ljava/lang/String;
+	public field required Ljava/lang/Boolean;
+	public fun <init> ()V
+	public fun build ()Lapp/cash/backfila/protos/service/Parameter;
+	public synthetic fun build ()Lcom/squareup/wire/Message;
+	public fun description (Ljava/lang/String;)Lapp/cash/backfila/protos/service/Parameter$Builder;
+	public fun name (Ljava/lang/String;)Lapp/cash/backfila/protos/service/Parameter$Builder;
+	public fun required (Ljava/lang/Boolean;)Lapp/cash/backfila/protos/service/Parameter$Builder;
+}
+

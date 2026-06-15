@@ -1,0 +1,24 @@
+public final class app/cash/backfila/client/testing/BackfillRunAssert : org/assertj/core/api/AbstractAssert {
+	public fun <init> (Lapp/cash/backfila/embedded/BackfillRun;)V
+	public final fun hasBatchesToRun ()Lapp/cash/backfila/client/testing/BackfillRunAssert;
+	public final fun hasNoBatchesToRun ()Lapp/cash/backfila/client/testing/BackfillRunAssert;
+	public final fun isComplete ()Lapp/cash/backfila/client/testing/BackfillRunAssert;
+	public final fun isFinishedPrecomputing ()Lapp/cash/backfila/client/testing/BackfillRunAssert;
+	public final fun isFinishedScanning ()Lapp/cash/backfila/client/testing/BackfillRunAssert;
+	public final fun isNotComplete ()Lapp/cash/backfila/client/testing/BackfillRunAssert;
+}
+
+public final class app/cash/backfila/client/testing/BackfillRunAssertKt {
+	public static final fun assertThat (Lapp/cash/backfila/embedded/BackfillRun;)Lapp/cash/backfila/client/testing/BackfillRunAssert;
+}
+
+public final class app/cash/backfila/client/testing/PartitionCursorAssert : org/assertj/core/api/AbstractAssert {
+	public fun <init> (Lapp/cash/backfila/embedded/internal/PartitionCursor;)V
+	public final fun isDone ()Lapp/cash/backfila/client/testing/PartitionCursorAssert;
+	public final fun isNotDone ()Lapp/cash/backfila/client/testing/PartitionCursorAssert;
+}
+
+public final class app/cash/backfila/client/testing/PartitionCursorAssertKt {
+	public static final fun assertThat (Lapp/cash/backfila/embedded/internal/PartitionCursor;)Lapp/cash/backfila/client/testing/PartitionCursorAssert;
+}
+
