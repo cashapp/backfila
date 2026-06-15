@@ -12,7 +12,6 @@ import com.google.inject.TypeLiteral
 import com.google.inject.multibindings.MapBinder
 import com.google.inject.multibindings.Multibinder
 import com.squareup.moshi.Types
-import jakarta.inject.Qualifier
 import java.lang.reflect.ParameterizedType
 import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
@@ -91,4 +90,6 @@ private object SqlDelightDatasourceBackfillBackendModule : AbstractModule() {
 }
 
 /** Annotation for specifying dependencies specifically for this Backend. */
-@Qualifier annotation class ForSqlDelightBackend
+@jakarta.inject.Qualifier
+@javax.inject.Qualifier
+annotation class ForSqlDelightBackend
