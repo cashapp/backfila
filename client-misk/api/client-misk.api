@@ -1,0 +1,40 @@
+public final class app/cash/backfila/client/misk/MiskBackfillModule : misk/inject/KAbstractModule {
+	public fun <init> (Lapp/cash/backfila/client/BackfilaHttpClientConfig;)V
+	public fun <init> (Lapp/cash/backfila/client/BackfilaHttpClientConfig;Lkotlin/reflect/KClass;)V
+	public fun <init> (Lapp/cash/backfila/client/BackfilaHttpClientConfig;Lkotlin/reflect/KClass;Ljava/util/List;)V
+	public synthetic fun <init> (Lapp/cash/backfila/client/BackfilaHttpClientConfig;Lkotlin/reflect/KClass;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class app/cash/backfila/client/misk/client/BackfilaClientMDCLoggingSetupProvider : app/cash/backfila/client/BackfilaClientLoggingSetupProvider {
+	public static final field Companion Lapp/cash/backfila/client/misk/client/BackfilaClientMDCLoggingSetupProvider$Companion;
+	public static final field MDC_BACKFILL_ID Ljava/lang/String;
+	public static final field MDC_BACKFILL_NAME Ljava/lang/String;
+	public static final field MDC_PARTITION_NAME Ljava/lang/String;
+	public fun <init> ()V
+	public fun withBackfillPartitionLogging (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public fun withBackfillRunLogging (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+}
+
+public final class app/cash/backfila/client/misk/client/BackfilaClientMDCLoggingSetupProvider$Companion {
+	public final fun getLogger ()Lmu/KLogger;
+}
+
+public final class app/cash/backfila/client/misk/client/BackfilaMiskClientModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public final class app/cash/backfila/client/misk/embedded/Backfila {
+	public fun <init> ()V
+}
+
+public abstract interface class app/cash/backfila/client/misk/embedded/BackfillRun {
+}
+
+public final class app/cash/backfila/client/misk/embedded/EmbeddedBackfilaModule {
+	public fun <init> ()V
+}
+
+public final class app/cash/backfila/client/misk/internal/BackfilaStartupService : com/google/common/util/concurrent/AbstractIdleService {
+	public fun <init> (Lapp/cash/backfila/client/internal/BackfilaStartupConfigurator;)V
+}
+

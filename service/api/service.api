@@ -1,0 +1,1578 @@
+public final class app/cash/backfila/BackfillCreator {
+	public static final field Companion Lapp/cash/backfila/BackfillCreator$Companion;
+	public fun <init> (Lmisk/hibernate/Transacter;Lmisk/hibernate/Query$Factory;Lapp/cash/backfila/client/ConnectorProvider;)V
+	public final fun create (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lapp/cash/backfila/protos/service/CreateBackfillRequest;)Lmisk/hibernate/Id;
+}
+
+public final class app/cash/backfila/BackfillCreator$Companion {
+}
+
+public final class app/cash/backfila/api/CheckBackfillStatusAction : misk/web/actions/WebAction {
+	public fun <init> (Lmisk/scope/ActionScoped;Lapp/cash/backfila/dashboard/GetBackfillStatusAction;)V
+	public final fun checkBackfillStatus (Lapp/cash/backfila/protos/service/CheckBackfillStatusRequest;)Lapp/cash/backfila/protos/service/CheckBackfillStatusResponse;
+}
+
+public final class app/cash/backfila/api/ConfigureServiceAction : misk/web/actions/WebAction {
+	public static final field Companion Lapp/cash/backfila/api/ConfigureServiceAction$Companion;
+	public static final field MAX_VARIANTS I
+	public static final field RESERVED_VARIANT Ljava/lang/String;
+	public fun <init> (Lmisk/scope/ActionScoped;Lmisk/hibernate/Transacter;Lmisk/hibernate/Query$Factory;Ljava/time/Clock;Lapp/cash/backfila/client/ConnectorProvider;)V
+	public final fun configureService (Lapp/cash/backfila/protos/service/ConfigureServiceRequest;)Lapp/cash/backfila/protos/service/ConfigureServiceResponse;
+}
+
+public final class app/cash/backfila/api/ConfigureServiceAction$Companion {
+}
+
+public final class app/cash/backfila/api/CreateAndStartBackfillAction : misk/web/actions/WebAction {
+	public fun <init> (Lmisk/scope/ActionScoped;Lapp/cash/backfila/BackfillCreator;Lapp/cash/backfila/dashboard/BackfillStateToggler;)V
+	public final fun createAndStartBackfill (Lapp/cash/backfila/protos/service/CreateAndStartBackfillRequest;)Lapp/cash/backfila/protos/service/CreateAndStartBackfillResponse;
+}
+
+public final class app/cash/backfila/api/ServiceWebActionsModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public abstract interface class app/cash/backfila/client/BackfilaCallbackConnector {
+	public abstract fun connectionLogData ()Ljava/lang/String;
+	public abstract fun getNextBatchRange (Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun prepareBackfill (Lapp/cash/backfila/protos/clientservice/PrepareBackfillRequest;)Lapp/cash/backfila/protos/clientservice/PrepareBackfillResponse;
+	public abstract fun runBatch (Lapp/cash/backfila/protos/clientservice/RunBatchRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class app/cash/backfila/client/BackfilaCallbackConnectorProvider {
+	public abstract fun clientFor (Ljava/lang/String;Ljava/lang/String;)Lapp/cash/backfila/client/BackfilaCallbackConnector;
+	public abstract fun validateExtraData (Ljava/lang/String;)V
+}
+
+public final class app/cash/backfila/client/BackfilaCallbackConnectorProviderKt {
+	public static final fun getDEFAULT_HTTP_CLIENTS_CONFIG ()Lmisk/client/HttpClientsConfig;
+}
+
+public final class app/cash/backfila/client/BackfilaDefaultEndpointConfigModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+	public final fun httpClientsConfigDefault ()Lmisk/client/HttpClientsConfig;
+}
+
+public final class app/cash/backfila/client/ConnectorProvider {
+	public fun <init> (Ljava/util/Map;)V
+	public final fun clientProvider (Ljava/lang/String;)Lapp/cash/backfila/client/BackfilaCallbackConnectorProvider;
+}
+
+public final class app/cash/backfila/client/EnvoyCallbackConnectorProvider : app/cash/backfila/client/BackfilaCallbackConnectorProvider {
+	public fun <init> (Lmisk/client/HttpClientsConfig;Lmisk/client/HttpClientFactory;Lcom/squareup/moshi/Moshi;)V
+	public fun clientFor (Ljava/lang/String;Ljava/lang/String;)Lapp/cash/backfila/client/BackfilaCallbackConnector;
+	public fun validateExtraData (Ljava/lang/String;)V
+}
+
+public abstract interface class app/cash/backfila/client/EnvoyClientServiceApi {
+	public static final field Companion Lapp/cash/backfila/client/EnvoyClientServiceApi$Companion;
+	public abstract fun getNextBatchRange (Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun prepareBackfill (Lapp/cash/backfila/protos/clientservice/PrepareBackfillRequest;)Lretrofit2/Call;
+	public abstract fun runBatch (Lapp/cash/backfila/protos/clientservice/RunBatchRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class app/cash/backfila/client/EnvoyClientServiceApi$Companion {
+}
+
+public abstract interface annotation class app/cash/backfila/client/ForConnectors : java/lang/annotation/Annotation {
+}
+
+public final class app/cash/backfila/client/GrpcCallbackConnectorProvider : app/cash/backfila/client/BackfilaCallbackConnectorProvider {
+	public fun <init> (Lmisk/client/HttpClientsConfig;Lmisk/client/HttpClientFactory;Lmisk/client/HttpClientConfigUrlProvider;Lcom/squareup/moshi/Moshi;)V
+	public fun clientFor (Ljava/lang/String;Ljava/lang/String;)Lapp/cash/backfila/client/BackfilaCallbackConnector;
+	public fun validateExtraData (Ljava/lang/String;)V
+}
+
+public final class app/cash/backfila/client/HttpCallbackConnectorProvider : app/cash/backfila/client/BackfilaCallbackConnectorProvider {
+	public fun <init> (Lmisk/client/HttpClientsConfig;Lmisk/client/HttpClientFactory;Lmisk/client/HttpClientConfigUrlProvider;Ljava/util/List;Lcom/squareup/moshi/Moshi;)V
+	public fun clientFor (Ljava/lang/String;Ljava/lang/String;)Lapp/cash/backfila/client/BackfilaCallbackConnector;
+	public fun validateExtraData (Ljava/lang/String;)V
+}
+
+public abstract interface class app/cash/backfila/client/HttpClientServiceApi {
+	public static final field Companion Lapp/cash/backfila/client/HttpClientServiceApi$Companion;
+	public abstract fun getNextBatchRange (Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun prepareBackfill (Lapp/cash/backfila/protos/clientservice/PrepareBackfillRequest;)Lretrofit2/Call;
+	public abstract fun runBatch (Lapp/cash/backfila/protos/clientservice/RunBatchRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class app/cash/backfila/client/HttpClientServiceApi$Companion {
+}
+
+public final class app/cash/backfila/dashboard/BackfilaDashboardModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public final class app/cash/backfila/dashboard/BackfilaWebActionsModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public final class app/cash/backfila/dashboard/BackfillStateToggler {
+	public static final field Companion Lapp/cash/backfila/dashboard/BackfillStateToggler$Companion;
+	public fun <init> (Lmisk/hibernate/Transacter;Lmisk/hibernate/Query$Factory;Ljava/util/Set;)V
+	public final fun toggleRunningState (JLmisk/MiskCaller;Lapp/cash/backfila/service/persistence/BackfillState;)V
+}
+
+public final class app/cash/backfila/dashboard/BackfillStateToggler$Companion {
+}
+
+public final class app/cash/backfila/dashboard/CancelBackfillAction : misk/web/actions/WebAction {
+	public fun <init> (Lmisk/hibernate/Transacter;Lmisk/hibernate/Query$Factory;Ljava/util/Set;Lmisk/scope/ActionScoped;)V
+	public final fun cancel (J)V
+}
+
+public final class app/cash/backfila/dashboard/CloneBackfillAction : misk/web/actions/WebAction {
+	public static final field Companion Lapp/cash/backfila/dashboard/CloneBackfillAction$Companion;
+	public fun <init> (Lmisk/scope/ActionScoped;Lmisk/hibernate/Transacter;Lmisk/hibernate/Query$Factory;Lapp/cash/backfila/client/ConnectorProvider;)V
+	public final fun create (JLapp/cash/backfila/dashboard/CloneBackfillRequest;)Lapp/cash/backfila/dashboard/CloneBackfillResponse;
+	public final fun validate (Lapp/cash/backfila/dashboard/CloneBackfillRequest;)V
+}
+
+public final class app/cash/backfila/dashboard/CloneBackfillAction$Companion {
+}
+
+public final class app/cash/backfila/dashboard/CloneBackfillAction$DbData {
+	public fun <init> (Lmisk/hibernate/Id;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/hibernate/Id;Ljava/lang/String;)V
+	public final fun component1 ()Lmisk/hibernate/Id;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Lmisk/hibernate/Id;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun copy (Lmisk/hibernate/Id;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/hibernate/Id;Ljava/lang/String;)Lapp/cash/backfila/dashboard/CloneBackfillAction$DbData;
+	public static synthetic fun copy$default (Lapp/cash/backfila/dashboard/CloneBackfillAction$DbData;Lmisk/hibernate/Id;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/hibernate/Id;Ljava/lang/String;ILjava/lang/Object;)Lapp/cash/backfila/dashboard/CloneBackfillAction$DbData;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBackfillName ()Ljava/lang/String;
+	public final fun getConnectorExtraData ()Ljava/lang/String;
+	public final fun getConnectorType ()Ljava/lang/String;
+	public final fun getRegisteredBackfillId ()Lmisk/hibernate/Id;
+	public final fun getServiceId ()Lmisk/hibernate/Id;
+	public final fun getServiceName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/dashboard/CloneBackfillRequest {
+	public fun <init> (JJILapp/cash/backfila/dashboard/RangeCloneType;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;ZLjava/lang/String;J)V
+	public synthetic fun <init> (JJILapp/cash/backfila/dashboard/RangeCloneType;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;ZLjava/lang/String;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()J
+	public final fun component10 ()J
+	public final fun component2 ()J
+	public final fun component3 ()I
+	public final fun component4 ()Lapp/cash/backfila/dashboard/RangeCloneType;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/util/Map;
+	public final fun component8 ()Z
+	public final fun component9 ()Ljava/lang/String;
+	public final fun copy (JJILapp/cash/backfila/dashboard/RangeCloneType;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;ZLjava/lang/String;J)Lapp/cash/backfila/dashboard/CloneBackfillRequest;
+	public static synthetic fun copy$default (Lapp/cash/backfila/dashboard/CloneBackfillRequest;JJILapp/cash/backfila/dashboard/RangeCloneType;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;ZLjava/lang/String;JILjava/lang/Object;)Lapp/cash/backfila/dashboard/CloneBackfillRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBackoff_schedule ()Ljava/lang/String;
+	public final fun getBatch_size ()J
+	public final fun getDry_run ()Z
+	public final fun getExtra_sleep_ms ()J
+	public final fun getNum_threads ()I
+	public final fun getParameter_map ()Ljava/util/Map;
+	public final fun getPkey_range_end ()Ljava/lang/String;
+	public final fun getPkey_range_start ()Ljava/lang/String;
+	public final fun getRange_clone_type ()Lapp/cash/backfila/dashboard/RangeCloneType;
+	public final fun getScan_size ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/dashboard/CloneBackfillResponse {
+	public fun <init> (J)V
+	public final fun component1 ()J
+	public final fun copy (J)Lapp/cash/backfila/dashboard/CloneBackfillResponse;
+	public static synthetic fun copy$default (Lapp/cash/backfila/dashboard/CloneBackfillResponse;JILjava/lang/Object;)Lapp/cash/backfila/dashboard/CloneBackfillResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/dashboard/CreateBackfillAction : misk/web/actions/WebAction {
+	public fun <init> (Lmisk/scope/ActionScoped;Lapp/cash/backfila/BackfillCreator;)V
+	public final fun create (Ljava/lang/String;Ljava/lang/String;Lapp/cash/backfila/protos/service/CreateBackfillRequest;)Lapp/cash/backfila/protos/service/CreateBackfillResponse;
+}
+
+public final class app/cash/backfila/dashboard/EditPartitionCursorAction : misk/web/actions/WebAction {
+	public static final field Companion Lapp/cash/backfila/dashboard/EditPartitionCursorAction$Companion;
+	public fun <init> (Lapp/cash/backfila/dashboard/GetBackfillStatusAction;Lapp/cash/backfila/ui/components/DashboardPageLayout;)V
+	public final fun get (JLjava/lang/String;)Lmisk/web/Response;
+}
+
+public final class app/cash/backfila/dashboard/EditPartitionCursorAction$Companion {
+	public final fun path (JLjava/lang/String;)Ljava/lang/String;
+}
+
+public final class app/cash/backfila/dashboard/EditPartitionCursorHandlerAction : misk/web/actions/WebAction {
+	public static final field Companion Lapp/cash/backfila/dashboard/EditPartitionCursorHandlerAction$Companion;
+	public fun <init> (Lapp/cash/backfila/dashboard/GetBackfillStatusAction;Lmisk/hibernate/Transacter;Lmisk/hibernate/Query$Factory;Lmisk/scope/ActionScoped;Lapp/cash/backfila/ui/components/DashboardPageLayout;)V
+	public final fun get (JLjava/lang/String;)Lmisk/web/Response;
+}
+
+public final class app/cash/backfila/dashboard/EditPartitionCursorHandlerAction$Companion {
+	public final fun path (JLjava/lang/String;)Ljava/lang/String;
+}
+
+public final class app/cash/backfila/dashboard/GetBackfillRunsAction : misk/web/actions/WebAction {
+	public fun <init> (Lmisk/hibernate/Transacter;Lmisk/hibernate/Query$Factory;)V
+	public final fun backfillRuns (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)Lapp/cash/backfila/dashboard/GetBackfillRunsResponse;
+	public static synthetic fun backfillRuns$default (Lapp/cash/backfila/dashboard/GetBackfillRunsAction;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)Lapp/cash/backfila/dashboard/GetBackfillRunsResponse;
+}
+
+public final class app/cash/backfila/dashboard/GetBackfillRunsResponse {
+	public fun <init> (Ljava/util/List;Ljava/util/List;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/util/List;Ljava/util/List;Ljava/lang/String;)Lapp/cash/backfila/dashboard/GetBackfillRunsResponse;
+	public static synthetic fun copy$default (Lapp/cash/backfila/dashboard/GetBackfillRunsResponse;Ljava/util/List;Ljava/util/List;Ljava/lang/String;ILjava/lang/Object;)Lapp/cash/backfila/dashboard/GetBackfillRunsResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getNext_pagination_token ()Ljava/lang/String;
+	public final fun getPaused_backfills ()Ljava/util/List;
+	public final fun getRunning_backfills ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/dashboard/GetBackfillStatusAction : misk/web/actions/WebAction {
+	public fun <init> (Lmisk/hibernate/Transacter;Lmisk/hibernate/Query$Factory;)V
+	public final fun status (JLjava/lang/String;)Lapp/cash/backfila/dashboard/GetBackfillStatusResponse;
+	public static synthetic fun status$default (Lapp/cash/backfila/dashboard/GetBackfillStatusAction;JLjava/lang/String;ILjava/lang/Object;)Lapp/cash/backfila/dashboard/GetBackfillStatusResponse;
+}
+
+public final class app/cash/backfila/dashboard/GetBackfillStatusResponse {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lapp/cash/backfila/service/persistence/BackfillState;Ljava/util/Map;JJZILjava/time/Instant;Ljava/lang/String;JLjava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/time/Instant;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component10 ()Ljava/time/Instant;
+	public final fun component11 ()Ljava/lang/String;
+	public final fun component12 ()J
+	public final fun component13 ()Ljava/lang/String;
+	public final fun component14 ()Ljava/util/List;
+	public final fun component15 ()Ljava/util/List;
+	public final fun component16 ()Ljava/time/Instant;
+	public final fun component17 ()Ljava/lang/String;
+	public final fun component18 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Lapp/cash/backfila/service/persistence/BackfillState;
+	public final fun component5 ()Ljava/util/Map;
+	public final fun component6 ()J
+	public final fun component7 ()J
+	public final fun component8 ()Z
+	public final fun component9 ()I
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lapp/cash/backfila/service/persistence/BackfillState;Ljava/util/Map;JJZILjava/time/Instant;Ljava/lang/String;JLjava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/time/Instant;Ljava/lang/String;Ljava/lang/String;)Lapp/cash/backfila/dashboard/GetBackfillStatusResponse;
+	public static synthetic fun copy$default (Lapp/cash/backfila/dashboard/GetBackfillStatusResponse;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lapp/cash/backfila/service/persistence/BackfillState;Ljava/util/Map;JJZILjava/time/Instant;Ljava/lang/String;JLjava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/time/Instant;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lapp/cash/backfila/dashboard/GetBackfillStatusResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBackoff_schedule ()Ljava/lang/String;
+	public final fun getBatch_size ()J
+	public final fun getCreated_at ()Ljava/time/Instant;
+	public final fun getCreated_by_user ()Ljava/lang/String;
+	public final fun getDeleted_at ()Ljava/time/Instant;
+	public final fun getDry_run ()Z
+	public final fun getEvent_logs ()Ljava/util/List;
+	public final fun getExtra_sleep_ms ()J
+	public final fun getName ()Ljava/lang/String;
+	public final fun getNext_offset ()Ljava/lang/String;
+	public final fun getNum_threads ()I
+	public final fun getParameters ()Ljava/util/Map;
+	public final fun getPartitions ()Ljava/util/List;
+	public final fun getScan_size ()J
+	public final fun getService_name ()Ljava/lang/String;
+	public final fun getState ()Lapp/cash/backfila/service/persistence/BackfillState;
+	public final fun getUnit ()Ljava/lang/String;
+	public final fun getVariant ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/dashboard/GetRegisteredBackfillsAction : misk/web/actions/WebAction {
+	public fun <init> (Lmisk/hibernate/Transacter;Lmisk/hibernate/Query$Factory;)V
+	public final fun backfills (Ljava/lang/String;Ljava/lang/String;)Lapp/cash/backfila/dashboard/GetRegisteredBackfillsResponse;
+}
+
+public final class app/cash/backfila/dashboard/GetRegisteredBackfillsResponse {
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lapp/cash/backfila/dashboard/GetRegisteredBackfillsResponse;
+	public static synthetic fun copy$default (Lapp/cash/backfila/dashboard/GetRegisteredBackfillsResponse;Ljava/util/List;ILjava/lang/Object;)Lapp/cash/backfila/dashboard/GetRegisteredBackfillsResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBackfills ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/dashboard/GetServiceDetailsAction : misk/web/actions/WebAction {
+	public fun <init> (Lmisk/hibernate/Transacter;Lmisk/hibernate/Query$Factory;)V
+	public final fun getServiceDetails (Ljava/lang/String;Ljava/lang/String;)Lapp/cash/backfila/dashboard/GetServiceDetailsResponse;
+}
+
+public final class app/cash/backfila/dashboard/GetServiceDetailsResponse {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/time/Instant;
+	public final fun component7 ()Ljava/time/Instant;
+	public final fun component8 ()Ljava/time/Instant;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;)Lapp/cash/backfila/dashboard/GetServiceDetailsResponse;
+	public static synthetic fun copy$default (Lapp/cash/backfila/dashboard/GetServiceDetailsResponse;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;ILjava/lang/Object;)Lapp/cash/backfila/dashboard/GetServiceDetailsResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getConnector ()Ljava/lang/String;
+	public final fun getConnector_extra_data ()Ljava/lang/String;
+	public final fun getCreated_at ()Ljava/time/Instant;
+	public final fun getLast_registered_at ()Ljava/time/Instant;
+	public final fun getService_name ()Ljava/lang/String;
+	public final fun getSlack_channel ()Ljava/lang/String;
+	public final fun getUpdated_at ()Ljava/time/Instant;
+	public final fun getVariant ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/dashboard/GetServiceVariantsAction : misk/web/actions/WebAction {
+	public fun <init> (Lmisk/hibernate/Transacter;Lmisk/hibernate/Query$Factory;)V
+	public final fun variants (Ljava/lang/String;)Lapp/cash/backfila/dashboard/GetServiceVariantsAction$GetServiceVariantsResponse;
+}
+
+public final class app/cash/backfila/dashboard/GetServiceVariantsAction$GetServiceVariantsResponse {
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lapp/cash/backfila/dashboard/GetServiceVariantsAction$GetServiceVariantsResponse;
+	public static synthetic fun copy$default (Lapp/cash/backfila/dashboard/GetServiceVariantsAction$GetServiceVariantsResponse;Ljava/util/List;ILjava/lang/Object;)Lapp/cash/backfila/dashboard/GetServiceVariantsAction$GetServiceVariantsResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getVariants ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/dashboard/GetServiceVariantsAction$UiVariant {
+	public fun <init> (Ljava/lang/String;I)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()I
+	public final fun copy (Ljava/lang/String;I)Lapp/cash/backfila/dashboard/GetServiceVariantsAction$UiVariant;
+	public static synthetic fun copy$default (Lapp/cash/backfila/dashboard/GetServiceVariantsAction$UiVariant;Ljava/lang/String;IILjava/lang/Object;)Lapp/cash/backfila/dashboard/GetServiceVariantsAction$UiVariant;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getName ()Ljava/lang/String;
+	public final fun getRunning_backfills ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/dashboard/GetServicesAction : misk/web/actions/WebAction {
+	public fun <init> (Lmisk/hibernate/Transacter;Lmisk/hibernate/Query$Factory;)V
+	public final fun services ()Lapp/cash/backfila/dashboard/GetServicesAction$GetServicesResponse;
+}
+
+public final class app/cash/backfila/dashboard/GetServicesAction$GetServicesResponse {
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lapp/cash/backfila/dashboard/GetServicesAction$GetServicesResponse;
+	public static synthetic fun copy$default (Lapp/cash/backfila/dashboard/GetServicesAction$GetServicesResponse;Ljava/util/List;ILjava/lang/Object;)Lapp/cash/backfila/dashboard/GetServicesAction$GetServicesResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getServices ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/dashboard/GetServicesAction$UiService {
+	public fun <init> (Ljava/lang/String;Ljava/util/Set;I)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/Set;
+	public final fun component3 ()I
+	public final fun copy (Ljava/lang/String;Ljava/util/Set;I)Lapp/cash/backfila/dashboard/GetServicesAction$UiService;
+	public static synthetic fun copy$default (Lapp/cash/backfila/dashboard/GetServicesAction$UiService;Ljava/lang/String;Ljava/util/Set;IILjava/lang/Object;)Lapp/cash/backfila/dashboard/GetServicesAction$UiService;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getName ()Ljava/lang/String;
+	public final fun getRunning_backfills ()I
+	public final fun getVariants ()Ljava/util/Set;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/dashboard/RangeCloneType : java/lang/Enum {
+	public static final field CONTINUE Lapp/cash/backfila/dashboard/RangeCloneType;
+	public static final field NEW Lapp/cash/backfila/dashboard/RangeCloneType;
+	public static final field RESTART Lapp/cash/backfila/dashboard/RangeCloneType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lapp/cash/backfila/dashboard/RangeCloneType;
+	public static fun values ()[Lapp/cash/backfila/dashboard/RangeCloneType;
+}
+
+public final class app/cash/backfila/dashboard/RegisteredBackfill {
+	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/util/List;)Lapp/cash/backfila/dashboard/RegisteredBackfill;
+	public static synthetic fun copy$default (Lapp/cash/backfila/dashboard/RegisteredBackfill;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lapp/cash/backfila/dashboard/RegisteredBackfill;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getName ()Ljava/lang/String;
+	public final fun getParameterNames ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/dashboard/SearchBackfillNamesAction : misk/web/actions/WebAction {
+	public fun <init> (Lmisk/hibernate/Transacter;Lmisk/hibernate/Query$Factory;)V
+	public final fun searchBackfillNames (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+	public static synthetic fun searchBackfillNames$default (Lapp/cash/backfila/dashboard/SearchBackfillNamesAction;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ljava/lang/String;
+	public final fun searchBackfillNamesJson (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/util/List;
+	public static synthetic fun searchBackfillNamesJson$default (Lapp/cash/backfila/dashboard/SearchBackfillNamesAction;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ljava/util/List;
+}
+
+public final class app/cash/backfila/dashboard/SearchUsersAction : misk/web/actions/WebAction {
+	public fun <init> (Lmisk/hibernate/Transacter;Lmisk/hibernate/Query$Factory;)V
+	public final fun searchUsers (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+	public static synthetic fun searchUsers$default (Lapp/cash/backfila/dashboard/SearchUsersAction;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ljava/lang/String;
+	public final fun searchUsersJson (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/util/List;
+	public static synthetic fun searchUsersJson$default (Lapp/cash/backfila/dashboard/SearchUsersAction;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ljava/util/List;
+}
+
+public final class app/cash/backfila/dashboard/SoftDeleteBackfillAction : misk/web/actions/WebAction {
+	public fun <init> (Lmisk/hibernate/Transacter;Lmisk/scope/ActionScoped;)V
+	public final fun softDelete (J)V
+}
+
+public final class app/cash/backfila/dashboard/StartBackfillAction : misk/web/actions/WebAction {
+	public static final field Companion Lapp/cash/backfila/dashboard/StartBackfillAction$Companion;
+	public fun <init> (Lmisk/scope/ActionScoped;Lapp/cash/backfila/dashboard/BackfillStateToggler;)V
+	public final fun start (JLapp/cash/backfila/dashboard/StartBackfillRequest;)Lapp/cash/backfila/dashboard/StartBackfillResponse;
+}
+
+public final class app/cash/backfila/dashboard/StartBackfillAction$Companion {
+}
+
+public final class app/cash/backfila/dashboard/StartBackfillRequest {
+	public fun <init> ()V
+}
+
+public final class app/cash/backfila/dashboard/StartBackfillResponse {
+	public fun <init> ()V
+}
+
+public final class app/cash/backfila/dashboard/StopAllBackfillsAction : misk/web/actions/WebAction {
+	public static final field Companion Lapp/cash/backfila/dashboard/StopAllBackfillsAction$Companion;
+	public fun <init> (Lmisk/scope/ActionScoped;Lapp/cash/backfila/dashboard/BackfillStateToggler;Lmisk/hibernate/Transacter;Lmisk/hibernate/Query$Factory;)V
+	public final fun stopAll (Lapp/cash/backfila/dashboard/StopAllBackfillsRequest;)Lapp/cash/backfila/dashboard/StopAllBackfillsResponse;
+}
+
+public final class app/cash/backfila/dashboard/StopAllBackfillsAction$Companion {
+}
+
+public final class app/cash/backfila/dashboard/StopAllBackfillsRequest {
+	public fun <init> ()V
+}
+
+public final class app/cash/backfila/dashboard/StopAllBackfillsResponse {
+	public fun <init> ()V
+}
+
+public final class app/cash/backfila/dashboard/StopBackfillAction : misk/web/actions/WebAction {
+	public static final field Companion Lapp/cash/backfila/dashboard/StopBackfillAction$Companion;
+	public fun <init> (Lmisk/scope/ActionScoped;Lapp/cash/backfila/dashboard/BackfillStateToggler;)V
+	public final fun stop (JLapp/cash/backfila/dashboard/StopBackfillRequest;)Lapp/cash/backfila/dashboard/StopBackfillResponse;
+}
+
+public final class app/cash/backfila/dashboard/StopBackfillAction$Companion {
+}
+
+public final class app/cash/backfila/dashboard/StopBackfillRequest {
+	public fun <init> ()V
+}
+
+public final class app/cash/backfila/dashboard/StopBackfillResponse {
+	public fun <init> ()V
+}
+
+public final class app/cash/backfila/dashboard/UiBackfillRun {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lapp/cash/backfila/service/persistence/BackfillState;ZLjava/time/Instant;Ljava/lang/String;Ljava/time/Instant;ZJJ)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component10 ()J
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lapp/cash/backfila/service/persistence/BackfillState;
+	public final fun component4 ()Z
+	public final fun component5 ()Ljava/time/Instant;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/time/Instant;
+	public final fun component8 ()Z
+	public final fun component9 ()J
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lapp/cash/backfila/service/persistence/BackfillState;ZLjava/time/Instant;Ljava/lang/String;Ljava/time/Instant;ZJJ)Lapp/cash/backfila/dashboard/UiBackfillRun;
+	public static synthetic fun copy$default (Lapp/cash/backfila/dashboard/UiBackfillRun;Ljava/lang/String;Ljava/lang/String;Lapp/cash/backfila/service/persistence/BackfillState;ZLjava/time/Instant;Ljava/lang/String;Ljava/time/Instant;ZJJILjava/lang/Object;)Lapp/cash/backfila/dashboard/UiBackfillRun;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBackfilled_matching_record_count ()J
+	public final fun getComputed_matching_record_count ()J
+	public final fun getCreated_at ()Ljava/time/Instant;
+	public final fun getCreated_by_user ()Ljava/lang/String;
+	public final fun getDry_run ()Z
+	public final fun getId ()Ljava/lang/String;
+	public final fun getLast_active_at ()Ljava/time/Instant;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getPrecomputing_done ()Z
+	public final fun getState ()Lapp/cash/backfila/service/persistence/BackfillState;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/dashboard/UiEventLog {
+	public fun <init> (Ljava/time/Instant;Lapp/cash/backfila/service/persistence/DbEventLog$Type;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/time/Instant;
+	public final fun component2 ()Lapp/cash/backfila/service/persistence/DbEventLog$Type;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun copy (Ljava/time/Instant;Lapp/cash/backfila/service/persistence/DbEventLog$Type;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lapp/cash/backfila/dashboard/UiEventLog;
+	public static synthetic fun copy$default (Lapp/cash/backfila/dashboard/UiEventLog;Ljava/time/Instant;Lapp/cash/backfila/service/persistence/DbEventLog$Type;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lapp/cash/backfila/dashboard/UiEventLog;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getExtra_data ()Ljava/lang/String;
+	public final fun getMessage ()Ljava/lang/String;
+	public final fun getOccurred_at ()Ljava/time/Instant;
+	public final fun getPartition_name ()Ljava/lang/String;
+	public final fun getType ()Lapp/cash/backfila/service/persistence/DbEventLog$Type;
+	public final fun getUser ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/dashboard/UiPartition {
+	public fun <init> (JLjava/lang/String;Lapp/cash/backfila/service/persistence/BackfillState;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;JJJJLjava/lang/Long;Ljava/lang/Long;)V
+	public final fun component1 ()J
+	public final fun component10 ()J
+	public final fun component11 ()J
+	public final fun component12 ()J
+	public final fun component13 ()Ljava/lang/Long;
+	public final fun component14 ()Ljava/lang/Long;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lapp/cash/backfila/service/persistence/BackfillState;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Z
+	public final fun component8 ()Ljava/lang/String;
+	public final fun component9 ()J
+	public final fun copy (JLjava/lang/String;Lapp/cash/backfila/service/persistence/BackfillState;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;JJJJLjava/lang/Long;Ljava/lang/Long;)Lapp/cash/backfila/dashboard/UiPartition;
+	public static synthetic fun copy$default (Lapp/cash/backfila/dashboard/UiPartition;JLjava/lang/String;Lapp/cash/backfila/service/persistence/BackfillState;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;JJJJLjava/lang/Long;Ljava/lang/Long;ILjava/lang/Object;)Lapp/cash/backfila/dashboard/UiPartition;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBackfilled_matching_record_count ()J
+	public final fun getBackfilled_scanned_record_count ()J
+	public final fun getComputed_matching_record_count ()J
+	public final fun getComputed_scanned_record_count ()J
+	public final fun getId ()J
+	public final fun getMatching_records_per_minute ()Ljava/lang/Long;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getPkey_cursor ()Ljava/lang/String;
+	public final fun getPkey_end ()Ljava/lang/String;
+	public final fun getPkey_start ()Ljava/lang/String;
+	public final fun getPrecomputing_done ()Z
+	public final fun getPrecomputing_pkey_cursor ()Ljava/lang/String;
+	public final fun getScanned_records_per_minute ()Ljava/lang/Long;
+	public final fun getState ()Lapp/cash/backfila/service/persistence/BackfillState;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/dashboard/UpdateBackfillAction : misk/web/actions/WebAction {
+	public static final field Companion Lapp/cash/backfila/dashboard/UpdateBackfillAction$Companion;
+	public fun <init> (Lmisk/scope/ActionScoped;Lmisk/hibernate/Transacter;)V
+	public final fun update (JLapp/cash/backfila/dashboard/UpdateBackfillRequest;)Lapp/cash/backfila/dashboard/UpdateBackfillResponse;
+}
+
+public final class app/cash/backfila/dashboard/UpdateBackfillAction$Companion {
+}
+
+public final class app/cash/backfila/dashboard/UpdateBackfillRequest {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/Long;)V
+	public synthetic fun <init> (Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/Long;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/Long;
+	public final fun component2 ()Ljava/lang/Long;
+	public final fun component3 ()Ljava/lang/Integer;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/Long;
+	public final fun copy (Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/Long;)Lapp/cash/backfila/dashboard/UpdateBackfillRequest;
+	public static synthetic fun copy$default (Lapp/cash/backfila/dashboard/UpdateBackfillRequest;Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/Long;ILjava/lang/Object;)Lapp/cash/backfila/dashboard/UpdateBackfillRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBackoff_schedule ()Ljava/lang/String;
+	public final fun getBatch_size ()Ljava/lang/Long;
+	public final fun getExtra_sleep_ms ()Ljava/lang/Long;
+	public final fun getNum_threads ()Ljava/lang/Integer;
+	public final fun getScan_size ()Ljava/lang/Long;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/dashboard/UpdateBackfillResponse {
+	public fun <init> ()V
+}
+
+public final class app/cash/backfila/dashboard/ViewDashboardAction : misk/web/actions/WebAction {
+	public fun <init> (Lmisk/hibernate/Transacter;Lapp/cash/backfila/dashboard/ViewDashboardUrlProvider;)V
+	public final fun getUrl (J)Ljava/lang/String;
+	public final fun viewDashboard (J)Lmisk/web/Response;
+}
+
+public abstract interface class app/cash/backfila/dashboard/ViewDashboardUrlProvider {
+	public abstract fun getUrl (Lmisk/hibernate/Session;Lapp/cash/backfila/service/persistence/DbBackfillRun;)Ljava/lang/String;
+}
+
+public final class app/cash/backfila/dashboard/ViewLogsAction : misk/web/actions/WebAction {
+	public fun <init> (Lmisk/hibernate/Transacter;Lapp/cash/backfila/dashboard/ViewLogsUrlProvider;)V
+	public final fun getUrl (J)Ljava/lang/String;
+	public final fun viewLogs (J)Lmisk/web/Response;
+}
+
+public abstract interface class app/cash/backfila/dashboard/ViewLogsUrlProvider {
+	public abstract fun getUrl (Lmisk/hibernate/Session;Lapp/cash/backfila/service/persistence/DbBackfillRun;)Ljava/lang/String;
+}
+
+public final class app/cash/backfila/service/BackfilaConfig : misk/config/Config {
+	public fun <init> (Ljava/lang/Integer;Lmisk/jdbc/DataSourceClustersConfig;Lmisk/slack/SlackConfig;Ljava/lang/String;IILjava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/Integer;Lmisk/jdbc/DataSourceClustersConfig;Lmisk/slack/SlackConfig;Ljava/lang/String;IILjava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/Integer;
+	public final fun component2 ()Lmisk/jdbc/DataSourceClustersConfig;
+	public final fun component3 ()Lmisk/slack/SlackConfig;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()I
+	public final fun component6 ()I
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/Integer;Lmisk/jdbc/DataSourceClustersConfig;Lmisk/slack/SlackConfig;Ljava/lang/String;IILjava/lang/String;Ljava/lang/String;)Lapp/cash/backfila/service/BackfilaConfig;
+	public static synthetic fun copy$default (Lapp/cash/backfila/service/BackfilaConfig;Ljava/lang/Integer;Lmisk/jdbc/DataSourceClustersConfig;Lmisk/slack/SlackConfig;Ljava/lang/String;IILjava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lapp/cash/backfila/service/BackfilaConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBackfill_runner_threads ()Ljava/lang/Integer;
+	public final fun getBatch_queue_thread_multiplier ()I
+	public final fun getData_source_clusters ()Lmisk/jdbc/DataSourceClustersConfig;
+	public final fun getMinimum_batches_per_get_next_batch_call ()I
+	public final fun getSlack ()Lmisk/slack/SlackConfig;
+	public final fun getSupport_button_label ()Ljava/lang/String;
+	public final fun getSupport_button_url ()Ljava/lang/String;
+	public final fun getWeb_url_root ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/service/BackfilaMetrics {
+	public static final field Companion Lapp/cash/backfila/service/BackfilaMetrics$Companion;
+	public final fun getBatchRunsInProgress ()Lio/prometheus/client/Gauge;
+	public final fun getBlockedOnComputingNextBatchDuration ()Lio/prometheus/client/Histogram;
+	public final fun getBufferedBatchesReadyToRun ()Lio/prometheus/client/Gauge;
+	public final fun getComputedBatchCount ()Lio/prometheus/client/Counter;
+	public final fun getComputedRecordsMatching ()Lio/prometheus/client/Counter;
+	public final fun getComputedRecordsScanned ()Lio/prometheus/client/Counter;
+	public final fun getEta ()Lio/prometheus/client/Gauge;
+	public final fun getGetNextBatchDuration ()Lio/prometheus/client/Histogram;
+	public final fun getGetNextBatchFailures ()Lio/prometheus/client/Counter;
+	public final fun getGetNextBatchSuccesses ()Lio/prometheus/client/Counter;
+	public final fun getRunBatchCompletedRecordsMatching ()Lio/prometheus/client/Counter;
+	public final fun getRunBatchCompletedRecordsScanned ()Lio/prometheus/client/Counter;
+	public final fun getRunBatchDuration ()Lio/prometheus/client/Histogram;
+	public final fun getRunBatchFailures ()Lio/prometheus/client/Counter;
+	public final fun getRunBatchSuccesses ()Lio/prometheus/client/Counter;
+}
+
+public final class app/cash/backfila/service/BackfilaMetrics$Companion {
+}
+
+public final class app/cash/backfila/service/BackfilaServiceModule : misk/inject/KAbstractModule {
+	public fun <init> (Lwisp/deployment/Deployment;Lapp/cash/backfila/service/BackfilaConfig;Ljava/lang/Class;)V
+	public synthetic fun <init> (Lwisp/deployment/Deployment;Lapp/cash/backfila/service/BackfilaConfig;Ljava/lang/Class;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun backfillRunnerExecutor ()Lcom/google/common/util/concurrent/ListeningExecutorService;
+}
+
+public abstract interface annotation class app/cash/backfila/service/HttpClientNetworkInterceptor : java/lang/annotation/Annotation {
+}
+
+public final class app/cash/backfila/service/listener/BackfilaListenerModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public abstract interface class app/cash/backfila/service/listener/BackfillRunListener {
+	public abstract fun runCancelled (Lmisk/hibernate/Id;Ljava/lang/String;)V
+	public abstract fun runCompleted (Lmisk/hibernate/Id;)V
+	public abstract fun runErrored (Lmisk/hibernate/Id;)V
+	public abstract fun runPaused (Lmisk/hibernate/Id;Ljava/lang/String;)V
+	public abstract fun runStarted (Lmisk/hibernate/Id;Ljava/lang/String;)V
+}
+
+public final class app/cash/backfila/service/listener/SlackHelper : app/cash/backfila/service/listener/BackfillRunListener {
+	public fun <init> (Lmisk/hibernate/Transacter;Lmisk/slack/SlackClient;Lapp/cash/backfila/service/BackfilaConfig;Lwisp/deployment/Deployment;)V
+	public fun runCancelled (Lmisk/hibernate/Id;Ljava/lang/String;)V
+	public fun runCompleted (Lmisk/hibernate/Id;)V
+	public fun runErrored (Lmisk/hibernate/Id;)V
+	public fun runPaused (Lmisk/hibernate/Id;Ljava/lang/String;)V
+	public fun runStarted (Lmisk/hibernate/Id;Ljava/lang/String;)V
+}
+
+public abstract interface annotation class app/cash/backfila/service/persistence/BackfilaDb : java/lang/annotation/Annotation {
+}
+
+public final class app/cash/backfila/service/persistence/BackfilaPersistenceModule : misk/inject/KAbstractModule {
+	public fun <init> (Lapp/cash/backfila/service/BackfilaConfig;)V
+}
+
+public abstract interface class app/cash/backfila/service/persistence/BackfillRunQuery : misk/hibernate/Query {
+	public abstract fun createdByUser (Ljava/lang/String;)Lapp/cash/backfila/service/persistence/BackfillRunQuery;
+	public abstract fun id (Lmisk/hibernate/Id;)Lapp/cash/backfila/service/persistence/BackfillRunQuery;
+	public abstract fun notSoftDeleted ()Lapp/cash/backfila/service/persistence/BackfillRunQuery;
+	public abstract fun orderByIdDesc ()Lapp/cash/backfila/service/persistence/BackfillRunQuery;
+	public abstract fun orderByUpdatedAtDesc ()Lapp/cash/backfila/service/persistence/BackfillRunQuery;
+	public abstract fun serviceId (Lmisk/hibernate/Id;)Lapp/cash/backfila/service/persistence/BackfillRunQuery;
+	public abstract fun serviceIdIn (Ljava/util/Collection;)Lapp/cash/backfila/service/persistence/BackfillRunQuery;
+	public abstract fun state (Lapp/cash/backfila/service/persistence/BackfillState;)Lapp/cash/backfila/service/persistence/BackfillRunQuery;
+	public abstract fun stateNot (Lapp/cash/backfila/service/persistence/BackfillState;)Lapp/cash/backfila/service/persistence/BackfillRunQuery;
+}
+
+public final class app/cash/backfila/service/persistence/BackfillState : java/lang/Enum {
+	public static final field CANCELLED Lapp/cash/backfila/service/persistence/BackfillState;
+	public static final field COMPLETE Lapp/cash/backfila/service/persistence/BackfillState;
+	public static final field PAUSED Lapp/cash/backfila/service/persistence/BackfillState;
+	public static final field RUNNING Lapp/cash/backfila/service/persistence/BackfillState;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lapp/cash/backfila/service/persistence/BackfillState;
+	public static fun values ()[Lapp/cash/backfila/service/persistence/BackfillState;
+}
+
+public class app/cash/backfila/service/persistence/DbBackfillRun : misk/hibernate/DbTimestampedEntity, misk/hibernate/DbUnsharded {
+	public field created_at Ljava/time/Instant;
+	public field id Lmisk/hibernate/Id;
+	public field registered_backfill Lapp/cash/backfila/service/persistence/DbRegisteredBackfill;
+	public field registered_backfill_id Lmisk/hibernate/Id;
+	public field service Lapp/cash/backfila/service/persistence/DbService;
+	public field service_id Lmisk/hibernate/Id;
+	protected field state Lapp/cash/backfila/service/persistence/BackfillState;
+	public field updated_at Ljava/time/Instant;
+	public fun <init> ()V
+	public fun <init> (Lmisk/hibernate/Id;Lmisk/hibernate/Id;Ljava/util/Map;Lapp/cash/backfila/service/persistence/BackfillState;Ljava/lang/String;JJILjava/lang/String;ZJ)V
+	public fun backoffSchedule ()Ljava/util/List;
+	public fun complete ()V
+	public fun getApproved_at ()Ljava/time/Instant;
+	public fun getApproved_by_user ()Ljava/lang/String;
+	public fun getBackoff_schedule ()Ljava/lang/String;
+	public fun getBatch_size ()J
+	public fun getCreated_at ()Ljava/time/Instant;
+	public fun getCreated_by_user ()Ljava/lang/String;
+	public fun getDeleted_at ()Ljava/time/Instant;
+	public fun getDry_run ()Z
+	public fun getExtra_sleep_ms ()J
+	public fun getId ()Lmisk/hibernate/Id;
+	public fun getNum_threads ()I
+	public fun getParameter_map ()Ljava/util/Map;
+	public fun getPipeline_target_backfill_id ()Lmisk/hibernate/Id;
+	public fun getRegistered_backfill ()Lapp/cash/backfila/service/persistence/DbRegisteredBackfill;
+	public fun getRegistered_backfill_id ()Lmisk/hibernate/Id;
+	public fun getScan_size ()J
+	public fun getService ()Lapp/cash/backfila/service/persistence/DbService;
+	public fun getService_id ()Lmisk/hibernate/Id;
+	public fun getState ()Lapp/cash/backfila/service/persistence/BackfillState;
+	public fun getUpdated_at ()Ljava/time/Instant;
+	public fun getVersion ()J
+	public fun parameters ()Ljava/util/Map;
+	public fun partitions (Lmisk/hibernate/Session;Lmisk/hibernate/Query$Factory;)Ljava/util/List;
+	public fun setApproved_at (Ljava/time/Instant;)V
+	public fun setApproved_by_user (Ljava/lang/String;)V
+	public fun setBackoff_schedule (Ljava/lang/String;)V
+	public fun setBatch_size (J)V
+	public fun setCreated_at (Ljava/time/Instant;)V
+	public fun setCreated_by_user (Ljava/lang/String;)V
+	public fun setDeleted_at (Ljava/time/Instant;)V
+	public fun setDry_run (Z)V
+	public fun setExtra_sleep_ms (J)V
+	public fun setId (Lmisk/hibernate/Id;)V
+	public fun setNum_threads (I)V
+	public fun setParameter_map (Ljava/util/Map;)V
+	public fun setPipeline_target_backfill_id (Lmisk/hibernate/Id;)V
+	public fun setRegistered_backfill (Lapp/cash/backfila/service/persistence/DbRegisteredBackfill;)V
+	public fun setRegistered_backfill_id (Lmisk/hibernate/Id;)V
+	public fun setScan_size (J)V
+	public fun setService (Lapp/cash/backfila/service/persistence/DbService;)V
+	public fun setService_id (Lmisk/hibernate/Id;)V
+	protected fun setState (Lapp/cash/backfila/service/persistence/BackfillState;)V
+	public fun setState (Lmisk/hibernate/Session;Lmisk/hibernate/Query$Factory;Lapp/cash/backfila/service/persistence/BackfillState;)V
+	public fun setUpdated_at (Ljava/time/Instant;)V
+	public fun setVersion (J)V
+}
+
+public class app/cash/backfila/service/persistence/DbEventLog : misk/hibernate/DbTimestampedEntity, misk/hibernate/DbUnsharded {
+	public field backfill_run_id Lmisk/hibernate/Id;
+	public field created_at Ljava/time/Instant;
+	public field id Lmisk/hibernate/Id;
+	public field message Ljava/lang/String;
+	public field type Lapp/cash/backfila/service/persistence/DbEventLog$Type;
+	public field updated_at Ljava/time/Instant;
+	public fun <init> ()V
+	public fun <init> (Lmisk/hibernate/Id;Lmisk/hibernate/Id;Ljava/lang/String;Lapp/cash/backfila/service/persistence/DbEventLog$Type;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Lmisk/hibernate/Id;Lmisk/hibernate/Id;Ljava/lang/String;Lapp/cash/backfila/service/persistence/DbEventLog$Type;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getBackfill_run_id ()Lmisk/hibernate/Id;
+	public fun getCreated_at ()Ljava/time/Instant;
+	public fun getExtra_data ()Ljava/lang/String;
+	public fun getId ()Lmisk/hibernate/Id;
+	public fun getMessage ()Ljava/lang/String;
+	public fun getPartition_id ()Lmisk/hibernate/Id;
+	public fun getType ()Lapp/cash/backfila/service/persistence/DbEventLog$Type;
+	public fun getUpdated_at ()Ljava/time/Instant;
+	public fun getUser ()Ljava/lang/String;
+	public fun setBackfill_run_id (Lmisk/hibernate/Id;)V
+	public fun setCreated_at (Ljava/time/Instant;)V
+	public fun setExtra_data (Ljava/lang/String;)V
+	public fun setId (Lmisk/hibernate/Id;)V
+	public fun setMessage (Ljava/lang/String;)V
+	public fun setPartition_id (Lmisk/hibernate/Id;)V
+	public fun setType (Lapp/cash/backfila/service/persistence/DbEventLog$Type;)V
+	public fun setUpdated_at (Ljava/time/Instant;)V
+	public fun setUser (Ljava/lang/String;)V
+}
+
+public final class app/cash/backfila/service/persistence/DbEventLog$Type : java/lang/Enum {
+	public static final field CONFIG_CHANGE Lapp/cash/backfila/service/persistence/DbEventLog$Type;
+	public static final field ERROR Lapp/cash/backfila/service/persistence/DbEventLog$Type;
+	public static final field STATE_CHANGE Lapp/cash/backfila/service/persistence/DbEventLog$Type;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lapp/cash/backfila/service/persistence/DbEventLog$Type;
+	public static fun values ()[Lapp/cash/backfila/service/persistence/DbEventLog$Type;
+}
+
+public class app/cash/backfila/service/persistence/DbRegisteredBackfill : misk/hibernate/DbTimestampedEntity, misk/hibernate/DbUnsharded {
+	public field created_at Ljava/time/Instant;
+	public field id Lmisk/hibernate/Id;
+	public field name Ljava/lang/String;
+	public field service Lapp/cash/backfila/service/persistence/DbService;
+	public field service_id Lmisk/hibernate/Id;
+	public field updated_at Ljava/time/Instant;
+	public fun <init> ()V
+	public fun <init> (Lmisk/hibernate/Id;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;ZLjava/time/Instant;Ljava/lang/String;)V
+	public synthetic fun <init> (Lmisk/hibernate/Id;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;ZLjava/time/Instant;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun deactivate (Ljava/time/Clock;)V
+	public fun equalConfig (Lapp/cash/backfila/service/persistence/DbRegisteredBackfill;)Z
+	public fun getActive ()Ljava/lang/Boolean;
+	public fun getCreated_at ()Ljava/time/Instant;
+	public fun getDelete_by ()Ljava/time/Instant;
+	public fun getDeleted_in_service_at ()Ljava/time/Instant;
+	public fun getId ()Lmisk/hibernate/Id;
+	public fun getName ()Ljava/lang/String;
+	public fun getParameter_names ()Ljava/lang/String;
+	public fun getParameters ()Ljava/util/Set;
+	public fun getRequires_approval ()Z
+	public fun getService ()Lapp/cash/backfila/service/persistence/DbService;
+	public fun getService_id ()Lmisk/hibernate/Id;
+	public fun getType_consumed ()Ljava/lang/String;
+	public fun getType_provided ()Ljava/lang/String;
+	public fun getUnit ()Ljava/lang/String;
+	public fun getUpdated_at ()Ljava/time/Instant;
+	public fun parameterNames ()Ljava/util/List;
+	public fun setActive (Ljava/lang/Boolean;)V
+	public fun setCreated_at (Ljava/time/Instant;)V
+	public fun setDelete_by (Ljava/time/Instant;)V
+	public fun setDeleted_in_service_at (Ljava/time/Instant;)V
+	public fun setId (Lmisk/hibernate/Id;)V
+	public fun setName (Ljava/lang/String;)V
+	public fun setParameter_names (Ljava/lang/String;)V
+	public fun setParameters (Ljava/util/Set;)V
+	public fun setRequires_approval (Z)V
+	public fun setService (Lapp/cash/backfila/service/persistence/DbService;)V
+	public fun setService_id (Lmisk/hibernate/Id;)V
+	public fun setType_consumed (Ljava/lang/String;)V
+	public fun setType_provided (Ljava/lang/String;)V
+	public fun setUnit (Ljava/lang/String;)V
+	public fun setUpdated_at (Ljava/time/Instant;)V
+}
+
+public class app/cash/backfila/service/persistence/DbRegisteredParameter : misk/hibernate/DbTimestampedEntity, misk/hibernate/DbUnsharded {
+	public field created_at Ljava/time/Instant;
+	public field id Lmisk/hibernate/Id;
+	public field name Ljava/lang/String;
+	public field registered_backfill Lapp/cash/backfila/service/persistence/DbRegisteredBackfill;
+	public field updated_at Ljava/time/Instant;
+	public fun <init> ()V
+	public fun <init> (Lapp/cash/backfila/service/persistence/DbRegisteredBackfill;Ljava/lang/String;Ljava/lang/String;Z)V
+	public fun getCreated_at ()Ljava/time/Instant;
+	public fun getDescription ()Ljava/lang/String;
+	public fun getId ()Lmisk/hibernate/Id;
+	public fun getName ()Ljava/lang/String;
+	public fun getRegistered_backfill ()Lapp/cash/backfila/service/persistence/DbRegisteredBackfill;
+	public fun getRequired ()Z
+	public fun getUpdated_at ()Ljava/time/Instant;
+	public fun setCreated_at (Ljava/time/Instant;)V
+	public fun setDescription (Ljava/lang/String;)V
+	public fun setId (Lmisk/hibernate/Id;)V
+	public fun setName (Ljava/lang/String;)V
+	public fun setRegistered_backfill (Lapp/cash/backfila/service/persistence/DbRegisteredBackfill;)V
+	public fun setRequired (Z)V
+	public fun setUpdated_at (Ljava/time/Instant;)V
+}
+
+public class app/cash/backfila/service/persistence/DbRunPartition : misk/hibernate/DbTimestampedEntity, misk/hibernate/DbUnsharded {
+	public field backfill_run Lapp/cash/backfila/service/persistence/DbBackfillRun;
+	public field backfill_run_id Lmisk/hibernate/Id;
+	public field created_at Ljava/time/Instant;
+	public field id Lmisk/hibernate/Id;
+	public field lease_expires_at Ljava/time/Instant;
+	public field partition_name Ljava/lang/String;
+	public field run_state Lapp/cash/backfila/service/persistence/BackfillState;
+	public field updated_at Ljava/time/Instant;
+	public fun <init> ()V
+	public fun <init> (Lmisk/hibernate/Id;Ljava/lang/String;Lapp/cash/backfila/protos/clientservice/KeyRange;Lapp/cash/backfila/service/persistence/BackfillState;Ljava/lang/Long;)V
+	public fun backfillRange ()Lapp/cash/backfila/protos/clientservice/KeyRange;
+	public fun clearLease ()V
+	public fun getBackfill_run ()Lapp/cash/backfila/service/persistence/DbBackfillRun;
+	public fun getBackfill_run_id ()Lmisk/hibernate/Id;
+	public fun getBackfilled_matching_record_count ()J
+	public fun getBackfilled_scanned_record_count ()J
+	public fun getComputed_matching_record_count ()J
+	public fun getComputed_scanned_record_count ()J
+	public fun getCreated_at ()Ljava/time/Instant;
+	public fun getEstimated_record_count ()Ljava/lang/Long;
+	public fun getId ()Lmisk/hibernate/Id;
+	public fun getLease_expires_at ()Ljava/time/Instant;
+	public fun getLease_token ()Ljava/lang/String;
+	public fun getMatching_records_per_minute ()Ljava/lang/Long;
+	public fun getPartition_name ()Ljava/lang/String;
+	public fun getPkey_cursor ()Lokio/ByteString;
+	public fun getPkey_range_end ()Lokio/ByteString;
+	public fun getPkey_range_start ()Lokio/ByteString;
+	public fun getPrecomputing_done ()Z
+	public fun getPrecomputing_pkey_cursor ()Lokio/ByteString;
+	public fun getRun_state ()Lapp/cash/backfila/service/persistence/BackfillState;
+	public fun getScanned_records_per_minute ()Ljava/lang/Long;
+	public fun getUpdated_at ()Ljava/time/Instant;
+	public fun getVersion ()J
+	public fun setBackfill_run (Lapp/cash/backfila/service/persistence/DbBackfillRun;)V
+	public fun setBackfill_run_id (Lmisk/hibernate/Id;)V
+	public fun setBackfilled_matching_record_count (J)V
+	public fun setBackfilled_scanned_record_count (J)V
+	public fun setComputed_matching_record_count (J)V
+	public fun setComputed_scanned_record_count (J)V
+	public fun setCreated_at (Ljava/time/Instant;)V
+	public fun setEstimated_record_count (Ljava/lang/Long;)V
+	public fun setId (Lmisk/hibernate/Id;)V
+	public fun setLease_expires_at (Ljava/time/Instant;)V
+	public fun setLease_token (Ljava/lang/String;)V
+	public fun setMatching_records_per_minute (Ljava/lang/Long;)V
+	public fun setPartition_name (Ljava/lang/String;)V
+	public fun setPkey_cursor (Lokio/ByteString;)V
+	public fun setPkey_range_end (Lokio/ByteString;)V
+	public fun setPkey_range_start (Lokio/ByteString;)V
+	public fun setPrecomputing_done (Z)V
+	public fun setPrecomputing_pkey_cursor (Lokio/ByteString;)V
+	public fun setRun_state (Lapp/cash/backfila/service/persistence/BackfillState;)V
+	public fun setScanned_records_per_minute (Ljava/lang/Long;)V
+	public fun setUpdated_at (Ljava/time/Instant;)V
+	public fun setVersion (J)V
+}
+
+public class app/cash/backfila/service/persistence/DbService : misk/hibernate/DbTimestampedEntity, misk/hibernate/DbUnsharded {
+	public field connector Ljava/lang/String;
+	public field created_at Ljava/time/Instant;
+	public field id Lmisk/hibernate/Id;
+	public field registry_name Ljava/lang/String;
+	public field updated_at Ljava/time/Instant;
+	public field variant Ljava/lang/String;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/time/Instant;)V
+	public fun getConnector ()Ljava/lang/String;
+	public fun getConnector_extra_data ()Ljava/lang/String;
+	public fun getCreated_at ()Ljava/time/Instant;
+	public fun getId ()Lmisk/hibernate/Id;
+	public fun getLast_registered_at ()Ljava/time/Instant;
+	public fun getRegistry_name ()Ljava/lang/String;
+	public fun getSlack_channel ()Ljava/lang/String;
+	public fun getUpdated_at ()Ljava/time/Instant;
+	public fun getVariant ()Ljava/lang/String;
+	public fun setConnector (Ljava/lang/String;)V
+	public fun setConnector_extra_data (Ljava/lang/String;)V
+	public fun setCreated_at (Ljava/time/Instant;)V
+	public fun setId (Lmisk/hibernate/Id;)V
+	public fun setLast_registered_at (Ljava/time/Instant;)V
+	public fun setRegistry_name (Ljava/lang/String;)V
+	public fun setSlack_channel (Ljava/lang/String;)V
+	public fun setUpdated_at (Ljava/time/Instant;)V
+	public fun setVariant (Ljava/lang/String;)V
+}
+
+public abstract interface class app/cash/backfila/service/persistence/EventLogQuery : misk/hibernate/Query {
+	public abstract fun backfillRunId (Lmisk/hibernate/Id;)Lapp/cash/backfila/service/persistence/EventLogQuery;
+	public abstract fun orderByIdDesc ()Lapp/cash/backfila/service/persistence/EventLogQuery;
+}
+
+public abstract interface class app/cash/backfila/service/persistence/RegisteredBackfillQuery : misk/hibernate/Query {
+	public abstract fun active ()Lapp/cash/backfila/service/persistence/RegisteredBackfillQuery;
+	public abstract fun idIn (Ljava/util/Collection;)Lapp/cash/backfila/service/persistence/RegisteredBackfillQuery;
+	public abstract fun name (Ljava/lang/String;)Lapp/cash/backfila/service/persistence/RegisteredBackfillQuery;
+	public abstract fun notActive ()Lapp/cash/backfila/service/persistence/RegisteredBackfillQuery;
+	public abstract fun orderByName ()Lapp/cash/backfila/service/persistence/RegisteredBackfillQuery;
+	public abstract fun serviceId (Lmisk/hibernate/Id;)Lapp/cash/backfila/service/persistence/RegisteredBackfillQuery;
+}
+
+public abstract interface class app/cash/backfila/service/persistence/RunPartitionQuery : misk/hibernate/Query {
+	public abstract fun backfillRunId (Lmisk/hibernate/Id;)Lapp/cash/backfila/service/persistence/RunPartitionQuery;
+	public abstract fun backfillRunIdIn (Ljava/util/Collection;)Lapp/cash/backfila/service/persistence/RunPartitionQuery;
+	public abstract fun leaseExpiresAtBefore (Ljava/time/Instant;)Lapp/cash/backfila/service/persistence/RunPartitionQuery;
+	public abstract fun orderByName ()Lapp/cash/backfila/service/persistence/RunPartitionQuery;
+	public abstract fun partitionId (J)Lapp/cash/backfila/service/persistence/RunPartitionQuery;
+	public abstract fun runState (Lapp/cash/backfila/service/persistence/BackfillState;)Lapp/cash/backfila/service/persistence/RunPartitionQuery;
+}
+
+public abstract interface class app/cash/backfila/service/persistence/ServiceQuery : misk/hibernate/Query {
+	public abstract fun id (Lmisk/hibernate/Id;)Lapp/cash/backfila/service/persistence/ServiceQuery;
+	public abstract fun orderByName ()Lapp/cash/backfila/service/persistence/ServiceQuery;
+	public abstract fun orderByVariant ()Lapp/cash/backfila/service/persistence/ServiceQuery;
+	public abstract fun registryName (Ljava/lang/String;)Lapp/cash/backfila/service/persistence/ServiceQuery;
+	public abstract fun variant (Ljava/lang/String;)Lapp/cash/backfila/service/persistence/ServiceQuery;
+}
+
+public final class app/cash/backfila/service/runner/BackfillRunner {
+	public static final field Companion Lapp/cash/backfila/service/runner/BackfillRunner$Companion;
+	public synthetic fun <init> (Lapp/cash/backfila/service/runner/BackfillRunner$Factory;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lmisk/hibernate/Id;Lmisk/hibernate/Id;Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun clearLease ()V
+	public final fun getBackfillName ()Ljava/lang/String;
+	public final fun getBackfillRunId ()Lmisk/hibernate/Id;
+	public final fun getClient ()Lapp/cash/backfila/client/BackfilaCallbackConnector;
+	public final fun getFactory ()Lapp/cash/backfila/service/runner/BackfillRunner$Factory;
+	public final fun getGlobalBackoff ()Lapp/cash/backfila/service/runner/Backoff;
+	public final fun getMetadata ()Lapp/cash/backfila/service/runner/BackfillRunner$BackfillMetaData;
+	public final fun getMetricLabels ()[Ljava/lang/String;
+	public final fun getPartitionId ()Lmisk/hibernate/Id;
+	public final fun getPartitionName ()Ljava/lang/String;
+	public final fun getRunBatchBackoff ()Lapp/cash/backfila/service/runner/Backoff;
+	public final fun logLabel ()Ljava/lang/String;
+	public final fun onRpcFailure (Ljava/lang/Exception;Ljava/lang/String;Ljava/time/Duration;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun onRpcSuccess ()V
+	public final fun run ()V
+	public final fun runBatchAsync (Lkotlinx/coroutines/CoroutineScope;Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeResponse$Batch;Lapp/cash/backfila/protos/clientservice/PipelinedData;)Lkotlinx/coroutines/Deferred;
+	public static synthetic fun runBatchAsync$default (Lapp/cash/backfila/service/runner/BackfillRunner;Lkotlinx/coroutines/CoroutineScope;Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeResponse$Batch;Lapp/cash/backfila/protos/clientservice/PipelinedData;ILjava/lang/Object;)Lkotlinx/coroutines/Deferred;
+	public final fun start (Lkotlinx/coroutines/CoroutineScope;)V
+	public final fun stop ()V
+}
+
+public final class app/cash/backfila/service/runner/BackfillRunner$BackfillMetaData {
+	public fun <init> (Lmisk/hibernate/Id;Lokio/ByteString;Lokio/ByteString;Lokio/ByteString;Ljava/util/Map;JJZIZLokio/ByteString;JJJLjava/util/List;JJ)V
+	public final fun component1 ()Lmisk/hibernate/Id;
+	public final fun component10 ()Z
+	public final fun component11 ()Lokio/ByteString;
+	public final fun component12 ()J
+	public final fun component13 ()J
+	public final fun component14 ()J
+	public final fun component15 ()Ljava/util/List;
+	public final fun component16 ()J
+	public final fun component17 ()J
+	public final fun component2 ()Lokio/ByteString;
+	public final fun component3 ()Lokio/ByteString;
+	public final fun component4 ()Lokio/ByteString;
+	public final fun component5 ()Ljava/util/Map;
+	public final fun component6 ()J
+	public final fun component7 ()J
+	public final fun component8 ()Z
+	public final fun component9 ()I
+	public final fun copy (Lmisk/hibernate/Id;Lokio/ByteString;Lokio/ByteString;Lokio/ByteString;Ljava/util/Map;JJZIZLokio/ByteString;JJJLjava/util/List;JJ)Lapp/cash/backfila/service/runner/BackfillRunner$BackfillMetaData;
+	public static synthetic fun copy$default (Lapp/cash/backfila/service/runner/BackfillRunner$BackfillMetaData;Lmisk/hibernate/Id;Lokio/ByteString;Lokio/ByteString;Lokio/ByteString;Ljava/util/Map;JJZIZLokio/ByteString;JJJLjava/util/List;JJILjava/lang/Object;)Lapp/cash/backfila/service/runner/BackfillRunner$BackfillMetaData;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBackfillRunId ()Lmisk/hibernate/Id;
+	public final fun getBackfilledMatchingRecordCount ()J
+	public final fun getBackfilledScannedRecordCount ()J
+	public final fun getBackoffSchedule ()Ljava/util/List;
+	public final fun getBatchSize ()J
+	public final fun getComputedMatchingRecordCount ()J
+	public final fun getComputedScannedRecordCount ()J
+	public final fun getDryRun ()Z
+	public final fun getExtraSleepMs ()J
+	public final fun getNumThreads ()I
+	public final fun getParameters ()Ljava/util/Map;
+	public final fun getPkeyCursor ()Lokio/ByteString;
+	public final fun getPkeyEnd ()Lokio/ByteString;
+	public final fun getPkeyStart ()Lokio/ByteString;
+	public final fun getPrecomputingDone ()Z
+	public final fun getPrecomputingPkeyCursor ()Lokio/ByteString;
+	public final fun getScanSize ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/service/runner/BackfillRunner$Companion {
+}
+
+public final class app/cash/backfila/service/runner/BackfillRunner$Factory {
+	public final fun create (Lmisk/hibernate/Session;Lapp/cash/backfila/service/persistence/DbRunPartition;Ljava/lang/String;)Lapp/cash/backfila/service/runner/BackfillRunner;
+	public final fun getBackfilaConfig ()Lapp/cash/backfila/service/BackfilaConfig;
+	public final fun getBackfillRunListeners ()Ljava/util/Set;
+	public final fun getClock ()Ljava/time/Clock;
+	public final fun getConnectorProvider ()Lapp/cash/backfila/client/ConnectorProvider;
+	public final fun getLoggingSetupProvider ()Lapp/cash/backfila/service/runner/BackfillRunnerLoggingSetupProvider;
+	public final fun getMetrics ()Lapp/cash/backfila/service/BackfilaMetrics;
+	public final fun getQueryFactory ()Lmisk/hibernate/Query$Factory;
+	public final fun getTransacter ()Lmisk/hibernate/Transacter;
+}
+
+public final class app/cash/backfila/service/runner/BackfillRunnerKt {
+	public static final fun getDEFAULT_BACKOFF_SCHEDULE ()Ljava/util/List;
+}
+
+public abstract interface class app/cash/backfila/service/runner/BackfillRunnerLoggingSetupProvider {
+	public abstract fun withLogging (Ljava/lang/String;Lmisk/hibernate/Id;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+}
+
+public final class app/cash/backfila/service/runner/BackfillRunnerMDCLoggingSetupProvider : app/cash/backfila/service/runner/BackfillRunnerLoggingSetupProvider {
+	public static final field Companion Lapp/cash/backfila/service/runner/BackfillRunnerMDCLoggingSetupProvider$Companion;
+	public static final field MDC_BACKFILL_ID Ljava/lang/String;
+	public static final field MDC_BACKFILL_NAME Ljava/lang/String;
+	public static final field MDC_PARTITION_NAME Ljava/lang/String;
+	public fun <init> ()V
+	public fun withLogging (Ljava/lang/String;Lmisk/hibernate/Id;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+}
+
+public final class app/cash/backfila/service/runner/BackfillRunnerMDCLoggingSetupProvider$Companion {
+	public final fun getLogger ()Lmu/KLogger;
+}
+
+public final class app/cash/backfila/service/runner/BackfillRunnerNoLoggingSetupProvider : app/cash/backfila/service/runner/BackfillRunnerLoggingSetupProvider {
+	public fun <init> ()V
+	public fun withLogging (Ljava/lang/String;Lmisk/hibernate/Id;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+}
+
+public final class app/cash/backfila/service/runner/Backoff {
+	public fun <init> (Ljava/time/Clock;)V
+	public final fun addMillis (J)V
+	public final fun backingOff ()Z
+	public final fun backoffMs ()J
+	public final fun getClock ()Ljava/time/Clock;
+}
+
+public final class app/cash/backfila/service/runner/statemachine/AwaitingRun {
+	public fun <init> (Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeResponse$Batch;Lkotlinx/coroutines/Deferred;Ljava/time/Instant;)V
+	public final fun component1 ()Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeResponse$Batch;
+	public final fun component2 ()Lkotlinx/coroutines/Deferred;
+	public final fun component3 ()Ljava/time/Instant;
+	public final fun copy (Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeResponse$Batch;Lkotlinx/coroutines/Deferred;Ljava/time/Instant;)Lapp/cash/backfila/service/runner/statemachine/AwaitingRun;
+	public static synthetic fun copy$default (Lapp/cash/backfila/service/runner/statemachine/AwaitingRun;Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeResponse$Batch;Lkotlinx/coroutines/Deferred;Ljava/time/Instant;ILjava/lang/Object;)Lapp/cash/backfila/service/runner/statemachine/AwaitingRun;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBatch ()Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeResponse$Batch;
+	public final fun getRunBatchRpc ()Lkotlinx/coroutines/Deferred;
+	public final fun getStartedAt ()Ljava/time/Instant;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/service/runner/statemachine/BatchAwaiter {
+	public static final field Companion Lapp/cash/backfila/service/runner/statemachine/BatchAwaiter$Companion;
+	public fun <init> (Lapp/cash/backfila/service/runner/BackfillRunner;Lkotlinx/coroutines/channels/ReceiveChannel;Lkotlinx/coroutines/channels/ReceiveChannel;)V
+	public final fun run (Lkotlinx/coroutines/CoroutineScope;)Lkotlinx/coroutines/Job;
+	public final fun updateProgress (Lapp/cash/backfila/service/persistence/DbRunPartition;)V
+}
+
+public final class app/cash/backfila/service/runner/statemachine/BatchAwaiter$Companion {
+}
+
+public final class app/cash/backfila/service/runner/statemachine/BatchPrecomputer {
+	public static final field Companion Lapp/cash/backfila/service/runner/statemachine/BatchPrecomputer$Companion;
+	public fun <init> (Lapp/cash/backfila/service/runner/BackfillRunner;)V
+	public final fun run (Lkotlinx/coroutines/CoroutineScope;)Lkotlinx/coroutines/Job;
+	public final fun updateProgress (Lapp/cash/backfila/service/persistence/DbRunPartition;)V
+}
+
+public final class app/cash/backfila/service/runner/statemachine/BatchPrecomputer$Companion {
+}
+
+public final class app/cash/backfila/service/runner/statemachine/BatchQueuer {
+	public static final field Companion Lapp/cash/backfila/service/runner/statemachine/BatchQueuer$Companion;
+	public fun <init> (Lapp/cash/backfila/service/runner/BackfillRunner;I)V
+	public final fun nextBatchChannel ()Lkotlinx/coroutines/channels/ReceiveChannel;
+	public final fun run (Lkotlinx/coroutines/CoroutineScope;)Lkotlinx/coroutines/Job;
+}
+
+public final class app/cash/backfila/service/runner/statemachine/BatchQueuer$Companion {
+}
+
+public final class app/cash/backfila/service/runner/statemachine/BatchRunner {
+	public static final field Companion Lapp/cash/backfila/service/runner/statemachine/BatchRunner$Companion;
+	public fun <init> (Lapp/cash/backfila/service/runner/BackfillRunner;Lkotlinx/coroutines/channels/ReceiveChannel;I)V
+	public final fun rpcBackpressureChannel ()Lkotlinx/coroutines/channels/ReceiveChannel;
+	public final fun run (Lkotlinx/coroutines/CoroutineScope;)Lkotlinx/coroutines/Job;
+	public final fun runChannel ()Lkotlinx/coroutines/channels/ReceiveChannel;
+}
+
+public final class app/cash/backfila/service/runner/statemachine/BatchRunner$Companion {
+}
+
+public final class app/cash/backfila/service/runner/statemachine/RateCounter {
+	public fun <init> (Ljava/time/Clock;J)V
+	public synthetic fun <init> (Ljava/time/Clock;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun add (J)V
+	public final fun projectedRate ()J
+	public final fun sum ()J
+}
+
+public final class app/cash/backfila/service/runner/statemachine/RateCounter$Entry {
+	public fun <init> (JJ)V
+	public final fun component1 ()J
+	public final fun component2 ()J
+	public final fun copy (JJ)Lapp/cash/backfila/service/runner/statemachine/RateCounter$Entry;
+	public static synthetic fun copy$default (Lapp/cash/backfila/service/runner/statemachine/RateCounter$Entry;JJILjava/lang/Object;)Lapp/cash/backfila/service/runner/statemachine/RateCounter$Entry;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCount ()J
+	public final fun getTime ()J
+	public fun hashCode ()I
+	public final fun setCount (J)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/service/runner/statemachine/RunBatchException : java/lang/Exception {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun getStackTrace ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/service/runner/statemachine/VariableCapacityChannel {
+	public fun <init> (ILkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (ILkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun downstream ()Lkotlinx/coroutines/channels/ReceiveChannel;
+	public final fun getCapacity ()I
+	public final fun proxy (Lkotlinx/coroutines/CoroutineScope;)Lkotlinx/coroutines/channels/ReceiveChannel;
+	public final fun queued ()I
+	public final fun setCapacity (I)V
+	public final fun upstream ()Lkotlinx/coroutines/channels/SendChannel;
+}
+
+public abstract interface annotation class app/cash/backfila/service/scheduler/ForBackfilaScheduler : java/lang/annotation/Annotation {
+}
+
+public final class app/cash/backfila/service/scheduler/LeaseHunter {
+	public static final field Companion Lapp/cash/backfila/service/scheduler/LeaseHunter$Companion;
+	public static final field RUN_PARTITION_QUERY_LIMIT I
+	public fun <init> (Lmisk/hibernate/Transacter;Lmisk/hibernate/Query$Factory;Ljava/time/Clock;Lwisp/token/TokenGenerator;Lapp/cash/backfila/service/runner/BackfillRunner$Factory;)V
+	public final fun hunt ()Ljava/util/Set;
+}
+
+public final class app/cash/backfila/service/scheduler/LeaseHunter$Companion {
+	public final fun getLEASE_DURATION ()Ljava/time/Duration;
+}
+
+public final class app/cash/backfila/service/scheduler/RunnerSchedulerService : com/google/common/util/concurrent/AbstractExecutionThreadService {
+	public static final field Companion Lapp/cash/backfila/service/scheduler/RunnerSchedulerService$Companion;
+	public fun <init> (Lcom/google/common/util/concurrent/ListeningExecutorService;Lapp/cash/backfila/service/scheduler/LeaseHunter;)V
+}
+
+public final class app/cash/backfila/service/scheduler/RunnerSchedulerService$Companion {
+}
+
+public final class app/cash/backfila/service/scheduler/RunnerSchedulerServiceModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public abstract interface annotation class app/cash/backfila/ui/BackfilaDashboard : java/lang/annotation/Annotation {
+}
+
+public final class app/cash/backfila/ui/DashboardUrls {
+	public static final field INSTANCE Lapp/cash/backfila/ui/DashboardUrls;
+	public final fun app (Ljava/lang/String;)Ljava/lang/String;
+	public final fun createDeploy (Ljava/lang/String;)Ljava/lang/String;
+	public final fun deploy (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+	public final fun setMinimalCommitTimestamp (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class app/cash/backfila/ui/UiModule : misk/inject/KAbstractModule {
+	public fun <init> ()V
+}
+
+public final class app/cash/backfila/ui/actions/BackfillCreateHandlerAction : misk/web/actions/WebAction {
+	public static final field Companion Lapp/cash/backfila/ui/actions/BackfillCreateHandlerAction$Companion;
+	public static final field PATH Ljava/lang/String;
+	public fun <init> (Lapp/cash/backfila/dashboard/CreateBackfillAction;Lapp/cash/backfila/dashboard/GetBackfillStatusAction;Lapp/cash/backfila/ui/components/DashboardPageLayout;Lmisk/scope/ActionScoped;)V
+	public final fun get ()Lmisk/web/Response;
+}
+
+public final class app/cash/backfila/ui/actions/BackfillCreateHandlerAction$Companion {
+}
+
+public final class app/cash/backfila/ui/actions/BackfillShowButtonHandlerAction : misk/web/actions/WebAction {
+	public static final field Companion Lapp/cash/backfila/ui/actions/BackfillShowButtonHandlerAction$Companion;
+	public static final field PATH Ljava/lang/String;
+	public fun <init> (Lapp/cash/backfila/ui/components/DashboardPageLayout;Lapp/cash/backfila/dashboard/StartBackfillAction;Lapp/cash/backfila/dashboard/StopBackfillAction;Lapp/cash/backfila/dashboard/UpdateBackfillAction;Lapp/cash/backfila/dashboard/CancelBackfillAction;Lapp/cash/backfila/dashboard/SoftDeleteBackfillAction;Lapp/cash/backfila/dashboard/GetBackfillStatusAction;)V
+	public final fun get (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/web/Response;
+	public final fun renderButton (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;Lmisk/tailwind/Link;Ljava/lang/String;)V
+	public final fun renderStateButtons (Lkotlinx/html/TagConsumer;Ljava/lang/String;Lapp/cash/backfila/service/persistence/BackfillState;Ljava/time/Instant;)V
+	public static synthetic fun renderStateButtons$default (Lapp/cash/backfila/ui/actions/BackfillShowButtonHandlerAction;Lkotlinx/html/TagConsumer;Ljava/lang/String;Lapp/cash/backfila/service/persistence/BackfillState;Ljava/time/Instant;ILjava/lang/Object;)V
+}
+
+public final class app/cash/backfila/ui/actions/BackfillShowButtonHandlerAction$Companion {
+	public final fun path (J)Ljava/lang/String;
+	public final fun path (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class app/cash/backfila/ui/actions/ServiceDataHelper {
+	public fun <init> (Lapp/cash/backfila/dashboard/GetServicesAction;)V
+	public final fun getFlattenedServices ()Ljava/util/Map;
+}
+
+public final class app/cash/backfila/ui/components/AlertMessageKt {
+	public static final fun Alert (Lkotlinx/html/TagConsumer;Lapp/cash/backfila/ui/components/AlertTheme;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZZLjava/lang/String;Ljava/lang/String;)V
+	public static synthetic fun Alert$default (Lkotlinx/html/TagConsumer;Lapp/cash/backfila/ui/components/AlertTheme;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZZLjava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+	public static final fun AlertError (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZZLjava/lang/String;Ljava/lang/String;)V
+	public static synthetic fun AlertError$default (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZZLjava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+	public static final fun AlertInfo (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZZ)V
+	public static synthetic fun AlertInfo$default (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZZILjava/lang/Object;)V
+	public static final fun AlertInfoHighlight (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZZ)V
+	public static synthetic fun AlertInfoHighlight$default (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZZILjava/lang/Object;)V
+	public static final fun AlertMessage (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public static final fun AlertSuccess (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZZ)V
+	public static synthetic fun AlertSuccess$default (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZZILjava/lang/Object;)V
+}
+
+public final class app/cash/backfila/ui/components/AlertSupportKt {
+	public static final fun AlertSupport (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;)V
+}
+
+public final class app/cash/backfila/ui/components/AlertTheme : java/lang/Enum {
+	public static final field BLUE Lapp/cash/backfila/ui/components/AlertTheme;
+	public static final field BLUE_HIGHLIGHT Lapp/cash/backfila/ui/components/AlertTheme;
+	public static final field GREEN Lapp/cash/backfila/ui/components/AlertTheme;
+	public static final field RED Lapp/cash/backfila/ui/components/AlertTheme;
+	public final fun getBackgroundColor ()Ljava/lang/String;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getHeadingTextColor ()Ljava/lang/String;
+	public final fun getHoverTextColor ()Ljava/lang/String;
+	public final fun getIconColor ()Ljava/lang/String;
+	public final fun getTextColor ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lapp/cash/backfila/ui/components/AlertTheme;
+	public static fun values ()[Lapp/cash/backfila/ui/components/AlertTheme;
+}
+
+public final class app/cash/backfila/ui/components/AutoReloadKt {
+	public static final fun AutoReload (Lkotlinx/html/TagConsumer;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun AutoReload$default (Lkotlinx/html/TagConsumer;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+}
+
+public final class app/cash/backfila/ui/components/BackfillSearchFormKt {
+	public static final fun BackfillSearchForm (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public static synthetic fun BackfillSearchForm$default (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+}
+
+public final class app/cash/backfila/ui/components/BackfillsTableKt {
+	public static final fun BackfillsTable (Lkotlinx/html/TagConsumer;ZLjava/util/List;Z)V
+	public static synthetic fun BackfillsTable$default (Lkotlinx/html/TagConsumer;ZLjava/util/List;ZILjava/lang/Object;)V
+}
+
+public final class app/cash/backfila/ui/components/DashboardPageLayout {
+	public static final field Companion Lapp/cash/backfila/ui/components/DashboardPageLayout$Companion;
+	public fun <init> (Lmisk/scope/ActionScoped;Lwisp/deployment/Deployment;Lmisk/scope/ActionScoped;Lapp/cash/backfila/service/BackfilaConfig;Lapp/cash/backfila/dashboard/GetBackfillRunsAction;Lmisk/hibernate/Transacter;Lmisk/hibernate/Query$Factory;Ljava/util/List;)V
+	public final fun breadcrumbLinks ([Lmisk/tailwind/Link;)Lapp/cash/backfila/ui/components/DashboardPageLayout;
+	public final fun build ()Ljava/lang/String;
+	public final fun build (Lkotlin/jvm/functions/Function1;)Ljava/lang/String;
+	public static synthetic fun build$default (Lapp/cash/backfila/ui/components/DashboardPageLayout;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/lang/String;
+	public final fun buildHtmlResponseBody (Lkotlin/jvm/functions/Function1;)Lmisk/web/ResponseBody;
+	public final fun headBlock (Lkotlin/jvm/functions/Function1;)Lapp/cash/backfila/ui/components/DashboardPageLayout;
+	public final fun newBuilder ()Lapp/cash/backfila/ui/components/DashboardPageLayout;
+	public final fun title (Ljava/lang/String;)Lapp/cash/backfila/ui/components/DashboardPageLayout;
+}
+
+public final class app/cash/backfila/ui/components/DashboardPageLayout$Companion {
+}
+
+public final class app/cash/backfila/ui/components/PageTitleKt {
+	public static final fun PageTitle (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun PageTitle$default (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+}
+
+public final class app/cash/backfila/ui/components/PaginationKt {
+	public static final fun Pagination (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public static final fun PaginationWithHistory (Lkotlinx/html/TagConsumer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public static final fun appendOffsets (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+	public static synthetic fun appendOffsets$default (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ljava/lang/String;
+	public static final fun appendOffsetsWithHistory (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+	public static synthetic fun appendOffsetsWithHistory$default (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ljava/lang/String;
+}
+
+public final class app/cash/backfila/ui/components/ProgressBarKt {
+	public static final fun ProgressBar (Lkotlinx/html/TagConsumer;Ljava/lang/Number;Ljava/lang/Number;Z)V
+	public static synthetic fun ProgressBar$default (Lkotlinx/html/TagConsumer;Ljava/lang/Number;Ljava/lang/Number;ZILjava/lang/Object;)V
+}
+
+public final class app/cash/backfila/ui/components/ProgressBarReloaderKt {
+	public static final fun ProgressBarReloader (Lkotlinx/html/TagConsumer;Ljava/lang/Number;Ljava/lang/Number;Z)V
+	public static synthetic fun ProgressBarReloader$default (Lkotlinx/html/TagConsumer;Ljava/lang/Number;Ljava/lang/Number;ZILjava/lang/Object;)V
+}
+
+public final class app/cash/backfila/ui/components/ServiceSelectionKt {
+	public static final fun ServiceSelect (Lkotlinx/html/TagConsumer;Ljava/util/Map;Lkotlin/jvm/functions/Function2;)V
+}
+
+public final class app/cash/backfila/ui/components/ToggleContainerKt {
+	public static final fun ToggleContainer (Lkotlinx/html/TagConsumer;Ljava/lang/String;ZZZZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun ToggleContainer$default (Lkotlinx/html/TagConsumer;Ljava/lang/String;ZZZZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+}
+
+public final class app/cash/backfila/ui/pages/BackfillCreateAction : misk/web/actions/WebAction {
+	public static final field Companion Lapp/cash/backfila/ui/pages/BackfillCreateAction$Companion;
+	public fun <init> (Lapp/cash/backfila/dashboard/GetBackfillStatusAction;Lapp/cash/backfila/dashboard/GetRegisteredBackfillsAction;Lapp/cash/backfila/dashboard/GetBackfillRunsAction;Lapp/cash/backfila/ui/components/DashboardPageLayout;)V
+	public final fun get (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/web/Response;
+	public static synthetic fun get$default (Lapp/cash/backfila/ui/pages/BackfillCreateAction;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/Response;
+}
+
+public final class app/cash/backfila/ui/pages/BackfillCreateAction$BackfillCreateField : java/lang/Enum {
+	public static final field BACKFILL_ID_TO_CLONE Lapp/cash/backfila/ui/pages/BackfillCreateAction$BackfillCreateField;
+	public static final field BACKFILL_NAME Lapp/cash/backfila/ui/pages/BackfillCreateAction$BackfillCreateField;
+	public static final field BACKOFF_SCHEDULE Lapp/cash/backfila/ui/pages/BackfillCreateAction$BackfillCreateField;
+	public static final field BATCH_SIZE Lapp/cash/backfila/ui/pages/BackfillCreateAction$BackfillCreateField;
+	public static final field CUSTOM_PARAMETER_PREFIX Lapp/cash/backfila/ui/pages/BackfillCreateAction$BackfillCreateField;
+	public static final field DRY_RUN Lapp/cash/backfila/ui/pages/BackfillCreateAction$BackfillCreateField;
+	public static final field EXTRA_SLEEP_MS Lapp/cash/backfila/ui/pages/BackfillCreateAction$BackfillCreateField;
+	public static final field RANGE_END Lapp/cash/backfila/ui/pages/BackfillCreateAction$BackfillCreateField;
+	public static final field RANGE_OPTION Lapp/cash/backfila/ui/pages/BackfillCreateAction$BackfillCreateField;
+	public static final field RANGE_START Lapp/cash/backfila/ui/pages/BackfillCreateAction$BackfillCreateField;
+	public static final field SCAN_SIZE Lapp/cash/backfila/ui/pages/BackfillCreateAction$BackfillCreateField;
+	public static final field SERVICE Lapp/cash/backfila/ui/pages/BackfillCreateAction$BackfillCreateField;
+	public static final field THREADS_PER_PARTITION Lapp/cash/backfila/ui/pages/BackfillCreateAction$BackfillCreateField;
+	public static final field VARIANT Lapp/cash/backfila/ui/pages/BackfillCreateAction$BackfillCreateField;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getFieldId ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lapp/cash/backfila/ui/pages/BackfillCreateAction$BackfillCreateField;
+	public static fun values ()[Lapp/cash/backfila/ui/pages/BackfillCreateAction$BackfillCreateField;
+}
+
+public final class app/cash/backfila/ui/pages/BackfillCreateAction$Companion {
+	public final fun path (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class app/cash/backfila/ui/pages/BackfillCreateAction$RangeOption : java/lang/Enum {
+	public static final field CONTINUE Lapp/cash/backfila/ui/pages/BackfillCreateAction$RangeOption;
+	public static final field NEW Lapp/cash/backfila/ui/pages/BackfillCreateAction$RangeOption;
+	public static final field RESTART Lapp/cash/backfila/ui/pages/BackfillCreateAction$RangeOption;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getValue ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lapp/cash/backfila/ui/pages/BackfillCreateAction$RangeOption;
+	public static fun values ()[Lapp/cash/backfila/ui/pages/BackfillCreateAction$RangeOption;
+}
+
+public final class app/cash/backfila/ui/pages/BackfillCreateIndexAction : misk/web/actions/WebAction {
+	public static final field Companion Lapp/cash/backfila/ui/pages/BackfillCreateIndexAction$Companion;
+	public static final field PATH Ljava/lang/String;
+	public fun <init> (Lapp/cash/backfila/ui/actions/ServiceDataHelper;Lapp/cash/backfila/ui/components/DashboardPageLayout;)V
+	public final fun get ()Lmisk/web/Response;
+}
+
+public final class app/cash/backfila/ui/pages/BackfillCreateIndexAction$Companion {
+}
+
+public final class app/cash/backfila/ui/pages/BackfillCreateServiceIndexAction : misk/web/actions/WebAction {
+	public static final field Companion Lapp/cash/backfila/ui/pages/BackfillCreateServiceIndexAction$Companion;
+	public fun <init> (Lapp/cash/backfila/dashboard/GetRegisteredBackfillsAction;Lapp/cash/backfila/ui/components/DashboardPageLayout;)V
+	public final fun get (Ljava/lang/String;Ljava/lang/String;)Lmisk/web/Response;
+	public static synthetic fun get$default (Lapp/cash/backfila/ui/pages/BackfillCreateServiceIndexAction;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/Response;
+}
+
+public final class app/cash/backfila/ui/pages/BackfillCreateServiceIndexAction$Companion {
+	public final fun path (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class app/cash/backfila/ui/pages/BackfillIndexAction : misk/web/actions/WebAction {
+	public static final field Companion Lapp/cash/backfila/ui/pages/BackfillIndexAction$Companion;
+	public static final field PATH Ljava/lang/String;
+	public fun <init> (Lapp/cash/backfila/ui/components/DashboardPageLayout;Lmisk/hibernate/Transacter;Lmisk/hibernate/Query$Factory;)V
+	public final fun get (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/web/Response;
+	public static synthetic fun get$default (Lapp/cash/backfila/ui/pages/BackfillIndexAction;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/Response;
+}
+
+public final class app/cash/backfila/ui/pages/BackfillIndexAction$Companion {
+}
+
+public final class app/cash/backfila/ui/pages/BackfillShowAction : misk/web/actions/WebAction {
+	public static final field CANCEL_STATE_BUTTON_LABEL Ljava/lang/String;
+	public static final field Companion Lapp/cash/backfila/ui/pages/BackfillShowAction$Companion;
+	public static final field DELETE_STATE_BUTTON_LABEL Ljava/lang/String;
+	public static final field PAUSE_STATE_BUTTON_LABEL Ljava/lang/String;
+	public static final field START_STATE_BUTTON_LABEL Ljava/lang/String;
+	public static final field UPDATE_BUTTON_LABEL Ljava/lang/String;
+	public static final field VIEW_DASHBOARD_BUTTON_LABEL Ljava/lang/String;
+	public static final field VIEW_LOGS_BUTTON_LABEL Ljava/lang/String;
+	public fun <init> (Lapp/cash/backfila/dashboard/GetBackfillStatusAction;Lapp/cash/backfila/ui/components/DashboardPageLayout;Lapp/cash/backfila/dashboard/ViewLogsAction;Lapp/cash/backfila/dashboard/ViewDashboardAction;Lapp/cash/backfila/ui/actions/BackfillShowButtonHandlerAction;Lmisk/scope/ActionScoped;)V
+	public final fun get (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/web/Response;
+	public static synthetic fun get$default (Lapp/cash/backfila/ui/pages/BackfillShowAction;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/Response;
+}
+
+public final class app/cash/backfila/ui/pages/BackfillShowAction$Companion {
+	public final fun path (J)Ljava/lang/String;
+	public final fun path (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class app/cash/backfila/ui/pages/BackfillShowAction$DescriptionListRow {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lmisk/tailwind/Link;Ljava/lang/String;Lmisk/tailwind/Link;Lmisk/tailwind/Link;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lmisk/tailwind/Link;Ljava/lang/String;Lmisk/tailwind/Link;Lmisk/tailwind/Link;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lmisk/tailwind/Link;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Lmisk/tailwind/Link;
+	public final fun component6 ()Lmisk/tailwind/Link;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lmisk/tailwind/Link;Ljava/lang/String;Lmisk/tailwind/Link;Lmisk/tailwind/Link;)Lapp/cash/backfila/ui/pages/BackfillShowAction$DescriptionListRow;
+	public static synthetic fun copy$default (Lapp/cash/backfila/ui/pages/BackfillShowAction$DescriptionListRow;Ljava/lang/String;Ljava/lang/String;Lmisk/tailwind/Link;Ljava/lang/String;Lmisk/tailwind/Link;Lmisk/tailwind/Link;ILjava/lang/Object;)Lapp/cash/backfila/ui/pages/BackfillShowAction$DescriptionListRow;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getButton ()Lmisk/tailwind/Link;
+	public final fun getCancelButton ()Lmisk/tailwind/Link;
+	public final fun getDeleteButton ()Lmisk/tailwind/Link;
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getUpdateFieldId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/ui/pages/IndexAction : misk/web/actions/WebAction {
+	public static final field Companion Lapp/cash/backfila/ui/pages/IndexAction$Companion;
+	public static final field PATH Ljava/lang/String;
+	public fun <init> (Lapp/cash/backfila/service/BackfilaConfig;Lapp/cash/backfila/ui/actions/ServiceDataHelper;Lapp/cash/backfila/ui/components/DashboardPageLayout;Lmisk/scope/ActionScoped;)V
+	public final fun get (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class app/cash/backfila/ui/pages/IndexAction$Companion {
+}
+
+public final class app/cash/backfila/ui/pages/ServiceIndexAction : misk/web/actions/WebAction {
+	public static final field Companion Lapp/cash/backfila/ui/pages/ServiceIndexAction$Companion;
+	public static final field PATH Ljava/lang/String;
+	public fun <init> (Lapp/cash/backfila/ui/actions/ServiceDataHelper;Lapp/cash/backfila/ui/components/DashboardPageLayout;)V
+	public final fun get ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/ui/pages/ServiceIndexAction$Companion {
+}
+
+public final class app/cash/backfila/ui/pages/ServiceInfoAction : misk/web/actions/WebAction {
+	public static final field Companion Lapp/cash/backfila/ui/pages/ServiceInfoAction$Companion;
+	public fun <init> (Lapp/cash/backfila/ui/components/DashboardPageLayout;Lapp/cash/backfila/dashboard/GetServiceDetailsAction;)V
+	public final fun get (Ljava/lang/String;Ljava/lang/String;)Lmisk/web/Response;
+	public static synthetic fun get$default (Lapp/cash/backfila/ui/pages/ServiceInfoAction;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/Response;
+}
+
+public final class app/cash/backfila/ui/pages/ServiceInfoAction$Companion {
+	public final fun path (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class app/cash/backfila/ui/pages/ServiceShowAction : misk/web/actions/WebAction {
+	public static final field Companion Lapp/cash/backfila/ui/pages/ServiceShowAction$Companion;
+	public fun <init> (Lmisk/scope/ActionScoped;Lapp/cash/backfila/ui/components/DashboardPageLayout;Lapp/cash/backfila/dashboard/GetBackfillRunsAction;)V
+	public final fun get (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;)Lmisk/web/Response;
+	public static synthetic fun get$default (Lapp/cash/backfila/ui/pages/ServiceShowAction;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/Response;
+}
+
+public final class app/cash/backfila/ui/pages/ServiceShowAction$Companion {
+	public final fun path (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class app/cash/protos/backfila/ui/SortCol : java/lang/Enum, com/squareup/wire/WireEnum {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lapp/cash/protos/backfila/ui/SortCol$Companion;
+	public static final field DO_NOT_USE_SORT_COL Lapp/cash/protos/backfila/ui/SortCol;
+	public static final field RUNNING Lapp/cash/protos/backfila/ui/SortCol;
+	public static final fun fromValue (I)Lapp/cash/protos/backfila/ui/SortCol;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public fun getValue ()I
+	public static fun valueOf (Ljava/lang/String;)Lapp/cash/protos/backfila/ui/SortCol;
+	public static fun values ()[Lapp/cash/protos/backfila/ui/SortCol;
+}
+
+public final class app/cash/protos/backfila/ui/SortCol$Companion {
+	public final fun fromValue (I)Lapp/cash/protos/backfila/ui/SortCol;
+}
+

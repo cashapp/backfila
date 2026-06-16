@@ -1,0 +1,97 @@
+public abstract interface annotation class app/cash/backfila/client/stat/ForStaticBackend : java/lang/annotation/Annotation {
+}
+
+public abstract class app/cash/backfila/client/stat/StaticDatasourceBackfill : app/cash/backfila/client/stat/StaticDatasourceBackfillBase {
+	public fun <init> ()V
+	public abstract fun getStaticDatasource ()Ljava/util/List;
+	public fun getStaticDatasource (Lapp/cash/backfila/client/PrepareBackfillConfig;)Ljava/util/List;
+}
+
+public abstract class app/cash/backfila/client/stat/StaticDatasourceBackfillBase : app/cash/backfila/client/Backfill {
+	public fun <init> ()V
+	public final fun getItemType ()Lkotlin/reflect/KClass;
+	public abstract fun getStaticDatasource (Lapp/cash/backfila/client/PrepareBackfillConfig;)Ljava/util/List;
+	public fun runBatch (Ljava/util/List;Lapp/cash/backfila/client/BackfillConfig;)V
+	public fun runOne (Ljava/lang/Object;Lapp/cash/backfila/client/BackfillConfig;)V
+	public fun validate (Lapp/cash/backfila/client/PrepareBackfillConfig;)V
+}
+
+public final class app/cash/backfila/client/stat/StaticDatasourceBackfillModule : com/google/inject/AbstractModule {
+	public static final field Companion Lapp/cash/backfila/client/stat/StaticDatasourceBackfillModule$Companion;
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public static final fun create (Ljava/lang/Class;)Lapp/cash/backfila/client/stat/StaticDatasourceBackfillModule;
+	public static final fun create (Lkotlin/reflect/KClass;)Lapp/cash/backfila/client/stat/StaticDatasourceBackfillModule;
+}
+
+public final class app/cash/backfila/client/stat/StaticDatasourceBackfillModule$Companion {
+	public final fun create (Ljava/lang/Class;)Lapp/cash/backfila/client/stat/StaticDatasourceBackfillModule;
+	public final fun create (Lkotlin/reflect/KClass;)Lapp/cash/backfila/client/stat/StaticDatasourceBackfillModule;
+}
+
+public final class app/cash/backfila/client/stat/internal/StaticDatasourceBackend : app/cash/backfila/client/spi/BackfillBackend {
+	public fun <init> (Lcom/google/inject/Injector;Ljava/util/Map;)V
+	public fun backfills ()Ljava/util/Set;
+	public fun create (Ljava/lang/String;)Lapp/cash/backfila/client/spi/BackfillOperator;
+}
+
+public final class app/cash/backfila/client/stat/internal/StaticDatasourceBackfillOperator : app/cash/backfila/client/spi/BackfillOperator {
+	public static final field Companion Lapp/cash/backfila/client/stat/internal/StaticDatasourceBackfillOperator$Companion;
+	public fun <init> (Lapp/cash/backfila/client/stat/StaticDatasourceBackfillBase;Lapp/cash/backfila/client/spi/BackfilaParametersOperator;)V
+	public synthetic fun getBackfill ()Lapp/cash/backfila/client/Backfill;
+	public fun getBackfill ()Lapp/cash/backfila/client/stat/StaticDatasourceBackfillBase;
+	public fun getNextBatchRange (Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeRequest;)Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeResponse;
+	public final fun getParametersOperator ()Lapp/cash/backfila/client/spi/BackfilaParametersOperator;
+	public fun name ()Ljava/lang/String;
+	public fun prepareBackfill (Lapp/cash/backfila/protos/clientservice/PrepareBackfillRequest;)Lapp/cash/backfila/protos/clientservice/PrepareBackfillResponse;
+	public fun runBatch (Lapp/cash/backfila/protos/clientservice/RunBatchRequest;)Lapp/cash/backfila/protos/clientservice/RunBatchResponse;
+}
+
+public final class app/cash/backfila/client/stat/internal/StaticDatasourceBackfillOperator$Companion {
+}
+
+public final class app/cash/backfila/client/stat/internal/StaticDatasourceBackfillOperator$DecodedRange {
+	public fun <init> (II)V
+	public final fun component1 ()I
+	public final fun component2 ()I
+	public final fun copy (II)Lapp/cash/backfila/client/stat/internal/StaticDatasourceBackfillOperator$DecodedRange;
+	public static synthetic fun copy$default (Lapp/cash/backfila/client/stat/internal/StaticDatasourceBackfillOperator$DecodedRange;IIILjava/lang/Object;)Lapp/cash/backfila/client/stat/internal/StaticDatasourceBackfillOperator$DecodedRange;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEnd ()I
+	public final fun getStart ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/client/stat/parameters/CommaParameterDatasource : app/cash/backfila/client/stat/parameters/DatasourceParameters {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lapp/cash/backfila/client/stat/parameters/CommaParameterDatasource;
+	public static synthetic fun copy$default (Lapp/cash/backfila/client/stat/parameters/CommaParameterDatasource;Ljava/lang/String;ILjava/lang/Object;)Lapp/cash/backfila/client/stat/parameters/CommaParameterDatasource;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getBackfillData ()Ljava/util/List;
+	public final fun getCommaDatasource ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class app/cash/backfila/client/stat/parameters/DatasourceParameters {
+	public abstract fun getBackfillData ()Ljava/util/List;
+}
+
+public final class app/cash/backfila/client/stat/parameters/NewlineParameterDatasource : app/cash/backfila/client/stat/parameters/DatasourceParameters {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lapp/cash/backfila/client/stat/parameters/NewlineParameterDatasource;
+	public static synthetic fun copy$default (Lapp/cash/backfila/client/stat/parameters/NewlineParameterDatasource;Ljava/lang/String;ILjava/lang/Object;)Lapp/cash/backfila/client/stat/parameters/NewlineParameterDatasource;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getBackfillData ()Ljava/util/List;
+	public final fun getNewlineDatasource ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class app/cash/backfila/client/stat/parameters/ParametersDatasourceBackfill : app/cash/backfila/client/stat/StaticDatasourceBackfillBase {
+	public fun <init> ()V
+	public fun getStaticDatasource (Lapp/cash/backfila/client/PrepareBackfillConfig;)Ljava/util/List;
+}
+

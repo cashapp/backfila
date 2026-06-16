@@ -1,0 +1,110 @@
+public abstract interface class app/cash/backfila/embedded/Backfila {
+	public abstract fun createDryRun (Lkotlin/reflect/KClass;Ljava/util/Map;Ljava/lang/String;Ljava/lang/String;)Lapp/cash/backfila/embedded/BackfillRun;
+	public abstract fun createWetRun (Lkotlin/reflect/KClass;Ljava/util/Map;Ljava/lang/String;Ljava/lang/String;)Lapp/cash/backfila/embedded/BackfillRun;
+	public abstract fun findExistingRun (Lkotlin/reflect/KClass;J)Lapp/cash/backfila/embedded/BackfillRun;
+	public abstract fun findLatestRun (Lkotlin/reflect/KClass;)Lapp/cash/backfila/embedded/BackfillRun;
+	public abstract fun getConfigureServiceData ()Lapp/cash/backfila/protos/service/ConfigureServiceRequest;
+}
+
+public final class app/cash/backfila/embedded/BackfilaKt {
+	public static final fun createDryRun (Lapp/cash/backfila/embedded/Backfila;Lkotlin/reflect/KClass;Ljava/lang/Object;Ljava/util/Map;Ljava/lang/String;Ljava/lang/String;)Lapp/cash/backfila/embedded/BackfillRun;
+	public static final fun createWetRun (Lapp/cash/backfila/embedded/Backfila;Lkotlin/reflect/KClass;Ljava/lang/Object;Ljava/util/Map;Ljava/lang/String;Ljava/lang/String;)Lapp/cash/backfila/embedded/BackfillRun;
+}
+
+public abstract interface class app/cash/backfila/embedded/BackfillRun {
+	public abstract fun complete ()Z
+	public fun execute ()V
+	public abstract fun finishedPrecomputing ()Z
+	public abstract fun finishedScanning ()Z
+	public abstract fun getBackfill ()Lapp/cash/backfila/client/Backfill;
+	public abstract fun getBackfillRunId ()Ljava/lang/String;
+	public abstract fun getBatchSize ()J
+	public abstract fun getBatchesToRunSnapshot ()Ljava/util/List;
+	public abstract fun getComputeCountLimit ()J
+	public abstract fun getDryRun ()Z
+	public abstract fun getParameters ()Ljava/util/Map;
+	public abstract fun getPartitionProgressSnapshot ()Ljava/util/Map;
+	public abstract fun getPrecomputeMatchingCount ()J
+	public abstract fun getPrecomputeScannedCount ()J
+	public abstract fun getPrepareBackfillResponse ()Lapp/cash/backfila/protos/clientservice/PrepareBackfillResponse;
+	public abstract fun getRangeEnd ()Ljava/lang/String;
+	public abstract fun getRangeStart ()Ljava/lang/String;
+	public abstract fun getScanSize ()J
+	public abstract fun partitionScan (Ljava/lang/String;)Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeResponse;
+	public abstract fun precomputeRemaining ()V
+	public abstract fun precomputeScan ()Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeResponse;
+	public abstract fun runAllScanned ()V
+	public abstract fun runBatch ()V
+	public abstract fun scanRemaining ()V
+	public abstract fun setBatchSize (J)V
+	public abstract fun setComputeCountLimit (J)V
+	public abstract fun setScanSize (J)V
+	public abstract fun singleScan ()Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeResponse;
+}
+
+public final class app/cash/backfila/embedded/BackfillRun$DefaultImpls {
+	public static fun execute (Lapp/cash/backfila/embedded/BackfillRun;)V
+}
+
+public final class app/cash/backfila/embedded/EmbeddedBackfilaModule : com/google/inject/AbstractModule {
+	public fun <init> ()V
+	public fun <init> (Z)V
+	public synthetic fun <init> (ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class app/cash/backfila/embedded/JavaBackfila {
+	public fun <init> (Lapp/cash/backfila/embedded/Backfila;)V
+	public final fun createDryRun (Ljava/lang/Class;)Lapp/cash/backfila/embedded/BackfillRun;
+	public final fun createDryRun (Ljava/lang/Class;Ljava/util/Map;)Lapp/cash/backfila/embedded/BackfillRun;
+	public final fun createDryRun (Ljava/lang/Class;Ljava/util/Map;Ljava/lang/String;)Lapp/cash/backfila/embedded/BackfillRun;
+	public final fun createDryRun (Ljava/lang/Class;Ljava/util/Map;Ljava/lang/String;Ljava/lang/String;)Lapp/cash/backfila/embedded/BackfillRun;
+	public static synthetic fun createDryRun$default (Lapp/cash/backfila/embedded/JavaBackfila;Ljava/lang/Class;Ljava/util/Map;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lapp/cash/backfila/embedded/BackfillRun;
+	public final fun createWetRun (Ljava/lang/Class;)Lapp/cash/backfila/embedded/BackfillRun;
+	public final fun createWetRun (Ljava/lang/Class;Ljava/util/Map;)Lapp/cash/backfila/embedded/BackfillRun;
+	public final fun createWetRun (Ljava/lang/Class;Ljava/util/Map;Ljava/lang/String;)Lapp/cash/backfila/embedded/BackfillRun;
+	public final fun createWetRun (Ljava/lang/Class;Ljava/util/Map;Ljava/lang/String;Ljava/lang/String;)Lapp/cash/backfila/embedded/BackfillRun;
+	public static synthetic fun createWetRun$default (Lapp/cash/backfila/embedded/JavaBackfila;Ljava/lang/Class;Ljava/util/Map;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lapp/cash/backfila/embedded/BackfillRun;
+	public final fun findExistingRun (Ljava/lang/Class;J)Lapp/cash/backfila/embedded/BackfillRun;
+	public final fun findLatestRun (Ljava/lang/Class;)Lapp/cash/backfila/embedded/BackfillRun;
+	public final fun getConfigureServiceData ()Lapp/cash/backfila/protos/service/ConfigureServiceRequest;
+}
+
+public final class app/cash/backfila/embedded/internal/BatchSnapshot {
+	public fun <init> (Ljava/lang/String;Lapp/cash/backfila/protos/clientservice/KeyRange;JJ)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lapp/cash/backfila/protos/clientservice/KeyRange;
+	public final fun component3 ()J
+	public final fun component4 ()J
+	public final fun copy (Ljava/lang/String;Lapp/cash/backfila/protos/clientservice/KeyRange;JJ)Lapp/cash/backfila/embedded/internal/BatchSnapshot;
+	public static synthetic fun copy$default (Lapp/cash/backfila/embedded/internal/BatchSnapshot;Ljava/lang/String;Lapp/cash/backfila/protos/clientservice/KeyRange;JJILjava/lang/Object;)Lapp/cash/backfila/embedded/internal/BatchSnapshot;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBatchRange ()Lapp/cash/backfila/protos/clientservice/KeyRange;
+	public final fun getMatchingRecordCount ()J
+	public final fun getPartitionName ()Ljava/lang/String;
+	public final fun getScannedRecordCount ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun utf8RangeEnd ()Ljava/lang/String;
+	public final fun utf8RangeStart ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/embedded/internal/PartitionCursor {
+	public fun <init> (Ljava/lang/String;Lapp/cash/backfila/protos/clientservice/KeyRange;Lokio/ByteString;Z)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lapp/cash/backfila/protos/clientservice/KeyRange;
+	public final fun component3 ()Lokio/ByteString;
+	public final fun component4 ()Z
+	public final fun copy (Ljava/lang/String;Lapp/cash/backfila/protos/clientservice/KeyRange;Lokio/ByteString;Z)Lapp/cash/backfila/embedded/internal/PartitionCursor;
+	public static synthetic fun copy$default (Lapp/cash/backfila/embedded/internal/PartitionCursor;Ljava/lang/String;Lapp/cash/backfila/protos/clientservice/KeyRange;Lokio/ByteString;ZILjava/lang/Object;)Lapp/cash/backfila/embedded/internal/PartitionCursor;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDone ()Z
+	public final fun getKeyRange ()Lapp/cash/backfila/protos/clientservice/KeyRange;
+	public final fun getPartitionName ()Ljava/lang/String;
+	public final fun getPreviousEndKey ()Lokio/ByteString;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun utf8PreviousEndKey ()Ljava/lang/String;
+	public final fun utf8RangeEnd ()Ljava/lang/String;
+	public final fun utf8RangeStart ()Ljava/lang/String;
+}
+

@@ -22,11 +22,29 @@ buildscript {
     classpath(libs.wireGradlePlugin)
     classpath(libs.buildConfigPlugin)
     classpath(libs.shadowJarPlugin)
+    classpath(libs.binaryCompatibilityValidatorPlugin)
     classpath("app.cash.backfila:client-sqldelight-gradle-plugin")
   }
 }
 
 apply(plugin = "com.vanniktech.maven.publish.base")
+
+// ABI/binary compatibility validation for the published libraries. The plugin is applied at the
+// root and automatically configures every subproject; we ignore the projects that don't publish a
+// consumable JVM API (the BOM, the Gradle plugin, and test-only modules).
+apply(plugin = "org.jetbrains.kotlinx.binary-compatibility-validator")
+
+configure<kotlinx.validation.ApiValidationExtension> {
+  // Ignore subprojects only if present. This keeps the configuration robust if a project is
+  // removed or excluded via a settings overlay.
+  val ignorable = setOf(
+    "bom",
+    "client-sqldelight-gradle-plugin",
+    "client-sqldelight-test",
+    "service-self-backfill",
+  )
+  ignoredProjects.addAll(subprojects.map { it.name }.filter { it in ignorable })
+}
 
 allprojects {
   group = project.property("GROUP") as String

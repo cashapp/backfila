@@ -1,0 +1,141 @@
+public abstract interface class app/cash/backfila/client/BackfilaApi {
+	public abstract fun checkBackfillStatus (Lapp/cash/backfila/protos/service/CheckBackfillStatusRequest;)Lretrofit2/Call;
+	public abstract fun configureService (Lapp/cash/backfila/protos/service/ConfigureServiceRequest;)Lretrofit2/Call;
+	public abstract fun createAndStartbackfill (Lapp/cash/backfila/protos/service/CreateAndStartBackfillRequest;)Lretrofit2/Call;
+}
+
+public final class app/cash/backfila/client/OnStartup : java/lang/Enum {
+	public static final field CONTINUE_ON_STARTUP Lapp/cash/backfila/client/OnStartup;
+	public static final field THROW_ON_STARTUP Lapp/cash/backfila/client/OnStartup;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lapp/cash/backfila/client/OnStartup;
+	public static fun values ()[Lapp/cash/backfila/client/OnStartup;
+}
+
+public final class app/cash/backfila/client/RealBackfilaManagementClient : app/cash/backfila/client/BackfilaManagementClient {
+	public fun checkBackfillStatus (J)Lapp/cash/backfila/protos/service/CheckBackfillStatusResponse$Status;
+	public fun createAndStart (Ljava/lang/Class;ZLjava/lang/Integer;Ljava/lang/Object;Ljava/lang/Long;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lokio/ByteString;Lokio/ByteString;)J
+}
+
+public final class app/cash/backfila/client/RealBackfillModule : com/google/inject/AbstractModule {
+	public fun <init> (Lapp/cash/backfila/client/BackfilaClientConfig;Lkotlin/reflect/KClass;)V
+	public synthetic fun <init> (Lapp/cash/backfila/client/BackfilaClientConfig;Lkotlin/reflect/KClass;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljavax/inject/Provider;)V
+	public fun <init> (Ljavax/inject/Provider;Ljava/lang/Class;)V
+	public synthetic fun <init> (Ljavax/inject/Provider;Ljava/lang/Class;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljavax/inject/Provider;Lkotlin/reflect/KClass;)V
+	public synthetic fun <init> (Ljavax/inject/Provider;Lkotlin/reflect/KClass;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class app/cash/backfila/client/UnknownBackfillException : java/lang/Exception {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public abstract interface class app/cash/backfila/client/internal/BackfilaClient {
+	public abstract fun checkBackfillStatus (Lapp/cash/backfila/protos/service/CheckBackfillStatusRequest;)Lapp/cash/backfila/protos/service/CheckBackfillStatusResponse;
+	public abstract fun configureService (Lapp/cash/backfila/protos/service/ConfigureServiceRequest;)Lapp/cash/backfila/protos/service/ConfigureServiceResponse;
+	public abstract fun createAndStartBackfill (Lapp/cash/backfila/protos/service/CreateAndStartBackfillRequest;)Lapp/cash/backfila/protos/service/CreateAndStartBackfillResponse;
+	public abstract fun getThrowOnStartup ()Z
+}
+
+public final class app/cash/backfila/client/internal/BackfilaStartupConfigurator {
+	public static final field Companion Lapp/cash/backfila/client/internal/BackfilaStartupConfigurator$Companion;
+	public fun <init> (Lapp/cash/backfila/client/BackfilaClientConfig;Lapp/cash/backfila/client/internal/BackfilaClient;Ljava/util/Set;)V
+	public final fun sendBackfillMetadataToBackfila ()V
+}
+
+public final class app/cash/backfila/client/internal/BackfilaStartupConfigurator$Companion {
+	public final fun getLogger ()Lmu/KLogger;
+}
+
+public final class app/cash/backfila/client/internal/BackfillOperatorFactory {
+	public static final field Companion Lapp/cash/backfila/client/internal/BackfillOperatorFactory$Companion;
+	public fun <init> (Ljava/util/Set;)V
+	public final fun create (Ljava/lang/String;)Lapp/cash/backfila/client/spi/BackfillOperator;
+	public final fun create (Ljava/lang/String;Ljava/lang/String;)Lapp/cash/backfila/client/spi/BackfillOperator;
+}
+
+public final class app/cash/backfila/client/internal/BackfillOperatorFactory$Companion {
+}
+
+public final class app/cash/backfila/client/internal/EmptyBackend : app/cash/backfila/client/spi/BackfillBackend {
+	public fun <init> ()V
+	public fun backfills ()Ljava/util/Set;
+	public fun create (Ljava/lang/String;)Lapp/cash/backfila/client/spi/BackfillOperator;
+}
+
+public final class app/cash/backfila/client/internal/RealBackfilaClient : app/cash/backfila/client/internal/BackfilaClient {
+	public fun checkBackfillStatus (Lapp/cash/backfila/protos/service/CheckBackfillStatusRequest;)Lapp/cash/backfila/protos/service/CheckBackfillStatusResponse;
+	public fun configureService (Lapp/cash/backfila/protos/service/ConfigureServiceRequest;)Lapp/cash/backfila/protos/service/ConfigureServiceResponse;
+	public fun createAndStartBackfill (Lapp/cash/backfila/protos/service/CreateAndStartBackfillRequest;)Lapp/cash/backfila/protos/service/CreateAndStartBackfillResponse;
+	public fun getThrowOnStartup ()Z
+}
+
+public final class app/cash/backfila/client/spi/BackfilaClientServiceHandler {
+	public static final field Companion Lapp/cash/backfila/client/spi/BackfilaClientServiceHandler$Companion;
+	public fun <init> (Lapp/cash/backfila/client/internal/BackfillOperatorFactory;Lapp/cash/backfila/client/BackfilaClientLoggingSetupProvider;)V
+	public final fun finalizeBackfill (Lapp/cash/backfila/protos/clientservice/FinalizeBackfillRequest;)Lapp/cash/backfila/protos/clientservice/FinalizeBackfillResponse;
+	public final fun getNextBatchRange (Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeRequest;)Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeResponse;
+	public final fun prepareBackfill (Lapp/cash/backfila/protos/clientservice/PrepareBackfillRequest;)Lapp/cash/backfila/protos/clientservice/PrepareBackfillResponse;
+	public final fun runBatch (Lapp/cash/backfila/protos/clientservice/RunBatchRequest;)Lapp/cash/backfila/protos/clientservice/RunBatchResponse;
+}
+
+public final class app/cash/backfila/client/spi/BackfilaClientServiceHandler$Companion {
+	public final fun getLogger ()Lmu/KLogger;
+}
+
+public final class app/cash/backfila/client/spi/BackfilaParametersKt {
+	public static final fun parametersToBytes (Ljava/lang/Object;)Ljava/util/Map;
+}
+
+public final class app/cash/backfila/client/spi/BackfilaParametersOperator {
+	public static final field Companion Lapp/cash/backfila/client/spi/BackfilaParametersOperator$Companion;
+	public fun <init> (Lkotlin/reflect/KClass;)V
+	public final fun constructBackfillConfig (Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeRequest;)Lapp/cash/backfila/client/BackfillConfig;
+	public final fun constructBackfillConfig (Lapp/cash/backfila/protos/clientservice/PrepareBackfillRequest;)Lapp/cash/backfila/client/PrepareBackfillConfig;
+	public final fun constructBackfillConfig (Lapp/cash/backfila/protos/clientservice/RunBatchRequest;)Lapp/cash/backfila/client/BackfillConfig;
+	public final fun constructParameters (Ljava/util/Map;)Ljava/lang/Object;
+	public final fun getParametersClass ()Lkotlin/reflect/KClass;
+}
+
+public final class app/cash/backfila/client/spi/BackfilaParametersOperator$Companion {
+	public final fun backfilaParametersFromClass (Lkotlin/reflect/KClass;)Ljava/util/List;
+	public final fun getTYPE_CONVERTERS ()Ljava/util/Map;
+}
+
+public abstract interface class app/cash/backfila/client/spi/BackfillBackend {
+	public abstract fun backfills ()Ljava/util/Set;
+	public abstract fun create (Ljava/lang/String;)Lapp/cash/backfila/client/spi/BackfillOperator;
+}
+
+public abstract interface class app/cash/backfila/client/spi/BackfillOperator {
+	public abstract fun getBackfill ()Lapp/cash/backfila/client/Backfill;
+	public abstract fun getNextBatchRange (Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeRequest;)Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeResponse;
+	public abstract fun name ()Ljava/lang/String;
+	public abstract fun prepareBackfill (Lapp/cash/backfila/protos/clientservice/PrepareBackfillRequest;)Lapp/cash/backfila/protos/clientservice/PrepareBackfillResponse;
+	public abstract fun runBatch (Lapp/cash/backfila/protos/clientservice/RunBatchRequest;)Lapp/cash/backfila/protos/clientservice/RunBatchResponse;
+}
+
+public final class app/cash/backfila/client/spi/BackfillRegistration {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlin/reflect/KClass;Ljava/time/Instant;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlin/reflect/KClass;Ljava/time/Instant;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlin/reflect/KClass;Ljava/time/Instant;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lkotlin/reflect/KClass;
+	public final fun component4 ()Ljava/time/Instant;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lkotlin/reflect/KClass;Ljava/time/Instant;Ljava/lang/String;)Lapp/cash/backfila/client/spi/BackfillRegistration;
+	public static synthetic fun copy$default (Lapp/cash/backfila/client/spi/BackfillRegistration;Ljava/lang/String;Ljava/lang/String;Lkotlin/reflect/KClass;Ljava/time/Instant;Ljava/lang/String;ILjava/lang/Object;)Lapp/cash/backfila/client/spi/BackfillRegistration;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDeleteBy ()Ljava/time/Instant;
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getParametersClass ()Lkotlin/reflect/KClass;
+	public final fun getUnit ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+

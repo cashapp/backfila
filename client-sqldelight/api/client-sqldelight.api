@@ -1,0 +1,142 @@
+public abstract interface annotation class app/cash/backfila/client/sqldelight/ForSqlDelightBackend : java/lang/annotation/Annotation {
+}
+
+public final class app/cash/backfila/client/sqldelight/IntKeyEncoder : app/cash/backfila/client/sqldelight/KeyEncoder {
+	public static final field INSTANCE Lapp/cash/backfila/client/sqldelight/IntKeyEncoder;
+	public fun decode (Lokio/ByteString;)Ljava/lang/Integer;
+	public synthetic fun decode (Lokio/ByteString;)Ljava/lang/Object;
+	public fun encode (I)Lokio/ByteString;
+	public synthetic fun encode (Ljava/lang/Object;)Lokio/ByteString;
+}
+
+public abstract interface class app/cash/backfila/client/sqldelight/KeyEncoder {
+	public abstract fun decode (Lokio/ByteString;)Ljava/lang/Object;
+	public abstract fun encode (Ljava/lang/Object;)Lokio/ByteString;
+}
+
+public final class app/cash/backfila/client/sqldelight/LongKeyEncoder : app/cash/backfila/client/sqldelight/KeyEncoder {
+	public static final field INSTANCE Lapp/cash/backfila/client/sqldelight/LongKeyEncoder;
+	public fun decode (Lokio/ByteString;)Ljava/lang/Long;
+	public synthetic fun decode (Lokio/ByteString;)Ljava/lang/Object;
+	public fun encode (J)Lokio/ByteString;
+	public synthetic fun encode (Ljava/lang/Object;)Lokio/ByteString;
+}
+
+public final class app/cash/backfila/client/sqldelight/MinAndCount {
+	public fun <init> (Ljava/lang/Object;J)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun component2 ()J
+	public final fun copy (Ljava/lang/Object;J)Lapp/cash/backfila/client/sqldelight/MinAndCount;
+	public static synthetic fun copy$default (Lapp/cash/backfila/client/sqldelight/MinAndCount;Ljava/lang/Object;JILjava/lang/Object;)Lapp/cash/backfila/client/sqldelight/MinAndCount;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCount ()J
+	public final fun getMin ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/client/sqldelight/MinMax {
+	public fun <init> (Ljava/lang/Object;Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun component2 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;Ljava/lang/Object;)Lapp/cash/backfila/client/sqldelight/MinMax;
+	public static synthetic fun copy$default (Lapp/cash/backfila/client/sqldelight/MinMax;Ljava/lang/Object;Ljava/lang/Object;ILjava/lang/Object;)Lapp/cash/backfila/client/sqldelight/MinMax;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMax ()Ljava/lang/Object;
+	public final fun getMin ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/client/sqldelight/NullKeyContainer {
+	public fun <init> (Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;)Lapp/cash/backfila/client/sqldelight/NullKeyContainer;
+	public static synthetic fun copy$default (Lapp/cash/backfila/client/sqldelight/NullKeyContainer;Ljava/lang/Object;ILjava/lang/Object;)Lapp/cash/backfila/client/sqldelight/NullKeyContainer;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getKey ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class app/cash/backfila/client/sqldelight/SqlDelightDatasourceBackfill : app/cash/backfila/client/Backfill {
+	public fun <init> (Lapp/cash/backfila/client/sqldelight/SqlDelightRecordSourceConfig;)V
+	public final fun getRecordSourceConfig ()Lapp/cash/backfila/client/sqldelight/SqlDelightRecordSourceConfig;
+	public fun runBatch (Ljava/util/List;Lapp/cash/backfila/client/BackfillConfig;)V
+	public fun runOne (Ljava/lang/Object;Lapp/cash/backfila/client/BackfillConfig;)V
+	public fun validate (Lapp/cash/backfila/client/PrepareBackfillConfig;)V
+}
+
+public final class app/cash/backfila/client/sqldelight/SqlDelightDatasourceBackfillModule : com/google/inject/AbstractModule {
+	public static final field Companion Lapp/cash/backfila/client/sqldelight/SqlDelightDatasourceBackfillModule$Companion;
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public static final fun create (Ljava/lang/Class;)Lapp/cash/backfila/client/sqldelight/SqlDelightDatasourceBackfillModule;
+	public static final fun create (Lkotlin/reflect/KClass;)Lapp/cash/backfila/client/sqldelight/SqlDelightDatasourceBackfillModule;
+}
+
+public final class app/cash/backfila/client/sqldelight/SqlDelightDatasourceBackfillModule$Companion {
+	public final fun create (Ljava/lang/Class;)Lapp/cash/backfila/client/sqldelight/SqlDelightDatasourceBackfillModule;
+	public final fun create (Lkotlin/reflect/KClass;)Lapp/cash/backfila/client/sqldelight/SqlDelightDatasourceBackfillModule;
+}
+
+public abstract interface class app/cash/backfila/client/sqldelight/SqlDelightRecordSourceConfig {
+	public static final field Companion Lapp/cash/backfila/client/sqldelight/SqlDelightRecordSourceConfig$Companion;
+	public abstract fun countInitialBatchMatches (Ljava/lang/Object;Ljava/lang/Object;)Lapp/cash/sqldelight/Query;
+	public abstract fun countNextBatchMatches (Ljava/lang/Object;Ljava/lang/Object;)Lapp/cash/sqldelight/Query;
+	public abstract fun getBatch (Ljava/lang/Object;Ljava/lang/Object;)Lapp/cash/sqldelight/Query;
+	public abstract fun getInitialStartKeyAndScanCount (Ljava/lang/Object;Ljava/lang/Object;)Lapp/cash/sqldelight/Query;
+	public abstract fun getKeyEncoder ()Lapp/cash/backfila/client/sqldelight/KeyEncoder;
+	public abstract fun getNextStartKeyAndScanCount (Ljava/lang/Object;Ljava/lang/Object;)Lapp/cash/sqldelight/Query;
+	public abstract fun produceInitialBatchFromRange (Ljava/lang/Object;Ljava/lang/Object;J)Lapp/cash/sqldelight/Query;
+	public abstract fun produceNextBatchFromRange (Ljava/lang/Object;Ljava/lang/Object;J)Lapp/cash/sqldelight/Query;
+	public abstract fun selectAbsoluteRange ()Lapp/cash/sqldelight/Query;
+	public abstract fun selectInitialMaxBound (Ljava/lang/Object;Ljava/lang/Object;J)Lapp/cash/sqldelight/Query;
+	public abstract fun selectNextMaxBound (Ljava/lang/Object;Ljava/lang/Object;J)Lapp/cash/sqldelight/Query;
+}
+
+public final class app/cash/backfila/client/sqldelight/SqlDelightRecordSourceConfig$Companion {
+	public final fun create (Lapp/cash/backfila/client/sqldelight/KeyEncoder;Lapp/cash/sqldelight/Query;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)Lapp/cash/backfila/client/sqldelight/SqlDelightRecordSourceConfig;
+}
+
+public final class app/cash/backfila/client/sqldelight/StringKeyEncoder : app/cash/backfila/client/sqldelight/KeyEncoder {
+	public static final field INSTANCE Lapp/cash/backfila/client/sqldelight/StringKeyEncoder;
+	public synthetic fun decode (Lokio/ByteString;)Ljava/lang/Object;
+	public fun decode (Lokio/ByteString;)Ljava/lang/String;
+	public synthetic fun encode (Ljava/lang/Object;)Lokio/ByteString;
+	public fun encode (Ljava/lang/String;)Lokio/ByteString;
+}
+
+public final class app/cash/backfila/client/sqldelight/internal/SqlDelightDatasourceBackend : app/cash/backfila/client/spi/BackfillBackend {
+	public fun <init> (Ljava/util/Map;Ljava/util/Map;)V
+	public fun backfills ()Ljava/util/Set;
+	public fun create (Ljava/lang/String;)Lapp/cash/backfila/client/spi/BackfillOperator;
+}
+
+public final class app/cash/backfila/client/sqldelight/internal/SqlDelightDatasourceBackfillOperator : app/cash/backfila/client/spi/BackfillOperator {
+	public fun <init> (Lapp/cash/backfila/client/sqldelight/SqlDelightDatasourceBackfill;Lapp/cash/backfila/client/spi/BackfilaParametersOperator;)V
+	public synthetic fun getBackfill ()Lapp/cash/backfila/client/Backfill;
+	public fun getBackfill ()Lapp/cash/backfila/client/sqldelight/SqlDelightDatasourceBackfill;
+	public fun getNextBatchRange (Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeRequest;)Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeResponse;
+	public fun name ()Ljava/lang/String;
+	public fun prepareBackfill (Lapp/cash/backfila/protos/clientservice/PrepareBackfillRequest;)Lapp/cash/backfila/protos/clientservice/PrepareBackfillResponse;
+	public fun runBatch (Lapp/cash/backfila/protos/clientservice/RunBatchRequest;)Lapp/cash/backfila/protos/clientservice/RunBatchResponse;
+}
+
+public final class app/cash/backfila/client/sqldelight/internal/SqlDelightRecordSource {
+	public fun <init> (Lapp/cash/backfila/client/sqldelight/SqlDelightRecordSourceConfig;)V
+	public final fun computeOverallRange (Lapp/cash/backfila/protos/clientservice/KeyRange;)Lapp/cash/backfila/protos/clientservice/KeyRange;
+	public final fun getBatchData (Lapp/cash/backfila/protos/clientservice/RunBatchRequest;)Ljava/util/List;
+	public final fun getBatchGenerator (Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeRequest;)Lapp/cash/backfila/client/sqldelight/internal/SqlDelightRecordSource$BatchGenerator;
+	public final fun getKeyEncoder ()Lapp/cash/backfila/client/sqldelight/KeyEncoder;
+	public final fun validateRange (Lapp/cash/backfila/protos/clientservice/KeyRange;)V
+}
+
+public final class app/cash/backfila/client/sqldelight/internal/SqlDelightRecordSource$BatchGenerator {
+	public fun <init> (Lapp/cash/backfila/client/sqldelight/internal/SqlDelightRecordSource;Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeRequest;)V
+	public final fun next ()Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeResponse$Batch;
+}
+
+public final class app/cash/backfila/client/sqldelight/internal/SqlDelightRecordSourceKt {
+	public static final fun validate (Lapp/cash/backfila/protos/clientservice/KeyRange;Lapp/cash/backfila/client/sqldelight/KeyEncoder;)V
+}
+

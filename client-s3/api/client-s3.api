@@ -1,0 +1,119 @@
+public abstract interface annotation class app/cash/backfila/client/s3/ForS3Backend : java/lang/annotation/Annotation {
+}
+
+public abstract class app/cash/backfila/client/s3/S3DatasourceBackfill : app/cash/backfila/client/Backfill {
+	public fun <init> ()V
+	public abstract fun getBucket (Lapp/cash/backfila/client/PrepareBackfillConfig;)Ljava/lang/String;
+	public fun getPrefix (Lapp/cash/backfila/client/PrepareBackfillConfig;)Ljava/lang/String;
+	public abstract fun getRecordStrategy ()Lapp/cash/backfila/client/s3/record/RecordStrategy;
+	public fun getStaticPrefix ()Ljava/lang/String;
+	public fun runBatch (Ljava/util/List;Lapp/cash/backfila/client/BackfillConfig;)V
+	public fun runOne (Ljava/lang/Object;Lapp/cash/backfila/client/BackfillConfig;)V
+	public fun validate (Lapp/cash/backfila/client/PrepareBackfillConfig;)V
+}
+
+public final class app/cash/backfila/client/s3/S3DatasourceBackfillModule : com/google/inject/AbstractModule {
+	public static final field Companion Lapp/cash/backfila/client/s3/S3DatasourceBackfillModule$Companion;
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public static final fun create (Ljava/lang/Class;)Lapp/cash/backfila/client/s3/S3DatasourceBackfillModule;
+	public static final fun create (Lkotlin/reflect/KClass;)Lapp/cash/backfila/client/s3/S3DatasourceBackfillModule;
+}
+
+public final class app/cash/backfila/client/s3/S3DatasourceBackfillModule$Companion {
+	public final fun create (Ljava/lang/Class;)Lapp/cash/backfila/client/s3/S3DatasourceBackfillModule;
+	public final fun create (Lkotlin/reflect/KClass;)Lapp/cash/backfila/client/s3/S3DatasourceBackfillModule;
+}
+
+public final class app/cash/backfila/client/s3/internal/RealS3AwsV2Service : app/cash/backfila/client/s3/shim/S3Service {
+	public fun <init> (Lsoftware/amazon/awssdk/services/s3/S3Client;)V
+	public fun getFileSize (Ljava/lang/String;Ljava/lang/String;)J
+	public fun getFileStreamStartingAt (Ljava/lang/String;Ljava/lang/String;J)Lokio/BufferedSource;
+	public fun getWithSeek (Ljava/lang/String;Ljava/lang/String;JJ)Lokio/ByteString;
+	public fun listFiles (Ljava/lang/String;Ljava/lang/String;)Ljava/util/List;
+}
+
+public final class app/cash/backfila/client/s3/internal/RealS3Service : app/cash/backfila/client/s3/shim/S3Service {
+	public fun <init> (Lcom/amazonaws/services/s3/AmazonS3;)V
+	public fun getFileSize (Ljava/lang/String;Ljava/lang/String;)J
+	public fun getFileStreamStartingAt (Ljava/lang/String;Ljava/lang/String;J)Lokio/BufferedSource;
+	public fun getWithSeek (Ljava/lang/String;Ljava/lang/String;JJ)Lokio/ByteString;
+	public fun listFiles (Ljava/lang/String;Ljava/lang/String;)Ljava/util/List;
+}
+
+public final class app/cash/backfila/client/s3/internal/S3DatasourceBackend : app/cash/backfila/client/spi/BackfillBackend {
+	public fun <init> (Lcom/google/inject/Injector;Ljava/util/Map;Lapp/cash/backfila/client/s3/shim/S3Service;)V
+	public fun backfills ()Ljava/util/Set;
+	public fun create (Ljava/lang/String;)Lapp/cash/backfila/client/spi/BackfillOperator;
+}
+
+public final class app/cash/backfila/client/s3/internal/S3DatasourceBackfillOperator : app/cash/backfila/client/spi/BackfillOperator {
+	public fun <init> (Lapp/cash/backfila/client/s3/S3DatasourceBackfill;Lapp/cash/backfila/client/spi/BackfilaParametersOperator;Lapp/cash/backfila/client/s3/shim/S3Service;)V
+	public synthetic fun getBackfill ()Lapp/cash/backfila/client/Backfill;
+	public fun getBackfill ()Lapp/cash/backfila/client/s3/S3DatasourceBackfill;
+	public fun getNextBatchRange (Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeRequest;)Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeResponse;
+	public fun name ()Ljava/lang/String;
+	public fun prepareBackfill (Lapp/cash/backfila/protos/clientservice/PrepareBackfillRequest;)Lapp/cash/backfila/protos/clientservice/PrepareBackfillResponse;
+	public fun runBatch (Lapp/cash/backfila/protos/clientservice/RunBatchRequest;)Lapp/cash/backfila/protos/clientservice/RunBatchResponse;
+}
+
+public final class app/cash/backfila/client/s3/internal/S3DatasourceBackfillOperator$DecodedRange {
+	public fun <init> (JJ)V
+	public final fun component1 ()J
+	public final fun component2 ()J
+	public final fun copy (JJ)Lapp/cash/backfila/client/s3/internal/S3DatasourceBackfillOperator$DecodedRange;
+	public static synthetic fun copy$default (Lapp/cash/backfila/client/s3/internal/S3DatasourceBackfillOperator$DecodedRange;JJILjava/lang/Object;)Lapp/cash/backfila/client/s3/internal/S3DatasourceBackfillOperator$DecodedRange;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEnd ()J
+	public final fun getStart ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class app/cash/backfila/client/s3/record/RecordStrategy {
+	public abstract fun bytesToRecords (Lokio/ByteString;)Ljava/util/List;
+	public abstract fun calculateNextRecordBytes (Lokio/BufferedSource;)J
+}
+
+public final class app/cash/backfila/client/s3/record/StringStrategyTools {
+	public static final field INSTANCE Lapp/cash/backfila/client/s3/record/StringStrategyTools;
+	public final fun multipleNewlineByteCalculator (Lokio/BufferedSource;)J
+	public final fun newlineByteCalculator (Lokio/BufferedSource;)J
+}
+
+public class app/cash/backfila/client/s3/record/Utf8StringNewlineStrategy : app/cash/backfila/client/s3/record/RecordStrategy {
+	public fun <init> ()V
+	public fun <init> (Z)V
+	public synthetic fun <init> (ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun bytesToRecords (Lokio/ByteString;)Ljava/util/List;
+	public fun calculateNextRecordBytes (Lokio/BufferedSource;)J
+}
+
+public final class app/cash/backfila/client/s3/shim/FakeS3Module : com/google/inject/AbstractModule {
+	public fun <init> ()V
+}
+
+public final class app/cash/backfila/client/s3/shim/FakeS3Service : app/cash/backfila/client/s3/shim/S3Service {
+	public fun <init> ()V
+	public final fun add (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)V
+	public fun getFileSize (Ljava/lang/String;Ljava/lang/String;)J
+	public fun getFileStreamStartingAt (Ljava/lang/String;Ljava/lang/String;J)Lokio/BufferedSource;
+	public fun getWithSeek (Ljava/lang/String;Ljava/lang/String;JJ)Lokio/ByteString;
+	public fun listFiles (Ljava/lang/String;Ljava/lang/String;)Ljava/util/List;
+	public final fun loadResourceDirectory (Ljava/lang/String;)V
+}
+
+public final class app/cash/backfila/client/s3/shim/RealS3AwsV2Module : com/google/inject/AbstractModule {
+	public fun <init> ()V
+}
+
+public final class app/cash/backfila/client/s3/shim/RealS3Module : com/google/inject/AbstractModule {
+	public fun <init> ()V
+}
+
+public abstract interface class app/cash/backfila/client/s3/shim/S3Service {
+	public abstract fun getFileSize (Ljava/lang/String;Ljava/lang/String;)J
+	public abstract fun getFileStreamStartingAt (Ljava/lang/String;Ljava/lang/String;J)Lokio/BufferedSource;
+	public abstract fun getWithSeek (Ljava/lang/String;Ljava/lang/String;JJ)Lokio/ByteString;
+	public abstract fun listFiles (Ljava/lang/String;Ljava/lang/String;)Ljava/util/List;
+}
+

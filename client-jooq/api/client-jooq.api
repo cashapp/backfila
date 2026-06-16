@@ -1,0 +1,329 @@
+public final class app/cash/backfila/client/jooq/BackfillBatch {
+	public fun <init> (Ljava/lang/String;Lapp/cash/backfila/client/jooq/BackfillJooqTransacter;Ljava/util/List;Lapp/cash/backfila/client/BackfillConfig;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lapp/cash/backfila/client/jooq/BackfillJooqTransacter;
+	public final fun component3 ()Ljava/util/List;
+	public final fun component4 ()Lapp/cash/backfila/client/BackfillConfig;
+	public final fun copy (Ljava/lang/String;Lapp/cash/backfila/client/jooq/BackfillJooqTransacter;Ljava/util/List;Lapp/cash/backfila/client/BackfillConfig;)Lapp/cash/backfila/client/jooq/BackfillBatch;
+	public static synthetic fun copy$default (Lapp/cash/backfila/client/jooq/BackfillBatch;Ljava/lang/String;Lapp/cash/backfila/client/jooq/BackfillJooqTransacter;Ljava/util/List;Lapp/cash/backfila/client/BackfillConfig;ILjava/lang/Object;)Lapp/cash/backfila/client/jooq/BackfillBatch;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getConfig ()Lapp/cash/backfila/client/BackfillConfig;
+	public final fun getKeys ()Ljava/util/List;
+	public final fun getShardName ()Ljava/lang/String;
+	public final fun getTransacter ()Lapp/cash/backfila/client/jooq/BackfillJooqTransacter;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class app/cash/backfila/client/jooq/BackfillJooqTransacter {
+	public abstract fun transaction (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+}
+
+public abstract interface class app/cash/backfila/client/jooq/ByteStringSerializer {
+	public static final field Companion Lapp/cash/backfila/client/jooq/ByteStringSerializer$Companion;
+	public fun composeWith (Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)Lapp/cash/backfila/client/jooq/ByteStringSerializer;
+	public abstract fun fromByteString (Lokio/ByteString;)Ljava/lang/Object;
+	public abstract fun toByteString (Ljava/lang/Object;)Lokio/ByteString;
+}
+
+public final class app/cash/backfila/client/jooq/ByteStringSerializer$Companion {
+	public final fun build (Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)Lapp/cash/backfila/client/jooq/ByteStringSerializer;
+	public final fun getForByteArray ()Lapp/cash/backfila/client/jooq/ByteStringSerializer;
+	public final fun getForLong ()Lapp/cash/backfila/client/jooq/ByteStringSerializer;
+	public final fun getForString ()Lapp/cash/backfila/client/jooq/ByteStringSerializer;
+}
+
+public final class app/cash/backfila/client/jooq/ByteStringSerializer$DefaultImpls {
+	public static fun composeWith (Lapp/cash/backfila/client/jooq/ByteStringSerializer;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)Lapp/cash/backfila/client/jooq/ByteStringSerializer;
+}
+
+public final class app/cash/backfila/client/jooq/CompoundKeyComparer {
+	public static final field Companion Lapp/cash/backfila/client/jooq/CompoundKeyComparer$Companion;
+	public fun <init> (Ljava/util/List;)V
+	public final fun gt (Lorg/jooq/Record;)Lorg/jooq/Condition;
+	public final fun gte (Lorg/jooq/Record;)Lorg/jooq/Condition;
+	public final fun lt (Lorg/jooq/Record;)Lorg/jooq/Condition;
+	public final fun lte (Lorg/jooq/Record;)Lorg/jooq/Condition;
+}
+
+public final class app/cash/backfila/client/jooq/CompoundKeyComparer$Companion {
+}
+
+public abstract interface annotation class app/cash/backfila/client/jooq/ForJooqBackend : java/lang/annotation/Annotation {
+}
+
+public abstract class app/cash/backfila/client/jooq/JooqBackfill : app/cash/backfila/client/Backfill {
+	public fun <init> ()V
+	public abstract fun backfill (Lapp/cash/backfila/client/jooq/BackfillBatch;)V
+	public final fun buildKeyRange (Ljava/lang/Object;Ljava/lang/Object;)Lapp/cash/backfila/protos/clientservice/KeyRange;
+	public final fun compareCompoundKey (Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Lorg/jooq/Condition;
+	public final fun compoundKeyComparer ()Lapp/cash/backfila/client/jooq/CompoundKeyComparer;
+	public fun filterCondition (Lapp/cash/backfila/client/BackfillConfig;)Lorg/jooq/Condition;
+	public final fun fromByteString (Lokio/ByteString;)Ljava/lang/Object;
+	public abstract fun getCompoundKeyFields ()Ljava/util/List;
+	public abstract fun getKeySerializer ()Lapp/cash/backfila/client/jooq/ByteStringSerializer;
+	public abstract fun getShardedTransacterMap ()Ljava/util/Map;
+	public final fun getSqlDialect ()Lorg/jooq/SQLDialect;
+	public abstract fun getTable ()Lorg/jooq/TableLike;
+	public final fun getTransacter (Ljava/lang/String;)Lapp/cash/backfila/client/jooq/BackfillJooqTransacter;
+	public final fun getUnfilteredBoundaryKeyValue (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public final fun inTransactionReturning (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public fun keyToRecord (Ljava/lang/Object;)Lorg/jooq/Record;
+	public fun prepareAndValidateBackfill (Lapp/cash/backfila/client/PrepareBackfillConfig;)V
+	public fun recordToKey (Lorg/jooq/Record;)Ljava/lang/Object;
+	public final fun sortingByCompoundKeyFields (Lkotlin/jvm/functions/Function1;)Ljava/util/List;
+	public final fun toByteString (Ljava/lang/Object;)Lokio/ByteString;
+}
+
+public final class app/cash/backfila/client/jooq/JooqBackfillModule : com/google/inject/AbstractModule {
+	public static final field Companion Lapp/cash/backfila/client/jooq/JooqBackfillModule$Companion;
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public static final fun create (Ljava/lang/Class;)Lapp/cash/backfila/client/jooq/JooqBackfillModule;
+	public static final fun create (Lkotlin/reflect/KClass;)Lapp/cash/backfila/client/jooq/JooqBackfillModule;
+}
+
+public final class app/cash/backfila/client/jooq/JooqBackfillModule$Companion {
+	public final fun create (Ljava/lang/Class;)Lapp/cash/backfila/client/jooq/JooqBackfillModule;
+	public final fun create (Lkotlin/reflect/KClass;)Lapp/cash/backfila/client/jooq/JooqBackfillModule;
+}
+
+public class app/cash/backfila/client/jooq/gen/DefaultCatalog : org/jooq/impl/CatalogImpl {
+	public static final field Companion Lapp/cash/backfila/client/jooq/gen/DefaultCatalog$Companion;
+	public fun <init> ()V
+	public final fun getJOOQ ()Lapp/cash/backfila/client/jooq/gen/Jooq;
+	public fun getSchemas ()Ljava/util/List;
+}
+
+public final class app/cash/backfila/client/jooq/gen/DefaultCatalog$Companion {
+	public final fun getDEFAULT_CATALOG ()Lapp/cash/backfila/client/jooq/gen/DefaultCatalog;
+}
+
+public class app/cash/backfila/client/jooq/gen/Jooq : org/jooq/impl/SchemaImpl {
+	public static final field Companion Lapp/cash/backfila/client/jooq/gen/Jooq$Companion;
+	public fun <init> ()V
+	public fun getCatalog ()Lorg/jooq/Catalog;
+	public final fun getMENU ()Lapp/cash/backfila/client/jooq/gen/tables/Menu;
+	public fun getTables ()Ljava/util/List;
+	public final fun getWIDGETS ()Lapp/cash/backfila/client/jooq/gen/tables/Widgets;
+}
+
+public final class app/cash/backfila/client/jooq/gen/Jooq$Companion {
+	public final fun getJOOQ ()Lapp/cash/backfila/client/jooq/gen/Jooq;
+}
+
+public final class app/cash/backfila/client/jooq/gen/indexes/IndexesKt {
+	public static final fun getWIDGETS_MANUFACTURER_CREATED_AT ()Lorg/jooq/Index;
+}
+
+public final class app/cash/backfila/client/jooq/gen/keys/KeysKt {
+	public static final fun getKEY_MENU_PRIMARY ()Lorg/jooq/UniqueKey;
+	public static final fun getKEY_WIDGETS_PRIMARY ()Lorg/jooq/UniqueKey;
+}
+
+public class app/cash/backfila/client/jooq/gen/tables/Menu : org/jooq/impl/TableImpl {
+	public static final field Companion Lapp/cash/backfila/client/jooq/gen/tables/Menu$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Lorg/jooq/Name;)V
+	public fun <init> (Lorg/jooq/Name;Lorg/jooq/Table;Lorg/jooq/ForeignKey;Lorg/jooq/Table;[Lorg/jooq/Field;)V
+	public fun <init> (Lorg/jooq/Table;Lorg/jooq/ForeignKey;)V
+	public fun as (Ljava/lang/String;)Lapp/cash/backfila/client/jooq/gen/tables/Menu;
+	public synthetic fun as (Ljava/lang/String;)Lorg/jooq/SelectField;
+	public synthetic fun as (Ljava/lang/String;)Lorg/jooq/Table;
+	public fun as (Lorg/jooq/Name;)Lapp/cash/backfila/client/jooq/gen/tables/Menu;
+	public synthetic fun as (Lorg/jooq/Name;)Lorg/jooq/SelectField;
+	public synthetic fun as (Lorg/jooq/Name;)Lorg/jooq/Table;
+	public fun as (Lorg/jooq/Table;)Lapp/cash/backfila/client/jooq/gen/tables/Menu;
+	public synthetic fun as (Lorg/jooq/Table;)Lorg/jooq/Table;
+	public fun fieldsRow ()Lorg/jooq/Row2;
+	public synthetic fun fieldsRow ()Lorg/jooq/Row;
+	public final fun getID ()Lorg/jooq/TableField;
+	public fun getIdentity ()Lorg/jooq/Identity;
+	public final fun getNAME ()Lorg/jooq/TableField;
+	public fun getPrimaryKey ()Lorg/jooq/UniqueKey;
+	public fun getRecordType ()Ljava/lang/Class;
+	public fun getSchema ()Lorg/jooq/Schema;
+	public final fun mapping (Ljava/lang/Class;Lkotlin/jvm/functions/Function2;)Lorg/jooq/SelectField;
+	public final fun mapping (Lkotlin/jvm/functions/Function2;)Lorg/jooq/SelectField;
+	public fun rename (Ljava/lang/String;)Lapp/cash/backfila/client/jooq/gen/tables/Menu;
+	public synthetic fun rename (Ljava/lang/String;)Lorg/jooq/Table;
+	public fun rename (Lorg/jooq/Name;)Lapp/cash/backfila/client/jooq/gen/tables/Menu;
+	public synthetic fun rename (Lorg/jooq/Name;)Lorg/jooq/Table;
+	public fun rename (Lorg/jooq/Table;)Lapp/cash/backfila/client/jooq/gen/tables/Menu;
+	public synthetic fun rename (Lorg/jooq/Table;)Lorg/jooq/Table;
+}
+
+public final class app/cash/backfila/client/jooq/gen/tables/Menu$Companion {
+	public final fun getMENU ()Lapp/cash/backfila/client/jooq/gen/tables/Menu;
+}
+
+public class app/cash/backfila/client/jooq/gen/tables/Widgets : org/jooq/impl/TableImpl {
+	public static final field Companion Lapp/cash/backfila/client/jooq/gen/tables/Widgets$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Lorg/jooq/Name;)V
+	public fun <init> (Lorg/jooq/Name;Lorg/jooq/Table;Lorg/jooq/ForeignKey;Lorg/jooq/Table;[Lorg/jooq/Field;)V
+	public fun <init> (Lorg/jooq/Table;Lorg/jooq/ForeignKey;)V
+	public fun as (Ljava/lang/String;)Lapp/cash/backfila/client/jooq/gen/tables/Widgets;
+	public synthetic fun as (Ljava/lang/String;)Lorg/jooq/SelectField;
+	public synthetic fun as (Ljava/lang/String;)Lorg/jooq/Table;
+	public fun as (Lorg/jooq/Name;)Lapp/cash/backfila/client/jooq/gen/tables/Widgets;
+	public synthetic fun as (Lorg/jooq/Name;)Lorg/jooq/SelectField;
+	public synthetic fun as (Lorg/jooq/Name;)Lorg/jooq/Table;
+	public fun as (Lorg/jooq/Table;)Lapp/cash/backfila/client/jooq/gen/tables/Widgets;
+	public synthetic fun as (Lorg/jooq/Table;)Lorg/jooq/Table;
+	public fun fieldsRow ()Lorg/jooq/Row4;
+	public synthetic fun fieldsRow ()Lorg/jooq/Row;
+	public final fun getCREATED_AT_MS ()Lorg/jooq/TableField;
+	public fun getIndexes ()Ljava/util/List;
+	public final fun getMANUFACTURER_TOKEN ()Lorg/jooq/TableField;
+	public final fun getNAME ()Lorg/jooq/TableField;
+	public fun getPrimaryKey ()Lorg/jooq/UniqueKey;
+	public fun getRecordType ()Ljava/lang/Class;
+	public fun getSchema ()Lorg/jooq/Schema;
+	public final fun getWIDGET_TOKEN ()Lorg/jooq/TableField;
+	public final fun mapping (Ljava/lang/Class;Lkotlin/jvm/functions/Function4;)Lorg/jooq/SelectField;
+	public final fun mapping (Lkotlin/jvm/functions/Function4;)Lorg/jooq/SelectField;
+	public fun rename (Ljava/lang/String;)Lapp/cash/backfila/client/jooq/gen/tables/Widgets;
+	public synthetic fun rename (Ljava/lang/String;)Lorg/jooq/Table;
+	public fun rename (Lorg/jooq/Name;)Lapp/cash/backfila/client/jooq/gen/tables/Widgets;
+	public synthetic fun rename (Lorg/jooq/Name;)Lorg/jooq/Table;
+	public fun rename (Lorg/jooq/Table;)Lapp/cash/backfila/client/jooq/gen/tables/Widgets;
+	public synthetic fun rename (Lorg/jooq/Table;)Lorg/jooq/Table;
+}
+
+public final class app/cash/backfila/client/jooq/gen/tables/Widgets$Companion {
+	public final fun getWIDGETS ()Lapp/cash/backfila/client/jooq/gen/tables/Widgets;
+}
+
+public class app/cash/backfila/client/jooq/gen/tables/records/MenuRecord : org/jooq/impl/UpdatableRecordImpl, org/jooq/Record2 {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/Long;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/Long;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun component1 ()Ljava/lang/Long;
+	public synthetic fun component1 ()Ljava/lang/Object;
+	public synthetic fun component2 ()Ljava/lang/Object;
+	public fun component2 ()Ljava/lang/String;
+	public fun field1 ()Lorg/jooq/Field;
+	public fun field2 ()Lorg/jooq/Field;
+	public fun fieldsRow ()Lorg/jooq/Row2;
+	public synthetic fun fieldsRow ()Lorg/jooq/Row;
+	public fun getId ()Ljava/lang/Long;
+	public fun getName ()Ljava/lang/String;
+	public fun key ()Lorg/jooq/Record1;
+	public synthetic fun key ()Lorg/jooq/Record;
+	public fun setId (Ljava/lang/Long;)V
+	public fun setName (Ljava/lang/String;)V
+	public fun value1 ()Ljava/lang/Long;
+	public synthetic fun value1 ()Ljava/lang/Object;
+	public fun value1 (Ljava/lang/Long;)Lapp/cash/backfila/client/jooq/gen/tables/records/MenuRecord;
+	public synthetic fun value1 (Ljava/lang/Object;)Lorg/jooq/Record2;
+	public synthetic fun value2 ()Ljava/lang/Object;
+	public fun value2 ()Ljava/lang/String;
+	public synthetic fun value2 (Ljava/lang/Object;)Lorg/jooq/Record2;
+	public fun value2 (Ljava/lang/String;)Lapp/cash/backfila/client/jooq/gen/tables/records/MenuRecord;
+	public fun values (Ljava/lang/Long;Ljava/lang/String;)Lapp/cash/backfila/client/jooq/gen/tables/records/MenuRecord;
+	public synthetic fun values (Ljava/lang/Object;Ljava/lang/Object;)Lorg/jooq/Record2;
+	public fun valuesRow ()Lorg/jooq/Row2;
+	public synthetic fun valuesRow ()Lorg/jooq/Row;
+	public synthetic fun with (Lorg/jooq/Field;Ljava/lang/Object;)Lorg/jooq/Record2;
+	public synthetic fun with (Lorg/jooq/Field;Ljava/lang/Object;Lorg/jooq/Converter;)Lorg/jooq/Record2;
+}
+
+public class app/cash/backfila/client/jooq/gen/tables/records/WidgetsRecord : org/jooq/impl/UpdatableRecordImpl, org/jooq/Record4 {
+	public fun <init> ()V
+	public fun <init> ([BLjava/lang/String;Ljava/lang/Long;Ljava/lang/String;)V
+	public synthetic fun <init> ([BLjava/lang/String;Ljava/lang/Long;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun component1 ()Ljava/lang/Object;
+	public fun component1 ()[B
+	public synthetic fun component2 ()Ljava/lang/Object;
+	public fun component2 ()Ljava/lang/String;
+	public fun component3 ()Ljava/lang/Long;
+	public synthetic fun component3 ()Ljava/lang/Object;
+	public synthetic fun component4 ()Ljava/lang/Object;
+	public fun component4 ()Ljava/lang/String;
+	public fun field1 ()Lorg/jooq/Field;
+	public fun field2 ()Lorg/jooq/Field;
+	public fun field3 ()Lorg/jooq/Field;
+	public fun field4 ()Lorg/jooq/Field;
+	public fun fieldsRow ()Lorg/jooq/Row4;
+	public synthetic fun fieldsRow ()Lorg/jooq/Row;
+	public fun getCreatedAtMs ()Ljava/lang/Long;
+	public fun getManufacturerToken ()Ljava/lang/String;
+	public fun getName ()Ljava/lang/String;
+	public fun getWidgetToken ()[B
+	public fun key ()Lorg/jooq/Record1;
+	public synthetic fun key ()Lorg/jooq/Record;
+	public fun setCreatedAtMs (Ljava/lang/Long;)V
+	public fun setManufacturerToken (Ljava/lang/String;)V
+	public fun setName (Ljava/lang/String;)V
+	public fun setWidgetToken ([B)V
+	public synthetic fun value1 ()Ljava/lang/Object;
+	public fun value1 ()[B
+	public synthetic fun value1 (Ljava/lang/Object;)Lorg/jooq/Record4;
+	public fun value1 ([B)Lapp/cash/backfila/client/jooq/gen/tables/records/WidgetsRecord;
+	public synthetic fun value2 ()Ljava/lang/Object;
+	public fun value2 ()Ljava/lang/String;
+	public synthetic fun value2 (Ljava/lang/Object;)Lorg/jooq/Record4;
+	public fun value2 (Ljava/lang/String;)Lapp/cash/backfila/client/jooq/gen/tables/records/WidgetsRecord;
+	public fun value3 ()Ljava/lang/Long;
+	public synthetic fun value3 ()Ljava/lang/Object;
+	public fun value3 (Ljava/lang/Long;)Lapp/cash/backfila/client/jooq/gen/tables/records/WidgetsRecord;
+	public synthetic fun value3 (Ljava/lang/Object;)Lorg/jooq/Record4;
+	public synthetic fun value4 ()Ljava/lang/Object;
+	public fun value4 ()Ljava/lang/String;
+	public synthetic fun value4 (Ljava/lang/Object;)Lorg/jooq/Record4;
+	public fun value4 (Ljava/lang/String;)Lapp/cash/backfila/client/jooq/gen/tables/records/WidgetsRecord;
+	public synthetic fun values (Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Lorg/jooq/Record4;
+	public fun values ([BLjava/lang/String;Ljava/lang/Long;Ljava/lang/String;)Lapp/cash/backfila/client/jooq/gen/tables/records/WidgetsRecord;
+	public fun valuesRow ()Lorg/jooq/Row4;
+	public synthetic fun valuesRow ()Lorg/jooq/Row;
+	public synthetic fun with (Lorg/jooq/Field;Ljava/lang/Object;)Lorg/jooq/Record4;
+	public synthetic fun with (Lorg/jooq/Field;Ljava/lang/Object;Lorg/jooq/Converter;)Lorg/jooq/Record4;
+}
+
+public final class app/cash/backfila/client/jooq/gen/tables/references/TablesKt {
+	public static final fun getMENU ()Lapp/cash/backfila/client/jooq/gen/tables/Menu;
+	public static final fun getWIDGETS ()Lapp/cash/backfila/client/jooq/gen/tables/Widgets;
+}
+
+public final class app/cash/backfila/client/jooq/internal/BatchRangeIterator : com/google/common/collect/AbstractIterator {
+	public fun <init> (Lapp/cash/backfila/client/jooq/JooqBackfill;Lorg/jooq/DSLContext;Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeRequest;Lapp/cash/backfila/client/BackfillConfig;)V
+	public synthetic fun computeNext ()Ljava/lang/Object;
+}
+
+public final class app/cash/backfila/client/jooq/internal/JooqBackend : app/cash/backfila/client/spi/BackfillBackend {
+	public fun <init> (Lcom/google/inject/Injector;Ljava/util/Map;)V
+	public fun backfills ()Ljava/util/Set;
+	public fun create (Ljava/lang/String;)Lapp/cash/backfila/client/jooq/internal/JooqBackfillOperator;
+	public synthetic fun create (Ljava/lang/String;)Lapp/cash/backfila/client/spi/BackfillOperator;
+}
+
+public final class app/cash/backfila/client/jooq/internal/JooqBackfillOperator : app/cash/backfila/client/spi/BackfillOperator {
+	public synthetic fun getBackfill ()Lapp/cash/backfila/client/Backfill;
+	public fun getBackfill ()Lapp/cash/backfila/client/jooq/JooqBackfill;
+	public fun getNextBatchRange (Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeRequest;)Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeResponse;
+	public fun name ()Ljava/lang/String;
+	public fun prepareBackfill (Lapp/cash/backfila/protos/clientservice/PrepareBackfillRequest;)Lapp/cash/backfila/protos/clientservice/PrepareBackfillResponse;
+	public fun runBatch (Lapp/cash/backfila/protos/clientservice/RunBatchRequest;)Lapp/cash/backfila/protos/clientservice/RunBatchResponse;
+}
+
+public final class app/cash/backfila/client/jooq/internal/OpenKeyRange {
+	public static final field Companion Lapp/cash/backfila/client/jooq/internal/OpenKeyRange$Companion;
+	public fun <init> (Lapp/cash/backfila/client/jooq/JooqBackfill;Lkotlin/jvm/functions/Function2;Ljava/lang/Object;Ljava/lang/Object;)V
+	public final fun betweenStartAndEndCondition (Ljava/lang/Object;)Lorg/jooq/Condition;
+	public final fun betweenStartAndUpperBoundCondition ()Lorg/jooq/Condition;
+	public final fun copy (Lapp/cash/backfila/client/jooq/JooqBackfill;Lkotlin/jvm/functions/Function2;Ljava/lang/Object;Ljava/lang/Object;)Lapp/cash/backfila/client/jooq/internal/OpenKeyRange;
+	public static synthetic fun copy$default (Lapp/cash/backfila/client/jooq/internal/OpenKeyRange;Lapp/cash/backfila/client/jooq/JooqBackfill;Lkotlin/jvm/functions/Function2;Ljava/lang/Object;Ljava/lang/Object;ILjava/lang/Object;)Lapp/cash/backfila/client/jooq/internal/OpenKeyRange;
+	public final fun determineEnd (Ljava/util/List;)Ljava/lang/Object;
+	public final fun determineStart (Ljava/util/List;)Ljava/lang/Object;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public final fun nextRangeFor (Ljava/lang/Object;)Lapp/cash/backfila/client/jooq/internal/OpenKeyRange;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/cash/backfila/client/jooq/internal/OpenKeyRange$Companion {
+	public final fun initialRangeFor (Lapp/cash/backfila/client/jooq/JooqBackfill;Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeRequest;Lorg/jooq/DSLContext;)Lapp/cash/backfila/client/jooq/internal/OpenKeyRange;
+}
+
