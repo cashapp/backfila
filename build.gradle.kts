@@ -29,9 +29,9 @@ buildscript {
 
 apply(plugin = "com.vanniktech.maven.publish.base")
 
-// ABI/binary compatibility validation for the published client libraries. The plugin is applied at
-// the root and automatically configures every subproject; we ignore the projects that aren't
-// consumable client libraries (the service, the BOM, the Gradle plugin, and test-only modules).
+// ABI/binary compatibility validation for the published libraries. The plugin is applied at the
+// root and automatically configures every subproject; we ignore the projects that don't publish a
+// consumable JVM API (the BOM, the Gradle plugin, and test-only modules).
 apply(plugin = "org.jetbrains.kotlinx.binary-compatibility-validator")
 
 configure<kotlinx.validation.ApiValidationExtension> {
@@ -41,7 +41,6 @@ configure<kotlinx.validation.ApiValidationExtension> {
     "bom",
     "client-sqldelight-gradle-plugin",
     "client-sqldelight-test",
-    "service",
     "service-self-backfill",
   )
   ignoredProjects.addAll(subprojects.map { it.name }.filter { it in ignorable })
