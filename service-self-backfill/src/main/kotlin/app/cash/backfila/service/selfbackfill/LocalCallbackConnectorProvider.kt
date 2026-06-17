@@ -2,8 +2,8 @@ package app.cash.backfila.service.selfbackfill
 
 import app.cash.backfila.client.BackfilaCallbackConnector
 import app.cash.backfila.client.BackfilaCallbackConnectorProvider
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @Singleton
 internal class LocalCallbackConnectorProvider @Inject internal constructor(

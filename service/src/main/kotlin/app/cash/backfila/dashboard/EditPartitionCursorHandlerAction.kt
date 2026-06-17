@@ -6,8 +6,8 @@ import app.cash.backfila.service.persistence.RunPartitionQuery
 import app.cash.backfila.ui.components.AlertError
 import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.pages.BackfillShowAction
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlinx.html.div
 import misk.exceptions.BadRequestException
 import misk.hibernate.Query

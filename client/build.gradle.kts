@@ -10,6 +10,9 @@ plugins {
 }
 
 dependencies {
+  api(libs.jakartaInject)
+  api(libs.javaxInject)
+
   implementation(libs.moshiCore)
   implementation(libs.moshiKotlin)
   implementation(libs.wireGrpcClient)

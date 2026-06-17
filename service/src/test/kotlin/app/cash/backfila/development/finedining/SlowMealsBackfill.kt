@@ -2,7 +2,7 @@ package app.cash.backfila.development.finedining
 
 import app.cash.backfila.client.BackfillConfig
 import app.cash.backfila.client.stat.StaticDatasourceBackfill
-import javax.inject.Inject
+import jakarta.inject.Inject
 import misk.logging.getLogger
 
 class SlowMealsBackfill @Inject constructor() : StaticDatasourceBackfill<String, SlowMealsBackfill.SlowMealsAttributes>() {

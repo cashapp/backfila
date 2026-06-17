@@ -1,6 +1,6 @@
 package app.cash.backfila.client
 
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 interface BackfilaClientLoggingSetupProvider {
   fun <T> withBackfillRunLogging(backfillName: String, backfillId: String?, wrapped: () -> T): T

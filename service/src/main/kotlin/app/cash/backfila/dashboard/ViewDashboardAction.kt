@@ -2,8 +2,8 @@ package app.cash.backfila.dashboard
 
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.DbBackfillRun
+import jakarta.inject.Inject
 import java.net.HttpURLConnection
-import javax.inject.Inject
 import misk.exceptions.BadRequestException
 import misk.hibernate.Id
 import misk.hibernate.Session

@@ -10,7 +10,7 @@ import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
 import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
 import app.cash.backfila.protos.clientservice.RunBatchRequest
 import app.cash.backfila.protos.clientservice.RunBatchResponse
-import javax.inject.Inject
+import jakarta.inject.Inject
 import misk.exceptions.BadRequestException
 import misk.security.authz.Authenticated
 import misk.web.AvailableWhenDegraded

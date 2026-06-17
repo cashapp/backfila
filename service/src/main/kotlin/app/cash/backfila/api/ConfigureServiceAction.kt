@@ -8,9 +8,9 @@ import app.cash.backfila.service.persistence.DbRegisteredBackfill
 import app.cash.backfila.service.persistence.DbService
 import app.cash.backfila.service.persistence.RegisteredBackfillQuery
 import app.cash.backfila.service.persistence.ServiceQuery
+import jakarta.inject.Inject
 import java.time.Clock
 import java.time.Instant
-import javax.inject.Inject
 import misk.MiskCaller
 import misk.hibernate.Query
 import misk.hibernate.Transacter

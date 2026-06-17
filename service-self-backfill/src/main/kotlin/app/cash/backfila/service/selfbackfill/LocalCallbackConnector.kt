@@ -8,7 +8,7 @@ import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
 import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
 import app.cash.backfila.protos.clientservice.RunBatchRequest
 import app.cash.backfila.protos.clientservice.RunBatchResponse
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 internal class LocalCallbackConnector @Inject internal constructor(
   private val backfilaClientServiceHandler: BackfilaClientServiceHandler,

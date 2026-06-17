@@ -1,7 +1,7 @@
 package app.cash.backfila.client.fixedset
 
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 /**
  * Sample datastore for testing Backfila client.

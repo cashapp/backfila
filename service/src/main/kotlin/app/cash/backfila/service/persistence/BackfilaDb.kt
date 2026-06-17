@@ -1,7 +1,6 @@
 package app.cash.backfila.service.persistence
 
-import javax.inject.Qualifier
-
-@Qualifier
+@jakarta.inject.Qualifier
+@javax.inject.Qualifier
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
 annotation class BackfilaDb

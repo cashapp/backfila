@@ -9,6 +9,9 @@ plugins {
 }
 
 dependencies {
+  api(libs.jakartaInject)
+  api(libs.javaxInject)
+
   implementation(libs.guava)
   implementation(libs.moshiCore)
   implementation(libs.moshiKotlin)

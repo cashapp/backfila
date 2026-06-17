@@ -9,7 +9,7 @@ import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.DbRegisteredBackfill
 import app.cash.backfila.service.persistence.DbRegisteredParameter
 import app.cash.backfila.service.persistence.RegisteredBackfillQuery
-import javax.inject.Inject
+import jakarta.inject.Inject
 import misk.hibernate.Id
 import misk.hibernate.Query
 import misk.hibernate.Transacter

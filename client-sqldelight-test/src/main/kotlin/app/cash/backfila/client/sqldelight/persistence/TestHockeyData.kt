@@ -1,8 +1,8 @@
 package app.cash.backfila.client.sqldelight.persistence
 
 import app.cash.backfila.client.sqldelight.hockeydata.HockeyDataDatabase
+import jakarta.inject.Inject
 import java.time.LocalDate
-import javax.inject.Inject
 
 class TestHockeyData @Inject constructor(
   val hockeyDataDb: HockeyDataDatabase,

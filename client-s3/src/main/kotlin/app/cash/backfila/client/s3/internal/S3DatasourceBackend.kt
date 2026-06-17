@@ -14,9 +14,9 @@ import app.cash.backfila.client.spi.BackfillRegistration
 import com.google.inject.Injector
 import com.google.inject.TypeLiteral
 import com.squareup.moshi.Types
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import java.lang.reflect.ParameterizedType
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
 

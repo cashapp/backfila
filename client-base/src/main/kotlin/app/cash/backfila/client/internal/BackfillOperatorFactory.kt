@@ -5,9 +5,9 @@ import app.cash.backfila.client.spi.BackfillBackend
 import app.cash.backfila.client.spi.BackfillOperator
 import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.jvm.Throws
 import misk.logging.getLogger
 

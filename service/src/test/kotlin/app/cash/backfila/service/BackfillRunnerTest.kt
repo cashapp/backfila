@@ -27,8 +27,8 @@ import app.cash.backfila.service.runner.BackfillRunner
 import app.cash.backfila.service.runner.EXTEND_LEASE_PERIOD
 import app.cash.backfila.service.scheduler.LeaseHunter
 import com.google.inject.Module
+import jakarta.inject.Inject
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest

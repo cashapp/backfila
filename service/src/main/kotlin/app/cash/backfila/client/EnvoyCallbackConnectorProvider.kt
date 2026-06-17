@@ -3,9 +3,9 @@ package app.cash.backfila.client
 import app.cash.backfila.client.interceptors.OkHttpClientSpecifiedHeadersInterceptor
 import app.cash.backfila.client.interceptors.OkHttpClientSpecifiedHeadersInterceptor.Companion.headersSizeWithinLimit
 import com.squareup.moshi.Moshi
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import java.net.URL
-import javax.inject.Inject
-import javax.inject.Singleton
 import misk.client.EnvoyClientEndpointProvider
 import misk.client.HttpClientEnvoyConfig
 import misk.client.HttpClientFactory

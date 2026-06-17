@@ -18,8 +18,15 @@ public final class app/cash/backfila/client/RealBackfilaManagementClient : app/c
 }
 
 public final class app/cash/backfila/client/RealBackfillModule : com/google/inject/AbstractModule {
+	public fun <init> (Lapp/cash/backfila/client/BackfilaClientConfig;)V
 	public fun <init> (Lapp/cash/backfila/client/BackfilaClientConfig;Lkotlin/reflect/KClass;)V
 	public synthetic fun <init> (Lapp/cash/backfila/client/BackfilaClientConfig;Lkotlin/reflect/KClass;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lcom/google/inject/Provider;Lkotlin/reflect/KClass;)V
+	public synthetic fun <init> (Lcom/google/inject/Provider;Lkotlin/reflect/KClass;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljakarta/inject/Provider;)V
+	public fun <init> (Ljakarta/inject/Provider;Ljava/lang/Class;)V
+	public synthetic fun <init> (Ljakarta/inject/Provider;Ljava/lang/Class;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljakarta/inject/Provider;Lkotlin/reflect/KClass;)V
 	public fun <init> (Ljavax/inject/Provider;)V
 	public fun <init> (Ljavax/inject/Provider;Ljava/lang/Class;)V
 	public synthetic fun <init> (Ljavax/inject/Provider;Ljava/lang/Class;ILkotlin/jvm/internal/DefaultConstructorMarker;)V

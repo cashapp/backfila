@@ -19,9 +19,8 @@ import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import com.google.inject.Provides
+import jakarta.inject.Singleton
 import java.util.concurrent.Executors
-import javax.inject.Qualifier
-import javax.inject.Singleton
 import misk.config.ConfigModule
 import misk.inject.KAbstractModule
 import misk.security.authz.AccessAnnotationEntry
@@ -30,7 +29,8 @@ import misk.web.dashboard.AdminDashboardAccess
 import okhttp3.Interceptor
 import wisp.deployment.Deployment
 
-@Qualifier
+@jakarta.inject.Qualifier
+@javax.inject.Qualifier
 annotation class HttpClientNetworkInterceptor
 
 class BackfilaServiceModule(

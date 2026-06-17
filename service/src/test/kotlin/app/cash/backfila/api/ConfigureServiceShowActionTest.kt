@@ -15,10 +15,10 @@ import app.cash.backfila.service.persistence.ServiceQuery
 import com.google.inject.Module
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.JsonEncodingException
+import jakarta.inject.Inject
 import java.time.Clock
 import java.time.Instant
 import java.time.temporal.ChronoUnit.DAYS
-import javax.inject.Inject
 import misk.hibernate.Query
 import misk.hibernate.Transacter
 import misk.hibernate.newQuery

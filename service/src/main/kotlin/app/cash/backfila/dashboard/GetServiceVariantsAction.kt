@@ -4,7 +4,7 @@ import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillRunQuery
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.ServiceQuery
-import javax.inject.Inject
+import jakarta.inject.Inject
 import misk.hibernate.Query
 import misk.hibernate.Transacter
 import misk.hibernate.newQuery

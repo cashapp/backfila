@@ -4,7 +4,7 @@ import app.cash.backfila.service.BackfilaConfig
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.DbBackfillRun
 import app.cash.backfila.ui.pages.BackfillShowAction
-import javax.inject.Inject
+import jakarta.inject.Inject
 import misk.audit.AuditClient
 import misk.hibernate.Id
 import misk.hibernate.Transacter

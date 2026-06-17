@@ -5,9 +5,9 @@ import app.cash.backfila.client.interceptors.OkHttpClientSpecifiedHeadersInterce
 import app.cash.backfila.protos.clientservice.BackfilaClientServiceClient
 import com.squareup.moshi.Moshi
 import com.squareup.wire.GrpcClient
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import java.net.URL
-import javax.inject.Inject
-import javax.inject.Singleton
 import misk.client.HttpClientConfigUrlProvider
 import misk.client.HttpClientFactory
 import misk.client.HttpClientsConfig

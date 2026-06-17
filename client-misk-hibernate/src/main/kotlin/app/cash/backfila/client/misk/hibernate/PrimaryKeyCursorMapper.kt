@@ -1,6 +1,6 @@
 package app.cash.backfila.client.misk.hibernate
 
-import javax.inject.Inject
+import jakarta.inject.Inject
 import okio.ByteString
 
 internal class PrimaryKeyCursorMapper @Inject constructor(

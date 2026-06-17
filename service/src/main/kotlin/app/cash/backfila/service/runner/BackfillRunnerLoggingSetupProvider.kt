@@ -1,7 +1,7 @@
 package app.cash.backfila.service.runner
 
 import app.cash.backfila.service.persistence.DbBackfillRun
-import javax.inject.Inject
+import jakarta.inject.Inject
 import misk.hibernate.Id
 import misk.logging.getLogger
 import org.slf4j.MDC

@@ -5,9 +5,9 @@ import app.cash.backfila.client.fixedset.FixedSetDatastore
 import app.cash.backfila.client.fixedset.FixedSetRow
 import app.cash.backfila.embedded.Backfila
 import com.google.inject.Module
+import jakarta.inject.Inject
 import java.time.LocalDate
 import java.time.ZoneOffset.UTC
-import javax.inject.Inject
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat

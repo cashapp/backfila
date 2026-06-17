@@ -8,7 +8,6 @@ import com.google.inject.Binder
 import com.google.inject.TypeLiteral
 import com.google.inject.multibindings.MapBinder
 import com.google.inject.multibindings.Multibinder
-import javax.inject.Qualifier
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
 import misk.inject.KAbstractModule
@@ -64,4 +63,6 @@ private fun mapBinder(binder: Binder) = MapBinder.newMapBinder(
 )
 
 /** Annotation for specifying dependencies specifically for this Backend. */
-@Qualifier annotation class ForHibernateBackend
+@jakarta.inject.Qualifier
+@javax.inject.Qualifier
+annotation class ForHibernateBackend

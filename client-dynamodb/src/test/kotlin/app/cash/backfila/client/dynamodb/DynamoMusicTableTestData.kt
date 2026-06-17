@@ -2,7 +2,7 @@ package app.cash.backfila.client.dynamodb
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 class DynamoMusicTableTestData @Inject constructor(
   var dynamoDb: DynamoDBMapper,

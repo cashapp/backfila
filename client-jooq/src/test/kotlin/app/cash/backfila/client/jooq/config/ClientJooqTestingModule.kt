@@ -6,14 +6,12 @@ import app.cash.backfila.client.BackfilaHttpClientConfig
 import app.cash.backfila.client.jooq.JooqBackfillModule
 import app.cash.backfila.client.misk.MiskBackfillModule
 import app.cash.backfila.embedded.EmbeddedBackfilaModule
-import javax.inject.Provider
-import javax.inject.Qualifier
+import com.google.inject.Provides
+import jakarta.inject.Qualifier
+import jakarta.inject.Singleton
 import misk.MiskTestingServiceModule
 import misk.environment.DeploymentModule
 import misk.inject.KAbstractModule
-import misk.inject.asSingleton
-import misk.inject.keyOf
-import misk.inject.toKey
 import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceService
 import misk.jdbc.DataSourceType
@@ -32,16 +30,16 @@ import org.jooq.impl.DefaultTransactionProvider
 import org.jooq.tools.JooqLogger
 
 class ClientJooqTestingModule : KAbstractModule() {
+  val datasourceConfig = DataSourceConfig(
+    type = DataSourceType.MYSQL,
+    username = "root",
+    password = "",
+    database = "backfila_client_jooq_testing",
+    migrations_resource = "classpath:/db-migrations",
+  )
   override fun configure() {
     install(MiskTestingServiceModule())
     install(DeploymentModule(wisp.deployment.TESTING))
-    val datasourceConfig = DataSourceConfig(
-      type = DataSourceType.MYSQL,
-      username = "root",
-      password = "",
-      database = "backfila_client_jooq_testing",
-      migrations_resource = "classpath:/db-migrations",
-    )
     install(
       JdbcModule(
         JooqDBIdentifier::class,
@@ -51,15 +49,6 @@ class ClientJooqTestingModule : KAbstractModule() {
         RealDatabasePool,
       ),
     )
-    val transacterKey = JooqTransacter::class.toKey(JooqDBIdentifier::class)
-    val dataSourceServiceProvider = getProvider(keyOf<DataSourceService>(JooqDBIdentifier::class))
-    bind(transacterKey).toProvider(
-      Provider {
-        JooqTransacter(
-          dslContext = dslContext(dataSourceServiceProvider.get(), datasourceConfig),
-        )
-      },
-    ).asSingleton()
     install(JdbcTestingModule(JooqDBIdentifier::class))
     install(LogCollectorModule())
 
@@ -67,6 +56,14 @@ class ClientJooqTestingModule : KAbstractModule() {
     JooqLogger.globalThreshold(Log.Level.DEBUG)
 //    LoggerFactory.getLogger("org.jooq.tools.LoggerListener").
   }
+
+  @Provides
+  @JooqDBIdentifier
+  @Singleton
+  fun provideJooqTransacter(@JooqDBIdentifier dataSourceService: DataSourceService) =
+    JooqTransacter(
+      dslContext = dslContext(dataSourceService, datasourceConfig),
+    )
 
   /**
    * This is how you need to set up jooq backfills in your project

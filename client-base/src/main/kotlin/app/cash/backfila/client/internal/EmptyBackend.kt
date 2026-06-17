@@ -3,8 +3,8 @@ package app.cash.backfila.client.internal
 import app.cash.backfila.client.spi.BackfillBackend
 import app.cash.backfila.client.spi.BackfillOperator
 import app.cash.backfila.client.spi.BackfillRegistration
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 /**
  * Basic backend that registers no backfills. Allows for Backfila to be setup but with no registered

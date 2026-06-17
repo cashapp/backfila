@@ -10,7 +10,7 @@ import app.cash.backfila.protos.service.CheckBackfillStatusResponse.Status.RUNNI
 import app.cash.backfila.protos.service.CreateAndStartBackfillRequest
 import app.cash.backfila.protos.service.CreateBackfillRequest
 import com.google.inject.Module
-import javax.inject.Inject
+import jakarta.inject.Inject
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import org.assertj.core.api.Assertions.assertThat

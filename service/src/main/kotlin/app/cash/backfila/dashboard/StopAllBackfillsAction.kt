@@ -3,7 +3,7 @@ package app.cash.backfila.dashboard
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillRunQuery
 import app.cash.backfila.service.persistence.BackfillState
-import javax.inject.Inject
+import jakarta.inject.Inject
 import misk.MiskCaller
 import misk.hibernate.Query
 import misk.hibernate.Transacter
