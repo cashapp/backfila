@@ -115,6 +115,11 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
 
     var lastEvaluatedKey: Map<String, AttributeValue>? = keyRange.lastEvaluatedKey
 
+    // Track the real counts the scan returns so we can report them back to Backfila. The scan result
+    // gives us these for free. See RunBatchResponse in client_service.proto.
+    var scannedRecordCount = 0L
+    var matchingRecordCount = 0L
+
     val stopwatch = Stopwatch.createStarted()
     do {
       val scanRequest = DynamoDBScanExpression().apply {
@@ -130,6 +135,12 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
         this.indexName = backfill.indexName(config)
       }
       val result = dynamoDb.scanPage(backfill.itemType.java, scanRequest)
+
+      // scannedCount is everything examined; count is what remained after filterExpression. With no
+      // filter the two are equal, which is the correct matching/scanned ratio of 1.0.
+      scannedRecordCount += result.scannedCount.toLong()
+      matchingRecordCount += result.count.toLong()
+
       backfill.runBatch(result.results, config)
       lastEvaluatedKey = result.lastEvaluatedKey
       if (stopwatch.elapsed() > Duration.ofMillis(1_000L)) {
@@ -138,6 +149,8 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
     } while (lastEvaluatedKey != null)
 
     return RunBatchResponse.Builder()
+      .scanned_record_count(scannedRecordCount)
+      .matching_record_count(matchingRecordCount)
       .remaining_batch_range(lastEvaluatedKey?.toKeyRange(keyRange))
       .build()
   }

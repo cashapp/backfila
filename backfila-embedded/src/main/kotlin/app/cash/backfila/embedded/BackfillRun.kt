@@ -27,6 +27,14 @@ interface BackfillRun<B : Backfill> {
   val precomputeMatchingCount: Long
   val precomputeScannedCount: Long
 
+  /**
+   * Real scanned/matching record counts reported by the operator's RunBatch responses so far,
+   * accumulated across all run batches. Operators that don't report counts (most SQL clients leave
+   * RunBatchResponse counts unset) contribute 0 here.
+   */
+  val runMatchingCount: Long
+  val runScannedCount: Long
+
   val partitionProgressSnapshot: Map<String, PartitionCursor>
 
   val batchesToRunSnapshot: List<BatchSnapshot>

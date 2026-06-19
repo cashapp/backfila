@@ -29,6 +29,8 @@ public abstract interface class app/cash/backfila/embedded/BackfillRun {
 	public abstract fun getPrepareBackfillResponse ()Lapp/cash/backfila/protos/clientservice/PrepareBackfillResponse;
 	public abstract fun getRangeEnd ()Ljava/lang/String;
 	public abstract fun getRangeStart ()Ljava/lang/String;
+	public abstract fun getRunMatchingCount ()J
+	public abstract fun getRunScannedCount ()J
 	public abstract fun getScanSize ()J
 	public abstract fun partitionScan (Ljava/lang/String;)Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeResponse;
 	public abstract fun precomputeRemaining ()V

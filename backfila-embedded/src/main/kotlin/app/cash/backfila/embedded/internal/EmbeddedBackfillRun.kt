@@ -41,6 +41,8 @@ internal class EmbeddedBackfillRun<B : Backfill>(
   private val precomputeProgress: Map<String, MutablePartitionCursor>
   override var precomputeMatchingCount: Long = 0L
   override var precomputeScannedCount: Long = 0L
+  override var runMatchingCount: Long = 0L
+  override var runScannedCount: Long = 0L
 
   private val scanProgress: Map<String, MutablePartitionCursor>
   override val partitionProgressSnapshot: Map<String, PartitionCursor>
@@ -179,6 +181,8 @@ internal class EmbeddedBackfillRun<B : Backfill>(
       check(response.exception_stack_trace == null) {
         "RunBatch returned stack trace: ${response.exception_stack_trace}"
       }
+      runMatchingCount += response.matching_record_count ?: 0L
+      runScannedCount += response.scanned_record_count ?: 0L
       if (response.remaining_batch_range != null) {
         remainingRange = response.remaining_batch_range
       }

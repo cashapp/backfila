@@ -601,12 +601,16 @@ public final class app/cash/backfila/protos/clientservice/RunBatchResponse : com
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field DEFAULT_BACKOFF_MS Ljava/lang/Long;
 	public static final field DEFAULT_EXCEPTION_STACK_TRACE Ljava/lang/String;
+	public static final field DEFAULT_MATCHING_RECORD_COUNT Ljava/lang/Long;
+	public static final field DEFAULT_SCANNED_RECORD_COUNT Ljava/lang/Long;
 	public final field backoff_ms Ljava/lang/Long;
 	public final field exception_stack_trace Ljava/lang/String;
+	public final field matching_record_count Ljava/lang/Long;
 	public final field pipelined_data Lapp/cash/backfila/protos/clientservice/PipelinedData;
 	public final field remaining_batch_range Lapp/cash/backfila/protos/clientservice/KeyRange;
-	public fun <init> (Ljava/lang/Long;Lapp/cash/backfila/protos/clientservice/PipelinedData;Ljava/lang/String;Lapp/cash/backfila/protos/clientservice/KeyRange;)V
-	public fun <init> (Ljava/lang/Long;Lapp/cash/backfila/protos/clientservice/PipelinedData;Ljava/lang/String;Lapp/cash/backfila/protos/clientservice/KeyRange;Lokio/ByteString;)V
+	public final field scanned_record_count Ljava/lang/Long;
+	public fun <init> (Ljava/lang/Long;Lapp/cash/backfila/protos/clientservice/PipelinedData;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lapp/cash/backfila/protos/clientservice/KeyRange;)V
+	public fun <init> (Ljava/lang/Long;Lapp/cash/backfila/protos/clientservice/PipelinedData;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lapp/cash/backfila/protos/clientservice/KeyRange;Lokio/ByteString;)V
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public fun newBuilder ()Lapp/cash/backfila/protos/clientservice/RunBatchResponse$Builder;
@@ -617,15 +621,19 @@ public final class app/cash/backfila/protos/clientservice/RunBatchResponse : com
 public final class app/cash/backfila/protos/clientservice/RunBatchResponse$Builder : com/squareup/wire/Message$Builder {
 	public field backoff_ms Ljava/lang/Long;
 	public field exception_stack_trace Ljava/lang/String;
+	public field matching_record_count Ljava/lang/Long;
 	public field pipelined_data Lapp/cash/backfila/protos/clientservice/PipelinedData;
 	public field remaining_batch_range Lapp/cash/backfila/protos/clientservice/KeyRange;
+	public field scanned_record_count Ljava/lang/Long;
 	public fun <init> ()V
 	public fun backoff_ms (Ljava/lang/Long;)Lapp/cash/backfila/protos/clientservice/RunBatchResponse$Builder;
 	public fun build ()Lapp/cash/backfila/protos/clientservice/RunBatchResponse;
 	public synthetic fun build ()Lcom/squareup/wire/Message;
 	public fun exception_stack_trace (Ljava/lang/String;)Lapp/cash/backfila/protos/clientservice/RunBatchResponse$Builder;
+	public fun matching_record_count (Ljava/lang/Long;)Lapp/cash/backfila/protos/clientservice/RunBatchResponse$Builder;
 	public fun pipelined_data (Lapp/cash/backfila/protos/clientservice/PipelinedData;)Lapp/cash/backfila/protos/clientservice/RunBatchResponse$Builder;
 	public fun remaining_batch_range (Lapp/cash/backfila/protos/clientservice/KeyRange;)Lapp/cash/backfila/protos/clientservice/RunBatchResponse$Builder;
+	public fun scanned_record_count (Ljava/lang/Long;)Lapp/cash/backfila/protos/clientservice/RunBatchResponse$Builder;
 }
 
 public final class app/cash/backfila/protos/service/CheckBackfillStatusRequest : com/squareup/wire/Message {
