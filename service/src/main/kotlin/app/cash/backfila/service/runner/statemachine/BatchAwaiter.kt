@@ -79,6 +79,16 @@ class BatchAwaiter(
             // purposes of resetting the count of consecutive failures.
             backfillRunner.onRpcSuccess()
 
+            // If the client reported real counts for this partial chunk, record them now. Each RPC
+            // of a split batch carries only the records it processed, so we must accumulate per-RPC
+            // rather than waiting for the final RPC (which only knows about its own chunk).
+            if (response.matching_record_count != null || response.scanned_record_count != null) {
+              incCompletedRecordMetrics(
+                response.matching_record_count ?: 0L,
+                response.scanned_record_count ?: 0L,
+              )
+            }
+
             // We have a remaining_batch_range, continue the batch.
             remainingBatch = initialBatch.newBuilder()
               .batch_range(response.remaining_batch_range)
@@ -94,12 +104,21 @@ class BatchAwaiter(
 
             backfillRunner.factory.metrics.runBatchSuccesses
               .labels(*backfillRunner.metricLabels).inc()
-            backfillRunner.factory.metrics.runBatchCompletedRecordsMatching
-              .labels(*backfillRunner.metricLabels)
-              .inc(initialBatch.matching_record_count.toDouble())
-            backfillRunner.factory.metrics.runBatchCompletedRecordsScanned
-              .labels(*backfillRunner.metricLabels)
-              .inc(initialBatch.scanned_record_count.toDouble())
+            // Prefer the real counts reported by the client; fall back to the GetNextBatchRange
+            // estimate for clients that don't report them. Only metrics consume the actuals — the
+            // persisted backfilled_*_record_count, rate counters, and ETA below stay on the estimate
+            // so their units remain consistent with the precomputed (computed_*) totals.
+            if (response.matching_record_count != null || response.scanned_record_count != null) {
+              incCompletedRecordMetrics(
+                response.matching_record_count ?: 0L,
+                response.scanned_record_count ?: 0L,
+              )
+            } else {
+              incCompletedRecordMetrics(
+                initialBatch.matching_record_count,
+                initialBatch.scanned_record_count,
+              )
+            }
             backfillRunner.onRpcSuccess()
 
             matchingRateCounter.add(initialBatch.matching_record_count)
@@ -214,6 +233,15 @@ class BatchAwaiter(
     if (runComplete) {
       backfillRunner.factory.backfillRunListeners.forEach { it.runCompleted(backfillRunner.backfillRunId) }
     }
+  }
+
+  private fun incCompletedRecordMetrics(matching: Long, scanned: Long) {
+    backfillRunner.factory.metrics.runBatchCompletedRecordsMatching
+      .labels(*backfillRunner.metricLabels)
+      .inc(matching.toDouble())
+    backfillRunner.factory.metrics.runBatchCompletedRecordsScanned
+      .labels(*backfillRunner.metricLabels)
+      .inc(scanned.toDouble())
   }
 
   fun updateProgress(dbRunPartition: DbRunPartition) {

@@ -118,6 +118,14 @@ message RunBatchResponse {
   // If this is provided this batch request is assumed to have failed.
   optional string exception_stack_trace = 3;
 
+  // Actual number of records scanned and matched while processing this RunBatch call. These are
+  // optional: clients that cannot cheaply count up front (e.g. the DynamoDB clients) can report the
+  // real counts here after scanning, while clients that don't populate them leave them unset and the
+  // service falls back to the GetNextBatchRange estimate. When a batch is split across multiple RPCs
+  // via remaining_batch_range, each RPC reports only the records it processed in that call.
+  optional uint64 scanned_record_count = 4;
+  optional uint64 matching_record_count = 5;
+
   // Provided data from the backfila client telling backfila what part of the batch was not
   // completed yet. Backfila will end up resuming with a new request containing either the remaining
   // range or the original range.

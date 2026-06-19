@@ -32,6 +32,11 @@ class DynamoDbFilteringTest {
     val run = backfila.createWetRun<FilteredMakeTracksExplicitBackfill>()
     run.execute()
     assertThat(run.backfill.nonTrackCount).isEqualTo(5)
+
+    // Without a DynamoDB filter expression everything is scanned and everything matches, so the
+    // reported matching/scanned counts are equal (the 5 album rows + 57 track rows).
+    assertThat(run.runScannedCount).isEqualTo(62)
+    assertThat(run.runMatchingCount).isEqualTo(62)
   }
 
   @Test
@@ -42,6 +47,11 @@ class DynamoDbFilteringTest {
     val run = backfila.createWetRun<DynamoFilterMakeTracksExplicitBackfill>()
     run.execute()
     assertThat(run.backfill.nonTrackCount).isEqualTo(0)
+
+    // The DynamoDB filter still scans every row but only the 57 track rows match, so the reported
+    // counts reflect the real sparseness (57 matching of 62 scanned).
+    assertThat(run.runScannedCount).isEqualTo(62)
+    assertThat(run.runMatchingCount).isEqualTo(57)
   }
 
   @Test
