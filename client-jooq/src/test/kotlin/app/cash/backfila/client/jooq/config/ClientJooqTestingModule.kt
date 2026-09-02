@@ -88,6 +88,7 @@ class ClientJooqTestingModule : KAbstractModule() {
     // Registers all your backfills here
     install(JooqBackfillModule.create<JooqMenuTestBackfill>())
     install(JooqBackfillModule.create<JooqWidgetCompoundKeyBackfill>())
+    install(JooqBackfillModule.create<JooqExpressionKeyBackfill>())
   }
 
   private fun dslContext(

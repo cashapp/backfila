@@ -4,6 +4,7 @@ import app.cash.backfila.client.jooq.config.ClientJooqTestingModule
 import app.cash.backfila.client.jooq.config.CompoundKey
 import app.cash.backfila.client.jooq.config.IdRecorder
 import app.cash.backfila.client.jooq.config.JooqDBIdentifier
+import app.cash.backfila.client.jooq.config.JooqExpressionKeyBackfill
 import app.cash.backfila.client.jooq.config.JooqMenuTestBackfill
 import app.cash.backfila.client.jooq.config.JooqTransacter
 import app.cash.backfila.client.jooq.config.JooqWidgetCompoundKeyBackfill
@@ -193,6 +194,42 @@ class MiskJooqBackfillTests {
     testingAssertThat(run).isComplete()
     assertThat(run.backfill.idsRanDry).containsExactlyElementsOf(backfillRowKeys)
     assertThat(run.backfill.idsRanWet).isEmpty()
+  }
+
+  @Test
+  fun expressionKeyFieldsScanInWindows() {
+    val matchingPositions = listOf(0, 1, 8, 11)
+    val rawKeys = transacter.transaction("expressionKeyFieldsScanInWindows") { session ->
+      (0 until 12).map { position ->
+        session.newRecord(MENU)
+          .apply {
+            name = if (position in matchingPositions) "chicken" else "beef"
+          }.let {
+            it.store()
+            it.id!!
+          }
+      }
+    }
+    val expectedMatchingKeys = matchingPositions.map(rawKeys::get)
+    val run = backfila.createDryRun(
+      JooqExpressionKeyBackfill::class,
+      emptyMap(),
+      null,
+      null,
+    ).apply {
+      batchSize = 2
+      scanSize = 4
+      computeCountLimit = 10
+    }
+
+    val batches = run.singleScan().batches
+
+    assertThat(batches).allMatch { it.scanned_record_count <= run.scanSize }
+
+    run.scanRemaining()
+    run.runAllScanned()
+
+    assertThat(run.backfill.idsRanDry).containsExactlyElementsOf(expectedMatchingKeys)
   }
 
   @Test

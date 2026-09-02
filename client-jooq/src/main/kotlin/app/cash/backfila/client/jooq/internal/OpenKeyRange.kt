@@ -183,19 +183,22 @@ data class OpenKeyRange<K>(
      * This is so that we can restrict the upper bound when the filter is applied subsequently.
      * If we don't restrict the range, then the query could perform badly.
      *
-     * This SQL is essentially going to look like
+     * The bound is the `scan_size`th row of the window:
      * <pre>
      * select <backfill fields>
-     *   from (
-     *      select <backfill fields>
-     *      from <backfill table>
-     *      where (backfill fields > end of previous range or >= start of backfill)
-     *      order by <backfill fields> asc
-     *      limit <scan size>
-     *      )
-     *  order by <backfill fields> desc
-     *  limit 1
+     *   from <backfill table>
+     *  where (backfill fields > end of previous range or >= start of backfill)
+     *    and backfill fields <= end of the overall backfill range
+     *  order by <backfill fields> asc
+     *  limit 1 offset <scan size> - 1
      * </pre>
+     *
+     * A backfill's final window holds fewer than `scan_size` rows, so that returns nothing and we
+     * fall back to the largest key in the window.
+     *
+     * Both queries read the backfill's own key fields from its own table. Selecting them from a
+     * derived table instead would require resolving them by column name, which fails for key
+     * fields that are expressions rather than plain columns.
      */
     private fun <K> computeUpperBound(
       jooqBackfill: JooqBackfill<K, *>,
@@ -211,21 +214,21 @@ data class OpenKeyRange<K>(
           },
         )
       } ?: afterPrecedingRowsCondition
-      val scanWindow = session
+
+      fun selectBoundedWindow() = session
         .select(jooqBackfill.compoundKeyFields)
         .from(jooqBackfill.table)
         .where(boundedCondition)
-        .orderBy(jooqBackfill.sortingByCompoundKeyFields { it.asc() })
-        .limit(request.scan_size)
-        .asTable("scan_window")
-      val scanWindowFields = jooqBackfill.compoundKeyFields.map { field ->
-        checkNotNull(scanWindow.field(field))
-      }
 
-      return session
-        .select(scanWindowFields)
-        .from(scanWindow)
-        .orderBy(scanWindowFields.map { it.desc() })
+      val lastKeyOfFullWindow = selectBoundedWindow()
+        .orderBy(jooqBackfill.sortingByCompoundKeyFields { it.asc() })
+        .limit(1)
+        .offset(maxOf(request.scan_size - 1, 0))
+        .fetchOne { jooqBackfill.recordToKey(it) }
+      if (lastKeyOfFullWindow != null) return lastKeyOfFullWindow
+
+      return selectBoundedWindow()
+        .orderBy(jooqBackfill.sortingByCompoundKeyFields { it.desc() })
         .limit(1)
         .fetchOne { jooqBackfill.recordToKey(it) }
     }
