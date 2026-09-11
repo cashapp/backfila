@@ -13,6 +13,9 @@ class SqlDelightRecordSource<K : Any, R : Any>(
 ) {
   val keyEncoder = recordSourceQueries.keyEncoder
 
+  private fun <T> execute(block: () -> T): T =
+    recordSourceQueries.allowScatterDriver?.allowingScatter(block) ?: block()
+
   fun validateRange(range: KeyRange) {
     range.validate(keyEncoder)
   }
@@ -22,7 +25,7 @@ class SqlDelightRecordSource<K : Any, R : Any>(
       return requestedRange
     }
 
-    val minMax = recordSourceQueries.selectAbsoluteRange().executeAsOneOrNull()
+    val minMax = execute { recordSourceQueries.selectAbsoluteRange().executeAsOneOrNull() }
     return if (minMax?.min == null && minMax?.max == null) {
       // Both are null so it is an empty table, no work to do for this partition.
       KeyRange.Builder().build()
@@ -60,9 +63,9 @@ class SqlDelightRecordSource<K : Any, R : Any>(
       if (batchBoundingMax == null) {
         val stopwatch = Stopwatch.createStarted()
         batchBoundingMax = if (previousEndKey == null) {
-          recordSourceQueries.selectInitialMaxBound(rangeStart, rangeEnd, scanSize).executeAsOne().key
+          execute { recordSourceQueries.selectInitialMaxBound(rangeStart, rangeEnd, scanSize).executeAsOne().key }
         } else {
-          recordSourceQueries.selectNextMaxBound(previousEndKey!!, rangeEnd, scanSize).executeAsOne().key
+          execute { recordSourceQueries.selectNextMaxBound(previousEndKey!!, rangeEnd, scanSize).executeAsOne().key }
         }
 
         if (batchBoundingMax == null) {
@@ -97,9 +100,9 @@ class SqlDelightRecordSource<K : Any, R : Any>(
         // Now that we have a bound, this query can find criteria-matching batches without
         // becoming a long-running query.
         if (previousEndKey == null) {
-          recordSourceQueries.produceInitialBatchFromRange(rangeStart, batchBoundingMax, batchSize - 1).executeAsOneOrNull()
+          execute { recordSourceQueries.produceInitialBatchFromRange(rangeStart, batchBoundingMax, batchSize - 1).executeAsOneOrNull() }
         } else {
-          recordSourceQueries.produceNextBatchFromRange(previousEndKey!!, batchBoundingMax, batchSize - 1).executeAsOneOrNull()
+          execute { recordSourceQueries.produceNextBatchFromRange(previousEndKey!!, batchBoundingMax, batchSize - 1).executeAsOneOrNull() }
         }
       }
 
@@ -108,9 +111,9 @@ class SqlDelightRecordSource<K : Any, R : Any>(
       if (batchEndPkey == null) {
         // Less than batchSize matches, so return the end of the scan size and count the matches.
         matchingCount = if (previousEndKey == null) {
-          recordSourceQueries.countInitialBatchMatches(rangeStart, batchBoundingMax).executeAsOne().toLong()
+          execute { recordSourceQueries.countInitialBatchMatches(rangeStart, batchBoundingMax).executeAsOne().toLong() }
         } else {
-          recordSourceQueries.countNextBatchMatches(previousEndKey!!, batchBoundingMax).executeAsOne().toLong()
+          execute { recordSourceQueries.countNextBatchMatches(previousEndKey!!, batchBoundingMax).executeAsOne().toLong() }
         }
         end = batchBoundingMax
       } else {
@@ -121,9 +124,9 @@ class SqlDelightRecordSource<K : Any, R : Any>(
 
       // Get start pkey and scanned record count for this batch.
       val result = if (previousEndKey == null) {
-        recordSourceQueries.getInitialStartKeyAndScanCount(rangeStart, end).executeAsOne()
+        execute { recordSourceQueries.getInitialStartKeyAndScanCount(rangeStart, end).executeAsOne() }
       } else {
-        recordSourceQueries.getNextStartKeyAndScanCount(previousEndKey!!, end).executeAsOne()
+        execute { recordSourceQueries.getNextStartKeyAndScanCount(previousEndKey!!, end).executeAsOne() }
       }
       require(result.min != null) {
         "getInitialStartKeyAndScanCount or getNextStartKeyAndScanCount query failed to return a min and/or count. result: $result"
@@ -150,7 +153,7 @@ class SqlDelightRecordSource<K : Any, R : Any>(
     // TODO create a transaction and deal with sharding.
     val start = keyEncoder.decode(request.batch_range.start)
     val end = keyEncoder.decode(request.batch_range.end)
-    return recordSourceQueries.getBatch(start, end).executeAsList()
+    return execute { recordSourceQueries.getBatch(start, end).executeAsList() }
   }
 }
 

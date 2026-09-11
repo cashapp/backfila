@@ -100,6 +100,7 @@ abstract class BackfilaSqlDelightExtension {
     recordColumns: String,
     recordType: String,
     whereClause: String = "1 = 1",
+    allowScatter: Boolean = false,
   ) {
     backfills.create(name) {
       it.backfill.set(
@@ -113,6 +114,7 @@ abstract class BackfilaSqlDelightExtension {
           recordColumns = recordColumns,
           recordType = recordType,
           whereClause = whereClause,
+          allowScatter = allowScatter,
         ),
       )
     }
@@ -142,4 +144,6 @@ data class SqlDelightRecordSource(
   val recordType: String, // TODO: Get this information directly from SQLDelight
   // The additional where clause is optional.
   val whereClause: String,
+  // Whether this record source opts in to Vitess scatter queries at execution time.
+  val allowScatter: Boolean = false,
 ) : Serializable

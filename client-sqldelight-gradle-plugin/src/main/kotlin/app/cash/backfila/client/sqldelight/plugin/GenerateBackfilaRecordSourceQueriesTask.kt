@@ -44,6 +44,7 @@ abstract class GenerateBackfilaRecordSourceQueriesTask : DefaultTask() {
     val keyEncoderType = ClassName("app.cash.backfila.client.sqldelight", "KeyEncoder")
       .parameterizedBy(keyType)
     val myKeyEncoderType = ClassName.bestGuess(backfillConfig.keyEncoder)
+    val allowScatterDriverType = ClassName("app.cash.backfila.client.sqldelight", "AllowScatterSqlDriver")
 
     val parameterizedRecordType = ClassName("app.cash.backfila.client.sqldelight", "SqlDelightRecordSourceConfig")
       .parameterizedBy(keyType, ClassName.bestGuess(backfillConfig.recordType))
@@ -72,12 +73,23 @@ abstract class GenerateBackfilaRecordSourceQueriesTask : DefaultTask() {
           .primaryConstructor(
             FunSpec.constructorBuilder()
               .addParameter("database", databaseType)
+              .apply {
+                if (backfillConfig.allowScatter) addParameter("allowScatterDriver", allowScatterDriverType)
+              }
               .build(),
           ).addProperty(
             PropertySpec.builder("database", databaseType, PRIVATE)
               .initializer("database")
               .build(),
-          ).addProperty(
+          ).apply {
+            if (backfillConfig.allowScatter) {
+              addProperty(
+                PropertySpec.builder("allowScatterDriver", allowScatterDriverType, OVERRIDE)
+                  .initializer("allowScatterDriver")
+                  .build(),
+              )
+            }
+          }.addProperty(
             PropertySpec.builder("keyEncoder", keyEncoderType, OVERRIDE)
               .initializer("%T", myKeyEncoderType)
               .build(),

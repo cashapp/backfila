@@ -1,3 +1,15 @@
+public final class app/cash/backfila/client/sqldelight/AllowScatterSqlDriver : app/cash/sqldelight/db/SqlDriver {
+	public fun <init> (Lapp/cash/sqldelight/db/SqlDriver;)V
+	public fun addListener ([Ljava/lang/String;Lapp/cash/sqldelight/Query$Listener;)V
+	public fun close ()V
+	public fun currentTransaction ()Lapp/cash/sqldelight/Transacter$Transaction;
+	public fun execute (Ljava/lang/Integer;Ljava/lang/String;ILkotlin/jvm/functions/Function1;)Lapp/cash/sqldelight/db/QueryResult;
+	public fun executeQuery (Ljava/lang/Integer;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/functions/Function1;)Lapp/cash/sqldelight/db/QueryResult;
+	public fun newTransaction ()Lapp/cash/sqldelight/db/QueryResult;
+	public fun notifyListeners ([Ljava/lang/String;)V
+	public fun removeListener ([Ljava/lang/String;Lapp/cash/sqldelight/Query$Listener;)V
+}
+
 public abstract interface annotation class app/cash/backfila/client/sqldelight/ForSqlDelightBackend : java/lang/annotation/Annotation {
 }
 
@@ -83,6 +95,7 @@ public abstract interface class app/cash/backfila/client/sqldelight/SqlDelightRe
 	public static final field Companion Lapp/cash/backfila/client/sqldelight/SqlDelightRecordSourceConfig$Companion;
 	public abstract fun countInitialBatchMatches (Ljava/lang/Object;Ljava/lang/Object;)Lapp/cash/sqldelight/Query;
 	public abstract fun countNextBatchMatches (Ljava/lang/Object;Ljava/lang/Object;)Lapp/cash/sqldelight/Query;
+	public fun getAllowScatterDriver ()Lapp/cash/backfila/client/sqldelight/AllowScatterSqlDriver;
 	public abstract fun getBatch (Ljava/lang/Object;Ljava/lang/Object;)Lapp/cash/sqldelight/Query;
 	public abstract fun getInitialStartKeyAndScanCount (Ljava/lang/Object;Ljava/lang/Object;)Lapp/cash/sqldelight/Query;
 	public abstract fun getKeyEncoder ()Lapp/cash/backfila/client/sqldelight/KeyEncoder;
@@ -96,6 +109,10 @@ public abstract interface class app/cash/backfila/client/sqldelight/SqlDelightRe
 
 public final class app/cash/backfila/client/sqldelight/SqlDelightRecordSourceConfig$Companion {
 	public final fun create (Lapp/cash/backfila/client/sqldelight/KeyEncoder;Lapp/cash/sqldelight/Query;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)Lapp/cash/backfila/client/sqldelight/SqlDelightRecordSourceConfig;
+}
+
+public final class app/cash/backfila/client/sqldelight/SqlDelightRecordSourceConfig$DefaultImpls {
+	public static fun getAllowScatterDriver (Lapp/cash/backfila/client/sqldelight/SqlDelightRecordSourceConfig;)Lapp/cash/backfila/client/sqldelight/AllowScatterSqlDriver;
 }
 
 public final class app/cash/backfila/client/sqldelight/StringKeyEncoder : app/cash/backfila/client/sqldelight/KeyEncoder {
