@@ -4,10 +4,6 @@ import app.cash.sqldelight.Query
 
 interface SqlDelightRecordSourceConfig<K : Any, R : Any> {
   val keyEncoder: KeyEncoder<K>
-
-  /** Driver used by this SQLDelight database when its Backfila queries should carry Vitess's `ALLOW_SCATTER` hint. */
-  val allowScatterDriver: AllowScatterSqlDriver?
-    get() = null
   fun selectAbsoluteRange(): Query<MinMax<K>>
   fun selectInitialMaxBound(rangeStart: K, rangeEnd: K, scanSize: Long): Query<NullKeyContainer<K>>
   fun selectNextMaxBound(previousEndKey: K, rangeEnd: K, scanSize: Long): Query<NullKeyContainer<K>>

@@ -31,14 +31,6 @@ class BackfilaSqlDelightGradlePluginTest {
     val result = createRunner(projectDir, "clean", taskName).build()
     assertThat(SUCCESS_OUTCOMES)
       .contains(result.task(taskName)!!.outcome)
-
-    val generatedConfig =
-      File(
-        projectDir,
-        "lib/build/backfilaSqlDelight/hockeyPlayerNumbers/kotlin/app/cash/backfila/client/sqldelight/hockeydata/HockeyPlayerNumbersRecordSourceConfig.kt",
-      ).readText()
-    assertThat(generatedConfig).contains("allowScatterDriver: AllowScatterSqlDriver")
-    assertThat(generatedConfig).contains("override val allowScatterDriver: AllowScatterSqlDriver")
   }
 
   private fun createRunner(

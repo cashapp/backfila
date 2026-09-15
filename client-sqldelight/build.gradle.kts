@@ -32,9 +32,8 @@ dependencies {
   implementation(project(":client-base"))
 
   testImplementation(libs.assertj)
-  testImplementation(libs.junitApi)
   testImplementation(libs.junitEngine)
-  testRuntimeOnly(libs.junitPlatformLauncher)
+  testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.14.4")
 }
 
 configure<MavenPublishBaseExtension> {

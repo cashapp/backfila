@@ -49,8 +49,7 @@ backfilaSqlDelight {
     keyType = "kotlin.Int",
     keyEncoder = "app.cash.backfila.client.sqldelight.IntKeyEncoder",
     recordColumns = "player_number, full_name",
-    recordType = "app.cash.backfila.client.sqldelight.hockeydata.HockeyPlayerNumbersGetBatch",
-    allowScatter = true
+    recordType = "app.cash.backfila.client.sqldelight.hockeydata.HockeyPlayerNumbersGetBatch"
   )
 }
 

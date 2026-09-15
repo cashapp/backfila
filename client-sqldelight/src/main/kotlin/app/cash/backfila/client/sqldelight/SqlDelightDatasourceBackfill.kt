@@ -12,7 +12,10 @@ import app.cash.backfila.client.PrepareBackfillConfig
  */
 abstract class SqlDelightDatasourceBackfill<K : Any, R : Any, P : Any>(
   val recordSourceConfig: SqlDelightRecordSourceConfig<K, R>,
+  val queryInterceptor: SqlDelightQueryInterceptor,
 ) : Backfill {
+  constructor(recordSourceConfig: SqlDelightRecordSourceConfig<K, R>) :
+    this(recordSourceConfig, SqlDelightQueryInterceptor.NONE)
 
   /**
    * Override this and throw an exception to prevent the backfill from being created.

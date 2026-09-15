@@ -9,22 +9,26 @@ import app.cash.sqldelight.db.SqlPreparedStatement
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class AllowScatterSqlDriverTest {
+class ScopedSqlDriverInterceptorTest {
   @Test
-  fun `adds hint only within allowingScatter scope`() {
+  fun `transforms SQL only within intercept scope`() {
     val delegate = RecordingSqlDriver()
-    val driver = AllowScatterSqlDriver(delegate)
+    val driver = ScopedSqlDriverInterceptor(delegate) { sql -> "$sql /* transformed */" }
 
     driver.executeQuery(null, "SELECT 1", { QueryResult.Value(Unit) }, 0, null)
-    driver.allowingScatter {
-      driver.executeQuery(null, "  select 2", { QueryResult.Value(Unit) }, 0, null)
+    driver.intercept {
+      driver.executeQuery(null, "SELECT 2", { QueryResult.Value(Unit) }, 0, null)
+      driver.intercept {
+        driver.executeQuery(null, "SELECT 3", { QueryResult.Value(Unit) }, 0, null)
+      }
     }
-    driver.executeQuery(null, "SELECT 3", { QueryResult.Value(Unit) }, 0, null)
+    driver.executeQuery(null, "SELECT 4", { QueryResult.Value(Unit) }, 0, null)
 
     assertThat(delegate.sql).containsExactly(
       "SELECT 1",
-      "  select /*vt+ ALLOW_SCATTER */ 2",
-      "SELECT 3",
+      "SELECT 2 /* transformed */",
+      "SELECT 3 /* transformed */",
+      "SELECT 4",
     )
   }
 

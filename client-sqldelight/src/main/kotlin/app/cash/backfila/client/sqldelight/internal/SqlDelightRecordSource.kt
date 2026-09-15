@@ -1,6 +1,7 @@
 package app.cash.backfila.client.sqldelight.internal
 
 import app.cash.backfila.client.sqldelight.KeyEncoder
+import app.cash.backfila.client.sqldelight.SqlDelightQueryInterceptor
 import app.cash.backfila.client.sqldelight.SqlDelightRecordSourceConfig
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeRequest
 import app.cash.backfila.protos.clientservice.GetNextBatchRangeResponse.Batch
@@ -10,11 +11,14 @@ import com.google.common.base.Stopwatch
 
 class SqlDelightRecordSource<K : Any, R : Any>(
   private val recordSourceQueries: SqlDelightRecordSourceConfig<K, R>,
+  private val queryInterceptor: SqlDelightQueryInterceptor,
 ) {
+  constructor(recordSourceQueries: SqlDelightRecordSourceConfig<K, R>) :
+    this(recordSourceQueries, SqlDelightQueryInterceptor.NONE)
+
   val keyEncoder = recordSourceQueries.keyEncoder
 
-  private fun <T> execute(block: () -> T): T =
-    recordSourceQueries.allowScatterDriver?.allowingScatter(block) ?: block()
+  private fun <T> execute(block: () -> T): T = queryInterceptor.intercept(block)
 
   fun validateRange(range: KeyRange) {
     range.validate(keyEncoder)

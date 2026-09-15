@@ -1,15 +1,3 @@
-public final class app/cash/backfila/client/sqldelight/AllowScatterSqlDriver : app/cash/sqldelight/db/SqlDriver {
-	public fun <init> (Lapp/cash/sqldelight/db/SqlDriver;)V
-	public fun addListener ([Ljava/lang/String;Lapp/cash/sqldelight/Query$Listener;)V
-	public fun close ()V
-	public fun currentTransaction ()Lapp/cash/sqldelight/Transacter$Transaction;
-	public fun execute (Ljava/lang/Integer;Ljava/lang/String;ILkotlin/jvm/functions/Function1;)Lapp/cash/sqldelight/db/QueryResult;
-	public fun executeQuery (Ljava/lang/Integer;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/functions/Function1;)Lapp/cash/sqldelight/db/QueryResult;
-	public fun newTransaction ()Lapp/cash/sqldelight/db/QueryResult;
-	public fun notifyListeners ([Ljava/lang/String;)V
-	public fun removeListener ([Ljava/lang/String;Lapp/cash/sqldelight/Query$Listener;)V
-}
-
 public abstract interface annotation class app/cash/backfila/client/sqldelight/ForSqlDelightBackend : java/lang/annotation/Annotation {
 }
 
@@ -71,8 +59,23 @@ public final class app/cash/backfila/client/sqldelight/NullKeyContainer {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class app/cash/backfila/client/sqldelight/ScopedSqlDriverInterceptor : app/cash/backfila/client/sqldelight/SqlDelightQueryInterceptor, app/cash/sqldelight/db/SqlDriver {
+	public fun <init> (Lapp/cash/sqldelight/db/SqlDriver;Lkotlin/jvm/functions/Function1;)V
+	public fun addListener ([Ljava/lang/String;Lapp/cash/sqldelight/Query$Listener;)V
+	public fun close ()V
+	public fun currentTransaction ()Lapp/cash/sqldelight/Transacter$Transaction;
+	public fun execute (Ljava/lang/Integer;Ljava/lang/String;ILkotlin/jvm/functions/Function1;)Lapp/cash/sqldelight/db/QueryResult;
+	public fun executeQuery (Ljava/lang/Integer;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/functions/Function1;)Lapp/cash/sqldelight/db/QueryResult;
+	public fun intercept (Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public fun newTransaction ()Lapp/cash/sqldelight/db/QueryResult;
+	public fun notifyListeners ([Ljava/lang/String;)V
+	public fun removeListener ([Ljava/lang/String;Lapp/cash/sqldelight/Query$Listener;)V
+}
+
 public abstract class app/cash/backfila/client/sqldelight/SqlDelightDatasourceBackfill : app/cash/backfila/client/Backfill {
 	public fun <init> (Lapp/cash/backfila/client/sqldelight/SqlDelightRecordSourceConfig;)V
+	public fun <init> (Lapp/cash/backfila/client/sqldelight/SqlDelightRecordSourceConfig;Lapp/cash/backfila/client/sqldelight/SqlDelightQueryInterceptor;)V
+	public final fun getQueryInterceptor ()Lapp/cash/backfila/client/sqldelight/SqlDelightQueryInterceptor;
 	public final fun getRecordSourceConfig ()Lapp/cash/backfila/client/sqldelight/SqlDelightRecordSourceConfig;
 	public fun runBatch (Ljava/util/List;Lapp/cash/backfila/client/BackfillConfig;)V
 	public fun runOne (Ljava/lang/Object;Lapp/cash/backfila/client/BackfillConfig;)V
@@ -91,11 +94,19 @@ public final class app/cash/backfila/client/sqldelight/SqlDelightDatasourceBackf
 	public final fun create (Lkotlin/reflect/KClass;)Lapp/cash/backfila/client/sqldelight/SqlDelightDatasourceBackfillModule;
 }
 
+public abstract interface class app/cash/backfila/client/sqldelight/SqlDelightQueryInterceptor {
+	public static final field Companion Lapp/cash/backfila/client/sqldelight/SqlDelightQueryInterceptor$Companion;
+	public static final field NONE Lapp/cash/backfila/client/sqldelight/SqlDelightQueryInterceptor;
+	public abstract fun intercept (Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+}
+
+public final class app/cash/backfila/client/sqldelight/SqlDelightQueryInterceptor$Companion {
+}
+
 public abstract interface class app/cash/backfila/client/sqldelight/SqlDelightRecordSourceConfig {
 	public static final field Companion Lapp/cash/backfila/client/sqldelight/SqlDelightRecordSourceConfig$Companion;
 	public abstract fun countInitialBatchMatches (Ljava/lang/Object;Ljava/lang/Object;)Lapp/cash/sqldelight/Query;
 	public abstract fun countNextBatchMatches (Ljava/lang/Object;Ljava/lang/Object;)Lapp/cash/sqldelight/Query;
-	public fun getAllowScatterDriver ()Lapp/cash/backfila/client/sqldelight/AllowScatterSqlDriver;
 	public abstract fun getBatch (Ljava/lang/Object;Ljava/lang/Object;)Lapp/cash/sqldelight/Query;
 	public abstract fun getInitialStartKeyAndScanCount (Ljava/lang/Object;Ljava/lang/Object;)Lapp/cash/sqldelight/Query;
 	public abstract fun getKeyEncoder ()Lapp/cash/backfila/client/sqldelight/KeyEncoder;
@@ -109,10 +120,6 @@ public abstract interface class app/cash/backfila/client/sqldelight/SqlDelightRe
 
 public final class app/cash/backfila/client/sqldelight/SqlDelightRecordSourceConfig$Companion {
 	public final fun create (Lapp/cash/backfila/client/sqldelight/KeyEncoder;Lapp/cash/sqldelight/Query;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)Lapp/cash/backfila/client/sqldelight/SqlDelightRecordSourceConfig;
-}
-
-public final class app/cash/backfila/client/sqldelight/SqlDelightRecordSourceConfig$DefaultImpls {
-	public static fun getAllowScatterDriver (Lapp/cash/backfila/client/sqldelight/SqlDelightRecordSourceConfig;)Lapp/cash/backfila/client/sqldelight/AllowScatterSqlDriver;
 }
 
 public final class app/cash/backfila/client/sqldelight/StringKeyEncoder : app/cash/backfila/client/sqldelight/KeyEncoder {
@@ -141,6 +148,7 @@ public final class app/cash/backfila/client/sqldelight/internal/SqlDelightDataso
 
 public final class app/cash/backfila/client/sqldelight/internal/SqlDelightRecordSource {
 	public fun <init> (Lapp/cash/backfila/client/sqldelight/SqlDelightRecordSourceConfig;)V
+	public fun <init> (Lapp/cash/backfila/client/sqldelight/SqlDelightRecordSourceConfig;Lapp/cash/backfila/client/sqldelight/SqlDelightQueryInterceptor;)V
 	public final fun computeOverallRange (Lapp/cash/backfila/protos/clientservice/KeyRange;)Lapp/cash/backfila/protos/clientservice/KeyRange;
 	public final fun getBatchData (Lapp/cash/backfila/protos/clientservice/RunBatchRequest;)Ljava/util/List;
 	public final fun getBatchGenerator (Lapp/cash/backfila/protos/clientservice/GetNextBatchRangeRequest;)Lapp/cash/backfila/client/sqldelight/internal/SqlDelightRecordSource$BatchGenerator;
