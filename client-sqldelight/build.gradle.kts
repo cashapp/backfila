@@ -30,6 +30,10 @@ dependencies {
   api(project(":client"))
   // We do not want to leak client-base implementation details to customers.
   implementation(project(":client-base"))
+
+  testImplementation(libs.assertj)
+  testImplementation(libs.junitEngine)
+  testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.14.4")
 }
 
 configure<MavenPublishBaseExtension> {

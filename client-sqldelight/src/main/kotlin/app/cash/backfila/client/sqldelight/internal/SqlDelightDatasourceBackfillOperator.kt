@@ -20,7 +20,7 @@ class SqlDelightDatasourceBackfillOperator<K : Any, R : Any, P : Any>(
   private val parametersOperator: BackfilaParametersOperator<P>,
 ) : BackfillOperator {
   private val recSourceConfig = backfill.recordSourceConfig
-  private val recordSource = SqlDelightRecordSource(recSourceConfig)
+  private val recordSource = SqlDelightRecordSource(recSourceConfig, backfill.queryInterceptor)
 
   override fun name(): String = backfill.javaClass.toString()
 
