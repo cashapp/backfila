@@ -13,8 +13,6 @@ import app.cash.backfila.protos.clientservice.RunBatchResponse
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
-import com.google.common.base.Stopwatch
-import java.time.Duration
 
 @Deprecated(
   message = "AWS V1 SDK is deprecated, use the `client-dynamodb-v2` client instead.",
@@ -113,44 +111,28 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
 
     val config = parametersOperator.constructBackfillConfig(request)
 
-    var lastEvaluatedKey: Map<String, AttributeValue>? = keyRange.lastEvaluatedKey
-
-    // Track the real counts the scan returns so we can report them back to Backfila. The scan result
-    // gives us these for free. See RunBatchResponse in client_service.proto.
-    var scannedRecordCount = 0L
-    var matchingRecordCount = 0L
-
-    val stopwatch = Stopwatch.createStarted()
-    do {
-      val scanRequest = DynamoDBScanExpression().apply {
-        segment = keyRange.start
-        totalSegments = keyRange.count
-        limit = request.batch_size.toInt()
-        if (lastEvaluatedKey != null) {
-          exclusiveStartKey = lastEvaluatedKey
-        }
-        this.filterExpression = backfill.filterExpression(config)
-        this.expressionAttributeValues = backfill.expressionAttributeValues(config)
-        this.expressionAttributeNames = backfill.expressionAttributeNames(config)
-        this.indexName = backfill.indexName(config)
+    val scanRequest = DynamoDBScanExpression().apply {
+      segment = keyRange.start
+      totalSegments = keyRange.count
+      limit = request.batch_size.toInt()
+      if (!keyRange.lastEvaluatedKey.isNullOrEmpty()) {
+        exclusiveStartKey = keyRange.lastEvaluatedKey
       }
-      val result = dynamoDb.scanPage(backfill.itemType.java, scanRequest)
+      this.filterExpression = backfill.filterExpression(config)
+      this.expressionAttributeValues = backfill.expressionAttributeValues(config)
+      this.expressionAttributeNames = backfill.expressionAttributeNames(config)
+      this.indexName = backfill.indexName(config)
+    }
 
-      // scannedCount is everything examined; count is what remained after filterExpression. With no
-      // filter the two are equal, which is the correct matching/scanned ratio of 1.0.
-      scannedRecordCount += result.scannedCount.toLong()
-      matchingRecordCount += result.count.toLong()
-
-      backfill.runBatch(result.results, config)
-      lastEvaluatedKey = result.lastEvaluatedKey
-      if (stopwatch.elapsed() > Duration.ofMillis(1_000L)) {
-        break
-      }
-    } while (lastEvaluatedKey != null)
+    // One scan bounds each RunBatch call by batch_size evaluated items, before filtering.
+    // Return the cursor even for an empty page so the next call can continue the segment.
+    val result = dynamoDb.scanPage(backfill.itemType.java, scanRequest)
+    backfill.runBatch(result.results, config)
+    val lastEvaluatedKey = result.lastEvaluatedKey?.takeIf { it.isNotEmpty() }
 
     return RunBatchResponse.Builder()
-      .scanned_record_count(scannedRecordCount)
-      .matching_record_count(matchingRecordCount)
+      .scanned_record_count(result.scannedCount.toLong())
+      .matching_record_count(result.count.toLong())
       .remaining_batch_range(lastEvaluatedKey?.toKeyRange(keyRange))
       .build()
   }

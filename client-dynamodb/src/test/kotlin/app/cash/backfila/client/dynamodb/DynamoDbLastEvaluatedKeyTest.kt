@@ -23,14 +23,13 @@ class DynamoDbLastEvaluatedKeyTest {
   @Inject lateinit var testData: DynamoMusicTableTestData
 
   @Test
-  fun `one big segment with one second batch execution time works`() {
+  fun `one big segment completes across scan pages`() {
     testData.addThriller()
 
-    // Pause so at most two dynamo batches run per runBatch service call
-    val run = backfila.createWetRun<PausingBackfill>(
-      parameters = PausingBackfill.Parameters(
+    val run = backfila.createWetRun<PaginatingBackfill>(
+      parameters = PaginatingBackfill.Parameters(
         segmentCount = 1, partitionCount = 1,
-        pauseMilliseconds = 500L, requireMaxBatchSize = 5,
+        requireMaxBatchSize = 5,
       ),
     )
     run.batchSize = 5
@@ -41,14 +40,13 @@ class DynamoDbLastEvaluatedKeyTest {
   }
 
   @Test
-  fun `really long run batches work`() {
+  fun `multiple partitions complete across scan pages`() {
     testData.addLinkinPark()
 
-    // Pause so only one dynamo batch runs per runBatch service call
-    val run = backfila.createWetRun<PausingBackfill>(
-      parameters = PausingBackfill.Parameters(
+    val run = backfila.createWetRun<PaginatingBackfill>(
+      parameters = PaginatingBackfill.Parameters(
         segmentCount = 4, partitionCount = 2,
-        pauseMilliseconds = 1000L, requireMaxBatchSize = 5,
+        requireMaxBatchSize = 5,
       ),
     )
     run.batchSize = 5
@@ -58,14 +56,13 @@ class DynamoDbLastEvaluatedKeyTest {
     assertThat(rows).extracting<String> { it.track_title }.allMatch { it.endsWith("(EXPLICIT)") }
   }
 
-  class PausingBackfill @Inject constructor(
+  class PaginatingBackfill @Inject constructor(
     dynamoDb: DynamoDBMapper,
-  ) : UpdateInPlaceDynamoDbBackfill<TrackItem, PausingBackfill.Parameters>(dynamoDb) {
+  ) : UpdateInPlaceDynamoDbBackfill<TrackItem, PaginatingBackfill.Parameters>(dynamoDb) {
 
     override fun runBatch(items: List<TrackItem>, config: BackfillConfig<Parameters>) {
       require(items.size <= config.parameters.requireMaxBatchSize)
       super.runBatch(items, config)
-      Thread.sleep(config.parameters.pauseMilliseconds)
     }
 
     override fun runOne(item: TrackItem, config: BackfillConfig<Parameters>): Boolean {
@@ -78,7 +75,6 @@ class DynamoDbLastEvaluatedKeyTest {
     data class Parameters(
       val segmentCount: Int = 4,
       val partitionCount: Int = 2,
-      val pauseMilliseconds: Long = 1000L,
       val requireMaxBatchSize: Long = 100L,
     )
 

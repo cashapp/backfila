@@ -5,6 +5,11 @@
 
 Backfila backend client implementation to backfill a DynamoDB datastore.
 
+Each `RunBatch` service call performs one DynamoDB scan with `batch_size` as its limit.
+The limit bounds items evaluated before filtering; the scan may return fewer matches or none.
+If the scan returns a `LastEvaluatedKey`, the client returns it in `remaining_batch_range`
+so a later call can continue the same segment. Segments remain the scheduling unit.
+
 There are a couple features that help keep the costs down when performing a DynamoDB datastore backfill.
 
 This backfill client performs what should usually be a single pass of the dynamo datastore. However, in order
