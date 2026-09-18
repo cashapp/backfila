@@ -43,10 +43,14 @@ class EditPartitionCursorHandlerAction @Inject constructor(
     @PathParam partitionId: Long,
     @QueryParam cursor_snapshot: String? = null,
     @QueryParam new_cursor: String? = null,
+    @QueryParam new_range_end: String? = null,
   ): Response<ResponseBody> {
     val cursorSnapshot = cursor_snapshot?.takeIf { it.isNotBlank() }
     val newCursor = new_cursor?.takeIf { it.isNotBlank() }
-      ?: return buildErrorResponse("New cursor is required.")
+    val newRangeEnd = new_range_end?.takeIf { it.isNotBlank() }
+    if (newCursor == null && newRangeEnd == null) {
+      return buildErrorResponse("A new cursor or a new range end is required.")
+    }
 
     val backfill = getBackfillStatusAction.status(id)
     if (backfill.state != BackfillState.PAUSED) {
@@ -56,7 +60,7 @@ class EditPartitionCursorHandlerAction @Inject constructor(
     val partition = backfill.partitions.find { it.id == partitionId }
       ?: return buildErrorResponse("Partition $partitionId not found in backfill $id")
 
-    return when (compareAndSetCursor(id, partitionId, cursorSnapshot, newCursor)) {
+    return when (compareAndSetCursor(id, partitionId, cursorSnapshot, newCursor, newRangeEnd)) {
       CursorUpdate.UPDATED -> redirectToBackfillPage(id)
       CursorUpdate.CURSOR_NOT_UTF8 -> buildErrorResponse(
         "Partition ${partition.name} has a cursor that is not valid UTF-8, so it cannot be edited here.",
@@ -86,7 +90,8 @@ class EditPartitionCursorHandlerAction @Inject constructor(
     id: Long,
     partitionId: Long,
     cursorSnapshot: String?,
-    newCursor: String,
+    newCursor: String?,
+    newRangeEnd: String?,
   ): CursorUpdate = transacter.transaction { session ->
     val partitionRecord = queryFactory.newQuery<RunPartitionQuery>()
       .backfillRunId(Id(id))
@@ -101,7 +106,11 @@ class EditPartitionCursorHandlerAction @Inject constructor(
     if (storedCursor != cursorSnapshot?.encodeUtf8()) {
       return@transaction CursorUpdate.SNAPSHOT_STALE
     }
-    partitionRecord.pkey_cursor = newCursor.encodeUtf8()
+    newCursor?.let { partitionRecord.pkey_cursor = it.encodeUtf8() }
+    // The runner reloads its metadata when the partition is leased again, and both the runner and
+    // the precomputer stop when the client reports no batches past the range end, so a narrowed end
+    // takes effect on resume.
+    newRangeEnd?.let { partitionRecord.pkey_range_end = it.encodeUtf8() }
     CursorUpdate.UPDATED
   }
 

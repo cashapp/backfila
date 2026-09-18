@@ -162,6 +162,52 @@ class EditPartitionCursorActionTest {
   }
 
   @Test
+  fun `narrows the range end without touching the cursor`() {
+    val id = createPausedBackfill("only")
+
+    inScope {
+      val partitionId = onlyPartitionId(id)
+      editPartitionCursorHandlerAction.get(id, partitionId, "", "500")
+
+      val response = editPartitionCursorHandlerAction.get(id, partitionId, "500", null, "9000")
+
+      assertThat(response.statusCode).isEqualTo(303)
+      assertThat(cursorOf(id)).isEqualTo("500")
+      assertThat(rangeEndOf(id)).isEqualTo("9000")
+    }
+  }
+
+  @Test
+  fun `edits the cursor and the range end together`() {
+    val id = createPausedBackfill("only")
+
+    inScope {
+      val partitionId = onlyPartitionId(id)
+
+      val response = editPartitionCursorHandlerAction.get(id, partitionId, "", "500", "9000")
+
+      assertThat(response.statusCode).isEqualTo(303)
+      assertThat(cursorOf(id)).isEqualTo("500")
+      assertThat(rangeEndOf(id)).isEqualTo("9000")
+    }
+  }
+
+  @Test
+  fun `a stale snapshot leaves the range end untouched`() {
+    val id = createPausedBackfill("only")
+
+    inScope {
+      val partitionId = onlyPartitionId(id)
+      editPartitionCursorHandlerAction.get(id, partitionId, "", "500")
+
+      val response = editPartitionCursorHandlerAction.get(id, partitionId, "499", null, "9000")
+
+      assertThat(response.statusCode).isEqualTo(200)
+      assertThat(rangeEndOf(id)).isEqualTo("17701296")
+    }
+  }
+
+  @Test
   fun `refuses a partition belonging to a different backfill`() {
     val otherId = createPausedBackfill("only")
     val id = createPausedBackfill("only")
@@ -194,6 +240,9 @@ class EditPartitionCursorActionTest {
   private fun onlyPartitionId(id: Long) = getBackfillStatusAction.status(id).partitions.single().id
 
   private fun cursorOf(id: Long) = getBackfillStatusAction.status(id).partitions.single().pkey_cursor
+
+  private fun rangeEndOf(id: Long) =
+    getBackfillStatusAction.status(id).partitions.single().pkey_end
 
   private fun cursorBytesOf(partitionId: Long) = transacter.transaction { session ->
     queryFactory.newQuery<RunPartitionQuery>()
