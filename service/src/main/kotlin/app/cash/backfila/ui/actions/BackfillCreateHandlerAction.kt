@@ -2,6 +2,7 @@ package app.cash.backfila.ui.actions
 
 import app.cash.backfila.dashboard.CreateBackfillAction
 import app.cash.backfila.dashboard.GetBackfillStatusAction
+import app.cash.backfila.dashboard.UiPartition
 import app.cash.backfila.protos.service.CreateBackfillRequest
 import app.cash.backfila.ui.components.AlertError
 import app.cash.backfila.ui.components.DashboardPageLayout
@@ -58,24 +59,18 @@ class BackfillCreateHandlerAction @Inject constructor(
           // Get the last processed position from the original backfill
           val backfillId = formFields[BackfillCreateField.BACKFILL_ID_TO_CLONE.fieldId]?.toLongOrNull()
           backfillId?.let { id ->
-            val status = getBackfillStatusAction.status(id)
-            status.partitions.firstOrNull()?.let { partition ->
-              // Use cursor if available, otherwise use start
-              val startValue = partition.pkey_cursor ?: partition.pkey_start
-              startValue?.let { createRequestBuilder.pkey_range_start(it.encodeUtf8()) }
-              partition.pkey_end?.let { createRequestBuilder.pkey_range_end(it.encodeUtf8()) }
-            }
+            val range = continueRange(getBackfillStatusAction.status(id).partitions)
+            range.start?.let { createRequestBuilder.pkey_range_start(it.encodeUtf8()) }
+            range.end?.let { createRequestBuilder.pkey_range_end(it.encodeUtf8()) }
           }
         }
         RangeOption.RESTART.value -> {
           // Use the original range but start from beginning
           val backfillId = formFields[BackfillCreateField.BACKFILL_ID_TO_CLONE.fieldId]?.toLongOrNull()
           backfillId?.let { id ->
-            val status = getBackfillStatusAction.status(id)
-            status.partitions.firstOrNull()?.let { partition ->
-              partition.pkey_start?.let { createRequestBuilder.pkey_range_start(it.encodeUtf8()) }
-              partition.pkey_end?.let { createRequestBuilder.pkey_range_end(it.encodeUtf8()) }
-            }
+            val range = restartRange(getBackfillStatusAction.status(id).partitions)
+            range.start?.let { createRequestBuilder.pkey_range_start(it.encodeUtf8()) }
+            range.end?.let { createRequestBuilder.pkey_range_end(it.encodeUtf8()) }
           }
         }
         else -> {
@@ -125,7 +120,46 @@ class BackfillCreateHandlerAction @Inject constructor(
     )
   }
 
+  /** The range a clone should start from, in the same string form the create form submits. */
+  internal data class CloneRange(val start: String?, val end: String?)
+
   companion object {
+    /**
+     * A clone carries one range for every partition of the new backfill, so a position that differs
+     * between the source partitions cannot be carried over at all.
+     *
+     * Each partition holds its own cursor, so continuing is only expressible when the source has a
+     * single partition. Taking any one partition's cursor for all of them would rewind the
+     * partitions that ran ahead of it, and skip every row between the cursor and the true position
+     * of the partitions that lag behind it.
+     */
+    internal fun continueRange(partitions: List<UiPartition>): CloneRange {
+      require(partitions.size == 1) {
+        "Cannot continue a backfill that has ${partitions.size} partitions. Each partition has its" +
+          " own cursor, and a clone applies one range to every partition, so continuing would" +
+          " rewind the partitions that ran ahead and skip rows in the partitions that lag behind." +
+          " Clone it with a new range instead."
+      }
+      val partition = partitions.single()
+      return CloneRange(partition.pkey_cursor ?: partition.pkey_start, partition.pkey_end)
+    }
+
+    /**
+     * Restarting can carry the range over when every source partition shares it, which is the case
+     * when the original run was given an explicit range. When the partitions computed their own
+     * ranges those differ, and no single range reproduces them, so the range is left unset and each
+     * partition of the clone computes its own again.
+     */
+    internal fun restartRange(partitions: List<UiPartition>): CloneRange {
+      val starts = partitions.mapTo(mutableSetOf()) { it.pkey_start }
+      val ends = partitions.mapTo(mutableSetOf()) { it.pkey_end }
+      return if (starts.size == 1 && ends.size == 1) {
+        CloneRange(starts.single(), ends.single())
+      } else {
+        CloneRange(null, null)
+      }
+    }
+
     private val logger = getLogger<BackfillCreateHandlerAction>()
 
     const val PATH = "/api/backfill/create"
