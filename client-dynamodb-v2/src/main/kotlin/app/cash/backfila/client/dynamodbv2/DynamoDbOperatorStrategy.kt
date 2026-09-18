@@ -26,10 +26,10 @@ open class DynamoDbOperatorStrategy(
   val fixedSegmentCount: Int? = null,
 
   /**
-   * Configures how long a `runBatch` call is allowed to paginate through a scan segment before we
-   * pause the pagination and respond to the Backfila server. The response creates a checkpoint; a
-   * future `runBatch` call will resume from that point in the segment. Defaults to 2 seconds.
+   * Retained for compatibility and no longer used. Each `runBatch` call performs one scan and
+   * returns any remaining segment range, regardless of this duration.
    */
+  @Deprecated("Each runBatch call now performs one scan, regardless of checkpoint duration.")
   val checkpointSegmentProgressAfter: Duration = Duration.ofSeconds(2),
 
   /**
@@ -69,6 +69,7 @@ open class DynamoDbOperatorStrategy(
     }
 
     /** See [DynamoDbOperatorStrategy.checkpointSegmentProgressAfter]. */
+    @Deprecated("Each runBatch call now performs one scan, regardless of checkpoint duration.")
     fun checkpointSegmentProgressAfter(duration: Duration): Builder {
       this.checkpointSegmentProgressAfter = duration
       return this
