@@ -331,7 +331,7 @@ class BackfillShowAction @Inject constructor(
                   attributes["data-partitions-table-target"] = "tbody"
                   backfill.partitions.map { partition ->
                     val progressPct = if (partition.precomputing_done && partition.computed_matching_record_count > 0) {
-                      (partition.backfilled_matching_record_count.toDouble() / partition.computed_matching_record_count) * 100.0
+                      ((partition.backfilled_matching_record_count.toDouble() / partition.computed_matching_record_count) * 100.0).coerceIn(0.0, 100.0)
                     } else {
                       -1.0
                     }
