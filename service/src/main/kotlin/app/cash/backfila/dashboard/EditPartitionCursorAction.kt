@@ -123,11 +123,10 @@ class EditPartitionCursorAction @Inject constructor(
                       type = InputType.text
                       name = "new_cursor"
                       attributes["id"] = "new_cursor"
-                      value = cursorSnapshot ?: ""
                     }
                   }
                   p("mt-2 text-sm text-gray-500") {
-                    +"Leave unchanged to keep the current cursor."
+                    +"Leave blank to keep the current cursor."
                   }
                 }
 

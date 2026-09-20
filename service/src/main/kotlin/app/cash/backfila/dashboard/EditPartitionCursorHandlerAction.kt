@@ -101,7 +101,7 @@ class EditPartitionCursorHandlerAction @Inject constructor(
     )
   }
 
-  /** The form round-trips the snapshot through `utf8()`, so bytes that are not UTF-8 cannot be compared. */
+  /** Validate snapshots only for fields being edited, preserving untouched bytes as stored. */
   private fun compareAndSetCursor(
     id: Long,
     partitionId: Long,
@@ -126,12 +126,14 @@ class EditPartitionCursorHandlerAction @Inject constructor(
       return@transaction CursorUpdate.LEASE_ACTIVE
     }
 
-    val storedCursor = partitionRecord.pkey_cursor
-    if (storedCursor != null && storedCursor.utf8().encodeUtf8() != storedCursor) {
-      return@transaction CursorUpdate.CURSOR_NOT_UTF8
-    }
-    if (storedCursor != cursorSnapshot?.encodeUtf8()) {
-      return@transaction CursorUpdate.SNAPSHOT_STALE
+    if (newCursor != null) {
+      val storedCursor = partitionRecord.pkey_cursor
+      if (storedCursor != null && storedCursor.utf8().encodeUtf8() != storedCursor) {
+        return@transaction CursorUpdate.CURSOR_NOT_UTF8
+      }
+      if (storedCursor != cursorSnapshot?.encodeUtf8()) {
+        return@transaction CursorUpdate.SNAPSHOT_STALE
+      }
     }
     val storedEnd = partitionRecord.pkey_range_end
     if (newRangeEnd != null) {

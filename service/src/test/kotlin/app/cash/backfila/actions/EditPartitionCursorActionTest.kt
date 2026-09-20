@@ -128,6 +128,29 @@ class EditPartitionCursorActionTest {
     }
   }
 
+  @ParameterizedTest
+  @ValueSource(booleans = [false, true])
+  fun `form leaves the new cursor blank so end only edits preserve its bytes`(binary: Boolean) {
+    val id = createPausedBackfill("only")
+    val cursor = if (binary) ByteString.of(0xFF.toByte(), 0xFE.toByte()) else "500".encodeUtf8()
+
+    inScope {
+      val partitionId = onlyPartitionId(id)
+      setCursorBytes(partitionId, cursor)
+      val response = editPartitionCursorAction.get(id, partitionId)
+      val html = Buffer().also { response.body.writeTo(it) }.readUtf8()
+      val cursorInput = Regex("""<input\b[^>]*\bname="new_cursor"[^>]*>""").find(html)!!.value
+      val newCursor = Regex("""\bvalue="([^"]*)"""").find(cursorInput)?.groupValues?.get(1).orEmpty()
+      assertThat(newCursor).isEmpty()
+
+      val update = editPartitionCursorHandlerAction.get(id, partitionId, cursor.utf8(), newCursor, "9000", "17701296")
+
+      assertThat(update.statusCode).isEqualTo(303)
+      assertThat(cursorBytesOf(partitionId)).isEqualTo(cursor)
+      assertThat(rangeEndOf(id)).isEqualTo("9000")
+    }
+  }
+
   @Test
   fun `edits a partition whose name is not url safe`() {
     val id = createPausedBackfill("region-shard-us-east#orders_local_ro_0")
@@ -220,7 +243,7 @@ class EditPartitionCursorActionTest {
   }
 
   @Test
-  fun `a stale snapshot leaves the range end untouched`() {
+  fun `an end only edit preserves a cursor changed since the form was loaded`() {
     val id = createPausedBackfill("only")
 
     inScope {
@@ -229,8 +252,9 @@ class EditPartitionCursorActionTest {
 
       val response = editPartitionCursorHandlerAction.get(id, partitionId, "499", null, "9000", "17701296")
 
-      assertThat(response.statusCode).isEqualTo(200)
-      assertThat(rangeEndOf(id)).isEqualTo("17701296")
+      assertThat(response.statusCode).isEqualTo(303)
+      assertThat(cursorOf(id)).isEqualTo("500")
+      assertThat(rangeEndOf(id)).isEqualTo("9000")
     }
   }
 
@@ -282,6 +306,57 @@ class EditPartitionCursorActionTest {
       assertThat(response.statusCode).isEqualTo(303)
       assertThat(cursorOf(id)).isEqualTo("500")
       assertThat(withPartition(partitionId) { it.pkey_range_end }).isEqualTo(binaryEnd)
+    }
+  }
+
+  @Test
+  fun `end only edits preserve a binary cursor`() {
+    val id = createPausedBackfill("only")
+    val binaryCursor = ByteString.of(0xFF.toByte(), 0xFE.toByte())
+
+    inScope {
+      val partitionId = onlyPartitionId(id)
+      setCursorBytes(partitionId, binaryCursor)
+
+      val response = editPartitionCursorHandlerAction.get(id, partitionId, binaryCursor.utf8(), null, "9000", "17701296")
+
+      assertThat(response.statusCode).isEqualTo(303)
+      assertThat(cursorBytesOf(partitionId)).isEqualTo(binaryCursor)
+      assertThat(rangeEndOf(id)).isEqualTo("9000")
+    }
+  }
+
+  @Test
+  fun `end only edits with a binary cursor still reject a stale range end`() {
+    val id = createPausedBackfill("only")
+    val binaryCursor = ByteString.of(0xFF.toByte(), 0xFE.toByte())
+
+    inScope {
+      val partitionId = onlyPartitionId(id)
+      setCursorBytes(partitionId, binaryCursor)
+
+      val response = editPartitionCursorHandlerAction.get(id, partitionId, binaryCursor.utf8(), null, "9000", "old end")
+
+      assertThat(response.statusCode).isEqualTo(200)
+      assertThat(cursorBytesOf(partitionId)).isEqualTo(binaryCursor)
+      assertThat(rangeEndOf(id)).isEqualTo("17701296")
+    }
+  }
+
+  @Test
+  fun `a binary cursor edit rejects both requested changes`() {
+    val id = createPausedBackfill("only")
+    val binaryCursor = ByteString.of(0xFF.toByte(), 0xFE.toByte())
+
+    inScope {
+      val partitionId = onlyPartitionId(id)
+      setCursorBytes(partitionId, binaryCursor)
+
+      val response = editPartitionCursorHandlerAction.get(id, partitionId, binaryCursor.utf8(), "500", "9000", "17701296")
+
+      assertThat(response.statusCode).isEqualTo(200)
+      assertThat(cursorBytesOf(partitionId)).isEqualTo(binaryCursor)
+      assertThat(rangeEndOf(id)).isEqualTo("17701296")
     }
   }
 
