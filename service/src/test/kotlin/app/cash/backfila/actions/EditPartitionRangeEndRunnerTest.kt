@@ -32,6 +32,7 @@ import app.cash.backfila.service.scheduler.LeaseHunter
 import app.cash.backfila.ui.pages.BackfillShowAction
 import com.google.inject.Module
 import jakarta.inject.Inject
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
@@ -130,7 +131,48 @@ class EditPartitionRangeEndRunnerTest {
     resumeWithNarrowedEnd(cursor = 299)
   }
 
-  private fun resumeWithNarrowedEnd(cursor: Long) {
+  @Test
+  fun `resuming waits for recounting when scanning is already past the narrowed end`() {
+    resumeWithNarrowedEnd(cursor = 299, precomputingDelayMs = 3 * EXTEND_LEASE_PERIOD.toMillis())
+  }
+
+  @Test
+  fun `a runner waiting for recounting can still be paused`() {
+    val runner = createRunner(cursor = 299)
+    pause(runner)
+    runner.clearLease()
+    val response = inScope {
+      editPartitionCursorHandlerAction.get(
+        runner.backfillRunId.id, runner.partitionId.id, "299", null, "199", "1000",
+      )
+    }
+    assertThat(response.statusCode).isEqualTo(303)
+    scope.fakeCaller(user = "molly") {
+      startBackfillAction.start(runner.backfillRunId.id, StartBackfillRequest())
+    }
+    val resumedRunner = leaseHunter.hunt().single()
+    fakeClient.dontBlockGetNextBatch()
+    fakeClient.dontBlockRunBatch()
+    fakeClient.beforeGetNextBatchRange = { request ->
+      if (request.precomputing == true) awaitCancellation()
+    }
+
+    runTest {
+      resumedRunner.start(this)
+      delay(3 * EXTEND_LEASE_PERIOD.toMillis())
+      assertThat(partition(runner).state).isEqualTo(BackfillState.RUNNING)
+      assertThat(partition(runner).precomputing_done).isFalse()
+      pause(resumedRunner)
+    }
+    resumedRunner.clearLease()
+
+    val status = getBackfillStatusAction.status(runner.backfillRunId.id)
+    assertThat(status.state).isEqualTo(BackfillState.PAUSED)
+    assertThat(status.partitions.single().state).isEqualTo(BackfillState.PAUSED)
+    assertThat(status.partitions.single().precomputing_done).isFalse()
+  }
+
+  private fun resumeWithNarrowedEnd(cursor: Long, precomputingDelayMs: Long = 0) {
     val runner = createRunner(cursor)
     runTest {
       runner.start(this)
@@ -163,6 +205,10 @@ class EditPartitionRangeEndRunnerTest {
     val resumedRunner = leaseHunter.hunt().single()
     val rangeRequests = mutableListOf<GetNextBatchRangeRequest>()
     val runRequests = mutableListOf<RunBatchRequest>()
+
+    fakeClient.beforeGetNextBatchRange = { request ->
+      if (request.precomputing == true) delay(precomputingDelayMs)
+    }
 
     runTest {
       backgroundScope.launch {
@@ -213,6 +259,9 @@ class EditPartitionRangeEndRunnerTest {
       val html = Buffer().also { page.body.writeTo(it) }.readUtf8()
       assertThat(html).contains("data-progress-pct=\"100.0\"")
       assertThat(html).doesNotContain("width: 150.0%", ">150%<")
+      val overallProgress = Regex("""Overall Progress</span>\s*<span[^>]*>([^<]+)</span>""")
+        .find(html)!!.groupValues[1]
+      assertThat(overallProgress).isEqualTo("100.0%")
     }
   }
 

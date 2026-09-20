@@ -214,7 +214,7 @@ class BackfillShowAction @Inject constructor(
                       if (allPrecomputingDone && totalItemsToRun > 0) {
                         val percentage =
                           (totalBackfilledItems.toDouble() / totalItemsToRun * 100).let {
-                            if (it.isNaN()) 0.0 else it
+                            if (it.isNaN()) 0.0 else it.coerceIn(0.0, 100.0)
                           }
                         +"""${String.format("%.1f", percentage)}%"""
                       } else {
