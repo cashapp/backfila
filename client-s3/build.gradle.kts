@@ -9,43 +9,10 @@ plugins {
 }
 
 dependencies {
-  api(libs.jakartaInject)
-  api(libs.javaxInject)
-
-  implementation(libs.aws2S3)
-  implementation(libs.guava)
-  implementation(libs.moshiCore)
-  implementation(libs.moshiKotlin)
-  implementation(libs.wireRuntime)
-  implementation(libs.guice)
-  implementation(libs.okHttp)
-  implementation(libs.retrofit)
-  implementation(libs.retrofitMock)
-  implementation(libs.retrofitMoshi)
-  implementation(libs.retrofitWire)
-  implementation(libs.okio)
-  implementation(libs.kotlinStdLib)
-  implementation(libs.wireMoshiAdapter)
-
-  api(project(":client"))
-  // We do not want to leak client-base implementation details to customers.
-  implementation(project(":client-base"))
-  testImplementation(libs.assertj)
-  testImplementation(libs.junitEngine)
-  testImplementation(libs.kotlinTest)
-
-  testImplementation(project(":backfila-embedded"))
-  testImplementation(project(":client-testing"))
-
-  // ****************************************
-  // For TESTING purposes only. We only want Misk for easy testing.
-  // DO NOT turn these into regular dependencies.
-  // ****************************************
-  testImplementation(libs.misk)
-  testImplementation(libs.miskActions)
-  testImplementation(libs.miskInject)
-  testImplementation(libs.miskTesting)
-  testImplementation(project(":client-misk"))
+  // Aggregator that exposes both S3 backends. Depend on client-s3-aws-v2 directly for a classpath
+  // without the AWS SDK v1.
+  api(project(":client-s3-aws-v2"))
+  api(project(":client-s3-aws-v1"))
 }
 
 configure<MavenPublishBaseExtension> {

@@ -9,7 +9,7 @@ plugins {
 }
 
 dependencies {
-  api(project(":client-s3"))
+  api(project(":client-s3-aws-v2"))
 
   implementation(libs.awsS3)
   implementation(libs.guice)
