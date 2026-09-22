@@ -6,6 +6,7 @@ import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.DbEventLog
 import app.cash.backfila.service.persistence.DbRunPartition
 import app.cash.backfila.service.runner.BackfillRunner
+import app.cash.backfila.service.runner.EXTEND_LEASE_PERIOD
 import java.time.Duration
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineName
@@ -49,6 +50,11 @@ class BatchAwaiter(
         logger.info(e) { "BatchAwaiter job cancelled ${backfillRunner.logLabel()}" }
         break
       } catch (e: ClosedReceiveChannelException) {
+        // Completing stops the runner, including its precomputer. A range edit can restart
+        // counting behind an already-finished scan, so let it persist the new totals first.
+        while (!backfillRunner.metadata.precomputingDone) {
+          delay(EXTEND_LEASE_PERIOD.toMillis())
+        }
         logger.info { "No more batches to await, completed ${backfillRunner.logLabel()}" }
         completePartition()
         break
