@@ -9,10 +9,13 @@ plugins {
 }
 
 dependencies {
-  // Aggregator that exposes both S3 backends. Depend on client-s3-aws-v2 directly for a classpath
-  // without the AWS SDK v1.
   api(project(":client-s3-aws-v2"))
-  api(project(":client-s3-aws-v1"))
+
+  implementation(libs.awsS3)
+  implementation(libs.guice)
+  implementation(libs.jakartaInject)
+  implementation(libs.okio)
+  implementation(libs.kotlinStdLib)
 }
 
 configure<MavenPublishBaseExtension> {
