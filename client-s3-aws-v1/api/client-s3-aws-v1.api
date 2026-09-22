@@ -1,0 +1,12 @@
+public final class app/cash/backfila/client/s3/internal/RealS3Service : app/cash/backfila/client/s3/shim/S3Service {
+	public fun <init> (Lcom/amazonaws/services/s3/AmazonS3;)V
+	public fun getFileSize (Ljava/lang/String;Ljava/lang/String;)J
+	public fun getFileStreamStartingAt (Ljava/lang/String;Ljava/lang/String;J)Lokio/BufferedSource;
+	public fun getWithSeek (Ljava/lang/String;Ljava/lang/String;JJ)Lokio/ByteString;
+	public fun listFiles (Ljava/lang/String;Ljava/lang/String;)Ljava/util/List;
+}
+
+public final class app/cash/backfila/client/s3/shim/RealS3Module : com/google/inject/AbstractModule {
+	public fun <init> ()V
+}
+

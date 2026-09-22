@@ -32,14 +32,6 @@ public final class app/cash/backfila/client/s3/internal/RealS3AwsV2Service : app
 	public fun listFiles (Ljava/lang/String;Ljava/lang/String;)Ljava/util/List;
 }
 
-public final class app/cash/backfila/client/s3/internal/RealS3Service : app/cash/backfila/client/s3/shim/S3Service {
-	public fun <init> (Lcom/amazonaws/services/s3/AmazonS3;)V
-	public fun getFileSize (Ljava/lang/String;Ljava/lang/String;)J
-	public fun getFileStreamStartingAt (Ljava/lang/String;Ljava/lang/String;J)Lokio/BufferedSource;
-	public fun getWithSeek (Ljava/lang/String;Ljava/lang/String;JJ)Lokio/ByteString;
-	public fun listFiles (Ljava/lang/String;Ljava/lang/String;)Ljava/util/List;
-}
-
 public final class app/cash/backfila/client/s3/internal/S3DatasourceBackend : app/cash/backfila/client/spi/BackfillBackend {
 	public fun <init> (Lcom/google/inject/Injector;Ljava/util/Map;Lapp/cash/backfila/client/s3/shim/S3Service;)V
 	public fun backfills ()Ljava/util/Set;
@@ -103,10 +95,6 @@ public final class app/cash/backfila/client/s3/shim/FakeS3Service : app/cash/bac
 }
 
 public final class app/cash/backfila/client/s3/shim/RealS3AwsV2Module : com/google/inject/AbstractModule {
-	public fun <init> ()V
-}
-
-public final class app/cash/backfila/client/s3/shim/RealS3Module : com/google/inject/AbstractModule {
 	public fun <init> ()V
 }
 

@@ -12,7 +12,6 @@ dependencies {
   api(libs.jakartaInject)
   api(libs.javaxInject)
 
-  implementation(libs.awsS3)
   implementation(libs.aws2S3)
   implementation(libs.guava)
   implementation(libs.moshiCore)
