@@ -25,6 +25,11 @@ import misk.config.ConfigModule
 import misk.inject.KAbstractModule
 import misk.security.authz.AccessAnnotationEntry
 import misk.slack.SlackModule
+import misk.slack.webapi.RealSlackClientModule
+import misk.slack.webapi.SlackClient
+import misk.slack.webapi.helpers.GetUserResponse
+import misk.slack.webapi.helpers.PostMessageRequest
+import misk.slack.webapi.helpers.PostMessageResponse
 import misk.web.dashboard.AdminDashboardAccess
 import okhttp3.Interceptor
 import wisp.deployment.Deployment
@@ -71,6 +76,11 @@ class BackfilaServiceModule(
     if (config.slack != null) {
       install(SlackModule(config.slack))
     }
+    if (config.slack_api != null) {
+      install(RealSlackClientModule(config.slack_api))
+    } else {
+      bind<SlackClient>().toInstance(DisabledSlackClient)
+    }
 
     // TODO:mikepaw Require that the Admin Console is installed so it isn't forgotten.
     // something along the lines of requireBinding but works for multibindings.
@@ -87,4 +97,17 @@ class BackfilaServiceModule(
       ),
     )
   }
+}
+
+private object DisabledSlackClient : SlackClient {
+  override fun postMessage(request: PostMessageRequest) = PostMessageResponse(ok = false)
+
+  override fun postConfirmation(url: String, request: PostMessageRequest) =
+    PostMessageResponse(ok = false)
+
+  override fun getUserByEmail(email: String): GetUserResponse =
+    error("Slack Web API is not configured")
+
+  override fun getUserById(userId: String): GetUserResponse =
+    error("Slack Web API is not configured")
 }

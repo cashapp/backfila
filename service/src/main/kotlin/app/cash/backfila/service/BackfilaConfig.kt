@@ -9,6 +9,8 @@ data class BackfilaConfig(
   val data_source_clusters: DataSourceClustersConfig,
   /** Configures Slack API for Backfila Slackbot to notify on backfill status changes. */
   val slack: SlackConfig?,
+  /** Configures the Slack Web API used for threaded backfill status notifications. */
+  val slack_api: misk.slack.webapi.SlackConfig? = null,
   /** Used to construct absolute links to the dashboard, ie. from the Backfila Slackbot. */
   val web_url_root: String,
   /** Sets the minimum number of batches to compute per GetNextBatch call. */

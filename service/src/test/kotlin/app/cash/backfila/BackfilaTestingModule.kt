@@ -31,6 +31,10 @@ import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.logging.LogCollectorModule
 import misk.scope.ActionScopedProviderModule
+import misk.slack.webapi.SlackClient
+import misk.slack.webapi.helpers.GetUserResponse
+import misk.slack.webapi.helpers.PostMessageRequest
+import misk.slack.webapi.helpers.PostMessageResponse
 
 internal class BackfilaTestingModule : KAbstractModule() {
   override fun configure() {
@@ -55,6 +59,7 @@ internal class BackfilaTestingModule : KAbstractModule() {
     bind<BackfilaConfig>().toInstance(config)
 
     install(BackfilaListenerModule())
+    bind<SlackClient>().to<FakeSlackClient>()
     install(AppNameModule("backfila"))
     install(FakeAuditClientModule())
 
@@ -99,4 +104,22 @@ internal class BackfilaTestingModule : KAbstractModule() {
       ),
     )
   }
+}
+
+@jakarta.inject.Singleton
+internal class FakeSlackClient @jakarta.inject.Inject constructor() : SlackClient {
+  val postMessageRequests = mutableListOf<PostMessageRequest>()
+  var postMessageResponse = PostMessageResponse(ok = true)
+
+  override fun postMessage(request: PostMessageRequest): PostMessageResponse {
+    postMessageRequests += request
+    return postMessageResponse
+  }
+
+  override fun postConfirmation(url: String, request: PostMessageRequest): PostMessageResponse =
+    error("Not implemented by fake")
+
+  override fun getUserByEmail(email: String): GetUserResponse = error("Not implemented by fake")
+
+  override fun getUserById(userId: String): GetUserResponse = error("Not implemented by fake")
 }

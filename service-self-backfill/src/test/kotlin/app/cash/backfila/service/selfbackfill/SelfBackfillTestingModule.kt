@@ -28,6 +28,10 @@ import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.logging.LogCollectorModule
 import misk.scope.ActionScopedProviderModule
+import misk.slack.webapi.SlackClient
+import misk.slack.webapi.helpers.GetUserResponse
+import misk.slack.webapi.helpers.PostMessageRequest
+import misk.slack.webapi.helpers.PostMessageResponse
 import wisp.deployment.TESTING
 
 class SelfBackfillTestingModule : KAbstractModule() {
@@ -52,6 +56,17 @@ class SelfBackfillTestingModule : KAbstractModule() {
     )
 
     install(BackfilaListenerModule())
+    bind<SlackClient>().toInstance(object : SlackClient {
+      override fun postMessage(request: PostMessageRequest) = PostMessageResponse(ok = true)
+
+      override fun postConfirmation(url: String, request: PostMessageRequest) =
+        PostMessageResponse(ok = true)
+
+      override fun getUserByEmail(email: String): GetUserResponse = error("Not implemented by fake")
+
+      override fun getUserById(userId: String): GetUserResponse = error("Not implemented by fake")
+    },
+    )
     install(AppNameModule("self-backfila"))
     install(FakeAuditClientModule())
 
