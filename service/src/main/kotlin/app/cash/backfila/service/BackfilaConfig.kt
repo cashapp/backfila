@@ -7,7 +7,7 @@ import misk.slack.SlackConfig
 data class BackfilaConfig(
   val backfill_runner_threads: Int?,
   val data_source_clusters: DataSourceClustersConfig,
-  /** Configures Slack API for Backfila Slackbot to notify on backfill status changes. */
+  /** Configures legacy webhook notifications and their default channel. */
   val slack: SlackConfig?,
   /** Configures the Slack Web API used for threaded backfill status notifications. */
   val slack_api: misk.slack.webapi.SlackConfig? = null,

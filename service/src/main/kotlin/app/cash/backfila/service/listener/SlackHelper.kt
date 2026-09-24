@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap
 import misk.hibernate.Id
 import misk.hibernate.Transacter
 import misk.hibernate.load
+import misk.slack.SlackClient as SlackWebhookClient
 import misk.slack.webapi.SlackClient
 import misk.slack.webapi.helpers.Block
 import misk.slack.webapi.helpers.PostMessageRequest
@@ -19,6 +20,7 @@ import wisp.deployment.Deployment
 class SlackHelper @Inject constructor(
   @BackfilaDb private val transacter: Transacter,
   private val slackClient: SlackClient,
+  private val slackWebhookClient: SlackWebhookClient,
   private val backfilaConfig: BackfilaConfig,
   private val deployment: Deployment,
 ) : BackfillRunListener {
@@ -70,11 +72,16 @@ class SlackHelper @Inject constructor(
   }
 
   private fun postMessage(message: String, channel: String?, threadTimestamp: String? = null): String? {
-    if (channel == null) return null
+    if (backfilaConfig.slack_api == null) {
+      slackWebhookClient.postMessage("Backfila", ":backfila:", message, channel)
+      return null
+    }
+
+    val destination = channel ?: backfilaConfig.slack?.default_channel ?: return null
 
     return slackClient.postMessage(
       PostMessageRequest(
-        channel = channel,
+        channel = destination,
         blocks = listOf(
           Block(
             type = "section",

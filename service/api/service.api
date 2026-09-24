@@ -704,7 +704,7 @@ public abstract interface class app/cash/backfila/service/listener/BackfillRunLi
 }
 
 public final class app/cash/backfila/service/listener/SlackHelper : app/cash/backfila/service/listener/BackfillRunListener {
-	public fun <init> (Lmisk/hibernate/Transacter;Lmisk/slack/webapi/SlackClient;Lapp/cash/backfila/service/BackfilaConfig;Lwisp/deployment/Deployment;)V
+	public fun <init> (Lmisk/hibernate/Transacter;Lmisk/slack/webapi/SlackClient;Lmisk/slack/SlackClient;Lapp/cash/backfila/service/BackfilaConfig;Lwisp/deployment/Deployment;)V
 	public fun runCancelled (Lmisk/hibernate/Id;Ljava/lang/String;)V
 	public fun runCompleted (Lmisk/hibernate/Id;)V
 	public fun runErrored (Lmisk/hibernate/Id;)V

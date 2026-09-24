@@ -22,6 +22,7 @@ import misk.MiskCaller
 import misk.MiskTestingServiceModule
 import misk.audit.FakeAuditClientModule
 import misk.config.AppNameModule
+import misk.config.Secret
 import misk.environment.DeploymentModule
 import misk.hibernate.HibernateTestingModule
 import misk.inject.KAbstractModule
@@ -31,13 +32,19 @@ import misk.jdbc.DataSourceConfig
 import misk.jdbc.DataSourceType
 import misk.logging.LogCollectorModule
 import misk.scope.ActionScopedProviderModule
+import misk.slack.SlackClient as SlackWebhookClient
+import misk.slack.SlackWebhookResponse
 import misk.slack.webapi.SlackClient
+import misk.slack.webapi.SlackConfig as SlackApiConfig
 import misk.slack.webapi.helpers.GetUserResponse
 import misk.slack.webapi.helpers.PostMessageRequest
 import misk.slack.webapi.helpers.PostMessageResponse
 
 internal class BackfilaTestingModule : KAbstractModule() {
   override fun configure() {
+    val testSecret = object : Secret<String> {
+      override val value = "unused"
+    }
     val config = BackfilaConfig(
       backfill_runner_threads = null,
       data_source_clusters = DataSourceClustersConfig(
@@ -55,11 +62,13 @@ internal class BackfilaTestingModule : KAbstractModule() {
       ),
       web_url_root = "",
       slack = null,
+      slack_api = SlackApiConfig(bearer_token = testSecret, signing_secret = testSecret),
     )
     bind<BackfilaConfig>().toInstance(config)
 
     install(BackfilaListenerModule())
     bind<SlackClient>().to<FakeSlackClient>()
+    bind<SlackWebhookClient>().to<FakeSlackWebhookClient>()
     install(AppNameModule("backfila"))
     install(FakeAuditClientModule())
 
@@ -122,4 +131,26 @@ internal class FakeSlackClient @jakarta.inject.Inject constructor() : SlackClien
   override fun getUserByEmail(email: String): GetUserResponse = error("Not implemented by fake")
 
   override fun getUserById(userId: String): GetUserResponse = error("Not implemented by fake")
+}
+
+@jakarta.inject.Singleton
+internal class FakeSlackWebhookClient @jakarta.inject.Inject constructor() : SlackWebhookClient() {
+  data class PostedMessage(
+    val username: String,
+    val iconEmoji: String,
+    val message: String,
+    val channel: String?,
+  )
+
+  val postMessageRequests = mutableListOf<PostedMessage>()
+
+  override fun postMessage(
+    username: String,
+    iconEmoji: String,
+    message: String,
+    channel: String?,
+  ): SlackWebhookResponse {
+    postMessageRequests += PostedMessage(username, iconEmoji, message, channel)
+    return SlackWebhookResponse.ok
+  }
 }
