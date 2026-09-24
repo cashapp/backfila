@@ -633,26 +633,24 @@ public abstract interface class app/cash/backfila/dashboard/ViewLogsUrlProvider 
 }
 
 public final class app/cash/backfila/service/BackfilaConfig : misk/config/Config {
-	public fun <init> (Ljava/lang/Integer;Lmisk/jdbc/DataSourceClustersConfig;Lmisk/slack/SlackConfig;Lmisk/slack/webapi/SlackConfig;Ljava/lang/String;IILjava/lang/String;Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/lang/Integer;Lmisk/jdbc/DataSourceClustersConfig;Lmisk/slack/SlackConfig;Lmisk/slack/webapi/SlackConfig;Ljava/lang/String;IILjava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/Integer;Lmisk/jdbc/DataSourceClustersConfig;Lapp/cash/backfila/service/BackfilaSlackConfig;Ljava/lang/String;IILjava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/Integer;Lmisk/jdbc/DataSourceClustersConfig;Lapp/cash/backfila/service/BackfilaSlackConfig;Ljava/lang/String;IILjava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/Integer;
 	public final fun component2 ()Lmisk/jdbc/DataSourceClustersConfig;
-	public final fun component3 ()Lmisk/slack/SlackConfig;
-	public final fun component4 ()Lmisk/slack/webapi/SlackConfig;
-	public final fun component5 ()Ljava/lang/String;
+	public final fun component3 ()Lapp/cash/backfila/service/BackfilaSlackConfig;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()I
 	public final fun component6 ()I
-	public final fun component7 ()I
+	public final fun component7 ()Ljava/lang/String;
 	public final fun component8 ()Ljava/lang/String;
-	public final fun component9 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/Integer;Lmisk/jdbc/DataSourceClustersConfig;Lmisk/slack/SlackConfig;Lmisk/slack/webapi/SlackConfig;Ljava/lang/String;IILjava/lang/String;Ljava/lang/String;)Lapp/cash/backfila/service/BackfilaConfig;
-	public static synthetic fun copy$default (Lapp/cash/backfila/service/BackfilaConfig;Ljava/lang/Integer;Lmisk/jdbc/DataSourceClustersConfig;Lmisk/slack/SlackConfig;Lmisk/slack/webapi/SlackConfig;Ljava/lang/String;IILjava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lapp/cash/backfila/service/BackfilaConfig;
+	public final fun copy (Ljava/lang/Integer;Lmisk/jdbc/DataSourceClustersConfig;Lapp/cash/backfila/service/BackfilaSlackConfig;Ljava/lang/String;IILjava/lang/String;Ljava/lang/String;)Lapp/cash/backfila/service/BackfilaConfig;
+	public static synthetic fun copy$default (Lapp/cash/backfila/service/BackfilaConfig;Ljava/lang/Integer;Lmisk/jdbc/DataSourceClustersConfig;Lapp/cash/backfila/service/BackfilaSlackConfig;Ljava/lang/String;IILjava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lapp/cash/backfila/service/BackfilaConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBackfill_runner_threads ()Ljava/lang/Integer;
 	public final fun getBatch_queue_thread_multiplier ()I
 	public final fun getData_source_clusters ()Lmisk/jdbc/DataSourceClustersConfig;
 	public final fun getMinimum_batches_per_get_next_batch_call ()I
-	public final fun getSlack ()Lmisk/slack/SlackConfig;
-	public final fun getSlack_api ()Lmisk/slack/webapi/SlackConfig;
+	public final fun getSlack ()Lapp/cash/backfila/service/BackfilaSlackConfig;
 	public final fun getSupport_button_label ()Ljava/lang/String;
 	public final fun getSupport_button_url ()Ljava/lang/String;
 	public final fun getWeb_url_root ()Ljava/lang/String;
@@ -686,6 +684,25 @@ public final class app/cash/backfila/service/BackfilaServiceModule : misk/inject
 	public fun <init> (Lwisp/deployment/Deployment;Lapp/cash/backfila/service/BackfilaConfig;Ljava/lang/Class;)V
 	public synthetic fun <init> (Lwisp/deployment/Deployment;Lapp/cash/backfila/service/BackfilaConfig;Ljava/lang/Class;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun backfillRunnerExecutor ()Lcom/google/common/util/concurrent/ListeningExecutorService;
+}
+
+public final class app/cash/backfila/service/BackfilaSlackConfig : misk/config/Config {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Lmisk/config/Secret;Ljava/lang/String;Lmisk/slack/webapi/SlackConfig;)V
+	public synthetic fun <init> (Ljava/lang/String;Lmisk/config/Secret;Ljava/lang/String;Lmisk/slack/webapi/SlackConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lmisk/config/Secret;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Lmisk/slack/webapi/SlackConfig;
+	public final fun copy (Ljava/lang/String;Lmisk/config/Secret;Ljava/lang/String;Lmisk/slack/webapi/SlackConfig;)Lapp/cash/backfila/service/BackfilaSlackConfig;
+	public static synthetic fun copy$default (Lapp/cash/backfila/service/BackfilaSlackConfig;Ljava/lang/String;Lmisk/config/Secret;Ljava/lang/String;Lmisk/slack/webapi/SlackConfig;ILjava/lang/Object;)Lapp/cash/backfila/service/BackfilaSlackConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getApi ()Lmisk/slack/webapi/SlackConfig;
+	public final fun getBaseUrl ()Ljava/lang/String;
+	public final fun getDefault_channel ()Ljava/lang/String;
+	public final fun getWebhook_path ()Lmisk/config/Secret;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public abstract interface annotation class app/cash/backfila/service/HttpClientNetworkInterceptor : java/lang/annotation/Annotation {

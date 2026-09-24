@@ -72,7 +72,7 @@ class SlackHelper @Inject constructor(
   }
 
   private fun postMessage(message: String, channel: String?, threadTimestamp: String? = null): String? {
-    if (backfilaConfig.slack_api == null) {
+    if (backfilaConfig.slack?.api == null) {
       slackWebhookClient.postMessage("Backfila", ":backfila:", message, channel)
       return null
     }

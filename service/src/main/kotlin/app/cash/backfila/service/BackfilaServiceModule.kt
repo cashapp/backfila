@@ -24,6 +24,7 @@ import java.util.concurrent.Executors
 import misk.config.ConfigModule
 import misk.inject.KAbstractModule
 import misk.security.authz.AccessAnnotationEntry
+import misk.slack.SlackConfig
 import misk.slack.SlackModule
 import misk.slack.webapi.RealSlackClientModule
 import misk.slack.webapi.SlackClient
@@ -73,11 +74,12 @@ class BackfilaServiceModule(
 
     bind<BackfillRunnerLoggingSetupProvider>().to(runnerLoggingSetupProvider)
 
-    if (config.slack != null) {
-      install(SlackModule(config.slack))
+    val slack = config.slack
+    slack?.webhook_path?.let { webhookPath ->
+      install(SlackModule(SlackConfig(slack.baseUrl, webhookPath, slack.default_channel)))
     }
-    if (config.slack_api != null) {
-      install(RealSlackClientModule(config.slack_api))
+    if (slack?.api != null) {
+      install(RealSlackClientModule(slack.api))
     } else {
       bind<SlackClient>().toInstance(DisabledSlackClient)
     }

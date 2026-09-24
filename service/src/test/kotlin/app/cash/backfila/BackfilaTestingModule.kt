@@ -6,6 +6,7 @@ import app.cash.backfila.client.Connectors
 import app.cash.backfila.client.FakeBackfilaCallbackConnectorProvider
 import app.cash.backfila.client.ForConnectors
 import app.cash.backfila.service.BackfilaConfig
+import app.cash.backfila.service.BackfilaSlackConfig
 import app.cash.backfila.service.listener.BackfilaListenerModule
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfilaPersistenceModule
@@ -61,8 +62,7 @@ internal class BackfilaTestingModule : KAbstractModule() {
         ),
       ),
       web_url_root = "",
-      slack = null,
-      slack_api = SlackApiConfig(bearer_token = testSecret, signing_secret = testSecret),
+      slack = BackfilaSlackConfig(api = SlackApiConfig(bearer_token = testSecret, signing_secret = testSecret)),
     )
     bind<BackfilaConfig>().toInstance(config)
 

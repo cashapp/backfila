@@ -11,6 +11,7 @@ import app.cash.backfila.fakeCaller
 import app.cash.backfila.protos.service.ConfigureServiceRequest
 import app.cash.backfila.protos.service.CreateBackfillRequest
 import app.cash.backfila.service.BackfilaConfig
+import app.cash.backfila.service.BackfilaSlackConfig
 import app.cash.backfila.service.persistence.BackfilaDb
 import com.google.inject.Module
 import jakarta.inject.Inject
@@ -18,7 +19,6 @@ import misk.config.Secret
 import misk.hibernate.Id
 import misk.hibernate.Transacter
 import misk.scope.ActionScope
-import misk.slack.SlackConfig
 import misk.slack.webapi.helpers.Block
 import misk.slack.webapi.helpers.PostMessageResponse
 import misk.slack.webapi.helpers.Text
@@ -124,8 +124,7 @@ internal class SlackHelperTest {
       override val value = "unused"
     }
     val legacyConfig = backfilaConfig.copy(
-      slack = SlackConfig(webhook_path = testSecret, default_channel = "#default"),
-      slack_api = null,
+      slack = BackfilaSlackConfig(webhook_path = testSecret, default_channel = "#default"),
     )
     val legacyHelper = SlackHelper(transacter, slackClient, slackWebhookClient, legacyConfig, deployment)
 
@@ -157,7 +156,7 @@ internal class SlackHelperTest {
       override val value = "unused"
     }
     val configWithDefaultChannel = backfilaConfig.copy(
-      slack = SlackConfig(webhook_path = testSecret, default_channel = "#default"),
+      slack = backfilaConfig.slack!!.copy(webhook_path = testSecret, default_channel = "#default"),
     )
     val helper = SlackHelper(transacter, slackClient, slackWebhookClient, configWithDefaultChannel, deployment)
     slackClient.postMessageResponse = PostMessageResponse(ok = true, ts = "1234.5678")
