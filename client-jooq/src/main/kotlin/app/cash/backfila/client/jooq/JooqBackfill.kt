@@ -44,6 +44,16 @@ abstract class JooqBackfill<K, Param : Any> : Backfill {
   }
 
   /**
+   * Intercepts the queries this backfill generates to iterate its records, for databases that need something a
+   * [Condition] cannot express. Defaults to [JooqQueryInterceptor.NONE], which changes nothing.
+   *
+   * Scoped to the generated queries: it does not apply to the work [backfill] does on the transacter it is handed. See
+   * [JooqQueryInterceptor], and [SqlTransformingQueryInterceptor] for the common case of adding a directive to the
+   * generated SQL.
+   */
+  open val queryInterceptor: JooqQueryInterceptor = JooqQueryInterceptor.NONE
+
+  /**
    * List of fields that uniquely identifies keys to backfill.
    *
    * Note: this could be a list of a single field when you aren't using a real compound key.
@@ -102,13 +112,19 @@ abstract class JooqBackfill<K, Param : Any> : Backfill {
       .build()
   }
 
+  /**
+   * Runs [work] in a transaction on the partition's transacter, with [queryInterceptor] applied to the context [work]
+   * receives. Every query the library generates runs through here, which is what scopes the interceptor to them.
+   */
   fun <T> inTransactionReturning(
     comment: String,
     partitionName: String?,
     work: (dslContext: DSLContext) -> T,
   ): T {
     val transacterBackfill: BackfillJooqTransacter = getTransacter(partitionName)
-    return transacterBackfill.transaction(comment, work)
+    return transacterBackfill.transaction(comment) { dslContext ->
+      work(queryInterceptor.intercept(dslContext))
+    }
   }
 
   fun sortingByCompoundKeyFields(

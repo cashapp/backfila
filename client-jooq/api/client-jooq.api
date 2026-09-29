@@ -62,6 +62,7 @@ public abstract class app/cash/backfila/client/jooq/JooqBackfill : app/cash/back
 	public final fun fromByteString (Lokio/ByteString;)Ljava/lang/Object;
 	public abstract fun getCompoundKeyFields ()Ljava/util/List;
 	public abstract fun getKeySerializer ()Lapp/cash/backfila/client/jooq/ByteStringSerializer;
+	public fun getQueryInterceptor ()Lapp/cash/backfila/client/jooq/JooqQueryInterceptor;
 	public abstract fun getShardedTransacterMap ()Ljava/util/Map;
 	public final fun getSqlDialect ()Lorg/jooq/SQLDialect;
 	public abstract fun getTable ()Lorg/jooq/TableLike;
@@ -85,6 +86,20 @@ public final class app/cash/backfila/client/jooq/JooqBackfillModule : com/google
 public final class app/cash/backfila/client/jooq/JooqBackfillModule$Companion {
 	public final fun create (Ljava/lang/Class;)Lapp/cash/backfila/client/jooq/JooqBackfillModule;
 	public final fun create (Lkotlin/reflect/KClass;)Lapp/cash/backfila/client/jooq/JooqBackfillModule;
+}
+
+public abstract interface class app/cash/backfila/client/jooq/JooqQueryInterceptor {
+	public static final field Companion Lapp/cash/backfila/client/jooq/JooqQueryInterceptor$Companion;
+	public static final field NONE Lapp/cash/backfila/client/jooq/JooqQueryInterceptor;
+	public abstract fun intercept (Lorg/jooq/DSLContext;)Lorg/jooq/DSLContext;
+}
+
+public final class app/cash/backfila/client/jooq/JooqQueryInterceptor$Companion {
+}
+
+public final class app/cash/backfila/client/jooq/SqlTransformingQueryInterceptor : app/cash/backfila/client/jooq/JooqQueryInterceptor {
+	public fun <init> (Lkotlin/jvm/functions/Function1;)V
+	public fun intercept (Lorg/jooq/DSLContext;)Lorg/jooq/DSLContext;
 }
 
 public class app/cash/backfila/client/jooq/gen/DefaultCatalog : org/jooq/impl/CatalogImpl {
