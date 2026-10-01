@@ -41,6 +41,7 @@ class GetServiceDetailsAction @Inject constructor(
       val dbService = queryFactory.newQuery<ServiceQuery>()
         .registryName(service)
         .variant(variant)
+        .notDeleted()
         .uniqueResult(session) ?: throw BadRequestException("`$service`-`$variant` doesn't exist")
 
       GetServiceDetailsResponse(

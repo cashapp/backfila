@@ -198,6 +198,15 @@ public final class app/cash/backfila/dashboard/CreateBackfillAction : misk/web/a
 	public final fun create (Ljava/lang/String;Ljava/lang/String;Lapp/cash/backfila/protos/service/CreateBackfillRequest;)Lapp/cash/backfila/protos/service/CreateBackfillResponse;
 }
 
+public final class app/cash/backfila/dashboard/DeleteServiceVariantAction : misk/web/actions/WebAction {
+	public static final field Companion Lapp/cash/backfila/dashboard/DeleteServiceVariantAction$Companion;
+	public fun <init> (Lmisk/hibernate/Transacter;Lmisk/hibernate/Query$Factory;Ljava/time/Clock;Lmisk/scope/ActionScoped;Lmisk/audit/AuditClient;)V
+	public final fun delete (Ljava/lang/String;Ljava/lang/String;)Lmisk/web/Response;
+}
+
+public final class app/cash/backfila/dashboard/DeleteServiceVariantAction$Companion {
+}
+
 public final class app/cash/backfila/dashboard/EditPartitionCursorAction : misk/web/actions/WebAction {
 	public static final field Companion Lapp/cash/backfila/dashboard/EditPartitionCursorAction$Companion;
 	public fun <init> (Lapp/cash/backfila/dashboard/GetBackfillStatusAction;Lapp/cash/backfila/ui/components/DashboardPageLayout;)V
@@ -977,6 +986,7 @@ public class app/cash/backfila/service/persistence/DbService : misk/hibernate/Db
 	public fun getConnector ()Ljava/lang/String;
 	public fun getConnector_extra_data ()Ljava/lang/String;
 	public fun getCreated_at ()Ljava/time/Instant;
+	public fun getDeleted_at ()Ljava/time/Instant;
 	public fun getId ()Lmisk/hibernate/Id;
 	public fun getLast_registered_at ()Ljava/time/Instant;
 	public fun getRegistry_name ()Ljava/lang/String;
@@ -986,6 +996,7 @@ public class app/cash/backfila/service/persistence/DbService : misk/hibernate/Db
 	public fun setConnector (Ljava/lang/String;)V
 	public fun setConnector_extra_data (Ljava/lang/String;)V
 	public fun setCreated_at (Ljava/time/Instant;)V
+	public fun setDeleted_at (Ljava/time/Instant;)V
 	public fun setId (Lmisk/hibernate/Id;)V
 	public fun setLast_registered_at (Ljava/time/Instant;)V
 	public fun setRegistry_name (Ljava/lang/String;)V
@@ -1019,6 +1030,7 @@ public abstract interface class app/cash/backfila/service/persistence/RunPartiti
 
 public abstract interface class app/cash/backfila/service/persistence/ServiceQuery : misk/hibernate/Query {
 	public abstract fun id (Lmisk/hibernate/Id;)Lapp/cash/backfila/service/persistence/ServiceQuery;
+	public abstract fun notDeleted ()Lapp/cash/backfila/service/persistence/ServiceQuery;
 	public abstract fun orderByName ()Lapp/cash/backfila/service/persistence/ServiceQuery;
 	public abstract fun orderByVariant ()Lapp/cash/backfila/service/persistence/ServiceQuery;
 	public abstract fun registryName (Ljava/lang/String;)Lapp/cash/backfila/service/persistence/ServiceQuery;
