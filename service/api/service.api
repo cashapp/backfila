@@ -212,7 +212,9 @@ public final class app/cash/backfila/dashboard/EditPartitionCursorHandlerAction 
 	public static final field Companion Lapp/cash/backfila/dashboard/EditPartitionCursorHandlerAction$Companion;
 	public fun <init> (Lapp/cash/backfila/dashboard/GetBackfillStatusAction;Lmisk/hibernate/Transacter;Lmisk/hibernate/Query$Factory;Lapp/cash/backfila/ui/components/DashboardPageLayout;)V
 	public final fun get (JJLjava/lang/String;Ljava/lang/String;)Lmisk/web/Response;
+	public final fun get (JJLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/web/Response;
 	public static synthetic fun get$default (Lapp/cash/backfila/dashboard/EditPartitionCursorHandlerAction;JJLjava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/Response;
+	public static synthetic fun get$default (Lapp/cash/backfila/dashboard/EditPartitionCursorHandlerAction;JJLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/Response;
 }
 
 public final class app/cash/backfila/dashboard/EditPartitionCursorHandlerAction$Companion {

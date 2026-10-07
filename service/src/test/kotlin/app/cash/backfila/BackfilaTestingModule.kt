@@ -41,7 +41,7 @@ internal class BackfilaTestingModule : KAbstractModule() {
           "backfila-001" to DataSourceClusterConfig(
             writer = DataSourceConfig(
               type = DataSourceType.MYSQL,
-              database = "backfila_test",
+              database = System.getenv("BACKFILA_TEST_DATABASE") ?: "backfila_test",
               username = "root",
               migrations_resource = "classpath:/migrations",
             ),

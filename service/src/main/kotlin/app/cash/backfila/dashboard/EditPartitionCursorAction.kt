@@ -46,18 +46,19 @@ class EditPartitionCursorAction @Inject constructor(
 
     val partitionName = partition.name
     val cursorSnapshot = partition.pkey_cursor
+    val rangeEnd = partition.pkey_end
 
     return Response(
       dashboardPageLayout.newBuilder()
-        .title("Edit Cursor - Partition $partitionName")
+        .title("Edit Partition - $partitionName")
         .breadcrumbLinks(
           Link("Backfill #$id", BackfillShowAction.path(id)),
-          Link("Edit Cursor", path(id, partitionId)),
+          Link("Edit Partition", path(id, partitionId)),
         )
         .buildHtmlResponseBody {
           div("space-y-6 max-w-2xl mx-auto py-8") {
             h1("text-xl font-semibold") {
-              +"Edit Cursor for Partition: $partitionName"
+              +"Edit Partition: $partitionName"
             }
 
             div("rounded-md bg-yellow-50 p-4 mb-6") {
@@ -70,11 +71,11 @@ class EditPartitionCursorAction @Inject constructor(
                 }
                 div("ml-3") {
                   h1("text-sm font-medium text-yellow-800") {
-                    +"Warning: Editing cursors can be dangerous"
+                    +"Warning: Editing partition bounds can skip records"
                   }
                   div("mt-2 text-sm text-yellow-700") {
                     p {
-                      +"Make sure you understand the implications of changing the cursor position. Records between the old and new cursor positions may be skipped or processed multiple times."
+                      +"Moving the cursor can skip or repeat records. Lowering the range end excludes later records. Use the client's key format and range-end convention."
                     }
                   }
                 }
@@ -89,6 +90,11 @@ class EditPartitionCursorAction @Inject constructor(
                 type = InputType.hidden
                 name = "cursor_snapshot"
                 value = cursorSnapshot ?: ""
+              }
+              input {
+                type = InputType.hidden
+                name = "range_end_snapshot"
+                value = rangeEnd ?: ""
               }
 
               div("space-y-4") {
@@ -117,12 +123,29 @@ class EditPartitionCursorAction @Inject constructor(
                       type = InputType.text
                       name = "new_cursor"
                       attributes["id"] = "new_cursor"
-                      value = cursorSnapshot ?: ""
-                      required = true
                     }
                   }
                   p("mt-2 text-sm text-gray-500") {
-                    +"Enter the new cursor value. It cannot be empty."
+                    +"Leave blank to keep the current cursor."
+                  }
+                }
+
+                div {
+                  label("block text-sm font-medium text-gray-700") {
+                    htmlFor = "new_range_end"
+                    +"New Range End"
+                  }
+                  div("mt-1") {
+                    input(classes = "block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6") {
+                      type = InputType.text
+                      name = "new_range_end"
+                      attributes["id"] = "new_range_end"
+                      placeholder = rangeEnd ?: "No range end"
+                      disabled = rangeEnd == null
+                    }
+                  }
+                  p("mt-2 text-sm text-gray-500") {
+                    +"Leave blank to keep the current end. Changing the end restarts counting over the new range when resumed. Only partitions with an existing UTF-8 end support this edit."
                   }
                 }
 
@@ -132,7 +155,7 @@ class EditPartitionCursorAction @Inject constructor(
                   }
                   button(classes = "rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600") {
                     type = ButtonType.submit
-                    +"Update Cursor"
+                    +"Update Partition"
                   }
                 }
               }

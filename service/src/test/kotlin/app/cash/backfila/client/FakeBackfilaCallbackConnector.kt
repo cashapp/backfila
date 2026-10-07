@@ -22,6 +22,8 @@ class FakeBackfilaCallbackConnector @Inject constructor() : BackfilaCallbackConn
   /** Send empty data here to signal GetNextBatchRange should return the next batch. */
   val getNextBatchRangeResponses = Channel<Result<GetNextBatchRangeResponse>>()
 
+  var beforeGetNextBatchRange: suspend (GetNextBatchRangeRequest) -> Unit = {}
+
   val runBatchRequests = Channel<RunBatchRequest>()
 
   /** Send responses or exceptions here to return them to the runner. */
@@ -59,6 +61,7 @@ class FakeBackfilaCallbackConnector @Inject constructor() : BackfilaCallbackConn
 
   override suspend fun getNextBatchRange(request: GetNextBatchRangeRequest):
     GetNextBatchRangeResponse {
+    beforeGetNextBatchRange(request)
     if (!getNextBatchRangeRequests.isClosedForSend) {
       getNextBatchRangeRequests.send(request)
       return getNextBatchRangeResponses.receive().getOrThrow()

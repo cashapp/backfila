@@ -35,6 +35,14 @@ class EditPartitionCursorHandlerAction @Inject constructor(
   private val dashboardPageLayout: DashboardPageLayout,
 ) : WebAction {
 
+  // Keep the published cursor-only entry point for callers compiled against older service versions.
+  fun get(
+    id: Long,
+    partitionId: Long,
+    cursor_snapshot: String? = null,
+    new_cursor: String? = null,
+  ): Response<ResponseBody> = get(id, partitionId, cursor_snapshot, new_cursor, null, null)
+
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
   @Authenticated(capabilities = ["users"])
@@ -43,10 +51,15 @@ class EditPartitionCursorHandlerAction @Inject constructor(
     @PathParam partitionId: Long,
     @QueryParam cursor_snapshot: String? = null,
     @QueryParam new_cursor: String? = null,
+    @QueryParam new_range_end: String? = null,
+    @QueryParam range_end_snapshot: String? = null,
   ): Response<ResponseBody> {
     val cursorSnapshot = cursor_snapshot?.takeIf { it.isNotBlank() }
     val newCursor = new_cursor?.takeIf { it.isNotBlank() }
-      ?: return buildErrorResponse("New cursor is required.")
+    val newRangeEnd = new_range_end?.takeIf { it.isNotBlank() }
+    if (newCursor == null && newRangeEnd == null) {
+      return buildErrorResponse("A new cursor or a new range end is required.")
+    }
 
     val backfill = getBackfillStatusAction.status(id)
     if (backfill.state != BackfillState.PAUSED) {
@@ -56,13 +69,20 @@ class EditPartitionCursorHandlerAction @Inject constructor(
     val partition = backfill.partitions.find { it.id == partitionId }
       ?: return buildErrorResponse("Partition $partitionId not found in backfill $id")
 
-    return when (compareAndSetCursor(id, partitionId, cursorSnapshot, newCursor)) {
+    return when (compareAndSetCursor(id, partitionId, cursorSnapshot, newCursor, newRangeEnd, range_end_snapshot)) {
       CursorUpdate.UPDATED -> redirectToBackfillPage(id)
       CursorUpdate.CURSOR_NOT_UTF8 -> buildErrorResponse(
         "Partition ${partition.name} has a cursor that is not valid UTF-8, so it cannot be edited here.",
       )
       CursorUpdate.SNAPSHOT_STALE -> buildErrorResponse(
-        "Cursor has changed since edit form was loaded. Current Cursor: ${partition.pkey_cursor}",
+        "The cursor or range end has changed since the edit form was loaded. Reload the form and try again.",
+      )
+      CursorUpdate.NOT_PAUSED -> buildErrorResponse("The partition must still be paused. Reload the form and try again.")
+      CursorUpdate.LEASE_ACTIVE -> buildErrorResponse(
+        "Wait for the runner to release this partition before editing. If its runner crashed, resume the backfill to recover the lease, then pause it again.",
+      )
+      CursorUpdate.RANGE_END_NOT_EDITABLE -> buildErrorResponse(
+        "Only partitions with an existing UTF-8 range end can have their end edited here.",
       )
     }
   }
@@ -81,12 +101,14 @@ class EditPartitionCursorHandlerAction @Inject constructor(
     )
   }
 
-  /** The form round-trips the snapshot through `utf8()`, so bytes that are not UTF-8 cannot be compared. */
+  /** Validate snapshots only for fields being edited, preserving untouched bytes as stored. */
   private fun compareAndSetCursor(
     id: Long,
     partitionId: Long,
     cursorSnapshot: String?,
-    newCursor: String,
+    newCursor: String?,
+    newRangeEnd: String?,
+    rangeEndSnapshot: String?,
   ): CursorUpdate = transacter.transaction { session ->
     val partitionRecord = queryFactory.newQuery<RunPartitionQuery>()
       .backfillRunId(Id(id))
@@ -94,18 +116,49 @@ class EditPartitionCursorHandlerAction @Inject constructor(
       .uniqueResult(session)
       ?: throw BadRequestException("Partition $partitionId not found in backfill $id")
 
-    val storedCursor = partitionRecord.pkey_cursor
-    if (storedCursor != null && storedCursor.utf8().encodeUtf8() != storedCursor) {
-      return@transaction CursorUpdate.CURSOR_NOT_UTF8
+    if (partitionRecord.run_state != BackfillState.PAUSED ||
+      partitionRecord.backfill_run.state != BackfillState.PAUSED
+    ) {
+      return@transaction CursorUpdate.NOT_PAUSED
     }
-    if (storedCursor != cursorSnapshot?.encodeUtf8()) {
-      return@transaction CursorUpdate.SNAPSHOT_STALE
+    // Expiry alone does not stop a stalled runner from persisting its old cursor and counts.
+    if (partitionRecord.lease_token != null) {
+      return@transaction CursorUpdate.LEASE_ACTIVE
     }
-    partitionRecord.pkey_cursor = newCursor.encodeUtf8()
+
+    if (newCursor != null) {
+      val storedCursor = partitionRecord.pkey_cursor
+      if (storedCursor != null && storedCursor.utf8().encodeUtf8() != storedCursor) {
+        return@transaction CursorUpdate.CURSOR_NOT_UTF8
+      }
+      if (storedCursor != cursorSnapshot?.encodeUtf8()) {
+        return@transaction CursorUpdate.SNAPSHOT_STALE
+      }
+    }
+    val storedEnd = partitionRecord.pkey_range_end
+    if (newRangeEnd != null) {
+      // Unbounded clients (including S3) do not necessarily honor an end in batch requests.
+      if (storedEnd == null || storedEnd.utf8().encodeUtf8() != storedEnd) {
+        return@transaction CursorUpdate.RANGE_END_NOT_EDITABLE
+      }
+      if (storedEnd != rangeEndSnapshot?.encodeUtf8()) {
+        return@transaction CursorUpdate.SNAPSHOT_STALE
+      }
+    }
+    newCursor?.let { partitionRecord.pkey_cursor = it.encodeUtf8() }
+    if (newRangeEnd != null && newRangeEnd.encodeUtf8() != storedEnd) {
+      partitionRecord.pkey_range_end = newRangeEnd.encodeUtf8()
+      // Completed and partial totals both describe the previous range. Recount the edited range
+      // on the next lease without changing the history of records already processed.
+      partitionRecord.precomputing_done = false
+      partitionRecord.precomputing_pkey_cursor = null
+      partitionRecord.computed_scanned_record_count = 0
+      partitionRecord.computed_matching_record_count = 0
+    }
     CursorUpdate.UPDATED
   }
 
-  private enum class CursorUpdate { UPDATED, SNAPSHOT_STALE, CURSOR_NOT_UTF8 }
+  private enum class CursorUpdate { UPDATED, SNAPSHOT_STALE, CURSOR_NOT_UTF8, NOT_PAUSED, LEASE_ACTIVE, RANGE_END_NOT_EDITABLE }
 
   private fun redirectToBackfillPage(id: Long): Response<ResponseBody> {
     return Response(
