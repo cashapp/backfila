@@ -35,9 +35,9 @@ jettyServlet = { module = "org.eclipse.jetty:jetty-servlet", version.ref = "jett
 jettyWebsocketServer = { module = "org.eclipse.jetty.websocket:websocket-jetty-server", version.ref = "jetty" }
 jettyWebsocketServlet = { module = "org.eclipse.jetty.websocket:websocket-servlet", version.ref = "jetty" }
 javaxInject = { module = "javax.inject:javax.inject", version = "1" }
-junitApi = { module = "org.junit.jupiter:junit-jupiter-api", version = "5.14.4" }
-junitEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version = "5.14.4" }
-junitParams = { module = "org.junit.jupiter:junit-jupiter-params", version = "5.14.4" }
+junitApi = { module = "org.junit.jupiter:junit-jupiter-api", version = "6.1.0" }
+junitEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version = "6.1.0" }
+junitParams = { module = "org.junit.jupiter:junit-jupiter-params", version = "6.1.0" }
 logbackClassic = { module = "ch.qos.logback:logback-classic", version = "1.5.32" }
 loggingApi = { module = "io.github.microutils:kotlin-logging", version = "2.1.23" }
 mavenPublishGradlePlugin = { module = "com.vanniktech:gradle-maven-publish-plugin", version = "0.31.0" }
