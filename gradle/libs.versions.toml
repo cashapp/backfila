@@ -7,7 +7,7 @@ kotlinBinaryCompatibilityPlugin = "0.18.1"
 kotlinxCoroutines = "1.11.0"
 ktlint = "0.47.1"
 misk = "2026.05.30.235949-9f75c59"
-okhttp = "5.3.2"
+okhttp = "5.4.0"
 sqldelight = "2.2.1"
 wire = "6.4.0"
 
