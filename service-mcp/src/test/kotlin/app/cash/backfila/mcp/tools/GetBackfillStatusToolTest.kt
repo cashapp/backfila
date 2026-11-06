@@ -1,6 +1,10 @@
 package app.cash.backfila.mcp.tools
 
+import app.cash.backfila.dashboard.GetBackfillStatusResponse
+import app.cash.backfila.dashboard.UiEventLog
+import app.cash.backfila.dashboard.UiPartition
 import app.cash.backfila.mcp.BackfilaMcpTestingModule
+import app.cash.backfila.mcp.assertMapsEveryField
 import app.cash.backfila.mcp.callStructured
 import app.cash.backfila.mcp.createRun
 import app.cash.backfila.mcp.logEvent
@@ -245,6 +249,34 @@ class GetBackfillStatusToolTest {
   fun `every event log type has a counterpart`() {
     assertThat(GetBackfillStatusOutput.EventLogType.entries.map { it.name })
       .containsExactlyElementsOf(DbEventLog.Type.entries.map { it.name })
+  }
+
+  @Test
+  fun `maps every field of the dashboard's status`() {
+    assertMapsEveryField(
+      GetBackfillStatusResponse::class,
+      GetBackfillStatusOutput::class,
+      renamed = mapOf(
+        "service_name" to "service",
+        "name" to "backfill_name",
+        "next_offset" to "next_event_log_pagination_token",
+      ),
+    )
+    assertMapsEveryField(
+      UiPartition::class,
+      GetBackfillStatusOutput.Partition::class,
+      omitted = setOf(
+        "id",
+        "pkey_cursor",
+        "pkey_start",
+        "pkey_end",
+        "precomputing_pkey_cursor",
+        "computed_scanned_record_count",
+        "backfilled_scanned_record_count",
+        "scanned_records_per_minute",
+      ),
+    )
+    assertMapsEveryField(UiEventLog::class, GetBackfillStatusOutput.EventLog::class)
   }
 
   private suspend fun getBackfillStatus(
