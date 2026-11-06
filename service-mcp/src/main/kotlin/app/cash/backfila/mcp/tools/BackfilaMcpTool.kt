@@ -3,7 +3,12 @@ package app.cash.backfila.mcp.tools
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import misk.mcp.StructuredMcpTool
 
-/** Base for Backfila's MCP tools. Implement [call], and throw [ToolError] for problems the agent can fix. */
+/**
+ * Base for Backfila's MCP tools. Implement [call], and throw [ToolError] for problems the agent can fix.
+ *
+ * Output goes into the agent's context, so keep the default response small. Put large sections behind
+ * `include_<section>: Boolean` inputs rather than returning them every time.
+ */
 internal abstract class BackfilaMcpTool<I : Any, O : Any> : StructuredMcpTool<I, O>() {
   abstract suspend fun call(input: I): O
 
