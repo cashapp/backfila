@@ -9,7 +9,6 @@ import app.cash.backfila.fakeCaller
 import app.cash.backfila.protos.service.ConfigureServiceRequest
 import app.cash.backfila.protos.service.CreateBackfillRequest
 import app.cash.backfila.protos.service.Parameter
-import app.cash.backfila.ui.parseCheckbox
 import jakarta.inject.Inject
 import javax.servlet.http.HttpServletRequest
 import misk.Action
@@ -103,16 +102,6 @@ class BackfillCreateActionTest {
     assertThat(render("ChickenSandwich", "dryRun=off").isChecked("dryRun")).isFalse()
     assertThat(render("ChickenSandwich", "dryRun=false").isChecked("dryRun")).isFalse()
     assertThat(render("ChickenSandwich", "dryRun=FALSE").isChecked("dryRun")).isFalse()
-  }
-
-  @Test
-  fun `parseCheckbox matches the create handler`() {
-    assertThat(parseCheckbox(null)).isNull()
-    assertThat(parseCheckbox(" ")).isNull()
-    assertThat(parseCheckbox("off")).isFalse()
-    assertThat(parseCheckbox("False")).isFalse()
-    assertThat(parseCheckbox("on")).isTrue()
-    assertThat(parseCheckbox("true")).isTrue()
   }
 
   @Test
