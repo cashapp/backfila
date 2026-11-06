@@ -1,6 +1,8 @@
 package app.cash.backfila.mcp.tools
 
+import app.cash.backfila.dashboard.GetServicesAction
 import app.cash.backfila.mcp.BackfilaMcpTestingModule
+import app.cash.backfila.mcp.assertMapsEveryField
 import app.cash.backfila.mcp.callStructured
 import app.cash.backfila.mcp.mcpClient
 import app.cash.backfila.mcp.registerService
@@ -53,5 +55,10 @@ class ListServicesToolTest {
       ListServicesOutput.Service(name = "deep-fryer", variants = listOf("default", "staging"), running_backfills = 0),
       ListServicesOutput.Service(name = "grill", variants = listOf("default"), running_backfills = 0),
     )
+  }
+
+  @Test
+  fun `maps every field of the dashboard's services`() {
+    assertMapsEveryField(GetServicesAction.UiService::class, ListServicesOutput.Service::class)
   }
 }
