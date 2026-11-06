@@ -19,7 +19,7 @@ internal class BackfilaMcpInstructions @Inject constructor(
       "",
       "- A service is identified by its name and a variant. Services with a single deployment use the variant \"default\".",
       "- Call list_services first to find valid service names and variants.",
-      "- From a service, use list_registered_backfills to see which backfills it can run, or list_backfill_runs to see runs that exist.",
+      "- From a service, use list_registered_backfills to see which backfills it can run, or list_backfill_runs to see runs that exist. Then call get_backfill_status for one run.",
       "- When you tell the user about a run, include its backfila_url so they can open it.",
       "- These tools are read-only. To create a backfill, send the user to the Backfila dashboard. To start, pause, or cancel a run, send them to its backfila_url."
         .takeIf { config.mcp.read_only },

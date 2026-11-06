@@ -5,6 +5,7 @@ import app.cash.backfila.protos.clientservice.KeyRange
 import app.cash.backfila.protos.service.Parameter
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.DbBackfillRun
+import app.cash.backfila.service.persistence.DbEventLog
 import app.cash.backfila.service.persistence.DbRegisteredBackfill
 import app.cash.backfila.service.persistence.DbRunPartition
 import app.cash.backfila.service.persistence.DbService
@@ -99,6 +100,16 @@ internal fun Transacter.createRun(
     ),
   )
   runId
+}
+
+internal fun Transacter.logEvent(
+  runId: Id<DbBackfillRun>,
+  type: DbEventLog.Type,
+  message: String,
+  user: String? = null,
+  extraData: String? = null,
+): Id<DbEventLog> = transaction { session ->
+  session.save(DbEventLog(runId, user = user, type = type, message = message, extra_data = extraData))
 }
 
 internal fun Transacter.registerService(name: String, variant: String = "default"): Id<DbService> =
