@@ -1,13 +1,13 @@
 package app.cash.backfila.mcp.tools
 
 import app.cash.backfila.mcp.BackfilaMcpTestingModule
+import app.cash.backfila.mcp.callStructured
 import app.cash.backfila.mcp.mcpClient
 import app.cash.backfila.mcp.registerService
 import app.cash.backfila.service.persistence.BackfilaDb
 import com.google.inject.Module
 import jakarta.inject.Inject
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -47,10 +47,8 @@ class ListServicesToolTest {
     transacter.registerService("deep-fryer", "staging")
     transacter.registerService("grill")
 
-    val result = jettyService.mcpClient().callTool(name = "list_services", arguments = mapOf())
+    val output = jettyService.mcpClient().callStructured<ListServicesOutput>("list_services")
 
-    assertThat(result.isError).isNotEqualTo(true)
-    val output = Json.decodeFromJsonElement(ListServicesOutput.serializer(), result.structuredContent!!)
     assertThat(output.services).containsExactly(
       ListServicesOutput.Service(name = "deep-fryer", variants = listOf("default", "staging"), running_backfills = 0),
       ListServicesOutput.Service(name = "grill", variants = listOf("default"), running_backfills = 0),

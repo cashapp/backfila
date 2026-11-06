@@ -5,7 +5,7 @@ import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.serialization.Serializable
 import misk.mcp.Description
-import misk.mcp.StructuredMcpToolEmptyInput
+import misk.mcp.EmptyInput
 
 @Serializable
 internal data class ListServicesOutput(
@@ -25,7 +25,7 @@ internal data class ListServicesOutput(
 @Singleton
 internal class ListServicesTool @Inject constructor(
   private val getServicesAction: GetServicesAction,
-) : StructuredMcpToolEmptyInput<ListServicesOutput>() {
+) : BackfilaMcpTool<EmptyInput, ListServicesOutput>() {
   override val name = "list_services"
   override val title = "List services"
   override val description =
@@ -33,7 +33,7 @@ internal class ListServicesTool @Inject constructor(
   override val readOnlyHint = true
   override val openWorldHint = false
 
-  override suspend fun handle(): ToolResult {
+  override suspend fun call(input: EmptyInput): ListServicesOutput {
     val services = getServicesAction.services().services.map { service ->
       ListServicesOutput.Service(
         name = service.name,
@@ -41,6 +41,6 @@ internal class ListServicesTool @Inject constructor(
         running_backfills = service.running_backfills,
       )
     }
-    return ToolResult(ListServicesOutput(services))
+    return ListServicesOutput(services)
   }
 }

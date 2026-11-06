@@ -5,10 +5,12 @@ import app.cash.backfila.service.persistence.DbService
 import io.modelcontextprotocol.kotlin.sdk.client.Client
 import misk.hibernate.Id
 import misk.hibernate.Transacter
+import misk.mcp.decode
 import misk.mcp.testing.asMcpStreamableHttpClient
 import misk.security.authz.FakeCallerAuthenticator
 import misk.web.jetty.JettyService
 import okhttp3.OkHttpClient
+import org.assertj.core.api.Assertions.assertThat
 
 /** Connects an MCP client to this test's server, authenticated as [user]. */
 internal suspend fun JettyService.mcpClient(user: String = "molly"): Client {
@@ -22,6 +24,19 @@ internal suspend fun JettyService.mcpClient(user: String = "molly"): Client {
     }
     .build()
   return httpClient.asMcpStreamableHttpClient(httpServerUrl, "/mcp")
+}
+
+/**
+ * Calls [name] and decodes its structured output, failing if the tool returned an error. Decodes with
+ * misk-mcp's JSON settings, which omit null fields.
+ */
+internal suspend inline fun <reified T : Any> Client.callStructured(
+  name: String,
+  arguments: Map<String, Any?> = mapOf(),
+): T {
+  val result = callTool(name = name, arguments = arguments)
+  assertThat(result.isError).describedAs(result.content.toString()).isNotEqualTo(true)
+  return result.structuredContent!!.decode()
 }
 
 internal fun Transacter.registerService(name: String, variant: String = "default"): Id<DbService> =
