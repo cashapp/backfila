@@ -1,6 +1,7 @@
 package app.cash.backfila.mcp
 
 import app.cash.backfila.mcp.tools.ListServicesTool
+import app.cash.backfila.service.BackfilaConfig
 import com.google.inject.Provider
 import kotlin.reflect.KClass
 import misk.inject.KAbstractModule
@@ -12,30 +13,33 @@ import misk.mcp.config.McpServerConfig
 import misk.web.WebActionModule
 
 /**
- * Exposes Backfila tools to AI agents over the Model Context Protocol at `POST /mcp`.
+ * Exposes Backfila tools to AI agents over the Model Context Protocol at `POST /mcp`, configured
+ * by [BackfilaConfig.mcp]. Install it alongside `BackfilaServiceModule` with the same config.
  *
  * The endpoint requires an authenticated user, like the dashboard's read endpoints. As with the
  * dashboard, that is only enforced if the host installs Misk's `AccessControlModule`; without it
  * `/mcp` is open to any caller.
  */
 @ExperimentalBackfilaMcpApi
-class BackfilaMcpModule @JvmOverloads constructor(
-  private val config: BackfilaMcpConfig = BackfilaMcpConfig(),
+class BackfilaMcpModule(
+  private val config: BackfilaConfig,
 ) : KAbstractModule() {
   override fun configure() {
+    val mcpConfig = config.mcp
     val instructions = getProvider(BackfilaMcpInstructions::class.java)
     install(
       McpServerModule.create(
-        name = config.server_name,
-        config = McpConfig(mapOf(config.server_name to McpServerConfig(version = SERVER_VERSION))),
+        name = mcpConfig.server_name,
+        config = McpConfig(mapOf(mcpConfig.server_name to McpServerConfig(version = SERVER_VERSION))),
         instructionsProvider = Provider { instructions.get().text },
+        groupAnnotation = BackfilaMcp::class,
       ),
     )
     install(WebActionModule.create<BackfilaMcpWebAction>())
 
     backfilaMcpTools
-      .filter { it.readOnly || !config.read_only }
-      .forEach { install(McpToolModule.create(it.toolClass, groupAnnotationClass = null)) }
+      .filter { it.readOnly || !mcpConfig.read_only }
+      .forEach { install(McpToolModule.create(it.toolClass, groupAnnotationClass = BackfilaMcp::class)) }
   }
 }
 

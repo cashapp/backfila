@@ -16,7 +16,7 @@ import misk.web.sse.ServerSentEvent
 
 @Singleton
 internal class BackfilaMcpWebAction @Inject constructor(
-  private val mcpStreamManager: McpStreamManager,
+  @BackfilaMcp private val mcpStreamManager: McpStreamManager,
 ) : WebAction {
   // Same access as the dashboard's read endpoints: any authenticated user.
   @McpPost

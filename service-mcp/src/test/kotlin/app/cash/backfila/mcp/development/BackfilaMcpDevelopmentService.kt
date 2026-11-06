@@ -40,6 +40,28 @@ import wisp.deployment.Deployment
 fun main(args: Array<String>) {
   val port = (System.getenv("BACKFILA_PORT") ?: "8080").toInt()
   val deployment = Deployment(name = "backfila", isLocalDevelopment = true)
+  val config = BackfilaConfig(
+    backfill_runner_threads = null,
+    data_source_clusters = DataSourceClustersConfig(
+      mapOf(
+        "backfila-001" to DataSourceClusterConfig(
+          writer = DataSourceConfig(
+            type = DataSourceType.MYSQL,
+            database = System.getenv("BACKFILA_DB_NAME") ?: "backfila_development",
+            username = System.getenv("BACKFILA_DB_USER") ?: "root",
+            migrations_resource = "classpath:/migrations",
+            host = System.getenv("BACKFILA_DB_HOST") ?: "127.0.0.1",
+            port = (System.getenv("BACKFILA_DB_PORT") ?: "3306").toInt(),
+            password = System.getenv("BACKFILA_DB_PASSWORD"),
+            connection_idle_timeout = null,
+          ),
+          reader = null,
+        ),
+      ),
+    ),
+    web_url_root = "http://localhost:$port/",
+    slack = null,
+  )
 
   MiskApplication(
     object : KAbstractModule() {
@@ -56,32 +78,8 @@ fun main(args: Array<String>) {
       }
     },
     DeploymentModule(deployment),
-    BackfilaServiceModule(
-      deployment,
-      BackfilaConfig(
-        backfill_runner_threads = null,
-        data_source_clusters = DataSourceClustersConfig(
-          mapOf(
-            "backfila-001" to DataSourceClusterConfig(
-              writer = DataSourceConfig(
-                type = DataSourceType.MYSQL,
-                database = System.getenv("BACKFILA_DB_NAME") ?: "backfila_development",
-                username = System.getenv("BACKFILA_DB_USER") ?: "root",
-                migrations_resource = "classpath:/migrations",
-                host = System.getenv("BACKFILA_DB_HOST") ?: "127.0.0.1",
-                port = (System.getenv("BACKFILA_DB_PORT") ?: "3306").toInt(),
-                password = System.getenv("BACKFILA_DB_PASSWORD"),
-                connection_idle_timeout = null,
-              ),
-              reader = null,
-            ),
-          ),
-        ),
-        web_url_root = "http://localhost:$port/",
-        slack = null,
-      ),
-    ),
-    BackfilaMcpModule(),
+    BackfilaServiceModule(deployment, config),
+    BackfilaMcpModule(config),
     BackfilaDefaultEndpointConfigModule(),
     MiskRealServiceModule(),
     NoOpAuditClientModule(),

@@ -54,6 +54,6 @@ internal class BackfilaMcpTestingModule : KAbstractModule() {
     install(AccessControlModule())
     multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
 
-    install(BackfilaMcpModule())
+    install(BackfilaMcpModule(config))
   }
 }

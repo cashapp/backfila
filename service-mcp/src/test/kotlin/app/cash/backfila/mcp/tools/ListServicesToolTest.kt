@@ -8,7 +8,9 @@ import com.google.inject.Module
 import jakarta.inject.Inject
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import misk.hibernate.Transacter
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -35,8 +37,8 @@ class ListServicesToolTest {
     val outputSchema = tool.outputSchema!!
     assertThat(outputSchema.required).containsExactly("services")
     val service = outputSchema.properties!!["services"]!!.jsonObject["items"]!!.jsonObject
-    assertThat(service["required"].toString())
-      .contains("\"name\"", "\"variants\"", "\"running_backfills\"")
+    assertThat(service["required"]!!.jsonArray.map { it.jsonPrimitive.content })
+      .containsExactlyInAnyOrder("name", "variants", "running_backfills")
   }
 
   @Test

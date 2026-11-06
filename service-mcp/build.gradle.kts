@@ -12,7 +12,8 @@ plugins {
 }
 
 dependencies {
-  api(libs.miskMcp)
+  api(libs.miskInject)
+  api(project(":service"))
 
   implementation(libs.guice)
   implementation(libs.jakartaInject)
@@ -21,9 +22,7 @@ dependencies {
   implementation(libs.kotlinxSerializationJson)
   implementation(libs.misk)
   implementation(libs.miskActions)
-  implementation(libs.miskInject)
-
-  implementation(project(":service"))
+  implementation(libs.miskMcp)
 
   testImplementation(testFixtures(libs.miskMcp))
   testImplementation(libs.miskAdmin)
@@ -36,6 +35,7 @@ dependencies {
   testImplementation(libs.miskSlack)
   testImplementation(libs.junitApi)
   testImplementation(libs.junitEngine)
+  testImplementation(libs.junitParams)
   testImplementation(libs.kotlinTest)
   testImplementation(libs.assertj)
   testImplementation(libs.okHttp)

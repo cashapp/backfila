@@ -24,6 +24,8 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 
 @MiskTest(startService = true)
 class BackfilaMcpWebActionTest {
@@ -33,7 +35,7 @@ class BackfilaMcpWebActionTest {
     BackfilaMcpTestingModule(),
     object : KAbstractModule() {
       override fun configure() {
-        install(McpToolModule.create<WhoAmITool>())
+        install(McpToolModule.create<BackfilaMcp, WhoAmITool>())
       }
     },
   )
@@ -72,9 +74,10 @@ class BackfilaMcpWebActionTest {
     }
   }
 
-  @Test
-  fun `malformed messages are rejected as bad requests`() {
-    post("{\"not\":\"json-rpc\"", user = "molly").use { response ->
+  @ParameterizedTest
+  @ValueSource(strings = ["{\"not\":\"json-rpc\"", "{\"not\":\"json-rpc\"}", ""])
+  fun `malformed messages are rejected as bad requests`(body: String) {
+    post(body, user = "molly").use { response ->
       assertThat(response.code).isEqualTo(400)
     }
   }

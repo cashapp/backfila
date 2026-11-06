@@ -14,13 +14,14 @@ internal class BackfilaMcpInstructions @Inject constructor(
 ) {
   val text: String by lazy {
     val dashboardRoot = config.web_url_root.trimEnd('/')
-    val dashboard = if (dashboardRoot.isBlank()) "" else "\n- The Backfila dashboard is at $dashboardRoot/."
-    """
-    |Backfila runs backfills: batched jobs that a service registers with Backfila, which Backfila then drives by calling back into that service.
-    |
-    |- A service is identified by its name and a variant. Services with a single deployment use the variant "default".
-    |- Call list_services first to find valid service names and variants.
-    |- These tools are read-only. To create, start, pause, or cancel a backfill, send the user to the Backfila dashboard.
-    """.trimMargin() + dashboard
+    listOfNotNull(
+      "Backfila runs backfills: batched jobs that a service registers with Backfila, which Backfila then drives by calling back into that service.",
+      "",
+      "- A service is identified by its name and a variant. Services with a single deployment use the variant \"default\".",
+      "- Call list_services first to find valid service names and variants.",
+      "- These tools are read-only. To create, start, pause, or cancel a backfill, send the user to the Backfila dashboard."
+        .takeIf { config.mcp.read_only },
+      "- The Backfila dashboard is at $dashboardRoot/.".takeIf { dashboardRoot.isNotBlank() },
+    ).joinToString("\n")
   }
 }
