@@ -80,6 +80,18 @@ class ListRegisteredBackfillsToolTest {
   }
 
   @Test
+  fun `leaves out inactive registrations`(): Unit = runBlocking {
+    val fryer = transacter.registerService("deep-fryer")
+    val removed = transacter.registerBackfill(fryer, "RefillOil")
+    transacter.registerBackfill(fryer, "DrainOil")
+    transacter.transaction { session -> session.load<DbRegisteredBackfill>(removed).active = null }
+
+    val output = listRegisteredBackfills(mapOf("service" to "deep-fryer"))
+
+    assertThat(output.backfills.map { it.name }).containsExactly("DrainOil")
+  }
+
+  @Test
   fun `unknown services are tool errors that point at list_services`(): Unit = runBlocking {
     val result = jettyService.mcpClient().callTool(
       name = "list_registered_backfills",
