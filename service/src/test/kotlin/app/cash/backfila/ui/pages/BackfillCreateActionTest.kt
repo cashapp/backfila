@@ -99,6 +99,48 @@ class BackfillCreateActionTest {
   fun `dryRun off or false unchecks the box`() {
     assertThat(inputTag(render("ChickenSandwich", "dryRun=off"), "dryRun")).doesNotContain("checked=\"checked\"")
     assertThat(inputTag(render("ChickenSandwich", "dryRun=false"), "dryRun")).doesNotContain("checked=\"checked\"")
+    assertThat(inputTag(render("ChickenSandwich", "dryRun=FALSE"), "dryRun")).doesNotContain("checked=\"checked\"")
+  }
+
+  @Test
+  fun `parseCheckbox matches the create handler`() {
+    assertThat(BackfillCreateAction.parseCheckbox(null)).isNull()
+    assertThat(BackfillCreateAction.parseCheckbox(" ")).isNull()
+    assertThat(BackfillCreateAction.parseCheckbox("off")).isFalse()
+    assertThat(BackfillCreateAction.parseCheckbox("False")).isFalse()
+    assertThat(BackfillCreateAction.parseCheckbox("on")).isTrue()
+    assertThat(BackfillCreateAction.parseCheckbox("true")).isTrue()
+  }
+
+  @Test
+  fun `blank or invalid query parameters fall back to defaults`() {
+    val html = render(
+      "ChickenSandwich",
+      "dryRun=&rangeStart=&batchSize=&scanSize=abc&threadsPerPartition=1.5&extraSleepMs=0007" +
+        "&backoffSchedule=&customParameter_param1=",
+    )
+
+    assertThat(inputTag(html, "dryRun")).contains("checked=\"checked\"")
+    assertThat(inputTag(html, "rangeStart")).doesNotContain("value=")
+    assertThat(inputTag(html, "batchSize")).contains("value=\"100\"")
+    assertThat(inputTag(html, "scanSize")).contains("value=\"10000\"")
+    assertThat(inputTag(html, "threadsPerPartition")).contains("value=\"1\"")
+    assertThat(inputTag(html, "extraSleepMs")).contains("value=\"7\"")
+    assertThat(inputTag(html, "backoffSchedule")).doesNotContain("value=")
+    assertThat(inputTag(html, "customParameter_param1")).doesNotContain("value=")
+  }
+
+  @Test
+  fun `blank query parameters keep cloned values`() {
+    val backfillId = createRun()
+
+    val html = render(backfillId, "dryRun=&batchSize=&scanSize=abc&customParameter_param1=&rangeStart=&rangeEnd=")
+    assertThat(inputTag(html, "dryRun")).doesNotContain("checked=\"checked\"")
+    assertThat(inputTag(html, "batchSize")).contains("value=\"123\"")
+    assertThat(inputTag(html, "scanSize")).contains("value=\"223\"")
+    assertThat(inputTag(html, "customParameter_param1")).contains("value=\"val1\"")
+    assertThat(inputTag(html, "range-option-restart")).contains("checked=\"checked\"")
+    assertThat(html).contains("id=\"range-inputs\" style=\"display: none;\"")
   }
 
   @Test

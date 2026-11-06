@@ -99,7 +99,7 @@ class BackfillCreateAction @Inject constructor(
     val resolvedBackfillName = registeredBackfill?.name ?: backfillToClone?.name ?: ""
 
     val prefillUrl = httpCall.get().asOkHttpRequest().url
-    fun prefill(fieldId: String): String? = prefillUrl.queryParameter(fieldId)
+    fun prefill(fieldId: String): String? = prefillUrl.queryParameter(fieldId)?.takeIf { it.isNotBlank() }
     val prefillNewRange = prefill(BackfillCreateField.RANGE_START.fieldId) != null ||
       prefill(BackfillCreateField.RANGE_END.fieldId) != null
 
@@ -192,7 +192,7 @@ class BackfillCreateAction @Inject constructor(
                               name = field
                               type = InputType.checkBox
                               // Set checkbox state based on query parameter, cloned backfill, or default to checked
-                              checked = prefill(field)?.let { it != "off" && it != "false" }
+                              checked = parseCheckbox(prefill(field))
                                 ?: backfillToCloneStatus?.dry_run
                                 ?: true
                             }
@@ -438,7 +438,7 @@ class BackfillCreateAction @Inject constructor(
                           name = field
                           id = field
                           attributes["autocomplete"] = field
-                          value = prefill(field) ?: backfillToCloneStatus?.batch_size?.toString() ?: "100"
+                          value = prefill(field)?.toLongOrNull()?.toString() ?: backfillToCloneStatus?.batch_size?.toString() ?: "100"
                         }
                       }
                     }
@@ -459,7 +459,7 @@ class BackfillCreateAction @Inject constructor(
                           name = field
                           id = field
                           attributes["autocomplete"] = field
-                          value = prefill(field) ?: backfillToCloneStatus?.scan_size?.toString() ?: "10000"
+                          value = prefill(field)?.toLongOrNull()?.toString() ?: backfillToCloneStatus?.scan_size?.toString() ?: "10000"
                         }
                       }
                     }
@@ -478,7 +478,7 @@ class BackfillCreateAction @Inject constructor(
                           name = field
                           id = field
                           attributes["autocomplete"] = field
-                          value = prefill(field) ?: backfillToCloneStatus?.num_threads?.toString() ?: "1"
+                          value = prefill(field)?.toIntOrNull()?.toString() ?: backfillToCloneStatus?.num_threads?.toString() ?: "1"
                         }
                       }
                     }
@@ -497,7 +497,7 @@ class BackfillCreateAction @Inject constructor(
                           name = field
                           id = field
                           attributes["autocomplete"] = field
-                          value = prefill(field) ?: backfillToCloneStatus?.extra_sleep_ms?.toString() ?: "1"
+                          value = prefill(field)?.toLongOrNull()?.toString() ?: backfillToCloneStatus?.extra_sleep_ms?.toString() ?: "1"
                         }
                       }
                     }
@@ -600,5 +600,11 @@ class BackfillCreateAction @Inject constructor(
       .replace("{service}", service)
       .replace("{variantOrBackfillNameOrId}", variantOrBackfillNameOrId)
       .replace("{backfillNameOrIdOrBlank}", backfillNameOrIdOrBlank)
+
+    fun parseCheckbox(value: String?): Boolean? = when (value?.trim()?.lowercase()) {
+      null, "" -> null
+      "off", "false" -> false
+      else -> true
+    }
   }
 }
