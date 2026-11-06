@@ -8,6 +8,9 @@ import misk.mcp.StructuredMcpTool
  *
  * Output goes into the agent's context, so keep the default response small. Put large sections behind
  * `include_<section>: Boolean` inputs rather than returning them every time.
+ *
+ * When output is mapped from one of Backfila's types, test the mapping with `assertMapsEveryField` so
+ * fields added to Backfila aren't silently dropped.
  */
 internal abstract class BackfilaMcpTool<I : Any, O : Any> : StructuredMcpTool<I, O>() {
   abstract suspend fun call(input: I): O

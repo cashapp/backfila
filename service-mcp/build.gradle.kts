@@ -37,6 +37,7 @@ dependencies {
   testImplementation(libs.junitEngine)
   testImplementation(libs.junitParams)
   testImplementation(libs.kotlinTest)
+  testImplementation(libs.kotlinReflection)
   testImplementation(libs.assertj)
   testImplementation(libs.okHttp)
   testImplementation(libs.logbackClassic)
