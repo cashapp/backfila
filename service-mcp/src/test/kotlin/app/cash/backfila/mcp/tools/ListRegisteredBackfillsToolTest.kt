@@ -1,6 +1,7 @@
 package app.cash.backfila.mcp.tools
 
 import app.cash.backfila.mcp.BackfilaMcpTestingModule
+import app.cash.backfila.mcp.assertMapsEveryField
 import app.cash.backfila.mcp.callStructured
 import app.cash.backfila.mcp.mcpClient
 import app.cash.backfila.mcp.registerBackfill
@@ -8,6 +9,7 @@ import app.cash.backfila.mcp.registerService
 import app.cash.backfila.protos.service.Parameter
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.DbRegisteredBackfill
+import app.cash.backfila.service.persistence.DbRegisteredParameter
 import com.google.inject.Module
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import jakarta.inject.Inject
@@ -101,6 +103,34 @@ class ListRegisteredBackfillsToolTest {
     assertThat(result.isError).isTrue()
     assertThat((result.content.single() as TextContent).text)
       .contains("`deep-fryer`-`nope` doesn't exist", "list_services")
+  }
+
+  @Test
+  fun `maps every field of registered backfills and their parameters`() {
+    assertMapsEveryField(
+      DbRegisteredBackfill::class,
+      ListRegisteredBackfillsOutput.RegisteredBackfill::class,
+      omitted = setOf(
+        "id",
+        "service",
+        "service_id",
+        "created_at",
+        "updated_at",
+        "active",
+        "deleted_in_service_at",
+        "delete_by",
+        "parameter_names",
+        "type_provided",
+        "type_consumed",
+        "requires_approval",
+        "unit",
+      ),
+    )
+    assertMapsEveryField(
+      DbRegisteredParameter::class,
+      ListRegisteredBackfillsOutput.Parameter::class,
+      omitted = setOf("id", "registered_backfill", "created_at", "updated_at"),
+    )
   }
 
   private suspend fun listRegisteredBackfills(arguments: Map<String, Any?>): ListRegisteredBackfillsOutput =

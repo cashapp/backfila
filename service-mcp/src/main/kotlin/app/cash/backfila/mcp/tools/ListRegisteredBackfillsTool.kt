@@ -55,7 +55,8 @@ internal class ListRegisteredBackfillsTool @Inject constructor(
   override val openWorldHint = false
 
   // Reads the database directly because the dashboard's GetRegisteredBackfillsAction only returns
-  // parameter names, not their descriptions.
+  // parameter names, not their descriptions. Not paginated, matching that action, which returns all of
+  // a variant's active backfills at once.
   override suspend fun call(input: ListRegisteredBackfillsInput): ListRegisteredBackfillsOutput =
     transacter.transaction { session ->
       val service = queryFactory.newQuery<ServiceQuery>()
