@@ -439,7 +439,9 @@ class BackfillCreateAction @Inject constructor(
                           name = field
                           id = field
                           attributes["autocomplete"] = field
-                          value = prefill(field)?.toLongOrNull()?.toString() ?: backfillToCloneStatus?.batch_size?.toString() ?: "100"
+                          value = prefill(field)?.toLongOrNull()?.toString()
+                            ?: backfillToCloneStatus?.batch_size?.toString()
+                            ?: "100"
                         }
                       }
                     }
@@ -460,7 +462,9 @@ class BackfillCreateAction @Inject constructor(
                           name = field
                           id = field
                           attributes["autocomplete"] = field
-                          value = prefill(field)?.toLongOrNull()?.toString() ?: backfillToCloneStatus?.scan_size?.toString() ?: "10000"
+                          value = prefill(field)?.toLongOrNull()?.toString()
+                            ?: backfillToCloneStatus?.scan_size?.toString()
+                            ?: "10000"
                         }
                       }
                     }
@@ -479,7 +483,9 @@ class BackfillCreateAction @Inject constructor(
                           name = field
                           id = field
                           attributes["autocomplete"] = field
-                          value = prefill(field)?.toIntOrNull()?.toString() ?: backfillToCloneStatus?.num_threads?.toString() ?: "1"
+                          value = prefill(field)?.toIntOrNull()?.toString()
+                            ?: backfillToCloneStatus?.num_threads?.toString()
+                            ?: "1"
                         }
                       }
                     }
@@ -498,7 +504,9 @@ class BackfillCreateAction @Inject constructor(
                           name = field
                           id = field
                           attributes["autocomplete"] = field
-                          value = prefill(field)?.toLongOrNull()?.toString() ?: backfillToCloneStatus?.extra_sleep_ms?.toString() ?: "1"
+                          value = prefill(field)?.toLongOrNull()?.toString()
+                            ?: backfillToCloneStatus?.extra_sleep_ms?.toString()
+                            ?: "1"
                         }
                       }
                     }
