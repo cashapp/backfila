@@ -35,7 +35,7 @@ internal data class ListBackfillRunsOutput(
 ) {
   @Serializable
   data class Run(
-    @Description("Backfill run ID. Pass it to get_backfill_status for details.")
+    @Description("Backfill run ID.")
     val id: Long,
     @Description("Name of the registered backfill this run executes.")
     val backfill_name: String,
