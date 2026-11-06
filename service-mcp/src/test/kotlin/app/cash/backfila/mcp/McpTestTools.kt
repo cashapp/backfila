@@ -1,6 +1,8 @@
 package app.cash.backfila.mcp
 
 import app.cash.backfila.client.Connectors
+import app.cash.backfila.protos.service.Parameter
+import app.cash.backfila.service.persistence.DbRegisteredBackfill
 import app.cash.backfila.service.persistence.DbService
 import io.modelcontextprotocol.kotlin.sdk.client.Client
 import misk.hibernate.Id
@@ -37,6 +39,25 @@ internal suspend inline fun <reified T : Any> Client.callStructured(
   val result = callTool(name = name, arguments = arguments)
   assertThat(result.isError).describedAs(result.content.toString()).isNotEqualTo(true)
   return result.structuredContent!!.decode()
+}
+
+internal fun Transacter.registerBackfill(
+  serviceId: Id<DbService>,
+  name: String,
+  parameters: List<Parameter> = listOf(),
+): Id<DbRegisteredBackfill> = transaction { session ->
+  val backfill = DbRegisteredBackfill(
+    service_id = serviceId,
+    name = name,
+    parameters = parameters,
+    type_provided = null,
+    type_consumed = null,
+    requires_approval = false,
+    delete_by = null,
+  )
+  val id = session.save(backfill)
+  backfill.parameters.forEach { session.save(it) }
+  id
 }
 
 internal fun Transacter.registerService(name: String, variant: String = "default"): Id<DbService> =

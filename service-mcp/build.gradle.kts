@@ -21,6 +21,7 @@ dependencies {
   implementation(libs.kotlinxCoroutines)
   implementation(libs.misk)
   implementation(libs.miskActions)
+  implementation(libs.miskHibernate)
   // Also provides kotlinx-serialization-json, at the version misk is built against.
   implementation(libs.miskMcp)
 
