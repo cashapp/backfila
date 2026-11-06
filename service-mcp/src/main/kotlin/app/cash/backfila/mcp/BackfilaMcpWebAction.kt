@@ -4,7 +4,6 @@ import io.modelcontextprotocol.kotlin.sdk.types.JSONRPCMessage
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.coroutines.channels.SendChannel
-import kotlinx.serialization.SerializationException
 import misk.exceptions.BadRequestException
 import misk.mcp.action.McpPost
 import misk.mcp.action.McpStreamManager
@@ -27,9 +26,11 @@ internal class BackfilaMcpWebAction @Inject constructor(
   suspend fun mcp(sendChannel: SendChannel<ServerSentEvent>) {
     // Decoded here rather than with @RequestBody: misk picks the first unmarshaller that accepts
     // application/json, so the MCP one only wins if this module is installed before MiskWebModule.
+    val body = httpCall.get().takeRequestBody() ?: throw BadRequestException("Missing MCP JSON-RPC message")
     val message = try {
-      httpCall.get().takeRequestBody()!!.readUtf8().decode<JSONRPCMessage>()
-    } catch (e: SerializationException) {
+      body.readUtf8().decode<JSONRPCMessage>()
+    } catch (e: IllegalArgumentException) {
+      // Includes kotlinx.serialization's SerializationException.
       throw BadRequestException("Invalid MCP JSON-RPC message", e)
     }
     mcpStreamManager.withSseChannel(sendChannel) { handleMessage(message) }
