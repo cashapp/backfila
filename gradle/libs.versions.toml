@@ -66,6 +66,7 @@ kotlinAllOpenPlugin = { module = "org.jetbrains.kotlin:kotlin-allopen", version.
 kotlinGradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlinPoet = { module = "com.squareup:kotlinpoet", version = "1.18.1" }
 kotlinReflection = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
+kotlinSerializationPlugin = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
 kotlinStdLib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 kotlinTest = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlinxCoroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
@@ -85,6 +86,7 @@ miskHotwire = { module = "com.squareup.misk:misk-hotwire", version.ref = "misk" 
 miskJdbc = { module = "com.squareup.misk:misk-jdbc", version.ref = "misk" }
 miskInject = { module = "com.squareup.misk:misk-inject", version.ref = "misk" }
 miskLogging = { module = "com.squareup.misk:misk-logging", version.ref = "misk" }
+miskMcp = { module = "com.squareup.misk:misk-mcp", version.ref = "misk" }
 miskMetrics = { module = "com.squareup.misk:misk-metrics", version.ref = "misk" }
 miskMetricsPrometheus = { module = "com.squareup.misk:misk-prometheus", version.ref = "misk" }
 miskService = { module = "com.squareup.misk:misk-service", version.ref = "misk" }
