@@ -1,5 +1,6 @@
 package app.cash.backfila.mcp
 
+import app.cash.backfila.mcp.tools.ListServicesTool
 import app.cash.backfila.service.BackfilaConfig
 import app.cash.backfila.service.BackfilaMcpConfig
 import com.google.inject.Provider
@@ -52,7 +53,9 @@ internal class BackfilaMcpToolBinding(
   val readOnly: Boolean,
 )
 
-internal val backfilaMcpTools: List<BackfilaMcpToolBinding> = listOf()
+internal val backfilaMcpTools: List<BackfilaMcpToolBinding> = listOf(
+  BackfilaMcpToolBinding(ListServicesTool::class, readOnly = true),
+)
 
 internal fun List<BackfilaMcpToolBinding>.boundFor(config: BackfilaMcpConfig) =
   filter { it.readOnly || !config.read_only }
