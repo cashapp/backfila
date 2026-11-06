@@ -21,7 +21,7 @@ internal class BackfilaMcpInstructions @Inject constructor(
       "- Call list_services first to find valid service names and variants.",
       "- From a service, use list_registered_backfills to see which backfills it can run, or list_backfill_runs to see runs that exist.",
       "- When you tell the user about a run, include its backfila_url so they can open it.",
-      "- These tools are read-only. To create, start, pause, or cancel a backfill, send the user to the Backfila dashboard."
+      "- These tools are read-only. To create a backfill, send the user to the Backfila dashboard. To start, pause, or cancel a run, send them to its backfila_url."
         .takeIf { config.mcp.read_only },
       dashboardLinks.home?.let { "- The Backfila dashboard is at $it." },
     ).joinToString("\n")
