@@ -33,6 +33,8 @@ import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 
 @MiskTest(startService = true)
 class BackfillCreateActionTest {
@@ -97,11 +99,10 @@ class BackfillCreateActionTest {
     assertThat(renderHtml("ChickenSandwich", query)).contains("value=\"&quot;&gt;&lt;script&gt;\"")
   }
 
-  @Test
-  fun `dryRun off or false unchecks the box`() {
-    assertThat(render("ChickenSandwich", "dryRun=off").isChecked("dryRun")).isFalse()
-    assertThat(render("ChickenSandwich", "dryRun=false").isChecked("dryRun")).isFalse()
-    assertThat(render("ChickenSandwich", "dryRun=FALSE").isChecked("dryRun")).isFalse()
+  @ParameterizedTest(name = "dryRun={0} unchecks the box")
+  @ValueSource(strings = ["off", "false", "FALSE"])
+  fun `dryRun off or false unchecks the box`(value: String) {
+    assertThat(render("ChickenSandwich", "dryRun=$value").isChecked("dryRun")).isFalse()
   }
 
   @Test
