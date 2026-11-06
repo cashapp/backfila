@@ -1,6 +1,9 @@
 package app.cash.backfila.mcp.tools
 
+import app.cash.backfila.dashboard.GetBackfillRunsResponse
+import app.cash.backfila.dashboard.UiBackfillRun
 import app.cash.backfila.mcp.BackfilaMcpTestingModule
+import app.cash.backfila.mcp.assertMapsEveryField
 import app.cash.backfila.mcp.callStructured
 import app.cash.backfila.mcp.createRun
 import app.cash.backfila.mcp.mcpClient
@@ -146,6 +149,16 @@ class ListBackfillRunsToolTest {
 
     assertThat(result.isError).isTrue()
     assertThat((result.content.single() as TextContent).text).contains("doesn't exist", "list_services")
+  }
+
+  @Test
+  fun `maps every field of the dashboard's runs`() {
+    assertMapsEveryField(
+      GetBackfillRunsResponse::class,
+      ListBackfillRunsOutput::class,
+      renamed = mapOf("running_backfills" to "running_runs", "paused_backfills" to "other_runs"),
+    )
+    assertMapsEveryField(UiBackfillRun::class, ListBackfillRunsOutput.Run::class, renamed = mapOf("name" to "backfill_name"))
   }
 
   private suspend fun listBackfillRuns(arguments: Map<String, Any?>): ListBackfillRunsOutput =
