@@ -7,11 +7,13 @@ import app.cash.backfila.mcp.logEvent
 import app.cash.backfila.mcp.mcpClient
 import app.cash.backfila.mcp.registerBackfill
 import app.cash.backfila.mcp.registerService
+import app.cash.backfila.protos.clientservice.KeyRange
 import app.cash.backfila.protos.service.Parameter
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.DbBackfillRun
 import app.cash.backfila.service.persistence.DbEventLog
+import app.cash.backfila.service.persistence.DbRunPartition
 import com.google.inject.Module
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import jakarta.inject.Inject
@@ -24,6 +26,7 @@ import misk.hibernate.load
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.jetty.JettyService
+import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -122,6 +125,45 @@ class GetBackfillStatusToolTest {
     assertThat(eventLogs.last().user).isEqualTo("molly")
     assertThat(status.next_event_log_pagination_token).isNull()
     assertThat(status.backfila_url).isEqualTo("https://backfila.example.com/backfills/${runId.id}")
+  }
+
+  @Test
+  fun `progress totals partitions, counting only running partitions towards the rate`(): Unit = runBlocking {
+    val fryer = transacter.registerService("deep-fryer")
+    val runId = transacter.createRun(fryer, transacter.registerBackfill(fryer, "RefillOil"), state = BackfillState.RUNNING)
+    transacter.transaction { session ->
+      session.load(runId).partitions(session, queryFactory).single().apply {
+        run_state = BackfillState.COMPLETE
+        precomputing_done = true
+        computed_matching_record_count = 1_000
+        backfilled_matching_record_count = 1_000
+        matching_records_per_minute = 30
+      }
+      session.save(
+        DbRunPartition(
+          backfill_run_id = runId,
+          partition_name = "80-",
+          backfill_range = KeyRange("0".encodeUtf8(), "1000".encodeUtf8()),
+          run_state = BackfillState.RUNNING,
+          estimated_record_count = null,
+        ).apply {
+          computed_matching_record_count = 500
+          backfilled_matching_record_count = 100
+          matching_records_per_minute = 20
+        },
+      )
+    }
+
+    assertThat(getBackfillStatus(runId).progress).isEqualTo(
+      GetBackfillStatusOutput.Progress(
+        partition_count = 2,
+        complete_partition_count = 1,
+        precomputing_done = false,
+        computed_matching_record_count = 1_500,
+        backfilled_matching_record_count = 1_100,
+        matching_records_per_minute = 20,
+      ),
+    )
   }
 
   @Test
