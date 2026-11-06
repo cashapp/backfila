@@ -28,6 +28,9 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okio.Buffer
 import okio.ByteString.Companion.encodeUtf8
 import org.assertj.core.api.Assertions.assertThat
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
+import org.jsoup.nodes.Element
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -66,40 +69,39 @@ class BackfillCreateActionTest {
 
   @Test
   fun `defaults are used without query parameters`() {
-    val html = render("ChickenSandwich")
+    val page = render("ChickenSandwich")
 
-    assertThat(inputTag(html, "dryRun")).contains("checked=\"checked\"")
-    assertThat(inputTag(html, "batchSize")).contains("value=\"100\"")
-    assertThat(inputTag(html, "scanSize")).contains("value=\"10000\"")
-    assertThat(inputTag(html, "rangeStart")).doesNotContain("value=")
-    assertThat(inputTag(html, "customParameter_param1")).doesNotContain("value=")
+    assertThat(page.isChecked("dryRun")).isTrue()
+    assertThat(page.valueOf("batchSize")).isEqualTo("100")
+    assertThat(page.valueOf("scanSize")).isEqualTo("10000")
+    assertThat(page.valueOf("rangeStart")).isNull()
+    assertThat(page.valueOf("customParameter_param1")).isNull()
   }
 
   @Test
   fun `query parameters pre-fill the create form`() {
-    val html = render(
-      "ChickenSandwich",
-      "dryRun=on&rangeStart=10&rangeEnd=20&batchSize=250&scanSize=5000&threadsPerPartition=4" +
-        "&extraSleepMs=7&backoffSchedule=100,200&customParameter_param1=%22%3E%3Cscript%3E",
-    )
+    val query = "dryRun=on&rangeStart=10&rangeEnd=20&batchSize=250&scanSize=5000&threadsPerPartition=4" +
+      "&extraSleepMs=7&backoffSchedule=100,200&customParameter_param1=%22%3E%3Cscript%3E"
+    val page = render("ChickenSandwich", query)
 
-    assertThat(inputTag(html, "dryRun")).contains("checked=\"checked\"")
-    assertThat(inputTag(html, "rangeStart")).contains("value=\"10\"")
-    assertThat(inputTag(html, "rangeEnd")).contains("value=\"20\"")
-    assertThat(inputTag(html, "batchSize")).contains("value=\"250\"")
-    assertThat(inputTag(html, "scanSize")).contains("value=\"5000\"")
-    assertThat(inputTag(html, "threadsPerPartition")).contains("value=\"4\"")
-    assertThat(inputTag(html, "extraSleepMs")).contains("value=\"7\"")
-    assertThat(inputTag(html, "backoffSchedule")).contains("value=\"100,200\"")
-    assertThat(inputTag(html, "customParameter_param1")).contains("value=\"&quot;&gt;&lt;script&gt;\"")
-    assertThat(html).doesNotContain("\"><script>")
+    assertThat(page.isChecked("dryRun")).isTrue()
+    assertThat(page.valueOf("rangeStart")).isEqualTo("10")
+    assertThat(page.valueOf("rangeEnd")).isEqualTo("20")
+    assertThat(page.valueOf("batchSize")).isEqualTo("250")
+    assertThat(page.valueOf("scanSize")).isEqualTo("5000")
+    assertThat(page.valueOf("threadsPerPartition")).isEqualTo("4")
+    assertThat(page.valueOf("extraSleepMs")).isEqualTo("7")
+    assertThat(page.valueOf("backoffSchedule")).isEqualTo("100,200")
+    // jsoup decodes entities, so the escaping itself can only be seen in the raw HTML.
+    assertThat(page.valueOf("customParameter_param1")).isEqualTo("\"><script>")
+    assertThat(renderHtml("ChickenSandwich", query)).contains("value=\"&quot;&gt;&lt;script&gt;\"")
   }
 
   @Test
   fun `dryRun off or false unchecks the box`() {
-    assertThat(inputTag(render("ChickenSandwich", "dryRun=off"), "dryRun")).doesNotContain("checked=\"checked\"")
-    assertThat(inputTag(render("ChickenSandwich", "dryRun=false"), "dryRun")).doesNotContain("checked=\"checked\"")
-    assertThat(inputTag(render("ChickenSandwich", "dryRun=FALSE"), "dryRun")).doesNotContain("checked=\"checked\"")
+    assertThat(render("ChickenSandwich", "dryRun=off").isChecked("dryRun")).isFalse()
+    assertThat(render("ChickenSandwich", "dryRun=false").isChecked("dryRun")).isFalse()
+    assertThat(render("ChickenSandwich", "dryRun=FALSE").isChecked("dryRun")).isFalse()
   }
 
   @Test
@@ -114,41 +116,42 @@ class BackfillCreateActionTest {
 
   @Test
   fun `blank or invalid query parameters fall back to defaults`() {
-    val html = render(
+    val page = render(
       "ChickenSandwich",
       "dryRun=&rangeStart=&batchSize=&scanSize=abc&threadsPerPartition=1.5&extraSleepMs=0007" +
         "&backoffSchedule=&customParameter_param1=",
     )
 
-    assertThat(inputTag(html, "dryRun")).contains("checked=\"checked\"")
-    assertThat(inputTag(html, "rangeStart")).doesNotContain("value=")
-    assertThat(inputTag(html, "batchSize")).contains("value=\"100\"")
-    assertThat(inputTag(html, "scanSize")).contains("value=\"10000\"")
-    assertThat(inputTag(html, "threadsPerPartition")).contains("value=\"1\"")
-    assertThat(inputTag(html, "extraSleepMs")).contains("value=\"7\"")
-    assertThat(inputTag(html, "backoffSchedule")).doesNotContain("value=")
-    assertThat(inputTag(html, "customParameter_param1")).doesNotContain("value=")
+    assertThat(page.isChecked("dryRun")).isTrue()
+    assertThat(page.valueOf("rangeStart")).isNull()
+    assertThat(page.valueOf("batchSize")).isEqualTo("100")
+    assertThat(page.valueOf("scanSize")).isEqualTo("10000")
+    assertThat(page.valueOf("threadsPerPartition")).isEqualTo("1")
+    assertThat(page.valueOf("extraSleepMs")).isEqualTo("7")
+    assertThat(page.valueOf("backoffSchedule")).isNull()
+    assertThat(page.valueOf("customParameter_param1")).isNull()
   }
 
   @Test
   fun `blank query parameters keep cloned values`() {
     val backfillId = createRun()
 
-    val html = render(backfillId, "dryRun=&batchSize=&scanSize=abc&customParameter_param1=&rangeStart=&rangeEnd=")
-    assertThat(inputTag(html, "dryRun")).doesNotContain("checked=\"checked\"")
-    assertThat(inputTag(html, "batchSize")).contains("value=\"123\"")
-    assertThat(inputTag(html, "scanSize")).contains("value=\"223\"")
-    assertThat(inputTag(html, "customParameter_param1")).contains("value=\"val1\"")
-    assertThat(inputTag(html, "range-option-restart")).contains("checked=\"checked\"")
-    assertThat(html).contains("id=\"range-inputs\" style=\"display: none;\"")
+    val page = render(backfillId, "dryRun=&batchSize=&scanSize=abc&customParameter_param1=&rangeStart=&rangeEnd=")
+    assertThat(page.isChecked("dryRun")).isFalse()
+    assertThat(page.valueOf("batchSize")).isEqualTo("123")
+    assertThat(page.valueOf("scanSize")).isEqualTo("223")
+    assertThat(page.valueOf("customParameter_param1")).isEqualTo("val1")
+    assertThat(page.isChecked("range-option-restart")).isTrue()
+    assertThat(page.rangeInputsStyle()).isEqualTo("display: none;")
   }
 
   @Test
   fun `unknown custom parameters are ignored`() {
-    val html = render("ChickenSandwich", "customParameter_unknown=surprise")
+    val page = render("ChickenSandwich", "customParameter_unknown=surprise")
 
-    assertThat(html).doesNotContain("customParameter_unknown")
-    assertThat(html).doesNotContain("surprise")
+    assertThat(page.select("input[name^=customParameter_]").map { it.attr("name") })
+      .containsExactly("customParameter_param1")
+    assertThat(page.select("[value=surprise]")).isEmpty()
   }
 
   @Test
@@ -156,21 +159,21 @@ class BackfillCreateActionTest {
     val backfillId = createRun()
 
     val cloned = render(backfillId)
-    assertThat(inputTag(cloned, "dryRun")).doesNotContain("checked=\"checked\"")
-    assertThat(inputTag(cloned, "batchSize")).contains("value=\"123\"")
-    assertThat(inputTag(cloned, "customParameter_param1")).contains("value=\"val1\"")
-    assertThat(inputTag(cloned, "range-option-restart")).contains("checked=\"checked\"")
-    assertThat(cloned).contains("id=\"range-inputs\" style=\"display: none;\"")
+    assertThat(cloned.isChecked("dryRun")).isFalse()
+    assertThat(cloned.valueOf("batchSize")).isEqualTo("123")
+    assertThat(cloned.valueOf("customParameter_param1")).isEqualTo("val1")
+    assertThat(cloned.isChecked("range-option-restart")).isTrue()
+    assertThat(cloned.rangeInputsStyle()).isEqualTo("display: none;")
 
     val prefilled = render(backfillId, "dryRun=on&batchSize=250&customParameter_param1=val2&rangeStart=5")
-    assertThat(inputTag(prefilled, "dryRun")).contains("checked=\"checked\"")
-    assertThat(inputTag(prefilled, "batchSize")).contains("value=\"250\"")
-    assertThat(inputTag(prefilled, "customParameter_param1")).contains("value=\"val2\"")
-    assertThat(inputTag(prefilled, "scanSize")).contains("value=\"223\"")
-    assertThat(inputTag(prefilled, "range-option-restart")).doesNotContain("checked=\"checked\"")
-    assertThat(inputTag(prefilled, "range-option-new")).contains("checked=\"checked\"")
-    assertThat(prefilled).contains("id=\"range-inputs\" style=\"display: block;\"")
-    assertThat(inputTag(prefilled, "rangeStart")).contains("value=\"5\"")
+    assertThat(prefilled.isChecked("dryRun")).isTrue()
+    assertThat(prefilled.valueOf("batchSize")).isEqualTo("250")
+    assertThat(prefilled.valueOf("customParameter_param1")).isEqualTo("val2")
+    assertThat(prefilled.valueOf("scanSize")).isEqualTo("223")
+    assertThat(prefilled.isChecked("range-option-restart")).isFalse()
+    assertThat(prefilled.isChecked("range-option-new")).isTrue()
+    assertThat(prefilled.rangeInputsStyle()).isEqualTo("display: block;")
+    assertThat(prefilled.valueOf("rangeStart")).isEqualTo("5")
   }
 
   private fun createRun(): String = scope.fakeCaller(user = "molly") {
@@ -187,7 +190,10 @@ class BackfillCreateActionTest {
     ).backfill_run_id.toString()
   }
 
-  private fun render(backfillNameOrId: String, query: String = ""): String {
+  private fun render(backfillNameOrId: String, query: String = ""): Document =
+    Jsoup.parse(renderHtml(backfillNameOrId, query))
+
+  private fun renderHtml(backfillNameOrId: String, query: String = ""): String {
     val url = "http://backfila.test/backfills/create/deep-fryer/$backfillNameOrId/?$query".toHttpUrl()
     return scope.create(
       mapOf(
@@ -201,9 +207,14 @@ class BackfillCreateActionTest {
     }
   }
 
-  private fun inputTag(html: String, nameOrId: String): String =
-    Regex("""<input[^>]*(name|id)="$nameOrId"[^>]*>""").find(html)?.value
-      ?: throw AssertionError("No input named $nameOrId")
+  private fun Document.input(id: String): Element =
+    selectFirst("input#$id") ?: throw AssertionError("No input with id $id")
+
+  private fun Document.valueOf(id: String): String? = input(id).takeIf { it.hasAttr("value") }?.attr("value")
+
+  private fun Document.isChecked(id: String): Boolean = input(id).hasAttr("checked")
+
+  private fun Document.rangeInputsStyle(): String? = selectFirst("#range-inputs")?.attr("style")
 
   class TestModule : KAbstractModule() {
     override fun configure() {

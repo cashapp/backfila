@@ -601,7 +601,7 @@ class BackfillCreateAction @Inject constructor(
       .replace("{variantOrBackfillNameOrId}", variantOrBackfillNameOrId)
       .replace("{backfillNameOrIdOrBlank}", backfillNameOrIdOrBlank)
 
-    fun parseCheckbox(value: String?): Boolean? = when (value?.trim()?.lowercase()) {
+    internal fun parseCheckbox(value: String?): Boolean? = when (value?.trim()?.lowercase()) {
       null, "" -> null
       "off", "false" -> false
       else -> true
