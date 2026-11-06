@@ -22,6 +22,11 @@ class BackfilaMcpInstructionsTest {
   }
 
   @Test
+  fun `agents are told to start with list_services`() {
+    assertThat(instructions()).contains("Call list_services first")
+  }
+
+  @Test
   fun `dashboard link is omitted when no web url root is configured`() {
     assertThat(instructions(webUrlRoot = "https://backfila.example.com")).contains("https://backfila.example.com/.")
     assertThat(instructions(webUrlRoot = "")).doesNotContain("dashboard is at")
