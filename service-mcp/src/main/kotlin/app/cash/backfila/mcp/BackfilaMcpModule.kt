@@ -1,7 +1,7 @@
 package app.cash.backfila.mcp
 
-import app.cash.backfila.mcp.tools.ListServicesTool
 import app.cash.backfila.service.BackfilaConfig
+import app.cash.backfila.service.BackfilaMcpConfig
 import com.google.inject.Provider
 import kotlin.reflect.KClass
 import misk.inject.KAbstractModule
@@ -14,7 +14,8 @@ import misk.web.WebActionModule
 
 /**
  * Exposes Backfila tools to AI agents over the Model Context Protocol at `POST /mcp`, configured
- * by [BackfilaConfig.mcp]. Install it alongside `BackfilaServiceModule` with the same config.
+ * by [BackfilaConfig.mcp]. Install it alongside `BackfilaServiceModule` with the same config. It
+ * binds nothing unless `mcp.enabled` is true.
  *
  * The endpoint requires an authenticated user, like the dashboard's read endpoints. As with the
  * dashboard, that is only enforced if the host installs Misk's `AccessControlModule`; without it
@@ -26,6 +27,8 @@ class BackfilaMcpModule(
 ) : KAbstractModule() {
   override fun configure() {
     val mcpConfig = config.mcp
+    if (!mcpConfig.enabled) return
+
     val instructions = getProvider(BackfilaMcpInstructions::class.java)
     install(
       McpServerModule.create(
@@ -38,7 +41,7 @@ class BackfilaMcpModule(
     install(WebActionModule.create<BackfilaMcpWebAction>())
 
     backfilaMcpTools
-      .filter { it.readOnly || !mcpConfig.read_only }
+      .boundFor(mcpConfig)
       .forEach { install(McpToolModule.create(it.toolClass, groupAnnotationClass = BackfilaMcp::class)) }
   }
 }
@@ -49,9 +52,10 @@ internal class BackfilaMcpToolBinding(
   val readOnly: Boolean,
 )
 
-internal val backfilaMcpTools = listOf(
-  BackfilaMcpToolBinding(ListServicesTool::class, readOnly = true),
-)
+internal val backfilaMcpTools: List<BackfilaMcpToolBinding> = listOf()
+
+internal fun List<BackfilaMcpToolBinding>.boundFor(config: BackfilaMcpConfig) =
+  filter { it.readOnly || !config.read_only }
 
 // Reported to clients in the MCP server info. Bump when tool names or schemas change.
 private const val SERVER_VERSION = "0.1.0-experimental"

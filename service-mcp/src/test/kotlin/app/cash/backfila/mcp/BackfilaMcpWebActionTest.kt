@@ -43,12 +43,10 @@ class BackfilaMcpWebActionTest {
   @Inject lateinit var jettyService: JettyService
 
   @Test
-  fun `server instructions point agents at list_services and the dashboard`(): Unit = runBlocking {
+  fun `server instructions point agents at the dashboard`(): Unit = runBlocking {
     val instructions = jettyService.mcpClient().serverInstructions
 
-    assertThat(instructions)
-      .contains("list_services")
-      .contains("https://backfila.example.com/")
+    assertThat(instructions).contains("https://backfila.example.com/")
   }
 
   @Test

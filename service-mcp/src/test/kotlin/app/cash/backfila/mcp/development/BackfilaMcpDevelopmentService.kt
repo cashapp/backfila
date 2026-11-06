@@ -6,6 +6,7 @@ import app.cash.backfila.dashboard.ViewLogsUrlProvider
 import app.cash.backfila.mcp.BackfilaMcpModule
 import app.cash.backfila.mcp.ExperimentalBackfilaMcpApi
 import app.cash.backfila.service.BackfilaConfig
+import app.cash.backfila.service.BackfilaMcpConfig
 import app.cash.backfila.service.BackfilaServiceModule
 import app.cash.backfila.service.persistence.DbBackfillRun
 import misk.MiskApplication
@@ -61,6 +62,7 @@ fun main(args: Array<String>) {
     ),
     web_url_root = "http://localhost:$port/",
     slack = null,
+    mcp = BackfilaMcpConfig(enabled = true),
   )
 
   MiskApplication(

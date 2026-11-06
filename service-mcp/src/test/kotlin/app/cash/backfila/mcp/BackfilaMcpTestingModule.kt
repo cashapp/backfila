@@ -1,6 +1,7 @@
 package app.cash.backfila.mcp
 
 import app.cash.backfila.service.BackfilaConfig
+import app.cash.backfila.service.BackfilaMcpConfig
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfilaPersistenceModule
 import misk.MiskTestingServiceModule
@@ -20,7 +21,9 @@ import misk.web.WebServerTestingModule
 import wisp.deployment.TESTING
 
 @OptIn(ExperimentalBackfilaMcpApi::class)
-internal class BackfilaMcpTestingModule : KAbstractModule() {
+internal class BackfilaMcpTestingModule(
+  private val mcp: BackfilaMcpConfig = BackfilaMcpConfig(enabled = true),
+) : KAbstractModule() {
   override fun configure() {
     val config = BackfilaConfig(
       backfill_runner_threads = null,
@@ -39,6 +42,7 @@ internal class BackfilaMcpTestingModule : KAbstractModule() {
       ),
       web_url_root = "https://backfila.example.com/",
       slack = null,
+      mcp = mcp,
     )
     bind<BackfilaConfig>().toInstance(config)
 
