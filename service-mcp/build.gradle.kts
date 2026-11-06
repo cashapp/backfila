@@ -19,9 +19,9 @@ dependencies {
   implementation(libs.jakartaInject)
   implementation(libs.kotlinStdLib)
   implementation(libs.kotlinxCoroutines)
-  implementation(libs.kotlinxSerializationJson)
   implementation(libs.misk)
   implementation(libs.miskActions)
+  // Also provides kotlinx-serialization-json, at the version misk is built against.
   implementation(libs.miskMcp)
 
   testImplementation(testFixtures(libs.miskMcp))

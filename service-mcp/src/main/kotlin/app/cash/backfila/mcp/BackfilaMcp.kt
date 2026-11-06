@@ -2,7 +2,12 @@ package app.cash.backfila.mcp
 
 import jakarta.inject.Qualifier
 
-/** Groups Backfila's MCP server and tools so they don't mix with a host's own MCP servers or tools. */
+/**
+ * Qualifies the bindings misk-mcp creates for Backfila's server: its `Set<McpTool<*>>` multibinder,
+ * `McpStreamManager`, and `MiskMcpServer`. Without it those are unqualified, so any tool a host
+ * registers with `McpToolModule.create<T>()` would be served by Backfila, and a host's own
+ * `McpServerModule` would fail with duplicate bindings.
+ */
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
 internal annotation class BackfilaMcp
