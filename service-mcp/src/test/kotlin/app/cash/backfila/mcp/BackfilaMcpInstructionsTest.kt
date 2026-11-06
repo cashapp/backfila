@@ -32,13 +32,14 @@ class BackfilaMcpInstructionsTest {
     assertThat(instructions(webUrlRoot = "")).doesNotContain("dashboard is at")
   }
 
-  private fun instructions(read_only: Boolean = true, webUrlRoot: String = "") = BackfilaMcpInstructions(
-    BackfilaConfig(
+  private fun instructions(read_only: Boolean = true, webUrlRoot: String = ""): String {
+    val config = BackfilaConfig(
       backfill_runner_threads = null,
       data_source_clusters = DataSourceClustersConfig(mapOf()),
       slack = null,
       web_url_root = webUrlRoot,
       mcp = BackfilaMcpConfig(read_only = read_only),
-    ),
-  ).text
+    )
+    return BackfilaMcpInstructions(config, DashboardLinks(config)).text
+  }
 }

@@ -1,5 +1,6 @@
 package app.cash.backfila.mcp
 
+import app.cash.backfila.mcp.tools.ListBackfillRunsTool
 import app.cash.backfila.mcp.tools.ListRegisteredBackfillsTool
 import app.cash.backfila.mcp.tools.ListServicesTool
 import app.cash.backfila.service.BackfilaConfig
@@ -57,6 +58,7 @@ internal class BackfilaMcpToolBinding(
 internal val backfilaMcpTools: List<BackfilaMcpToolBinding> = listOf(
   BackfilaMcpToolBinding(ListServicesTool::class, readOnly = true),
   BackfilaMcpToolBinding(ListRegisteredBackfillsTool::class, readOnly = true),
+  BackfilaMcpToolBinding(ListBackfillRunsTool::class, readOnly = true),
 )
 
 internal fun List<BackfilaMcpToolBinding>.boundFor(config: BackfilaMcpConfig) =
