@@ -18,4 +18,4 @@ package app.cash.backfila.mcp
   AnnotationTarget.CONSTRUCTOR,
   AnnotationTarget.TYPEALIAS,
 )
-annotation class ExperimentalBackfilaApi
+annotation class ExperimentalBackfilaMcpApi

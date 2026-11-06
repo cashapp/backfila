@@ -19,7 +19,7 @@ import misk.security.authz.MiskCallerAuthenticator
 import misk.web.WebServerTestingModule
 import wisp.deployment.TESTING
 
-@OptIn(ExperimentalBackfilaApi::class)
+@OptIn(ExperimentalBackfilaMcpApi::class)
 internal class BackfilaMcpTestingModule : KAbstractModule() {
   override fun configure() {
     val config = BackfilaConfig(

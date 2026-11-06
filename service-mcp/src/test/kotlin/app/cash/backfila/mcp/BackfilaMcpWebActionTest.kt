@@ -2,11 +2,18 @@ package app.cash.backfila.mcp
 
 import com.google.inject.Module
 import com.google.inject.util.Modules
+import io.modelcontextprotocol.kotlin.sdk.types.ClientCapabilities
+import io.modelcontextprotocol.kotlin.sdk.types.Implementation
+import io.modelcontextprotocol.kotlin.sdk.types.InitializeRequest
+import io.modelcontextprotocol.kotlin.sdk.types.InitializeRequestParams
+import io.modelcontextprotocol.kotlin.sdk.types.LATEST_PROTOCOL_VERSION
+import io.modelcontextprotocol.kotlin.sdk.types.toJSON
 import jakarta.inject.Inject
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import misk.inject.KAbstractModule
 import misk.mcp.McpToolModule
+import misk.mcp.encodeToString
 import misk.security.authz.FakeCallerAuthenticator
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
@@ -52,12 +59,15 @@ class BackfilaMcpWebActionTest {
 
   @Test
   fun `unauthenticated callers are rejected`() {
-    val initialize = """
-      {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18",
-      "capabilities":{},"clientInfo":{"name":"test","version":"1.0"}}}
-    """.trimIndent()
+    val initialize = InitializeRequest(
+      InitializeRequestParams(
+        protocolVersion = LATEST_PROTOCOL_VERSION,
+        capabilities = ClientCapabilities(),
+        clientInfo = Implementation(name = "test", version = "1.0"),
+      ),
+    ).toJSON()
 
-    post(initialize, user = null).use { response ->
+    post(initialize.encodeToString(), user = null).use { response ->
       assertThat(response.code).isEqualTo(401)
     }
   }

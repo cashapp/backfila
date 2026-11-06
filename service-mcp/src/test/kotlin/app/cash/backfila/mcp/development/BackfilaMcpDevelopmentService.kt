@@ -4,7 +4,7 @@ import app.cash.backfila.client.BackfilaDefaultEndpointConfigModule
 import app.cash.backfila.dashboard.ViewDashboardUrlProvider
 import app.cash.backfila.dashboard.ViewLogsUrlProvider
 import app.cash.backfila.mcp.BackfilaMcpModule
-import app.cash.backfila.mcp.ExperimentalBackfilaApi
+import app.cash.backfila.mcp.ExperimentalBackfilaMcpApi
 import app.cash.backfila.service.BackfilaConfig
 import app.cash.backfila.service.BackfilaServiceModule
 import app.cash.backfila.service.persistence.DbBackfillRun
@@ -36,7 +36,7 @@ import wisp.deployment.Deployment
  *
  * Requests without an `X-Forwarded-User` header run as the development user `testfila`.
  */
-@OptIn(ExperimentalBackfilaApi::class)
+@OptIn(ExperimentalBackfilaMcpApi::class)
 fun main(args: Array<String>) {
   val port = (System.getenv("BACKFILA_PORT") ?: "8080").toInt()
   val deployment = Deployment(name = "backfila", isLocalDevelopment = true)
