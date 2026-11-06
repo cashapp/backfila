@@ -71,6 +71,7 @@ dependencies {
   testImplementation(libs.kotlinTest)
   testImplementation(libs.kotlinxCoroutinesTest)
   testImplementation(libs.assertj)
+  testImplementation(libs.jsoup)
   testImplementation(libs.openTracingMock)
   testImplementation(libs.okHttpMockWebServer)
   testImplementation(libs.logbackClassic)
