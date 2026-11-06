@@ -227,7 +227,7 @@ class BackfillCreateAction @Inject constructor(
                             name = BackfillCreateField.RANGE_OPTION.fieldId
                             type = InputType.radio
                             value = RangeOption.RESTART.value
-                            checked = !prefillNewRange // Default option
+                            checked = !prefillNewRange // Default unless a new range is pre-filled
                             attributes["onchange"] = "document.getElementById('range-inputs').style.display = 'none';"
                           }
                           div("ml-3") {
@@ -528,7 +528,9 @@ class BackfillCreateAction @Inject constructor(
                           id = field
                           attributes["autocomplete"] = field
                           placeholder = "5000,15000,30000"
-                          (prefill(field) ?: backfillToCloneStatus?.backoff_schedule)?.let { value = it }
+                          val backoffSchedule = prefill(field)
+                            ?: backfillToCloneStatus?.backoff_schedule
+                          backoffSchedule?.let { value = it }
                         }
                       }
                     }
@@ -557,7 +559,9 @@ class BackfillCreateAction @Inject constructor(
                               name = field
                               id = field
                               attributes["autocomplete"] = field
-                              (prefill(field) ?: backfillToCloneStatus?.parameters?.get(it))?.let { value = it }
+                              val parameterValue = prefill(field)
+                                ?: backfillToCloneStatus?.parameters?.get(it)
+                              parameterValue?.let { value = it }
                             }
                           }
                         }

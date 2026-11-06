@@ -45,8 +45,12 @@ class BackfillCreateHandlerAction @Inject constructor(
       // Submit create call
       val createRequestBuilder = CreateBackfillRequest.Builder()
       formFields[BackfillCreateField.BACKFILL_NAME.fieldId]?.ifNotBlank { createRequestBuilder.backfill_name(it) }
-      // Unchecked box in UI will not send a value
-      createRequestBuilder.dry_run(parseCheckbox(formFields[BackfillCreateField.DRY_RUN.fieldId]) ?: false)
+      // Unchecked box in UI will not send a value. Only off/false opt out once present; blank is still a dry run.
+      createRequestBuilder.dry_run(
+        formFields[BackfillCreateField.DRY_RUN.fieldId]
+          ?.let { parseCheckbox(it) ?: true }
+          ?: false,
+      )
 
       // Handle range options for cloned backfills
       when (formFields[BackfillCreateField.RANGE_OPTION.fieldId]) {

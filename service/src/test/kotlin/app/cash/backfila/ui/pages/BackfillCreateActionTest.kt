@@ -76,15 +76,22 @@ class BackfillCreateActionTest {
     assertThat(page.isChecked("dryRun")).isTrue()
     assertThat(page.valueOf("batchSize")).isEqualTo("100")
     assertThat(page.valueOf("scanSize")).isEqualTo("10000")
+    assertThat(page.valueOf("threadsPerPartition")).isEqualTo("1")
+    assertThat(page.valueOf("extraSleepMs")).isEqualTo("1")
+    assertThat(page.valueOf("backoffSchedule")).isNull()
     assertThat(page.valueOf("rangeStart")).isNull()
+    assertThat(page.valueOf("rangeEnd")).isNull()
     assertThat(page.valueOf("customParameter_param1")).isNull()
   }
 
   @Test
   fun `query parameters pre-fill the create form`() {
-    val query = "dryRun=on&rangeStart=10&rangeEnd=20&batchSize=250&scanSize=5000&threadsPerPartition=4" +
-      "&extraSleepMs=7&backoffSchedule=100,200&customParameter_param1=%22%3E%3Cscript%3E"
-    val page = render("ChickenSandwich", query)
+    val html = renderHtml(
+      "ChickenSandwich",
+      "dryRun=on&rangeStart=10&rangeEnd=20&batchSize=250&scanSize=5000&threadsPerPartition=4" +
+        "&extraSleepMs=7&backoffSchedule=100,200&customParameter_param1=%22%3E%3Cscript%3E",
+    )
+    val page = Jsoup.parse(html)
 
     assertThat(page.isChecked("dryRun")).isTrue()
     assertThat(page.valueOf("rangeStart")).isEqualTo("10")
@@ -96,7 +103,15 @@ class BackfillCreateActionTest {
     assertThat(page.valueOf("backoffSchedule")).isEqualTo("100,200")
     // jsoup decodes entities, so the escaping itself can only be seen in the raw HTML.
     assertThat(page.valueOf("customParameter_param1")).isEqualTo("\"><script>")
-    assertThat(renderHtml("ChickenSandwich", query)).contains("value=\"&quot;&gt;&lt;script&gt;\"")
+    assertThat(html).contains("value=\"&quot;&gt;&lt;script&gt;\"")
+  }
+
+  @Test
+  fun `numeric query parameters are normalized`() {
+    val page = render("ChickenSandwich", "batchSize=0250&extraSleepMs=0007")
+
+    assertThat(page.valueOf("batchSize")).isEqualTo("250")
+    assertThat(page.valueOf("extraSleepMs")).isEqualTo("7")
   }
 
   @ParameterizedTest(name = "dryRun={0} unchecks the box")
@@ -109,7 +124,7 @@ class BackfillCreateActionTest {
   fun `blank or invalid query parameters fall back to defaults`() {
     val page = render(
       "ChickenSandwich",
-      "dryRun=&rangeStart=&batchSize=&scanSize=abc&threadsPerPartition=1.5&extraSleepMs=0007" +
+      "dryRun=&rangeStart=&batchSize=&scanSize=abc&threadsPerPartition=1.5&extraSleepMs=x" +
         "&backoffSchedule=&customParameter_param1=",
     )
 
@@ -118,7 +133,7 @@ class BackfillCreateActionTest {
     assertThat(page.valueOf("batchSize")).isEqualTo("100")
     assertThat(page.valueOf("scanSize")).isEqualTo("10000")
     assertThat(page.valueOf("threadsPerPartition")).isEqualTo("1")
-    assertThat(page.valueOf("extraSleepMs")).isEqualTo("7")
+    assertThat(page.valueOf("extraSleepMs")).isEqualTo("1")
     assertThat(page.valueOf("backoffSchedule")).isNull()
     assertThat(page.valueOf("customParameter_param1")).isNull()
   }
@@ -167,7 +182,25 @@ class BackfillCreateActionTest {
     assertThat(prefilled.valueOf("rangeStart")).isEqualTo("5")
   }
 
-  private fun createRun(): String = scope.fakeCaller(user = "molly") {
+  @Test
+  fun `rangeEnd alone selects a new range when cloning`() {
+    val page = render(createRun(), "rangeEnd=9")
+
+    assertThat(page.isChecked("range-option-new")).isTrue()
+    assertThat(page.rangeInputsStyle()).isEqualTo("display: block;")
+    assertThat(page.valueOf("rangeStart")).isNull()
+    assertThat(page.valueOf("rangeEnd")).isEqualTo("9")
+  }
+
+  @Test
+  fun `dryRun false overrides a cloned dry run`() {
+    val backfillId = createRun(dryRun = true)
+
+    assertThat(render(backfillId).isChecked("dryRun")).isTrue()
+    assertThat(render(backfillId, "dryRun=false").isChecked("dryRun")).isFalse()
+  }
+
+  private fun createRun(dryRun: Boolean = false): String = scope.fakeCaller(user = "molly") {
     createBackfillAction.create(
       "deep-fryer",
       RESERVED_VARIANT,
@@ -175,7 +208,7 @@ class BackfillCreateActionTest {
         .backfill_name("ChickenSandwich")
         .batch_size(123)
         .scan_size(223)
-        .dry_run(false)
+        .dry_run(dryRun)
         .parameter_map(mapOf("param1" to "val1".encodeUtf8()))
         .build(),
     ).backfill_run_id.toString()
