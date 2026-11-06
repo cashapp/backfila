@@ -7,6 +7,7 @@ import app.cash.backfila.ui.actions.BackfillCreateHandlerAction
 import app.cash.backfila.ui.components.AlertError
 import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.components.PageTitle
+import app.cash.backfila.ui.parseCheckbox
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.html.ButtonType
@@ -600,11 +601,5 @@ class BackfillCreateAction @Inject constructor(
       .replace("{service}", service)
       .replace("{variantOrBackfillNameOrId}", variantOrBackfillNameOrId)
       .replace("{backfillNameOrIdOrBlank}", backfillNameOrIdOrBlank)
-
-    internal fun parseCheckbox(value: String?): Boolean? = when (value?.trim()?.lowercase()) {
-      null, "" -> null
-      "off", "false" -> false
-      else -> true
-    }
   }
 }

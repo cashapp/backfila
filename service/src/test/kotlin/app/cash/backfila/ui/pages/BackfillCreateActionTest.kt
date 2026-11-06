@@ -9,6 +9,7 @@ import app.cash.backfila.fakeCaller
 import app.cash.backfila.protos.service.ConfigureServiceRequest
 import app.cash.backfila.protos.service.CreateBackfillRequest
 import app.cash.backfila.protos.service.Parameter
+import app.cash.backfila.ui.parseCheckbox
 import jakarta.inject.Inject
 import javax.servlet.http.HttpServletRequest
 import misk.Action
@@ -106,12 +107,12 @@ class BackfillCreateActionTest {
 
   @Test
   fun `parseCheckbox matches the create handler`() {
-    assertThat(BackfillCreateAction.parseCheckbox(null)).isNull()
-    assertThat(BackfillCreateAction.parseCheckbox(" ")).isNull()
-    assertThat(BackfillCreateAction.parseCheckbox("off")).isFalse()
-    assertThat(BackfillCreateAction.parseCheckbox("False")).isFalse()
-    assertThat(BackfillCreateAction.parseCheckbox("on")).isTrue()
-    assertThat(BackfillCreateAction.parseCheckbox("true")).isTrue()
+    assertThat(parseCheckbox(null)).isNull()
+    assertThat(parseCheckbox(" ")).isNull()
+    assertThat(parseCheckbox("off")).isFalse()
+    assertThat(parseCheckbox("False")).isFalse()
+    assertThat(parseCheckbox("on")).isTrue()
+    assertThat(parseCheckbox("true")).isTrue()
   }
 
   @Test

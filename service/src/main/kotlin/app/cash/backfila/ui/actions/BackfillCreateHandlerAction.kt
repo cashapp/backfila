@@ -5,10 +5,10 @@ import app.cash.backfila.dashboard.GetBackfillStatusAction
 import app.cash.backfila.protos.service.CreateBackfillRequest
 import app.cash.backfila.ui.components.AlertError
 import app.cash.backfila.ui.components.DashboardPageLayout
-import app.cash.backfila.ui.pages.BackfillCreateAction
 import app.cash.backfila.ui.pages.BackfillCreateAction.BackfillCreateField
 import app.cash.backfila.ui.pages.BackfillCreateAction.RangeOption
 import app.cash.backfila.ui.pages.BackfillShowAction
+import app.cash.backfila.ui.parseCheckbox
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.html.div
@@ -46,7 +46,7 @@ class BackfillCreateHandlerAction @Inject constructor(
       val createRequestBuilder = CreateBackfillRequest.Builder()
       formFields[BackfillCreateField.BACKFILL_NAME.fieldId]?.ifNotBlank { createRequestBuilder.backfill_name(it) }
       // Unchecked box in UI will not send a value
-      createRequestBuilder.dry_run(BackfillCreateAction.parseCheckbox(formFields[BackfillCreateField.DRY_RUN.fieldId]) ?: false)
+      createRequestBuilder.dry_run(parseCheckbox(formFields[BackfillCreateField.DRY_RUN.fieldId]) ?: false)
 
       // Handle range options for cloned backfills
       when (formFields[BackfillCreateField.RANGE_OPTION.fieldId]) {
