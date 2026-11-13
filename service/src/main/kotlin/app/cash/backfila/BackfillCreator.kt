@@ -193,7 +193,7 @@ class BackfillCreator @Inject constructor(
     }
     for ((name, value) in request.parameter_map) {
       if (value.size > MAX_PARAMETER_VALUE_SIZE) {
-        throw BadRequestException("parameter $name is too long (max $MAX_PARAMETER_VALUE_SIZE characters)")
+        throw BadRequestException("parameter $name is too long (max $MAX_PARAMETER_VALUE_SIZE bytes)")
       }
     }
   }
@@ -208,6 +208,6 @@ class BackfillCreator @Inject constructor(
   companion object {
     private val logger = getLogger<BackfillCreator>()
 
-    internal const val MAX_PARAMETER_VALUE_SIZE = 1000
+    internal const val MAX_PARAMETER_VALUE_SIZE = 4096
   }
 }

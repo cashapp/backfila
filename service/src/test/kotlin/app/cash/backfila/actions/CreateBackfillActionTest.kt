@@ -416,7 +416,44 @@ class CreateBackfillActionTest {
   }
 
   @Test
-  fun `error is shown when parameter is too long`() {
+  fun `accepts a parameter at the byte limit`() {
+    scope.fakeCaller(service = "deep-fryer") {
+      configureServiceAction.configureService(
+        ConfigureServiceRequest.Builder()
+          .backfills(
+            listOf(
+              ConfigureServiceRequest.BackfillData.Builder()
+                .name("ChickenSandwich")
+                .parameters(listOf(Parameter.Builder().name("sauce").build()))
+                .build(),
+            ),
+          )
+          .connector_type(Connectors.ENVOY)
+          .build(),
+      )
+    }
+
+    val sauce = "a".repeat(BackfillCreator.MAX_PARAMETER_VALUE_SIZE).encodeUtf8()
+    scope.fakeCaller(user = "molly") {
+      createBackfillAction.create(
+        "deep-fryer",
+        RESERVED_VARIANT,
+        CreateBackfillRequest.Builder()
+          .backfill_name("ChickenSandwich")
+          .parameter_map(mapOf("sauce" to sauce))
+          .build(),
+      )
+
+      transacter.transaction { session ->
+        val run = queryFactory.newQuery<BackfillRunQuery>().uniqueResult(session)
+        assertNotNull(run)
+        assertThat(run.parameters()).containsEntry("sauce", sauce)
+      }
+    }
+  }
+
+  @Test
+  fun `rejects a parameter over the byte limit`() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(
         ConfigureServiceRequest.Builder()
@@ -439,11 +476,11 @@ class CreateBackfillActionTest {
           RESERVED_VARIANT,
           CreateBackfillRequest.Builder()
             .backfill_name("ChickenSandwich")
-            .parameter_map(mapOf("sauce" to "a".repeat(BackfillCreator.MAX_PARAMETER_VALUE_SIZE + 1).encodeUtf8()))
+            .parameter_map(mapOf("sauce" to "é".repeat(2049).encodeUtf8()))
             .build(),
         )
       }.isInstanceOf(BadRequestException::class.java)
-        .hasMessage("parameter sauce is too long (max 1000 characters)")
+        .hasMessage("parameter sauce is too long (max 4096 bytes)")
 
       transacter.transaction { session ->
         val runs = queryFactory.newQuery<BackfillRunQuery>().list(session)
