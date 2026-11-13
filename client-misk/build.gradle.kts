@@ -40,6 +40,7 @@ dependencies {
 
   testImplementation(libs.assertj)
   testImplementation(libs.miskTesting)
+  testImplementation(libs.kotlinTest)
   testImplementation(libs.junitEngine)
 
   testImplementation(project(":backfila-embedded"))

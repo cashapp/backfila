@@ -15,6 +15,9 @@ data class BackfilaHttpClientConfig @JvmOverloads constructor(
   val slack_channel: String?,
 
   val variant: String? = null,
+
+  /** See [BackfilaClientConfig.callback_services]. */
+  val callback_services: List<String> = listOf(BackfilaClientConfig.DEFAULT_CALLBACK_SERVICE),
 ) {
   fun toBackfilaClientConfig(): BackfilaClientConfig {
     // Creating a local moshi to do the quick config conversion.
@@ -28,6 +31,7 @@ data class BackfilaHttpClientConfig @JvmOverloads constructor(
       connector_type = Connectors.HTTP,
       connector_extra_data = connectorDataAdapter.toJson(httpConnectorData),
       variant,
+      callback_services,
     )
   }
 }
