@@ -11,6 +11,7 @@ import app.cash.backfila.ui.pages.BackfillShowAction
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.html.div
+import misk.exceptions.BadRequestException
 import misk.logging.getLogger
 import misk.scope.ActionScoped
 import misk.security.authz.Authenticated
@@ -23,6 +24,7 @@ import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 import misk.web.toResponseBody
 import okhttp3.Headers
+import okio.BufferedSource
 import okio.ByteString.Companion.encodeUtf8
 
 @Singleton
@@ -40,7 +42,7 @@ class BackfillCreateHandlerAction @Inject constructor(
       // Use the same decoding as the old query form, but read values from the POST body.
       val call = httpCall.get()
       val formUrl = call.url.newBuilder()
-        .encodedQuery(call.takeRequestBody()?.readUtf8().orEmpty())
+        .encodedQuery(call.takeRequestBody()?.let(::readBoundedFormBody).orEmpty())
         .build()
       val formFields = formUrl.queryParameterNames.associateWith { formUrl.queryParameter(it) }
 
@@ -132,6 +134,14 @@ class BackfillCreateHandlerAction @Inject constructor(
     private val logger = getLogger<BackfillCreateHandlerAction>()
 
     const val PATH = "/api/backfill/create"
+    internal const val MAX_FORM_BODY_BYTES = 64 * 1024
+
+    internal fun readBoundedFormBody(body: BufferedSource): String {
+      if (body.request(MAX_FORM_BODY_BYTES + 1L)) {
+        throw BadRequestException("form body is too long (max $MAX_FORM_BODY_BYTES bytes)")
+      }
+      return body.readUtf8()
+    }
 
     private fun <T>String?.ifNotBlank(block: (String) -> T) = if (this.isNullOrBlank()) null else block(this)
   }
