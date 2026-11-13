@@ -14,8 +14,8 @@ import kotlinx.html.div
 import misk.logging.getLogger
 import misk.scope.ActionScoped
 import misk.security.authz.Authenticated
-import misk.web.Get
 import misk.web.HttpCall
+import misk.web.Post
 import misk.web.Response
 import misk.web.ResponseBody
 import misk.web.ResponseContentType
@@ -32,14 +32,17 @@ class BackfillCreateHandlerAction @Inject constructor(
   private val dashboardPageLayout: DashboardPageLayout,
   private val httpCall: ActionScoped<HttpCall>,
 ) : WebAction {
-  @Get(PATH)
+  @Post(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
   @Authenticated(capabilities = ["users"])
-  fun get(): Response<ResponseBody> {
+  fun post(): Response<ResponseBody> {
     val response = try {
-      // Parse form
-      val formFieldNames = this.httpCall.get().asOkHttpRequest().url.queryParameterNames
-      val formFields = formFieldNames.associateWith { this.httpCall.get().asOkHttpRequest().url.queryParameter(it) }
+      // Use the same decoding as the old query form, but read values from the POST body.
+      val call = httpCall.get()
+      val formUrl = call.url.newBuilder()
+        .encodedQuery(call.takeRequestBody()?.readUtf8().orEmpty())
+        .build()
+      val formFields = formUrl.queryParameterNames.associateWith { formUrl.queryParameter(it) }
 
       // Submit create call
       val createRequestBuilder = CreateBackfillRequest.Builder()

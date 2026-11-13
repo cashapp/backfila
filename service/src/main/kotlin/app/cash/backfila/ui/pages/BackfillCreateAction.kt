@@ -10,6 +10,7 @@ import app.cash.backfila.ui.components.PageTitle
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.html.ButtonType
+import kotlinx.html.FormMethod
 import kotlinx.html.InputType
 import kotlinx.html.button
 import kotlinx.html.div
@@ -143,6 +144,7 @@ class BackfillCreateAction @Inject constructor(
           div("mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8") {
             form {
               action = BackfillCreateHandlerAction.PATH
+              method = FormMethod.post
 
               input {
                 type = InputType.hidden
