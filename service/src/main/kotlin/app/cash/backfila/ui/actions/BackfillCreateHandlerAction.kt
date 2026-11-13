@@ -134,11 +134,13 @@ class BackfillCreateHandlerAction @Inject constructor(
     private val logger = getLogger<BackfillCreateHandlerAction>()
 
     const val PATH = "/api/backfill/create"
-    internal const val MAX_FORM_BODY_BYTES = 64 * 1024
+
+    // URL encoding can triple each byte in a valid 4 KiB custom parameter.
+    internal const val MAX_FORM_BODY_BYTES = 1024 * 1024
 
     internal fun readBoundedFormBody(body: BufferedSource): String {
       if (body.request(MAX_FORM_BODY_BYTES + 1L)) {
-        throw BadRequestException("form body is too long (max $MAX_FORM_BODY_BYTES bytes)")
+        throw BadRequestException("submitted form is too large (max $MAX_FORM_BODY_BYTES encoded bytes)")
       }
       return body.readUtf8()
     }

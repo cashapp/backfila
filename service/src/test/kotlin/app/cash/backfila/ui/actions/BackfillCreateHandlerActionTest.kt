@@ -17,11 +17,19 @@ class BackfillCreateHandlerActionTest {
   }
 
   @Test
+  fun `accepts several fully encoded parameters at the value size limit`() {
+    val encodedValue = "%7B".repeat(4096)
+    val body = Buffer().writeUtf8((1..6).joinToString("&") { "customParameter_$it=$encodedValue" })
+
+    assertThat(readBoundedFormBody(body)).contains("customParameter_6=$encodedValue")
+  }
+
+  @Test
   fun `rejects a form body above the size limit`() {
     val body = Buffer().writeUtf8("a".repeat(MAX_FORM_BODY_BYTES + 1))
 
     assertThatThrownBy { readBoundedFormBody(body) }
       .isInstanceOf(BadRequestException::class.java)
-      .hasMessage("form body is too long (max $MAX_FORM_BODY_BYTES bytes)")
+      .hasMessage("submitted form is too large (max $MAX_FORM_BODY_BYTES encoded bytes)")
   }
 }
