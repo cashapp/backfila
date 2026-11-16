@@ -4,17 +4,11 @@ import app.cash.backfila.dashboard.GetRegisteredBackfillsAction
 import app.cash.backfila.ui.components.AlertError
 import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.components.PageTitle
+import app.cash.backfila.ui.components.RegisteredBackfillsList
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import java.net.HttpURLConnection
-import kotlinx.html.a
-import kotlinx.html.div
-import kotlinx.html.h3
-import kotlinx.html.li
-import kotlinx.html.p
-import kotlinx.html.role
 import kotlinx.html.span
-import kotlinx.html.ul
 import misk.security.authz.Authenticated
 import misk.tailwind.Link
 import misk.web.Get
@@ -84,40 +78,7 @@ class BackfillCreateServiceIndexAction @Inject constructor(
           // TODO add link to runbook?
           AlertError("No backfills registered for this service. Check docs for how to register backfills.")
         } else {
-          // If service + variant is set and valid, show registered backfills drop down
-          div("py-5") {
-            ul("grid grid-cols-1 gap-6") {
-              role = "list"
-
-              registeredBackfills.backfills.map {
-                a {
-                  val variantOrBackfillNameOrId = variantOrBlank.orEmpty().ifBlank { it.name }
-                  href = BackfillCreateAction.path(
-                    service = service,
-                    variantOrBackfillNameOrId = variantOrBackfillNameOrId,
-                    backfillNameOrIdOrBlank = if (variantOrBackfillNameOrId == it.name) "" else it.name,
-                  )
-
-                  this@ul.li("registration col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow") {
-                    div("flex w-full items-center justify-between space-x-6 p-6") {
-                      div("flex-1 truncate") {
-                        div("flex items-center space-x-3") {
-                          h3("truncate text-sm font-medium text-gray-900") {
-                            +it.name
-                          }
-                        }
-                        if (it.parameterNames.isNotEmpty()) {
-                          p("mt-1 truncate text-sm text-gray-500") {
-                            +"""Custom Parameters: ${it.parameterNames.joinToString(", ")}"""
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
+          RegisteredBackfillsList(registeredBackfills.backfills, service, variantOrBlank)
         }
       }
 

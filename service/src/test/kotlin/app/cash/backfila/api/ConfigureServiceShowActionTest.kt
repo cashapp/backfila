@@ -55,6 +55,85 @@ class ConfigureServiceShowActionTest {
   lateinit var scope: ActionScope
 
   @Test
+  fun `registration timestamps retain first registration across configuration changes and re-additions`() {
+    fun configure(parameters: List<Parameter> = emptyList(), includeBackfill: Boolean = true) {
+      scope.fakeCaller(service = "deep-fryer") {
+        configureServiceAction.configureService(
+          ConfigureServiceRequest.Builder()
+            .connector_type(ENVOY)
+            .backfills(
+              if (includeBackfill) {
+                listOf(ConfigureServiceRequest.BackfillData.Builder().name("xyz").parameters(parameters).build())
+              } else {
+                emptyList()
+              },
+            )
+            .build(),
+        )
+      }
+    }
+    fun registration() = getRegisteredBackfillsAction.backfills("deep-fryer", RESERVED_VARIANT).backfills.single()
+    fun setActiveRegistrationTime(timestamp: Instant) {
+      transacter.transaction { session ->
+        queryFactory.newQuery<RegisteredBackfillQuery>().active().uniqueResult(session)!!.created_at = timestamp
+      }
+    }
+    val first = Instant.parse("2026-01-01T00:00:00Z")
+    val changed = Instant.parse("2026-02-01T00:00:00Z")
+    val readded = Instant.parse("2026-03-01T00:00:00Z")
+
+    configure()
+    setActiveRegistrationTime(first)
+    assertThat(registration().createdAt).isEqualTo(first)
+    assertThat(registration().updatedAt).isEqualTo(first)
+
+    configure()
+    assertThat(registration().updatedAt).isEqualTo(first)
+
+    configure(listOf(Parameter.Builder().name("mode").build()))
+    setActiveRegistrationTime(changed)
+    assertThat(registration().createdAt).isEqualTo(first)
+    assertThat(registration().updatedAt).isEqualTo(changed)
+    assertThat(registration().parameterNames).containsExactly("mode")
+
+    configure(includeBackfill = false)
+    assertThat(getRegisteredBackfillsAction.backfills("deep-fryer", RESERVED_VARIANT).backfills).isEmpty()
+    configure()
+    setActiveRegistrationTime(readded)
+    assertThat(registration().createdAt).isEqualTo(first)
+    assertThat(registration().updatedAt).isEqualTo(readded)
+  }
+
+  @Test
+  fun `first registration is scoped to the service and variant`() {
+    fun configure(service: String, variant: String, timestamp: Instant) {
+      scope.fakeCaller(service = service) {
+        configureServiceAction.configureService(
+          ConfigureServiceRequest.Builder()
+            .connector_type(ENVOY)
+            .variant(variant)
+            .backfills(listOf(ConfigureServiceRequest.BackfillData.Builder().name("xyz").build()))
+            .build(),
+        )
+      }
+      transacter.transaction { session ->
+        val dbService = queryFactory.newQuery<ServiceQuery>().registryName(service).variant(variant).uniqueResult(session)!!
+        queryFactory.newQuery<RegisteredBackfillQuery>().serviceId(dbService.id).active().uniqueResult(session)!!.created_at = timestamp
+      }
+    }
+    val first = Instant.parse("2026-01-01T00:00:00Z")
+    val otherVariant = Instant.parse("2026-02-01T00:00:00Z")
+    val otherService = Instant.parse("2026-03-01T00:00:00Z")
+    configure("deep-fryer", RESERVED_VARIANT, first)
+    configure("deep-fryer", "sandbox", otherVariant)
+    configure("bakery", RESERVED_VARIANT, otherService)
+
+    assertThat(getRegisteredBackfillsAction.backfills("deep-fryer", RESERVED_VARIANT).backfills.single().createdAt).isEqualTo(first)
+    assertThat(getRegisteredBackfillsAction.backfills("deep-fryer", "sandbox").backfills.single().createdAt).isEqualTo(otherVariant)
+    assertThat(getRegisteredBackfillsAction.backfills("bakery", RESERVED_VARIANT).backfills.single().createdAt).isEqualTo(otherService)
+  }
+
+  @Test
   fun changeServiceConnector() {
     scope.fakeCaller(service = "deep-fryer") {
       configureServiceAction.configureService(

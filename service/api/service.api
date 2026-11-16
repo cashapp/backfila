@@ -407,14 +407,18 @@ public final class app/cash/backfila/dashboard/RangeCloneType : java/lang/Enum {
 }
 
 public final class app/cash/backfila/dashboard/RegisteredBackfill {
-	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
+	public fun <init> (Ljava/lang/String;Ljava/util/List;Ljava/time/Instant;Ljava/time/Instant;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/util/List;
-	public final fun copy (Ljava/lang/String;Ljava/util/List;)Lapp/cash/backfila/dashboard/RegisteredBackfill;
-	public static synthetic fun copy$default (Lapp/cash/backfila/dashboard/RegisteredBackfill;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lapp/cash/backfila/dashboard/RegisteredBackfill;
+	public final fun component3 ()Ljava/time/Instant;
+	public final fun component4 ()Ljava/time/Instant;
+	public final fun copy (Ljava/lang/String;Ljava/util/List;Ljava/time/Instant;Ljava/time/Instant;)Lapp/cash/backfila/dashboard/RegisteredBackfill;
+	public static synthetic fun copy$default (Lapp/cash/backfila/dashboard/RegisteredBackfill;Ljava/lang/String;Ljava/util/List;Ljava/time/Instant;Ljava/time/Instant;ILjava/lang/Object;)Lapp/cash/backfila/dashboard/RegisteredBackfill;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCreatedAt ()Ljava/time/Instant;
 	public final fun getName ()Ljava/lang/String;
 	public final fun getParameterNames ()Ljava/util/List;
+	public final fun getUpdatedAt ()Ljava/time/Instant;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
