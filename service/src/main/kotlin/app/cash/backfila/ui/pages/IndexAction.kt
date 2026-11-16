@@ -1,7 +1,7 @@
 package app.cash.backfila.ui.pages
 
-import app.cash.backfila.service.BackfilaConfig
-import app.cash.backfila.ui.actions.ServiceDataHelper
+import app.cash.backfila.dashboard.GetBackfillRunsAction
+import app.cash.backfila.ui.components.BackfillsTable
 import app.cash.backfila.ui.components.DashboardPageLayout
 import jakarta.inject.Inject
 import kotlinx.html.dd
@@ -10,6 +10,7 @@ import kotlinx.html.dl
 import kotlinx.html.dt
 import kotlinx.html.h1
 import kotlinx.html.h3
+import kotlinx.html.p
 import kotlinx.html.span
 import misk.MiskCaller
 import misk.scope.ActionScoped
@@ -21,8 +22,7 @@ import misk.web.actions.WebAction
 import misk.web.mediatype.MediaTypes
 
 class IndexAction @Inject constructor(
-  private val config: BackfilaConfig,
-  private val serviceDataHelper: ServiceDataHelper,
+  private val getBackfillRunsAction: GetBackfillRunsAction,
   private val dashboardPageLayout: DashboardPageLayout,
   private val callerProvider: ActionScoped<MiskCaller?>,
 ) : WebAction {
@@ -61,7 +61,18 @@ class IndexAction @Inject constructor(
         }
       }
 
-      // Running Backfills
+      val recentBackfills = callerProvider.get()?.user?.let { getBackfillRunsAction.recentBackfills(it) }.orEmpty()
+      if (recentBackfills.isEmpty()) {
+        div("py-5") {
+          h3("text-base font-semibold text-gray-900") { +"Your recent backfills" }
+          p("mt-2 text-sm text-gray-500") { +"No recent backfills to show." }
+        }
+      } else {
+        BackfillsTable(
+          backfills = recentBackfills,
+          title = "Your recent backfills",
+        )
+      }
     }
 
   companion object {
