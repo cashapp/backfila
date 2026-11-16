@@ -39,4 +39,18 @@ class RegisteredBackfillsListTest {
     assertThat(html).contains("Example&lt;Backfill&gt;", "mode&amp;value")
     assertThat(html).doesNotContain("Example<Backfill>")
   }
+
+  @Test
+  fun `shows a placeholder when the updated time is unknown`() {
+    val html = buildHtml {
+      RegisteredBackfillsList(
+        listOf(RegisteredBackfill("ExampleBackfill", emptyList(), createdAt, null)),
+        "genie",
+        "",
+      )
+    }
+
+    assertThat(html).contains("2026-10-01 09:05:07 UTC", "—")
+    assertThat(html).doesNotContain("datetime=\"null\"")
+  }
 }

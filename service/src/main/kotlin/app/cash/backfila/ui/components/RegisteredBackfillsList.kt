@@ -10,6 +10,7 @@ import kotlinx.html.div
 import kotlinx.html.h3
 import kotlinx.html.li
 import kotlinx.html.p
+import kotlinx.html.role
 import kotlinx.html.span
 import kotlinx.html.time
 import kotlinx.html.title
@@ -38,6 +39,7 @@ internal fun TagConsumer<*>.RegisteredBackfillsList(
         }
       }
       ul("grid grid-cols-1 gap-6") {
+        role = "list"
         backfills.forEach { backfill ->
           li("registration rounded-lg bg-white shadow") {
             a(classes = "$REGISTRATION_COLUMNS items-baseline gap-y-1 p-6") {
@@ -53,13 +55,16 @@ internal fun TagConsumer<*>.RegisteredBackfillsList(
               }
               time("whitespace-nowrap text-right text-sm tabular-nums text-gray-500") {
                 dateTime = backfill.createdAt.toString()
-                title = "Created at: first registered with Backfila in this environment."
                 +registrationTimestampFormat.format(backfill.createdAt)
               }
-              time("whitespace-nowrap text-right text-sm tabular-nums text-gray-500") {
-                dateTime = backfill.updatedAt.toString()
-                title = "Updated at: current configuration registered with Backfila."
-                +registrationTimestampFormat.format(backfill.updatedAt)
+              val updatedAt = backfill.updatedAt
+              if (updatedAt != null) {
+                time("whitespace-nowrap text-right text-sm tabular-nums text-gray-500") {
+                  dateTime = updatedAt.toString()
+                  +registrationTimestampFormat.format(updatedAt)
+                }
+              } else {
+                span("whitespace-nowrap text-right text-sm text-gray-500") { +"—" }
               }
               if (backfill.parameterNames.isNotEmpty()) {
                 p("col-span-3 truncate text-sm text-gray-500") {

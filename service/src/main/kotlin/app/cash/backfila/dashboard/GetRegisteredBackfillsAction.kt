@@ -20,7 +20,7 @@ data class RegisteredBackfill(
   val name: String,
   val parameterNames: List<String>,
   val createdAt: Instant,
-  val updatedAt: Instant,
+  val updatedAt: Instant?,
 )
 data class GetRegisteredBackfillsResponse(val backfills: List<RegisteredBackfill>)
 
@@ -52,7 +52,6 @@ class GetRegisteredBackfillsAction @Inject constructor(
 
       // Include obsolete registrations so configuration changes and re-registration do not
       // reset the first time Backfila saw a backfill for this service and variant.
-      @Suppress("UNCHECKED_CAST")
       val registrationTimes = session.hibernateSession.createQuery(
         """
         select name, min(created_at)
@@ -60,8 +59,9 @@ class GetRegisteredBackfillsAction @Inject constructor(
         where service_id = :serviceId
         group by name
         """,
+        Array<Any>::class.java,
       ).setParameter("serviceId", dbService.id)
-        .list() as List<Array<Any>>
+        .list()
       val firstRegisteredAt = registrationTimes.associate { it[0] as String to it[1] as Instant }
 
       backfills.map {
