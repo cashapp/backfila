@@ -86,7 +86,12 @@ class GetBackfillRunsAction @Inject constructor(
       val summaries = partitionSummary(session, runs)
       val registered = registeredBackfills(session, runs)
       runs.map { run ->
-        dbToUi(session, run, summaries.getValue(run.id), registered.getValue(run.registered_backfill_id))
+        dbToUi(
+          session,
+          run,
+          summaries[run.id] ?: PartitionSummary(false, 0, 0),
+          registered.getValue(run.registered_backfill_id),
+        )
       }
     }
   }
