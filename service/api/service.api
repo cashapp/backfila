@@ -633,6 +633,8 @@ public abstract interface class app/cash/backfila/dashboard/ViewLogsUrlProvider 
 }
 
 public final class app/cash/backfila/service/BackfilaConfig : misk/config/Config {
+	public synthetic fun <init> (Ljava/lang/Integer;Lmisk/jdbc/DataSourceClustersConfig;Lmisk/slack/SlackConfig;Ljava/lang/String;IILjava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/Integer;Lmisk/jdbc/DataSourceClustersConfig;Lmisk/slack/SlackConfig;Ljava/lang/String;IILjava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Ljava/lang/Integer;Lmisk/jdbc/DataSourceClustersConfig;Lmisk/slack/SlackConfig;Ljava/lang/String;IILjava/lang/String;Ljava/lang/String;Lapp/cash/backfila/service/BackfilaMcpConfig;)V
 	public synthetic fun <init> (Ljava/lang/Integer;Lmisk/jdbc/DataSourceClustersConfig;Lmisk/slack/SlackConfig;Ljava/lang/String;IILjava/lang/String;Ljava/lang/String;Lapp/cash/backfila/service/BackfilaMcpConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/Integer;
@@ -644,7 +646,9 @@ public final class app/cash/backfila/service/BackfilaConfig : misk/config/Config
 	public final fun component7 ()Ljava/lang/String;
 	public final fun component8 ()Ljava/lang/String;
 	public final fun component9 ()Lapp/cash/backfila/service/BackfilaMcpConfig;
+	public final synthetic fun copy (Ljava/lang/Integer;Lmisk/jdbc/DataSourceClustersConfig;Lmisk/slack/SlackConfig;Ljava/lang/String;IILjava/lang/String;Ljava/lang/String;)Lapp/cash/backfila/service/BackfilaConfig;
 	public final fun copy (Ljava/lang/Integer;Lmisk/jdbc/DataSourceClustersConfig;Lmisk/slack/SlackConfig;Ljava/lang/String;IILjava/lang/String;Ljava/lang/String;Lapp/cash/backfila/service/BackfilaMcpConfig;)Lapp/cash/backfila/service/BackfilaConfig;
+	public static synthetic fun copy$default (Lapp/cash/backfila/service/BackfilaConfig;Ljava/lang/Integer;Lmisk/jdbc/DataSourceClustersConfig;Lmisk/slack/SlackConfig;Ljava/lang/String;IILjava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lapp/cash/backfila/service/BackfilaConfig;
 	public static synthetic fun copy$default (Lapp/cash/backfila/service/BackfilaConfig;Ljava/lang/Integer;Lmisk/jdbc/DataSourceClustersConfig;Lmisk/slack/SlackConfig;Ljava/lang/String;IILjava/lang/String;Ljava/lang/String;Lapp/cash/backfila/service/BackfilaMcpConfig;ILjava/lang/Object;)Lapp/cash/backfila/service/BackfilaConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBackfill_runner_threads ()Ljava/lang/Integer;
