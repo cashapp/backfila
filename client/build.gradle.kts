@@ -26,6 +26,26 @@ dependencies {
   implementation(libs.wireMoshiAdapter)
 }
 
+val binaryCompat: SourceSet by sourceSets.creating
+
+dependencies {
+  "binaryCompatCompileOnly"("app.cash.backfila:client:2026.10.01.201111-ad9f619") {
+    isTransitive = false
+  }
+  "binaryCompatImplementation"(libs.kotlinStdLib)
+}
+
+val binaryCompatCheck by tasks.registering(JavaExec::class) {
+  description = "Runs code compiled against the last released client with the current client."
+  group = "verification"
+  classpath = binaryCompat.output + sourceSets.main.get().runtimeClasspath
+  mainClass.set("app.cash.backfila.client.BinaryCompatConsumerKt")
+}
+
+tasks.named("check") {
+  dependsOn(binaryCompatCheck)
+}
+
 wire {
   protoLibrary = true
   sourcePath {
