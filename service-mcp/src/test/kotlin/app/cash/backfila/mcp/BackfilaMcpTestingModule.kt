@@ -23,6 +23,7 @@ import wisp.deployment.TESTING
 @OptIn(ExperimentalBackfilaMcpApi::class)
 internal class BackfilaMcpTestingModule(
   private val mcp: BackfilaMcpConfig = BackfilaMcpConfig(enabled = true),
+  private val installAccessControl: Boolean = true,
 ) : KAbstractModule() {
   override fun configure() {
     val config = BackfilaConfig(
@@ -55,7 +56,7 @@ internal class BackfilaMcpTestingModule(
     install(HibernateTestingModule(BackfilaDb::class))
     install(BackfilaPersistenceModule(config))
 
-    install(AccessControlModule())
+    if (installAccessControl) install(AccessControlModule())
     multibind<MiskCallerAuthenticator>().to<FakeCallerAuthenticator>()
 
     install(BackfilaMcpModule(config))
