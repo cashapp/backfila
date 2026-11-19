@@ -70,6 +70,32 @@ class GetBackfillRunsAction @Inject constructor(
     return search(service, variant, pagination_token, filterArgs)
   }
 
+  /** The newest non-deleted runs created by this exact user, across services and states. */
+  fun recentBackfills(user: String): List<UiBackfillRun> {
+    if (user.isBlank()) return emptyList()
+
+    return transacter.transaction { session ->
+      val runs = queryFactory.newQuery<BackfillRunQuery>()
+        .createdByUser(user)
+        .notSoftDeleted()
+        .orderByIdDesc()
+        .apply { maxRows = 10 }
+        .list(session)
+      if (runs.isEmpty()) return@transaction emptyList()
+
+      val summaries = partitionSummary(session, runs)
+      val registered = registeredBackfills(session, runs)
+      runs.map { run ->
+        dbToUi(
+          session,
+          run,
+          summaries[run.id] ?: PartitionSummary(false, 0, 0),
+          registered.getValue(run.registered_backfill_id),
+        )
+      }
+    }
+  }
+
   private fun search(
     service: String,
     variant: String,
