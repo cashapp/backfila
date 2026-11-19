@@ -12,7 +12,6 @@ import app.cash.backfila.protos.clientservice.RunBatchRequest
 import app.cash.backfila.protos.clientservice.RunBatchResponse
 import jakarta.inject.Inject
 import misk.exceptions.BadRequestException
-import misk.security.authz.Authenticated
 import misk.web.AvailableWhenDegraded
 import misk.web.Post
 import misk.web.RequestBody
@@ -28,7 +27,7 @@ internal class PrepareBackfillAction @Inject constructor(
   @Post("/backfila/prepare-backfill")
   @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
   @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)
-  @Authenticated(services = ["backfila"])
+  @BackfilaCallbackAccess
   @LogRequestResponse(bodySampling = 1.0, errorBodySampling = 1.0)
   @AvailableWhenDegraded
   fun prepareBackfill(@RequestBody request: PrepareBackfillRequest): PrepareBackfillResponse =
@@ -41,7 +40,7 @@ internal class GetNextBatchRangeAction @Inject constructor(
   @Post("/backfila/get-next-batch-range")
   @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
   @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)
-  @Authenticated(services = ["backfila"])
+  @BackfilaCallbackAccess
   @AvailableWhenDegraded
   fun getNextBatchRange(@RequestBody request: GetNextBatchRangeRequest): GetNextBatchRangeResponse =
     wrapExceptions { clientServiceHandler.getNextBatchRange(request) }
@@ -53,7 +52,7 @@ internal class RunBatchAction @Inject constructor(
   @Post("/backfila/run-batch")
   @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
   @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)
-  @Authenticated(services = ["backfila"])
+  @BackfilaCallbackAccess
   @AvailableWhenDegraded
   fun runBatch(@RequestBody request: RunBatchRequest): RunBatchResponse =
     wrapExceptions { clientServiceHandler.runBatch(request) }
@@ -65,7 +64,7 @@ internal class FinalizeBackfillAction @Inject constructor(
   @Post("/backfila/finalize-backfill")
   @RequestContentType(MediaTypes.APPLICATION_PROTOBUF)
   @ResponseContentType(MediaTypes.APPLICATION_PROTOBUF)
-  @Authenticated(services = ["backfila"])
+  @BackfilaCallbackAccess
   @LogRequestResponse(bodySampling = 1.0, errorBodySampling = 1.0)
   @AvailableWhenDegraded
   fun finalizeBackfill(@RequestBody request: FinalizeBackfillRequest): FinalizeBackfillResponse =
