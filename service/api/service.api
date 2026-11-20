@@ -1406,7 +1406,7 @@ public final class app/cash/backfila/ui/components/ToggleContainerKt {
 
 public final class app/cash/backfila/ui/pages/BackfillCreateAction : misk/web/actions/WebAction {
 	public static final field Companion Lapp/cash/backfila/ui/pages/BackfillCreateAction$Companion;
-	public fun <init> (Lapp/cash/backfila/dashboard/GetBackfillStatusAction;Lapp/cash/backfila/dashboard/GetRegisteredBackfillsAction;Lapp/cash/backfila/dashboard/GetBackfillRunsAction;Lapp/cash/backfila/ui/components/DashboardPageLayout;)V
+	public fun <init> (Lapp/cash/backfila/dashboard/GetBackfillStatusAction;Lapp/cash/backfila/dashboard/GetRegisteredBackfillsAction;Lapp/cash/backfila/dashboard/GetBackfillRunsAction;Lapp/cash/backfila/ui/components/DashboardPageLayout;Lmisk/scope/ActionScoped;)V
 	public final fun get (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lmisk/web/Response;
 	public static synthetic fun get$default (Lapp/cash/backfila/ui/pages/BackfillCreateAction;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lmisk/web/Response;
 }
