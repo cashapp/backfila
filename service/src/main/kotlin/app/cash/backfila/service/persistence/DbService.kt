@@ -41,6 +41,9 @@ class DbService() : DbUnsharded<DbService>, DbTimestampedEntity {
   @Column(nullable = true)
   var last_registered_at: Instant? = null
 
+  @Column(nullable = true)
+  var deleted_at: Instant? = null
+
   constructor(
     registry_name: String,
     connector: String,
