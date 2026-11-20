@@ -16,6 +16,7 @@ buildscript {
   dependencies {
     classpath(libs.kotlinGradlePlugin)
     classpath(libs.kotlinAllOpenPlugin)
+    classpath(libs.kotlinSerializationPlugin)
     classpath(libs.dokkaGradlePlugin)
     classpath(libs.mavenPublishGradlePlugin)
     classpath(libs.spotlessPlugin)
