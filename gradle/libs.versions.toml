@@ -1,7 +1,7 @@
 [versions]
 jackson = "2.21.3"
 jetty = "10.0.26"
-jooq = "3.18.25"
+jooq = "3.21.5"
 kotlin = "2.2.21"
 kotlinBinaryCompatibilityPlugin = "0.18.1"
 kotlinxCoroutines = "1.11.0"
