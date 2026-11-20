@@ -2,7 +2,7 @@
 jackson = "2.21.3"
 jetty = "10.0.26"
 jooq = "3.18.25"
-kotlin = "2.2.21"
+kotlin = "2.4.0"
 kotlinBinaryCompatibilityPlugin = "0.18.1"
 kotlinxCoroutines = "1.11.0"
 ktlint = "0.47.1"
