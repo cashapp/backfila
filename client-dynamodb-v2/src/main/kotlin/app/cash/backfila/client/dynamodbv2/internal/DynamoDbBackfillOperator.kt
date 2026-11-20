@@ -10,8 +10,6 @@ import app.cash.backfila.protos.clientservice.PrepareBackfillRequest
 import app.cash.backfila.protos.clientservice.PrepareBackfillResponse
 import app.cash.backfila.protos.clientservice.RunBatchRequest
 import app.cash.backfila.protos.clientservice.RunBatchResponse
-import com.google.common.base.Stopwatch
-import java.time.Duration
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import software.amazon.awssdk.services.dynamodb.model.BillingMode
@@ -132,8 +130,6 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
 
     val config = parametersOperator.constructBackfillConfig(request)
 
-    var lastEvaluatedKey: Map<String, AttributeValue>? = keyRange.lastEvaluatedKey
-
     val filterExpression = backfill.dataDefinition?.filterExpression
       ?: backfill.filterExpression(config)
 
@@ -146,64 +142,37 @@ class DynamoDbBackfillOperator<I : Any, P : Any>(
     val indexName = backfill.dataDefinition?.indexName
       ?: backfill.indexName(config)
 
-    val checkpointDuration = backfill.operatorStrategy?.checkpointSegmentProgressAfter
-      ?: Duration.ofSeconds(2)
-
-    // Track the real counts the scan returns so we can report them back to Backfila. Unlike SQL
-    // clients we can't cheaply count up front in getNextBatchRange, but the scan result gives us
-    // these for free here. See RunBatchResponse in client_service.proto.
-    var scannedRecordCount = 0L
-    var matchingRecordCount = 0L
-
-    val stopwatch = Stopwatch.createStarted()
-    do {
-      val scanRequest = ScanRequest.builder()
-        .tableName(dynamoDbTable.tableName())
-        .segment(keyRange.start)
-        .totalSegments(keyRange.count)
-        .limit(request.batch_size.toInt())
-        .let {
-          if (lastEvaluatedKey != null && lastEvaluatedKey!!.isNotEmpty()) {
-            it.exclusiveStartKey(lastEvaluatedKey)
-          } else {
-            it
-          }
+    val scanRequest = ScanRequest.builder()
+      .tableName(dynamoDbTable.tableName())
+      .segment(keyRange.start)
+      .totalSegments(keyRange.count)
+      .limit(request.batch_size.toInt())
+      .let {
+        if (!keyRange.lastEvaluatedKey.isNullOrEmpty()) {
+          it.exclusiveStartKey(keyRange.lastEvaluatedKey)
+        } else {
+          it
         }
-        .filterExpression(filterExpression)
-        .expressionAttributeValues(expressionAttributeValues)
-        .expressionAttributeNames(expressionAttributeNames)
-        .indexName(indexName)
-        .build()
-
-      val result = dynamoDbClient.scan(scanRequest)
-
-      // scannedCount is everything examined; count is what remained after filterExpression. With no
-      // filter the two are equal, which is the correct matching/scanned ratio of 1.0.
-      scannedRecordCount += result.scannedCount().toLong()
-      matchingRecordCount += result.count().toLong()
-
-      backfill.runBatch(
-        result.items().map {
-          dynamoDbTable.tableSchema().mapToItem(it)
-        },
-        config,
-      )
-      lastEvaluatedKey = result.lastEvaluatedKey()
-      if (stopwatch.elapsed() > checkpointDuration) {
-        break
       }
-    } while (lastEvaluatedKey != null && lastEvaluatedKey.isNotEmpty())
+      .filterExpression(filterExpression)
+      .expressionAttributeValues(expressionAttributeValues)
+      .expressionAttributeNames(expressionAttributeNames)
+      .indexName(indexName)
+      .build()
+
+    // One scan bounds each RunBatch call by batch_size evaluated items, before filtering.
+    // Return the cursor even for an empty page so the next call can continue the segment.
+    val result = dynamoDbClient.scan(scanRequest)
+    backfill.runBatch(
+      result.items().map { dynamoDbTable.tableSchema().mapToItem(it) },
+      config,
+    )
+    val lastEvaluatedKey = result.lastEvaluatedKey()?.takeIf { it.isNotEmpty() }
 
     return RunBatchResponse.Builder()
-      .scanned_record_count(scannedRecordCount)
-      .matching_record_count(matchingRecordCount)
-      .let {
-        if (lastEvaluatedKey != null && lastEvaluatedKey.isNotEmpty()) {
-          it.remaining_batch_range(lastEvaluatedKey.toKeyRange(keyRange))
-        } else {
-          it.remaining_batch_range(null)
-        }
-      }
+      .scanned_record_count(result.scannedCount().toLong())
+      .matching_record_count(result.count().toLong())
+      .remaining_batch_range(lastEvaluatedKey?.toKeyRange(keyRange))
       .build()
   }
 

@@ -61,7 +61,10 @@ abstract class DynamoDbBackfill<I : Any, P : Any> : Backfill {
   open fun validate(config: PrepareBackfillConfig<P>) {}
 
   /**
-   * Called for each batch of matching records.
+   * Called once per `RunBatch` service call with at most `batch_size` matching items.
+   * Batch size is an upper bound: the scan can stop at DynamoDB's 1 MB page limit or the end of
+   * the segment, and filtering can further reduce the result, including to zero items.
+   * A call can therefore process fewer items even when more remain in the table.
    * Override in a backfill to process all records in a batch.
    */
   abstract fun runBatch(items: List<@JvmSuppressWildcards I>, config: BackfillConfig<P>)

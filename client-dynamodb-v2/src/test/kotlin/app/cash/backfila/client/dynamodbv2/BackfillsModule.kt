@@ -26,7 +26,7 @@ class BackfillsModule : KAbstractModule() {
     install(DynamoDbBackfillModule.create<DynamoDbFilteringTest.DynamoFilterMakeTracksExplicitBackfill>())
     install(DynamoDbBackfillModule.create<DynamoDbFilteringTest.DynamoFilterWithAttributeNameMakeTracksExplicitBackfill>())
     install(DynamoDbBackfillModule.create<DynamoDbSegmentingTest.SegmentingBackfill>())
-    install(DynamoDbBackfillModule.create<DynamoDbLastEvaluatedKeyTest.PausingBackfill>())
+    install(DynamoDbBackfillModule.create<DynamoDbLastEvaluatedKeyTest.PaginatingBackfill>())
     install(DynamoDbBackfillModule.create<DynamoDbBillingModeTest.EmptyTrackBackfill>())
     install(DynamoDbBackfillModule.create<DynamoDbBillingModeTest.ReallyExpensiveBackfill>())
     install(DynamoDbBackfillModule.create<DynamoDbIndexTest.MakeTracksAsSinglesBackfill>())
