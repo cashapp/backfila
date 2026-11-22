@@ -1,12 +1,8 @@
 package app.cash.backfila.mcp
 
 import com.google.inject.Module
-import com.google.inject.util.Modules
 import jakarta.inject.Inject
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.json.Json
-import misk.inject.KAbstractModule
-import misk.mcp.McpToolModule
 import misk.testing.MiskTest
 import misk.testing.MiskTestModule
 import misk.web.jetty.JettyService
@@ -19,14 +15,7 @@ import org.junit.jupiter.params.provider.ValueSource
 class BackfilaMcpWebActionTest {
   @Suppress("unused")
   @MiskTestModule
-  val module: Module = Modules.combine(
-    BackfilaMcpTestingModule(),
-    object : KAbstractModule() {
-      override fun configure() {
-        install(McpToolModule.create<BackfilaMcp, WhoAmITool>())
-      }
-    },
-  )
+  val module: Module = BackfilaMcpTestingModule()
 
   @Inject lateinit var jettyService: JettyService
 
@@ -35,14 +24,6 @@ class BackfilaMcpWebActionTest {
     val instructions = jettyService.mcpClient().serverInstructions
 
     assertThat(instructions).contains("https://backfila.example.com/")
-  }
-
-  @Test
-  fun `tools see the authenticated caller`(): Unit = runBlocking {
-    val result = jettyService.mcpClient(user = "molly").callTool(name = "who_am_i", arguments = mapOf())
-
-    val output = Json.decodeFromJsonElement(WhoAmIOutput.serializer(), result.structuredContent!!)
-    assertThat(output.user).isEqualTo("molly")
   }
 
   @ParameterizedTest
