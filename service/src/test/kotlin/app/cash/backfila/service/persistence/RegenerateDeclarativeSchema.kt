@@ -17,7 +17,7 @@ fun main(args: Array<String>) {
   val tables = DeclarativeSchema.connect().use { connection ->
     try {
       DeclarativeSchema.recreateDatabase(connection, database)
-      DeclarativeSchema.applyMigrations(connection, database)
+      DeclarativeSchema.applySchemaChanges(connection, database)
       DeclarativeSchema.showCreateTables(connection, database)
     } finally {
       DeclarativeSchema.dropDatabase(connection, database)

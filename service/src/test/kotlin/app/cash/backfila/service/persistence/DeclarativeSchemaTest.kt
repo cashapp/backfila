@@ -24,16 +24,16 @@ class DeclarativeSchemaTest {
 
     val problems = DeclarativeSchema.connect().use { connection ->
       try {
-        DeclarativeSchema.recreateDatabase(connection, MIGRATED)
-        DeclarativeSchema.applyMigrations(connection, MIGRATED)
+        DeclarativeSchema.recreateDatabase(connection, VERSIONED)
+        DeclarativeSchema.applySchemaChanges(connection, VERSIONED)
 
-        spiritProblems(DeclarativeSchema.spiritDiff(spirit, MIGRATED)) +
+        spiritProblems(DeclarativeSchema.spiritDiff(spirit, VERSIONED)) +
           fileProblems(
-            migrated = DeclarativeSchema.showCreateTables(connection, MIGRATED),
+            versioned = DeclarativeSchema.showCreateTables(connection, VERSIONED),
             files = DeclarativeSchema.declarativeFiles().mapValues { (_, file) -> file.readText() },
           )
       } finally {
-        DeclarativeSchema.dropDatabase(connection, MIGRATED)
+        DeclarativeSchema.dropDatabase(connection, VERSIONED)
       }
     }
 
@@ -42,7 +42,7 @@ class DeclarativeSchemaTest {
         buildString {
           appendLine(
             "The declarative schema in src/main/resources/${DeclarativeSchema.DECLARATIVE_RESOURCE} " +
-              "does not match the versioned files in src/main/resources/${DeclarativeSchema.MIGRATIONS_RESOURCE}.",
+              "does not match the versioned files in src/main/resources/${DeclarativeSchema.VERSIONED_RESOURCE}.",
           )
           appendLine(
             "Regenerate it with `${DeclarativeSchema.REGENERATE_COMMAND}` and commit the result.",
@@ -61,10 +61,10 @@ class DeclarativeSchemaTest {
     )
   }
 
-  private fun fileProblems(migrated: Map<String, String>, files: Map<String, String>): List<String> {
+  private fun fileProblems(versioned: Map<String, String>, files: Map<String, String>): List<String> {
     val problems = mutableListOf<String>()
-    for (table in (migrated.keys + files.keys).sorted()) {
-      val showCreateTable = migrated[table]
+    for (table in (versioned.keys + files.keys).sorted()) {
+      val showCreateTable = versioned[table]
       val file = files[table]
       when {
         showCreateTable == null ->
@@ -110,6 +110,6 @@ class DeclarativeSchemaTest {
   }
 
   private companion object {
-    const val MIGRATED = "backfila_declarative_schema_test_migrated"
+    const val VERSIONED = "backfila_declarative_schema_test_versioned"
   }
 }

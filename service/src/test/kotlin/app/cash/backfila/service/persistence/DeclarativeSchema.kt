@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit
  * localhost:3306) and works in scratch databases it drops and recreates.
  */
 internal object DeclarativeSchema {
-  const val MIGRATIONS_RESOURCE = "migrations"
+  const val VERSIONED_RESOURCE = "migrations"
   const val DECLARATIVE_RESOURCE = "mysql/schema/backfila"
   const val REGENERATE_COMMAND = "gradle :service:regenerateDeclarativeSchema"
 
@@ -29,7 +29,7 @@ internal object DeclarativeSchema {
    * The versioned files are named like Misk's default `migrations_resources_regex` expects, and
    * applied in version order.
    */
-  private val MIGRATION_FILE_NAME = Regex("""v(\d+)__[^/]+\.sql""")
+  private val VERSIONED_FILE_NAME = Regex("""v(\d+)__[^/]+\.sql""")
   private val AUTO_INCREMENT_COUNTER = Regex(""" AUTO_INCREMENT=\d+""")
 
   /**
@@ -58,12 +58,12 @@ internal object DeclarativeSchema {
   }
 
   /** Applies every versioned file in `classpath:/migrations` to [database], in version order. */
-  fun applyMigrations(connection: Connection, database: String) {
-    val migrations = sqlResources(MIGRATIONS_RESOURCE).sortedBy { versionOf(it.name) }
-    check(migrations.isNotEmpty()) { "no versioned files found in classpath:/$MIGRATIONS_RESOURCE" }
+  fun applySchemaChanges(connection: Connection, database: String) {
+    val files = sqlResources(VERSIONED_RESOURCE).sortedBy { versionOf(it.name) }
+    check(files.isNotEmpty()) { "no versioned files found in classpath:/$VERSIONED_RESOURCE" }
     connection.catalog = database
-    for (migration in migrations) {
-      connection.executeFile(migration)
+    for (file in files) {
+      connection.executeFile(file)
     }
   }
 
@@ -130,8 +130,8 @@ internal object DeclarativeSchema {
   fun declarativeFileContents(showCreateTable: String): String = "$showCreateTable;\n"
 
   private fun versionOf(fileName: String): Int {
-    val match = requireNotNull(MIGRATION_FILE_NAME.matchEntire(fileName)) {
-      "unexpected file in classpath:/$MIGRATIONS_RESOURCE: $fileName"
+    val match = requireNotNull(VERSIONED_FILE_NAME.matchEntire(fileName)) {
+      "unexpected file in classpath:/$VERSIONED_RESOURCE: $fileName"
     }
     return match.groupValues[1].toInt()
   }
