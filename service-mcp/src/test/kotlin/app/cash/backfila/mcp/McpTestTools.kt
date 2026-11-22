@@ -9,7 +9,11 @@ import misk.mcp.decode
 import misk.mcp.testing.asMcpStreamableHttpClient
 import misk.security.authz.FakeCallerAuthenticator
 import misk.web.jetty.JettyService
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
 import org.assertj.core.api.Assertions.assertThat
 
 /** Connects an MCP client to this test's server, authenticated as [user]. */
@@ -25,6 +29,16 @@ internal suspend fun JettyService.mcpClient(user: String = "molly"): Client {
     .build()
   return httpClient.asMcpStreamableHttpClient(httpServerUrl, "/mcp")
 }
+
+/** Posts a raw body to `/mcp`, authenticated as [user] unless it's null. */
+internal fun JettyService.postMcp(body: String, user: String?): Response = OkHttpClient().newCall(
+  Request.Builder()
+    .url(httpServerUrl.resolve("/mcp")!!)
+    .header("Accept", "application/json, text/event-stream")
+    .apply { if (user != null) header(FakeCallerAuthenticator.USER_HEADER, user) }
+    .post(body.toRequestBody("application/json".toMediaType()))
+    .build(),
+).execute()
 
 /**
  * Calls [name] and decodes its structured output, failing if the tool returned an error. Decodes with
