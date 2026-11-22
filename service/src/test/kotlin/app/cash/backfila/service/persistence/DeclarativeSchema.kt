@@ -5,6 +5,7 @@ import java.net.URL
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.Statement
+import java.util.concurrent.TimeUnit
 
 /**
  * Backfila's schema in declarative form: one `CREATE TABLE` per table under
@@ -36,7 +37,10 @@ internal object DeclarativeSchema {
    * statements rather than a hand-written parser.
    */
   fun connect(): Connection =
-    DriverManager.getConnection("jdbc:mysql://localhost:3306/?allowMultiQueries=true", "root", "")
+    DriverManager.getConnection("jdbc:mysql://$HOST:$PORT/?allowMultiQueries=true", "root", "")
+
+  private const val HOST = "127.0.0.1"
+  private const val PORT = 3306
 
   /**
    * Drops and recreates [database]. The character set and collation are pinned to MySQL 8's
@@ -63,17 +67,41 @@ internal object DeclarativeSchema {
     }
   }
 
-  /** Applies every declarative file in `classpath:/mysql/schema/backfila` to [database]. */
-  fun applyDeclarative(connection: Connection, database: String) {
-    connection.catalog = database
-    for (file in declarativeFiles().values) {
-      connection.executeFile(file)
-    }
-  }
+  /** The directory holding the declarative files on the classpath. */
+  fun declarativeDirectory(): File = resourceDirectory(DECLARATIVE_RESOURCE)
 
   /** The declarative files on the classpath, keyed by the table each one is named after. */
   fun declarativeFiles(): Map<String, File> =
     sqlResources(DECLARATIVE_RESOURCE).associateBy { it.name.removeSuffix(".sql") }.toSortedMap()
+
+  /**
+   * Runs `spirit diff` from [database] to the declarative files and returns the DDL statements it
+   * would run to make the database match them: empty when the two describe the same schema. This
+   * is the same differ that declarative schema tools built on Spirit use to plan a change.
+   *
+   * [spirit] is the Hermit-pinned binary in the repository's `bin/`; the build passes its path in
+   * the `backfila.spirit` system property.
+   */
+  fun spiritDiff(spirit: File, database: String): List<String> {
+    val stderr = File.createTempFile("spirit-diff", ".stderr")
+    try {
+      val process = ProcessBuilder(
+        spirit.path,
+        "diff",
+        "--source-dsn=root:@tcp($HOST:$PORT)/$database?tls=false",
+        "--target-dir=${declarativeDirectory().path}",
+      ).redirectError(stderr).start()
+      val stdout = process.inputStream.bufferedReader().use { it.readText() }
+      check(process.waitFor(5, TimeUnit.MINUTES)) { "spirit diff did not finish in 5 minutes" }
+      check(process.exitValue() == 0) {
+        "spirit diff exited with ${process.exitValue()}:\n$stdout${stderr.readText()}"
+      }
+      // Spirit prints lint findings and status as `--` comments; every other line is DDL.
+      return stdout.lines().map { it.trim() }.filter { it.isNotEmpty() && !it.startsWith("--") }
+    } finally {
+      stderr.delete()
+    }
+  }
 
   /**
    * Returns each base table's `SHOW CREATE TABLE` output in [database], keyed by table name, with
@@ -108,15 +136,18 @@ internal object DeclarativeSchema {
     return match.groupValues[1].toInt()
   }
 
-  private fun sqlResources(path: String): List<File> {
+  private fun resourceDirectory(path: String): File {
     val url: URL = requireNotNull(javaClass.classLoader.getResource(path)) {
       "classpath:/$path not found"
     }
     check(url.protocol == "file") { "classpath:/$path must be a directory, got $url" }
-    return File(url.toURI()).listFiles { file -> file.isFile && file.name.endsWith(".sql") }
+    return File(url.toURI())
+  }
+
+  private fun sqlResources(path: String): List<File> =
+    resourceDirectory(path).listFiles { file -> file.isFile && file.name.endsWith(".sql") }
       ?.sortedBy { it.name }
       .orEmpty()
-  }
 
   private fun Connection.execute(sql: String) {
     createStatement().use { it.execute(sql) }

@@ -89,6 +89,12 @@ wire {
   }
 }
 
+// DeclarativeSchemaTest diffs the declarative schema against the versioned files with the
+// Hermit-pinned Spirit in bin/.
+tasks.named<Test>("test") {
+  systemProperty("backfila.spirit", rootProject.file("bin/spirit").absolutePath)
+}
+
 // Rewrites the declarative schema (one CREATE TABLE per table) from the versioned files in
 // src/main/resources/migrations. DeclarativeSchemaTest fails until the two agree. Needs the same
 // MySQL 8 server on localhost:3306 that the tests use.

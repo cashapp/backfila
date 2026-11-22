@@ -1,33 +1,39 @@
 package app.cash.backfila.service.persistence
 
+import java.io.File
 import kotlin.test.fail
 import org.junit.jupiter.api.Test
 
 /**
  * The declarative files in `src/main/resources/mysql/schema/backfila/` describe exactly the schema
  * the versioned files in `src/main/resources/migrations/` build. The versioned files are applied
- * to one scratch database and the declarative files loaded into another; every table's
- * `SHOW CREATE TABLE` must match between the two, ignoring the `AUTO_INCREMENT` counter, and every
- * declarative file must hold that output verbatim.
+ * to a scratch database, and then:
+ *
+ * - `spirit diff` from that database to the declarative files must find nothing to change, and
+ * - every declarative file must hold that database's `SHOW CREATE TABLE` output verbatim, so the
+ *   files stay exactly what regenerating them would write.
  */
 class DeclarativeSchemaTest {
   @Test
   fun declarativeSchemaMatchesVersionedFiles() {
+    val spirit = File(
+      requireNotNull(System.getProperty("backfila.spirit")) {
+        "the backfila.spirit system property must name the Spirit binary; run this test with Gradle"
+      },
+    )
+
     val problems = DeclarativeSchema.connect().use { connection ->
       try {
         DeclarativeSchema.recreateDatabase(connection, MIGRATED)
         DeclarativeSchema.applyMigrations(connection, MIGRATED)
-        DeclarativeSchema.recreateDatabase(connection, DECLARED)
-        DeclarativeSchema.applyDeclarative(connection, DECLARED)
 
-        compare(
-          migrated = DeclarativeSchema.showCreateTables(connection, MIGRATED),
-          declared = DeclarativeSchema.showCreateTables(connection, DECLARED),
-          files = DeclarativeSchema.declarativeFiles().mapValues { (_, file) -> file.readText() },
-        )
+        spiritProblems(DeclarativeSchema.spiritDiff(spirit, MIGRATED)) +
+          fileProblems(
+            migrated = DeclarativeSchema.showCreateTables(connection, MIGRATED),
+            files = DeclarativeSchema.declarativeFiles().mapValues { (_, file) -> file.readText() },
+          )
       } finally {
         DeclarativeSchema.dropDatabase(connection, MIGRATED)
-        DeclarativeSchema.dropDatabase(connection, DECLARED)
       }
     }
 
@@ -47,34 +53,31 @@ class DeclarativeSchemaTest {
     }
   }
 
-  private fun compare(
-    migrated: Map<String, String>,
-    declared: Map<String, String>,
-    files: Map<String, String>,
-  ): List<String> {
+  private fun spiritProblems(statements: List<String>): List<String> {
+    if (statements.isEmpty()) return emptyList()
+    return listOf(
+      "spirit diff would change the database built from the versioned files to match the " +
+        "declarative files:\n" + statements.joinToString("\n") { "  $it" },
+    )
+  }
+
+  private fun fileProblems(migrated: Map<String, String>, files: Map<String, String>): List<String> {
     val problems = mutableListOf<String>()
-    for (table in (migrated.keys + declared.keys + files.keys).sorted()) {
-      val expected = migrated[table]
+    for (table in (migrated.keys + files.keys).sorted()) {
+      val showCreateTable = migrated[table]
+      val file = files[table]
       when {
-        expected == null && table in files ->
+        showCreateTable == null ->
           problems += "$table.sql: no table named $table is created by the versioned files"
-        expected == null ->
-          problems += "$table: created by a declarative file under a different name"
-        table !in files ->
+        file == null ->
           problems += "$table.sql: missing"
-        declared[table] == null ->
-          problems += "$table.sql: does not create a table named $table"
-        declared[table] != expected ->
-          problems += "$table: SHOW CREATE TABLE differs\n" +
-            diff("versioned files", expected, "declarative file", declared.getValue(table))
-        // Same schema, but the file is not byte-for-byte what regenerating would write.
-        files[table] != DeclarativeSchema.declarativeFileContents(expected) ->
-          problems += "$table.sql: not the canonical SHOW CREATE TABLE output\n" +
+        file != DeclarativeSchema.declarativeFileContents(showCreateTable) ->
+          problems += "$table.sql: not the SHOW CREATE TABLE output of the versioned files\n" +
             diff(
-              "expected",
-              DeclarativeSchema.declarativeFileContents(expected),
-              "actual",
-              files.getValue(table),
+              "versioned files",
+              DeclarativeSchema.declarativeFileContents(showCreateTable),
+              "$table.sql",
+              file,
             )
       }
     }
@@ -108,6 +111,5 @@ class DeclarativeSchemaTest {
 
   private companion object {
     const val MIGRATED = "backfila_declarative_schema_test_migrated"
-    const val DECLARED = "backfila_declarative_schema_test_declared"
   }
 }

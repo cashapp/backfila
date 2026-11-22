@@ -33,9 +33,10 @@ The service jar also ships the same schema in declarative form: one `CREATE TABL
 `service/src/main/resources/mysql/schema/backfila/`, for tools that manage schema declaratively.
 Each file is the MySQL 8 `SHOW CREATE TABLE` output for its table once every versioned file has
 been applied, without the `AUTO_INCREMENT` counter. `DeclarativeSchemaTest` (run as part of
-`gradle check` and in CI) fails when the two disagree. After adding a versioned file, regenerate
-the declarative files and commit the result. Like the tests, this needs MySQL 8 on
-localhost:3306 accepting `root` with an empty password:
+`gradle check` and in CI) fails when the two disagree, using `spirit diff` from the
+Hermit-pinned [Spirit](https://github.com/block/spirit) in `bin/`. After adding a versioned
+file, regenerate the declarative files and commit the result. Like the tests, this needs MySQL 8
+on localhost:3306 accepting `root` with an empty password:
 
 ```
 gradle :service:regenerateDeclarativeSchema
