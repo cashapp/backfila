@@ -108,6 +108,8 @@ class GetBackfillStatusToolTest {
         computed_matching_record_count = 1_000,
         backfilled_matching_record_count = 250,
         matching_records_per_minute = 50,
+        percent_complete = 25.0,
+        estimated_minutes_remaining = 15,
       ),
     )
     assertThat(status.partitions).containsExactly(
@@ -166,8 +168,46 @@ class GetBackfillStatusToolTest {
         computed_matching_record_count = 1_500,
         backfilled_matching_record_count = 1_100,
         matching_records_per_minute = 20,
+        percent_complete = 73.3,
+        estimated_minutes_remaining = null,
       ),
     )
+  }
+
+  @Test
+  fun `estimates time remaining once precomputing is done and records are flowing`(): Unit = runBlocking {
+    val fryer = transacter.registerService("deep-fryer")
+    val runId = transacter.createRun(fryer, transacter.registerBackfill(fryer, "RefillOil"), state = BackfillState.RUNNING)
+    fun setProgress(rate: Long?) = transacter.transaction { session ->
+      session.load(runId).partitions(session, queryFactory).single().apply {
+        precomputing_done = true
+        computed_matching_record_count = 1_000
+        backfilled_matching_record_count = 590
+        matching_records_per_minute = rate
+      }
+    }
+
+    setProgress(rate = 20)
+    assertThat(getBackfillStatus(runId).progress.estimated_minutes_remaining).isEqualTo(21)
+    setProgress(rate = null)
+    assertThat(getBackfillStatus(runId).progress.estimated_minutes_remaining).isNull()
+  }
+
+  @Test
+  fun `filters event logs by type and pages through them`(): Unit = runBlocking {
+    val fryer = transacter.registerService("deep-fryer")
+    val runId = transacter.createRun(fryer, transacter.registerBackfill(fryer, "RefillOil"))
+    (1..11).forEach { transacter.logEvent(runId, DbEventLog.Type.ERROR, "error $it") }
+    (1..12).forEach { transacter.logEvent(runId, DbEventLog.Type.CONFIG_CHANGE, "change $it") }
+
+    val first = getBackfillStatus(runId, eventLogType = "ERROR")
+    val second = getBackfillStatus(runId, eventLogType = "ERROR", eventLogPaginationToken = first.next_event_log_pagination_token)
+
+    assertThat(first.event_logs!!.map { it.type }).containsOnly(GetBackfillStatusOutput.EventLogType.ERROR)
+    assertThat(second.next_event_log_pagination_token).isNull()
+    assertThat((first.event_logs!! + second.event_logs!!).map { it.message })
+      .containsExactlyElementsOf((11 downTo 1).map { "error $it" })
+    assertThat(first.event_logs!!.first().partition_name).isNull()
   }
 
   @Test
@@ -283,6 +323,7 @@ class GetBackfillStatusToolTest {
     runId: Id<DbBackfillRun>,
     includePartitions: Boolean = false,
     includeEventLogs: Boolean = true,
+    eventLogType: String? = null,
     eventLogPaginationToken: String? = null,
   ): GetBackfillStatusOutput = jettyService.mcpClient().callStructured(
     "get_backfill_status",
@@ -290,6 +331,7 @@ class GetBackfillStatusToolTest {
       "id" to runId.id,
       "include_partitions" to includePartitions,
       "include_event_logs" to includeEventLogs,
+      "event_log_type" to eventLogType,
       "event_log_pagination_token" to eventLogPaginationToken,
     ),
   )

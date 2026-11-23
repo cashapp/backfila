@@ -1,13 +1,25 @@
 package app.cash.backfila.mcp.tools
 
 import app.cash.backfila.dashboard.GetBackfillStatusAction
+import app.cash.backfila.dashboard.UiEventLog
 import app.cash.backfila.dashboard.UiPartition
 import app.cash.backfila.mcp.DashboardLinks
+import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.DbEventLog
+import app.cash.backfila.service.persistence.EventLogQuery
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.serialization.Serializable
+import misk.hibernate.Id
+import misk.hibernate.Query
+import misk.hibernate.Transacter
+import misk.hibernate.constraint
+import misk.hibernate.newQuery
+import misk.hibernate.pagination.Offset
+import misk.hibernate.pagination.Page
+import misk.hibernate.pagination.idDescPaginator
+import misk.hibernate.pagination.newPager
 import misk.mcp.Description
 
 @Serializable
@@ -18,7 +30,9 @@ internal data class GetBackfillStatusInput(
   val include_partitions: Boolean = false,
   @Description("Include a page of recent event logs, which carry error details. On by default.")
   val include_event_logs: Boolean = true,
-  @Description("next_event_log_pagination_token from a previous call, to get older event logs.")
+  @Description("Only include event logs of this type. Use ERROR to see why a run failed or paused.")
+  val event_log_type: GetBackfillStatusOutput.EventLogType? = null,
+  @Description("next_event_log_pagination_token from a previous call with the same event_log_type, to get older event logs.")
   val event_log_pagination_token: String? = null,
 )
 
@@ -75,6 +89,10 @@ internal data class GetBackfillStatusOutput(
     val backfilled_matching_record_count: Long,
     @Description("Recent backfill rate across running partitions.")
     val matching_records_per_minute: Long,
+    @Description("Backfilled share of the computed records, from 0 to 100. Overstated until precomputing_done is true. Absent before any records are computed.")
+    val percent_complete: Double?,
+    @Description("Minutes until the remaining records are backfilled at the current rate. Absent until precomputing is done, or while nothing is running.")
+    val estimated_minutes_remaining: Long?,
   )
 
   @Serializable
@@ -117,20 +135,27 @@ internal data class GetBackfillStatusOutput(
 @Singleton
 internal class GetBackfillStatusTool @Inject constructor(
   private val getBackfillStatusAction: GetBackfillStatusAction,
+  @BackfilaDb private val transacter: Transacter,
+  private val queryFactory: Query.Factory,
   private val dashboardLinks: DashboardLinks,
 ) : BackfilaMcpTool<GetBackfillStatusInput, GetBackfillStatusOutput>() {
   override val name = "get_backfill_status"
   override val title = "Get backfill status"
   override val description =
     "Gets one backfill run's configuration, overall progress, and recent event logs. " +
-      "To find out why a run failed, look at its ERROR event logs."
+      "To find out why a run failed or paused, pass event_log_type ERROR, since other events can push errors off the first page."
   override val readOnlyHint = true
   override val openWorldHint = false
 
   override suspend fun call(input: GetBackfillStatusInput): GetBackfillStatusOutput {
     val offset = paginationToken("event_log_pagination_token", input.event_log_pagination_token)
     val status = callDashboard("Call list_backfill_runs to find run IDs.") {
-      getBackfillStatusAction.status(input.id, offset)
+      getBackfillStatusAction.status(input.id, offset.takeIf { input.event_log_type == null })
+    }
+    val (eventLogs, nextEventLogOffset) = when {
+      !input.include_event_logs -> null to null
+      input.event_log_type == null -> status.event_logs to status.next_offset
+      else -> eventLogsOfType(input.id, input.event_log_type, offset, status.partitions)
     }
     return GetBackfillStatusOutput(
       id = input.id,
@@ -151,7 +176,7 @@ internal class GetBackfillStatusTool @Inject constructor(
       unit = status.unit,
       progress = progress(status.partitions),
       partitions = status.partitions.takeIf { input.include_partitions }?.map { it.toPartition() },
-      event_logs = status.event_logs.takeIf { input.include_event_logs }?.map {
+      event_logs = eventLogs?.map {
         GetBackfillStatusOutput.EventLog(
           occurred_at = it.occurred_at.toString(),
           type = GetBackfillStatusOutput.EventLogType.valueOf(it.type.name),
@@ -161,21 +186,47 @@ internal class GetBackfillStatusTool @Inject constructor(
           extra_data = it.extra_data?.truncate(),
         )
       },
-      next_event_log_pagination_token = status.next_offset.takeIf { input.include_event_logs },
+      next_event_log_pagination_token = nextEventLogOffset,
       backfila_url = dashboardLinks.backfillRun(input.id),
     )
   }
 
-  private fun progress(partitions: List<UiPartition>) = GetBackfillStatusOutput.Progress(
-    partition_count = partitions.size,
-    complete_partition_count = partitions.count { it.state == BackfillState.COMPLETE },
-    precomputing_done = partitions.all { it.precomputing_done },
-    computed_matching_record_count = partitions.sumOf { it.computed_matching_record_count },
-    backfilled_matching_record_count = partitions.sumOf { it.backfilled_matching_record_count },
-    matching_records_per_minute = partitions
-      .filter { it.state == BackfillState.RUNNING }
-      .sumOf { it.matching_records_per_minute ?: 0 },
-  )
+  // The dashboard's status action pages through every type of event log, so filtering by type needs
+  // its own query.
+  private fun eventLogsOfType(
+    runId: Long,
+    type: GetBackfillStatusOutput.EventLogType,
+    offset: String?,
+    partitions: List<UiPartition>,
+  ): Pair<List<UiEventLog>, String?> = transacter.transaction { session ->
+    val partitionNames = partitions.associate { it.id to it.name }
+    val (events, nextOffset) = queryFactory.newQuery<EventLogQuery>()
+      .backfillRunId(Id(runId))
+      .constraint { root -> equal(root.get<DbEventLog.Type>("type"), DbEventLog.Type.valueOf(type.name)) }
+      .newPager(idDescPaginator(), initialOffset = offset?.let(::Offset), pageSize = EVENT_LOGS_PAGE_SIZE)
+      .nextPage(session) ?: Page.empty()
+    val logs = events.map {
+      UiEventLog(it.created_at, it.type, it.user, it.partition_id?.let { id -> partitionNames[id.id] }, it.message, it.extra_data)
+    }
+    logs to nextOffset?.offset
+  }
+
+  private fun progress(partitions: List<UiPartition>): GetBackfillStatusOutput.Progress {
+    val precomputingDone = partitions.all { it.precomputing_done }
+    val computed = partitions.sumOf { it.computed_matching_record_count }
+    val backfilled = partitions.sumOf { it.backfilled_matching_record_count }
+    val rate = partitions.filter { it.state == BackfillState.RUNNING }.sumOf { it.matching_records_per_minute ?: 0 }
+    return GetBackfillStatusOutput.Progress(
+      partition_count = partitions.size,
+      complete_partition_count = partitions.count { it.state == BackfillState.COMPLETE },
+      precomputing_done = precomputingDone,
+      computed_matching_record_count = computed,
+      backfilled_matching_record_count = backfilled,
+      matching_records_per_minute = rate,
+      percent_complete = percentComplete(backfilled, computed),
+      estimated_minutes_remaining = if (precomputingDone && rate > 0) ((computed - backfilled).coerceAtLeast(0) + rate - 1) / rate else null,
+    )
+  }
 
   private fun UiPartition.toPartition() = GetBackfillStatusOutput.Partition(
     name = name,
@@ -191,5 +242,8 @@ internal class GetBackfillStatusTool @Inject constructor(
 }
 
 // extra_data is a MEDIUMTEXT column (up to 16 MB), and each page returns ten event logs.
+// Matches the dashboard's page of event logs.
+internal const val EVENT_LOGS_PAGE_SIZE = 10
+
 internal const val MAX_EXTRA_DATA_LENGTH = 4_000
 internal const val TRUNCATION_MARKER = "… [truncated; the Backfila dashboard shows the full text]"
