@@ -223,6 +223,7 @@ public final class app/cash/backfila/dashboard/GetBackfillRunsAction : misk/web/
 	public fun <init> (Lmisk/hibernate/Transacter;Lmisk/hibernate/Query$Factory;)V
 	public final fun backfillRuns (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)Lapp/cash/backfila/dashboard/GetBackfillRunsResponse;
 	public static synthetic fun backfillRuns$default (Lapp/cash/backfila/dashboard/GetBackfillRunsAction;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)Lapp/cash/backfila/dashboard/GetBackfillRunsResponse;
+	public final fun recentBackfills (Ljava/lang/String;)Ljava/util/List;
 }
 
 public final class app/cash/backfila/dashboard/GetBackfillRunsResponse {
@@ -1374,6 +1375,7 @@ public final class app/cash/backfila/ui/components/BackfillSearchFormKt {
 }
 
 public final class app/cash/backfila/ui/components/BackfillsTableKt {
+	public static final fun BackfillsTable (Lkotlinx/html/TagConsumer;Ljava/util/List;Ljava/lang/String;)V
 	public static final fun BackfillsTable (Lkotlinx/html/TagConsumer;ZLjava/util/List;Z)V
 	public static synthetic fun BackfillsTable$default (Lkotlinx/html/TagConsumer;ZLjava/util/List;ZILjava/lang/Object;)V
 }
@@ -1545,7 +1547,7 @@ public final class app/cash/backfila/ui/pages/BackfillShowAction$DescriptionList
 public final class app/cash/backfila/ui/pages/IndexAction : misk/web/actions/WebAction {
 	public static final field Companion Lapp/cash/backfila/ui/pages/IndexAction$Companion;
 	public static final field PATH Ljava/lang/String;
-	public fun <init> (Lapp/cash/backfila/service/BackfilaConfig;Lapp/cash/backfila/ui/actions/ServiceDataHelper;Lapp/cash/backfila/ui/components/DashboardPageLayout;Lmisk/scope/ActionScoped;)V
+	public fun <init> (Lapp/cash/backfila/dashboard/GetBackfillRunsAction;Lapp/cash/backfila/ui/components/DashboardPageLayout;Lmisk/scope/ActionScoped;)V
 	public final fun get (Ljava/lang/String;)Ljava/lang/String;
 }
 

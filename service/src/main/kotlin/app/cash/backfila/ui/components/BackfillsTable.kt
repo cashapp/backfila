@@ -23,13 +23,29 @@ fun TagConsumer<*>.BackfillsTable(
   backfills: List<UiBackfillRun>,
   showDeleted: Boolean = false,
 ) {
-  val title = if (running) "Running" else "Paused"
+  backfillsTable(
+    backfills = backfills,
+    title = if (running) "Backfills (Running)" else "Backfills (Paused)",
+    showDeletedToggle = !running,
+    showDeleted = showDeleted,
+  )
+}
 
+fun TagConsumer<*>.BackfillsTable(backfills: List<UiBackfillRun>, title: String) {
+  backfillsTable(backfills, title, showDeletedToggle = false, showDeleted = false)
+}
+
+private fun TagConsumer<*>.backfillsTable(
+  backfills: List<UiBackfillRun>,
+  title: String,
+  showDeletedToggle: Boolean,
+  showDeleted: Boolean,
+) {
   div("px-4 sm:px-6 lg:px-8 py-5") {
     section("sm:flex sm:items-center justify-between") {
-      h1("text-base font-semibold leading-6 text-gray-900") { +"""Backfills ($title)""" }
+      h1("text-base font-semibold leading-6 text-gray-900") { +title }
 
-      if (!running) { // Only show toggle for Paused backfills
+      if (showDeletedToggle) {
         form {
           label("text-sm font-medium text-gray-600 flex items-center") {
             +"Show deleted"
