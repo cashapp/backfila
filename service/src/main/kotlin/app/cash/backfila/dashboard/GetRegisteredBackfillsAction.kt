@@ -4,6 +4,7 @@ import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.RegisteredBackfillQuery
 import app.cash.backfila.service.persistence.ServiceQuery
 import jakarta.inject.Inject
+import java.time.Instant
 import misk.exceptions.BadRequestException
 import misk.hibernate.Query
 import misk.hibernate.Transacter
@@ -18,6 +19,8 @@ import misk.web.mediatype.MediaTypes
 data class RegisteredBackfill(
   val name: String,
   val parameterNames: List<String>,
+  val createdAt: Instant,
+  val updatedAt: Instant?,
 )
 data class GetRegisteredBackfillsResponse(val backfills: List<RegisteredBackfill>)
 
@@ -46,10 +49,27 @@ class GetRegisteredBackfillsAction @Inject constructor(
         .active()
         .orderByName()
         .list(session)
+
+      // Include obsolete registrations so configuration changes and re-registration do not
+      // reset the first time Backfila saw a backfill for this service and variant.
+      val registrationTimes = session.hibernateSession.createQuery(
+        """
+        select name, min(created_at)
+        from DbRegisteredBackfill
+        where service_id = :serviceId
+        group by name
+        """,
+        Array<Any>::class.java,
+      ).setParameter("serviceId", dbService.id)
+        .list()
+      val firstRegisteredAt = registrationTimes.associate { it[0] as String to it[1] as Instant }
+
       backfills.map {
         RegisteredBackfill(
           it.name,
           it.parameterNames(),
+          firstRegisteredAt.getValue(it.name),
+          it.created_at,
         )
       }
     }
