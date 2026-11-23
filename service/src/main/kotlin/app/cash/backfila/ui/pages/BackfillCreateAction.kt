@@ -7,6 +7,7 @@ import app.cash.backfila.ui.actions.BackfillCreateHandlerAction
 import app.cash.backfila.ui.components.AlertError
 import app.cash.backfila.ui.components.DashboardPageLayout
 import app.cash.backfila.ui.components.PageTitle
+import app.cash.backfila.ui.parseCheckbox
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.html.ButtonType
@@ -23,9 +24,11 @@ import kotlinx.html.p
 import kotlinx.html.span
 import kotlinx.html.strong
 import kotlinx.html.style
+import misk.scope.ActionScoped
 import misk.security.authz.Authenticated
 import misk.tailwind.Link
 import misk.web.Get
+import misk.web.HttpCall
 import misk.web.PathParam
 import misk.web.Response
 import misk.web.ResponseBody
@@ -39,6 +42,7 @@ class BackfillCreateAction @Inject constructor(
   private val getRegisteredBackfillsAction: GetRegisteredBackfillsAction,
   private val getBackfillRunsAction: GetBackfillRunsAction,
   private val dashboardPageLayout: DashboardPageLayout,
+  private val httpCall: ActionScoped<HttpCall>,
 ) : WebAction {
   @Get(PATH)
   @ResponseContentType(MediaTypes.TEXT_HTML)
@@ -94,6 +98,11 @@ class BackfillCreateAction @Inject constructor(
       registeredBackfills.backfills.firstOrNull { it.name == backfillName || it.name == backfillToClone?.name.orEmpty() }
 
     val resolvedBackfillName = registeredBackfill?.name ?: backfillToClone?.name ?: ""
+
+    val prefillUrl = httpCall.get().asOkHttpRequest().url
+    fun prefill(fieldId: String): String? = prefillUrl.queryParameter(fieldId)?.takeIf { it.isNotBlank() }
+    val prefillNewRange = prefill(BackfillCreateField.RANGE_START.fieldId) != null ||
+      prefill(BackfillCreateField.RANGE_END.fieldId) != null
 
     val cloneOrCreate = if (backfillToClone != null) {
       "Clone"
@@ -183,8 +192,10 @@ class BackfillCreateAction @Inject constructor(
                               attributes["aria-describedby"] = "dry-run-description"
                               name = field
                               type = InputType.checkBox
-                              // Set checkbox state based on cloned backfill or default to checked
-                              checked = backfillToCloneStatus?.dry_run ?: true
+                              // Set checkbox state based on query parameter, cloned backfill, or default to checked
+                              checked = parseCheckbox(prefill(field))
+                                ?: backfillToCloneStatus?.dry_run
+                                ?: true
                             }
                           }
                         }
@@ -216,7 +227,7 @@ class BackfillCreateAction @Inject constructor(
                             name = BackfillCreateField.RANGE_OPTION.fieldId
                             type = InputType.radio
                             value = RangeOption.RESTART.value
-                            checked = true // Default option
+                            checked = !prefillNewRange // Default unless a new range is pre-filled
                             attributes["onchange"] = "document.getElementById('range-inputs').style.display = 'none';"
                           }
                           div("ml-3") {
@@ -262,6 +273,7 @@ class BackfillCreateAction @Inject constructor(
                               name = BackfillCreateField.RANGE_OPTION.fieldId
                               type = InputType.radio
                               value = RangeOption.NEW.value
+                              checked = prefillNewRange
                               attributes["onchange"] = "document.getElementById('range-inputs').style.display = this.checked ? 'block' : 'none';"
                             }
                             div("ml-3 flex-1") {
@@ -278,7 +290,7 @@ class BackfillCreateAction @Inject constructor(
                           // Range input fields - shown when "New range" is selected
                           div("mt-4 ml-7") {
                             id = "range-inputs"
-                            style = "display: none;"
+                            style = if (prefillNewRange) "display: block;" else "display: none;"
 
                             div("grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6") {
                               div("sm:col-span-3") {
@@ -295,6 +307,7 @@ class BackfillCreateAction @Inject constructor(
                                     name = field
                                     id = field
                                     attributes["autocomplete"] = field
+                                    prefill(field)?.let { value = it }
                                   }
                                 }
                               }
@@ -312,6 +325,7 @@ class BackfillCreateAction @Inject constructor(
                                     name = field
                                     id = field
                                     attributes["autocomplete"] = field
+                                    prefill(field)?.let { value = it }
                                   }
                                 }
                               }
@@ -380,6 +394,7 @@ class BackfillCreateAction @Inject constructor(
                             name = field
                             id = field
                             attributes["autocomplete"] = field
+                            prefill(field)?.let { value = it }
                           }
                         }
                       }
@@ -395,6 +410,7 @@ class BackfillCreateAction @Inject constructor(
                             name = field
                             id = field
                             attributes["autocomplete"] = field
+                            prefill(field)?.let { value = it }
                           }
                         }
                       }
@@ -423,8 +439,9 @@ class BackfillCreateAction @Inject constructor(
                           name = field
                           id = field
                           attributes["autocomplete"] = field
-                          value = "100"
-                          backfillToCloneStatus?.batch_size?.let { value = it.toString() }
+                          value = prefill(field)?.toLongOrNull()?.toString()
+                            ?: backfillToCloneStatus?.batch_size?.toString()
+                            ?: "100"
                         }
                       }
                     }
@@ -445,8 +462,9 @@ class BackfillCreateAction @Inject constructor(
                           name = field
                           id = field
                           attributes["autocomplete"] = field
-                          value = "10000"
-                          backfillToCloneStatus?.scan_size?.let { value = it.toString() }
+                          value = prefill(field)?.toLongOrNull()?.toString()
+                            ?: backfillToCloneStatus?.scan_size?.toString()
+                            ?: "10000"
                         }
                       }
                     }
@@ -465,8 +483,9 @@ class BackfillCreateAction @Inject constructor(
                           name = field
                           id = field
                           attributes["autocomplete"] = field
-                          value = "1"
-                          backfillToCloneStatus?.num_threads?.let { value = it.toString() }
+                          value = prefill(field)?.toIntOrNull()?.toString()
+                            ?: backfillToCloneStatus?.num_threads?.toString()
+                            ?: "1"
                         }
                       }
                     }
@@ -485,8 +504,9 @@ class BackfillCreateAction @Inject constructor(
                           name = field
                           id = field
                           attributes["autocomplete"] = field
-                          value = "1"
-                          backfillToCloneStatus?.extra_sleep_ms?.let { value = it.toString() }
+                          value = prefill(field)?.toLongOrNull()?.toString()
+                            ?: backfillToCloneStatus?.extra_sleep_ms?.toString()
+                            ?: "1"
                         }
                       }
                     }
@@ -508,7 +528,9 @@ class BackfillCreateAction @Inject constructor(
                           id = field
                           attributes["autocomplete"] = field
                           placeholder = "5000,15000,30000"
-                          backfillToCloneStatus?.backoff_schedule?.let { value = it }
+                          val backoffSchedule = prefill(field)
+                            ?: backfillToCloneStatus?.backoff_schedule
+                          backoffSchedule?.let { value = it }
                         }
                       }
                     }
@@ -537,7 +559,9 @@ class BackfillCreateAction @Inject constructor(
                               name = field
                               id = field
                               attributes["autocomplete"] = field
-                              backfillToCloneStatus?.parameters?.get(it)?.let { value = it }
+                              val parameterValue = prefill(field)
+                                ?: backfillToCloneStatus?.parameters?.get(it)
+                              parameterValue?.let { value = it }
                             }
                           }
                         }
