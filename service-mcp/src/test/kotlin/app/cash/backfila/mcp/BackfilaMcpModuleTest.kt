@@ -1,5 +1,6 @@
 package app.cash.backfila.mcp
 
+import app.cash.backfila.mcp.tools.ListServicesTool
 import app.cash.backfila.mcp.tools.RejectingTool
 import app.cash.backfila.service.BackfilaMcpConfig
 import com.google.inject.Injector
@@ -21,14 +22,14 @@ class BackfilaMcpModuleTest {
   @Test
   fun `read-only servers only bind read-only tools`() {
     val bindings = listOf(
-      BackfilaMcpToolBinding(WhoAmITool::class, readOnly = true),
+      BackfilaMcpToolBinding(ListServicesTool::class, readOnly = true),
       BackfilaMcpToolBinding(RejectingTool::class, readOnly = false),
     )
 
     assertThat(bindings.boundFor(BackfilaMcpConfig(read_only = true)).map { it.toolClass })
-      .containsExactly(WhoAmITool::class)
+      .containsExactly(ListServicesTool::class)
     assertThat(bindings.boundFor(BackfilaMcpConfig(read_only = false)).map { it.toolClass })
-      .containsExactly(WhoAmITool::class, RejectingTool::class)
+      .containsExactly(ListServicesTool::class, RejectingTool::class)
   }
 
   @Test
