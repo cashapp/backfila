@@ -58,6 +58,16 @@ class ListServicesToolTest {
   }
 
   @Test
+  fun `filters services by name, ignoring case`(): Unit = runBlocking {
+    transacter.registerService("deep-fryer")
+    transacter.registerService("grill")
+
+    val output = jettyService.mcpClient().callStructured<ListServicesOutput>("list_services", mapOf("name" to "FRY"))
+
+    assertThat(output.services.map { it.name }).containsExactly("deep-fryer")
+  }
+
+  @Test
   fun `maps every field of the dashboard's services`() {
     assertMapsEveryField(GetServicesAction.UiService::class, ListServicesOutput.Service::class)
   }

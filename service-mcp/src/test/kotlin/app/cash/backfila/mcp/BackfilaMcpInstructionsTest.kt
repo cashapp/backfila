@@ -22,8 +22,8 @@ class BackfilaMcpInstructionsTest {
   }
 
   @Test
-  fun `agents are told to start with list_services`() {
-    assertThat(instructions()).contains("Call list_services first")
+  fun `agents are told where to find service names`() {
+    assertThat(instructions()).contains("Use list_services to find valid service names")
   }
 
   @Test
