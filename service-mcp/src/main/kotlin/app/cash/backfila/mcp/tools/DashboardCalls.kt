@@ -1,6 +1,15 @@
 package app.cash.backfila.mcp.tools
 
+import misk.exceptions.BadRequestException
+
 internal const val UNKNOWN_SERVICE_HINT = "Call list_services for valid service names and variants."
+
+/** Runs a dashboard action, turning its [BadRequestException]s into [ToolError]s that end with [hint]. */
+internal inline fun <T> callDashboard(hint: String, action: () -> T): T = try {
+  action()
+} catch (e: BadRequestException) {
+  throw ToolError("${e.message}. $hint")
+}
 
 /**
  * Validates a pagination token from an earlier response. The dashboard's paginators use row IDs as
