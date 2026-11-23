@@ -9,6 +9,7 @@ import app.cash.backfila.mcp.registerService
 import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.DbBackfillRun
+import app.cash.backfila.service.persistence.DbEventLog
 import com.google.inject.Module
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import jakarta.inject.Inject
@@ -53,7 +54,7 @@ class ListBackfillRunsToolTest {
     val run = tool.outputSchema!!.properties!!["runs"]!!.jsonObject["items"]!!.jsonObject
     assertThat(run["required"]!!.jsonArray.map { it.jsonPrimitive.content })
       .contains("id", "service", "variant", "state")
-      .doesNotContain("created_by_user", "percent_complete", "backfila_url")
+      .doesNotContain("created_by_user", "percent_complete", "last_error_at", "backfila_url")
   }
 
   @Test
@@ -80,6 +81,23 @@ class ListBackfillRunsToolTest {
     assertThat(run.backfila_url).isEqualTo("https://backfila.example.com/backfills/${newer.id}")
     assertThat(runs.last().created_by_user).isNull()
     assertThat(runs.last().percent_complete).isNull()
+  }
+
+  @Test
+  fun `reports when each run last logged an error`(): Unit = runBlocking {
+    val fryer = transacter.registerService("deep-fryer")
+    val refillOil = transacter.registerBackfill(fryer, "RefillOil")
+    val failing = transacter.createRun(fryer, refillOil)
+    val healthy = transacter.createRun(fryer, refillOil)
+    transacter.transaction { session ->
+      session.save(DbEventLog(failing, user = null, type = DbEventLog.Type.ERROR, message = "batch failed"))
+      session.save(DbEventLog(healthy, user = null, type = DbEventLog.Type.STATE_CHANGE, message = "state set to RUNNING"))
+    }
+
+    val runs = listBackfillRuns(mapOf()).runs.associateBy { it.id }
+
+    assertThat(runs.getValue(failing.id).last_error_at).isEqualTo(clock.instant().toString())
+    assertThat(runs.getValue(healthy.id).last_error_at).isNull()
   }
 
   @Test

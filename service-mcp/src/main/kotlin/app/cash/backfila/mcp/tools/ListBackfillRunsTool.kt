@@ -5,6 +5,7 @@ import app.cash.backfila.service.persistence.BackfilaDb
 import app.cash.backfila.service.persistence.BackfillRunQuery
 import app.cash.backfila.service.persistence.BackfillState
 import app.cash.backfila.service.persistence.DbBackfillRun
+import app.cash.backfila.service.persistence.DbEventLog
 import app.cash.backfila.service.persistence.DbRegisteredBackfill
 import app.cash.backfila.service.persistence.DbService
 import app.cash.backfila.service.persistence.RegisteredBackfillQuery
@@ -84,6 +85,8 @@ internal data class ListBackfillRunsOutput(
     val backfilled_matching_record_count: Long,
     @Description("Backfilled share of the computed records, from 0 to 100. Overstated until precomputing_done is true. Absent before any records are computed.")
     val percent_complete: Double?,
+    @Description("When the run last logged an error, as an ISO-8601 timestamp. Absent if it never has. Pass event_log_type ERROR to get_backfill_status for details.")
+    val last_error_at: String?,
     @Description("The run's page in Backfila, where a user can view, start, pause, or edit it. Absent if Backfila's URL isn't configured.")
     val backfila_url: String?,
   )
@@ -100,7 +103,8 @@ internal class ListBackfillRunsTool @Inject constructor(
   override val title = "List backfill runs"
   override val description =
     "Finds backfill runs across every service, newest first. Filter by service, backfill name, creator, state, or " +
-      "creation time. For example, created_by_me with states [\"RUNNING\"] finds the user's runs in progress."
+      "creation time. For example, created_by_me with states [\"RUNNING\"] finds the user's runs in progress. " +
+      "Each run's last_error_at shows whether it has logged errors."
   override val readOnlyHint = true
   override val openWorldHint = false
 
@@ -130,7 +134,8 @@ internal class ListBackfillRunsTool @Inject constructor(
         .nextPage(session) ?: Page.empty()
 
       val progress = progress(session, runs)
-      ListBackfillRunsOutput(runs.map { it.toRun(progress[it.id]) }, nextOffset?.offset)
+      val lastErrors = lastErrors(session, runs)
+      ListBackfillRunsOutput(runs.map { it.toRun(progress[it.id], lastErrors[it.id]) }, nextOffset?.offset)
     }
   }
 
@@ -179,7 +184,21 @@ internal class ListBackfillRunsTool @Inject constructor(
     return rows.associate { (it[0] as Id<DbBackfillRun>) to RunProgress(it[1] as Boolean, it[2] as Long, it[3] as Long) }
   }
 
-  private fun DbBackfillRun.toRun(progress: RunProgress?): ListBackfillRunsOutput.Run {
+  private fun lastErrors(session: Session, runs: List<DbBackfillRun>): Map<Id<DbBackfillRun>, Instant> {
+    if (runs.isEmpty()) return mapOf()
+    @Suppress("UNCHECKED_CAST")
+    val rows = session.hibernateSession.createQuery(
+      """
+        select backfill_run_id, max(created_at)
+        from DbEventLog
+        where type = :type and backfill_run_id in (:ids)
+        group by backfill_run_id
+      """,
+    ).setParameter("type", DbEventLog.Type.ERROR).setParameter("ids", runs.map { it.id }).list() as List<Array<Any>>
+    return rows.associate { (it[0] as Id<DbBackfillRun>) to (it[1] as Instant) }
+  }
+
+  private fun DbBackfillRun.toRun(progress: RunProgress?, lastError: Instant?): ListBackfillRunsOutput.Run {
     val computed = progress?.computed ?: 0
     val backfilled = progress?.backfilled ?: 0
     return ListBackfillRunsOutput.Run(
@@ -196,6 +215,7 @@ internal class ListBackfillRunsTool @Inject constructor(
       computed_matching_record_count = computed,
       backfilled_matching_record_count = backfilled,
       percent_complete = percentComplete(backfilled, computed),
+      last_error_at = lastError?.toString(),
       backfila_url = dashboardLinks.backfillRun(id.id),
     )
   }
