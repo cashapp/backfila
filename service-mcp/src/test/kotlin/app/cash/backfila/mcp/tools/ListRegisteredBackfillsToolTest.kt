@@ -92,6 +92,17 @@ class ListRegisteredBackfillsToolTest {
   }
 
   @Test
+  fun `filters backfills by name, ignoring case`(): Unit = runBlocking {
+    val fryer = transacter.registerService("deep-fryer")
+    transacter.registerBackfill(fryer, "RefillOil")
+    transacter.registerBackfill(fryer, "DrainOil")
+
+    val output = listRegisteredBackfills(mapOf("service" to "deep-fryer", "name" to "refill"))
+
+    assertThat(output.backfills.map { it.name }).containsExactly("RefillOil")
+  }
+
+  @Test
   fun `unknown services are tool errors that point at list_services`(): Unit = runBlocking {
     val result = jettyService.mcpClient().callTool(
       name = "list_registered_backfills",

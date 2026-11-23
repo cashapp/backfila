@@ -18,6 +18,8 @@ internal data class ListRegisteredBackfillsInput(
   val service: String,
   @Description("Service variant, from list_services. Defaults to \"default\".")
   val variant: String = "default",
+  @Description("Only include backfills whose name contains this text, ignoring case.")
+  val name: String? = null,
 )
 
 @Serializable
@@ -69,7 +71,10 @@ internal class ListRegisteredBackfillsTool @Inject constructor(
         .active()
         .orderByName()
         .list(session)
-      ListRegisteredBackfillsOutput(backfills.map { it.toOutput() })
+      val name = input.name?.ifBlank { null }
+      ListRegisteredBackfillsOutput(
+        backfills.filter { name == null || it.name.contains(name, ignoreCase = true) }.map { it.toOutput() },
+      )
     }
 
   private fun DbRegisteredBackfill.toOutput() = ListRegisteredBackfillsOutput.RegisteredBackfill(
