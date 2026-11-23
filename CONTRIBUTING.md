@@ -23,6 +23,25 @@ result:
 gradle apiDump
 ```
 
+## Database schema
+
+The service's schema is defined by the versioned files in
+`service/src/main/resources/migrations/`, which the service applies in order. To change the
+schema, add a new versioned file; never edit one that has already shipped.
+
+The service jar also ships the same schema in declarative form: one `CREATE TABLE` per table in
+`service/src/main/resources/mysql/schema/backfila/`, for tools that manage schema declaratively.
+Each file is the MySQL 8 `SHOW CREATE TABLE` output for its table once every versioned file has
+been applied, without the `AUTO_INCREMENT` counter. `DeclarativeSchemaTest` (run as part of
+`gradle check` and in CI) fails when the two disagree, using `spirit diff` from the
+Hermit-pinned [Spirit](https://github.com/block/spirit) in `bin/`. After adding a versioned
+file, regenerate the declarative files and commit the result. Like the tests, this needs MySQL 8
+on localhost:3306 accepting `root` with an empty password:
+
+```
+gradle :service:regenerateDeclarativeSchema
+```
+
 
  [1]: https://spreadsheets.google.com/spreadsheet/viewform?formkey=dDViT2xzUHAwRkI3X3k5Z0lQM091OGc6MQ&ndplr=1
  [2]: https://github.com/Kotlin/binary-compatibility-validator

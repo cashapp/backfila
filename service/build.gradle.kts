@@ -89,6 +89,23 @@ wire {
   }
 }
 
+// DeclarativeSchemaTest diffs the declarative schema against the versioned files with the
+// Hermit-pinned Spirit in bin/.
+tasks.named<Test>("test") {
+  systemProperty("backfila.spirit", rootProject.file("bin/spirit").absolutePath)
+}
+
+// Rewrites the declarative schema (one CREATE TABLE per table) from the versioned files in
+// src/main/resources/migrations. DeclarativeSchemaTest fails until the two agree. Needs the same
+// MySQL 8 server on localhost:3306 that the tests use.
+tasks.register<JavaExec>("regenerateDeclarativeSchema") {
+  group = "build"
+  description = "Regenerates src/main/resources/mysql/schema/backfila from the versioned files."
+  classpath = sourceSets["test"].runtimeClasspath
+  mainClass.set("app.cash.backfila.service.persistence.RegenerateDeclarativeSchemaKt")
+  args(layout.projectDirectory.dir("src/main/resources/mysql/schema/backfila").asFile.path)
+}
+
 val jar by tasks.getting(Jar::class) {
   manifest {
     attributes("Main-Class" to "app.cash.backfila.service.BackfilaDevelopmentServiceKt")

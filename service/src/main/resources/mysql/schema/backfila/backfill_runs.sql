@@ -1,0 +1,23 @@
+CREATE TABLE `backfill_runs` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `service_id` bigint NOT NULL,
+  `registered_backfill_id` bigint NOT NULL,
+  `pipeline_target_backfill_id` bigint DEFAULT NULL,
+  `created_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  `version` bigint NOT NULL DEFAULT '0',
+  `state` enum('PAUSED','RUNNING','COMPLETE','CANCELLED') NOT NULL,
+  `parameter_map` mediumtext,
+  `dry_run` tinyint(1) NOT NULL DEFAULT '0',
+  `created_by_user` varbinary(300) DEFAULT NULL,
+  `approved_by_user` varbinary(300) DEFAULT NULL,
+  `approved_at` timestamp(3) NULL DEFAULT NULL,
+  `scan_size` bigint NOT NULL,
+  `batch_size` bigint NOT NULL,
+  `num_threads` bigint NOT NULL,
+  `backoff_schedule` varbinary(200) DEFAULT NULL,
+  `extra_sleep_ms` bigint NOT NULL DEFAULT '0',
+  `deleted_at` timestamp(3) NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_service_id` (`service_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
