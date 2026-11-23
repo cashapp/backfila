@@ -13,3 +13,5 @@ internal enum class RunState {
 }
 
 internal fun BackfillState.toRunState(): RunState = RunState.valueOf(name)
+
+internal fun RunState.toBackfillState(): BackfillState = BackfillState.valueOf(name)
